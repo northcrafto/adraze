@@ -1,0 +1,10 @@
+# Genererade filer: räknas inte i GitHubs språkstatistik och fälls ihop i diffar
+site/index.html linguist-generated
+site/integritet.html linguist-generated
+site/*/index.html linguist-generated
+site/*/integritet.html linguist-generated
+site/sitemap.xml linguist-generated
+logo/index.html linguist-generated
+logo/svg/* linguist-generated
+extension/rules/*.json linguist-generated
+extension/data/*.json linguist-generated
