@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{t:privacy.meta_title}}</title>
+<meta name="description" content="{{t:privacy.meta_description}}">
+<link rel="icon" href="/favicon.png">
+{{alternates}}
+<link rel="stylesheet" href="/style.css">
+<style>
+  .policy { max-width: 760px; padding: 72px 0 120px; }
+  .policy h1 { font-size: clamp(44px, 6vw, 72px); letter-spacing: -0.05em; }
+  .policy .datum { color: var(--dov); margin: 16px 0 48px; }
+  .policy h2 { font-size: 28px; margin: 48px 0 14px; }
+  .policy p, .policy li { color: #33333a; font-size: 17px; }
+  .policy ul { list-style: disc; padding-left: 22px; display: grid; gap: 8px; margin-top: 12px; }
+  .policy code { background: #e6e6e1; padding: 1px 6px; border-radius: 5px; font-size: 15px; }
+  .tillbaka { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 40px; }
+  .tillbaka svg { transform: scaleX(-1); width: 18px; height: 18px; }
+</style>
+</head>
+<body>
+<header class="top solid">
+  <nav class="wrap nav">
+    <a href="{{hem}}" class="logo" aria-label="{{t:nav.home_label}}"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a>
+    {{sprakval}}
+    <a href="{{hem}}#installera" class="btn liq nav-cta-alltid">{{chrome}}{{t:nav.add_chrome}}</a>
+  </nav>
+</header>
+<main class="wrap policy">
+  <a class="tillbaka nav-link" href="{{hem}}">{{arrow-right}}{{t:privacy.back}}</a>
+  <h1>{{t:privacy.title}}</h1>
+  <p class="datum">{{t:privacy.updated}}</p>
+
+  <h2>{{t:privacy.h_short}}</h2>
+  <p>{{t:privacy.p_short}}</p>
+
+  <h2>{{t:privacy.h_local}}</h2>
+  <ul>
+    <li>{{t:privacy.local1}}</li>
+    <li>{{t:privacy.local2}}</li>
+  </ul>
+  <p>{{t:privacy.p_local}}</p>
+
+  <h2>{{t:privacy.h_perms}}</h2>
+  <ul>
+    <li>{{t:privacy.perm_dnr}}</li>
+    <li>{{t:privacy.perm_hosts}}</li>
+    <li>{{t:privacy.perm_nav}}</li>
+    <li>{{t:privacy.perm_scripting}}</li>
+    <li>{{t:privacy.perm_storage}}</li>
+  </ul>
+
+  <h2>{{t:privacy.h_lists}}</h2>
+  <p>{{t:privacy.p_lists}}</p>
+
+  <h2>{{t:privacy.h_third}}</h2>
+  <p>{{t:privacy.p_third}}</p>
+
+  <h2>{{t:privacy.h_open}}</h2>
+  <p>{{t:privacy.p_open}}</p>
+
+  <h2>{{t:privacy.h_changes}}</h2>
+  <p>{{t:privacy.p_changes}}</p>
+</main>
+<footer class="fot">
+  <div class="wrap fot-grid">
+    <div><a href="{{hem}}" class="logo"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a><p>{{t:footer.tagline}}</p></div>
+  </div>
+</footer>
+</body>
+</html>

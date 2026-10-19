@@ -1,0 +1,23 @@
+name: Missed ad or popup
+description: An ad, tracker, popup or redirect gets through
+labels: ["missed-ad"]
+body:
+  - type: input
+    id: url
+    attributes:
+      label: URL
+      placeholder: https://
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What got through?
+      options: ["Ad on the page", "Popup or new tab", "Page redirected by itself", "Tracker", "Anti-adblock wall", "Other"]
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Where on the page, what you clicked, a screenshot if you can.

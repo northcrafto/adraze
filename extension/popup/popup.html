@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <img src="../icons/48.png" alt="" width="24" height="24">
+    <b>AdRaze</b>
+  </header>
+
+  <main>
+    <p class="host" id="host">…</p>
+    <button id="vaxla" class="vaxla" role="switch" aria-checked="true">
+      <span class="spar"><span class="knopp"></span></span>
+      <span id="lage">Skyddet är på</span>
+    </button>
+
+    <dl class="siffror">
+      <div><dt id="natverk">0</dt><dd>reklam &amp; spårare</dd></div>
+      <div><dt id="popups">0</dt><dd>popups</dd></div>
+      <div><dt id="omdir">0</dt><dd>omdirigeringar</dd></div>
+    </dl>
+    <p class="not" id="not" hidden>Ladda om sidan för att ändringen ska gälla.</p>
+  </main>
+
+  <footer>
+    <span>Totalt stoppat</span>
+    <span id="totalt">0 popups · 0 omdirigeringar</span>
+  </footer>
+  <script src="popup.js"></script>
+</body>
+</html>

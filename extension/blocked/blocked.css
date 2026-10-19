@@ -1,0 +1,13 @@
+:root { --bg: #0c0c0e; --kort: #16161a; --linje: #26262c; --text: #f4f4f5; --dov: #8b8b94; --accent: #ff4b1f; }
+* { box-sizing: border-box; margin: 0; }
+body { min-height: 100dvh; display: grid; place-items: center; background: var(--bg); color: var(--text); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; padding: 24px 16px; }
+main { max-width: 520px; }
+h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.05; letter-spacing: -0.03em; margin: 24px 0 12px; }
+p { color: var(--dov); }
+code { display: block; margin: 20px 0 28px; padding: 12px 14px; background: var(--kort); border: 1px solid var(--linje); border-radius: 10px; font: 13px ui-monospace, monospace; word-break: break-all; }
+.knappar { display: flex; gap: 10px; flex-wrap: wrap; }
+button { font: inherit; font-weight: 600; padding: 12px 20px; border-radius: 99px; cursor: pointer; border: 1px solid transparent; }
+.prim { background: var(--accent); color: #fff; }
+.sek { background: transparent; color: var(--dov); border-color: var(--linje); }
+.sek:hover { color: var(--text); border-color: var(--dov); }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

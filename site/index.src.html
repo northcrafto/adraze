@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{t:meta.title}}</title>
+<meta name="description" content="{{t:meta.description}}">
+<meta property="og:title" content="{{t:meta.title}}">
+<meta property="og:description" content="{{t:meta.og_description}}">
+<meta property="og:image" content="/bilder/soffa-1600.webp">
+<meta name="theme-color" content="#f2f2ef">
+<link rel="icon" href="/favicon.png">
+{{alternates}}
+<link rel="preload" href="/fonts/familjen.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header class="top">
+  <nav class="wrap nav">
+    <a href="{{hem}}" class="logo" aria-label="{{t:nav.home_label}}"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a>
+    <ul class="links">
+      <li><a class="nav-link" href="#se-skillnaden">{{t:nav.difference}}</a></li>
+      <li><a class="nav-link" href="#funktioner">{{t:nav.features}}</a></li>
+      <li><a class="nav-link" href="#sa-funkar-det">{{t:nav.how}}</a></li>
+      <li><a class="nav-link" href="#fragor">{{t:nav.faq}}</a></li>
+    </ul>
+    {{sprakval}}
+    <a href="#installera" class="btn liq nav-cta">{{chrome}}{{t:nav.add_chrome}}</a>
+    <button id="menu-btn" class="menu-btn" aria-expanded="false" aria-controls="menu" aria-label="{{t:nav.menu}}" data-meny="{{t:nav.menu}}" data-stang="{{t:nav.menu_close}}">
+      <span class="hb"><span></span><span></span><span></span></span>
+    </button>
+  </nav>
+</header>
+
+<div id="menu" class="menu" aria-hidden="true">
+  <ul>
+    <li class="m-item" style="--i:0"><a href="#se-skillnaden"><span>01</span>{{t:nav.difference}}</a></li>
+    <li class="m-item" style="--i:1"><a href="#funktioner"><span>02</span>{{t:nav.features}}</a></li>
+    <li class="m-item" style="--i:2"><a href="#sa-funkar-det"><span>03</span>{{t:nav.how}}</a></li>
+    <li class="m-item" style="--i:3"><a href="#fragor"><span>04</span>{{t:nav.faq}}</a></li>
+  </ul>
+  <a href="#installera" class="btn liq m-item m-cta" style="--i:4">{{chrome}}{{t:nav.add_chrome}}</a>
+</div>
+
+<main>
+  <!-- HJÄLTE -->
+  <section class="hero wrap">
+    <div class="hero-text">
+      <h1>{{t:hero.title}}</h1>
+      <p class="lead">{{t:hero.lead}}</p>
+      <div class="cta-rad">
+        <a href="#installera" class="btn btn-stor liq">{{chrome}}{{t:hero.cta}}</a>
+        <a href="#se-skillnaden" class="btn btn-stor liq-ghost">{{t:nav.difference}}</a>
+      </div>
+      <ul class="bevis">
+        <li>{{check}}{{t:hero.proof1}}</li>
+        <li>{{check}}{{t:hero.proof2}}</li>
+        <li>{{check}}{{t:hero.proof3}}</li>
+      </ul>
+    </div>
+    <figure class="hero-illu">
+      <img src="/illu/secure-server.svg" alt="{{t:hero.img_alt}}" width="760" height="560">
+    </figure>
+  </section>
+
+  <!-- FÖRE / EFTER -->
+  <section id="se-skillnaden" class="demo-sektion">
+    <div class="wrap">
+      <div class="sektion-huvud">
+        <h2>{{t:demo.title}}</h2>
+        <p>{{t:demo.lead}}</p>
+      </div>
+
+      <div class="demo" data-pa="false">
+        <div class="demo-rad">
+          <button id="demo-knapp" data-pa-text="{{t:demo.on}}" data-av-text="{{t:demo.off}}" class="btn liq" aria-pressed="false">{{shield-check}}<span>{{t:demo.on}}</span></button>
+          <p class="demo-raknare" aria-live="polite"><b id="demo-antal">0</b> {{t:demo.counter}}</p>
+        </div>
+
+        <div class="webblasare" aria-label="{{t:demo.browser_label}}">
+          <div class="flikrad">
+            <span class="prickar"><i></i><i></i><i></i></span>
+            <span class="adressfalt">{{lock-simple}}{{t:demo.domain}}</span>
+          </div>
+          <div class="sida">
+            <div class="annons annons-topp" data-annons><span>{{t:demo.ad_label}}</span>{{t:demo.ad1}}</div>
+            <div class="sida-grid">
+              <article class="artikel">
+                <div class="artikel-bild"></div>
+                <h3>{{t:demo.headline}}</h3>
+                <p class="rad"></p><p class="rad"></p><p class="rad halv"></p>
+                <div class="annons annons-mitt" data-annons><span>{{t:demo.ad_label}}</span>{{t:demo.ad2}}</div>
+                <p class="rad"></p><p class="rad halv"></p>
+              </article>
+              <aside class="spalt">
+                <div class="annons annons-sida" data-annons><span>{{t:demo.ad_label}}</span>{{t:demo.ad3}}</div>
+                <div class="spalt-kort"><p class="rad"></p><p class="rad halv"></p></div>
+                <div class="annons annons-sida liten" data-annons><span>{{t:demo.ad_label}}</span>{{t:demo.ad4}}</div>
+              </aside>
+            </div>
+            <div class="popup" data-annons>
+              <b>{{t:demo.popup_title}}</b>
+              <p>{{t:demo.popup_text}}</p>
+              <span class="popup-knapp">{{t:demo.popup_btn}}</span>
+            </div>
+            <div class="sparare" data-annons><i></i><i></i><i></i><span>{{t:demo.trackers}}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SIFFROR (mörkt band) -->
+  <section class="siffror">
+    <div class="wrap siffror-grid">
+      <div><b>100<small>/100</small></b><p>{{t:stats.s1}}</p></div>
+      <div><b>35 → 0</b><p>{{t:stats.s2}}</p></div>
+      <div><b>120 000+</b><p>{{t:stats.s3}}</p></div>
+      <div><b>0</b><p>{{t:stats.s4}}</p></div>
+    </div>
+  </section>
+
+  <!-- FUNKTIONER -->
+  <section id="funktioner" class="wrap funktioner">
+    <div class="sektion-huvud">
+      <h2>{{t:features.title}}</h2>
+      <p>{{t:features.lead}}</p>
+    </div>
+    <div class="kort-grid">
+      <article class="kort">
+        <img src="/illu/online-ad.svg" alt="" loading="lazy">
+        <h3>{{t:features.ads_title}}</h3>
+        <p>{{t:features.ads_text}}</p>
+      </article>
+      <article class="kort">
+        <img src="/illu/surveillance.svg" alt="" loading="lazy">
+        <h3>{{t:features.trackers_title}}</h3>
+        <p>{{t:features.trackers_text}}</p>
+      </article>
+      <article class="kort">
+        <img src="/illu/cancel.svg" alt="" loading="lazy">
+        <h3>{{t:features.popups_title}}</h3>
+        <p>{{t:features.popups_text}}</p>
+      </article>
+      <article class="kort">
+        <img src="/illu/blocked.svg" alt="" loading="lazy">
+        <h3>{{t:features.redirects_title}}</h3>
+        <p>{{t:features.redirects_text}}</p>
+      </article>
+      <article class="kort">
+        <img src="/illu/newspaper.svg" alt="" loading="lazy">
+        <h3>{{t:features.local_title}}</h3>
+        <p>{{t:features.local_text}}</p>
+      </article>
+      <article class="kort">
+        <img src="/illu/personal-settings.svg" alt="" loading="lazy">
+        <h3>{{t:features.pause_title}}</h3>
+        <p>{{t:features.pause_text}}</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- FOTOBAND -->
+  <section class="fotoband">
+    <picture>
+      <source media="(max-width: 700px)" srcset="/bilder/soffa-900.webp">
+      <img src="/bilder/soffa-1600.webp" alt="{{t:photo.alt}}" loading="lazy">
+    </picture>
+    <div class="fotoband-text wrap">
+      <h2>{{t:photo.title}}</h2>
+      <p>{{t:photo.text}}</p>
+    </div>
+  </section>
+
+  <!-- SÅ FUNKAR DET -->
+  <section id="sa-funkar-det" class="wrap steg">
+    <div class="sektion-huvud">
+      <h2>{{t:steps.title}}</h2>
+    </div>
+    <ol class="steg-lista">
+      <li>
+        <img src="/illu/app-installation.svg" alt="" loading="lazy">
+        <h3><span>1</span>{{t:steps.s1_title}}</h3>
+        <p>{{t:steps.s1_text}}</p>
+      </li>
+      <li>
+        <img src="/illu/casual-browsing.svg" alt="" loading="lazy">
+        <h3><span>2</span>{{t:steps.s2_title}}</h3>
+        <p>{{t:steps.s2_text}}</p>
+      </li>
+      <li>
+        <img src="/illu/relaxation.svg" alt="" loading="lazy">
+        <h3><span>3</span>{{t:steps.s3_title}}</h3>
+        <p>{{t:steps.s3_text}}</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- SVERIGE -->
+  <section class="sverige">
+    <div class="wrap sverige-grid">
+      <figure class="sverige-bild">
+        <picture>
+          <source media="(max-width: 700px)" srcset="/bilder/stockholm-900.webp">
+          <img src="/bilder/stockholm-1600.webp" alt="{{t:open.img_alt}}" loading="lazy">
+        </picture>
+      </figure>
+      <div class="sverige-text">
+        <h2>{{t:open.title}}</h2>
+        <p>{{t:open.text}}</p>
+        <ul class="bocklista">
+          <li>{{check}}{{t:open.c1}}</li>
+          <li>{{check}}{{t:open.c2}}</li>
+          <li>{{check}}{{t:open.c3}}</li>
+        </ul>
+        <a class="nav-link las-mer" href="{{pre}}/integritet">{{t:open.privacy_link}} {{arrow-right}}</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- JORDKLOT -->
+  <section class="jord">
+    <div class="wrap jord-grid">
+      <div class="jord-text">
+        <h2>{{t:globe.title}}</h2>
+        <p>{{t:globe.text}}</p>
+        <ul class="jord-lista">
+          <li><b>EasyList</b><span>{{t:globe.l1}}</span></li>
+          <li><b>EasyPrivacy</b><span>{{t:globe.l2}}</span></li>
+          <li><b>Frellwit</b><span>{{t:globe.l3}}</span></li>
+        </ul>
+        <p class="jord-tips">{{t:globe.tip}}</p>
+      </div>
+      <div class="jord-klot">
+        <canvas id="klot" aria-label="{{t:globe.label}}" role="img"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- FRÅGOR -->
+  <section id="fragor" class="wrap fragor">
+    <div class="fragor-sida">
+      <h2>{{t:faq.title}}</h2>
+      <img src="/illu/chilling.svg" alt="" loading="lazy">
+    </div>
+    <div class="fragor-lista">
+      <details>
+        <summary>{{t:faq.q1}}</summary>
+        <p>{{t:faq.a1}}</p>
+      </details>
+      <details>
+        <summary>{{t:faq.q2}}</summary>
+        <p>{{t:faq.a2}}</p>
+      </details>
+      <details>
+        <summary>{{t:faq.q3}}</summary>
+        <p>{{t:faq.a3}}</p>
+      </details>
+      <details>
+        <summary>{{t:faq.q4}}</summary>
+        <p>{{t:faq.a4}}</p>
+      </details>
+      <details>
+        <summary>{{t:faq.q5}}</summary>
+        <p>{{t:faq.a5}}</p>
+      </details>
+      <details>
+        <summary>{{t:faq.q6}}</summary>
+        <p>{{t:faq.a6}}</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- INSTALLERA (accentblock) -->
+  <section id="installera" class="installera">
+    <div class="wrap installera-grid">
+      <div>
+        <h2>{{t:install.title}}</h2>
+        <p>{{t:install.text}}</p>
+        <div class="cta-rad">
+          <a href="/adraze-0.1.0.zip" class="btn btn-stor liq liq-mork" download>{{download-simple}}{{t:install.download}}</a>
+        </div>
+        <ol class="manuellt">
+          <li>{{t:install.step1}}</li>
+          <li>{{t:install.step2}}</li>
+          <li>{{t:install.step3}}</li>
+        </ol>
+      </div>
+      <img src="/illu/happy.svg" alt="" loading="lazy" class="installera-illu">
+    </div>
+  </section>
+</main>
+
+<footer class="fot">
+  <div class="wrap fot-grid">
+    <div>
+      <a href="{{hem}}" class="logo"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a>
+      <p>{{t:footer.tagline}}</p>
+    </div>
+    <ul>
+      <li><a class="nav-link" href="#funktioner">{{t:nav.features}}</a></li>
+      <li><a class="nav-link" href="#fragor">{{t:nav.faq}}</a></li>
+      <li><a class="nav-link" href="{{pre}}/integritet">{{t:footer.privacy}}</a></li>
+    </ul>
+    <p class="fot-liten">{{t:footer.credits}}</p>
+  </div>
+</footer>
+
+<script src="/main.js"></script>
+<script type="module" src="/klot.js"></script>
+</body>
+</html>

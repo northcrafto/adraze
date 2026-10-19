@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://adraze.vercel.app/sitemap.xml

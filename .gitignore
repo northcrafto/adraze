@@ -1,0 +1,18 @@
+# Beroenden och byggen
+tools/node_modules/
+tools/lists/
+dist/
+site/.vercel
+site/adraze-*.zip
+
+# Testkörningar (profiler, skärmdumpar, loggar från agenterna)
+tests/out/
+tests/agent-*/
+tests/verifiera-*/
+
+node_modules/
+.DS_Store
+
+# Skapas av Chrome när tillägget laddas okomprimerat
+extension/_metadata/
+__pycache__/

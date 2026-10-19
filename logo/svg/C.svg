@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><circle cx="138" cy="112" r="74" fill="#ff4b1f"/>
+<circle cx="138" cy="112" r="50" fill="#ffffff"/>
+<line x1="102" y1="148" x2="174" y2="76" stroke="#ff4b1f" stroke-width="22" stroke-linecap="round"/>
+<g transform="rotate(0 138.0 112.0)"><rect x="116" y="98" width="44" height="28" rx="5.04" fill="#e6e6e6"/><text x="138.0" y="116.48" text-anchor="middle" font-family="Familjen Grotesk, Arial Black, sans-serif" font-weight="700" font-size="14.0" fill="#2f2e41">AD</text></g>
+<line x1="102" y1="148" x2="174" y2="76" stroke="#ff4b1f" stroke-width="16" stroke-linecap="round"/>
+<path d="M54,186 L58,206 L48,224" fill="none" stroke="#2f2e41" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="53" cy="226" rx="10" ry="5" fill="#2f2e41"/>
+<path d="M62,186 L78,204 L86,224" fill="none" stroke="#2f2e41" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="91" cy="226" rx="10" ry="5" fill="#2f2e41"/>
+<path d="M46,138 L68,138 L71,186 L45,186 Z" fill="#ff4b1f" stroke="#ff4b1f" stroke-width="10" stroke-linejoin="round"/>
+<path d="M68,140 L78,126" fill="none" stroke="#ff4b1f" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M78,126 L72,110" fill="none" stroke="#ffb6b6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="72" cy="110" r="5" fill="#ffb6b6"/>
+<path d="M48,140 L46,162" fill="none" stroke="#ff4b1f" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M46,162 L58,172" fill="none" stroke="#ffb6b6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="58" cy="172" r="5" fill="#ffb6b6"/>
+<rect x="49" y="126" width="10" height="12" fill="#ffb6b6"/>
+<circle cx="54" cy="118" r="15" fill="#ffb6b6"/>
+<path d="M38,120 C36,98 70,96 70,114 C60,108 48,110 38,120 Z" fill="#2f2e41"/>
+<circle cx="58" cy="98" r="8" fill="#2f2e41"/>
+<line x1="20" y1="228" x2="220" y2="228" stroke="#e6e6e6" stroke-width="3" stroke-linecap="round"/></svg>

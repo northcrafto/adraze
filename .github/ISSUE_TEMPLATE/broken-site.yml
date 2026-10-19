@@ -1,0 +1,35 @@
+name: Broken site
+description: A page, video, game, login or checkout stops working with AdRaze on
+labels: ["broken-site"]
+body:
+  - type: input
+    id: url
+    attributes:
+      label: URL
+      placeholder: https://
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What breaks?
+      description: What did you try to do, and what happened instead?
+    validations:
+      required: true
+  - type: dropdown
+    id: paused
+    attributes:
+      label: Does it work when AdRaze is paused on the site?
+      options: ["Yes, it works when paused", "No, it's broken either way", "I haven't tried"]
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: Chrome 131, Brave 1.73 ...
+  - type: input
+    id: version
+    attributes:
+      label: AdRaze version
+      placeholder: "0.1.0"

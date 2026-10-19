@@ -1,0 +1,16 @@
+{
+  "name": "adraze-tools",
+  "version": "1.0.0",
+  "description": "Bygger AdRazes regelpaket från filterlistor",
+  "scripts": {
+    "build": "node build.js --fetch"
+  },
+  "license": "GPL-3.0-only",
+  "dependencies": {
+    "@eyeo/abp2dnr": "^1.3.3"
+  },
+  "private": true,
+  "devDependencies": {
+    "playwright-core": "^1.48.0"
+  }
+}

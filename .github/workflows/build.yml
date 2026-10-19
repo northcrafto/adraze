@@ -1,0 +1,50 @@
+name: Build rules
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 5 * * 1" # every Monday: check that the latest filter lists still compile
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tools/package-lock.json
+      - name: Install
+        working-directory: tools
+        run: |
+          npm ci
+          npx playwright-core install --with-deps chromium
+      - name: Compile filter lists
+        working-directory: tools
+        run: node build.js --fetch
+      - name: Check rule limits
+        run: |
+          node -e '
+            const fs = require("fs");
+            const m = JSON.parse(fs.readFileSync("extension/manifest.json"));
+            let total = 0;
+            for (const r of m.declarative_net_request.rule_resources) {
+              const rules = JSON.parse(fs.readFileSync("extension/" + r.path));
+              const regex = rules.filter((x) => x.condition.regexFilter).length;
+              console.log(`${r.id}: ${rules.length} rules, ${regex} regex`);
+              if (regex > 1000) throw new Error(`${r.id}: too many regex rules`);
+              total += rules.length;
+            }
+            console.log("total:", total);
+            if (total > 30000) throw new Error("over the guaranteed static rule limit");
+          '
+      - name: Package
+        run: cd extension && zip -qr ../adraze-${{ github.sha }}.zip .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: adraze-extension
+          path: adraze-*.zip

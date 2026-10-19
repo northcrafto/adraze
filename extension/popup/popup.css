@@ -1,0 +1,25 @@
+:root {
+  --bg: #0c0c0e;
+  --kort: #16161a;
+  --linje: #26262c;
+  --text: #f4f4f5;
+  --dov: #8b8b94;
+  --accent: #ff4b1f;
+}
+* { box-sizing: border-box; margin: 0; }
+body { width: 300px; background: var(--bg); color: var(--text); font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
+header { display: flex; align-items: center; gap: 8px; padding: 14px 16px; border-bottom: 1px solid var(--linje); font-size: 15px; letter-spacing: -0.01em; }
+main { padding: 16px; }
+.host { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 12px; }
+.vaxla { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px; border-radius: 12px; background: var(--kort); border: 1px solid var(--linje); font-weight: 600; }
+.vaxla:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.spar { width: 36px; height: 20px; border-radius: 99px; background: var(--accent); position: relative; transition: background .2s; flex: none; }
+.knopp { position: absolute; top: 2px; left: 18px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .2s cubic-bezier(.76,0,.24,1); }
+.vaxla[aria-checked="false"] .spar { background: #3a3a42; }
+.vaxla[aria-checked="false"] .knopp { left: 2px; }
+.siffror { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+.siffror div { background: var(--kort); border: 1px solid var(--linje); border-radius: 12px; padding: 10px; }
+.siffror dt { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.siffror dd { color: var(--dov); font-size: 11px; margin: 0; }
+.not { margin-top: 10px; color: var(--accent); font-size: 12px; }
+footer { display: flex; justify-content: space-between; padding: 12px 16px; border-top: 1px solid var(--linje); color: var(--dov); font-size: 11px; }
