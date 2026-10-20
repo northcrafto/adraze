@@ -1,6 +1,7 @@
 # Beroenden och byggen
 tools/node_modules/
-tools/lists/
+tools/lists/*
+!tools/lists/adraze-*.txt
 dist/
 site/.vercel
 site/adraze-*.zip

@@ -21,7 +21,7 @@ const KALLOR = {
 
 // Vilka listor som går till vilket regelpaket
 const PAKET = {
-  ads: ["easylist.txt", "ubo-filters.txt", "peterlowe.txt", "frellwit.txt"],
+  ads: ["easylist.txt", "ubo-filters.txt", "peterlowe.txt", "frellwit.txt", "adraze-kosmetik.txt", "adraze-natverk.txt"],
   privacy: ["easyprivacy.txt"],
   security: ["badware.txt", "adguard-popups.txt"],
 };

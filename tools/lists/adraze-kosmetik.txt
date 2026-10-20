@@ -1,0 +1,2 @@
+! AdRaze egna kosmetiska regler (dölj tomma annonsluckor, sponsrat innehåll) och undantag (#@#) för felaktigt dolda element.
+! Underhålls för hand. ABP/uBO-syntax: example.se##.selektor  respektive  example.se#@#.selektor

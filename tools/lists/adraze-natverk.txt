@@ -1,0 +1,2 @@
+! AdRaze egna nätverksregler och undantag (@@) för saker som filterlistorna blockerar felaktigt.
+! Underhålls för hand. ABP/uBO-syntax.
