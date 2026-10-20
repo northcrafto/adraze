@@ -1,1 +1,7 @@
-{ "cleanUrls": true }
+{
+  "cleanUrls": true,
+  "redirects": [
+    { "source": "/:path*", "has": [{ "type": "host", "value": "adraze.vercel.app" }], "destination": "https://adraze.app/:path*", "permanent": true },
+    { "source": "/:path*", "has": [{ "type": "host", "value": "www.adraze.app" }], "destination": "https://adraze.app/:path*", "permanent": true }
+  ]
+}

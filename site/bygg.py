@@ -7,7 +7,7 @@ Kör: python3 bygg.py"""
 import html, json, pathlib, re, shutil
 
 rot = pathlib.Path(__file__).parent
-SAJT = 'https://adraze.vercel.app'
+SAJT = 'https://adraze.app'
 # Kod, namn på språket självt (ordning = ordning i språkväljaren)
 SPRAK = [
     ('sv', 'Svenska'), ('en', 'English'), ('nb', 'Norsk'), ('da', 'Dansk'), ('fi', 'Suomi'), ('is', 'Íslenska'),
