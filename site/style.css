@@ -172,35 +172,78 @@ section { padding: 120px 0; }
 .prickar i { width: 11px; height: 11px; border-radius: 50%; background: #c9c9c2; }
 .adressfalt { flex: 1; max-width: 420px; display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; border-radius: 99px; background: var(--yta); font-size: 13px; color: var(--dov); }
 .adressfalt svg { width: 14px; height: 14px; }
-.sida { position: relative; padding: 24px; min-height: 520px; }
-.sida-grid { display: grid; grid-template-columns: 1fr 260px; gap: 24px; }
-.artikel-bild { height: 200px; border-radius: 12px; background: linear-gradient(135deg, #cfd8dc, #b0bec5); }
-.artikel h3 { margin: 18px 0 14px; font-size: 26px; }
-.rad { height: 10px; border-radius: 99px; background: #dcdcd6; margin-bottom: 10px; }
-.rad.halv { width: 60%; }
-.spalt { display: flex; flex-direction: column; gap: 16px; }
-.spalt-kort { padding: 16px; border-radius: 12px; background: var(--yta); }
+.sida { position: relative; padding: 0 24px 24px; min-height: 520px; background: #fff; }
+.sida-grid { display: grid; grid-template-columns: 1fr 260px; gap: 32px; }
+
+/* Nyhetssajten i demon */
+.tidning { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 0; margin-bottom: 20px; border-bottom: 3px solid #b3001b; }
+.tidning-logo { font: 700 28px/1 Georgia, "Times New Roman", serif; letter-spacing: -0.03em; color: #b3001b; }
+.tidning-nav { display: flex; gap: 18px; font-size: 14px; font-weight: 600; color: #3a3a40; }
+.tidning-nav .vald { color: #b3001b; box-shadow: inset 0 -2px #b3001b; }
+.artikel { font-family: Georgia, "Times New Roman", serif; font-size: 16px; line-height: 1.6; color: #222; }
+.artikel > p { margin-bottom: 14px; }
+.artikel-kicker { font: 700 12px/1 "Familjen Grotesk", system-ui, sans-serif; letter-spacing: .12em; color: #b3001b; margin-bottom: 10px !important; }
+.artikel h3 { font: 700 34px/1.08 "Familjen Grotesk", system-ui, sans-serif; letter-spacing: -0.03em; margin-bottom: 12px; color: var(--ink); }
+.artikel-ingress { font-weight: 700; font-size: 18px; line-height: 1.45; }
+.artikel-byline { font: 13px/1.4 "Familjen Grotesk", system-ui, sans-serif; color: #6b6b72; }
+.artikel-bild { position: relative; height: 240px; margin-bottom: 18px; border-radius: 6px; overflow: hidden; background: linear-gradient(#3d9be9, #9fd3fb 70%, #d9f0ff); }
+.artikel-bild .sol { position: absolute; top: 34px; right: 70px; width: 76px; height: 76px; border-radius: 50%; background: #ffd23a; box-shadow: 0 0 0 14px rgb(255 214 58 / .3), 0 0 60px 30px rgb(255 220 90 / .55); }
+.artikel-bild .moln { position: absolute; height: 34px; border-radius: 99px; background: #fff; box-shadow: 22px -16px 0 4px #fff, 48px -6px 0 -2px #fff; }
+.artikel-bild .m1 { top: 70px; left: 60px; width: 110px; }
+.artikel-bild .m2 { top: 130px; left: 46%; width: 80px; opacity: .85; }
+.artikel-bild .kulle { position: absolute; left: -10%; right: -10%; bottom: -110px; height: 180px; border-radius: 50%; background: linear-gradient(#5fae3e, #3d8a2a); }
+.prognos { margin: 6px 0 18px; padding: 16px; border-radius: 8px; background: #f3f6fa; font-family: "Familjen Grotesk", system-ui, sans-serif; }
+.prognos table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 14px; }
+.prognos th, .prognos td { padding: 7px 4px; text-align: left; border-top: 1px solid #dde3ea; }
+.prognos thead th { border: 0; font-size: 12px; color: #6b6b72; font-weight: 600; }
+.prognos td { font-weight: 700; white-space: nowrap; }
+.v { display: inline-block; width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px; border-radius: 50%; }
+.v.sol { background: #ffc51a; }
+.v.halv { background: linear-gradient(135deg, #ffc51a 50%, #b8c4d0 50%); }
+.v.moln { background: #b8c4d0; border-radius: 99px 99px 6px 6px; }
+.v.regn { background: #6f8fb0; border-radius: 99px 99px 6px 6px; box-shadow: 0 4px 0 -2px #3d9be9; }
+.spalt { display: flex; flex-direction: column; gap: 20px; }
+.spalt-kort { padding: 16px 0; border-top: 3px solid var(--ink); }
+.spalt-kort > b { font-size: 15px; }
+.mest-last { margin-top: 8px; counter-reset: n; }
+.mest-last li { counter-increment: n; display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #ececea; font-size: 14px; font-weight: 600; line-height: 1.3; }
+.mest-last li::before { content: counter(n); font-size: 22px; line-height: 1; color: #b3001b; }
 
 /* Annonserna i demon: krymper ihop och försvinner när AdRaze slås på */
-.annons { display: grid; place-items: center; text-align: center; gap: 4px; padding: 14px; border-radius: 10px; font-weight: 700; color: #7a2b12; background: repeating-linear-gradient(45deg, #ffe4d6 0 12px, #ffd6c2 12px 24px); border: 1.5px dashed #ff9b77; overflow: hidden;
-  max-height: 220px; transition: max-height .4s var(--ease), opacity .25s ease, padding .4s var(--ease), margin .4s var(--ease), border-width .4s; }
-.annons span { font-size: 10px; letter-spacing: .12em; color: #b4532e; }
-.annons-topp { height: 90px; margin-bottom: 24px; }
-.annons-mitt { height: 120px; margin: 18px 0; }
-.annons-sida { height: 220px; }
-.annons-sida.liten { height: 120px; }
-.popup { position: absolute; z-index: 2; left: 50%; top: 46%; width: min(340px, 86%); translate: -50% -50%; padding: 24px; border-radius: 16px; background: var(--yta); box-shadow: 0 24px 60px -12px rgb(17 17 19 / .35); text-align: center; transition: opacity .3s ease, scale .3s var(--ease); }
+.annons { position: relative; border-radius: 6px; overflow: hidden; max-height: 260px;
+  transition: max-height .4s var(--ease), opacity .25s ease, padding .4s var(--ease), margin .4s var(--ease); }
+.annons > span, .ad-krypto > span { position: absolute; z-index: 1; top: 6px; left: 8px; font: 700 9px/1 "Familjen Grotesk", system-ui, sans-serif; letter-spacing: .12em; color: rgb(255 255 255 / .75); }
+.annons b { font-family: "Familjen Grotesk", system-ui, sans-serif; letter-spacing: -0.02em; line-height: 1.15; }
+.ad-knapp { display: inline-block; padding: 8px 16px; border-radius: 99px; background: #ffe600; color: #111; font: 700 13px/1 "Familjen Grotesk", system-ui, sans-serif; font-style: normal; white-space: nowrap; animation: blinka 1s steps(2) infinite; }
+@keyframes blinka { 50% { background: #ff3d00; color: #fff; } }
+.annons-topp { height: 96px; margin-bottom: 24px; }
+.ad-iphone { height: 100%; display: flex; align-items: center; justify-content: center; gap: 24px; padding: 0 24px; background: linear-gradient(90deg, #1b0b46, #6a11cb 55%, #ff2e93); color: #fff; font-size: 22px; }
+.ad-telefon { width: 34px; height: 64px; flex: none; border-radius: 8px; border: 3px solid #e7e7ef; background: linear-gradient(160deg, #ff8ad8, #4a6bff); box-shadow: 0 0 24px rgb(255 255 255 / .5); }
+.annons-mitt { height: 190px; margin: 4px 0 18px; }
+.ad-video { position: relative; height: 100%; display: grid; place-content: center; justify-items: center; gap: 10px; background: radial-gradient(circle at 50% 40%, #3a2a00, #0d0d0d 70%); color: #ffd54a; font-size: 24px; text-align: center; }
+.ad-play { position: absolute; left: 22px; bottom: 18px; width: 0; height: 0; border-left: 14px solid #fff; border-block: 9px solid transparent; }
+.ad-video small { position: absolute; right: 12px; bottom: 12px; padding: 6px 10px; background: rgb(0 0 0 / .7); color: #ddd; font: 12px/1 "Familjen Grotesk", system-ui, sans-serif; }
+.ad-knapp.guld { background: linear-gradient(#ffe27a, #e0a800); animation: none; }
+.annons-sida { height: 250px; }
+.ad-banta { height: 100%; display: grid; place-content: center; justify-items: center; gap: 12px; padding: 20px; background: linear-gradient(160deg, #00c96b, #007a4d); color: #fff; font-size: 18px; text-align: center; }
+.ad-stor { font-size: 52px !important; color: #fffb00; text-shadow: 3px 3px 0 #004d2f; }
+.annons-sida.liten { height: 130px; }
+.ad-lan { height: 100%; display: grid; place-content: center; justify-items: center; gap: 12px; padding: 16px; background: linear-gradient(135deg, #0047ff, #00a2ff); color: #fff; font-size: 18px; text-align: center; }
+.annons-botten { margin: 24px -24px -24px; border-radius: 0; height: 64px; }
+.ad-krypto { position: relative; height: 100%; display: flex; align-items: center; justify-content: center; gap: 18px; padding: 0 16px; background: #111; color: #f7931a; font-size: 17px; border-top: 2px solid #f7931a; }
+.popup { position: absolute; z-index: 2; left: 50%; top: 380px; width: min(340px, 86%); translate: -50% -50%; padding: 24px; border-radius: 16px; background: var(--yta); box-shadow: 0 24px 60px -12px rgb(17 17 19 / .35); text-align: center; transition: opacity .3s ease, scale .3s var(--ease); }
 .popup b { display: block; font-size: 19px; letter-spacing: -0.02em; line-height: 1.2; }
 .popup p { color: var(--dov); font-size: 14px; margin: 8px 0 16px; }
 .popup-knapp { display: inline-block; padding: 10px 18px; border-radius: 99px; background: #18a957; color: #fff; font-weight: 700; font-size: 14px; }
-.sparare { position: absolute; right: 20px; bottom: 18px; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 99px; background: var(--ink); color: #fff; font-size: 12px; font-weight: 600; transition: opacity .3s ease, translate .3s var(--ease); }
+.sparare { position: absolute; z-index: 2; right: 20px; bottom: 84px; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 99px; background: var(--ink); color: #fff; font-size: 12px; font-weight: 600; transition: opacity .3s ease, translate .3s var(--ease); }
 .sparare i { width: 7px; height: 7px; border-radius: 50%; background: #ff4b1f; }
 
-.demo[data-pa="true"] .annons { max-height: 0; opacity: 0; padding-block: 0; margin: 0; border-width: 0; }
+.demo[data-pa="true"] .annons { max-height: 0; opacity: 0; margin: 0; }
 .demo[data-pa="true"] .annons-topp { margin-bottom: 0; }
 .demo[data-pa="true"] .popup { opacity: 0; scale: .92; pointer-events: none; }
 .demo[data-pa="true"] .sparare { opacity: 0; translate: 0 10px; }
 .demo[data-pa="true"] .spalt { gap: 0; }
+.demo[data-pa="true"] .sparare { pointer-events: none; }
 
 /* ---------- Siffror (mörkt band) ---------- */
 .siffror { background: var(--mork); color: #fff; padding: 96px 0; }
@@ -301,8 +344,16 @@ section { padding: 120px 0; }
   section { padding: 80px 0; }
   .kort-grid, .siffror-grid { grid-template-columns: 1fr; }
   .btn-stor { width: 100%; white-space: normal; height: auto; min-height: 56px; padding-block: 14px; text-align: center; line-height: 1.25; }
-  .sida { padding: 16px; min-height: 0; }
-  .annons-sida { height: 120px; }
+  .sida { padding: 0 16px 16px; min-height: 0; }
+  .annons-sida { height: 160px; }
+  .annons-botten { margin: 16px -16px -16px; }
+  .tidning-nav { display: none; }
+  .artikel h3 { font-size: 26px; }
+  .artikel-bild { height: 170px; }
+  .ad-iphone { font-size: 16px; gap: 12px; padding: 0 12px; }
+  .ad-iphone .ad-knapp { display: none; }
+  .ad-krypto { font-size: 14px; gap: 10px; }
+  .popup { top: 300px; }
   .fot-grid { grid-template-columns: 1fr; }
   .fot ul { flex-wrap: wrap; }
   .fotoband { min-height: 520px; }
@@ -312,7 +363,7 @@ section { padding: 120px 0; }
   html { scroll-behavior: auto; }
   .liq::before, .liq-ghost::before { border-radius: 0; height: 100%; transition: transform .2s ease; }
   .nav-link::after, .bar-hover::after { transition: none; }
-  .hero-text > *, .hero-illu { animation: none; }
+  .hero-text > *, .hero-illu, .ad-knapp { animation: none; }
   .menu, .menu.open { clip-path: none; transition: opacity .2s; }
   .menu:not(.open) { opacity: 0; }
   .menu .m-item, .menu.open .m-item, .hb span { transition-duration: .15s; transition-delay: 0s; }
