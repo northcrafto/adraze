@@ -216,12 +216,18 @@ async function main() {
 
   fs.mkdirSync(path.join(EXT, "rules"), { recursive: true });
   fs.mkdirSync(path.join(EXT, "data"), { recursive: true });
+  // Blockerande regler först, så att tillägget kan räkna stoppade förfrågningar på regel-id (id <= antal i rakna.json)
+  const blockerar = (r) => r.action.type === "block" || r.action.type === "redirect";
+  const rakna = {};
   for (const [namn, regler] of Object.entries(regelPaket)) {
+    regler.sort((a, b) => blockerar(b) - blockerar(a));
+    rakna[namn] = regler.filter(blockerar).length;
     regler.forEach((r, i) => (r.id = i + 1));
     fs.writeFileSync(path.join(EXT, "rules", namn + ".json"), JSON.stringify(regler));
     console.log(`${namn}: ${regler.length} regler`);
   }
   fs.writeFileSync(path.join(EXT, "data", "cosmetic.json"), JSON.stringify(cos));
+  fs.writeFileSync(path.join(EXT, "data", "rakna.json"), JSON.stringify(rakna));
   fs.writeFileSync(path.join(EXT, "data", "popup-hosts.json"), JSON.stringify(sakra));
   console.log(`kosmetik: ${cos.generic.length} generella, ${Object.keys(cos.specific).length} sajter (${allaSel.size - giltiga.size} ogiltiga borttagna)`);
   console.log(`popup/farliga värdar: ${sakra.length}, annonsvärdar: ${annonsHosts.size}`);

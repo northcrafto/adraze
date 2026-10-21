@@ -21,6 +21,12 @@ const $ = (id) => document.getElementById(id);
     $("totalt").textContent = `${s.totalt.popups} popups · ${s.totalt.omdirigeringar} omdirigeringar`;
   }
 
+  const konto = await chrome.runtime.sendMessage({ typ: "konto-status" }).catch(() => null);
+  if (konto?.kopplad) {
+    $("konto-rubrik").textContent = "Din statistik";
+    $("konto-under").textContent = konto.email ? `Kopplad till ${konto.email}` : "Tillägget är kopplat till ditt konto";
+  }
+
   $("vaxla").addEventListener("click", async () => {
     const pa = $("vaxla").getAttribute("aria-checked") === "true";
     await chrome.runtime.sendMessage({ typ: "pausa", host, pa });

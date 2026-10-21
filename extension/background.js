@@ -127,7 +127,58 @@ async function raknaNu(tabId, typ) {
   const tot = (await chrome.storage.local.get("totalt")).totalt || { popups: 0, omdirigeringar: 0 };
   tot[typ]++;
   await chrome.storage.local.set({ totalt: tot });
+  await laggTillDag({ [typ]: 1 });
 }
+
+// ---------- Statistik per dag (visas på kontosidan när tillägget är kopplat) ----------
+// Dagssummor i storage.local.dagar = { "2026-10-21": { reklam, sparare, farliga, popups, omdirigeringar } }
+const API = "https://api.adraze.app";
+const KATEGORI = { ads: "reklam", privacy: "sparare", security: "farliga" };
+const idag = () => new Date().toLocaleDateString("sv-SE");
+async function laggTillDag(okning) {
+  const { dagar = {} } = await chrome.storage.local.get("dagar");
+  const d = (dagar[idag()] ||= {});
+  for (const [f, n] of Object.entries(okning)) d[f] = (d[f] || 0) + n;
+  for (const k of Object.keys(dagar).sort().slice(0, -60)) delete dagar[k];
+  await chrome.storage.local.set({ dagar });
+}
+
+// Stoppade förfrågningar hämtas från Chrome varannan minut. Blockerande regler har de lägsta
+// id:na i varje regelpaket (se tools/build.js), så id <= antalet i rakna.json betyder stoppad.
+let grans = null;
+async function hamtaStoppade() {
+  grans ||= await (await fetch(chrome.runtime.getURL("data/rakna.json"))).json();
+  const { senastMatchad = Date.now() - 60_000 } = await chrome.storage.local.get("senastMatchad");
+  let info;
+  try { info = (await chrome.declarativeNetRequest.getMatchedRules({ minTimeStamp: senastMatchad + 1 })).rulesMatchedInfo; } catch { return; }
+  const okning = {};
+  let senast = senastMatchad;
+  for (const { rule, timeStamp } of info) {
+    senast = Math.max(senast, timeStamp);
+    const f = KATEGORI[rule.rulesetId];
+    if (f && rule.ruleId <= grans[rule.rulesetId]) okning[f] = (okning[f] || 0) + 1;
+  }
+  await chrome.storage.local.set({ senastMatchad: senast });
+  if (Object.keys(okning).length) await laggTillDag(okning);
+}
+
+// Kopplat konto: skicka dagssummorna (inte ökningar), så att samma dag kan skickas om utan att räknas dubbelt
+async function synka() {
+  const { konto, dagar = {} } = await chrome.storage.local.get(["konto", "dagar"]);
+  if (!konto?.token) return;
+  const r = await fetch(`${API}/stats/sync`, {
+    method: "POST",
+    headers: { "content-type": "application/json", authorization: `Bearer ${konto.token}` },
+    body: JSON.stringify({ dagar }),
+  }).catch(() => null);
+  // Kopplingen borttagen på kontosidan: glöm nyckeln
+  if (r?.status === 401) await chrome.storage.local.remove("konto");
+}
+
+chrome.alarms.onAlarm.addListener((larm) => {
+  if (larm.name === "stoppade") ko = ko.then(hamtaStoppade).catch(() => {});
+  if (larm.name === "synka") ko = ko.then(hamtaStoppade).then(synka).catch(() => {});
+});
 
 // ---------- Popups och omdirigeringar ----------
 const STOPP = chrome.runtime.getURL("blocked/blocked.html");
@@ -194,6 +245,17 @@ chrome.runtime.onMessage.addListener((msg, sender, svara) => {
       try { natverk = (await chrome.declarativeNetRequest.getMatchedRules({ tabId: msg.tabId })).rulesMatchedInfo.length; } catch {}
       const totalt = (await chrome.storage.local.get("totalt")).totalt || { popups: 0, omdirigeringar: 0 };
       svara({ pausad: suffix(host).some((n) => lista.includes(n)), natverk, ...tab, totalt });
+    } else if (msg.typ === "konto-koppla" && sender.url?.startsWith("https://adraze.app/")) {
+      // Från content/konto.js på adraze.app/konto: spara nyckeln och skicka statistiken direkt
+      await chrome.storage.local.set({ konto: { token: String(msg.token), email: String(msg.email || "") } });
+      ko = ko.then(hamtaStoppade).then(synka).catch(() => {});
+      svara(true);
+    } else if (msg.typ === "konto-status") {
+      const { konto } = await chrome.storage.local.get("konto");
+      svara({ kopplad: !!konto?.token, email: konto?.email || "" });
+    } else if (msg.typ === "konto-koppla-bort" && sender.url?.startsWith("https://adraze.app/")) {
+      await chrome.storage.local.remove("konto");
+      svara(true);
     } else if (msg.typ === "pausa") {
       let lista = await pausade();
       const nivaer = suffix(msg.host);
@@ -213,6 +275,8 @@ async function start() {
   await chrome.action.setBadgeBackgroundColor({ color: "#ff4b1f" });
   await chrome.action.setBadgeTextColor?.({ color: "#ffffff" });
   await synkaPaus();
+  chrome.alarms.create("stoppade", { periodInMinutes: 2 }); // getMatchedRules tål 20 anrop per 10 min
+  chrome.alarms.create("synka", { periodInMinutes: 15 });
 }
 chrome.runtime.onInstalled.addListener(start);
 chrome.runtime.onStartup.addListener(start);

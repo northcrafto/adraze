@@ -9,7 +9,9 @@
     "storage",
     "webNavigation",
     "scripting",
-    "activeTab"
+    "activeTab",
+    "declarativeNetRequestFeedback",
+    "alarms"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -62,5 +64,16 @@
     "48": "icons/48.png",
     "128": "icons/128.png"
   },
-  "homepage_url": "https://adraze.vercel.app"
+  "homepage_url": "https://adraze.app",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://adraze.app/*"
+      ],
+      "js": [
+        "content/konto.js"
+      ],
+      "run_at": "document_start"
+    }
+  ]
 }
