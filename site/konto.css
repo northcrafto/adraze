@@ -82,8 +82,6 @@
 
 .den-har { margin-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 16px; border-radius: 16px; background: var(--bg); }
 .den-har p { font-weight: 600; }
-.den-har .ok { display: inline-flex; align-items: center; gap: 8px; }
-.den-har .ok::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: #1fa45a; box-shadow: 0 0 0 4px rgb(31 164 90 / .15); }
 .enheter { margin-top: 8px; }
 .enheter li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 4px; border-bottom: 1px solid var(--linje); }
 .enheter li:last-child { border-bottom: 0; }
