@@ -165,6 +165,7 @@
   "privacy.perm_feedback": "<b>declarativeNetRequestFeedback :</b> compte le nombre de publicités, de traqueurs et de pages dangereuses bloqués. L’extension lit uniquement le type de règle déclenchée, pas la page concernée.",
   "privacy.perm_alarms": "<b>alarms :</b> met à jour les compteurs à intervalles réguliers et envoie les statistiques à votre compte si vous en avez associé un.",
   "nav.login": "Se connecter",
+  "nav.account": "Mon compte",
   "konto.meta_title": "Connexion – AdRaze",
   "konto.meta_description": "Connectez-vous à AdRaze et voyez combien de publicités, de traceurs et de pages dangereuses l’extension a bloqués sur tous vos ordinateurs.",
   "konto.title": "Voyez tout ce qu’AdRaze a bloqué.",

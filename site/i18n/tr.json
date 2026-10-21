@@ -165,6 +165,7 @@
   "privacy.perm_feedback": "<b>declarativeNetRequestFeedback:</b> kaç reklam, izleyici ve tehlikeli sayfanın durdurulduğunu sayar. Eklenti yalnızca ne tür bir kuralın eşleştiğini okur, hangi sayfada olduğunu değil.",
   "privacy.perm_alarms": "<b>alarms:</b> sayaçları düzenli aralıklarla günceller ve bir hesap bağladıysan istatistikleri hesabına gönderir.",
   "nav.login": "Giriş yap",
+  "nav.account": "Hesabım",
   "konto.meta_title": "Giriş yap – AdRaze",
   "konto.meta_description": "AdRaze'e giriş yap ve uzantının tüm bilgisayarlarında ne kadar reklam, izleyici ve tehlikeli sayfa durdurduğunu gör.",
   "konto.title": "AdRaze'in durdurduğu her şeyi gör.",

@@ -165,6 +165,7 @@
   "privacy.perm_feedback": "<b>declarativeNetRequestFeedback:</b> cuenta cuántos anuncios, rastreadores y páginas peligrosas se han bloqueado. La extensión solo lee qué tipo de regla ha coincidido, no en qué página.",
   "privacy.perm_alarms": "<b>alarms:</b> actualiza los contadores cada cierto tiempo y envía las estadísticas a tu cuenta si has conectado una.",
   "nav.login": "Iniciar sesión",
+  "nav.account": "Mi cuenta",
   "konto.meta_title": "Iniciar sesión – AdRaze",
   "konto.meta_description": "Inicia sesión en AdRaze y mira cuántos anuncios, rastreadores y páginas peligrosas ha frenado la extensión en todos tus ordenadores.",
   "konto.title": "Mira todo lo que AdRaze ha frenado.",

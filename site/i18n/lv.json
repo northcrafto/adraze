@@ -165,6 +165,7 @@
   "privacy.perm_feedback": "<b>declarativeNetRequestFeedback:</b> skaita, cik reklāmu, izsekotāju un bīstamu lapu apturēts. Paplašinājums nolasa tikai to, kāda veida noteikums nostrādāja, nevis to, kurā lapā.",
   "privacy.perm_alarms": "<b>alarms:</b> regulāri atjaunina skaitītājus un nosūta statistiku uz tavu kontu, ja esi to savienojis.",
   "nav.login": "Pieteikties",
+  "nav.account": "Mans konts",
   "konto.meta_title": "Pieteikšanās – AdRaze",
   "konto.meta_description": "Piesakies AdRaze un redzi, cik daudz reklāmu, izsekotāju un bīstamu lapu paplašinājums ir apturējis visos tavos datoros.",
   "konto.title": "Redzi visu, ko AdRaze apturēja.",

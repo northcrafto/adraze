@@ -165,6 +165,7 @@
   "privacy.perm_feedback": "<b>declarativeNetRequestFeedback:</b> laskee, kuinka monta mainosta, seurainta ja vaarallista sivua on estetty. Laajennus lukee vain, minkä tyyppinen sääntö osui, ei sitä, millä sivulla.",
   "privacy.perm_alarms": "<b>alarms:</b> päivittää laskurit säännöllisin väliajoin ja lähettää tilastot tilillesi, jos olet yhdistänyt sellaisen.",
   "nav.login": "Kirjaudu",
+  "nav.account": "Oma tili",
   "konto.meta_title": "Kirjaudu – AdRaze",
   "konto.meta_description": "Kirjaudu AdRazeen ja katso, kuinka paljon mainoksia, seuraimia ja vaarallisia sivuja laajennus on pysäyttänyt kaikilla tietokoneillasi.",
   "konto.title": "Näe kaikki, minkä AdRaze pysäytti.",

@@ -165,6 +165,7 @@
   "privacy.perm_feedback": "<b>declarativeNetRequestFeedback:</b> tæller, hvor mange reklamer, trackere og farlige sider der er stoppet. Udvidelsen læser kun, hvilken slags regel der ramte, ikke hvilken side det var på.",
   "privacy.perm_alarms": "<b>alarms:</b> opdaterer tællerne med jævne mellemrum og sender statistikken til din konto, hvis du har forbundet en.",
   "nav.login": "Log ind",
+  "nav.account": "Min konto",
   "konto.meta_title": "Log ind – AdRaze",
   "konto.meta_description": "Log ind på AdRaze og se, hvor mange reklamer, trackere og farlige sider udvidelsen har stoppet på alle dine computere.",
   "konto.title": "Se alt, AdRaze har stoppet.",

@@ -165,6 +165,7 @@
   "privacy.perm_feedback": "<b>declarativeNetRequestFeedback:</b> numără câte reclame, trackere și pagini periculoase au fost oprite. Extensia citește doar ce tip de regulă s-a aplicat, nu pe ce pagină.",
   "privacy.perm_alarms": "<b>alarms:</b> actualizează contoarele la intervale regulate și trimite statisticile în contul tău, dacă ai conectat unul.",
   "nav.login": "Autentificare",
+  "nav.account": "Contul meu",
   "konto.meta_title": "Autentificare – AdRaze",
   "konto.meta_description": "Autentifică-te în AdRaze și vezi câte reclame, trackere și pagini periculoase a oprit extensia pe toate calculatoarele tale.",
   "konto.title": "Vezi tot ce a oprit AdRaze.",

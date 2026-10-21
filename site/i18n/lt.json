@@ -165,6 +165,7 @@
   "privacy.perm_feedback": "<b>declarativeNetRequestFeedback:</b> skaičiuoja, kiek reklamų, sekiklių ir pavojingų puslapių sustabdyta. Plėtinys nuskaito tik tai, kokio tipo taisyklė suveikė, o ne kuriame puslapyje.",
   "privacy.perm_alarms": "<b>alarms:</b> reguliariai atnaujina skaitiklius ir siunčia statistiką į jūsų paskyrą, jei ją susiejote.",
   "nav.login": "Prisijungti",
+  "nav.account": "Mano paskyra",
   "konto.meta_title": "Prisijungimas – AdRaze",
   "konto.meta_description": "Prisijunkite prie AdRaze ir pažiūrėkite, kiek reklamų, sekiklių ir pavojingų puslapių plėtinys sustabdė visuose jūsų kompiuteriuose.",
   "konto.title": "Pažiūrėkite, ką sustabdė AdRaze.",

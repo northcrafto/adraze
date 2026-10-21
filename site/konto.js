@@ -193,6 +193,8 @@ function fragaTillagg(typ, data = {}) {
   });
 }
 const minEnhet = () => { try { return Number(localStorage.getItem('adraze-enhet')) || 0; } catch { return 0; } };
+// Flagga som startsidan läser för att visa "Mitt konto" i stället för "Logga in"
+const markeraInloggad = (ja) => { try { ja ? localStorage.setItem('adraze-inloggad', '1') : localStorage.removeItem('adraze-inloggad'); } catch {} };
 const sparaEnhet = (id) => { try { id ? localStorage.setItem('adraze-enhet', String(id)) : localStorage.removeItem('adraze-enhet'); } catch {} };
 
 async function koppla(email) {
@@ -217,6 +219,7 @@ async function inloggad() {
 async function visaKonto(status) {
   const data = await api('/me');
   jag = data.me;
+  markeraInloggad(true);
   $('#vy-ut').hidden = true;
   $('#vy-in').hidden = false;
   $('#min-mejl').textContent = jag.email;
@@ -296,6 +299,7 @@ function visaEnheter(enheter, status) {
 
 $('#logga-ut').addEventListener('click', async () => {
   try { await api('/auth/logout', {}); } catch {}
+  markeraInloggad(false);
   location.reload();
 });
 $('#f-radera').addEventListener('submit', (e) => {
@@ -306,6 +310,7 @@ $('#f-radera').addEventListener('submit', (e) => {
     await api('/me/delete', { password: f.password.value }, { 401: T.err_login });
     await fragaTillagg('koppla-bort');
     sparaEnhet(0);
+    markeraInloggad(false);
     location.reload();
   });
 });
@@ -316,6 +321,7 @@ $('#f-radera').addEventListener('submit', (e) => {
     const status = await fragaTillagg('status');
     await visaKonto(status);
   } catch (e) {
+    if (e.status === 401) markeraInloggad(false);
     $('#vy-ut').hidden = false;
     visaSteg(new URLSearchParams(location.search).has('skapa') ? 'skapa' : 'in');
     if (e.status !== 401) visaMeddelande(e.message);

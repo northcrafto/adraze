@@ -165,6 +165,7 @@
   "privacy.perm_feedback": "<b>declarativeNetRequestFeedback:</b> megszámolja, hány reklámot, nyomkövetőt és veszélyes oldalt állított meg. A bővítmény csak azt olvassa ki, milyen típusú szabály lépett életbe, azt nem, hogy melyik oldalon.",
   "privacy.perm_alarms": "<b>alarms:</b> rendszeres időközönként frissíti a számlálókat, és elküldi a statisztikát a fiókodba, ha összekapcsoltál egyet.",
   "nav.login": "Bejelentkezés",
+  "nav.account": "Fiókom",
   "konto.meta_title": "Bejelentkezés – AdRaze",
   "konto.meta_description": "Jelentkezz be az AdRaze-be, és nézd meg, mennyi reklámot, nyomkövetőt és veszélyes oldalt állított meg a bővítmény az összes gépeden.",
   "konto.title": "Nézd meg, mi mindent állított meg az AdRaze.",

@@ -63,3 +63,14 @@ if (sprak) {
     if (finns.includes(kod)) { location.replace(`/${kod}/${location.hash}`); return; }
   }
 })();
+
+// Inloggad (kontosidan har satt flaggan): visa "Mitt konto" i stället för "Logga in"
+(() => {
+  let inloggad = false;
+  try { inloggad = localStorage.getItem('adraze-inloggad') === '1'; } catch {}
+  if (!inloggad) return;
+  for (const a of document.querySelectorAll('[data-inloggad]')) {
+    const text = [...a.childNodes].reverse().find((n) => n.nodeType === 3 && n.textContent.trim());
+    if (text) text.textContent = a.dataset.inloggad;
+  }
+})();

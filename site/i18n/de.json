@@ -165,6 +165,7 @@
   "privacy.perm_feedback": "<b>declarativeNetRequestFeedback:</b> zählt, wie viele Werbeanzeigen, Tracker und gefährliche Seiten gestoppt wurden. Die Erweiterung liest nur, welche Art von Regel gegriffen hat, nicht auf welcher Seite.",
   "privacy.perm_alarms": "<b>alarms:</b> aktualisiert die Zähler in regelmäßigen Abständen und sendet die Statistik an dein Konto, falls du eines verbunden hast.",
   "nav.login": "Anmelden",
+  "nav.account": "Mein Konto",
   "konto.meta_title": "Anmelden – AdRaze",
   "konto.meta_description": "Melde dich bei AdRaze an und sieh, wie viel Werbung, Tracker und gefährliche Seiten die Erweiterung auf all deinen Computern gestoppt hat.",
   "konto.title": "Sieh alles, was AdRaze gestoppt hat.",

@@ -165,6 +165,7 @@
   "privacy.perm_feedback": "<b>declarativeNetRequestFeedback:</b> telur hve margar auglýsingar, rekjarar og hættulegar síður voru stöðvuð. Viðbótin les aðeins hvers konar regla átti við, ekki á hvaða síðu.",
   "privacy.perm_alarms": "<b>alarms:</b> uppfærir teljarana með reglulegu millibili og sendir tölfræðina á aðganginn þinn ef þú hefur tengt hann.",
   "nav.login": "Innskrá",
+  "nav.account": "Minn aðgangur",
   "konto.meta_title": "Innskrá – AdRaze",
   "konto.meta_description": "Skráðu þig inn á AdRaze og sjáðu hve mikið af auglýsingum, rekjurum og hættulegum síðum viðbótin hefur stöðvað á öllum tölvunum þínum.",
   "konto.title": "Sjáðu allt sem AdRaze stöðvaði.",

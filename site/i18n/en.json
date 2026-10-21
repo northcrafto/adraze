@@ -152,6 +152,7 @@
   "privacy.h_changes": "Changes",
   "privacy.p_changes": "If this policy changes, the date at the top of this page will be updated.",
   "nav.login": "Sign in",
+  "nav.account": "My account",
   "konto.meta_title": "Sign in – AdRaze",
   "konto.meta_description": "Sign in to AdRaze and see how many ads, trackers and dangerous pages the extension has stopped on all your computers.",
   "konto.title": "See everything AdRaze stopped.",

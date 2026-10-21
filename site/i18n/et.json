@@ -165,6 +165,7 @@
   "privacy.perm_feedback": "<b>declarativeNetRequestFeedback:</b> loeb, kui palju reklaame, jälgijaid ja ohtlikke lehti peatati. Laiendus loeb ainult seda, mis tüüpi reegel rakendus, mitte seda, millisel lehel.",
   "privacy.perm_alarms": "<b>alarms:</b> uuendab loendureid korrapäraste ajavahemike järel ja saadab statistika sinu kontole, kui oled selle ühendanud.",
   "nav.login": "Logi sisse",
+  "nav.account": "Minu konto",
   "konto.meta_title": "Logi sisse – AdRaze",
   "konto.meta_description": "Logi AdRaze'i sisse ja vaata, kui palju reklaame, jälgijaid ja ohtlikke lehti on laiendus kõigis sinu arvutites peatanud.",
   "konto.title": "Vaata kõike, mida AdRaze peatas.",

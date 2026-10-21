@@ -165,6 +165,7 @@
   "privacy.perm_feedback": "<b>declarativeNetRequestFeedback:</b> conta quante pubblicità, tracker e pagine pericolose sono stati bloccati. L'estensione legge solo quale tipo di regola è scattata, non su quale pagina.",
   "privacy.perm_alarms": "<b>alarms:</b> aggiorna i contatori a intervalli regolari e invia le statistiche al tuo account, se ne hai collegato uno.",
   "nav.login": "Accedi",
+  "nav.account": "Il mio account",
   "konto.meta_title": "Accedi – AdRaze",
   "konto.meta_description": "Accedi ad AdRaze e guarda quanta pubblicità, quanti tracker e quante pagine pericolose l’estensione ha fermato su tutti i tuoi computer.",
   "konto.title": "Guarda tutto quello che AdRaze ha fermato.",

@@ -165,6 +165,7 @@
   "privacy.perm_feedback": "<b>declarativeNetRequestFeedback:</b> šteje, koliko oglasov, sledilnikov in nevarnih strani je bilo ustavljenih. Razširitev prebere samo, katera vrsta pravila se je sprožila, ne pa, na kateri strani.",
   "privacy.perm_alarms": "<b>alarms:</b> v rednih presledkih posodablja števce in pošlje statistiko v tvoj račun, če si ga povezal.",
   "nav.login": "Prijava",
+  "nav.account": "Moj račun",
   "konto.meta_title": "Prijava – AdRaze",
   "konto.meta_description": "Prijavi se v AdRaze in poglej, koliko oglasov, sledilnikov in nevarnih strani je razširitev ustavila na vseh tvojih računalnikih.",
   "konto.title": "Poglej vse, kar je AdRaze ustavil.",
