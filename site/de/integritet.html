@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Datenschutzerklärung – AdRaze</title>
-<meta name="description" content="AdRaze sammelt keine Daten. So funktioniert die Erweiterung und diese Berechtigungen nutzt sie.">
+<meta name="description" content="Ohne Konto sammelt AdRaze keine Daten. So funktionieren die Erweiterung, das Konto und die Berechtigungen.">
 <link rel="icon" href="/favicon.png">
 <link rel="alternate" hreflang="sv" href="https://adraze.app/integritet">
 <link rel="alternate" hreflang="en" href="https://adraze.app/en/integritet">
@@ -58,17 +58,31 @@
 <main class="wrap policy">
   <a class="tillbaka nav-link" href="/de/"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg>Zur Startseite</a>
   <h1>Datenschutzerklärung</h1>
-  <p class="datum">Zuletzt aktualisiert am 19. Oktober 2026</p>
+  <p class="datum">Zuletzt aktualisiert am 21. Oktober 2026</p>
 
   <h2>Kurz gesagt</h2>
-  <p>AdRaze sammelt, speichert und versendet keine Informationen über dich oder das, was du im Netz tust. Alles, was die Erweiterung macht, passiert lokal in deinem Browser.</p>
+  <p>Ohne Konto sammelt, speichert und versendet AdRaze keine Informationen über dich oder das, was du im Netz tust. Alles passiert lokal in deinem Browser. Wenn du ein Konto erstellst, was freiwillig ist, speichern wir nur deine E-Mail-Adresse und wie viel pro Tag gestoppt wurde. Niemals, welche Seiten du besuchst.</p>
 
   <h2>Was auf deinem Rechner gespeichert wird</h2>
   <ul>
     <li>Die Liste der Seiten, auf denen du AdRaze pausiert hast.</li>
     <li>Zähler dafür, wie viele Pop-ups und Weiterleitungen gestoppt wurden.</li>
+    <li>Wie viele Werbeanzeigen, Tracker und gefährliche Seiten pro Tag gestoppt wurden, damit du deine Statistik sehen kannst.</li>
   </ul>
   <p>Das wird im browsereigenen Speicher (<code>chrome.storage</code>) abgelegt und verlässt nie deinen Rechner. Deinstallierst du AdRaze, ist es weg.</p>
+
+  <h2>Wenn du ein Konto erstellst</h2>
+  <p>Du brauchst kein Konto, um AdRaze zu nutzen. Es gibt das Konto nur, damit du deine Statistik auf adraze.app sehen kannst, von all deinen Computern aus. Dann wird Folgendes auf unserem Server gespeichert:</p>
+  <ul>
+    <li><b>E-Mail-Adresse</b>, damit du dich anmelden und Bestätigungscodes erhalten kannst.</li>
+    <li><b>Passwort</b>, nur als gesalzener scrypt-Hash gespeichert. Wir können dein Passwort nie sehen.</li>
+    <li><b>Google-Anmeldung</b>, falls du sie wählst: Wir erhalten deine E-Mail-Adresse und eine ID-Nummer von Google, sonst wird nichts gespeichert.</li>
+    <li><b>Statistik pro Tag</b>: die Anzahl gestoppter Werbeanzeigen, Tracker, gefährlicher Seiten, Pop-ups und Weiterleitungen. Nur Zahlen, niemals Adressen, Websites oder Suchanfragen.</li>
+    <li><b>Verbundene Browser</b>: ein Name wie „Chrome unter Windows“ und wann er zuletzt Statistiken gesendet hat.</li>
+    <li><b>Zwei Cookies</b> auf adraze.app: eines, das dich angemeldet hält, und eines, das sich merkt, dass der Browser bereits bestätigt ist. Keine Tracking-Cookies.</li>
+  </ul>
+  <p>E-Mails mit Bestätigungscodes werden über Cloudflare Email Service versendet. Der Server steht in Schweden und ist über Cloudflare erreichbar. Wir verwenden beim Konto keine Analyse-Tools und keine Werbung.</p>
+  <p>Du kannst dein Konto jederzeit unter Konto auf adraze.app löschen. Deine E-Mail-Adresse, deine Statistik und alle verbundenen Browser werden dann sofort gelöscht.</p>
 
   <h2>Berechtigungen und wofür sie nötig sind</h2>
   <ul>
@@ -77,13 +91,15 @@
     <li><b>webNavigation:</b> um Pop-up-Fenster zu erkennen, die eine Seite öffnet, und sie zu schließen, wenn sie zu Werbung oder gefährlichen Seiten führen.</li>
     <li><b>scripting und activeTab:</b> fügt Stilregeln ein, die Anzeigen ausblenden, und zeigt Statistiken für den geöffneten Tab.</li>
     <li><b>storage:</b> speichert deine pausierten Seiten und Zähler lokal.</li>
+    <li><b>declarativeNetRequestFeedback:</b> zählt, wie viele Werbeanzeigen, Tracker und gefährliche Seiten gestoppt wurden. Die Erweiterung liest nur, welche Art von Regel gegriffen hat, nicht auf welcher Seite.</li>
+    <li><b>alarms:</b> aktualisiert die Zähler in regelmäßigen Abständen und sendet die Statistik an dein Konto, falls du eines verbunden hast.</li>
   </ul>
 
   <h2>Filterlisten</h2>
   <p>AdRaze kommt mit Filterlisten von EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard und Peter Lowe. Die Listen sind in der Erweiterung enthalten. Es werden keine Anfragen darüber, welche Seiten du besuchst, an irgendjemanden gesendet.</p>
 
   <h2>Dritte</h2>
-  <p>AdRaze verkauft, teilt oder überträgt keine Daten an Dritte, denn es werden gar keine Daten erhoben.</p>
+  <p>AdRaze verkauft niemals Daten und teilt sie mit niemandem. Wenn du ein Konto hast, werden E-Mails über Cloudflare versendet, und wenn du die Google-Anmeldung wählst, bestätigt Google, wer du bist. Nichts anderes verlässt unseren Server.</p>
 
   <h2>Open Source</h2>
   <p>AdRaze ist Open Source unter GPL-3.0, also kann jeder genau prüfen, was die Erweiterung tut.</p>

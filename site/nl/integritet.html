@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privacybeleid – AdRaze</title>
-<meta name="description" content="AdRaze verzamelt geen data. Zo werkt de extensie en dit zijn de rechten die ze gebruikt.">
+<meta name="description" content="Zonder account verzamelt AdRaze geen data. Zo werken de extensie, het account en de rechten.">
 <link rel="icon" href="/favicon.png">
 <link rel="alternate" hreflang="sv" href="https://adraze.app/integritet">
 <link rel="alternate" hreflang="en" href="https://adraze.app/en/integritet">
@@ -58,17 +58,31 @@
 <main class="wrap policy">
   <a class="tillbaka nav-link" href="/nl/"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg>Naar de startpagina</a>
   <h1>Privacybeleid</h1>
-  <p class="datum">Laatst bijgewerkt op 19 oktober 2026</p>
+  <p class="datum">Laatst bijgewerkt op 21 oktober 2026</p>
 
   <h2>In het kort</h2>
-  <p>AdRaze verzamelt, bewaart en verstuurt geen informatie over jou of wat je online doet. Alles wat de extensie doet, gebeurt lokaal in je browser.</p>
+  <p>Zonder account verzamelt, bewaart en verstuurt AdRaze geen informatie over jou of wat je online doet. Alles gebeurt lokaal in je browser. Maak je een account aan, wat vrijwillig is, dan bewaren we alleen je e-mailadres en hoeveel er per dag is tegengehouden. Nooit welke sites je bezoekt.</p>
 
   <h2>Wat er op je computer wordt opgeslagen</h2>
   <ul>
     <li>De lijst met sites waar je AdRaze hebt gepauzeerd.</li>
     <li>Tellers voor hoeveel pop-ups en doorverwijzingen zijn tegengehouden.</li>
+    <li>Hoeveel advertenties, trackers en gevaarlijke pagina's per dag zijn tegengehouden, zodat je je statistieken kunt zien.</li>
   </ul>
   <p>Dit wordt opgeslagen in de eigen opslag van de browser (<code>chrome.storage</code>) en verlaat nooit je computer. Verwijder je AdRaze, dan is het weg.</p>
+
+  <h2>Als je een account aanmaakt</h2>
+  <p>Je hebt geen account nodig om AdRaze te gebruiken. Het bestaat alleen zodat je je statistieken op adraze.app kunt zien, vanaf al je computers. Dan wordt dit op onze server opgeslagen:</p>
+  <ul>
+    <li><b>E-mailadres</b>, zodat je kunt inloggen en verificatiecodes kunt ontvangen.</li>
+    <li><b>Wachtwoord</b>, alleen opgeslagen als gezouten scrypt-hash. We kunnen je wachtwoord nooit zien.</li>
+    <li><b>Inloggen met Google</b>, als je daarvoor kiest: we krijgen je e-mailadres en een ID-nummer van Google, verder wordt niets opgeslagen.</li>
+    <li><b>Statistieken per dag</b>: het aantal tegengehouden advertenties, trackers, gevaarlijke pagina's, pop-ups en doorverwijzingen. Alleen getallen, nooit adressen, sites of zoekopdrachten.</li>
+    <li><b>Gekoppelde browsers</b>: een naam als "Chrome op Windows" en wanneer die voor het laatst statistieken stuurde.</li>
+    <li><b>Twee cookies</b> op adraze.app: een die je ingelogd houdt en een die onthoudt dat de browser al geverifieerd is. Geen trackingcookies.</li>
+  </ul>
+  <p>E-mails met verificatiecodes worden verstuurd via Cloudflare Email Service. De server staat in Zweden en is bereikbaar via Cloudflare. We gebruiken geen analytics of advertenties bij het account.</p>
+  <p>Je kunt je account op elk moment verwijderen onder Account op adraze.app. Je e-mailadres, statistieken en alle gekoppelde browsers worden dan direct verwijderd.</p>
 
   <h2>Rechten en waarom ze nodig zijn</h2>
   <ul>
@@ -77,13 +91,15 @@
     <li><b>webNavigation:</b> om pop-upvensters te herkennen die een pagina opent, en ze te sluiten als ze naar reclame of gevaarlijke sites leiden.</li>
     <li><b>scripting en activeTab:</b> voegt stijlregels toe die advertenties verbergen en toont statistieken voor het tabblad dat je open hebt.</li>
     <li><b>storage:</b> slaat je gepauzeerde sites en tellers lokaal op.</li>
+    <li><b>declarativeNetRequestFeedback:</b> telt hoeveel advertenties, trackers en gevaarlijke pagina's zijn tegengehouden. De extensie leest alleen welk soort regel van toepassing was, niet op welke pagina.</li>
+    <li><b>alarms:</b> werkt de tellers regelmatig bij en stuurt de statistieken naar je account als je er een hebt gekoppeld.</li>
   </ul>
 
   <h2>Filterlijsten</h2>
   <p>AdRaze wordt geleverd met filterlijsten van EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard en Peter Lowe. De lijsten zitten in de extensie zelf. Er worden geen verzoeken over welke pagina's je bezoekt naar wie dan ook gestuurd.</p>
 
   <h2>Derden</h2>
-  <p>AdRaze verkoopt, deelt of verstrekt geen data aan derden, want er wordt geen data verzameld.</p>
+  <p>AdRaze verkoopt nooit data en deelt die met niemand. Heb je een account, dan worden e-mails via Cloudflare verstuurd, en kies je voor inloggen met Google, dan bevestigt Google wie je bent. Verder verlaat niets onze server.</p>
 
   <h2>Open source</h2>
   <p>AdRaze is open source onder GPL-3.0, dus iedereen kan precies nagaan wat de extensie doet.</p>

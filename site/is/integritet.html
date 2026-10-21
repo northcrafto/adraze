@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Persónuverndarstefna – AdRaze</title>
-<meta name="description" content="AdRaze safnar engum gögnum. Svona virkar viðbótin og þetta eru heimildirnar sem hún notar.">
+<meta name="description" content="Án aðgangs safnar AdRaze engum gögnum. Svona virka viðbótin, aðgangurinn og heimildirnar.">
 <link rel="icon" href="/favicon.png">
 <link rel="alternate" hreflang="sv" href="https://adraze.app/integritet">
 <link rel="alternate" hreflang="en" href="https://adraze.app/en/integritet">
@@ -58,17 +58,31 @@
 <main class="wrap policy">
   <a class="tillbaka nav-link" href="/is/"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg>Á forsíðu</a>
   <h1>Persónuverndarstefna</h1>
-  <p class="datum">Síðast uppfært 19. október 2026</p>
+  <p class="datum">Síðast uppfært 21. október 2026</p>
 
   <h2>Í stuttu máli</h2>
-  <p>AdRaze safnar ekki, vistar ekki og sendir ekki neinar upplýsingar um þig eða það sem þú gerir á netinu. Allt sem viðbótin gerir fer fram staðbundið í vafranum þínum.</p>
+  <p>Án aðgangs safnar AdRaze ekki, vistar ekki og sendir ekki neinar upplýsingar um þig eða það sem þú gerir á netinu. Allt fer fram staðbundið í vafranum þínum. Ef þú stofnar aðgang, sem er valfrjálst, vistum við aðeins netfangið þitt og hve margt var stöðvað á dag. Aldrei hvaða síður þú heimsækir.</p>
 
   <h2>Hvað er vistað á tölvunni þinni</h2>
   <ul>
     <li>Listi yfir síður þar sem þú hefur gert hlé á AdRaze.</li>
     <li>Teljarar yfir hve margir sprettigluggar og áframsendingar hafa verið stöðvuð.</li>
+    <li>Hve margar auglýsingar, rekjarar og hættulegar síður voru stöðvuð á dag, svo þú getir séð tölfræðina þína.</li>
   </ul>
   <p>Þetta er vistað í eigin geymslu vafrans (<code>chrome.storage</code>) og fer aldrei af tölvunni þinni. Ef þú fjarlægir AdRaze hverfur það.</p>
+
+  <h2>Ef þú stofnar aðgang</h2>
+  <p>Þú þarft ekki aðgang til að nota AdRaze. Hann er aðeins til svo þú getir séð tölfræðina þína á adraze.app úr öllum tölvunum þínum. Þá er eftirfarandi vistað á netþjóni okkar:</p>
+  <ul>
+    <li><b>Netfang</b>, svo þú getir skráð þig inn og fengið staðfestingarkóða.</li>
+    <li><b>Lykilorð</b>, sem er aðeins vistað sem saltað scrypt-tætigildi. Við getum aldrei séð lykilorðið þitt.</li>
+    <li><b>Google-innskráning</b>, ef þú velur hana: við fáum netfangið þitt og auðkennisnúmer frá Google, ekkert annað er vistað.</li>
+    <li><b>Tölfræði á dag</b>: fjöldi stöðvaðra auglýsinga, rekjara, hættulegra síðna, sprettiglugga og áframsendinga. Aðeins tölur, aldrei slóðir, síður eða leitir.</li>
+    <li><b>Tengdir vafrar</b>: heiti eins og "Chrome á Windows" og hvenær hann sendi síðast tölfræði.</li>
+    <li><b>Tvær vafrakökur</b> á adraze.app: ein sem heldur þér innskráðum og ein sem man að vafrinn er þegar staðfestur. Engar rakningarkökur.</li>
+  </ul>
+  <p>Tölvupóstar með staðfestingarkóðum eru sendir með Cloudflare Email Service. Netþjónninn er í Svíþjóð og tengst er við hann í gegnum Cloudflare. Við notum hvorki greiningu né auglýsingar á aðganginum.</p>
+  <p>Þú getur eytt aðganginum þínum hvenær sem er undir Aðgangur á adraze.app. Þá er netfanginu, tölfræðinni og öllum tengdum vöfrum eytt samstundis.</p>
 
   <h2>Heimildir og hvers vegna þær þarf</h2>
   <ul>
@@ -77,13 +91,15 @@
     <li><b>webNavigation:</b> til að þekkja sprettiglugga sem síða opnar og loka þeim ef þeir leiða á auglýsingar eða hættulegar síður.</li>
     <li><b>scripting og activeTab:</b> setur inn stílreglur sem fela auglýsingar og sýnir tölfræði fyrir flipann sem þú ert með opinn.</li>
     <li><b>storage:</b> vistar síðurnar þar sem þú gerðir hlé og teljarana staðbundið.</li>
+    <li><b>declarativeNetRequestFeedback:</b> telur hve margar auglýsingar, rekjarar og hættulegar síður voru stöðvuð. Viðbótin les aðeins hvers konar regla átti við, ekki á hvaða síðu.</li>
+    <li><b>alarms:</b> uppfærir teljarana með reglulegu millibili og sendir tölfræðina á aðganginn þinn ef þú hefur tengt hann.</li>
   </ul>
 
   <h2>Síulistar</h2>
   <p>AdRaze fylgja síulistar frá EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard og Peter Lowe. Listarnir eru innbyggðir í viðbótina. Engar fyrirspurnir um hvaða síður þú heimsækir eru sendar neinum.</p>
 
   <h2>Þriðju aðilar</h2>
-  <p>AdRaze selur hvorki, deilir né flytur nein gögn til þriðju aðila, því engum gögnum er safnað.</p>
+  <p>AdRaze selur aldrei gögn og deilir þeim ekki með neinum. Ef þú ert með aðgang eru tölvupóstar sendir í gegnum Cloudflare, og ef þú velur Google-innskráningu staðfestir Google hver þú ert. Ekkert annað fer frá netþjóni okkar.</p>
 
   <h2>Opinn hugbúnaður</h2>
   <p>AdRaze er opinn hugbúnaður undir GPL-3.0, svo hver sem er getur kannað nákvæmlega hvað viðbótin gerir.</p>

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{t:konto.meta_title}}</title>
+<meta name="description" content="{{t:konto.meta_description}}">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.png">
+{{alternates}}
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/konto.css">
+</head>
+<body>
+<header class="top solid">
+  <nav class="wrap nav">
+    <a href="{{hem}}" class="logo" aria-label="{{t:nav.home_label}}"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a>
+    {{sprakval}}
+    <a href="{{hem}}#installera" class="btn liq nav-cta-alltid">{{chrome}}{{t:nav.add_chrome}}</a>
+  </nav>
+</header>
+
+<main class="wrap konto" id="konto" data-api="https://api.adraze.app" data-lang="{{lang}}" aria-busy="true">
+
+  <!-- Inte inloggad -->
+  <section class="ut" id="vy-ut" hidden>
+    <div class="ut-intro">
+      <div class="vinkar"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
+      <h1>{{t:konto.title}}</h1>
+      <p>{{t:konto.lead}}</p>
+    </div>
+
+    <div class="ruta">
+      <div class="flikar" role="tablist" id="flikar">
+        <button role="tab" type="button" data-flik="in" aria-selected="true">{{t:konto.tab_login}}</button>
+        <button role="tab" type="button" data-flik="skapa" aria-selected="false">{{t:konto.tab_signup}}</button>
+        <span class="flik-markor" aria-hidden="true"></span>
+      </div>
+
+      <form class="steg" id="f-in" data-steg="in" novalidate>
+        <label class="falt"><span>{{t:konto.email}}</span><input type="email" name="email" autocomplete="email" required></label>
+        <label class="falt"><span>{{t:konto.password}}</span><input type="password" name="password" autocomplete="current-password" required></label>
+        <button type="button" class="lank-knapp nav-link" data-ga="glomt">{{t:konto.forgot}}</button>
+        <button class="btn btn-stor liq bred" type="submit">{{t:konto.login_btn}}</button>
+      </form>
+
+      <form class="steg" id="f-skapa" data-steg="skapa" novalidate hidden>
+        <label class="falt"><span>{{t:konto.email}}</span><input type="email" name="email" autocomplete="email" required></label>
+        <label class="falt"><span>{{t:konto.password_new}}</span><input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
+        <button class="btn btn-stor liq bred" type="submit">{{t:konto.signup_btn}}</button>
+        <p class="liten">{{t:konto.terms}} <a class="nav-link" href="{{pre}}/integritet">{{t:konto.privacy_link}}</a>.</p>
+      </form>
+
+      <form class="steg" id="f-kod" data-steg="kod" novalidate hidden>
+        <h2>{{t:konto.code_title}}</h2>
+        <p class="dov">{{t:konto.code_text}} <b id="kod-till"></b></p>
+        <div class="kodrutor" id="kodrutor">
+          <input inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="1">
+          <input inputmode="numeric" maxlength="1" aria-label="2">
+          <input inputmode="numeric" maxlength="1" aria-label="3">
+          <span class="kod-streck" aria-hidden="true"></span>
+          <input inputmode="numeric" maxlength="1" aria-label="4">
+          <input inputmode="numeric" maxlength="1" aria-label="5">
+          <input inputmode="numeric" maxlength="1" aria-label="6">
+        </div>
+        <label class="falt" id="nytt-losen" hidden><span>{{t:konto.password_new}}</span><input type="password" name="password" autocomplete="new-password" minlength="8"></label>
+        <button class="btn btn-stor liq bred" type="submit" id="kod-knapp">{{t:konto.code_btn}}</button>
+        <div class="rad-lankar">
+          <button type="button" class="lank-knapp nav-link" data-ga="tillbaka">{{t:konto.back}}</button>
+          <button type="button" class="lank-knapp nav-link" id="ny-kod">{{t:konto.code_resend}}</button>
+        </div>
+      </form>
+
+      <form class="steg" id="f-glomt" data-steg="glomt" novalidate hidden>
+        <h2>{{t:konto.forgot_title}}</h2>
+        <p class="dov">{{t:konto.forgot_text}}</p>
+        <label class="falt"><span>{{t:konto.email}}</span><input type="email" name="email" autocomplete="email" required></label>
+        <button class="btn btn-stor liq bred" type="submit">{{t:konto.forgot_btn}}</button>
+        <div class="rad-lankar"><button type="button" class="lank-knapp nav-link" data-ga="tillbaka">{{t:konto.back}}</button></div>
+      </form>
+
+      <div class="google" id="google-ruta" hidden>
+        <div class="eller"><span>{{t:konto.or}}</span></div>
+        <div id="google-knapp"></div>
+      </div>
+
+      <p class="meddelande" id="meddelande" role="alert" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- Inloggad -->
+  <section class="in" id="vy-in" hidden>
+    <div class="in-topp">
+      <div>
+        <p class="dov">{{t:konto.signed_in_as}} <b id="min-mejl"></b></p>
+        <h1>{{t:konto.total_title}}</h1>
+      </div>
+      <button type="button" class="btn liq-ghost" id="logga-ut">{{t:konto.logout}}</button>
+    </div>
+
+    <dl class="k-siffror">
+      <div class="k-siffra stor"><dt id="s-reklam">0</dt><dd>{{t:konto.stat_ads}}</dd></div>
+      <div class="k-siffra"><dt id="s-sparare">0</dt><dd>{{t:konto.stat_trackers}}</dd></div>
+      <div class="k-siffra"><dt id="s-farliga">0</dt><dd>{{t:konto.stat_danger}}</dd></div>
+      <div class="k-siffra"><dt id="s-popups">0</dt><dd>{{t:konto.stat_popups}}</dd></div>
+    </dl>
+
+    <div class="kort-yta">
+      <div class="kort-huvud"><h2>{{t:konto.chart_title}}</h2><span class="dov" id="diagram-summa"></span></div>
+      <div class="diagram" id="diagram" role="img" aria-label="{{t:konto.chart_title}}"></div>
+      <p class="dov tom" id="diagram-tom" hidden>{{t:konto.chart_empty}}</p>
+    </div>
+
+    <div class="kort-yta">
+      <div class="kort-huvud"><h2>{{t:konto.ext_title}}</h2></div>
+      <div class="den-har" id="den-har"></div>
+      <ul class="enheter" id="enheter"></ul>
+    </div>
+
+    <details class="farozon">
+      <summary>{{t:konto.delete}}</summary>
+      <form id="f-radera" novalidate>
+        <p class="dov">{{t:konto.delete_text}}</p>
+        <label class="falt" id="radera-losen"><span>{{t:konto.password}}</span><input type="password" name="password" autocomplete="current-password"></label>
+        <button class="btn liq-ghost farlig" type="submit">{{t:konto.delete_btn}}</button>
+      </form>
+    </details>
+  </section>
+
+  <!-- Texter som skriptet behöver, på sidans språk -->
+  <template id="texter">
+    <span data-k="ext_none">{{t:konto.ext_none}}</span>
+    <span data-k="ext_install">{{t:konto.ext_install}}</span>
+    <span data-k="ext_connect">{{t:konto.ext_connect}}</span>
+    <span data-k="ext_connected">{{t:konto.ext_connected}}</span>
+    <span data-k="ext_remove">{{t:konto.ext_remove}}</span>
+    <span data-k="ext_synced">{{t:konto.ext_synced}}</span>
+    <span data-k="ext_never">{{t:konto.ext_never}}</span>
+    <span data-k="ext_this">{{t:konto.ext_this}}</span>
+    <span data-k="ext_empty">{{t:konto.ext_empty}}</span>
+    <span data-k="code_sent">{{t:konto.code_sent}}</span>
+    <span data-k="reset_btn">{{t:konto.reset_btn}}</span>
+    <span data-k="code_btn">{{t:konto.code_btn}}</span>
+    <span data-k="days_total">{{t:konto.days_total}}</span>
+    <span data-k="err_generic">{{t:konto.err_generic}}</span>
+    <span data-k="err_network">{{t:konto.err_network}}</span>
+    <span data-k="err_email">{{t:konto.err_email}}</span>
+    <span data-k="err_password">{{t:konto.err_password}}</span>
+    <span data-k="err_code">{{t:konto.err_code}}</span>
+    <span data-k="err_login">{{t:konto.err_login}}</span>
+    <span data-k="err_exists">{{t:konto.err_exists}}</span>
+    <span data-k="err_wait">{{t:konto.err_wait}}</span>
+    <span data-k="delete_confirm">{{t:konto.delete_confirm}}</span>
+  </template>
+</main>
+
+<footer class="fot">
+  <div class="wrap fot-grid">
+    <div><a href="{{hem}}" class="logo"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a><p>{{t:footer.tagline}}</p></div>
+  </div>
+</footer>
+<script src="/konto.js" defer></script>
+</body>
+</html>

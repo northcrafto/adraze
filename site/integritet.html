@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Integritetspolicy – AdRaze</title>
-<meta name="description" content="AdRaze samlar inte in någon data. Så här fungerar tillägget och vilka behörigheter det använder.">
+<meta name="description" content="Utan konto samlar AdRaze ingen data. Så här fungerar tillägget, kontot och behörigheterna.">
 <link rel="icon" href="/favicon.png">
 <link rel="alternate" hreflang="sv" href="https://adraze.app/integritet">
 <link rel="alternate" hreflang="en" href="https://adraze.app/en/integritet">
@@ -58,17 +58,31 @@
 <main class="wrap policy">
   <a class="tillbaka nav-link" href="/"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg>Till startsidan</a>
   <h1>Integritetspolicy</h1>
-  <p class="datum">Senast uppdaterad 19 oktober 2026</p>
+  <p class="datum">Senast uppdaterad 21 oktober 2026</p>
 
   <h2>Kort sagt</h2>
-  <p>AdRaze samlar inte in, sparar inte och skickar inte någon information om dig eller vad du gör på nätet. Allt tillägget gör sker lokalt i din webbläsare.</p>
+  <p>Utan konto samlar AdRaze inte in, sparar inte och skickar inte någon information om dig eller vad du gör på nätet. Allt sker lokalt i din webbläsare. Skapar du ett konto, vilket är frivilligt, sparar vi bara din mejladress och hur många saker som stoppats per dag. Aldrig vilka sajter du besöker.</p>
 
   <h2>Vad som sparas på din dator</h2>
   <ul>
     <li>Listan över sajter där du har pausat AdRaze.</li>
     <li>Räknare för hur många popups och omdirigeringar som stoppats.</li>
+    <li>Hur många annonser, spårare och farliga sidor som stoppats per dag, så att du kan se din statistik.</li>
   </ul>
   <p>Detta sparas med webbläsarens egen lagring (<code>chrome.storage</code>) och lämnar aldrig din dator. Avinstallerar du AdRaze försvinner det.</p>
+
+  <h2>Om du skapar ett konto</h2>
+  <p>Ett konto behövs inte för att använda AdRaze. Det finns bara för att du ska kunna se din statistik på adraze.app, från alla dina datorer. Det här sparas då på vår server:</p>
+  <ul>
+    <li><b>Mejladress</b>, för att du ska kunna logga in och få verifieringskoder.</li>
+    <li><b>Lösenord</b>, som bara sparas som ett saltat scrypt-hashvärde. Vi kan aldrig se ditt lösenord.</li>
+    <li><b>Google-inloggning</b>, om du väljer det: vi får din mejladress och ett id-nummer från Google, inget annat sparas.</li>
+    <li><b>Statistik per dag</b>: antal stoppade annonser, spårare, farliga sidor, popups och omdirigeringar. Bara siffror, aldrig adresser, sajter eller sökningar.</li>
+    <li><b>Kopplade webbläsare</b>: ett namn som "Chrome på Windows" och när den senast skickade statistik.</li>
+    <li><b>Två cookies</b> på adraze.app: en som håller dig inloggad och en som kommer ihåg att webbläsaren redan är verifierad. Inga spårningscookies.</li>
+  </ul>
+  <p>Mejl med verifieringskoder skickas via Cloudflare Email Service. Servern ligger i Sverige och nås via Cloudflare. Vi använder ingen analys eller reklam på kontot.</p>
+  <p>Du kan radera ditt konto när som helst under Konto på adraze.app. Då raderas mejladressen, statistiken och alla kopplade webbläsare direkt.</p>
 
   <h2>Behörigheter och varför de behövs</h2>
   <ul>
@@ -77,13 +91,15 @@
     <li><b>webNavigation:</b> för att känna igen popup-fönster som öppnas av en sida och stänga dem om de leder till reklam eller farliga sidor.</li>
     <li><b>scripting och activeTab:</b> lägger in stilregler som döljer annonser och visar statistik för fliken du har öppen.</li>
     <li><b>storage:</b> sparar dina pausade sajter och räknare lokalt.</li>
+    <li><b>declarativeNetRequestFeedback:</b> räknar hur många annonser, spårare och farliga sidor som stoppats. Tillägget läser bara vilken sorts regel som träffade, inte vilken sida det gällde.</li>
+    <li><b>alarms:</b> uppdaterar räknarna med jämna mellanrum och skickar statistiken till ditt konto om du har kopplat ett.</li>
   </ul>
 
   <h2>Filterlistor</h2>
   <p>AdRaze levereras med filterlistor från EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard och Peter Lowe. Listorna ingår i tillägget. Inga förfrågningar om vilka sidor du besöker skickas till någon.</p>
 
   <h2>Tredje part</h2>
-  <p>AdRaze säljer, delar eller överför ingen data till tredje part, eftersom ingen data samlas in.</p>
+  <p>AdRaze säljer aldrig data och delar den inte med någon. Har du ett konto skickas mejlen via Cloudflare, och väljer du Google-inloggning bekräftar Google vem du är. Inget annat lämnar vår server.</p>
 
   <h2>Öppen källkod</h2>
   <p>AdRaze är öppen källkod under GPL-3.0, så vem som helst kan granska exakt vad tillägget gör.</p>

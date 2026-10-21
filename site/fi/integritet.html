@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tietosuojakäytäntö – AdRaze</title>
-<meta name="description" content="AdRaze ei kerää mitään tietoja. Näin laajennus toimii ja nämä käyttöoikeudet se tarvitsee.">
+<meta name="description" content="Ilman tiliä AdRaze ei kerää mitään tietoja. Näin laajennus, tili ja käyttöoikeudet toimivat.">
 <link rel="icon" href="/favicon.png">
 <link rel="alternate" hreflang="sv" href="https://adraze.app/integritet">
 <link rel="alternate" hreflang="en" href="https://adraze.app/en/integritet">
@@ -58,17 +58,31 @@
 <main class="wrap policy">
   <a class="tillbaka nav-link" href="/fi/"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg>Etusivulle</a>
   <h1>Tietosuojakäytäntö</h1>
-  <p class="datum">Päivitetty viimeksi 19.10.2026</p>
+  <p class="datum">Päivitetty viimeksi 21.10.2026</p>
 
   <h2>Lyhyesti</h2>
-  <p>AdRaze ei kerää, tallenna eikä lähetä mitään tietoja sinusta tai siitä, mitä teet verkossa. Kaikki, mitä laajennus tekee, tapahtuu paikallisesti selaimessasi.</p>
+  <p>Ilman tiliä AdRaze ei kerää, tallenna eikä lähetä mitään tietoja sinusta tai siitä, mitä teet verkossa. Kaikki tapahtuu paikallisesti selaimessasi. Jos luot tilin, mikä on vapaaehtoista, tallennamme vain sähköpostiosoitteesi ja sen, kuinka paljon on estetty päivittäin. Emme koskaan sitä, millä sivustoilla käyt.</p>
 
   <h2>Mitä tietokoneellesi tallennetaan</h2>
   <ul>
     <li>Luettelo sivustoista, joilla olet laittanut AdRazen tauolle.</li>
     <li>Laskurit estetyistä ponnahdusikkunoista ja uudelleenohjauksista.</li>
+    <li>Kuinka monta mainosta, seurainta ja vaarallista sivua on estetty päivittäin, jotta näet tilastosi.</li>
   </ul>
   <p>Nämä tallennetaan selaimen omaan tallennustilaan (<code>chrome.storage</code>), eivätkä ne koskaan poistu tietokoneeltasi. Jos poistat AdRazen, ne katoavat.</p>
+
+  <h2>Jos luot tilin</h2>
+  <p>Et tarvitse tiliä AdRazen käyttämiseen. Se on olemassa vain, jotta näet tilastosi osoitteessa adraze.app kaikilta tietokoneiltasi. Silloin palvelimellemme tallennetaan:</p>
+  <ul>
+    <li><b>Sähköpostiosoite</b>, jotta voit kirjautua sisään ja saada vahvistuskoodeja.</li>
+    <li><b>Salasana</b>, joka tallennetaan vain suolattuna scrypt-tiivisteenä. Emme voi koskaan nähdä salasanaasi.</li>
+    <li><b>Google-kirjautuminen</b>, jos valitset sen: saamme Googlelta sähköpostiosoitteesi ja tunnistenumeron, muuta ei tallenneta.</li>
+    <li><b>Päiväkohtaiset tilastot</b>: estettyjen mainosten, seurainten, vaarallisten sivujen, ponnahdusikkunoiden ja uudelleenohjausten määrä. Vain lukuja, ei koskaan osoitteita, sivustoja tai hakuja.</li>
+    <li><b>Yhdistetyt selaimet</b>: nimi, kuten "Chrome Windowsissa", ja milloin selain viimeksi lähetti tilastoja.</li>
+    <li><b>Kaksi evästettä</b> sivustolla adraze.app: toinen pitää sinut kirjautuneena ja toinen muistaa, että selain on jo vahvistettu. Ei seurantaevästeitä.</li>
+  </ul>
+  <p>Vahvistuskoodit sisältävät sähköpostit lähetetään palvelun Cloudflare Email Service kautta. Palvelin sijaitsee Ruotsissa, ja siihen yhdistetään Cloudflaren kautta. Tilillä ei käytetä analytiikkaa eikä mainoksia.</p>
+  <p>Voit poistaa tilisi milloin tahansa kohdasta Tili sivustolla adraze.app. Silloin sähköpostiosoitteesi, tilastosi ja kaikki yhdistetyt selaimet poistetaan heti.</p>
 
   <h2>Käyttöoikeudet ja miksi niitä tarvitaan</h2>
   <ul>
@@ -77,13 +91,15 @@
     <li><b>webNavigation:</b> tunnistaa sivun avaamat ponnahdusikkunat ja sulkee ne, jos ne johtavat mainoksiin tai vaarallisille sivuille.</li>
     <li><b>scripting ja activeTab:</b> lisää tyylisääntöjä, jotka piilottavat mainokset, ja näyttää tilastot avoimelle välilehdelle.</li>
     <li><b>storage:</b> tallentaa tauotetut sivustot ja laskurit paikallisesti.</li>
+    <li><b>declarativeNetRequestFeedback:</b> laskee, kuinka monta mainosta, seurainta ja vaarallista sivua on estetty. Laajennus lukee vain, minkä tyyppinen sääntö osui, ei sitä, millä sivulla.</li>
+    <li><b>alarms:</b> päivittää laskurit säännöllisin väliajoin ja lähettää tilastot tilillesi, jos olet yhdistänyt sellaisen.</li>
   </ul>
 
   <h2>Suodatinlistat</h2>
   <p>AdRazen mukana tulevat suodatinlistat EasyLististä, EasyPrivacystä, Frellwit's Swedish Filteristä, uBlock Originista, AdGuardista ja Peter Lowelta. Listat sisältyvät laajennukseen. Tietoja käymistäsi sivuista ei lähetetä kenellekään.</p>
 
   <h2>Kolmannet osapuolet</h2>
-  <p>AdRaze ei myy, jaa tai siirrä tietoja kolmansille osapuolille, koska tietoja ei kerätä.</p>
+  <p>AdRaze ei koskaan myy tietoja eikä jaa niitä kenellekään. Jos sinulla on tili, sähköpostit lähetetään Cloudflaren kautta, ja jos valitset Google-kirjautumisen, Google vahvistaa henkilöllisyytesi. Mikään muu ei poistu palvelimeltamme.</p>
 
   <h2>Avoin lähdekoodi</h2>
   <p>AdRaze on avointa lähdekoodia GPL-3.0-lisenssillä, joten kuka tahansa voi tarkistaa, mitä laajennus tarkalleen tekee.</p>

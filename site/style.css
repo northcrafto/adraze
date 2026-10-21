@@ -110,6 +110,7 @@ h3 { font-size: 22px; letter-spacing: -0.02em; line-height: 1.15; }
 .prick { width: 8px; height: 8px; border-radius: 2px; background: var(--accent); margin-bottom: 7px; }
 .links { display: flex; gap: 32px; margin-left: auto; font-size: 15px; font-weight: 500; }
 .nav-cta { margin-left: 8px; }
+.nav-login { font-weight: 600; font-size: 15px; white-space: nowrap; }
 .menu-btn { display: none; position: relative; z-index: 50; width: 44px; height: 44px; margin-left: auto; margin-right: -8px; place-items: center; background: none; border: 0; color: var(--ink); cursor: pointer; }
 
 .hb { position: relative; display: block; width: 24px; height: 16px; }
@@ -327,7 +328,7 @@ section { padding: 120px 0; }
 
 /* ---------- Mobil ---------- */
 @media (max-width: 960px) {
-  .links, .nav-cta { display: none; }
+  .links, .nav-cta, .nav-login { display: none; }
   .menu-btn { display: grid; }
   .menu { display: flex; }
   .hero { grid-template-columns: minmax(0, 1fr); min-height: 0; padding: 32px 0 72px; gap: 24px; }

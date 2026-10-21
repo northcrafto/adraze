@@ -16,7 +16,8 @@ SPRAK = [
     ('el', 'Ελληνικά'), ('hr', 'Hrvatski'), ('sl', 'Slovenščina'), ('et', 'Eesti'), ('lv', 'Latviešu'), ('lt', 'Lietuvių'),
     ('uk', 'Українська'), ('tr', 'Türkçe'),
 ]
-SIDOR = {'index.src.html': '', 'integritet.src.html': 'integritet'}
+SIDOR = {'index.src.html': '', 'integritet.src.html': 'integritet', 'konto.src.html': 'konto'}
+UTAN_SITEMAP = {'konto'}  # inloggningen ska inte indexeras
 
 def ikon(namn):
     svg = re.sub(r'<title>.*?</title>', '', (rot / 'ikoner' / f'{namn}.svg').read_text())
@@ -59,6 +60,7 @@ print('byggde', len(finns), 'språk:', ' '.join(k for k, _ in finns))
 # Sitemap med alla språkversioner
 rader = []
 for sida in SIDOR.values():
+    if sida in UTAN_SITEMAP: continue
     for kod, _ in finns:
         alt = ''.join(f'<xhtml:link rel="alternate" hreflang="{k}" href="{SAJT}{url(k, sida)}"/>' for k, _ in finns)
         rader.append(f'<url><loc>{SAJT}{url(kod, sida)}</loc>{alt}</url>')

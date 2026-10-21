@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pravila privatnosti – AdRaze</title>
-<meta name="description" content="AdRaze ne prikuplja nikakve podatke. Evo kako proširenje radi i koja dopuštenja koristi.">
+<meta name="description" content="Bez računa AdRaze ne prikuplja nikakve podatke. Evo kako rade proširenje, račun i dopuštenja.">
 <link rel="icon" href="/favicon.png">
 <link rel="alternate" hreflang="sv" href="https://adraze.app/integritet">
 <link rel="alternate" hreflang="en" href="https://adraze.app/en/integritet">
@@ -58,17 +58,31 @@
 <main class="wrap policy">
   <a class="tillbaka nav-link" href="/hr/"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg>Natrag na početnu</a>
   <h1>Pravila privatnosti</h1>
-  <p class="datum">Zadnje ažuriranje: 19. listopada 2026.</p>
+  <p class="datum">Zadnje ažuriranje: 21. listopada 2026.</p>
 
   <h2>Ukratko</h2>
-  <p>AdRaze ne prikuplja, ne sprema i ne šalje nikakve podatke o tebi ni o tome što radiš na internetu. Sve što proširenje radi odvija se lokalno u tvom pregledniku.</p>
+  <p>Bez računa AdRaze ne prikuplja, ne sprema i ne šalje nikakve podatke o tebi ni o tome što radiš na internetu. Sve se odvija lokalno u tvom pregledniku. Ako izradiš račun, što je dobrovoljno, spremamo samo tvoju adresu e-pošte i koliko je stvari zaustavljeno po danu. Nikad koje stranice posjećuješ.</p>
 
   <h2>Što se sprema na tvom računalu</h2>
   <ul>
     <li>Popis stranica na kojima si pauzirao AdRaze.</li>
     <li>Brojači koliko je skočnih prozora i preusmjeravanja zaustavljeno.</li>
+    <li>Koliko je oglasa, trackera i opasnih stranica zaustavljeno po danu, kako bi mogao vidjeti svoju statistiku.</li>
   </ul>
   <p>To se sprema u vlastitu pohranu preglednika (<code>chrome.storage</code>) i nikad ne napušta tvoje računalo. Ako deinstaliraš AdRaze, nestaje.</p>
+
+  <h2>Ako izradiš račun</h2>
+  <p>Račun ti ne treba da bi koristio AdRaze. Postoji samo zato da možeš vidjeti svoju statistiku na adraze.app sa svih svojih računala. Tada se na našem poslužitelju sprema:</p>
+  <ul>
+    <li><b>Adresa e-pošte</b>, kako bi se mogao prijaviti i primati kodove za potvrdu.</li>
+    <li><b>Lozinka</b>, spremljena samo kao posoljeni scrypt hash. Tvoju lozinku nikada ne možemo vidjeti.</li>
+    <li><b>Prijava putem Googlea</b>, ako je odabereš: od Googlea dobivamo tvoju adresu e-pošte i identifikacijski broj, ništa se drugo ne sprema.</li>
+    <li><b>Statistika po danu</b>: broj zaustavljenih oglasa, trackera, opasnih stranica, skočnih prozora i preusmjeravanja. Samo brojevi, nikad adrese, stranice ni pretraživanja.</li>
+    <li><b>Povezani preglednici</b>: naziv poput „Chrome na Windowsima” i kada je zadnji put poslao statistiku.</li>
+    <li><b>Dva kolačića</b> na adraze.app: jedan te drži prijavljenim, a drugi pamti da je preglednik već potvrđen. Nema kolačića za praćenje.</li>
+  </ul>
+  <p>E-poruke s kodovima za potvrdu šalju se putem usluge Cloudflare Email Service. Poslužitelj se nalazi u Švedskoj i dostupan je putem Cloudflarea. Na računu ne koristimo analitiku ni oglase.</p>
+  <p>Račun možeš izbrisati u bilo kojem trenutku u odjeljku Račun na adraze.app. Tada se tvoja adresa e-pošte, statistika i svi povezani preglednici odmah brišu.</p>
 
   <h2>Dopuštenja i zašto su potrebna</h2>
   <ul>
@@ -77,13 +91,15 @@
     <li><b>webNavigation:</b> za prepoznavanje skočnih prozora koje otvori stranica i njihovo zatvaranje ako vode na oglase ili opasne stranice.</li>
     <li><b>scripting i activeTab:</b> dodaje stilska pravila koja skrivaju oglase i prikazuje statistiku za karticu koju imaš otvorenu.</li>
     <li><b>storage:</b> lokalno sprema pauzirane stranice i brojače.</li>
+    <li><b>declarativeNetRequestFeedback:</b> broji koliko je oglasa, trackera i opasnih stranica zaustavljeno. Proširenje čita samo koja je vrsta pravila primijenjena, a ne na kojoj stranici.</li>
+    <li><b>alarms:</b> u redovitim razmacima ažurira brojače i šalje statistiku na tvoj račun ako si ga povezao.</li>
   </ul>
 
   <h2>Popisi filtara</h2>
   <p>AdRaze dolazi s popisima filtara od EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard i Peter Lowe. Popisi su uključeni u proširenje. Nikome se ne šalju upiti o tome koje stranice posjećuješ.</p>
 
   <h2>Treće strane</h2>
-  <p>AdRaze ne prodaje, ne dijeli i ne prenosi podatke trećim stranama jer ne prikuplja nikakve podatke.</p>
+  <p>AdRaze nikad ne prodaje podatke i ni s kim ih ne dijeli. Ako imaš račun, e-poruke se šalju putem Cloudflarea, a ako odabereš prijavu putem Googlea, Google potvrđuje tko si. Ništa drugo ne napušta naš poslužitelj.</p>
 
   <h2>Otvoreni kod</h2>
   <p>AdRaze je otvorenog koda pod licencom GPL-3.0, pa svatko može provjeriti točno što proširenje radi.</p>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Gizlilik politikası – AdRaze</title>
-<meta name="description" content="AdRaze hiçbir veri toplamaz. Eklentinin nasıl çalıştığı ve hangi izinleri kullandığı burada.">
+<meta name="description" content="Hesap olmadan AdRaze hiçbir veri toplamaz. Eklentinin, hesabın ve izinlerin nasıl çalıştığı burada.">
 <link rel="icon" href="/favicon.png">
 <link rel="alternate" hreflang="sv" href="https://adraze.app/integritet">
 <link rel="alternate" hreflang="en" href="https://adraze.app/en/integritet">
@@ -58,17 +58,31 @@
 <main class="wrap policy">
   <a class="tillbaka nav-link" href="/tr/"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg>Ana sayfaya dön</a>
   <h1>Gizlilik politikası</h1>
-  <p class="datum">Son güncelleme: 19 Ekim 2026</p>
+  <p class="datum">Son güncelleme: 21 Ekim 2026</p>
 
   <h2>Kısaca</h2>
-  <p>AdRaze senin veya internette ne yaptığın hakkında hiçbir bilgi toplamaz, saklamaz ya da göndermez. Eklentinin yaptığı her şey tarayıcında, yerel olarak gerçekleşir.</p>
+  <p>Hesap olmadan AdRaze senin veya internette ne yaptığın hakkında hiçbir bilgi toplamaz, saklamaz ya da göndermez. Her şey tarayıcında, yerel olarak gerçekleşir. İsteğe bağlı olarak bir hesap oluşturursan yalnızca e-posta adresini ve günde kaç şeyin durdurulduğunu saklarız. Hangi siteleri ziyaret ettiğini asla saklamayız.</p>
 
   <h2>Bilgisayarında neler saklanır</h2>
   <ul>
     <li>AdRaze'i duraklattığın sitelerin listesi.</li>
     <li>Kaç açılır pencere ve yönlendirmenin durdurulduğunu gösteren sayaçlar.</li>
+    <li>Günde kaç reklam, izleyici ve tehlikeli sayfanın durdurulduğu; böylece istatistiklerini görebilirsin.</li>
   </ul>
   <p>Bunlar tarayıcının kendi depolamasında (<code>chrome.storage</code>) saklanır ve bilgisayarından asla çıkmaz. AdRaze'i kaldırırsan hepsi silinir.</p>
+
+  <h2>Hesap oluşturursan</h2>
+  <p>AdRaze'i kullanmak için hesaba ihtiyacın yok. Hesap yalnızca istatistiklerini tüm bilgisayarlarından adraze.app üzerinde görebilmen için var. Bu durumda sunucumuzda şunlar saklanır:</p>
+  <ul>
+    <li><b>E-posta adresi</b>, giriş yapabilmen ve doğrulama kodları alabilmen için.</li>
+    <li><b>Şifre</b>, yalnızca tuzlanmış bir scrypt hash'i olarak saklanır. Şifreni asla göremeyiz.</li>
+    <li><b>Google ile giriş</b>, seçersen: Google'dan e-posta adresini ve bir kimlik numarası alırız, başka hiçbir şey saklanmaz.</li>
+    <li><b>Günlük istatistikler</b>: durdurulan reklam, izleyici, tehlikeli sayfa, açılır pencere ve yönlendirme sayısı. Yalnızca sayılar; adresler, siteler veya aramalar asla.</li>
+    <li><b>Bağlı tarayıcılar</b>: "Windows'ta Chrome" gibi bir ad ve en son ne zaman istatistik gönderdiği.</li>
+    <li><b>İki çerez</b> (adraze.app üzerinde): biri oturumunu açık tutar, diğeri tarayıcının zaten doğrulandığını hatırlar. İzleme çerezi yok.</li>
+  </ul>
+  <p>Doğrulama kodlu e-postalar Cloudflare Email Service üzerinden gönderilir. Sunucu İsveç'tedir ve Cloudflare üzerinden erişilir. Hesapta hiçbir analiz aracı veya reklam kullanmayız.</p>
+  <p>Hesabını istediğin zaman adraze.app üzerindeki Hesap bölümünden silebilirsin. Bu durumda e-posta adresin, istatistiklerin ve tüm bağlı tarayıcılar hemen silinir.</p>
 
   <h2>İzinler ve neden gerektikleri</h2>
   <ul>
@@ -77,13 +91,15 @@
     <li><b>webNavigation:</b> bir sayfanın açtığı açılır pencereleri tanımak ve reklama ya da tehlikeli sayfalara çıkıyorlarsa kapatmak için.</li>
     <li><b>scripting ve activeTab:</b> reklamları gizleyen stil kuralları ekler ve açık sekmenin istatistiklerini gösterir.</li>
     <li><b>storage:</b> duraklatılan sitelerini ve sayaçları yerel olarak saklar.</li>
+    <li><b>declarativeNetRequestFeedback:</b> kaç reklam, izleyici ve tehlikeli sayfanın durdurulduğunu sayar. Eklenti yalnızca ne tür bir kuralın eşleştiğini okur, hangi sayfada olduğunu değil.</li>
+    <li><b>alarms:</b> sayaçları düzenli aralıklarla günceller ve bir hesap bağladıysan istatistikleri hesabına gönderir.</li>
   </ul>
 
   <h2>Filtre listeleri</h2>
   <p>AdRaze; EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard ve Peter Lowe filtre listeleriyle gelir. Listeler eklentinin içindedir. Ziyaret ettiğin sayfalarla ilgili hiçbir sorgu kimseye gönderilmez.</p>
 
   <h2>Üçüncü taraflar</h2>
-  <p>AdRaze hiçbir veriyi üçüncü taraflara satmaz, paylaşmaz ya da aktarmaz, çünkü zaten veri toplanmaz.</p>
+  <p>AdRaze asla veri satmaz ve kimseyle paylaşmaz. Hesabın varsa e-postalar Cloudflare üzerinden gönderilir; Google ile girişi seçersen de kim olduğunu Google doğrular. Başka hiçbir şey sunucumuzdan çıkmaz.</p>
 
   <h2>Açık kaynak</h2>
   <p>AdRaze, GPL-3.0 lisanslı açık kaynak bir yazılım; böylece herkes eklentinin tam olarak ne yaptığını inceleyebilir.</p>

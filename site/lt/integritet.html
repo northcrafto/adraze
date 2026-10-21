@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privatumo politika – AdRaze</title>
-<meta name="description" content="AdRaze nerenka jokių duomenų. Štai kaip veikia plėtinys ir kokius leidimus jis naudoja.">
+<meta name="description" content="Be paskyros AdRaze nerenka jokių duomenų. Štai kaip veikia plėtinys, paskyra ir leidimai.">
 <link rel="icon" href="/favicon.png">
 <link rel="alternate" hreflang="sv" href="https://adraze.app/integritet">
 <link rel="alternate" hreflang="en" href="https://adraze.app/en/integritet">
@@ -58,17 +58,31 @@
 <main class="wrap policy">
   <a class="tillbaka nav-link" href="/lt/"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg>Į pradžią</a>
   <h1>Privatumo politika</h1>
-  <p class="datum">Paskutinį kartą atnaujinta 2026 m. spalio 19 d.</p>
+  <p class="datum">Paskutinį kartą atnaujinta 2026 m. spalio 21 d.</p>
 
   <h2>Trumpai</h2>
-  <p>AdRaze nerenka, nesaugo ir nesiunčia jokios informacijos apie jus ar tai, ką veikiate internete. Viskas, ką daro plėtinys, vyksta vietoje, jūsų naršyklėje.</p>
+  <p>Be paskyros AdRaze nerenka, nesaugo ir nesiunčia jokios informacijos apie jus ar tai, ką veikiate internete. Viskas vyksta vietoje, jūsų naršyklėje. Jei susikuriate paskyrą, o tai neprivaloma, saugome tik jūsų el. pašto adresą ir tai, kiek dalykų sustabdyta per dieną. Niekada nesaugome, kokias svetaines lankote.</p>
 
   <h2>Kas saugoma jūsų kompiuteryje</h2>
   <ul>
     <li>Svetainių, kuriose sustabdėte AdRaze, sąrašas.</li>
     <li>Skaitikliai, kiek iššokančių langų ir peradresavimų sustabdyta.</li>
+    <li>Kiek reklamų, sekiklių ir pavojingų puslapių sustabdyta per dieną, kad galėtumėte matyti savo statistiką.</li>
   </ul>
   <p>Tai saugoma naršyklės saugykloje (<code>chrome.storage</code>) ir niekada nepalieka jūsų kompiuterio. Pašalinus AdRaze, tai dingsta.</p>
+
+  <h2>Jei susikuriate paskyrą</h2>
+  <p>Norint naudotis AdRaze, paskyros nereikia. Ji skirta tik tam, kad galėtumėte matyti savo statistiką adraze.app iš visų savo kompiuterių. Tada mūsų serveryje saugoma:</p>
+  <ul>
+    <li><b>El. pašto adresas</b>, kad galėtumėte prisijungti ir gauti patvirtinimo kodus.</li>
+    <li><b>Slaptažodis</b>, saugomas tik kaip pasūdyta scrypt maišos reikšmė. Niekada negalime matyti jūsų slaptažodžio.</li>
+    <li><b>Prisijungimas per Google</b>, jei jį pasirenkate: iš Google gauname jūsų el. pašto adresą ir ID numerį, nieko kito nesaugome.</li>
+    <li><b>Dienos statistika</b>: sustabdytų reklamų, sekiklių, pavojingų puslapių, iššokančių langų ir peradresavimų skaičius. Tik skaičiai, niekada adresai, svetainės ar paieškos.</li>
+    <li><b>Susietos naršyklės</b>: pavadinimas, pavyzdžiui, „Chrome sistemoje Windows“, ir kada ji paskutinį kartą siuntė statistiką.</li>
+    <li><b>Du slapukai</b> adraze.app: vienas palaiko jūsų prisijungimą, kitas įsimena, kad naršyklė jau patvirtinta. Jokių sekimo slapukų.</li>
+  </ul>
+  <p>Laiškai su patvirtinimo kodais siunčiami per Cloudflare Email Service. Serveris yra Švedijoje ir pasiekiamas per Cloudflare. Paskyroje nenaudojame jokios analitikos ar reklamų.</p>
+  <p>Paskyrą galite bet kada ištrinti adraze.app skiltyje „Paskyra“. Tada jūsų el. pašto adresas, statistika ir visos susietos naršyklės ištrinamos iš karto.</p>
 
   <h2>Leidimai ir kam jų reikia</h2>
   <ul>
@@ -77,13 +91,15 @@
     <li><b>webNavigation:</b> kad atpažintų puslapio atidarytus iššokančius langus ir juos uždarytų, jei jie veda į reklamas ar pavojingas svetaines.</li>
     <li><b>scripting ir activeTab:</b> prideda stiliaus taisykles, slepiančias reklamas, ir rodo atidaryto skirtuko statistiką.</li>
     <li><b>storage:</b> vietoje saugo sustabdytas svetaines ir skaitiklius.</li>
+    <li><b>declarativeNetRequestFeedback:</b> skaičiuoja, kiek reklamų, sekiklių ir pavojingų puslapių sustabdyta. Plėtinys nuskaito tik tai, kokio tipo taisyklė suveikė, o ne kuriame puslapyje.</li>
+    <li><b>alarms:</b> reguliariai atnaujina skaitiklius ir siunčia statistiką į jūsų paskyrą, jei ją susiejote.</li>
   </ul>
 
   <h2>Filtrų sąrašai</h2>
   <p>AdRaze pateikiamas su filtrų sąrašais iš EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard ir Peter Lowe. Sąrašai yra plėtinio dalis. Jokios užklausos apie lankomas svetaines niekam nesiunčiamos.</p>
 
   <h2>Trečiosios šalys</h2>
-  <p>AdRaze neparduoda, nesidalija ir neperduoda duomenų trečiosioms šalims, nes jokie duomenys nerenkami.</p>
+  <p>AdRaze niekada neparduoda duomenų ir niekam jų neperduoda. Jei turite paskyrą, laiškai siunčiami per Cloudflare, o jei pasirenkate prisijungimą per Google, Google patvirtina, kas esate. Niekas kita nepalieka mūsų serverio.</p>
 
   <h2>Atvirasis kodas</h2>
   <p>AdRaze yra atvirojo kodo programa su GPL-3.0 licencija, todėl bet kas gali tiksliai patikrinti, ką plėtinys daro.</p>

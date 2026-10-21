@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Adatvédelmi tájékoztató – AdRaze</title>
-<meta name="description" content="Az AdRaze semmilyen adatot nem gyűjt. Így működik a bővítmény, és ezeket az engedélyeket használja.">
+<meta name="description" content="Fiók nélkül az AdRaze semmilyen adatot nem gyűjt. Így működik a bővítmény, a fiók és az engedélyek.">
 <link rel="icon" href="/favicon.png">
 <link rel="alternate" hreflang="sv" href="https://adraze.app/integritet">
 <link rel="alternate" hreflang="en" href="https://adraze.app/en/integritet">
@@ -58,17 +58,31 @@
 <main class="wrap policy">
   <a class="tillbaka nav-link" href="/hu/"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg>Vissza a kezdőlapra</a>
   <h1>Adatvédelmi tájékoztató</h1>
-  <p class="datum">Utoljára frissítve: 2026. október 19.</p>
+  <p class="datum">Utoljára frissítve: 2026. október 21.</p>
 
   <h2>Röviden</h2>
-  <p>Az AdRaze nem gyűjt, nem tárol és nem küld semmilyen információt rólad vagy arról, mit csinálsz a neten. Minden, amit a bővítmény csinál, helyben, a böngésződben történik.</p>
+  <p>Fiók nélkül az AdRaze nem gyűjt, nem tárol és nem küld semmilyen információt rólad vagy arról, mit csinálsz a neten. Minden helyben, a böngésződben történik. Ha fiókot hozol létre, ami nem kötelező, csak az e-mail-címedet tároljuk, és azt, hogy naponta mennyi mindent állított meg. Azt soha, hogy milyen oldalakat látogatsz.</p>
 
   <h2>Mi tárolódik a gépeden</h2>
   <ul>
     <li>Azoknak az oldalaknak a listája, ahol szüneteltetted az AdRaze-t.</li>
     <li>Számlálók a megállított felugró ablakokról és átirányításokról.</li>
+    <li>Hány reklámot, nyomkövetőt és veszélyes oldalt állított meg naponta, hogy lásd a statisztikádat.</li>
   </ul>
   <p>Ezeket a böngésző saját tárhelye (<code>chrome.storage</code>) tárolja, és soha nem hagyják el a gépedet. Ha eltávolítod az AdRaze-t, ezek is eltűnnek.</p>
+
+  <h2>Ha fiókot hozol létre</h2>
+  <p>Az AdRaze használatához nincs szükség fiókra. Csak azért létezik, hogy az adraze.app oldalon az összes számítógépedről láthasd a statisztikádat. Ilyenkor ezt tároljuk a szerverünkön:</p>
+  <ul>
+    <li><b>E-mail-cím</b>, hogy be tudj jelentkezni és megkapd az ellenőrző kódokat.</li>
+    <li><b>Jelszó</b>, kizárólag sózott scrypt-hashként tárolva. A jelszavadat soha nem látjuk.</li>
+    <li><b>Google-bejelentkezés</b>, ha ezt választod: a Google-tól megkapjuk az e-mail-címedet és egy azonosítószámot, mást nem tárolunk.</li>
+    <li><b>Napi statisztika</b>: a megállított reklámok, nyomkövetők, veszélyes oldalak, felugró ablakok és átirányítások száma. Csak számok, soha nem címek, oldalak vagy keresések.</li>
+    <li><b>Összekapcsolt böngészők</b>: egy név, például "Chrome Windowson", és hogy mikor küldött utoljára statisztikát.</li>
+    <li><b>Két süti</b> az adraze.app oldalon: az egyik bejelentkezve tart, a másik megjegyzi, hogy a böngésző már ellenőrzött. Nincsenek nyomkövető sütik.</li>
+  </ul>
+  <p>Az ellenőrző kódokat tartalmazó e-maileket a Cloudflare Email Service küldi. A szerver Svédországban van, és a Cloudflare-en keresztül érhető el. A fióknál nem használunk sem analitikát, sem reklámot.</p>
+  <p>A fiókodat bármikor törölheted az adraze.app oldalon, a Fiók menüpontban. Ekkor az e-mail-címed, a statisztikád és az összes összekapcsolt böngésző azonnal törlődik.</p>
 
   <h2>Engedélyek, és miért kellenek</h2>
   <ul>
@@ -77,13 +91,15 @@
     <li><b>webNavigation:</b> felismeri az oldal által megnyitott felugró ablakokat, és bezárja őket, ha reklámra vagy veszélyes oldalra vezetnek.</li>
     <li><b>scripting és activeTab:</b> stílusszabályokat illeszt be, amelyek elrejtik a hirdetéseket, és statisztikát mutat a megnyitott lapról.</li>
     <li><b>storage:</b> helyben menti a szüneteltetett oldalakat és a számlálókat.</li>
+    <li><b>declarativeNetRequestFeedback:</b> megszámolja, hány reklámot, nyomkövetőt és veszélyes oldalt állított meg. A bővítmény csak azt olvassa ki, milyen típusú szabály lépett életbe, azt nem, hogy melyik oldalon.</li>
+    <li><b>alarms:</b> rendszeres időközönként frissíti a számlálókat, és elküldi a statisztikát a fiókodba, ha összekapcsoltál egyet.</li>
   </ul>
 
   <h2>Szűrőlisták</h2>
   <p>Az AdRaze az EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard és Peter Lowe szűrőlistáival érkezik. A listák a bővítmény részei. Senkinek nem megy kérés arról, milyen oldalakat látogatsz.</p>
 
   <h2>Harmadik felek</h2>
-  <p>Az AdRaze nem ad el, nem oszt meg és nem továbbít adatot harmadik feleknek, hiszen nem is gyűjt semmit.</p>
+  <p>Az AdRaze soha nem ad el adatot, és senkivel nem osztja meg. Ha van fiókod, az e-maileket a Cloudflare küldi, és ha a Google-bejelentkezést választod, a Google igazolja, ki vagy. Semmi más nem hagyja el a szerverünket.</p>
 
   <h2>Nyílt forráskód</h2>
   <p>Az AdRaze nyílt forráskódú, GPL-3.0 licenccel, így bárki ellenőrizheti, pontosan mit csinál a bővítmény.</p>

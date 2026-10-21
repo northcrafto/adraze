@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privatlivspolitik – AdRaze</title>
-<meta name="description" content="AdRaze indsamler ingen data. Sådan virker udvidelsen, og disse tilladelser bruger den.">
+<meta name="description" content="Uden konto indsamler AdRaze ingen data. Sådan virker udvidelsen, kontoen og tilladelserne.">
 <link rel="icon" href="/favicon.png">
 <link rel="alternate" hreflang="sv" href="https://adraze.app/integritet">
 <link rel="alternate" hreflang="en" href="https://adraze.app/en/integritet">
@@ -58,17 +58,31 @@
 <main class="wrap policy">
   <a class="tillbaka nav-link" href="/da/"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg>Til forsiden</a>
   <h1>Privatlivspolitik</h1>
-  <p class="datum">Senest opdateret 19. oktober 2026</p>
+  <p class="datum">Senest opdateret 21. oktober 2026</p>
 
   <h2>Kort sagt</h2>
-  <p>AdRaze indsamler, gemmer og sender ingen oplysninger om dig eller det, du laver på nettet. Alt, hvad udvidelsen gør, sker lokalt i din browser.</p>
+  <p>Uden konto indsamler, gemmer og sender AdRaze ingen oplysninger om dig eller det, du laver på nettet. Alt sker lokalt i din browser. Opretter du en konto, hvilket er frivilligt, gemmer vi kun din e-mailadresse og hvor mange ting der er stoppet pr. dag. Aldrig hvilke sites du besøger.</p>
 
   <h2>Hvad der gemmes på din computer</h2>
   <ul>
     <li>Listen over sites, hvor du har sat AdRaze på pause.</li>
     <li>Tællere for, hvor mange popups og omdirigeringer der er stoppet.</li>
+    <li>Hvor mange reklamer, trackere og farlige sider der er stoppet pr. dag, så du kan se din statistik.</li>
   </ul>
   <p>Det gemmes med browserens eget lager (<code>chrome.storage</code>) og forlader aldrig din computer. Afinstallerer du AdRaze, forsvinder det.</p>
+
+  <h2>Hvis du opretter en konto</h2>
+  <p>Du behøver ikke en konto for at bruge AdRaze. Den findes kun, så du kan se din statistik på adraze.app fra alle dine computere. Så gemmes dette på vores server:</p>
+  <ul>
+    <li><b>E-mailadresse</b>, så du kan logge ind og få bekræftelseskoder.</li>
+    <li><b>Adgangskode</b>, som kun gemmes som en saltet scrypt-hash. Vi kan aldrig se din adgangskode.</li>
+    <li><b>Google-login</b>, hvis du vælger det: vi får din e-mailadresse og et id-nummer fra Google, intet andet gemmes.</li>
+    <li><b>Statistik pr. dag</b>: antal stoppede reklamer, trackere, farlige sider, popups og omdirigeringer. Kun tal, aldrig adresser, sites eller søgninger.</li>
+    <li><b>Forbundne browsere</b>: et navn som "Chrome på Windows" og hvornår den sidst sendte statistik.</li>
+    <li><b>To cookies</b> på adraze.app: én, der holder dig logget ind, og én, der husker, at browseren allerede er bekræftet. Ingen sporingscookies.</li>
+  </ul>
+  <p>E-mails med bekræftelseskoder sendes via Cloudflare Email Service. Serveren står i Sverige og nås via Cloudflare. Vi bruger ingen analyse eller reklame på kontoen.</p>
+  <p>Du kan slette din konto når som helst under Konto på adraze.app. Så slettes e-mailadressen, statistikken og alle forbundne browsere med det samme.</p>
 
   <h2>Tilladelser og hvorfor de er nødvendige</h2>
   <ul>
@@ -77,13 +91,15 @@
     <li><b>webNavigation:</b> til at genkende popup-vinduer, som en side åbner, og lukke dem, hvis de fører til reklamer eller farlige sider.</li>
     <li><b>scripting og activeTab:</b> indsætter stilregler, der skjuler annoncer, og viser statistik for den fane, du har åben.</li>
     <li><b>storage:</b> gemmer dine pausede sites og tællere lokalt.</li>
+    <li><b>declarativeNetRequestFeedback:</b> tæller, hvor mange reklamer, trackere og farlige sider der er stoppet. Udvidelsen læser kun, hvilken slags regel der ramte, ikke hvilken side det var på.</li>
+    <li><b>alarms:</b> opdaterer tællerne med jævne mellemrum og sender statistikken til din konto, hvis du har forbundet en.</li>
   </ul>
 
   <h2>Filterlister</h2>
   <p>AdRaze leveres med filterlister fra EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard og Peter Lowe. Listerne er indbygget i udvidelsen. Der sendes ingen forespørgsler om, hvilke sider du besøger, til nogen.</p>
 
   <h2>Tredjeparter</h2>
-  <p>AdRaze sælger, deler eller overfører ingen data til tredjeparter, fordi der ikke indsamles nogen data.</p>
+  <p>AdRaze sælger aldrig data og deler dem ikke med nogen. Har du en konto, sendes e-mails via Cloudflare, og vælger du Google-login, bekræfter Google, hvem du er. Intet andet forlader vores server.</p>
 
   <h2>Open source</h2>
   <p>AdRaze er open source under GPL-3.0, så alle kan tjekke præcis, hvad udvidelsen gør.</p>

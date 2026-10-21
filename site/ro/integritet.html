@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Politica de confidențialitate – AdRaze</title>
-<meta name="description" content="AdRaze nu colectează nicio dată. Iată cum funcționează extensia și ce permisiuni folosește.">
+<meta name="description" content="Fără cont, AdRaze nu colectează nicio dată. Iată cum funcționează extensia, contul și permisiunile.">
 <link rel="icon" href="/favicon.png">
 <link rel="alternate" hreflang="sv" href="https://adraze.app/integritet">
 <link rel="alternate" hreflang="en" href="https://adraze.app/en/integritet">
@@ -58,17 +58,31 @@
 <main class="wrap policy">
   <a class="tillbaka nav-link" href="/ro/"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg>Înapoi la pagina principală</a>
   <h1>Politica de confidențialitate</h1>
-  <p class="datum">Ultima actualizare: 19 octombrie 2026</p>
+  <p class="datum">Ultima actualizare: 21 octombrie 2026</p>
 
   <h2>Pe scurt</h2>
-  <p>AdRaze nu colectează, nu stochează și nu trimite nicio informație despre tine sau despre ce faci online. Tot ce face extensia se întâmplă local, în browserul tău.</p>
+  <p>Fără cont, AdRaze nu colectează, nu stochează și nu trimite nicio informație despre tine sau despre ce faci online. Totul se întâmplă local, în browserul tău. Dacă îți creezi un cont, ceea ce este opțional, păstrăm doar adresa ta de e-mail și câte lucruri au fost oprite pe zi. Niciodată ce site-uri vizitezi.</p>
 
   <h2>Ce se salvează pe calculatorul tău</h2>
   <ul>
     <li>Lista site-urilor pe care ai pus AdRaze pe pauză.</li>
     <li>Contoare pentru câte pop-up-uri și redirecționări au fost oprite.</li>
+    <li>Câte reclame, trackere și pagini periculoase au fost oprite pe zi, ca să-ți poți vedea statisticile.</li>
   </ul>
   <p>Acestea sunt salvate în spațiul de stocare al browserului (<code>chrome.storage</code>) și nu părăsesc niciodată calculatorul tău. Dacă dezinstalezi AdRaze, dispar.</p>
+
+  <h2>Dacă îți creezi un cont</h2>
+  <p>Nu ai nevoie de cont ca să folosești AdRaze. Există doar ca să-ți poți vedea statisticile pe adraze.app, de pe toate calculatoarele tale. Atunci, pe serverul nostru se salvează:</p>
+  <ul>
+    <li><b>Adresa de e-mail</b>, ca să te poți autentifica și să primești coduri de verificare.</li>
+    <li><b>Parola</b>, salvată doar ca hash scrypt cu salt. Nu îți putem vedea niciodată parola.</li>
+    <li><b>Autentificarea cu Google</b>, dacă o alegi: primim de la Google adresa ta de e-mail și un număr de identificare, nimic altceva nu se salvează.</li>
+    <li><b>Statistici pe zi</b>: numărul de reclame, trackere, pagini periculoase, pop-up-uri și redirecționări oprite. Doar cifre, niciodată adrese, site-uri sau căutări.</li>
+    <li><b>Browsere conectate</b>: un nume precum „Chrome pe Windows” și când a trimis ultima dată statistici.</li>
+    <li><b>Două cookie-uri</b> pe adraze.app: unul care te ține autentificat și unul care reține că browserul este deja verificat. Niciun cookie de urmărire.</li>
+  </ul>
+  <p>E-mailurile cu coduri de verificare sunt trimise prin Cloudflare Email Service. Serverul se află în Suedia și este accesat prin Cloudflare. Nu folosim instrumente de analiză sau reclame în cont.</p>
+  <p>Îți poți șterge contul oricând din secțiunea Cont de pe adraze.app. Adresa de e-mail, statisticile și toate browserele conectate sunt atunci șterse imediat.</p>
 
   <h2>Permisiuni și de ce sunt necesare</h2>
   <ul>
@@ -77,13 +91,15 @@
     <li><b>webNavigation:</b> pentru a recunoaște ferestrele pop-up deschise de o pagină și a le închide dacă duc la reclame sau site-uri periculoase.</li>
     <li><b>scripting și activeTab:</b> adaugă reguli de stil care ascund reclamele și arată statistici pentru fila deschisă.</li>
     <li><b>storage:</b> salvează local site-urile puse pe pauză și contoarele.</li>
+    <li><b>declarativeNetRequestFeedback:</b> numără câte reclame, trackere și pagini periculoase au fost oprite. Extensia citește doar ce tip de regulă s-a aplicat, nu pe ce pagină.</li>
+    <li><b>alarms:</b> actualizează contoarele la intervale regulate și trimite statisticile în contul tău, dacă ai conectat unul.</li>
   </ul>
 
   <h2>Liste de filtre</h2>
   <p>AdRaze vine cu liste de filtre de la EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard și Peter Lowe. Listele sunt incluse în extensie. Nu se trimite nimănui nicio cerere despre paginile pe care le vizitezi.</p>
 
   <h2>Terțe părți</h2>
-  <p>AdRaze nu vinde, nu partajează și nu transferă date către terțe părți, pentru că nu colectează nicio dată.</p>
+  <p>AdRaze nu vinde niciodată date și nu le împarte cu nimeni. Dacă ai cont, e-mailurile sunt trimise prin Cloudflare, iar dacă alegi autentificarea cu Google, Google confirmă cine ești. Nimic altceva nu părăsește serverul nostru.</p>
 
   <h2>Open source</h2>
   <p>AdRaze este open source sub licența GPL-3.0, așa că oricine poate verifica exact ce face extensia.</p>

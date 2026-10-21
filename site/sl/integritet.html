@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Politika zasebnosti – AdRaze</title>
-<meta name="description" content="AdRaze ne zbira nobenih podatkov. Tako deluje razširitev in ta dovoljenja uporablja.">
+<meta name="description" content="Brez računa AdRaze ne zbira nobenih podatkov. Tako delujejo razširitev, račun in dovoljenja.">
 <link rel="icon" href="/favicon.png">
 <link rel="alternate" hreflang="sv" href="https://adraze.app/integritet">
 <link rel="alternate" hreflang="en" href="https://adraze.app/en/integritet">
@@ -58,17 +58,31 @@
 <main class="wrap policy">
   <a class="tillbaka nav-link" href="/sl/"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg>Nazaj na domačo stran</a>
   <h1>Politika zasebnosti</h1>
-  <p class="datum">Zadnja posodobitev: 19. oktobra 2026</p>
+  <p class="datum">Zadnja posodobitev: 21. oktobra 2026</p>
 
   <h2>Na kratko</h2>
-  <p>AdRaze ne zbira, ne shranjuje in ne pošilja nobenih informacij o tebi ali o tem, kaj počneš na spletu. Vse, kar razširitev naredi, poteka lokalno v tvojem brskalniku.</p>
+  <p>Brez računa AdRaze ne zbira, ne shranjuje in ne pošilja nobenih informacij o tebi ali o tem, kaj počneš na spletu. Vse poteka lokalno v tvojem brskalniku. Če ustvariš račun, kar je prostovoljno, shranimo samo tvoj e-poštni naslov in koliko stvari je bilo ustavljenih na dan. Nikoli ne shranimo, katere strani obiskuješ.</p>
 
   <h2>Kaj se shrani na tvojem računalniku</h2>
   <ul>
     <li>Seznam strani, na katerih si začasno ustavil AdRaze.</li>
     <li>Števci, koliko pojavnih oken in preusmeritev je bilo ustavljenih.</li>
+    <li>Koliko oglasov, sledilnikov in nevarnih strani je bilo ustavljenih na dan, da lahko vidiš svojo statistiko.</li>
   </ul>
   <p>To se shrani v lastno shrambo brskalnika (<code>chrome.storage</code>) in nikoli ne zapusti tvojega računalnika. Če AdRaze odstraniš, izgine.</p>
+
+  <h2>Če ustvariš račun</h2>
+  <p>Za uporabo AdRaze ne potrebuješ računa. Obstaja samo zato, da lahko svojo statistiko vidiš na adraze.app z vseh svojih računalnikov. Takrat se na našem strežniku shrani:</p>
+  <ul>
+    <li><b>E-poštni naslov</b>, da se lahko prijaviš in prejemaš potrditvene kode.</li>
+    <li><b>Geslo</b>, shranjeno samo kot soljena zgoščena vrednost scrypt. Tvojega gesla nikoli ne moremo videti.</li>
+    <li><b>Prijava z Googlom</b>, če jo izbereš: od Googla prejmemo tvoj e-poštni naslov in identifikacijsko številko, nič drugega se ne shrani.</li>
+    <li><b>Statistika po dnevih</b>: število ustavljenih oglasov, sledilnikov, nevarnih strani, pojavnih oken in preusmeritev. Samo številke, nikoli naslovi, strani ali iskanja.</li>
+    <li><b>Povezani brskalniki</b>: ime, kot je »Chrome v sistemu Windows«, in kdaj je nazadnje poslal statistiko.</li>
+    <li><b>Dva piškotka</b> na adraze.app: eden te ohranja prijavljenega, drugi si zapomni, da je brskalnik že preverjen. Brez piškotkov za sledenje.</li>
+  </ul>
+  <p>E-poštna sporočila s potrditvenimi kodami se pošiljajo prek storitve Cloudflare Email Service. Strežnik je na Švedskem in je dosegljiv prek Cloudflara. Pri računu ne uporabljamo nobene analitike ali oglasov.</p>
+  <p>Račun lahko kadar koli izbrišeš v razdelku Račun na adraze.app. Takrat se tvoj e-poštni naslov, statistika in vsi povezani brskalniki takoj izbrišejo.</p>
 
   <h2>Dovoljenja in zakaj so potrebna</h2>
   <ul>
@@ -77,13 +91,15 @@
     <li><b>webNavigation:</b> za prepoznavanje pojavnih oken, ki jih odpre stran, in njihovo zapiranje, če vodijo na oglase ali nevarne strani.</li>
     <li><b>scripting in activeTab:</b> doda slogovna pravila, ki skrijejo oglase, in prikaže statistiko za zavihek, ki ga imaš odprtega.</li>
     <li><b>storage:</b> lokalno shrani ustavljene strani in števce.</li>
+    <li><b>declarativeNetRequestFeedback:</b> šteje, koliko oglasov, sledilnikov in nevarnih strani je bilo ustavljenih. Razširitev prebere samo, katera vrsta pravila se je sprožila, ne pa, na kateri strani.</li>
+    <li><b>alarms:</b> v rednih presledkih posodablja števce in pošlje statistiko v tvoj račun, če si ga povezal.</li>
   </ul>
 
   <h2>Seznami filtrov</h2>
   <p>AdRaze vključuje sezname filtrov EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard in Peter Lowe. Seznami so del razširitve. Nikomur se ne pošiljajo poizvedbe o tem, katere strani obiskuješ.</p>
 
   <h2>Tretje osebe</h2>
-  <p>AdRaze ne prodaja, ne deli in ne posreduje podatkov tretjim osebam, ker ne zbira nobenih podatkov.</p>
+  <p>AdRaze nikoli ne prodaja podatkov in jih ne deli z nikomer. Če imaš račun, se e-poštna sporočila pošiljajo prek Cloudflara, in če izbereš prijavo z Googlom, Google potrdi, kdo si. Nič drugega ne zapusti našega strežnika.</p>
 
   <h2>Odprta koda</h2>
   <p>AdRaze je odprtokoden pod licenco GPL-3.0, zato lahko vsakdo preveri, kaj točno razširitev počne.</p>

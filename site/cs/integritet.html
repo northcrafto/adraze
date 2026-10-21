@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Zásady ochrany soukromí – AdRaze</title>
-<meta name="description" content="AdRaze nesbírá žádná data. Takhle rozšíření funguje a tato oprávnění používá.">
+<meta name="description" content="Bez účtu AdRaze nesbírá žádná data. Takhle funguje rozšíření, účet a oprávnění.">
 <link rel="icon" href="/favicon.png">
 <link rel="alternate" hreflang="sv" href="https://adraze.app/integritet">
 <link rel="alternate" hreflang="en" href="https://adraze.app/en/integritet">
@@ -58,17 +58,31 @@
 <main class="wrap policy">
   <a class="tillbaka nav-link" href="/cs/"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg>Zpět na úvod</a>
   <h1>Zásady ochrany soukromí</h1>
-  <p class="datum">Naposledy aktualizováno 19. října 2026</p>
+  <p class="datum">Naposledy aktualizováno 21. října 2026</p>
 
   <h2>Ve zkratce</h2>
-  <p>AdRaze nesbírá, neukládá ani neodesílá žádné informace o vás ani o tom, co děláte na internetu. Všechno, co rozšíření dělá, probíhá lokálně ve vašem prohlížeči.</p>
+  <p>Bez účtu AdRaze nesbírá, neukládá ani neodesílá žádné informace o vás ani o tom, co děláte na internetu. Všechno probíhá lokálně ve vašem prohlížeči. Pokud si vytvoříte účet, což je dobrovolné, ukládáme jen vaši e-mailovou adresu a kolik věcí bylo každý den zastaveno. Nikdy neukládáme, jaké weby navštěvujete.</p>
 
   <h2>Co se ukládá ve vašem počítači</h2>
   <ul>
     <li>Seznam webů, na kterých jste AdRaze pozastavili.</li>
     <li>Počítadla zastavených vyskakovacích oken a přesměrování.</li>
+    <li>Kolik reklam, sledovacích skriptů a nebezpečných stránek bylo každý den zastaveno, abyste viděli své statistiky.</li>
   </ul>
   <p>Ukládá se to do vlastního úložiště prohlížeče (<code>chrome.storage</code>) a nikdy to neopustí váš počítač. Když AdRaze odinstalujete, zmizí to.</p>
+
+  <h2>Pokud si vytvoříte účet</h2>
+  <p>K používání AdRaze účet nepotřebujete. Existuje jen proto, abyste mohli vidět své statistiky na adraze.app ze všech svých počítačů. Na našem serveru se pak ukládá:</p>
+  <ul>
+    <li><b>E-mailová adresa</b>, abyste se mohli přihlásit a dostávat ověřovací kódy.</li>
+    <li><b>Heslo</b>, uložené pouze jako solený hash scrypt. Vaše heslo nikdy nevidíme.</li>
+    <li><b>Přihlášení přes Google</b>, pokud ho zvolíte: od Googlu dostaneme vaši e-mailovou adresu a identifikační číslo, nic jiného se neukládá.</li>
+    <li><b>Denní statistiky</b>: počet zastavených reklam, sledovacích skriptů, nebezpečných stránek, vyskakovacích oken a přesměrování. Jen čísla, nikdy adresy, weby ani vyhledávání.</li>
+    <li><b>Propojené prohlížeče</b>: název jako "Chrome ve Windows" a kdy naposledy odeslal statistiky.</li>
+    <li><b>Dva soubory cookie</b> na adraze.app: jeden vás udržuje přihlášené a druhý si pamatuje, že prohlížeč už je ověřený. Žádné sledovací soubory cookie.</li>
+  </ul>
+  <p>E-maily s ověřovacími kódy se odesílají přes Cloudflare Email Service. Server je ve Švédsku a přistupuje se k němu přes Cloudflare. U účtu nepoužíváme žádnou analytiku ani reklamy.</p>
+  <p>Účet můžete kdykoli smazat v sekci Účet na adraze.app. Vaše e-mailová adresa, statistiky a všechny propojené prohlížeče se pak okamžitě smažou.</p>
 
   <h2>Oprávnění a proč jsou potřeba</h2>
   <ul>
@@ -77,13 +91,15 @@
     <li><b>webNavigation:</b> slouží k rozpoznání vyskakovacích oken, která otevře stránka, a k jejich zavření, pokud vedou na reklamu nebo nebezpečné stránky.</li>
     <li><b>scripting a activeTab:</b> vkládá pravidla stylů, která skrývají reklamy, a zobrazuje statistiky pro otevřenou kartu.</li>
     <li><b>storage:</b> lokálně ukládá pozastavené weby a počítadla.</li>
+    <li><b>declarativeNetRequestFeedback:</b> počítá, kolik reklam, sledovacích skriptů a nebezpečných stránek bylo zastaveno. Rozšíření čte jen to, jaký druh pravidla se uplatnil, ne na které stránce.</li>
+    <li><b>alarms:</b> v pravidelných intervalech aktualizuje počítadla a odesílá statistiky do vašeho účtu, pokud jste nějaký propojili.</li>
   </ul>
 
   <h2>Seznamy filtrů</h2>
   <p>AdRaze obsahuje seznamy filtrů od EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard a Peter Lowe. Seznamy jsou součástí rozšíření. Nikomu se neposílají žádné dotazy na to, jaké stránky navštěvujete.</p>
 
   <h2>Třetí strany</h2>
-  <p>AdRaze neprodává, nesdílí ani nepředává žádná data třetím stranám, protože žádná data nesbírá.</p>
+  <p>AdRaze nikdy neprodává data a s nikým je nesdílí. Pokud máte účet, e-maily se odesílají přes Cloudflare, a pokud zvolíte přihlášení přes Google, Google potvrdí, kdo jste. Nic dalšího náš server neopouští.</p>
 
   <h2>Otevřený kód</h2>
   <p>AdRaze má otevřený kód pod licencí GPL-3.0, takže kdokoli může zkontrolovat, co přesně rozšíření dělá.</p>

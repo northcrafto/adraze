@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privātuma politika – AdRaze</title>
-<meta name="description" content="AdRaze nevāc nekādus datus. Lūk, kā paplašinājums darbojas un kādas atļaujas tas izmanto.">
+<meta name="description" content="Bez konta AdRaze nevāc nekādus datus. Lūk, kā darbojas paplašinājums, konts un atļaujas.">
 <link rel="icon" href="/favicon.png">
 <link rel="alternate" hreflang="sv" href="https://adraze.app/integritet">
 <link rel="alternate" hreflang="en" href="https://adraze.app/en/integritet">
@@ -58,17 +58,31 @@
 <main class="wrap policy">
   <a class="tillbaka nav-link" href="/lv/"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg>Uz sākumlapu</a>
   <h1>Privātuma politika</h1>
-  <p class="datum">Pēdējoreiz atjaunināts 2026. gada 19. oktobrī</p>
+  <p class="datum">Pēdējoreiz atjaunināts 2026. gada 21. oktobrī</p>
 
   <h2>Īsumā</h2>
-  <p>AdRaze nevāc, neglabā un nesūta nekādu informāciju par tevi vai to, ko tu dari internetā. Viss, ko paplašinājums dara, notiek lokāli tavā pārlūkā.</p>
+  <p>Bez konta AdRaze nevāc, neglabā un nesūta nekādu informāciju par tevi vai to, ko tu dari internetā. Viss notiek lokāli tavā pārlūkā. Ja izveido kontu, kas ir brīvprātīgi, mēs glabājam tikai tavu e-pasta adresi un to, cik daudz katru dienu apturēts. Nekad to, kuras vietnes tu apmeklē.</p>
 
   <h2>Kas tiek saglabāts tavā datorā</h2>
   <ul>
     <li>Saraksts ar vietnēm, kurās esi apturējis AdRaze.</li>
     <li>Skaitītāji, cik uznirstošo logu un pāradresāciju apturēts.</li>
+    <li>Cik reklāmu, izsekotāju un bīstamu lapu apturēts katru dienu, lai tu varētu redzēt savu statistiku.</li>
   </ul>
   <p>Tas tiek glabāts pārlūka krātuvē (<code>chrome.storage</code>) un nekad neatstāj tavu datoru. Ja atinstalē AdRaze, tas pazūd.</p>
+
+  <h2>Ja izveido kontu</h2>
+  <p>Lai lietotu AdRaze, konts nav vajadzīgs. Tas pastāv tikai tāpēc, lai tu varētu redzēt savu statistiku vietnē adraze.app no visiem saviem datoriem. Tad mūsu serverī tiek saglabāts:</p>
+  <ul>
+    <li><b>E-pasta adrese</b>, lai tu varētu pieteikties un saņemt verifikācijas kodus.</li>
+    <li><b>Parole</b>, kas tiek glabāta tikai kā sālīts scrypt jaucējkods. Mēs nekad nevaram redzēt tavu paroli.</li>
+    <li><b>Pieteikšanās ar Google</b>, ja to izvēlies: mēs saņemam no Google tavu e-pasta adresi un ID numuru, nekas cits netiek saglabāts.</li>
+    <li><b>Statistika pa dienām</b>: apturēto reklāmu, izsekotāju, bīstamo lapu, uznirstošo logu un pāradresāciju skaits. Tikai skaitļi, nekad adreses, vietnes vai meklējumi.</li>
+    <li><b>Savienotie pārlūki</b>: nosaukums, piemēram, „Chrome operētājsistēmā Windows”, un tas, kad tas pēdējo reizi nosūtīja statistiku.</li>
+    <li><b>Divas sīkdatnes</b> vietnē adraze.app: viena uztur tevi pieteiktu, otra atceras, ka pārlūks jau ir verificēts. Nekādu izsekošanas sīkdatņu.</li>
+  </ul>
+  <p>E-pasti ar verifikācijas kodiem tiek sūtīti caur Cloudflare Email Service. Serveris atrodas Zviedrijā, un tam piekļūst caur Cloudflare. Kontā mēs neizmantojam ne analītiku, ne reklāmas.</p>
+  <p>Kontu vari jebkurā laikā izdzēst sadaļā Konts vietnē adraze.app. Tad tava e-pasta adrese, statistika un visi savienotie pārlūki tiek nekavējoties izdzēsti.</p>
 
   <h2>Atļaujas un kāpēc tās vajadzīgas</h2>
   <ul>
@@ -77,13 +91,15 @@
     <li><b>webNavigation:</b> lai atpazītu lapas atvērtus uznirstošos logus un aizvērtu tos, ja tie ved uz reklāmām vai bīstamām lapām.</li>
     <li><b>scripting un activeTab:</b> pievieno stila noteikumus, kas paslēpj reklāmas, un rāda statistiku atvērtajai cilnei.</li>
     <li><b>storage:</b> lokāli saglabā apturētās vietnes un skaitītājus.</li>
+    <li><b>declarativeNetRequestFeedback:</b> skaita, cik reklāmu, izsekotāju un bīstamu lapu apturēts. Paplašinājums nolasa tikai to, kāda veida noteikums nostrādāja, nevis to, kurā lapā.</li>
+    <li><b>alarms:</b> regulāri atjaunina skaitītājus un nosūta statistiku uz tavu kontu, ja esi to savienojis.</li>
   </ul>
 
   <h2>Filtru saraksti</h2>
   <p>AdRaze ietver filtru sarakstus no EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard un Peter Lowe. Saraksti ir iekļauti paplašinājumā. Nekādi pieprasījumi par apmeklētajām lapām nevienam netiek sūtīti.</p>
 
   <h2>Trešās puses</h2>
-  <p>AdRaze nepārdod, nekopīgo un nenodod datus trešajām pusēm, jo dati netiek vākti.</p>
+  <p>AdRaze nekad nepārdod datus un ne ar vienu tos nekopīgo. Ja tev ir konts, e-pasti tiek sūtīti caur Cloudflare, un, ja izvēlies pieteikšanos ar Google, Google apstiprina, kas tu esi. Nekas cits neatstāj mūsu serveri.</p>
 
   <h2>Atvērtais pirmkods</h2>
   <p>AdRaze ir atvērtā pirmkoda programma ar GPL-3.0 licenci, tāpēc ikviens var pārbaudīt, ko tieši paplašinājums dara.</p>

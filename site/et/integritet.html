@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privaatsuspoliitika – AdRaze</title>
-<meta name="description" content="AdRaze ei kogu mingeid andmeid. Nii laiendus töötab ja need õigused ta kasutab.">
+<meta name="description" content="Ilma kontota ei kogu AdRaze mingeid andmeid. Nii töötavad laiendus, konto ja õigused.">
 <link rel="icon" href="/favicon.png">
 <link rel="alternate" hreflang="sv" href="https://adraze.app/integritet">
 <link rel="alternate" hreflang="en" href="https://adraze.app/en/integritet">
@@ -58,17 +58,31 @@
 <main class="wrap policy">
   <a class="tillbaka nav-link" href="/et/"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg>Avalehele</a>
   <h1>Privaatsuspoliitika</h1>
-  <p class="datum">Viimati uuendatud 19. oktoobril 2026</p>
+  <p class="datum">Viimati uuendatud 21. oktoobril 2026</p>
 
   <h2>Lühidalt</h2>
-  <p>AdRaze ei kogu, ei salvesta ega saada mingit teavet sinu ega sinu tegemiste kohta internetis. Kõik, mida laiendus teeb, toimub kohapeal sinu brauseris.</p>
+  <p>Ilma kontota ei kogu, ei salvesta ega saada AdRaze mingit teavet sinu ega sinu tegemiste kohta internetis. Kõik toimub kohapeal sinu brauseris. Kui lood konto, mis on vabatahtlik, salvestame ainult sinu e-posti aadressi ja selle, kui palju päevas peatati. Mitte kunagi seda, milliseid saite külastad.</p>
 
   <h2>Mida sinu arvutisse salvestatakse</h2>
   <ul>
     <li>Nimekiri saitidest, kus oled AdRaze peatanud.</li>
     <li>Loendurid peatatud hüpikakende ja ümbersuunamiste kohta.</li>
+    <li>Kui palju reklaame, jälgijaid ja ohtlikke lehti päevas peatati, et saaksid oma statistikat näha.</li>
   </ul>
   <p>See salvestatakse brauseri enda mällu (<code>chrome.storage</code>) ega lahku kunagi sinu arvutist. Kui AdRaze eemaldad, kaob ka see.</p>
+
+  <h2>Kui lood konto</h2>
+  <p>AdRaze'i kasutamiseks pole kontot vaja. See on olemas ainult selleks, et saaksid oma statistikat näha aadressil adraze.app kõigist oma arvutitest. Siis salvestatakse meie serverisse järgmine:</p>
+  <ul>
+    <li><b>E-posti aadress</b>, et saaksid sisse logida ja kinnituskoode saada.</li>
+    <li><b>Parool</b>, mis salvestatakse ainult soolatud scrypt-räsina. Me ei näe kunagi sinu parooli.</li>
+    <li><b>Google'iga sisselogimine</b>, kui selle valid: saame Google'ilt sinu e-posti aadressi ja ID-numbri, midagi muud ei salvestata.</li>
+    <li><b>Päevane statistika</b>: peatatud reklaamide, jälgijate, ohtlike lehtede, hüpikakende ja ümbersuunamiste arv. Ainult numbrid, mitte kunagi aadressid, saidid ega otsingud.</li>
+    <li><b>Ühendatud brauserid</b>: nimi nagu „Chrome Windowsis” ja millal see viimati statistikat saatis.</li>
+    <li><b>Kaks küpsist</b> saidil adraze.app: üks hoiab sind sisselogituna ja teine mäletab, et brauser on juba kinnitatud. Jälgimisküpsiseid pole.</li>
+  </ul>
+  <p>Kinnituskoodidega e-kirjad saadetakse teenuse Cloudflare Email Service kaudu. Server asub Rootsis ja sellega ühendutakse Cloudflare'i kaudu. Kontol ei kasuta me analüütikat ega reklaame.</p>
+  <p>Saad oma konto igal ajal kustutada saidil adraze.app jaotises Konto. Siis kustutatakse sinu e-posti aadress, statistika ja kõik ühendatud brauserid kohe.</p>
 
   <h2>Õigused ja milleks neid vaja on</h2>
   <ul>
@@ -77,13 +91,15 @@
     <li><b>webNavigation:</b> et ära tunda lehe avatud hüpikaknad ja need sulgeda, kui need viivad reklaamile või ohtlikule lehele.</li>
     <li><b>scripting ja activeTab:</b> lisab stiilireeglid, mis peidavad reklaamid, ja näitab avatud vahelehe statistikat.</li>
     <li><b>storage:</b> salvestab peatatud saidid ja loendurid kohapeal.</li>
+    <li><b>declarativeNetRequestFeedback:</b> loeb, kui palju reklaame, jälgijaid ja ohtlikke lehti peatati. Laiendus loeb ainult seda, mis tüüpi reegel rakendus, mitte seda, millisel lehel.</li>
+    <li><b>alarms:</b> uuendab loendureid korrapäraste ajavahemike järel ja saadab statistika sinu kontole, kui oled selle ühendanud.</li>
   </ul>
 
   <h2>Filtrinimekirjad</h2>
   <p>AdRaze sisaldab filtrinimekirju EasyListilt, EasyPrivacylt, Frellwit's Swedish Filterilt, uBlock Originilt, AdGuardilt ja Peter Lowe'lt. Nimekirjad on laienduse osa. Päringuid sinu külastatud lehtede kohta ei saadeta kellelegi.</p>
 
   <h2>Kolmandad osapooled</h2>
-  <p>AdRaze ei müü, jaga ega edasta andmeid kolmandatele osapooltele, sest andmeid ei koguta.</p>
+  <p>AdRaze ei müü kunagi andmeid ega jaga neid kellegagi. Kui sul on konto, saadetakse e-kirjad Cloudflare'i kaudu, ja kui valid Google'iga sisselogimise, kinnitab Google, kes sa oled. Midagi muud meie serverist ei lahku.</p>
 
   <h2>Avatud lähtekood</h2>
   <p>AdRaze on avatud lähtekoodiga GPL-3.0 litsentsi all, nii et igaüks saab täpselt üle vaadata, mida laiendus teeb.</p>
