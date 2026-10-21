@@ -4,6 +4,11 @@ const PAUS_PRIO = 100000;
 // ---------- Kosmetik ----------
 let kosmetik = null;
 let genericCss = null;
+// Lockbeten (tomma, osynliga "annonser" som sajter använder för att upptäcka blockerare) märks av
+// content/cosmetic.js med ett slumpat attribut, och den här regeln tar då tillbaka dem. Den är
+// specifikare än alla dölj-regler och kommer sist, så den vinner.
+const LOCKBETE = "data-" + crypto.randomUUID().slice(0, 8);
+const lockbeteCss = `[${LOCKBETE}]:not(#a#b#c#d#e){display:revert!important}\n`;
 
 async function laddaKosmetik() {
   if (kosmetik) return kosmetik;
@@ -11,6 +16,36 @@ async function laddaKosmetik() {
   kosmetik.genericHide = new Set(kosmetik.genericHideExceptions);
   genericCss = cssAv(kosmetik.generic);
   return kosmetik;
+}
+
+// Dölj-regler som skulle kunna träffa ett element med de här klasserna/id:na (för lockbeteskollen i
+// content/cosmetic.js, som själv provar el.matches). Regler utan klass eller id följer alltid med.
+const TOKEN = /[.#]((?:[\w-]|\\.)+)/g;
+let tokenIndex = null;
+function indexera(selektorer) {
+  const index = new Map();
+  const otokade = [];
+  for (const sel of selektorer) {
+    const tokens = [...sel.matchAll(TOKEN)].map((m) => m[1]);
+    if (!tokens.length) { otokade.push(sel); continue; }
+    for (const t of new Set(tokens)) { if (!index.has(t)) index.set(t, []); index.get(t).push(sel); }
+  }
+  return { index, otokade };
+}
+async function doljRegler(host, tokens) {
+  const k = await laddaKosmetik();
+  const nivaer = suffix(host);
+  const undantag = new Set();
+  for (const n of nivaer) for (const s of k.exceptions[n] || []) undantag.add(s);
+  const ut = new Set();
+  const specifika = indexera(nivaer.flatMap((n) => k.specific[n] || []));
+  const delar = [specifika];
+  if (!nivaer.some((n) => k.genericHide.has(n))) delar.push(tokenIndex ||= indexera(k.generic));
+  for (const { index, otokade } of delar) {
+    for (const s of otokade) ut.add(s);
+    for (const t of tokens) for (const s of index.get(t) || []) ut.add(s);
+  }
+  return [...ut].filter((s) => !undantag.has(s));
 }
 
 // 100 selektorer per regel: en selektor Chromium inte känner igen tar bara med sig sin egen grupp
@@ -38,7 +73,7 @@ async function cssFor(host) {
   const utanGeneric = nivaer.some((n) => k.genericHide.has(n));
   let css = specifika.length ? cssAv(specifika) : "";
   if (!utanGeneric) css += undantag.size ? cssAv(k.generic.filter((s) => !undantag.has(s))) : genericCss;
-  return css;
+  return css && css + lockbeteCss;
 }
 
 // ---------- Pausade sajter ----------
@@ -134,7 +169,9 @@ chrome.runtime.onMessage.addListener((msg, sender, svara) => {
     if (msg.typ === "css" && tabId !== undefined) {
       const css = await cssFor(msg.host);
       if (css) await chrome.scripting.insertCSS({ target: { tabId, frameIds: [sender.frameId] }, css, origin: "USER" }).catch(() => {});
-      svara(true);
+      svara({ lockbete: css ? LOCKBETE : null });
+    } else if (msg.typ === "dolj-regler") {
+      svara(await doljRegler(msg.host, msg.tokens || []));
     } else if (msg.typ === "popup-stoppad" && tabId !== undefined) {
       await rakna(tabId, "popups");
       svara(true);

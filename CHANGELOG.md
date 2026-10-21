@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Bait guard: sites that detect ad blockers by adding an empty "ad" (class `adsbox`, `ad-banner` and so on) and checking whether it gets hidden no longer see AdRaze. An element hidden by AdRaze's own rules is shown again only if people could not see it anyway: it is empty, draws nothing, and is off the page or at most one line tall. If it later gets content or grows, it is hidden again before it is painted. Elements the site hides itself are never touched.
+- browser.lol: the session start no longer asks you to turn off your ad blocker.
+
 ## 0.1.1 (2026-10-21)
 
 - YouTube: pre-roll and mid-roll ads are muted, hidden and skipped as soon as they start. The ad view is still reported, so the next video starts without YouTube's black waiting screen.
