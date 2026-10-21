@@ -38,7 +38,8 @@ for k, _ in SPRAK:
 for kod, namn in finns:
     t = {**sv, **json.loads((rot / 'i18n' / f'{kod}.json').read_text())}
     for src, sida in SIDOR.items():
-        mall = (rot / src).read_text()
+        # Gemensam topp med hamburgarmeny för alla sidor (före ikonerna, {{topp}} ser ut som ett ikonnamn)
+        mall = (rot / src).read_text().replace('{{topp}}', (rot / '_topp.html').read_text())
         alternates = '\n'.join(f'<link rel="alternate" hreflang="{k}" href="{SAJT}{url(k, sida)}">' for k, _ in finns)
         alternates += f'\n<link rel="alternate" hreflang="x-default" href="{SAJT}{url("sv", sida)}">'
         alternates += f'\n<link rel="canonical" href="{SAJT}{url(kod, sida)}">'

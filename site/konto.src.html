@@ -12,13 +12,7 @@
 <link rel="stylesheet" href="/konto.css">
 </head>
 <body>
-<header class="top solid">
-  <nav class="wrap nav">
-    <a href="{{hem}}" class="logo" aria-label="{{t:nav.home_label}}"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a>
-    {{sprakval}}
-    <a href="{{hem}}#installera" class="btn liq nav-cta-alltid">{{chrome}}{{t:nav.add_chrome}}</a>
-  </nav>
-</header>
+{{topp}}
 
 <main class="wrap konto" id="konto" data-api="https://api.adraze.app" data-lang="{{lang}}" aria-busy="true">
 
@@ -160,5 +154,6 @@
   </div>
 </footer>
 <script src="/konto.js" defer></script>
+<script src="/main.js"></script>
 </body>
 </html>

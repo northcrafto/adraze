@@ -15,8 +15,9 @@ addEventListener('keydown', (e) => e.key === 'Escape' && satt(false));
 
 // Headern får en kantlinje när man scrollat förbi toppen
 const header = document.querySelector('.top');
-new IntersectionObserver(([e]) => header.classList.toggle('solid', !e.isIntersecting), { rootMargin: '-80px 0px 0px 0px' })
-  .observe(document.querySelector('.hero'));
+const hero = document.querySelector('.hero');
+if (hero) new IntersectionObserver(([e]) => header.classList.toggle('solid', !e.isIntersecting), { rootMargin: '-80px 0px 0px 0px' }).observe(hero);
+else header.classList.add('solid'); // undersidorna har ingen hjälte att scrolla förbi
 
 // Före/efter-demon: slå på AdRaze och räkna upp det som stoppades
 const demo = document.querySelector('.demo');

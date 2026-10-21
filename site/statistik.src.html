@@ -11,13 +11,7 @@
 <link rel="stylesheet" href="/statistik.css">
 </head>
 <body class="st-sida">
-<header class="top solid st-top">
-  <nav class="wrap nav">
-    <a href="{{hem}}" class="logo" aria-label="{{t:nav.home_label}}"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a>
-    {{sprakval}}
-    <a href="{{hem}}#installera" class="btn liq nav-cta-alltid">{{chrome}}{{t:nav.add_chrome}}</a>
-  </nav>
-</header>
+{{topp}}
 
 <main id="statistik" data-api="https://api.adraze.app" data-lang="{{lang}}">
 
@@ -94,5 +88,6 @@
   </div>
 </footer>
 <script src="/statistik.js" defer></script>
+<script src="/main.js"></script>
 </body>
 </html>
