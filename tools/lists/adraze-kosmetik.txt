@@ -63,3 +63,7 @@ crazygames.com##[class*="GameInfo_rightColumn__"]:not(:has(:not([class*="AdUnit_
 
 ! --- Forbes: behållaren runt toppannonsen har fast höjd (90 px) och blir tomt band under menyn
 forbes.com##div:has(> .fbs-ad--top-wrapper)
+
+! --- browser.lol: annonsblockerarkollen räknar lockbetet <div class="adsbox ad-banner google-ads"> som dolt
+! och stänger sessionsstarten. Lockbetet syns ändå inte (left:-9999px), så låt det vara.
+browser.lol#@#.google-ads
