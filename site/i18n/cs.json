@@ -241,5 +241,15 @@
   "support.text": "AdRaze je zdarma a vždy bude. Podpořte náš tým, abychom mohli dál vyvíjet váš blokátor reklam, pro vás.",
   "support.cta": "Podpořit AdRaze",
   "support.note": "Libovolná částka, jednorázově. Bezpečná platba přes Stripe.",
-  "faq.a1_support": "Pokud nás chcete podpořit, můžete přispět libovolnou částkou, ale vše funguje stejně tak jako tak."
+  "faq.a1_support": "Pokud nás chcete podpořit, můžete přispět libovolnou částkou, ale vše funguje stejně tak jako tak.",
+  "stod.meta_title": "Podpořit AdRaze",
+  "stod.meta_description": "Podpořte tým za AdRaze libovolnou částkou, abychom mohli blokátor dál vyvíjet. Bezpečná platba přes Stripe.",
+  "stod.amount_label": "Vyberte částku",
+  "stod.custom": "Nebo zadejte vlastní částku",
+  "stod.continue": "Pokračovat k platbě",
+  "stod.change": "Změnit částku",
+  "stod.thanks_title": "Děkujeme za podporu!",
+  "stod.thanks_text": "Přispěli jste {belopp} kr. Hodně to pro nás znamená a pomáhá nám dál vyvíjet AdRaze, pro vás.",
+  "stod.error": "Něco se pokazilo. Zkuste to znovu.",
+  "stod.limits": "Vyberte částku mezi 20 a 5 000 kr."
 }

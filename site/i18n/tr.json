@@ -241,5 +241,15 @@
   "support.text": "AdRaze ücretsizdir ve her zaman öyle kalacak. Reklam engelleyicini senin için geliştirmeye devam edebilmemiz için ekibimizi destekle.",
   "support.cta": "AdRaze'i destekle",
   "support.note": "İstediğin tutar, tek seferlik. Stripe ile güvenli ödeme.",
-  "faq.a1_support": "Bizi desteklemek istersen istediğin tutarı verebilirsin, ama her şey yine aynı şekilde çalışır."
+  "faq.a1_support": "Bizi desteklemek istersen istediğin tutarı verebilirsin, ama her şey yine aynı şekilde çalışır.",
+  "stod.meta_title": "AdRaze'i destekle",
+  "stod.meta_description": "AdRaze ekibini istediğin tutarla destekle, böylece reklam engelleyiciyi geliştirmeye devam edebiliriz. Stripe ile güvenli ödeme.",
+  "stod.amount_label": "Tutar seç",
+  "stod.custom": "Ya da kendi tutarını yaz",
+  "stod.continue": "Ödemeye devam et",
+  "stod.change": "Tutarı değiştir",
+  "stod.thanks_title": "Desteğin için teşekkürler!",
+  "stod.thanks_text": "{belopp} kr verdin. Bu bizim için çok değerli ve AdRaze'i senin için geliştirmeye devam etmemize yardımcı oluyor.",
+  "stod.error": "Bir şeyler ters gitti. Tekrar dene.",
+  "stod.limits": "20 ile 5.000 kr arasında bir tutar seç."
 }

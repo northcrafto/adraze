@@ -241,5 +241,15 @@
   "support.text": "AdRaze este gratuit și va fi mereu. Susține echipa noastră ca să putem dezvolta în continuare adblockerul tău, pentru tine.",
   "support.cta": "Susține AdRaze",
   "support.note": "Orice sumă, o singură dată. Plată sigură prin Stripe.",
-  "faq.a1_support": "Dacă vrei să ne susții, poți da orice sumă, dar totul funcționează la fel oricum."
+  "faq.a1_support": "Dacă vrei să ne susții, poți da orice sumă, dar totul funcționează la fel oricum.",
+  "stod.meta_title": "Susține AdRaze",
+  "stod.meta_description": "Susține echipa AdRaze cu orice sumă, ca să putem dezvolta în continuare adblockerul. Plată sigură prin Stripe.",
+  "stod.amount_label": "Alege suma",
+  "stod.custom": "Sau scrie propria sumă",
+  "stod.continue": "Continuă la plată",
+  "stod.change": "Schimbă suma",
+  "stod.thanks_title": "Mulțumim pentru sprijin!",
+  "stod.thanks_text": "Ai dat {belopp} kr. Contează mult și ne ajută să dezvoltăm în continuare AdRaze, pentru tine.",
+  "stod.error": "Ceva n-a mers. Încearcă din nou.",
+  "stod.limits": "Alege o sumă între 20 și 5.000 kr."
 }

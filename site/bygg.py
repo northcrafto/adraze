@@ -16,7 +16,7 @@ SPRAK = [
     ('el', 'Ελληνικά'), ('hr', 'Hrvatski'), ('sl', 'Slovenščina'), ('et', 'Eesti'), ('lv', 'Latviešu'), ('lt', 'Lietuvių'),
     ('uk', 'Українська'), ('tr', 'Türkçe'),
 ]
-SIDOR = {'index.src.html': '', 'integritet.src.html': 'integritet', 'konto.src.html': 'konto', 'statistik.src.html': 'statistik'}
+SIDOR = {'index.src.html': '', 'integritet.src.html': 'integritet', 'konto.src.html': 'konto', 'statistik.src.html': 'statistik', 'stod.src.html': 'stod'}
 UTAN_SITEMAP = {'konto'}  # inloggningen ska inte indexeras
 
 def ikon(namn):

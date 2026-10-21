@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{t:stod.meta_title}}</title>
+<meta name="description" content="{{t:stod.meta_description}}">
+<link rel="icon" href="/favicon.png">
+{{alternates}}
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/stod.css">
+</head>
+<body class="stod-sida">
+{{topp}}
+
+<main id="stodsida" data-api="https://api.adraze.app" data-lang="{{lang}}" data-fel="{{t:stod.error}}" data-gransfel="{{t:stod.limits}}" data-tack="{{t:stod.thanks_text}}">
+  <section class="sd">
+    <div class="wrap sd-grid">
+      <!-- Vänster: text och belopp -->
+      <div class="sd-text">
+        <div id="sd-val">
+          <h1>{{t:support.title}}</h1>
+          <p class="sd-ingress">{{t:support.text}}</p>
+          <p class="sd-etikett" id="sd-etikett">{{t:stod.amount_label}}</p>
+          <div class="sd-belopp" role="radiogroup" aria-labelledby="sd-etikett">
+            <button type="button" class="sd-chip" role="radio" aria-checked="false" data-belopp="29">29 kr</button>
+            <button type="button" class="sd-chip" role="radio" aria-checked="true" data-belopp="49">49 kr</button>
+            <button type="button" class="sd-chip" role="radio" aria-checked="false" data-belopp="99">99 kr</button>
+            <button type="button" class="sd-chip" role="radio" aria-checked="false" data-belopp="199">199 kr</button>
+          </div>
+          <label class="sd-eget">
+            <span>{{t:stod.custom}}</span>
+            <span class="sd-falt"><input id="sd-eget" type="number" inputmode="numeric" min="20" max="5000" step="1" placeholder="49"><b>kr</b></span>
+          </label>
+          <p class="sd-fel" id="sd-fel" role="alert" hidden></p>
+          <button type="button" id="sd-fortsatt" class="btn btn-stor liq">{{t:stod.continue}}</button>
+          <p class="sd-not">{{t:support.note}}</p>
+        </div>
+        <div id="sd-tack" hidden>
+          <h1>{{t:stod.thanks_title}}</h1>
+          <p class="sd-ingress" id="sd-tack-text"></p>
+          <a href="{{hem}}" class="btn btn-stor liq">{{t:privacy.back}}</a>
+        </div>
+      </div>
+
+      <!-- Höger: gubben, sedan Stripes kassa på samma plats -->
+      <div class="sd-kort" id="sd-kort">
+        <div class="sd-gubbe" id="sd-gubbe"><img src="/mail/vinkar.gif" alt="" width="400" height="517"></div>
+        <div id="sd-kassa" hidden></div>
+        <button type="button" id="sd-andra" class="sd-andra" hidden>{{t:stod.change}}</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="fot">
+  <div class="wrap fot-grid">
+    <div><a href="{{hem}}" class="logo"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a><p>{{t:footer.tagline}}</p></div>
+    <ul>
+      <li><a class="nav-link" href="{{hem}}">{{t:privacy.back}}</a></li>
+      <li><a class="nav-link" href="{{pre}}/integritet">{{t:footer.privacy}}</a></li>
+    </ul>
+  </div>
+</footer>
+<script src="https://js.stripe.com/endive/stripe.js" defer></script>
+<script src="/stod.js" defer></script>
+<script src="/main.js"></script>
+</body>
+</html>

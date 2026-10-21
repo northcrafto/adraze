@@ -241,5 +241,15 @@
   "support.text": "AdRaze er gratis og vil altid være det. Støt vores team, så vi kan blive ved med at udvikle din adblocker, for din skyld.",
   "support.cta": "Støt AdRaze",
   "support.note": "Valgfrit beløb, én gang. Sikker betaling med Stripe.",
-  "faq.a1_support": "Vil du støtte os, kan du give et valgfrit beløb, men alt virker på samme måde uanset hvad."
+  "faq.a1_support": "Vil du støtte os, kan du give et valgfrit beløb, men alt virker på samme måde uanset hvad.",
+  "stod.meta_title": "Støt AdRaze",
+  "stod.meta_description": "Støt teamet bag AdRaze med et valgfrit beløb, så vi kan blive ved med at udvikle adblockeren. Sikker betaling med Stripe.",
+  "stod.amount_label": "Vælg beløb",
+  "stod.custom": "Eller skriv dit eget beløb",
+  "stod.continue": "Fortsæt til betaling",
+  "stod.change": "Skift beløb",
+  "stod.thanks_title": "Tak for din støtte!",
+  "stod.thanks_text": "Du gav {belopp} kr. Det betyder meget og hjælper os med at udvikle AdRaze, for din skyld.",
+  "stod.error": "Noget gik galt. Prøv igen.",
+  "stod.limits": "Vælg et beløb mellem 20 og 5.000 kr."
 }

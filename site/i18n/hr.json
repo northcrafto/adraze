@@ -241,5 +241,15 @@
   "support.text": "AdRaze je besplatan i uvijek će biti. Podrži naš tim kako bismo mogli nastaviti razvijati tvoj adblocker, zbog tebe.",
   "support.cta": "Podrži AdRaze",
   "support.note": "Iznos po želji, jednokratno. Sigurno plaćanje putem Stripea.",
-  "faq.a1_support": "Ako nas želiš podržati, možeš dati iznos po želji, ali sve radi jednako u svakom slučaju."
+  "faq.a1_support": "Ako nas želiš podržati, možeš dati iznos po želji, ali sve radi jednako u svakom slučaju.",
+  "stod.meta_title": "Podrži AdRaze",
+  "stod.meta_description": "Podrži tim iza AdRazea iznosom po želji kako bismo mogli nastaviti razvijati adblocker. Sigurno plaćanje putem Stripea.",
+  "stod.amount_label": "Odaberi iznos",
+  "stod.custom": "Ili upiši vlastiti iznos",
+  "stod.continue": "Nastavi na plaćanje",
+  "stod.change": "Promijeni iznos",
+  "stod.thanks_title": "Hvala na podršci!",
+  "stod.thanks_text": "Dao si {belopp} kr. To nam puno znači i pomaže nam razvijati AdRaze, zbog tebe.",
+  "stod.error": "Nešto je pošlo po zlu. Pokušaj ponovno.",
+  "stod.limits": "Odaberi iznos između 20 i 5.000 kr."
 }

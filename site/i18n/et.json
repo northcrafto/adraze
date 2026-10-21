@@ -241,5 +241,15 @@
   "support.text": "AdRaze on tasuta ja jääb alati tasuta. Toeta meie tiimi, et saaksime sinu reklaamiblokeerijat edasi arendada, sinu jaoks.",
   "support.cta": "Toeta AdRaze'i",
   "support.note": "Vabalt valitud summa, ühekordselt. Turvaline makse Stripe'i kaudu.",
-  "faq.a1_support": "Kui soovid meid toetada, võid anda mis tahes summa, kuid kõik töötab igal juhul samamoodi."
+  "faq.a1_support": "Kui soovid meid toetada, võid anda mis tahes summa, kuid kõik töötab igal juhul samamoodi.",
+  "stod.meta_title": "Toeta AdRaze'i",
+  "stod.meta_description": "Toeta AdRaze'i tiimi vabalt valitud summaga, et saaksime reklaamiblokeerijat edasi arendada. Turvaline makse Stripe'i kaudu.",
+  "stod.amount_label": "Vali summa",
+  "stod.custom": "Või sisesta oma summa",
+  "stod.continue": "Jätka maksmisega",
+  "stod.change": "Muuda summat",
+  "stod.thanks_title": "Aitäh toetuse eest!",
+  "stod.thanks_text": "Sa andsid {belopp} kr. See tähendab palju ja aitab meil AdRaze'i edasi arendada, sinu jaoks.",
+  "stod.error": "Midagi läks valesti. Proovi uuesti.",
+  "stod.limits": "Vali summa vahemikus 20–5000 kr."
 }

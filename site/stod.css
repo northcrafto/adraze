@@ -1,0 +1,46 @@
+/* Stödsidan: belopp till vänster, gubben och sedan Stripes kassa till höger */
+.sd { background: var(--mork); color: #fff; min-height: calc(100dvh - 73px); padding: 88px 0 104px; --sig-btn: #ffffff; --sig-btn-ink: var(--ink); }
+.sd-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 520px); gap: 72px; align-items: start; }
+.sd h1 { font-size: clamp(46px, 6.4vw, 92px); letter-spacing: -0.05em; line-height: .95; max-width: 11ch; }
+.sd-ingress { margin-top: 24px; font-size: 19px; max-width: 46ch; color: #c9c9cf; }
+.sd-etikett { margin-top: 40px; font-weight: 600; color: #fff; }
+.sd-belopp { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 14px; max-width: 520px; }
+.sd-chip {
+  all: unset; box-sizing: border-box; cursor: pointer; text-align: center;
+  padding: 18px 8px; border-radius: 18px; border: 1.5px solid #3a3a42; background: var(--mork-yta);
+  font-weight: 700; font-size: 20px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.sd-chip:hover { border-color: #6a6a74; }
+.sd-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sd-chip[aria-checked="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.sd-eget { display: grid; gap: 8px; margin-top: 18px; max-width: 520px; color: #a7a7af; font-size: 15px; }
+.sd-falt { display: flex; align-items: center; gap: 10px; border: 1.5px solid #3a3a42; border-radius: 18px; background: var(--mork-yta); padding: 0 18px; transition: border-color .15s; }
+.sd-falt:focus-within { border-color: var(--accent); }
+.sd-falt input { all: unset; flex: 1; min-width: 0; padding: 16px 0; color: #fff; font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.sd-falt input::placeholder { color: #5c5c63; }
+.sd-falt input::-webkit-outer-spin-button, .sd-falt input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.sd-falt b { color: #8b8b94; }
+.sd-fel { margin-top: 14px; color: #ff8a6b; font-weight: 600; }
+#sd-fortsatt { margin-top: 28px; }
+.sd-not { margin-top: 16px; font-size: 14px; color: #8b8b94; }
+#sd-tack .btn { margin-top: 32px; }
+
+.sd-kort { background: #fff; color: var(--ink); border-radius: 32px; overflow: hidden; position: relative; }
+.sd-gubbe { padding: 40px 48px 8px; }
+.sd-gubbe img { width: 100%; height: auto; max-width: 340px; margin-inline: auto; }
+#sd-kassa { min-height: 480px; padding: 8px 0; }
+.sd-andra { all: unset; cursor: pointer; display: block; margin: 0 auto 20px; font-size: 14px; font-weight: 600; color: var(--dov); text-decoration: underline; text-underline-offset: 3px; }
+.sd-andra:hover { color: var(--ink); }
+.sd-andra:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+#stodsida [hidden] { display: none !important; }
+
+@media (max-width: 900px) {
+  .sd { padding: 56px 0 80px; min-height: 0; }
+  .sd-grid { grid-template-columns: 1fr; gap: 40px; }
+  .sd-gubbe { padding: 24px 24px 4px; }
+  .sd-gubbe img { max-width: 180px; }
+}
+@media (max-width: 420px) {
+  .sd-belopp { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

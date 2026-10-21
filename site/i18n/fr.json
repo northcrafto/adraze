@@ -241,5 +241,15 @@
   "support.text": "AdRaze est gratuit et le restera toujours. Soutenez notre équipe pour que nous puissions continuer à développer votre bloqueur de pubs, pour vous.",
   "support.cta": "Soutenir AdRaze",
   "support.note": "Montant libre, une seule fois. Paiement sécurisé avec Stripe.",
-  "faq.a1_support": "Si vous voulez nous soutenir, vous pouvez donner le montant de votre choix, mais tout fonctionne de la même façon dans tous les cas."
+  "faq.a1_support": "Si vous voulez nous soutenir, vous pouvez donner le montant de votre choix, mais tout fonctionne de la même façon dans tous les cas.",
+  "stod.meta_title": "Soutenir AdRaze",
+  "stod.meta_description": "Soutenez l'équipe d'AdRaze avec le montant de votre choix pour que nous puissions continuer à développer le bloqueur. Paiement sécurisé avec Stripe.",
+  "stod.amount_label": "Choisissez un montant",
+  "stod.custom": "Ou saisissez votre propre montant",
+  "stod.continue": "Continuer vers le paiement",
+  "stod.change": "Changer de montant",
+  "stod.thanks_title": "Merci pour votre soutien !",
+  "stod.thanks_text": "Vous avez donné {belopp} kr. Cela compte beaucoup et nous aide à continuer à développer AdRaze, pour vous.",
+  "stod.error": "Une erreur s'est produite. Réessayez.",
+  "stod.limits": "Choisissez un montant entre 20 et 5 000 kr."
 }

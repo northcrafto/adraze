@@ -241,5 +241,15 @@
   "support.text": "AdRaze er ókeypis og verður það alltaf. Styrktu teymið okkar svo við getum haldið áfram að þróa auglýsingavörnina þína, fyrir þig.",
   "support.cta": "Styrkja AdRaze",
   "support.note": "Upphæð að eigin vali, einu sinni. Örugg greiðsla með Stripe.",
-  "faq.a1_support": "Ef þú vilt styrkja okkur getur þú gefið hvaða upphæð sem er, en allt virkar eins hvort sem er."
+  "faq.a1_support": "Ef þú vilt styrkja okkur getur þú gefið hvaða upphæð sem er, en allt virkar eins hvort sem er.",
+  "stod.meta_title": "Styrkja AdRaze",
+  "stod.meta_description": "Styrktu teymið á bak við AdRaze með upphæð að eigin vali svo við getum haldið áfram að þróa auglýsingavörnina. Örugg greiðsla með Stripe.",
+  "stod.amount_label": "Veldu upphæð",
+  "stod.custom": "Eða sláðu inn eigin upphæð",
+  "stod.continue": "Halda áfram í greiðslu",
+  "stod.change": "Breyta upphæð",
+  "stod.thanks_title": "Takk fyrir stuðninginn!",
+  "stod.thanks_text": "Þú gafst {belopp} kr. Það skiptir miklu og hjálpar okkur að halda áfram að þróa AdRaze, fyrir þig.",
+  "stod.error": "Eitthvað fór úrskeiðis. Reyndu aftur.",
+  "stod.limits": "Veldu upphæð á milli 20 og 5.000 kr."
 }

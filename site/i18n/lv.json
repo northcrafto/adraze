@@ -241,5 +241,15 @@
   "support.text": "AdRaze ir bezmaksas un vienmēr tāds būs. Atbalsti mūsu komandu, lai mēs varētu turpināt attīstīt tavu reklāmu bloķētāju, tevis dēļ.",
   "support.cta": "Atbalstīt AdRaze",
   "support.note": "Jebkura summa, vienreiz. Droša apmaksa ar Stripe.",
-  "faq.a1_support": "Ja vēlies mūs atbalstīt, vari ziedot jebkuru summu, taču viss darbojas vienādi jebkurā gadījumā."
+  "faq.a1_support": "Ja vēlies mūs atbalstīt, vari ziedot jebkuru summu, taču viss darbojas vienādi jebkurā gadījumā.",
+  "stod.meta_title": "Atbalstīt AdRaze",
+  "stod.meta_description": "Atbalsti AdRaze komandu ar jebkuru summu, lai mēs varētu turpināt attīstīt reklāmu bloķētāju. Droša apmaksa ar Stripe.",
+  "stod.amount_label": "Izvēlies summu",
+  "stod.custom": "Vai ievadi savu summu",
+  "stod.continue": "Turpināt uz apmaksu",
+  "stod.change": "Mainīt summu",
+  "stod.thanks_title": "Paldies par atbalstu!",
+  "stod.thanks_text": "Tu ziedoji {belopp} kr. Tas daudz nozīmē un palīdz mums attīstīt AdRaze, tevis dēļ.",
+  "stod.error": "Kaut kas nogāja greizi. Mēģini vēlreiz.",
+  "stod.limits": "Izvēlies summu no 20 līdz 5000 kr."
 }

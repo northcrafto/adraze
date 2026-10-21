@@ -241,5 +241,15 @@
   "support.text": "Az AdRaze ingyenes, és mindig az is marad. Támogasd a csapatunkat, hogy tovább fejleszthessük a reklámblokkolódat, érted.",
   "support.cta": "AdRaze támogatása",
   "support.note": "Tetszőleges összeg, egyszeri. Biztonságos fizetés Stripe-on keresztül.",
-  "faq.a1_support": "Ha támogatni szeretnél minket, bármekkora összeget adhatsz, de minden ugyanúgy működik."
+  "faq.a1_support": "Ha támogatni szeretnél minket, bármekkora összeget adhatsz, de minden ugyanúgy működik.",
+  "stod.meta_title": "AdRaze támogatása",
+  "stod.meta_description": "Támogasd az AdRaze csapatát tetszőleges összeggel, hogy tovább fejleszthessük a reklámblokkolót. Biztonságos fizetés Stripe-on keresztül.",
+  "stod.amount_label": "Válassz összeget",
+  "stod.custom": "Vagy írj be saját összeget",
+  "stod.continue": "Tovább a fizetéshez",
+  "stod.change": "Összeg módosítása",
+  "stod.thanks_title": "Köszönjük a támogatást!",
+  "stod.thanks_text": "{belopp} kr-t adtál. Ez sokat jelent, és segít tovább fejleszteni az AdRaze-t, érted.",
+  "stod.error": "Hiba történt. Próbáld újra.",
+  "stod.limits": "Válassz 20 és 5000 kr közötti összeget."
 }

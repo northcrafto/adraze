@@ -241,5 +241,15 @@
   "support.text": "AdRaze on ilmainen ja pysyy aina ilmaisena. Tue tiimiämme, jotta voimme jatkaa mainosesteesi kehittämistä, sinun hyväksesi.",
   "support.cta": "Tue AdRazea",
   "support.note": "Vapaavalintainen summa, kerran. Turvallinen maksu Stripen kautta.",
-  "faq.a1_support": "Jos haluat tukea meitä, voit antaa minkä tahansa summan, mutta kaikki toimii samalla tavalla joka tapauksessa."
+  "faq.a1_support": "Jos haluat tukea meitä, voit antaa minkä tahansa summan, mutta kaikki toimii samalla tavalla joka tapauksessa.",
+  "stod.meta_title": "Tue AdRazea",
+  "stod.meta_description": "Tue AdRazen tiimiä haluamallasi summalla, jotta voimme jatkaa mainosesteen kehittämistä. Turvallinen maksu Stripen kautta.",
+  "stod.amount_label": "Valitse summa",
+  "stod.custom": "Tai kirjoita oma summa",
+  "stod.continue": "Jatka maksamaan",
+  "stod.change": "Vaihda summaa",
+  "stod.thanks_title": "Kiitos tuestasi!",
+  "stod.thanks_text": "Annoit {belopp} kr. Se merkitsee paljon ja auttaa meitä kehittämään AdRazea, sinun hyväksesi.",
+  "stod.error": "Jokin meni pieleen. Yritä uudelleen.",
+  "stod.limits": "Valitse summa väliltä 20–5 000 kr."
 }
