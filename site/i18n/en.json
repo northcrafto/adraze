@@ -146,7 +146,7 @@
   "privacy.h_lists": "Filter lists",
   "privacy.p_lists": "AdRaze ships with filter lists from EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard and Peter Lowe. The lists are bundled with the extension. No requests about which pages you visit are sent to anyone.",
   "privacy.h_third": "Third parties",
-  "privacy.p_third": "AdRaze never sells data and doesn't share it with anyone. If you have an account, emails are sent through Cloudflare, and if you choose Google sign-in, Google confirms who you are. Nothing else leaves our server.",
+  "privacy.p_third": "AdRaze never sells data and doesn't share it with anyone. If you have an account, emails are sent through Brevo, and if you choose Google sign-in, Google confirms who you are. Nothing else leaves our server.",
   "privacy.h_open": "Open source",
   "privacy.p_open": "AdRaze is open source under GPL-3.0, so anyone can check exactly what the extension does.",
   "privacy.h_changes": "Changes",
@@ -218,7 +218,7 @@
   "privacy.acc_stats": "<b>Stats per day</b>: the number of stopped ads, trackers, dangerous pages, pop-ups and redirects. Only numbers, never addresses, sites or searches.",
   "privacy.acc_devices": "<b>Connected browsers</b>: a name like \"Chrome on Windows\" and when it last sent stats.",
   "privacy.acc_cookies": "<b>Two cookies</b> on adraze.app: one that keeps you signed in and one that remembers the browser is already verified. No tracking cookies.",
-  "privacy.p_account_mail": "Emails with verification codes are sent through Cloudflare Email Service. The server is in Sweden and is reached through Cloudflare. We use no analytics or ads on the account.",
+  "privacy.p_account_mail": "Emails with verification codes are sent through Brevo. The server is in Sweden and is reached through Cloudflare. We use no analytics or ads on the account.",
   "privacy.p_account_delete": "You can delete your account at any time under Account on adraze.app. Your email address, stats and all connected browsers are then deleted immediately.",
   "privacy.perm_feedback": "<b>declarativeNetRequestFeedback:</b> counts how many ads, trackers and dangerous pages were stopped. The extension only reads which kind of rule matched, not which page it was on.",
   "privacy.perm_alarms": "<b>alarms:</b> updates the counters at regular intervals and sends the stats to your account if you have connected one."

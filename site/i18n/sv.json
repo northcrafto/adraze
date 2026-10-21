@@ -146,7 +146,7 @@
   "privacy.h_lists": "Filterlistor",
   "privacy.p_lists": "AdRaze levereras med filterlistor från EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard och Peter Lowe. Listorna ingår i tillägget. Inga förfrågningar om vilka sidor du besöker skickas till någon.",
   "privacy.h_third": "Tredje part",
-  "privacy.p_third": "AdRaze säljer aldrig data och delar den inte med någon. Har du ett konto skickas mejlen via Cloudflare, och väljer du Google-inloggning bekräftar Google vem du är. Inget annat lämnar vår server.",
+  "privacy.p_third": "AdRaze säljer aldrig data och delar den inte med någon. Har du ett konto skickas mejlen via Brevo, och väljer du Google-inloggning bekräftar Google vem du är. Inget annat lämnar vår server.",
   "privacy.h_open": "Öppen källkod",
   "privacy.p_open": "AdRaze är öppen källkod under GPL-3.0, så vem som helst kan granska exakt vad tillägget gör.",
   "privacy.h_changes": "Ändringar",
@@ -218,7 +218,7 @@
   "privacy.acc_stats": "<b>Statistik per dag</b>: antal stoppade annonser, spårare, farliga sidor, popups och omdirigeringar. Bara siffror, aldrig adresser, sajter eller sökningar.",
   "privacy.acc_devices": "<b>Kopplade webbläsare</b>: ett namn som \"Chrome på Windows\" och när den senast skickade statistik.",
   "privacy.acc_cookies": "<b>Två cookies</b> på adraze.app: en som håller dig inloggad och en som kommer ihåg att webbläsaren redan är verifierad. Inga spårningscookies.",
-  "privacy.p_account_mail": "Mejl med verifieringskoder skickas via Cloudflare Email Service. Servern ligger i Sverige och nås via Cloudflare. Vi använder ingen analys eller reklam på kontot.",
+  "privacy.p_account_mail": "Mejl med verifieringskoder skickas via Brevo. Servern ligger i Sverige och nås via Cloudflare. Vi använder ingen analys eller reklam på kontot.",
   "privacy.p_account_delete": "Du kan radera ditt konto när som helst under Konto på adraze.app. Då raderas mejladressen, statistiken och alla kopplade webbläsare direkt.",
   "privacy.perm_feedback": "<b>declarativeNetRequestFeedback:</b> räknar hur många annonser, spårare och farliga sidor som stoppats. Tillägget läser bara vilken sorts regel som träffade, inte vilken sida det gällde.",
   "privacy.perm_alarms": "<b>alarms:</b> uppdaterar räknarna med jämna mellanrum och skickar statistiken till ditt konto om du har kopplat ett."
