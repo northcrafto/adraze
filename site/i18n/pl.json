@@ -235,5 +235,11 @@
   "konto.err_code": "Nieprawidłowy kod. Sprawdź e-mail i spróbuj ponownie.",
   "konto.err_login": "Nieprawidłowy e-mail lub hasło.",
   "konto.err_exists": "Konto z tym adresem e-mail już istnieje. Zaloguj się.",
-  "konto.err_wait": "Zbyt wiele prób. Odczekaj chwilę."
+  "konto.err_wait": "Zbyt wiele prób. Odczekaj chwilę.",
+  "nav.support": "Wesprzyj nas",
+  "support.title": "Wesprzyj nasz zespół",
+  "support.text": "AdRaze jest darmowy i zawsze taki będzie. Wesprzyj nasz zespół, abyśmy mogli dalej rozwijać Twój adblocker, dla Ciebie.",
+  "support.cta": "Wesprzyj AdRaze",
+  "support.note": "Dowolna kwota, jednorazowo. Bezpieczna płatność przez Stripe.",
+  "faq.a1_support": "Jeśli chcesz nas wesprzeć, możesz wpłacić dowolną kwotę, ale wszystko działa tak samo niezależnie od tego."
 }

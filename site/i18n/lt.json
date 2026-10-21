@@ -235,5 +235,11 @@
   "konto.err_code": "Neteisingas kodas. Patikrinkite el. paštą ir bandykite dar kartą.",
   "konto.err_login": "Neteisingas el. pašto adresas arba slaptažodis.",
   "konto.err_exists": "Paskyra su šiuo el. pašto adresu jau yra. Geriau prisijunkite.",
-  "konto.err_wait": "Per daug bandymų. Šiek tiek palaukite."
+  "konto.err_wait": "Per daug bandymų. Šiek tiek palaukite.",
+  "nav.support": "Paremk mus",
+  "support.title": "Paremk mūsų komandą",
+  "support.text": "AdRaze yra nemokamas ir visada toks bus. Paremk mūsų komandą, kad galėtume toliau tobulinti tavo reklamų blokatorių, dėl tavęs.",
+  "support.cta": "Paremti AdRaze",
+  "support.note": "Bet kokia suma, vieną kartą. Saugus mokėjimas per Stripe.",
+  "faq.a1_support": "Jei nori mus paremti, gali skirti bet kokią sumą, bet viskas veikia vienodai bet kuriuo atveju."
 }

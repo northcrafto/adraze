@@ -235,5 +235,11 @@
   "konto.err_code": "Napačna koda. Preveri e-pošto in poskusi znova.",
   "konto.err_login": "Napačen e-poštni naslov ali geslo.",
   "konto.err_exists": "Račun s tem e-poštnim naslovom že obstaja. Raje se prijavi.",
-  "konto.err_wait": "Preveč poskusov. Malo počakaj."
+  "konto.err_wait": "Preveč poskusov. Malo počakaj.",
+  "nav.support": "Podpri nas",
+  "support.title": "Podpri našo ekipo",
+  "support.text": "AdRaze je brezplačen in bo vedno ostal. Podpri našo ekipo, da bomo lahko še naprej razvijali tvoj adblocker, zate.",
+  "support.cta": "Podpri AdRaze",
+  "support.note": "Poljuben znesek, enkratno. Varno plačilo prek Stripa.",
+  "faq.a1_support": "Če nas želiš podpreti, lahko daš poljuben znesek, a vse deluje enako v vsakem primeru."
 }

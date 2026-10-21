@@ -235,5 +235,11 @@
   "stats.own_title_out": "Hur mycket stoppar din?",
   "stats.own_text_out": "Logga in och koppla AdRaze, så ser du din egen siffra, dag för dag, på alla dina datorer.",
   "stats.own_title_in": "Din AdRaze har stoppat",
-  "footer.stats": "Statistik"
+  "footer.stats": "Statistik",
+  "nav.support": "Stöd oss",
+  "support.title": "Stöd vårt team",
+  "support.text": "AdRaze är gratis och kommer alltid att vara det. Stöd vårt team så att vi kan fortsätta utveckla din adblocker, för din skull.",
+  "support.cta": "Stöd AdRaze",
+  "support.note": "Valfritt belopp, en gång. Säker betalning via Stripe.",
+  "faq.a1_support": "Vill du stödja oss kan du ge ett valfritt belopp, men allt fungerar likadant ändå."
 }

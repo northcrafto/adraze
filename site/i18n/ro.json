@@ -235,5 +235,11 @@
   "konto.err_code": "Cod greșit. Verifică e-mailul și încearcă din nou.",
   "konto.err_login": "E-mail sau parolă greșită.",
   "konto.err_exists": "Există deja un cont cu acest e-mail. Autentifică-te.",
-  "konto.err_wait": "Prea multe încercări. Așteaptă puțin."
+  "konto.err_wait": "Prea multe încercări. Așteaptă puțin.",
+  "nav.support": "Susține-ne",
+  "support.title": "Susține echipa noastră",
+  "support.text": "AdRaze este gratuit și va fi mereu. Susține echipa noastră ca să putem dezvolta în continuare adblockerul tău, pentru tine.",
+  "support.cta": "Susține AdRaze",
+  "support.note": "Orice sumă, o singură dată. Plată sigură prin Stripe.",
+  "faq.a1_support": "Dacă vrei să ne susții, poți da orice sumă, dar totul funcționează la fel oricum."
 }

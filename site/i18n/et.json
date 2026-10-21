@@ -235,5 +235,11 @@
   "konto.err_code": "Vale kood. Vaata e-posti ja proovi uuesti.",
   "konto.err_login": "Vale e-posti aadress või parool.",
   "konto.err_exists": "Selle e-posti aadressiga konto on juba olemas. Logi hoopis sisse.",
-  "konto.err_wait": "Liiga palju katseid. Oota natuke."
+  "konto.err_wait": "Liiga palju katseid. Oota natuke.",
+  "nav.support": "Toeta meid",
+  "support.title": "Toeta meie tiimi",
+  "support.text": "AdRaze on tasuta ja jääb alati tasuta. Toeta meie tiimi, et saaksime sinu reklaamiblokeerijat edasi arendada, sinu jaoks.",
+  "support.cta": "Toeta AdRaze'i",
+  "support.note": "Vabalt valitud summa, ühekordselt. Turvaline makse Stripe'i kaudu.",
+  "faq.a1_support": "Kui soovid meid toetada, võid anda mis tahes summa, kuid kõik töötab igal juhul samamoodi."
 }

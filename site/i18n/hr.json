@@ -235,5 +235,11 @@
   "konto.err_code": "Pogrešan kod. Provjeri e-poštu i pokušaj ponovno.",
   "konto.err_login": "Pogrešna e-pošta ili lozinka.",
   "konto.err_exists": "Račun s tom e-poštom već postoji. Radije se prijavi.",
-  "konto.err_wait": "Previše pokušaja. Pričekaj malo."
+  "konto.err_wait": "Previše pokušaja. Pričekaj malo.",
+  "nav.support": "Podrži nas",
+  "support.title": "Podrži naš tim",
+  "support.text": "AdRaze je besplatan i uvijek će biti. Podrži naš tim kako bismo mogli nastaviti razvijati tvoj adblocker, zbog tebe.",
+  "support.cta": "Podrži AdRaze",
+  "support.note": "Iznos po želji, jednokratno. Sigurno plaćanje putem Stripea.",
+  "faq.a1_support": "Ako nas želiš podržati, možeš dati iznos po želji, ali sve radi jednako u svakom slučaju."
 }

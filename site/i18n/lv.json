@@ -235,5 +235,11 @@
   "konto.err_code": "Nepareizs kods. Pārbaudi e-pastu un mēģini vēlreiz.",
   "konto.err_login": "Nepareiza e-pasta adrese vai parole.",
   "konto.err_exists": "Konts ar šo e-pasta adresi jau pastāv. Labāk piesakies.",
-  "konto.err_wait": "Pārāk daudz mēģinājumu. Uzgaidi mirkli."
+  "konto.err_wait": "Pārāk daudz mēģinājumu. Uzgaidi mirkli.",
+  "nav.support": "Atbalsti mūs",
+  "support.title": "Atbalsti mūsu komandu",
+  "support.text": "AdRaze ir bezmaksas un vienmēr tāds būs. Atbalsti mūsu komandu, lai mēs varētu turpināt attīstīt tavu reklāmu bloķētāju, tevis dēļ.",
+  "support.cta": "Atbalstīt AdRaze",
+  "support.note": "Jebkura summa, vienreiz. Droša apmaksa ar Stripe.",
+  "faq.a1_support": "Ja vēlies mūs atbalstīt, vari ziedot jebkuru summu, taču viss darbojas vienādi jebkurā gadījumā."
 }

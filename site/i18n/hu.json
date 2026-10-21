@@ -235,5 +235,11 @@
   "konto.err_code": "Hibás kód. Nézd meg a leveleidet, és próbáld újra.",
   "konto.err_login": "Hibás e-mail-cím vagy jelszó.",
   "konto.err_exists": "Ezzel az e-mail-címmel már van fiók. Jelentkezz be inkább.",
-  "konto.err_wait": "Túl sok próbálkozás. Várj egy kicsit."
+  "konto.err_wait": "Túl sok próbálkozás. Várj egy kicsit.",
+  "nav.support": "Támogass minket",
+  "support.title": "Támogasd a csapatunkat",
+  "support.text": "Az AdRaze ingyenes, és mindig az is marad. Támogasd a csapatunkat, hogy tovább fejleszthessük a reklámblokkolódat, érted.",
+  "support.cta": "AdRaze támogatása",
+  "support.note": "Tetszőleges összeg, egyszeri. Biztonságos fizetés Stripe-on keresztül.",
+  "faq.a1_support": "Ha támogatni szeretnél minket, bármekkora összeget adhatsz, de minden ugyanúgy működik."
 }

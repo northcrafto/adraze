@@ -235,5 +235,11 @@
   "konto.err_code": "Falscher Code. Prüf deine E-Mails und versuch es noch einmal.",
   "konto.err_login": "Falsche E-Mail-Adresse oder falsches Passwort.",
   "konto.err_exists": "Mit dieser E-Mail-Adresse gibt es schon ein Konto. Melde dich stattdessen an.",
-  "konto.err_wait": "Zu viele Versuche. Warte einen Moment."
+  "konto.err_wait": "Zu viele Versuche. Warte einen Moment.",
+  "nav.support": "Unterstütze uns",
+  "support.title": "Unterstütze unser Team",
+  "support.text": "AdRaze ist kostenlos und bleibt es auch. Unterstütze unser Team, damit wir deinen Adblocker weiterentwickeln können, für dich.",
+  "support.cta": "AdRaze unterstützen",
+  "support.note": "Beliebiger Betrag, einmalig. Sichere Zahlung über Stripe.",
+  "faq.a1_support": "Wenn du uns unterstützen willst, kannst du einen beliebigen Betrag geben, aber alles funktioniert trotzdem genau gleich."
 }

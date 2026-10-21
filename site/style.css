@@ -313,6 +313,19 @@ section { padding: 120px 0; }
 }
 
 /* ---------- Installera (accentblock) ---------- */
+/* Stöd oss: mörkt block med vinkande gubben, vit knapp som fylls med accent */
+.stod { background: var(--mork); color: #fff; padding: 112px 0; --sig-btn: #ffffff; --sig-btn-ink: var(--ink); }
+.stod-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 64px; align-items: center; }
+.stod h2 { font-size: clamp(42px, 6vw, 84px); max-width: 12ch; }
+.stod p { font-size: 19px; margin: 20px 0 32px; max-width: 46ch; color: #c9c9cf; }
+.stod .stod-not { margin: 16px 0 0; font-size: 14px; color: #8b8b94; }
+.stod-gubbe { width: clamp(200px, 22vw, 320px); background: #fff; border-radius: 36px; padding: 24px 24px 6px; }
+.stod-gubbe img { width: 100%; height: auto; }
+@media (max-width: 860px) {
+  .stod { padding: 80px 0; }
+  .stod-grid { grid-template-columns: 1fr; gap: 36px; }
+  .stod-gubbe { width: 150px; order: -1; border-radius: 26px; padding: 16px 16px 4px; }
+}
 .installera { background: var(--accent); color: var(--accent-ink); }
 .installera-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 48px; align-items: center; }
 .installera h2 { font-size: clamp(42px, 6vw, 84px); max-width: 12ch; }

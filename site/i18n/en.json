@@ -235,5 +235,11 @@
   "stats.own_title_out": "How much does yours stop?",
   "stats.own_text_out": "Sign in and connect AdRaze to see your own number, day by day, on all your computers.",
   "stats.own_title_in": "Your AdRaze has stopped",
-  "footer.stats": "Stats"
+  "footer.stats": "Stats",
+  "nav.support": "Support us",
+  "support.title": "Support our team",
+  "support.text": "AdRaze is free and always will be. Support our team so we can keep developing your ad blocker, for your sake.",
+  "support.cta": "Support AdRaze",
+  "support.note": "Any amount, one time. Secure payment with Stripe.",
+  "faq.a1_support": "If you want to support us you can give any amount, but everything works the same either way."
 }

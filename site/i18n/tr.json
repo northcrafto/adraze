@@ -235,5 +235,11 @@
   "konto.err_code": "Yanlış kod. E-postanı kontrol edip tekrar dene.",
   "konto.err_login": "Yanlış e-posta veya şifre.",
   "konto.err_exists": "Bu e-posta adresiyle zaten bir hesap var. Onun yerine giriş yap.",
-  "konto.err_wait": "Çok fazla deneme. Biraz bekle."
+  "konto.err_wait": "Çok fazla deneme. Biraz bekle.",
+  "nav.support": "Bizi destekle",
+  "support.title": "Ekibimizi destekle",
+  "support.text": "AdRaze ücretsizdir ve her zaman öyle kalacak. Reklam engelleyicini senin için geliştirmeye devam edebilmemiz için ekibimizi destekle.",
+  "support.cta": "AdRaze'i destekle",
+  "support.note": "İstediğin tutar, tek seferlik. Stripe ile güvenli ödeme.",
+  "faq.a1_support": "Bizi desteklemek istersen istediğin tutarı verebilirsin, ama her şey yine aynı şekilde çalışır."
 }

@@ -235,5 +235,11 @@
   "konto.err_code": "Nesprávny kód. Skontrolujte e-mail a skúste to znova.",
   "konto.err_login": "Nesprávny e-mail alebo heslo.",
   "konto.err_exists": "Účet s týmto e-mailom už existuje. Prihláste sa.",
-  "konto.err_wait": "Príliš veľa pokusov. Chvíľu počkajte."
+  "konto.err_wait": "Príliš veľa pokusov. Chvíľu počkajte.",
+  "nav.support": "Podporte nás",
+  "support.title": "Podporte náš tím",
+  "support.text": "AdRaze je zadarmo a vždy bude. Podporte náš tím, aby sme mohli ďalej vyvíjať váš blokovač reklám, pre vás.",
+  "support.cta": "Podporiť AdRaze",
+  "support.note": "Ľubovoľná suma, jednorazovo. Bezpečná platba cez Stripe.",
+  "faq.a1_support": "Ak nás chcete podporiť, môžete prispieť ľubovoľnou sumou, ale všetko funguje rovnako tak či tak."
 }

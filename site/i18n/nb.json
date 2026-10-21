@@ -235,5 +235,11 @@
   "konto.err_code": "Feil kode. Sjekk e-posten og prøv igjen.",
   "konto.err_login": "Feil e-postadresse eller passord.",
   "konto.err_exists": "Det finnes allerede en konto med den e-postadressen. Logg inn i stedet.",
-  "konto.err_wait": "For mange forsøk. Vent litt."
+  "konto.err_wait": "For mange forsøk. Vent litt.",
+  "nav.support": "Støtt oss",
+  "support.title": "Støtt teamet vårt",
+  "support.text": "AdRaze er gratis og vil alltid være det. Støtt teamet vårt så vi kan fortsette å utvikle adblockeren din, for din skyld.",
+  "support.cta": "Støtt AdRaze",
+  "support.note": "Valgfritt beløp, én gang. Sikker betaling med Stripe.",
+  "faq.a1_support": "Vil du støtte oss, kan du gi et valgfritt beløp, men alt fungerer likt uansett."
 }

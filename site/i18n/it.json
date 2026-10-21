@@ -235,5 +235,11 @@
   "konto.err_code": "Codice errato. Controlla l’email e riprova.",
   "konto.err_login": "Email o password errati.",
   "konto.err_exists": "Esiste già un account con questa email. Accedi.",
-  "konto.err_wait": "Troppi tentativi. Aspetta un momento."
+  "konto.err_wait": "Troppi tentativi. Aspetta un momento.",
+  "nav.support": "Sostienici",
+  "support.title": "Sostieni il nostro team",
+  "support.text": "AdRaze è gratuito e lo sarà sempre. Sostieni il nostro team così possiamo continuare a sviluppare il tuo ad blocker, per te.",
+  "support.cta": "Sostieni AdRaze",
+  "support.note": "Importo libero, una volta sola. Pagamento sicuro con Stripe.",
+  "faq.a1_support": "Se vuoi sostenerci puoi donare l'importo che preferisci, ma tutto funziona allo stesso modo comunque."
 }

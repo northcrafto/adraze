@@ -235,5 +235,11 @@
   "konto.err_code": "Forkert kode. Tjek din e-mail, og prøv igen.",
   "konto.err_login": "Forkert e-mailadresse eller adgangskode.",
   "konto.err_exists": "Der findes allerede en konto med den e-mailadresse. Log ind i stedet.",
-  "konto.err_wait": "For mange forsøg. Vent lidt."
+  "konto.err_wait": "For mange forsøg. Vent lidt.",
+  "nav.support": "Støt os",
+  "support.title": "Støt vores team",
+  "support.text": "AdRaze er gratis og vil altid være det. Støt vores team, så vi kan blive ved med at udvikle din adblocker, for din skyld.",
+  "support.cta": "Støt AdRaze",
+  "support.note": "Valgfrit beløb, én gang. Sikker betaling med Stripe.",
+  "faq.a1_support": "Vil du støtte os, kan du give et valgfrit beløb, men alt virker på samme måde uanset hvad."
 }

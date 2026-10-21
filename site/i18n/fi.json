@@ -235,5 +235,11 @@
   "konto.err_code": "Väärä koodi. Tarkista sähköpostisi ja yritä uudelleen.",
   "konto.err_login": "Väärä sähköpostiosoite tai salasana.",
   "konto.err_exists": "Tällä sähköpostiosoitteella on jo tili. Kirjaudu sisään.",
-  "konto.err_wait": "Liian monta yritystä. Odota hetki."
+  "konto.err_wait": "Liian monta yritystä. Odota hetki.",
+  "nav.support": "Tue meitä",
+  "support.title": "Tue tiimiämme",
+  "support.text": "AdRaze on ilmainen ja pysyy aina ilmaisena. Tue tiimiämme, jotta voimme jatkaa mainosesteesi kehittämistä, sinun hyväksesi.",
+  "support.cta": "Tue AdRazea",
+  "support.note": "Vapaavalintainen summa, kerran. Turvallinen maksu Stripen kautta.",
+  "faq.a1_support": "Jos haluat tukea meitä, voit antaa minkä tahansa summan, mutta kaikki toimii samalla tavalla joka tapauksessa."
 }

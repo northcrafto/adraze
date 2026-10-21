@@ -235,5 +235,11 @@
   "konto.err_code": "Rangur kóði. Athugaðu tölvupóstinn og reyndu aftur.",
   "konto.err_login": "Rangt netfang eða lykilorð.",
   "konto.err_exists": "Það er þegar til aðgangur með þessu netfangi. Skráðu þig frekar inn.",
-  "konto.err_wait": "Of margar tilraunir. Bíddu aðeins."
+  "konto.err_wait": "Of margar tilraunir. Bíddu aðeins.",
+  "nav.support": "Styrktu okkur",
+  "support.title": "Styrktu teymið okkar",
+  "support.text": "AdRaze er ókeypis og verður það alltaf. Styrktu teymið okkar svo við getum haldið áfram að þróa auglýsingavörnina þína, fyrir þig.",
+  "support.cta": "Styrkja AdRaze",
+  "support.note": "Upphæð að eigin vali, einu sinni. Örugg greiðsla með Stripe.",
+  "faq.a1_support": "Ef þú vilt styrkja okkur getur þú gefið hvaða upphæð sem er, en allt virkar eins hvort sem er."
 }

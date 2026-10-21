@@ -235,5 +235,11 @@
   "konto.err_code": "Verkeerde code. Check je e-mail en probeer het opnieuw.",
   "konto.err_login": "Verkeerd e-mailadres of wachtwoord.",
   "konto.err_exists": "Er bestaat al een account met dit e-mailadres. Log in plaats daarvan in.",
-  "konto.err_wait": "Te veel pogingen. Wacht even."
+  "konto.err_wait": "Te veel pogingen. Wacht even.",
+  "nav.support": "Steun ons",
+  "support.title": "Steun ons team",
+  "support.text": "AdRaze is gratis en blijft dat altijd. Steun ons team, zodat we je adblocker verder kunnen ontwikkelen, voor jou.",
+  "support.cta": "Steun AdRaze",
+  "support.note": "Elk bedrag, eenmalig. Veilig betalen via Stripe.",
+  "faq.a1_support": "Wil je ons steunen, dan kun je elk bedrag geven, maar alles werkt hoe dan ook hetzelfde."
 }
