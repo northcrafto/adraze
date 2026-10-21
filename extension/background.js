@@ -164,12 +164,14 @@ async function hamtaStoppade() {
 
 // Kopplat konto: skicka dagssummorna (inte ökningar), så att samma dag kan skickas om utan att räknas dubbelt
 async function synka() {
-  const { konto, dagar = {} } = await chrome.storage.local.get(["konto", "dagar"]);
+  let { konto, dagar = {}, installId } = await chrome.storage.local.get(["konto", "dagar", "installId"]);
   if (!konto?.token) return;
+  // Slumpat id för den här installationen, så att servern bara räknar den en gång om den kopplas om
+  if (!installId) { installId = crypto.randomUUID(); await chrome.storage.local.set({ installId }); }
   const r = await fetch(`${API}/stats/sync`, {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${konto.token}` },
-    body: JSON.stringify({ dagar }),
+    body: JSON.stringify({ dagar, installId }),
   }).catch(() => null);
   // Kopplingen borttagen på kontosidan: glöm nyckeln
   if (r?.status === 401) await chrome.storage.local.remove("konto");

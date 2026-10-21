@@ -222,5 +222,17 @@
   "privacy.p_account_mail": "Emails with verification codes are sent through Brevo. The server is in Sweden and is reached through Cloudflare. We use no analytics or ads on the account.",
   "privacy.p_account_delete": "You can delete your account at any time under Account on adraze.app. Your email address, stats and all connected browsers are then deleted immediately.",
   "privacy.perm_feedback": "<b>declarativeNetRequestFeedback:</b> counts how many ads, trackers and dangerous pages were stopped. The extension only reads which kind of rule matched, not which page it was on.",
-  "privacy.perm_alarms": "<b>alarms:</b> updates the counters at regular intervals and sends the stats to your account if you have connected one."
+  "privacy.perm_alarms": "<b>alarms:</b> updates the counters at regular intervals and sends the stats to your account if you have connected one.",
+  "stats.meta_title": "Stats – AdRaze",
+  "stats.meta_description": "How many ads, trackers and dangerous pages AdRaze has stopped. The numbers update live.",
+  "stats.hero_pre": "So far AdRaze has stopped",
+  "stats.hero_unit": "ads and trackers",
+  "stats.hero_note": "The total for everyone who has connected AdRaze to an account. Only numbers, never which sites. Updated every minute.",
+  "stats.cta_own": "See your own stats",
+  "stats.trackers_text": "Scripts that follow you between sites to build a profile of you. Stopped before they could load.",
+  "stats.today": "stopped today alone",
+  "stats.own_title_out": "How much does yours stop?",
+  "stats.own_text_out": "Sign in and connect AdRaze to see your own number, day by day, on all your computers.",
+  "stats.own_title_in": "Your AdRaze has stopped",
+  "footer.stats": "Stats"
 }

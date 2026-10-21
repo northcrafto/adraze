@@ -222,5 +222,17 @@
   "privacy.p_account_mail": "Mejl med verifieringskoder skickas via Brevo. Servern ligger i Sverige och nås via Cloudflare. Vi använder ingen analys eller reklam på kontot.",
   "privacy.p_account_delete": "Du kan radera ditt konto när som helst under Konto på adraze.app. Då raderas mejladressen, statistiken och alla kopplade webbläsare direkt.",
   "privacy.perm_feedback": "<b>declarativeNetRequestFeedback:</b> räknar hur många annonser, spårare och farliga sidor som stoppats. Tillägget läser bara vilken sorts regel som träffade, inte vilken sida det gällde.",
-  "privacy.perm_alarms": "<b>alarms:</b> uppdaterar räknarna med jämna mellanrum och skickar statistiken till ditt konto om du har kopplat ett."
+  "privacy.perm_alarms": "<b>alarms:</b> uppdaterar räknarna med jämna mellanrum och skickar statistiken till ditt konto om du har kopplat ett.",
+  "stats.meta_title": "Statistik – AdRaze",
+  "stats.meta_description": "Så många annonser, spårare och farliga sidor har AdRaze stoppat. Siffrorna uppdateras live.",
+  "stats.hero_pre": "Hittills har AdRaze stoppat",
+  "stats.hero_unit": "annonser och spårare",
+  "stats.hero_note": "Summan för alla som kopplat AdRaze till ett konto. Bara siffror, aldrig vilka sajter. Uppdateras varje minut.",
+  "stats.cta_own": "Se din egen statistik",
+  "stats.trackers_text": "Skript som följer dig mellan sajter för att bygga en profil om dig. Stoppade innan de hann ladda.",
+  "stats.today": "stoppade bara i dag",
+  "stats.own_title_out": "Hur mycket stoppar din?",
+  "stats.own_text_out": "Logga in och koppla AdRaze, så ser du din egen siffra, dag för dag, på alla dina datorer.",
+  "stats.own_title_in": "Din AdRaze har stoppat",
+  "footer.stats": "Statistik"
 }

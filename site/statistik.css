@@ -1,0 +1,67 @@
+/* Statistiksidan: en enorm siffra, resten av siffrorna, din egen */
+.st-hjalte {
+  background: var(--mork); color: #fff;
+  min-height: calc(100dvh - 73px); display: grid; align-items: center;
+  padding: 72px 0 88px; overflow: hidden;
+  --sig-btn: #ffffff; --sig-btn-ink: var(--ink);
+}
+.st-hjalte-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 48px; align-items: end; }
+.st-gubbe { width: clamp(220px, 22vw, 330px); background: #fff; border-radius: 36px; padding: 26px 26px 8px; }
+.st-gubbe img { width: 100%; height: auto; }
+.st-fore { font-size: clamp(20px, 2.4vw, 30px); font-weight: 600; color: #a7a7af; letter-spacing: -0.02em; }
+.st-hjalte h1 { margin-top: 10px; line-height: .86; letter-spacing: -0.065em; }
+.st-tal {
+  display: block; color: var(--accent);
+  font-size: clamp(84px, 19vw, 300px); font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.st-tal.lang { font-size: clamp(56px, 13vw, 210px); }
+.st-enhet { display: block; font-size: clamp(40px, 6.4vw, 100px); margin-top: .12em; letter-spacing: -0.05em; }
+.st-not { margin-top: 28px; max-width: 44ch; color: #a7a7af; font-size: 18px; }
+.st-knappar { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
+.st-ghost { color: #fff; }
+.st-ghost:hover, .st-ghost:focus-visible { color: var(--ink); }
+
+/* Plus en liten bock när siffran tickar upp live */
+.st-tal.tick { animation: tick .5s var(--ease); }
+@keyframes tick { 40% { transform: translateY(-.04em); } }
+
+.st-resten { padding: 112px 0; }
+.st-rutnat { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; grid-template-rows: auto auto; gap: 12px; }
+.st-ruta { background: var(--yta); border: 1px solid var(--linje); border-radius: 26px; padding: 30px; display: flex; flex-direction: column; justify-content: end; min-height: 200px; }
+.st-ruta b { font-size: clamp(44px, 5vw, 76px); letter-spacing: -0.05em; line-height: 1; font-variant-numeric: tabular-nums; }
+.st-ruta span { margin-top: 10px; font-weight: 600; color: var(--dov); }
+.st-ruta p { margin-top: 14px; max-width: 34ch; color: var(--dov); font-size: 16px; }
+.st-stor { grid-row: span 2; justify-content: space-between; }
+.st-stor b { font-size: clamp(64px, 8vw, 128px); color: var(--ink); }
+.st-idag { grid-column: span 3; background: var(--ink); border-color: var(--ink); color: #fff; flex-direction: row; align-items: baseline; justify-content: start; gap: 18px; min-height: 0; }
+.st-idag b { color: var(--accent); }
+.st-idag span { color: #b9b9c0; margin: 0; }
+
+.st-egen { background: var(--accent); color: var(--ink); padding: 104px 0; }
+.st-egen-inner > div { display: grid; justify-items: start; gap: 18px; }
+.st-egen h2 { font-size: clamp(44px, 6.4vw, 92px); letter-spacing: -0.05em; max-width: 14ch; }
+.st-egen p { font-size: 19px; max-width: 46ch; }
+.st-egen .btn { margin-top: 10px; }
+.st-egen-fore { font-weight: 600; font-size: clamp(20px, 2.4vw, 30px) !important; }
+.st-egen-tal { font-size: clamp(44px, 7vw, 104px) !important; font-weight: 700; letter-spacing: -0.05em; line-height: 1; max-width: none !important; }
+.st-egen-tal b { font-variant-numeric: tabular-nums; }
+#statistik [hidden] { display: none !important; }
+
+@media (max-width: 860px) {
+  .st-hjalte-grid { grid-template-columns: 1fr; }
+  .st-gubbe { width: 150px; order: -1; border-radius: 26px; padding: 16px 16px 4px; }
+  .st-hjalte { min-height: 0; padding: 56px 0 72px; }
+  .st-rutnat { grid-template-columns: 1fr 1fr; }
+  .st-stor { grid-column: 1 / -1; grid-row: auto; }
+  .st-idag { grid-column: 1 / -1; }
+  .st-resten { padding: 72px 0; }
+  .st-egen { padding: 72px 0; }
+}
+@media (max-width: 480px) {
+  .st-rutnat { grid-template-columns: 1fr; }
+  .st-ruta { min-height: 150px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .st-tal.tick { animation: none; }
+}
