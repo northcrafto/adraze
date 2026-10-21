@@ -119,7 +119,7 @@
   "faq.a6": "«Raze» significa arrasar, deitar abaixo até ao chão. É exatamente o que faz aos anúncios.",
   "install.title": "Livra-te dos anúncios agora.",
   "install.text": "O AdRaze está a caminho da Chrome Web Store. Até lá, podes instalá-lo à mão num minuto.",
-  "install.download": "Transferir o AdRaze 0.1.0",
+  "install.download": "Transferir o AdRaze 0.1.1",
   "install.step1": "Descomprime o ficheiro zip.",
   "install.step2": "Abre <code>chrome://extensions</code> e ativa o <b>Modo de programador</b>.",
   "install.step3": "Clica em <b>Carregar expandida</b> e escolhe a pasta que descomprimiste.",

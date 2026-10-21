@@ -119,7 +119,7 @@
   "faq.a6": "'Raze' betekent iets met de grond gelijkmaken. Precies wat het met reclame doet.",
   "install.title": "Weg met die reclame. Nu.",
   "install.text": "AdRaze komt binnenkort in de Chrome Web Store. Tot die tijd installeer je het in een minuutje zelf.",
-  "install.download": "AdRaze 0.1.0 downloaden",
+  "install.download": "AdRaze 0.1.1 downloaden",
   "install.step1": "Pak het zip-bestand uit.",
   "install.step2": "Open <code>chrome://extensions</code> en zet de <b>Ontwikkelaarsmodus</b> aan.",
   "install.step3": "Klik op <b>Uitgepakte extensie laden</b> en kies de map die je hebt uitgepakt.",

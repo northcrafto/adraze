@@ -51,9 +51,14 @@ async function synkaPaus() {
   const gamla = await chrome.declarativeNetRequest.getDynamicRules();
   await chrome.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: gamla.map((r) => r.id),
-    addRules: lista.length
-      ? [{ id: 1, priority: PAUS_PRIO, action: { type: "allowAllRequests" }, condition: { requestDomains: lista, resourceTypes: ["main_frame", "sub_frame"] } }]
-      : [],
+    addRules: [
+      ...(lista.length
+        ? [{ id: 1, priority: PAUS_PRIO, action: { type: "allowAllRequests" }, condition: { requestDomains: lista, resourceTypes: ["main_frame", "sub_frame"] } }]
+        : []),
+      // YouTube: släpp igenom kvittot på att reklamen visats (content/youtube.js spolar förbi den),
+      // annars får varje ny video en svart väntan lika lång som reklamen
+      { id: 2, priority: PAUS_PRIO, action: { type: "allow" }, condition: { urlFilter: "||youtube.com/pagead/adview" } },
+    ],
   });
   await registreraSkript(lista);
 }
@@ -67,6 +72,8 @@ async function registreraSkript(lista) {
   await chrome.scripting.registerContentScripts([
     { ...bas, id: "kosmetik", js: ["content/cosmetic.js"] },
     { ...bas, id: "vakt", js: ["content/guard.js"], world: "MAIN" },
+    // YouTube: spola förbi och dölj förvideo- och mellanreklam
+    { ...bas, id: "youtube", js: ["content/youtube.js"], world: "MAIN", matches: ["*://*.youtube.com/*", "*://*.youtube-nocookie.com/*"] },
   ]);
 }
 

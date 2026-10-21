@@ -119,7 +119,7 @@
   "faq.a6": "„Raze“ heißt so viel wie „dem Erdboden gleichmachen“. Genau das macht es mit der Werbung.",
   "install.title": "Schluss mit Werbung. Jetzt.",
   "install.text": "AdRaze ist auf dem Weg in den Chrome Web Store. Bis dahin installierst du es in einer Minute von Hand.",
-  "install.download": "AdRaze 0.1.0 herunterladen",
+  "install.download": "AdRaze 0.1.1 herunterladen",
   "install.step1": "Entpacke die ZIP-Datei.",
   "install.step2": "Öffne <code>chrome://extensions</code> und aktiviere den <b>Entwicklermodus</b>.",
   "install.step3": "Klicke auf <b>Entpackte Erweiterung laden</b> und wähle den entpackten Ordner.",

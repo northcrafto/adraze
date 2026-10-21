@@ -119,7 +119,7 @@
   "faq.a6": "\"Raze\" znamená anglicky srovnat se zemí. Přesně to dělá s reklamami.",
   "install.title": "Zbavte se reklam ještě dnes.",
   "install.text": "AdRaze míří do Chrome Web Store. Než tam bude, můžete ho za minutu nainstalovat ručně.",
-  "install.download": "Stáhnout AdRaze 0.1.0",
+  "install.download": "Stáhnout AdRaze 0.1.1",
   "install.step1": "Rozbalte soubor zip.",
   "install.step2": "Otevřete <code>chrome://extensions</code> a zapněte <b>Režim pro vývojáře</b>.",
   "install.step3": "Klikněte na <b>Načíst rozbalené</b> a vyberte rozbalenou složku.",

@@ -196,7 +196,9 @@ async function main() {
     regelPaket.security.push({ priority: 3000, action: { type: "block" }, condition: { requestDomains: sakra.slice(i, i + 5000), resourceTypes: ["sub_frame"] } });
   }
   // Länkförkortare och värdar med undantagsregler får aldrig räknas som "annons som skickar vidare fliken"
-  const ALDRIG = new Set(["t.co", "bit.ly", "goo.gl", "lnkd.in", "ow.ly", "buff.ly", "tinyurl.com", "is.gd", "fb.me", "youtu.be", "amzn.to", "linktr.ee"]);
+  // (även annonsfinansierade förkortare: deras slutsteg går till vilken sajt som helst)
+  const ALDRIG = new Set(["t.co", "bit.ly", "goo.gl", "lnkd.in", "ow.ly", "buff.ly", "tinyurl.com", "is.gd", "fb.me", "youtu.be", "amzn.to", "linktr.ee",
+    "linkvertise.com", "adf.ly", "adshrink.it"]);
   const initiators = [...new Set([...popupHosts, ...annonsHosts])].filter((h) => !ALDRIG.has(h) && !undantagsHosts.has(h)).sort();
   for (let i = 0; i < initiators.length; i += 5000) {
     regelPaket.security.push({ priority: 3000, action: STOPPSIDA, condition: { initiatorDomains: initiators.slice(i, i + 5000), resourceTypes: ["main_frame"], domainType: "thirdParty" } });

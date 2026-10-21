@@ -10,6 +10,9 @@ site/adraze-*.zip
 tests/out/
 tests/agent-*/
 tests/verifiera-*/
+tests/agent2-*/
+tests/fix-*/
+tests/buggjakt-resultat.json
 
 node_modules/
 .DS_Store

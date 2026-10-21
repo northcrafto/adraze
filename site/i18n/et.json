@@ -119,7 +119,7 @@
   "faq.a6": "„Raze” tähendab inglise keeles maatasa tegemist. Täpselt seda ta reklaamidega teebki.",
   "install.title": "Saa reklaamidest lahti kohe.",
   "install.text": "AdRaze on teel Chrome Web Store'i. Seni saad selle minutiga käsitsi paigaldada.",
-  "install.download": "Laadi alla AdRaze 0.1.0",
+  "install.download": "Laadi alla AdRaze 0.1.1",
   "install.step1": "Paki zip-fail lahti.",
   "install.step2": "Ava <code>chrome://extensions</code> ja lülita sisse <b>Arendaja režiim</b>.",
   "install.step3": "Klõpsa <b>Laadi pakkimata</b> ja vali kaust, mille lahti pakkisid.",

@@ -1,2 +1,65 @@
 ! AdRaze egna kosmetiska regler (dölj tomma annonsluckor, sponsrat innehåll) och undantag (#@#) för felaktigt dolda element.
 ! Underhålls för hand. ABP/uBO-syntax: example.se##.selektor  respektive  example.se#@#.selektor
+
+! --- YouTube: sponsrat kort bredvid spelaren (#player-ads) och annonspanelen
+youtube.com###player-ads
+youtube.com##ytd-player-legacy-desktop-watch-ads-renderer
+youtube.com##ytd-companion-slot-renderer
+youtube.com##ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"]
+! --- YouTube: Premium-reklambannern ("Färre annonser, mer tid för YouTube") på startsidan
+youtube.com##ytd-statement-banner-renderer
+youtube.com##ytd-rich-section-renderer:has(ytd-statement-banner-renderer)
+
+! --- di.se: Frellwits regel döljer hela panoramat i sidhuvudet, även den redaktionella Di TV-rutan.
+! Undanta hela regeln och lägg tillbaka allt utom .site-header__panorama. Själva annonsplatsen (.panorama, .ad) döljs ändå.
+di.se#@#.di_panorama-wrapper, .site-header__panorama, .di_panorama__isAdLabel, .discount-box, .campaign-ad-box, .di_start__teaser-placeholder, .di_teaser-flak-planbokskoll, .di_teaser-flak-container--native, .native-box, .bandit-box__teaser--native, a[href*="/brandstudio"], .service-box, .brand-studio-box, .native-article, .listing-box-native
+di.se##.di_panorama-wrapper, .di_panorama__isAdLabel, .discount-box, .campaign-ad-box, .di_start__teaser-placeholder, .di_teaser-flak-planbokskoll, .di_teaser-flak-container--native, .native-box, .bandit-box__teaser--native, a[href*="/brandstudio"], .service-box, .brand-studio-box, .native-article, .listing-box-native
+! panoramat utan redaktionellt innehåll är bara annonsplats
+di.se##.site-header__panorama:not(:has(.panorama-content))
+
+! --- omni.se: reserverad topPanorama-plats (275 px) blir tom lucka när annonsskriptet stoppas
+omni.se##div[class*="__topPanoramaAd"]
+omni.se##.advertory-omni-panorama-reserved-wrapper
+
+! --- aftonbladet.se: tom integration-plats (640x320) ovanför sidfoten
+aftonbladet.se##.advertory-aftonbladet-integration-wrapper
+
+! --- Elgiganten/Elkjøp: sponsrade produkter (Criteo retail media) som sajten renderar själv
+! Produktsidan: karusellmodulen märkt sponsored
+elgiganten.se,elgiganten.dk,elkjop.no,gigantti.fi##article.cms-module-container.sponsored
+! Söksidan: sponsrade kort är article utan data-insights-position (vanliga träffar är li med position)
+elgiganten.se,elgiganten.dk,elkjop.no,gigantti.fi##ol[data-component="Algolia-ProductHitList"] > article[data-cro="product-item"]:not([data-insights-position]):has(button[aria-label="info"] > span.text-xs)
+
+! --- Google Sök: sponsrade textannonser och shoppingannonser (bara www.google.*, inte Gmail/Docs m.fl.)
+www.google.com,www.google.se,www.google.no,www.google.dk,www.google.fi,www.google.de,www.google.co.uk,www.google.fr,www.google.es,www.google.it,www.google.nl,www.google.pl,www.google.at,www.google.ch,www.google.be,www.google.ie,www.google.pt,www.google.ca,www.google.com.au,www.google.co.in,www.google.com.br,www.google.com.tr,www.google.com.mx,www.google.co.jp###tads
+www.google.com,www.google.se,www.google.no,www.google.dk,www.google.fi,www.google.de,www.google.co.uk,www.google.fr,www.google.es,www.google.it,www.google.nl,www.google.pl,www.google.at,www.google.ch,www.google.be,www.google.ie,www.google.pt,www.google.ca,www.google.com.au,www.google.co.in,www.google.com.br,www.google.com.tr,www.google.com.mx,www.google.co.jp###tadsb
+www.google.com,www.google.se,www.google.no,www.google.dk,www.google.fi,www.google.de,www.google.co.uk,www.google.fr,www.google.es,www.google.it,www.google.nl,www.google.pl,www.google.at,www.google.ch,www.google.be,www.google.ie,www.google.pt,www.google.ca,www.google.com.au,www.google.co.in,www.google.com.br,www.google.com.tr,www.google.com.mx,www.google.co.jp###bottomads
+www.google.com,www.google.se,www.google.no,www.google.dk,www.google.fi,www.google.de,www.google.co.uk,www.google.fr,www.google.es,www.google.it,www.google.nl,www.google.pl,www.google.at,www.google.ch,www.google.be,www.google.ie,www.google.pt,www.google.ca,www.google.com.au,www.google.co.in,www.google.com.br,www.google.com.tr,www.google.com.mx,www.google.co.jp###atvcap
+www.google.com,www.google.se,www.google.no,www.google.dk,www.google.fi,www.google.de,www.google.co.uk,www.google.fr,www.google.es,www.google.it,www.google.nl,www.google.pl,www.google.at,www.google.ch,www.google.be,www.google.ie,www.google.pt,www.google.ca,www.google.com.au,www.google.co.in,www.google.com.br,www.google.com.tr,www.google.com.mx,www.google.co.jp##div[data-text-ad]
+www.google.com,www.google.se,www.google.no,www.google.dk,www.google.fi,www.google.de,www.google.co.uk,www.google.fr,www.google.es,www.google.it,www.google.nl,www.google.pl,www.google.at,www.google.ch,www.google.be,www.google.ie,www.google.pt,www.google.ca,www.google.com.au,www.google.co.in,www.google.com.br,www.google.com.tr,www.google.com.mx,www.google.co.jp##.commercial-unit-desktop-top
+www.google.com,www.google.se,www.google.no,www.google.dk,www.google.fi,www.google.de,www.google.co.uk,www.google.fr,www.google.es,www.google.it,www.google.nl,www.google.pl,www.google.at,www.google.ch,www.google.be,www.google.ie,www.google.pt,www.google.ca,www.google.com.au,www.google.co.in,www.google.com.br,www.google.com.tr,www.google.com.mx,www.google.co.jp##.commercial-unit-desktop-rhs
+www.google.com,www.google.se,www.google.no,www.google.dk,www.google.fi,www.google.de,www.google.co.uk,www.google.fr,www.google.es,www.google.it,www.google.nl,www.google.pl,www.google.at,www.google.ch,www.google.be,www.google.ie,www.google.pt,www.google.ca,www.google.com.au,www.google.co.in,www.google.com.br,www.google.com.tr,www.google.com.mx,www.google.co.jp##.cu-container
+! Annonsblock utanför #tads (t.ex. mitt i träfflistan): "Sponsrade resultat"-rubrik, "Dölj"-knapp och "Hitta relaterade produkter och tjänster"
+www.google.com,www.google.se,www.google.no,www.google.dk,www.google.fi,www.google.de,www.google.co.uk,www.google.fr,www.google.es,www.google.it,www.google.nl,www.google.pl,www.google.at,www.google.ch,www.google.be,www.google.ie,www.google.pt,www.google.ca,www.google.com.au,www.google.co.in,www.google.com.br,www.google.com.tr,www.google.com.mx,www.google.co.jp##.GUyUUb[data-hb]
+www.google.com,www.google.se,www.google.no,www.google.dk,www.google.fi,www.google.de,www.google.co.uk,www.google.fr,www.google.es,www.google.it,www.google.nl,www.google.pl,www.google.at,www.google.ch,www.google.be,www.google.ie,www.google.pt,www.google.ca,www.google.com.au,www.google.co.in,www.google.com.br,www.google.com.tr,www.google.com.mx,www.google.co.jp###k04FTb
+www.google.com,www.google.se,www.google.no,www.google.dk,www.google.fi,www.google.de,www.google.co.uk,www.google.fr,www.google.es,www.google.it,www.google.nl,www.google.pl,www.google.at,www.google.ch,www.google.be,www.google.ie,www.google.pt,www.google.ca,www.google.com.au,www.google.co.in,www.google.com.br,www.google.com.tr,www.google.com.mx,www.google.co.jp##.MjjYud:has(> div:only-child > #k04FTb:only-child)
+www.google.com,www.google.se,www.google.no,www.google.dk,www.google.fi,www.google.de,www.google.co.uk,www.google.fr,www.google.es,www.google.it,www.google.nl,www.google.pl,www.google.at,www.google.ch,www.google.be,www.google.ie,www.google.pt,www.google.ca,www.google.com.au,www.google.co.in,www.google.com.br,www.google.com.tr,www.google.com.mx,www.google.co.jp##div[data-dsktp-pla-or-su]
+www.google.com,www.google.se,www.google.no,www.google.dk,www.google.fi,www.google.de,www.google.co.uk,www.google.fr,www.google.es,www.google.it,www.google.nl,www.google.pl,www.google.at,www.google.ch,www.google.be,www.google.ie,www.google.pt,www.google.ca,www.google.com.au,www.google.co.in,www.google.com.br,www.google.com.tr,www.google.com.mx,www.google.co.jp##div[jscontroller="nYCnEd"]:has(.GUyUUb[data-hb])
+
+! --- Google Maps: sponsrad plats överst i resultatlistan (etiketten är h1 med aria-label, ibland "Sponsrad · Av Booking.com") + avgränsaren under
+www.google.com,www.google.se,www.google.no,www.google.dk,www.google.fi,www.google.de,www.google.co.uk##div[role="feed"] > div:has(h1[aria-label^="Sponsrad"], h1[aria-label^="Sponsrat"], h1[aria-label^="Sponsored"], h1[aria-label^="Sponset"], h1[aria-label^="Sponsoreret"], h1[aria-label^="Gesponsert"])
+www.google.com,www.google.se,www.google.no,www.google.dk,www.google.fi,www.google.de,www.google.co.uk##div[role="feed"] > div:has(h1[aria-label^="Sponsrad"], h1[aria-label^="Sponsrat"], h1[aria-label^="Sponsored"], h1[aria-label^="Sponset"], h1[aria-label^="Sponsoreret"], h1[aria-label^="Gesponsert"]) + div.TFQHme
+
+! --- Softonic/FileHippo (samma plattform): tomma annonslådor med etiketten Advertisement
+softonic.com,softonic.cn,softonic.pl,softonic.com.br,softonic.jp,filehippo.com##div[data-meta="placeholder-slot"]
+
+! --- CrazyGames: tomma annonsramar under spelet och i högerspalten (CSS-moduler, matcha på prefix)
+crazygames.com##[class*="AdUnit_adUnitRoot__"]
+crazygames.com##[class*="GamePageDesktop_leaderboard__"]
+crazygames.com##[class*="GamePageDesktop_rightMpuContainer__"]
+! behållarna runt har egen fast höjd/ram: dölj dem bara när de inte innehåller något annat än annonsplatsen
+crazygames.com##[class*="GamePageDesktop_leaderboardContainer__"]:not(:has(> :not([class*="GamePageDesktop_leaderboard__"])))
+crazygames.com##[class*="GameInfo_rightColumn__"]:not(:has(:not([class*="AdUnit_"])))
+
+! --- Forbes: behållaren runt toppannonsen har fast höjd (90 px) och blir tomt band under menyn
+forbes.com##div:has(> .fbs-ad--top-wrapper)

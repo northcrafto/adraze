@@ -1,2 +1,6 @@
 ! AdRaze egna nätverksregler och undantag (@@) för saker som filterlistorna blockerar felaktigt.
 ! Underhålls för hand. ABP/uBO-syntax.
+
+! Google Identity Services (inloggning med Google + Google-knappen). AdGuard Popups blockerar hela
+! skriptet mot One Tap, men då kastar sajterna "google is not defined" och Google-inloggningen går sönder.
+@@||accounts.google.com/gsi/client^$script

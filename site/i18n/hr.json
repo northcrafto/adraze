@@ -119,7 +119,7 @@
   "faq.a6": "„Raze” na engleskom znači sravniti nešto sa zemljom. Upravo to radi s oglasima.",
   "install.title": "Riješi se oglasa odmah.",
   "install.text": "AdRaze je na putu u Chrome Web Store. Dok ne stigne tamo, možeš ga ručno instalirati za minutu.",
-  "install.download": "Preuzmi AdRaze 0.1.0",
+  "install.download": "Preuzmi AdRaze 0.1.1",
   "install.step1": "Raspakiraj zip datoteku.",
   "install.step2": "Otvori <code>chrome://extensions</code> i uključi <b>Način rada za razvojne programere</b>.",
   "install.step3": "Klikni <b>Učitaj raspakirano</b> i odaberi mapu koju si raspakirao.",

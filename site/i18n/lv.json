@@ -119,7 +119,7 @@
   "faq.a6": "Angliski „raze” nozīmē nolīdzināt ar zemi. Tieši to tas dara ar reklāmām.",
   "install.title": "Atbrīvojies no reklāmām jau tagad.",
   "install.text": "AdRaze ir ceļā uz Chrome Web Store. Kamēr tā tur vēl nav, vari to uzstādīt manuāli vienā minūtē.",
-  "install.download": "Lejupielādēt AdRaze 0.1.0",
+  "install.download": "Lejupielādēt AdRaze 0.1.1",
   "install.step1": "Izpako zip failu.",
   "install.step2": "Atver <code>chrome://extensions</code> un ieslēdz <b>Izstrādātāja režīms</b>.",
   "install.step3": "Noklikšķini <b>Ielādēt neizpakotu</b> un izvēlies izpakoto mapi.",

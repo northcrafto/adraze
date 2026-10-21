@@ -32,4 +32,4 @@ body:
     id: version
     attributes:
       label: AdRaze version
-      placeholder: "0.1.0"
+      placeholder: "0.1.1"

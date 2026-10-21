@@ -119,7 +119,7 @@
   "faq.a6": "\"Raze\" tarkoittaa jonkin tasoittamista maan tasalle. Juuri niin se tekee mainoksille.",
   "install.title": "Eroon mainoksista nyt.",
   "install.text": "AdRaze on tulossa Chrome Web Storeen. Siihen asti voit asentaa sen käsin minuutissa.",
-  "install.download": "Lataa AdRaze 0.1.0",
+  "install.download": "Lataa AdRaze 0.1.1",
   "install.step1": "Pura zip-tiedosto.",
   "install.step2": "Avaa <code>chrome://extensions</code> ja kytke <b>Kehittäjätila</b> päälle.",
   "install.step3": "Klikkaa <b>Lataa pakkaamaton laajennus</b> ja valitse purkamasi kansio.",

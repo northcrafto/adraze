@@ -119,7 +119,7 @@
   "faq.a6": "\"Raze\" betyder at jævne noget med jorden. Det er præcis, hvad den gør med reklamerne.",
   "install.title": "Slip af med reklamerne nu.",
   "install.text": "AdRaze er på vej til Chrome Web Store. Indtil den er der, kan du installere den manuelt på et minut.",
-  "install.download": "Download AdRaze 0.1.0",
+  "install.download": "Download AdRaze 0.1.1",
   "install.step1": "Pak zip-filen ud.",
   "install.step2": "Åbn <code>chrome://extensions</code> og slå <b>Udviklertilstand</b> til.",
   "install.step3": "Klik på <b>Indlæs upakket</b> og vælg den mappe, du pakkede ud.",

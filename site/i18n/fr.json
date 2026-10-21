@@ -119,7 +119,7 @@
   "faq.a6": "« Raze » veut dire raser, réduire à néant. C’est exactement ce qu’il fait aux pubs.",
   "install.title": "Débarrassez-vous des pubs dès maintenant.",
   "install.text": "AdRaze arrive bientôt sur le Chrome Web Store. En attendant, vous pouvez l’installer vous-même en une minute.",
-  "install.download": "Télécharger AdRaze 0.1.0",
+  "install.download": "Télécharger AdRaze 0.1.1",
   "install.step1": "Décompressez le fichier zip.",
   "install.step2": "Ouvrez <code>chrome://extensions</code> et activez le <b>Mode développeur</b>.",
   "install.step3": "Cliquez sur <b>Charger l’extension non empaquetée</b> et choisissez le dossier décompressé.",
