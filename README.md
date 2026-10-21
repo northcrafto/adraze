@@ -36,6 +36,7 @@ It is built on Chrome's native `declarativeNetRequest` engine, so blocking happe
 | **Trackers** | Analytics scripts and ad networks that follow you across sites are blocked with EasyPrivacy. |
 | **Popups and popunders** | Windows opened by clicks on non-interactive parts of the page are stopped, and invisible full-page click traps are removed. Sign-in and payment popups (Google, Apple, Microsoft, PayPal, Klarna, BankID and more) always work. |
 | **Malicious redirects** | Known scam, malware and popup-network domains, and tab redirects started by an ad domain, land on AdRaze's stop page instead. You decide whether to continue. |
+| **Cookie banners** | AdRaze clicks "Reject all" in common consent banners (OneTrust, Cookiebot, Didomi, Sourcepoint, Usercentrics and about 20 more), so only necessary cookies are set. Banners without a free reject button are hidden, and a paid "reject" is never clicked. Want to choose yourself on a site? Turn it off for that site in the toolbar menu. |
 | **Swedish sites** | Ships with Frellwit's Swedish Filter on top of the international lists. |
 | **Pause per site** | One click in the toolbar menu pauses AdRaze on a site you want to support. |
 
@@ -112,13 +113,14 @@ Found a site where an ad slips through, a page breaks, or a popup gets past the 
 
 ## Privacy
 
-AdRaze collects nothing. The list of paused sites and the popup counter are stored with `chrome.storage` on your own device. Full policy: [adraze.app/en/integritet](https://adraze.app/en/integritet).
+AdRaze collects nothing. The list of paused sites, the sites where you want to see the cookie banner, and the counters are stored with `chrome.storage` on your own device. Full policy: [adraze.app/en/integritet](https://adraze.app/en/integritet).
 
 ## Credits
 
 AdRaze would not exist without the people who maintain the filter lists:
 
 - [EasyList and EasyPrivacy](https://easylist.to) (GPL-3.0 / CC BY-SA 3.0)
+- [EasyList Cookie List](https://easylist.to) (CC BY 3.0)
 - [Frellwit's Swedish Filter](https://github.com/lassekongo83/Frellwits-filter-lists) (GPL-3.0)
 - [uBlock Origin filters](https://github.com/uBlockOrigin/uAssets) (GPL-3.0)
 - [AdGuard Popups filter](https://github.com/AdguardTeam/AdguardFilters) (GPL-3.0)

@@ -148,6 +148,7 @@
   "privacy.h_local": "O que fica guardado no teu computador",
   "privacy.local1": "A lista de sites onde puseste o AdRaze em pausa.",
   "privacy.local2": "Contadores de quantos pop-ups e redirecionamentos foram bloqueados.",
+  "privacy.local4": "Os sites onde queres ver tu próprio o aviso de cookies e quantos avisos de cookies foram recusados.",
   "privacy.p_local": "Estes dados ficam guardados no armazenamento do próprio navegador (<code>chrome.storage</code>) e nunca saem do teu computador. Se desinstalares o AdRaze, desaparecem.",
   "privacy.h_perms": "Permissões e para que servem",
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> bloqueia anúncios e rastreadores com os filtros integrados do Chrome.",

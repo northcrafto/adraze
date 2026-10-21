@@ -148,6 +148,7 @@
   "privacy.h_local": "Što se sprema na tvom računalu",
   "privacy.local1": "Popis stranica na kojima si pauzirao AdRaze.",
   "privacy.local2": "Brojači koliko je skočnih prozora i preusmjeravanja zaustavljeno.",
+  "privacy.local4": "Stranice na kojima želiš sam vidjeti obavijest o kolačićima i koliko je obavijesti o kolačićima odbijeno.",
   "privacy.p_local": "To se sprema u vlastitu pohranu preglednika (<code>chrome.storage</code>) i nikad ne napušta tvoje računalo. Ako deinstaliraš AdRaze, nestaje.",
   "privacy.h_perms": "Dopuštenja i zašto su potrebna",
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> blokira oglase i trackere pomoću ugrađenih filtara u Chromeu.",

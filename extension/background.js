@@ -76,6 +76,39 @@ async function cssFor(host) {
   return css && css + lockbeteCss;
 }
 
+// ---------- Kakrutor ----------
+// Döljs med EasyList Cookie och avvisas av content/kakor.js. Av för hela tillägget med storage.local.kakor = false,
+// och per sajt med listan kakUndantag (då syns sajtens egen ruta som vanligt).
+let kakKos = null;
+let kakGenericCss = null;
+// Sajter som låser sidan medan rutan visas: lås upp när rutan är dold
+const KAK_UPPLAS = `html.sp-message-open,body.didomi-popup-open,html.didomi-popup-open,body.qc-cmp-ui-showing,html.qc-cmp-ui-showing,
+body.cmp-modal-open,body.cookie-consent-open,body.onetrust-consent-sdk-open,html.cookiebot-open,body.CybotCookiebotDialogActive,
+body.cky-modal-open,html.cmpbox-open,body.cmplz-cookiebanner-open{overflow:auto!important}
+html.sp-message-open body{overflow:auto!important;position:static!important}\n`;
+
+async function kakCssFor(host) {
+  kakKos ||= await (await fetch(chrome.runtime.getURL("data/kakor.json"))).json();
+  kakGenericCss ??= cssAv(kakKos.generic);
+  const nivaer = suffix(host);
+  const undantag = new Set();
+  for (const n of nivaer) for (const s of kakKos.exceptions[n] || []) undantag.add(s);
+  const specifika = [];
+  for (const n of nivaer) for (const s of kakKos.specific[n] || []) if (!undantag.has(s)) specifika.push(s);
+  return cssAv(specifika) + (undantag.size ? cssAv(kakKos.generic.filter((s) => !undantag.has(s))) : kakGenericCss) + KAK_UPPLAS;
+}
+
+// Rutor utan gratis nej (t.ex. "betala eller godkänn") döljs i toppramen när content/kakor.js ber om det
+const KAK_DOLJ = {
+  sourcepoint: `[id^="sp_message_container"]{display:none!important}html.sp-message-open,html.sp-message-open body{overflow:auto!important}html.sp-message-open body{position:static!important}`,
+  didomi: `#didomi-host{display:none!important}body.didomi-popup-open,html.didomi-popup-open{overflow:auto!important}`,
+};
+
+async function kakorPa(toppHost) {
+  const { kakor = true, kakUndantag = [] } = await chrome.storage.local.get(["kakor", "kakUndantag"]);
+  return kakor && !suffix(toppHost).some((n) => kakUndantag.includes(n));
+}
+
 // ---------- Pausade sajter ----------
 async function pausade() {
   return (await chrome.storage.local.get("pausade")).pausade || [];
@@ -106,6 +139,7 @@ async function registreraSkript(lista) {
   if (exclude.length) bas.excludeMatches = exclude;
   await chrome.scripting.registerContentScripts([
     { ...bas, id: "kosmetik", js: ["content/cosmetic.js"] },
+    { ...bas, id: "kakor", js: ["content/kakor.js"] },
     { ...bas, id: "vakt", js: ["content/guard.js"], world: "MAIN" },
     // YouTube: spola förbi och dölj förvideo- och mellanreklam
     { ...bas, id: "youtube", js: ["content/youtube.js"], world: "MAIN", matches: ["*://*.youtube.com/*", "*://*.youtube-nocookie.com/*"] },
@@ -122,10 +156,10 @@ function rakna(tabId, typ) {
 async function raknaNu(tabId, typ) {
   const nyckel = "tab" + tabId;
   const s = (await chrome.storage.session.get(nyckel))[nyckel] || { popups: 0, omdirigeringar: 0 };
-  s[typ]++;
+  s[typ] = (s[typ] || 0) + 1;
   await chrome.storage.session.set({ [nyckel]: s });
   const tot = (await chrome.storage.local.get("totalt")).totalt || { popups: 0, omdirigeringar: 0 };
-  tot[typ]++;
+  tot[typ] = (tot[typ] || 0) + 1;
   await chrome.storage.local.set({ totalt: tot });
   await laggTillDag({ [typ]: 1 });
 }
@@ -223,6 +257,31 @@ chrome.runtime.onMessage.addListener((msg, sender, svara) => {
       const css = await cssFor(msg.host);
       if (css) await chrome.scripting.insertCSS({ target: { tabId, frameIds: [sender.frameId] }, css, origin: "USER" }).catch(() => {});
       svara({ lockbete: css ? LOCKBETE : null });
+    } else if (msg.typ === "kakor" && tabId !== undefined) {
+      // Undantag och paus gäller sajten i adressfältet, även för rutor i en iframe från ett annat domännamn
+      let topp = "";
+      try { topp = new URL(sender.tab.url).hostname; } catch {}
+      const paus = await pausade();
+      const pa = !!topp && !suffix(topp).some((n) => paus.includes(n)) && (await kakorPa(topp));
+      if (pa && msg.host) {
+        await chrome.scripting.insertCSS({ target: { tabId, frameIds: [sender.frameId] }, css: await kakCssFor(msg.host), origin: "USER" }).catch(() => {});
+      }
+      svara({ pa });
+    } else if (msg.typ === "kaka-avvisad" && tabId !== undefined) {
+      await rakna(tabId, "kakor");
+      svara(true);
+    } else if (msg.typ === "kak-dolj" && tabId !== undefined && KAK_DOLJ[msg.cmp]) {
+      await chrome.scripting.insertCSS({ target: { tabId, frameIds: [0] }, css: KAK_DOLJ[msg.cmp], origin: "USER" }).catch(() => {});
+      await rakna(tabId, "kakor");
+      svara(true);
+    } else if (msg.typ === "kak-undantag") {
+      // pa = true: visa sajtens kakruta igen
+      const nivaer = suffix(msg.host);
+      let { kakUndantag = [] } = await chrome.storage.local.get("kakUndantag");
+      kakUndantag = kakUndantag.filter((h) => !nivaer.includes(h));
+      if (msg.pa) kakUndantag.push(msg.host.replace(/^www\./, ""));
+      await chrome.storage.local.set({ kakUndantag });
+      svara(true);
     } else if (msg.typ === "dolj-regler") {
       svara(await doljRegler(msg.host, msg.tokens || []));
     } else if (msg.typ === "popup-stoppad" && tabId !== undefined) {
@@ -246,7 +305,7 @@ chrome.runtime.onMessage.addListener((msg, sender, svara) => {
       let natverk = 0;
       try { natverk = (await chrome.declarativeNetRequest.getMatchedRules({ tabId: msg.tabId })).rulesMatchedInfo.length; } catch {}
       const totalt = (await chrome.storage.local.get("totalt")).totalt || { popups: 0, omdirigeringar: 0 };
-      svara({ pausad: suffix(host).some((n) => lista.includes(n)), natverk, ...tab, totalt });
+      svara({ ...tab, pausad: suffix(host).some((n) => lista.includes(n)), kakor: await kakorPa(host), kakor_flik: tab.kakor || 0, natverk, totalt });
     } else if (msg.typ === "konto-koppla" && sender.url?.startsWith("https://adraze.app/")) {
       // Från content/konto.js på adraze.app/konto: spara nyckeln och skicka statistiken direkt
       await chrome.storage.local.set({ konto: { token: String(msg.token), email: String(msg.email || "") } });

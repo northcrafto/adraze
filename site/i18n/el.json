@@ -148,6 +148,7 @@
   "privacy.h_local": "Τι αποθηκεύεται στον υπολογιστή σου",
   "privacy.local1": "Η λίστα με τα sites όπου έχεις κάνει παύση στο AdRaze.",
   "privacy.local2": "Μετρητές για το πόσα pop-ups και ανακατευθύνσεις έχουν σταματήσει.",
+  "privacy.local4": "Τα sites όπου θέλεις να βλέπεις μόνος σου το banner για cookies, και πόσα banner για cookies έχουν απορριφθεί.",
   "privacy.p_local": "Αυτά αποθηκεύονται στον χώρο αποθήκευσης του ίδιου του browser (<code>chrome.storage</code>) και δεν φεύγουν ποτέ από τον υπολογιστή σου. Αν απεγκαταστήσεις το AdRaze, διαγράφονται.",
   "privacy.h_perms": "Δικαιώματα και γιατί χρειάζονται",
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> μπλοκάρει διαφημίσεις και trackers με τα ενσωματωμένα φίλτρα του Chrome.",

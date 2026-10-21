@@ -148,6 +148,7 @@
   "privacy.h_local": "Kaj se shrani na tvojem računalniku",
   "privacy.local1": "Seznam strani, na katerih si začasno ustavil AdRaze.",
   "privacy.local2": "Števci, koliko pojavnih oken in preusmeritev je bilo ustavljenih.",
+  "privacy.local4": "Strani, na katerih želiš sam videti pasico s piškotki, in koliko pasic s piškotki je bilo zavrnjenih.",
   "privacy.p_local": "To se shrani v lastno shrambo brskalnika (<code>chrome.storage</code>) in nikoli ne zapusti tvojega računalnika. Če AdRaze odstraniš, izgine.",
   "privacy.h_perms": "Dovoljenja in zakaj so potrebna",
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> blokira oglase in sledilnike z vgrajenimi filtri v Chromu.",

@@ -148,6 +148,7 @@
   "privacy.h_local": "Hva som lagres på datamaskinen din",
   "privacy.local1": "Listen over nettsteder der du har pauset AdRaze.",
   "privacy.local2": "Tellere for hvor mange popups og omdirigeringer som er stoppet.",
+  "privacy.local4": "Nettsteder der du selv vil se informasjonskapsel-banneret, og hvor mange slike bannere som er avvist.",
   "privacy.p_local": "Dette lagres med nettleserens egen lagring (<code>chrome.storage</code>) og forlater aldri datamaskinen din. Avinstallerer du AdRaze, forsvinner det.",
   "privacy.h_perms": "Tillatelser og hvorfor de trengs",
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> blokkerer reklame og sporere med Chromes innebygde filter.",

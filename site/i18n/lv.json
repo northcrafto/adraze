@@ -148,6 +148,7 @@
   "privacy.h_local": "Kas tiek saglabāts tavā datorā",
   "privacy.local1": "Saraksts ar vietnēm, kurās esi apturējis AdRaze.",
   "privacy.local2": "Skaitītāji, cik uznirstošo logu un pāradresāciju apturēts.",
+  "privacy.local4": "Vietnes, kurās vēlies pats redzēt sīkdatņu paziņojumu, un cik sīkdatņu paziņojumu noraidīts.",
   "privacy.p_local": "Tas tiek glabāts pārlūka krātuvē (<code>chrome.storage</code>) un nekad neatstāj tavu datoru. Ja atinstalē AdRaze, tas pazūd.",
   "privacy.h_perms": "Atļaujas un kāpēc tās vajadzīgas",
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> bloķē reklāmas un izsekotājus ar Chrome iebūvētajiem filtriem.",

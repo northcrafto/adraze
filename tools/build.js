@@ -17,6 +17,8 @@ const KALLOR = {
   "ubo-filters.txt": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
   "peterlowe.txt": "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=adblockplus&showintro=0&mimetype=plaintext",
   "adguard-popups.txt": "https://filters.adtidy.org/extension/ublock/filters/19.txt",
+  // Bara kosmetiken används (döljer kakrutor), se kakor.json längre ner
+  "easylist-cookie.txt": "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt",
 };
 
 // Vilka listor som går till vilket regelpaket
@@ -58,6 +60,24 @@ function hostAv(monster) {
   return m && VALID_HOST.test(m[1].toLowerCase()) ? m[1].toLowerCase() : null;
 }
 
+// Kosmetisk regel (dölj-selektor eller undantag) -> in i mal. Svarar "kosmetik"/"undantag"/"hoppade", eller null om raden inte är kosmetisk.
+function kosmetikRad(line, mal) {
+  const km = line.match(/^([^#]*)(#@?#)(.+)$/);
+  if (!km || line.startsWith("/")) return null;
+  const [, doms, sep, sel] = km;
+  if (/^\+js|^\^|:-abp-|:has-text|:upward|:matches-|:xpath|:remove|:style|:watch-attr|:min-text|:others|:matches-path|:if\(|:if-not|:contains/.test(sel)) return "hoppade";
+  if (/#\?#|#\$#|#%#/.test(line)) return "hoppade";
+  const domaner = doms ? doms.split(",").map((x) => x.trim().toLowerCase()).filter(Boolean) : [];
+  if (sep === "#@#") {
+    for (const dm of domaner) { if (!mal.undantag.has(dm)) mal.undantag.set(dm, new Set()); mal.undantag.get(dm).add(sel); }
+    return "undantag";
+  }
+  const pos = domaner.filter((x) => !x.startsWith("~") && !x.includes("*"));
+  if (!domaner.length) mal.generic.add(sel);
+  else for (const dm of pos) { if (!mal.specific.has(dm)) mal.specific.set(dm, new Set()); mal.specific.get(dm).add(sel); }
+  return "kosmetik";
+}
+
 async function main() {
   fs.mkdirSync(LISTS, { recursive: true });
   if (process.argv.includes("--fetch")) {
@@ -74,7 +94,7 @@ async function main() {
   const annonsHosts = new Set();
   const undantagsHosts = new Set();
   const badfilters = new Set();
-  const stat = { natverk: 0, fel: 0, hoppade: 0, kosmetik: 0 };
+  const stat = { natverk: 0, fel: 0, hoppade: 0, kosmetik: 0, undantag: 0 };
   const rader = {};
 
   for (const [namn, filer] of Object.entries(PAKET)) {
@@ -98,22 +118,8 @@ async function main() {
       if (badfilters.has(line)) continue;
 
       // --- Kosmetik ---
-      const km = line.match(/^([^#]*)(#@?#)(.+)$/);
-      if (km && !line.startsWith("/")) {
-        const [, doms, sep, sel] = km;
-        if (/^\+js|^\^|:-abp-|:has-text|:upward|:matches-|:xpath|:remove|:style|:watch-attr|:min-text|:others|:matches-path|:if\(|:if-not|:contains/.test(sel)) { stat.hoppade++; continue; }
-        if (/#\?#|#\$#|#%#/.test(line)) { stat.hoppade++; continue; }
-        const domaner = doms ? doms.split(",").map((x) => x.trim().toLowerCase()).filter(Boolean) : [];
-        if (sep === "#@#") {
-          for (const dm of domaner) { if (!kosmetik.undantag.has(dm)) kosmetik.undantag.set(dm, new Set()); kosmetik.undantag.get(dm).add(sel); }
-          continue;
-        }
-        const pos = domaner.filter((x) => !x.startsWith("~") && !x.includes("*"));
-        if (!domaner.length) kosmetik.generic.add(sel);
-        else for (const dm of pos) { if (!kosmetik.specific.has(dm)) kosmetik.specific.set(dm, new Set()); kosmetik.specific.get(dm).add(sel); }
-        stat.kosmetik++;
-        continue;
-      }
+      const k = kosmetikRad(line, kosmetik);
+      if (k) { stat[k]++; continue; }
       if (line.includes("#@$#") || line.includes("#$?#") || line.includes("#@?#")) continue;
 
       // --- Nätverk ---
@@ -204,15 +210,30 @@ async function main() {
     regelPaket.security.push({ priority: 3000, action: STOPPSIDA, condition: { initiatorDomains: initiators.slice(i, i + 5000), resourceTypes: ["main_frame"], domainType: "thirdParty" } });
   }
 
+  // Kakrutor: egen kosmetik som kan stängas av per sajt (nätverksreglerna i listan används inte,
+  // de stoppar hela samtyckesskript och kan få sajter att sluta fungera)
+  const kakKos = { generic: new Set(), specific: new Map(), undantag: new Map() };
+  for (let line of fs.readFileSync(path.join(LISTS, "easylist-cookie.txt"), "utf8").split(/\r?\n/)) {
+    line = line.trim();
+    if (line && !line.startsWith("!")) kosmetikRad(line, kakKos);
+  }
+
   // Validera CSS-selektorer i riktiga Chromium så att en trasig selektor inte förstör resten
-  const allaSel = new Set(kosmetik.generic);
-  for (const s of kosmetik.specific.values()) for (const x of s) allaSel.add(x);
+  const allaSel = new Set();
+  for (const k of [kosmetik, kakKos]) {
+    for (const x of k.generic) allaSel.add(x);
+    for (const s of k.specific.values()) for (const x of s) allaSel.add(x);
+  }
   const giltiga = await validera([...allaSel]);
   const fil = (set) => [...set].filter((s) => giltiga.has(s));
-
-  const cos = { generic: fil(kosmetik.generic), specific: {}, exceptions: {}, genericHideExceptions: [...genericHideUndantag].sort() };
-  for (const [dm, s] of kosmetik.specific) { const f = fil(s); if (f.length) cos.specific[dm] = f; }
-  for (const [dm, s] of kosmetik.undantag) cos.exceptions[dm] = [...s];
+  const paketera = (k, extra) => {
+    const ut = { generic: fil(k.generic), specific: {}, exceptions: {}, ...extra };
+    for (const [dm, s] of k.specific) { const f = fil(s); if (f.length) ut.specific[dm] = f; }
+    for (const [dm, s] of k.undantag) ut.exceptions[dm] = [...s];
+    return ut;
+  };
+  const cos = paketera(kosmetik, { genericHideExceptions: [...genericHideUndantag].sort() });
+  const kakor = paketera(kakKos, {});
 
   fs.mkdirSync(path.join(EXT, "rules"), { recursive: true });
   fs.mkdirSync(path.join(EXT, "data"), { recursive: true });
@@ -227,9 +248,11 @@ async function main() {
     console.log(`${namn}: ${regler.length} regler`);
   }
   fs.writeFileSync(path.join(EXT, "data", "cosmetic.json"), JSON.stringify(cos));
+  fs.writeFileSync(path.join(EXT, "data", "kakor.json"), JSON.stringify(kakor));
   fs.writeFileSync(path.join(EXT, "data", "rakna.json"), JSON.stringify(rakna));
   fs.writeFileSync(path.join(EXT, "data", "popup-hosts.json"), JSON.stringify(sakra));
   console.log(`kosmetik: ${cos.generic.length} generella, ${Object.keys(cos.specific).length} sajter (${allaSel.size - giltiga.size} ogiltiga borttagna)`);
+  console.log(`kakrutor: ${kakor.generic.length} generella, ${Object.keys(kakor.specific).length} sajter`);
   console.log(`popup/farliga värdar: ${sakra.length}, annonsvärdar: ${annonsHosts.size}`);
   console.log(stat);
 }

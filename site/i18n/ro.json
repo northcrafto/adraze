@@ -148,6 +148,7 @@
   "privacy.h_local": "Ce se salvează pe calculatorul tău",
   "privacy.local1": "Lista site-urilor pe care ai pus AdRaze pe pauză.",
   "privacy.local2": "Contoare pentru câte pop-up-uri și redirecționări au fost oprite.",
+  "privacy.local4": "Site-urile pe care vrei să vezi singur bannerul de cookie-uri și câte bannere de cookie-uri au fost refuzate.",
   "privacy.p_local": "Acestea sunt salvate în spațiul de stocare al browserului (<code>chrome.storage</code>) și nu părăsesc niciodată calculatorul tău. Dacă dezinstalezi AdRaze, dispar.",
   "privacy.h_perms": "Permisiuni și de ce sunt necesare",
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> blochează reclamele și trackerele cu filtrele integrate în Chrome.",

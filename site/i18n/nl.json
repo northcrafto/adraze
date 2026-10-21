@@ -148,6 +148,7 @@
   "privacy.h_local": "Wat er op je computer wordt opgeslagen",
   "privacy.local1": "De lijst met sites waar je AdRaze hebt gepauzeerd.",
   "privacy.local2": "Tellers voor hoeveel pop-ups en doorverwijzingen zijn tegengehouden.",
+  "privacy.local4": "Sites waar je de cookiebanner zelf wilt zien, en hoeveel cookiebanners zijn geweigerd.",
   "privacy.p_local": "Dit wordt opgeslagen in de eigen opslag van de browser (<code>chrome.storage</code>) en verlaat nooit je computer. Verwijder je AdRaze, dan is het weg.",
   "privacy.h_perms": "Rechten en waarom ze nodig zijn",
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> blokkeert advertenties en trackers met de ingebouwde filters van Chrome.",

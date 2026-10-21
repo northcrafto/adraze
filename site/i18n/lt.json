@@ -148,6 +148,7 @@
   "privacy.h_local": "Kas saugoma jūsų kompiuteryje",
   "privacy.local1": "Svetainių, kuriose sustabdėte AdRaze, sąrašas.",
   "privacy.local2": "Skaitikliai, kiek iššokančių langų ir peradresavimų sustabdyta.",
+  "privacy.local4": "Svetainės, kuriose norite patys matyti slapukų juostą, ir kiek slapukų juostų atmesta.",
   "privacy.p_local": "Tai saugoma naršyklės saugykloje (<code>chrome.storage</code>) ir niekada nepalieka jūsų kompiuterio. Pašalinus AdRaze, tai dingsta.",
   "privacy.h_perms": "Leidimai ir kam jų reikia",
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> blokuoja reklamas ir sekiklius naudodamas integruotus Chrome filtrus.",

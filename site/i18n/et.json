@@ -148,6 +148,7 @@
   "privacy.h_local": "Mida sinu arvutisse salvestatakse",
   "privacy.local1": "Nimekiri saitidest, kus oled AdRaze peatanud.",
   "privacy.local2": "Loendurid peatatud hüpikakende ja ümbersuunamiste kohta.",
+  "privacy.local4": "Saidid, kus soovid küpsiste teavitust ise näha, ja mitu küpsiste teavitust on tagasi lükatud.",
   "privacy.p_local": "See salvestatakse brauseri enda mällu (<code>chrome.storage</code>) ega lahku kunagi sinu arvutist. Kui AdRaze eemaldad, kaob ka see.",
   "privacy.h_perms": "Õigused ja milleks neid vaja on",
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> blokeerib reklaamid ja jälgijad Chrome'i sisseehitatud filtritega.",

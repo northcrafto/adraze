@@ -148,6 +148,7 @@
   "privacy.h_local": "Mitä tietokoneellesi tallennetaan",
   "privacy.local1": "Luettelo sivustoista, joilla olet laittanut AdRazen tauolle.",
   "privacy.local2": "Laskurit estetyistä ponnahdusikkunoista ja uudelleenohjauksista.",
+  "privacy.local4": "Sivustot, joilla haluat nähdä evästeilmoituksen itse, ja kuinka monta evästeilmoitusta on hylätty.",
   "privacy.p_local": "Nämä tallennetaan selaimen omaan tallennustilaan (<code>chrome.storage</code>), eivätkä ne koskaan poistu tietokoneeltasi. Jos poistat AdRazen, ne katoavat.",
   "privacy.h_perms": "Käyttöoikeudet ja miksi niitä tarvitaan",
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> estää mainokset ja seurannan Chromen sisäänrakennetulla suodatuksella.",

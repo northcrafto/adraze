@@ -148,6 +148,7 @@
   "privacy.h_local": "Co se ukládá ve vašem počítači",
   "privacy.local1": "Seznam webů, na kterých jste AdRaze pozastavili.",
   "privacy.local2": "Počítadla zastavených vyskakovacích oken a přesměrování.",
+  "privacy.local4": "Weby, na kterých chcete lištu cookies vidět sami, a kolik lišt cookies bylo odmítnuto.",
   "privacy.p_local": "Ukládá se to do vlastního úložiště prohlížeče (<code>chrome.storage</code>) a nikdy to neopustí váš počítač. Když AdRaze odinstalujete, zmizí to.",
   "privacy.h_perms": "Oprávnění a proč jsou potřeba",
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> blokuje reklamy a sledovací skripty pomocí vestavěných filtrů Chromu.",

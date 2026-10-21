@@ -148,6 +148,7 @@
   "privacy.h_local": "Mi tárolódik a gépeden",
   "privacy.local1": "Azoknak az oldalaknak a listája, ahol szüneteltetted az AdRaze-t.",
   "privacy.local2": "Számlálók a megállított felugró ablakokról és átirányításokról.",
+  "privacy.local4": "Azok az oldalak, ahol magad szeretnéd látni a sütisávot, és hogy hány sütisávot utasított el.",
   "privacy.p_local": "Ezeket a böngésző saját tárhelye (<code>chrome.storage</code>) tárolja, és soha nem hagyják el a gépedet. Ha eltávolítod az AdRaze-t, ezek is eltűnnek.",
   "privacy.h_perms": "Engedélyek, és miért kellenek",
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> a Chrome beépített szűrőivel blokkolja a reklámokat és a nyomkövetőket.",

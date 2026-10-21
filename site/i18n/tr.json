@@ -148,6 +148,7 @@
   "privacy.h_local": "Bilgisayarında neler saklanır",
   "privacy.local1": "AdRaze'i duraklattığın sitelerin listesi.",
   "privacy.local2": "Kaç açılır pencere ve yönlendirmenin durdurulduğunu gösteren sayaçlar.",
+  "privacy.local4": "Çerez bildirimini kendin görmek istediğin siteler ve kaç çerez bildiriminin reddedildiği.",
   "privacy.p_local": "Bunlar tarayıcının kendi depolamasında (<code>chrome.storage</code>) saklanır ve bilgisayarından asla çıkmaz. AdRaze'i kaldırırsan hepsi silinir.",
   "privacy.h_perms": "İzinler ve neden gerektikleri",
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> reklamları ve izleyicileri Chrome'un yerleşik filtreleriyle engeller.",

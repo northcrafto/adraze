@@ -148,6 +148,7 @@
   "privacy.h_local": "Ce qui est enregistré sur votre ordinateur",
   "privacy.local1": "La liste des sites sur lesquels vous avez mis AdRaze en pause.",
   "privacy.local2": "Des compteurs du nombre de pop-ups et de redirections bloqués.",
+  "privacy.local4": "Les sites sur lesquels vous voulez voir vous-même la bannière de cookies, et le nombre de bannières de cookies refusées.",
   "privacy.p_local": "Ces informations sont enregistrées dans le stockage du navigateur (<code>chrome.storage</code>) et ne quittent jamais votre ordinateur. Si vous désinstallez AdRaze, elles disparaissent.",
   "privacy.h_perms": "Autorisations et pourquoi elles sont nécessaires",
   "privacy.perm_dnr": "<b>declarativeNetRequest :</b> bloque les pubs et les traqueurs avec les filtres intégrés de Chrome.",

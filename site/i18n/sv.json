@@ -136,6 +136,7 @@
   "privacy.h_local": "Vad som sparas på din dator",
   "privacy.local1": "Listan över sajter där du har pausat AdRaze.",
   "privacy.local2": "Räknare för hur många popups och omdirigeringar som stoppats.",
+  "privacy.local4": "Sajter där du vill se kakrutan själv, och hur många kakrutor som avvisats.",
   "privacy.p_local": "Detta sparas med webbläsarens egen lagring (<code>chrome.storage</code>) och lämnar aldrig din dator. Avinstallerar du AdRaze försvinner det.",
   "privacy.h_perms": "Behörigheter och varför de behövs",
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> blockerar reklam och spårare med Chromes inbyggda filter.",
