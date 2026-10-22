@@ -131,6 +131,7 @@
   "install.title": "Bli kvitt reklamen nå.",
   "install.text": "AdRaze er på vei til Chrome Web Store. Inntil den er der, kan du installere den manuelt på et minutt.",
   "install.download": "Last ned AdRaze 0.1.1",
+  "install.text_store": "Gratis i Chrome Nettmarked. Fungerer i Chrome, Brave, Edge, Opera og Vivaldi.",
   "install.step1": "Pakk ut zip-filen.",
   "install.step2": "Åpne <code>chrome://extensions</code> og slå på <b>Utviklermodus</b>.",
   "install.step3": "Klikk på <b>Last inn upakket</b> og velg mappen du pakket ut.",

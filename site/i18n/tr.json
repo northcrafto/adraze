@@ -131,6 +131,7 @@
   "install.title": "Reklamlardan hemen kurtul.",
   "install.text": "AdRaze, Chrome Web Store'a geliyor. O zamana kadar bir dakikada elle kurabilirsin.",
   "install.download": "AdRaze 0.1.1'ı indir",
+  "install.text_store": "Chrome Web Mağazası'nda ücretsiz. Chrome, Brave, Edge, Opera ve Vivaldi'de çalışır.",
   "install.step1": "Zip dosyasını aç.",
   "install.step2": "<code>chrome://extensions</code> sayfasını aç ve <b>Geliştirici modu</b>'nu etkinleştir.",
   "install.step3": "<b>Paketlenmemiş öğe yükle</b>'ye tıkla ve açtığın klasörü seç.",

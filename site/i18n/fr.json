@@ -131,6 +131,7 @@
   "install.title": "Débarrassez-vous des pubs dès maintenant.",
   "install.text": "AdRaze arrive bientôt sur le Chrome Web Store. En attendant, vous pouvez l’installer vous-même en une minute.",
   "install.download": "Télécharger AdRaze 0.1.1",
+  "install.text_store": "Gratuit sur le Chrome Web Store. Fonctionne avec Chrome, Brave, Edge, Opera et Vivaldi.",
   "install.step1": "Décompressez le fichier zip.",
   "install.step2": "Ouvrez <code>chrome://extensions</code> et activez le <b>Mode développeur</b>.",
   "install.step3": "Cliquez sur <b>Charger l’extension non empaquetée</b> et choisissez le dossier décompressé.",

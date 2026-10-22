@@ -131,6 +131,7 @@
   "install.title": "Atsikratykite reklamų dabar.",
   "install.text": "AdRaze jau keliauja į Chrome Web Store. Kol jo ten dar nėra, galite jį įdiegti rankiniu būdu per minutę.",
   "install.download": "Atsisiųsti AdRaze 0.1.1",
+  "install.text_store": "Nemokamai „Chrome“ internetinėje parduotuvėje. Veikia „Chrome“, „Brave“, „Edge“, „Opera“ ir „Vivaldi“.",
   "install.step1": "Išpakuokite zip failą.",
   "install.step2": "Atidarykite <code>chrome://extensions</code> ir įjunkite <b>Kūrėjo režimas</b>.",
   "install.step3": "Spustelėkite <b>Įkelti išpakuotą</b> ir pasirinkite išpakuotą aplanką.",

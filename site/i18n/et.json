@@ -131,6 +131,7 @@
   "install.title": "Saa reklaamidest lahti kohe.",
   "install.text": "AdRaze on teel Chrome Web Store'i. Seni saad selle minutiga käsitsi paigaldada.",
   "install.download": "Laadi alla AdRaze 0.1.1",
+  "install.text_store": "Tasuta Chrome'i veebipoes. Töötab Chrome'is, Brave'is, Edge'is, Operas ja Vivaldis.",
   "install.step1": "Paki zip-fail lahti.",
   "install.step2": "Ava <code>chrome://extensions</code> ja lülita sisse <b>Arendaja režiim</b>.",
   "install.step3": "Klõpsa <b>Laadi pakkimata</b> ja vali kaust, mille lahti pakkisid.",

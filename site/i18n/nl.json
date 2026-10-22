@@ -131,6 +131,7 @@
   "install.title": "Weg met die reclame. Nu.",
   "install.text": "AdRaze komt binnenkort in de Chrome Web Store. Tot die tijd installeer je het in een minuutje zelf.",
   "install.download": "AdRaze 0.1.1 downloaden",
+  "install.text_store": "Gratis in de Chrome Web Store. Werkt in Chrome, Brave, Edge, Opera en Vivaldi.",
   "install.step1": "Pak het zip-bestand uit.",
   "install.step2": "Open <code>chrome://extensions</code> en zet de <b>Ontwikkelaarsmodus</b> aan.",
   "install.step3": "Klik op <b>Uitgepakte extensie laden</b> en kies de map die je hebt uitgepakt.",
