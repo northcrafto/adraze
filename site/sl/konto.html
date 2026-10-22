@@ -146,7 +146,18 @@
         <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
-          <p class="hej-citat" id="hej-citat"><span></span><i class="markor" aria-hidden="true"></i></p>
+          <figure class="hej-citat" id="hej-citat">
+            <figcaption class="hej-etikett" hidden>Citat dneva</figcaption>
+            <blockquote><span></span><i class="markor" aria-hidden="true"></i></blockquote>
+            <p class="hej-vem"><span hidden>– <cite></cite> <span aria-hidden="true">·</span> </span><button type="button" class="lank-knapp nav-link" id="foresla">Predlagajte citat</button></p>
+          </figure>
+          <form class="forslag" id="f-forslag" novalidate hidden>
+            <div class="forslag-huvud"><b>Pošljite svoj predlog</b><button type="button" class="lank-knapp nav-link" id="forslag-stang">Zapri</button></div>
+            <label class="falt"><span>Citat</span><textarea name="citat" rows="2" maxlength="400" required></textarea></label>
+            <label class="falt"><span>Kdo je to rekel? (neobvezno)</span><input name="vem" maxlength="80" autocomplete="off"></label>
+            <button class="btn liq" type="submit">Pošlji</button>
+            <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
+          </form>
           <p class="dov hej-under">Prijavljen kot <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Spremeni ime</button></span></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Kako vas naj kličemo?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Vaše ime" required></label>
@@ -214,16 +225,49 @@
     <span data-k="err_wait">Preveč poskusov. Malo počakaj.</span>
     <span data-k="welcome">Dobrodošli</span>
     <span data-k="welcome_name">Dobrodošli, {namn}</span>
-    <span data-k="quote_1">Happy adblocking!</span>
-    <span data-k="quote_2">Tako je internet veliko tišji.</span>
-    <span data-k="quote_3">Tudi danes brez oglasov. Uživajte.</span>
-    <span data-k="quote_4">Sledilniki vas še vedno iščejo.</span>
-    <span data-k="quote_5">{n} oglasov, ki jih nikoli niste morali videti.</span>
-    <span data-k="quote_6">Hitrejše strani, mirnejša glava.</span>
-    <span data-k="quote_7">Splet, kot je bil mišljen.</span>
-    <span data-k="quote_8">Vaša pozornost ni naprodaj.</span>
-    <span data-k="quote_9">Pojavna okna? Nikoli slišal zanje.</span>
-    <span data-k="quote_10">Čist splet je srečen splet.</span>
+    <span data-k="quote_1">Kdor ima zakaj živeti, prenese skoraj vsak kako.</span>
+    <span data-k="quote_by_1">Friedrich Nietzsche</span>
+    <span data-k="quote_2">Neraziskano življenje ni vredno življenja.</span>
+    <span data-k="quote_by_2">Sokrat</span>
+    <span data-k="quote_3">Pogosteje trpimo v domišljiji kot v resnici.</span>
+    <span data-k="quote_by_3">Seneka</span>
+    <span data-k="quote_4">Ne upamo si ne zato, ker so stvari težke. Težke so, ker si ne upamo.</span>
+    <span data-k="quote_by_4">Seneka</span>
+    <span data-k="quote_5">Življenje ni kratko, le veliko ga zapravimo.</span>
+    <span data-k="quote_by_5">Seneka</span>
+    <span data-k="quote_6">Ne izgubljaj več časa z razpravami, kakšen naj bo dober človek. Bodi tak.</span>
+    <span data-k="quote_by_6">Mark Avrelij</span>
+    <span data-k="quote_7">Kar stoji na poti, postane pot.</span>
+    <span data-k="quote_by_7">Mark Avrelij</span>
+    <span data-k="quote_8">Življenje je mogoče razumeti le za nazaj, živeti pa ga je treba naprej.</span>
+    <span data-k="quote_by_8">Søren Kierkegaard</span>
+    <span data-k="quote_9">Nihče ne stopi dvakrat v isto reko.</span>
+    <span data-k="quote_by_9">Heraklit</span>
+    <span data-k="quote_10">Ko situacije ne moremo več spremeniti, smo izzvani, da spremenimo sebe.</span>
+    <span data-k="quote_by_10">Viktor Frankl</span>
+    <span data-k="quote_11">Kdor gleda navzven, sanja. Kdor gleda navznoter, se prebudi.</span>
+    <span data-k="quote_by_11">Carl Jung</span>
+    <span data-k="quote_12">Pot tisoč milj se začne z enim korakom.</span>
+    <span data-k="quote_by_12">Laozi</span>
+    <span data-k="quote_13">Kdor ve, da ima dovolj, je bogat.</span>
+    <span data-k="quote_by_13">Laozi</span>
+    <span data-k="quote_14">Sizifa si moramo predstavljati srečnega.</span>
+    <span data-k="quote_by_14">Albert Camus</span>
+    <span data-k="quote_15">Človek je obsojen na svobodo.</span>
+    <span data-k="quote_by_15">Jean-Paul Sartre</span>
+    <span data-k="quote_16">Bistveno je očem nevidno.</span>
+    <span data-k="quote_by_16">Antoine de Saint-Exupéry</span>
+    <span data-k="quote_17">Vsa nesreča ljudi izvira iz tega, da ne znajo mirno sedeti sami v sobi.</span>
+    <span data-k="quote_by_17">Blaise Pascal</span>
+    <span data-k="quote_18">Meje mojega jezika so meje mojega sveta.</span>
+    <span data-k="quote_by_18">Ludwig Wittgenstein</span>
+    <span data-k="quote_19">Kdor se bori s pošastmi, naj pazi, da sam ne postane pošast.</span>
+    <span data-k="quote_by_19">Friedrich Nietzsche</span>
+    <span data-k="quote_20">Ljudi ne vznemirjajo stvari, temveč njihova mnenja o njih.</span>
+    <span data-k="quote_by_20">Epiktet</span>
+    <span data-k="happy">Happy adblocking!</span>
+    <span data-k="suggest_thanks">Hvala! Predlog je poslan.</span>
+    <span data-k="err_suggest">Najprej vpišite citat.</span>
     <span data-k="err_name">Vpišite ime s črkami.</span>
     <span data-k="delete_confirm">Trajno izbrišem račun in vso statistiko?</span>
   </template>

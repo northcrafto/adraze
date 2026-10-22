@@ -146,7 +146,18 @@
         <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
-          <p class="hej-citat" id="hej-citat"><span></span><i class="markor" aria-hidden="true"></i></p>
+          <figure class="hej-citat" id="hej-citat">
+            <figcaption class="hej-etikett" hidden>Citação do dia</figcaption>
+            <blockquote><span></span><i class="markor" aria-hidden="true"></i></blockquote>
+            <p class="hej-vem"><span hidden>– <cite></cite> <span aria-hidden="true">·</span> </span><button type="button" class="lank-knapp nav-link" id="foresla">Sugerir uma citação</button></p>
+          </figure>
+          <form class="forslag" id="f-forslag" novalidate hidden>
+            <div class="forslag-huvud"><b>Envie sua sugestão</b><button type="button" class="lank-knapp nav-link" id="forslag-stang">Fechar</button></div>
+            <label class="falt"><span>A citação</span><textarea name="citat" rows="2" maxlength="400" required></textarea></label>
+            <label class="falt"><span>Quem disse? (opcional)</span><input name="vem" maxlength="80" autocomplete="off"></label>
+            <button class="btn liq" type="submit">Enviar</button>
+            <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
+          </form>
           <p class="dov hej-under">Sessão iniciada como <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Mudar nome</button></span></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Como devemos chamar você?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Seu primeiro nome" required></label>
@@ -214,16 +225,49 @@
     <span data-k="err_wait">Demasiadas tentativas. Espera um pouco.</span>
     <span data-k="welcome">Bem-vindo</span>
     <span data-k="welcome_name">Bem-vindo, {namn}</span>
-    <span data-k="quote_1">Happy adblocking!</span>
-    <span data-k="quote_2">A internet fica bem mais tranquila assim.</span>
-    <span data-k="quote_3">Nenhum anúncio hoje também. Aproveite.</span>
-    <span data-k="quote_4">Os rastreadores ainda estão procurando você.</span>
-    <span data-k="quote_5">{n} anúncios que você nunca precisou ver.</span>
-    <span data-k="quote_6">Páginas mais rápidas, mente mais calma.</span>
-    <span data-k="quote_7">A web como ela deveria ser.</span>
-    <span data-k="quote_8">Sua atenção não está à venda.</span>
-    <span data-k="quote_9">Pop-ups? Nunca ouvi falar.</span>
-    <span data-k="quote_10">Uma web limpa é uma web feliz.</span>
+    <span data-k="quote_1">Quem tem um porquê para viver suporta quase qualquer como.</span>
+    <span data-k="quote_by_1">Friedrich Nietzsche</span>
+    <span data-k="quote_2">Uma vida não examinada não vale a pena ser vivida.</span>
+    <span data-k="quote_by_2">Sócrates</span>
+    <span data-k="quote_3">Sofremos mais vezes na imaginação do que na realidade.</span>
+    <span data-k="quote_by_3">Séneca</span>
+    <span data-k="quote_4">Não é porque as coisas são difíceis que não ousamos; é porque não ousamos que elas são difíceis.</span>
+    <span data-k="quote_by_4">Séneca</span>
+    <span data-k="quote_5">A vida não é curta, apenas desperdiçamos muito dela.</span>
+    <span data-k="quote_by_5">Séneca</span>
+    <span data-k="quote_6">Não perca mais tempo discutindo como deve ser uma boa pessoa. Seja uma.</span>
+    <span data-k="quote_by_6">Marco Aurélio</span>
+    <span data-k="quote_7">O que está no caminho se torna o caminho.</span>
+    <span data-k="quote_by_7">Marco Aurélio</span>
+    <span data-k="quote_8">A vida só pode ser compreendida olhando para trás, mas deve ser vivida olhando para a frente.</span>
+    <span data-k="quote_by_8">Søren Kierkegaard</span>
+    <span data-k="quote_9">Ninguém entra duas vezes no mesmo rio.</span>
+    <span data-k="quote_by_9">Heráclito</span>
+    <span data-k="quote_10">Quando não podemos mais mudar uma situação, somos desafiados a mudar a nós mesmos.</span>
+    <span data-k="quote_by_10">Viktor Frankl</span>
+    <span data-k="quote_11">Quem olha para fora sonha. Quem olha para dentro desperta.</span>
+    <span data-k="quote_by_11">Carl Jung</span>
+    <span data-k="quote_12">Uma jornada de mil milhas começa com um único passo.</span>
+    <span data-k="quote_by_12">Lao-Tsé</span>
+    <span data-k="quote_13">Quem sabe que tem o suficiente é rico.</span>
+    <span data-k="quote_by_13">Lao-Tsé</span>
+    <span data-k="quote_14">É preciso imaginar Sísifo feliz.</span>
+    <span data-k="quote_by_14">Albert Camus</span>
+    <span data-k="quote_15">O homem está condenado a ser livre.</span>
+    <span data-k="quote_by_15">Jean-Paul Sartre</span>
+    <span data-k="quote_16">O essencial é invisível aos olhos.</span>
+    <span data-k="quote_by_16">Antoine de Saint-Exupéry</span>
+    <span data-k="quote_17">Toda a infelicidade dos homens vem de não saberem ficar quietos sozinhos num quarto.</span>
+    <span data-k="quote_by_17">Blaise Pascal</span>
+    <span data-k="quote_18">Os limites da minha linguagem são os limites do meu mundo.</span>
+    <span data-k="quote_by_18">Ludwig Wittgenstein</span>
+    <span data-k="quote_19">Quem luta contra monstros deve cuidar para não se tornar um monstro.</span>
+    <span data-k="quote_by_19">Friedrich Nietzsche</span>
+    <span data-k="quote_20">Não são as coisas que nos perturbam, mas as opiniões que temos sobre elas.</span>
+    <span data-k="quote_by_20">Epicteto</span>
+    <span data-k="happy">Happy adblocking!</span>
+    <span data-k="suggest_thanks">Obrigado! Sua sugestão foi enviada.</span>
+    <span data-k="err_suggest">Escreva a citação primeiro.</span>
     <span data-k="err_name">Digite um nome com letras.</span>
     <span data-k="delete_confirm">Eliminar a conta e todas as estatísticas de vez?</span>
   </template>

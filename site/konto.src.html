@@ -89,7 +89,18 @@
         <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
-          <p class="hej-citat" id="hej-citat"><span></span><i class="markor" aria-hidden="true"></i></p>
+          <figure class="hej-citat" id="hej-citat">
+            <figcaption class="hej-etikett" hidden>{{t:konto.quote_today}}</figcaption>
+            <blockquote><span></span><i class="markor" aria-hidden="true"></i></blockquote>
+            <p class="hej-vem"><span hidden>– <cite></cite> <span aria-hidden="true">·</span> </span><button type="button" class="lank-knapp nav-link" id="foresla">{{t:konto.suggest_open}}</button></p>
+          </figure>
+          <form class="forslag" id="f-forslag" novalidate hidden>
+            <div class="forslag-huvud"><b>{{t:konto.suggest_title}}</b><button type="button" class="lank-knapp nav-link" id="forslag-stang">{{t:konto.suggest_close}}</button></div>
+            <label class="falt"><span>{{t:konto.suggest_quote}}</span><textarea name="citat" rows="2" maxlength="400" required></textarea></label>
+            <label class="falt"><span>{{t:konto.suggest_by}}</span><input name="vem" maxlength="80" autocomplete="off"></label>
+            <button class="btn liq" type="submit">{{t:konto.suggest_send}}</button>
+            <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
+          </form>
           <p class="dov hej-under">{{t:konto.signed_in_as}} <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">{{t:konto.name_change}}</button></span></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>{{t:konto.name_ask}}</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="{{t:konto.name_placeholder}}" required></label>
@@ -158,15 +169,48 @@
     <span data-k="welcome">{{t:konto.welcome}}</span>
     <span data-k="welcome_name">{{t:konto.welcome_name}}</span>
     <span data-k="quote_1">{{t:konto.quote_1}}</span>
+    <span data-k="quote_by_1">{{t:konto.quote_by_1}}</span>
     <span data-k="quote_2">{{t:konto.quote_2}}</span>
+    <span data-k="quote_by_2">{{t:konto.quote_by_2}}</span>
     <span data-k="quote_3">{{t:konto.quote_3}}</span>
+    <span data-k="quote_by_3">{{t:konto.quote_by_3}}</span>
     <span data-k="quote_4">{{t:konto.quote_4}}</span>
+    <span data-k="quote_by_4">{{t:konto.quote_by_4}}</span>
     <span data-k="quote_5">{{t:konto.quote_5}}</span>
+    <span data-k="quote_by_5">{{t:konto.quote_by_5}}</span>
     <span data-k="quote_6">{{t:konto.quote_6}}</span>
+    <span data-k="quote_by_6">{{t:konto.quote_by_6}}</span>
     <span data-k="quote_7">{{t:konto.quote_7}}</span>
+    <span data-k="quote_by_7">{{t:konto.quote_by_7}}</span>
     <span data-k="quote_8">{{t:konto.quote_8}}</span>
+    <span data-k="quote_by_8">{{t:konto.quote_by_8}}</span>
     <span data-k="quote_9">{{t:konto.quote_9}}</span>
+    <span data-k="quote_by_9">{{t:konto.quote_by_9}}</span>
     <span data-k="quote_10">{{t:konto.quote_10}}</span>
+    <span data-k="quote_by_10">{{t:konto.quote_by_10}}</span>
+    <span data-k="quote_11">{{t:konto.quote_11}}</span>
+    <span data-k="quote_by_11">{{t:konto.quote_by_11}}</span>
+    <span data-k="quote_12">{{t:konto.quote_12}}</span>
+    <span data-k="quote_by_12">{{t:konto.quote_by_12}}</span>
+    <span data-k="quote_13">{{t:konto.quote_13}}</span>
+    <span data-k="quote_by_13">{{t:konto.quote_by_13}}</span>
+    <span data-k="quote_14">{{t:konto.quote_14}}</span>
+    <span data-k="quote_by_14">{{t:konto.quote_by_14}}</span>
+    <span data-k="quote_15">{{t:konto.quote_15}}</span>
+    <span data-k="quote_by_15">{{t:konto.quote_by_15}}</span>
+    <span data-k="quote_16">{{t:konto.quote_16}}</span>
+    <span data-k="quote_by_16">{{t:konto.quote_by_16}}</span>
+    <span data-k="quote_17">{{t:konto.quote_17}}</span>
+    <span data-k="quote_by_17">{{t:konto.quote_by_17}}</span>
+    <span data-k="quote_18">{{t:konto.quote_18}}</span>
+    <span data-k="quote_by_18">{{t:konto.quote_by_18}}</span>
+    <span data-k="quote_19">{{t:konto.quote_19}}</span>
+    <span data-k="quote_by_19">{{t:konto.quote_by_19}}</span>
+    <span data-k="quote_20">{{t:konto.quote_20}}</span>
+    <span data-k="quote_by_20">{{t:konto.quote_by_20}}</span>
+    <span data-k="happy">{{t:konto.happy}}</span>
+    <span data-k="suggest_thanks">{{t:konto.suggest_thanks}}</span>
+    <span data-k="err_suggest">{{t:konto.err_suggest}}</span>
     <span data-k="err_name">{{t:konto.err_name}}</span>
     <span data-k="delete_confirm">{{t:konto.delete_confirm}}</span>
   </template>

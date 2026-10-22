@@ -146,7 +146,18 @@
         <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
-          <p class="hej-citat" id="hej-citat"><span></span><i class="markor" aria-hidden="true"></i></p>
+          <figure class="hej-citat" id="hej-citat">
+            <figcaption class="hej-etikett" hidden>Citazione del giorno</figcaption>
+            <blockquote><span></span><i class="markor" aria-hidden="true"></i></blockquote>
+            <p class="hej-vem"><span hidden>– <cite></cite> <span aria-hidden="true">·</span> </span><button type="button" class="lank-knapp nav-link" id="foresla">Suggerisci una citazione</button></p>
+          </figure>
+          <form class="forslag" id="f-forslag" novalidate hidden>
+            <div class="forslag-huvud"><b>Invia il tuo suggerimento</b><button type="button" class="lank-knapp nav-link" id="forslag-stang">Chiudi</button></div>
+            <label class="falt"><span>La citazione</span><textarea name="citat" rows="2" maxlength="400" required></textarea></label>
+            <label class="falt"><span>Chi l’ha detto? (facoltativo)</span><input name="vem" maxlength="80" autocomplete="off"></label>
+            <button class="btn liq" type="submit">Invia</button>
+            <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
+          </form>
           <p class="dov hej-under">Accesso effettuato come <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Cambia nome</button></span></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Come vuoi che ti chiamiamo?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Il tuo nome" required></label>
@@ -214,16 +225,49 @@
     <span data-k="err_wait">Troppi tentativi. Aspetta un momento.</span>
     <span data-k="welcome">Benvenuto</span>
     <span data-k="welcome_name">Benvenuto, {namn}</span>
-    <span data-k="quote_1">Happy adblocking!</span>
-    <span data-k="quote_2">Internet è molto più tranquillo così.</span>
-    <span data-k="quote_3">Niente pubblicità neanche oggi. Goditela.</span>
-    <span data-k="quote_4">I tracker ti stanno ancora cercando.</span>
-    <span data-k="quote_5">{n} annunci che non hai mai dovuto vedere.</span>
-    <span data-k="quote_6">Pagine più veloci, mente più serena.</span>
-    <span data-k="quote_7">Il web come doveva essere.</span>
-    <span data-k="quote_8">La tua attenzione non è in vendita.</span>
-    <span data-k="quote_9">Popup? Mai sentiti nominare.</span>
-    <span data-k="quote_10">Un web pulito è un web felice.</span>
+    <span data-k="quote_1">Chi ha un perché per vivere può sopportare quasi ogni come.</span>
+    <span data-k="quote_by_1">Friedrich Nietzsche</span>
+    <span data-k="quote_2">Una vita senza ricerca non è degna di essere vissuta.</span>
+    <span data-k="quote_by_2">Socrate</span>
+    <span data-k="quote_3">Soffriamo più spesso nell’immaginazione che nella realtà.</span>
+    <span data-k="quote_by_3">Seneca</span>
+    <span data-k="quote_4">Non è perché le cose sono difficili che non osiamo, è perché non osiamo che sono difficili.</span>
+    <span data-k="quote_by_4">Seneca</span>
+    <span data-k="quote_5">La vita non è breve, siamo noi a sprecarne molta.</span>
+    <span data-k="quote_by_5">Seneca</span>
+    <span data-k="quote_6">Non perdere altro tempo a discutere di come dovrebbe essere una brava persona. Siilo.</span>
+    <span data-k="quote_by_6">Marco Aurelio</span>
+    <span data-k="quote_7">Ciò che ostacola il cammino diventa il cammino.</span>
+    <span data-k="quote_by_7">Marco Aurelio</span>
+    <span data-k="quote_8">La vita può essere capita solo all’indietro, ma va vissuta in avanti.</span>
+    <span data-k="quote_by_8">Søren Kierkegaard</span>
+    <span data-k="quote_9">Nessuno si bagna due volte nello stesso fiume.</span>
+    <span data-k="quote_by_9">Eraclito</span>
+    <span data-k="quote_10">Quando non siamo più in grado di cambiare una situazione, siamo sfidati a cambiare noi stessi.</span>
+    <span data-k="quote_by_10">Viktor Frankl</span>
+    <span data-k="quote_11">Chi guarda fuori sogna. Chi guarda dentro si sveglia.</span>
+    <span data-k="quote_by_11">Carl Jung</span>
+    <span data-k="quote_12">Un viaggio di mille miglia comincia con un solo passo.</span>
+    <span data-k="quote_by_12">Lao Tzu</span>
+    <span data-k="quote_13">Chi sa di avere abbastanza è ricco.</span>
+    <span data-k="quote_by_13">Lao Tzu</span>
+    <span data-k="quote_14">Bisogna immaginare Sisifo felice.</span>
+    <span data-k="quote_by_14">Albert Camus</span>
+    <span data-k="quote_15">L’uomo è condannato a essere libero.</span>
+    <span data-k="quote_by_15">Jean-Paul Sartre</span>
+    <span data-k="quote_16">L’essenziale è invisibile agli occhi.</span>
+    <span data-k="quote_by_16">Antoine de Saint-Exupéry</span>
+    <span data-k="quote_17">Tutta l’infelicità degli uomini deriva dal non saper restare tranquilli da soli in una stanza.</span>
+    <span data-k="quote_by_17">Blaise Pascal</span>
+    <span data-k="quote_18">I limiti del mio linguaggio significano i limiti del mio mondo.</span>
+    <span data-k="quote_by_18">Ludwig Wittgenstein</span>
+    <span data-k="quote_19">Chi combatte i mostri deve guardarsi dal diventare a sua volta un mostro.</span>
+    <span data-k="quote_by_19">Friedrich Nietzsche</span>
+    <span data-k="quote_20">Non sono le cose a turbarci, ma le opinioni che abbiamo su di esse.</span>
+    <span data-k="quote_by_20">Epitteto</span>
+    <span data-k="happy">Happy adblocking!</span>
+    <span data-k="suggest_thanks">Grazie! Il suggerimento è stato inviato.</span>
+    <span data-k="err_suggest">Scrivi prima la citazione.</span>
     <span data-k="err_name">Scrivi un nome usando lettere.</span>
     <span data-k="delete_confirm">Eliminare l’account e tutte le statistiche per sempre?</span>
   </template>

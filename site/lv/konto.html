@@ -146,7 +146,18 @@
         <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
-          <p class="hej-citat" id="hej-citat"><span></span><i class="markor" aria-hidden="true"></i></p>
+          <figure class="hej-citat" id="hej-citat">
+            <figcaption class="hej-etikett" hidden>Dienas citāts</figcaption>
+            <blockquote><span></span><i class="markor" aria-hidden="true"></i></blockquote>
+            <p class="hej-vem"><span hidden>– <cite></cite> <span aria-hidden="true">·</span> </span><button type="button" class="lank-knapp nav-link" id="foresla">Ieteikt citātu</button></p>
+          </figure>
+          <form class="forslag" id="f-forslag" novalidate hidden>
+            <div class="forslag-huvud"><b>Iesūti savu ieteikumu</b><button type="button" class="lank-knapp nav-link" id="forslag-stang">Aizvērt</button></div>
+            <label class="falt"><span>Citāts</span><textarea name="citat" rows="2" maxlength="400" required></textarea></label>
+            <label class="falt"><span>Kurš to teica? (nav obligāti)</span><input name="vem" maxlength="80" autocomplete="off"></label>
+            <button class="btn liq" type="submit">Sūtīt</button>
+            <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
+          </form>
           <p class="dov hej-under">Pieteicies kā <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Mainīt vārdu</button></span></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Kā mums tevi saukt?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Tavs vārds" required></label>
@@ -214,16 +225,49 @@
     <span data-k="err_wait">Pārāk daudz mēģinājumu. Uzgaidi mirkli.</span>
     <span data-k="welcome">Laipni lūdzam</span>
     <span data-k="welcome_name">Laipni lūdzam, {namn}</span>
-    <span data-k="quote_1">Happy adblocking!</span>
-    <span data-k="quote_2">Tā internets ir daudz klusāks.</span>
-    <span data-k="quote_3">Arī šodien bez reklāmām. Bauda.</span>
-    <span data-k="quote_4">Izsekotāji joprojām tevi meklē.</span>
-    <span data-k="quote_5">{n} reklāmas, kuras tev nekad nevajadzēja redzēt.</span>
-    <span data-k="quote_6">Ātrākas lapas, mierīgāks prāts.</span>
-    <span data-k="quote_7">Tīmeklis, kāds tam bija jābūt.</span>
-    <span data-k="quote_8">Tava uzmanība nav pārdošanā.</span>
-    <span data-k="quote_9">Uznirstošie logi? Neesmu dzirdējis.</span>
-    <span data-k="quote_10">Tīrs tīmeklis ir laimīgs tīmeklis.</span>
+    <span data-k="quote_1">Kam ir kāpēc dzīvot, tas var izturēt gandrīz jebkuru kā.</span>
+    <span data-k="quote_by_1">Frīdrihs Nīče</span>
+    <span data-k="quote_2">Neizpētīta dzīve nav dzīvošanas vērta.</span>
+    <span data-k="quote_by_2">Sokrats</span>
+    <span data-k="quote_3">Mēs biežāk ciešam iztēlē nekā īstenībā.</span>
+    <span data-k="quote_by_3">Seneka</span>
+    <span data-k="quote_4">Mēs neuzdrošināmies nevis tāpēc, ka lietas ir grūtas. Tās ir grūtas, jo mēs neuzdrošināmies.</span>
+    <span data-k="quote_by_4">Seneka</span>
+    <span data-k="quote_5">Dzīve nav īsa, mēs tikai daudz no tās izšķiežam.</span>
+    <span data-k="quote_by_5">Seneka</span>
+    <span data-k="quote_6">Netērē vairs laiku strīdiem par to, kādam jābūt labam cilvēkam. Esi tāds.</span>
+    <span data-k="quote_by_6">Marks Aurēlijs</span>
+    <span data-k="quote_7">Tas, kas stāv ceļā, kļūst par ceļu.</span>
+    <span data-k="quote_by_7">Marks Aurēlijs</span>
+    <span data-k="quote_8">Dzīvi var saprast tikai atskatoties, bet dzīvot to jādzīvo uz priekšu.</span>
+    <span data-k="quote_by_8">Sērens Kērkegors</span>
+    <span data-k="quote_9">Neviens neiekāpj divreiz vienā un tajā pašā upē.</span>
+    <span data-k="quote_by_9">Hērakleits</span>
+    <span data-k="quote_10">Kad vairs nevaram mainīt situāciju, mēs esam aicināti mainīt paši sevi.</span>
+    <span data-k="quote_by_10">Viktors Frankls</span>
+    <span data-k="quote_11">Kas skatās uz āru, sapņo. Kas skatās uz iekšu, pamostas.</span>
+    <span data-k="quote_by_11">Karls Jungs</span>
+    <span data-k="quote_12">Tūkstoš jūdžu ceļojums sākas ar vienu soli.</span>
+    <span data-k="quote_by_12">Laozi</span>
+    <span data-k="quote_13">Kas zina, ka viņam pietiek, ir bagāts.</span>
+    <span data-k="quote_by_13">Laozi</span>
+    <span data-k="quote_14">Mums jāiztēlojas Sīzifs laimīgs.</span>
+    <span data-k="quote_by_14">Alberts Kamī</span>
+    <span data-k="quote_15">Cilvēks ir nolemts būt brīvs.</span>
+    <span data-k="quote_by_15">Žans Pols Sartrs</span>
+    <span data-k="quote_16">Būtiskais acīm nav redzams.</span>
+    <span data-k="quote_by_16">Antuāns de Sent-Ekziperī</span>
+    <span data-k="quote_17">Visa cilvēku nelaime nāk no tā, ka viņi neprot mierīgi sēdēt vieni istabā.</span>
+    <span data-k="quote_by_17">Blēzs Paskāls</span>
+    <span data-k="quote_18">Manas valodas robežas ir manas pasaules robežas.</span>
+    <span data-k="quote_by_18">Ludvigs Vitgenšteins</span>
+    <span data-k="quote_19">Kas cīnās ar briesmoņiem, lai sargās pats nekļūt par briesmoni.</span>
+    <span data-k="quote_by_19">Frīdrihs Nīče</span>
+    <span data-k="quote_20">Cilvēkus satrauc nevis lietas, bet viņu uzskati par tām.</span>
+    <span data-k="quote_by_20">Epiktēts</span>
+    <span data-k="happy">Happy adblocking!</span>
+    <span data-k="suggest_thanks">Paldies! Ieteikums ir nosūtīts.</span>
+    <span data-k="err_suggest">Vispirms ieraksti citātu.</span>
     <span data-k="err_name">Ieraksti vārdu ar burtiem.</span>
     <span data-k="delete_confirm">Neatgriezeniski dzēst kontu un visu statistiku?</span>
   </template>

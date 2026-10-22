@@ -146,7 +146,18 @@
         <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
-          <p class="hej-citat" id="hej-citat"><span></span><i class="markor" aria-hidden="true"></i></p>
+          <figure class="hej-citat" id="hej-citat">
+            <figcaption class="hej-etikett" hidden>Quote of the day</figcaption>
+            <blockquote><span></span><i class="markor" aria-hidden="true"></i></blockquote>
+            <p class="hej-vem"><span hidden>– <cite></cite> <span aria-hidden="true">·</span> </span><button type="button" class="lank-knapp nav-link" id="foresla">Suggest a quote</button></p>
+          </figure>
+          <form class="forslag" id="f-forslag" novalidate hidden>
+            <div class="forslag-huvud"><b>Send in your suggestion</b><button type="button" class="lank-knapp nav-link" id="forslag-stang">Close</button></div>
+            <label class="falt"><span>The quote</span><textarea name="citat" rows="2" maxlength="400" required></textarea></label>
+            <label class="falt"><span>Who said it? (optional)</span><input name="vem" maxlength="80" autocomplete="off"></label>
+            <button class="btn liq" type="submit">Send</button>
+            <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
+          </form>
           <p class="dov hej-under">Signed in as <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Change name</button></span></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>What should we call you?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Your first name" required></label>
@@ -214,16 +225,49 @@
     <span data-k="err_wait">Too many attempts. Wait a moment.</span>
     <span data-k="welcome">Welcome</span>
     <span data-k="welcome_name">Welcome, {namn}</span>
-    <span data-k="quote_1">Happy adblocking!</span>
-    <span data-k="quote_2">The internet is much quieter like this.</span>
-    <span data-k="quote_3">No ads today either. Enjoy.</span>
-    <span data-k="quote_4">The trackers are still looking for you.</span>
-    <span data-k="quote_5">{n} ads you never had to see.</span>
-    <span data-k="quote_6">Faster pages, calmer mind.</span>
-    <span data-k="quote_7">The web as it was meant to be.</span>
-    <span data-k="quote_8">Your attention is not for sale.</span>
-    <span data-k="quote_9">Popups? Never heard of them.</span>
-    <span data-k="quote_10">A clean web is a happy web.</span>
+    <span data-k="quote_1">He who has a why to live for can bear almost any how.</span>
+    <span data-k="quote_by_1">Friedrich Nietzsche</span>
+    <span data-k="quote_2">The unexamined life is not worth living.</span>
+    <span data-k="quote_by_2">Socrates</span>
+    <span data-k="quote_3">We suffer more often in imagination than in reality.</span>
+    <span data-k="quote_by_3">Seneca</span>
+    <span data-k="quote_4">It is not because things are difficult that we do not dare. It is because we do not dare that they are difficult.</span>
+    <span data-k="quote_by_4">Seneca</span>
+    <span data-k="quote_5">Life is not short, we just waste a lot of it.</span>
+    <span data-k="quote_by_5">Seneca</span>
+    <span data-k="quote_6">Waste no more time arguing about what a good person should be. Be one.</span>
+    <span data-k="quote_by_6">Marcus Aurelius</span>
+    <span data-k="quote_7">What stands in the way becomes the way.</span>
+    <span data-k="quote_by_7">Marcus Aurelius</span>
+    <span data-k="quote_8">Life can only be understood backwards, but it must be lived forwards.</span>
+    <span data-k="quote_by_8">Søren Kierkegaard</span>
+    <span data-k="quote_9">No one ever steps in the same river twice.</span>
+    <span data-k="quote_by_9">Heraclitus</span>
+    <span data-k="quote_10">When we are no longer able to change a situation, we are challenged to change ourselves.</span>
+    <span data-k="quote_by_10">Viktor Frankl</span>
+    <span data-k="quote_11">Who looks outside, dreams. Who looks inside, awakes.</span>
+    <span data-k="quote_by_11">Carl Jung</span>
+    <span data-k="quote_12">A journey of a thousand miles begins with a single step.</span>
+    <span data-k="quote_by_12">Laozi</span>
+    <span data-k="quote_13">He who knows he has enough is rich.</span>
+    <span data-k="quote_by_13">Laozi</span>
+    <span data-k="quote_14">One must imagine Sisyphus happy.</span>
+    <span data-k="quote_by_14">Albert Camus</span>
+    <span data-k="quote_15">Man is condemned to be free.</span>
+    <span data-k="quote_by_15">Jean-Paul Sartre</span>
+    <span data-k="quote_16">What is essential is invisible to the eye.</span>
+    <span data-k="quote_by_16">Antoine de Saint-Exupéry</span>
+    <span data-k="quote_17">All of humanity's problems stem from our inability to sit quietly in a room alone.</span>
+    <span data-k="quote_by_17">Blaise Pascal</span>
+    <span data-k="quote_18">The limits of my language mean the limits of my world.</span>
+    <span data-k="quote_by_18">Ludwig Wittgenstein</span>
+    <span data-k="quote_19">Whoever fights monsters should see to it that he does not become a monster.</span>
+    <span data-k="quote_by_19">Friedrich Nietzsche</span>
+    <span data-k="quote_20">It is not things that disturb us, but our opinions about them.</span>
+    <span data-k="quote_by_20">Epictetus</span>
+    <span data-k="happy">Happy adblocking!</span>
+    <span data-k="suggest_thanks">Thanks! Your suggestion has been sent.</span>
+    <span data-k="err_suggest">Write the quote first.</span>
     <span data-k="err_name">Enter a name using letters.</span>
     <span data-k="delete_confirm">Delete your account and all statistics for good?</span>
   </template>

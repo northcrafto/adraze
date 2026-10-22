@@ -146,7 +146,18 @@
         <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
-          <p class="hej-citat" id="hej-citat"><span></span><i class="markor" aria-hidden="true"></i></p>
+          <figure class="hej-citat" id="hej-citat">
+            <figcaption class="hej-etikett" hidden>Цитат на деня</figcaption>
+            <blockquote><span></span><i class="markor" aria-hidden="true"></i></blockquote>
+            <p class="hej-vem"><span hidden>– <cite></cite> <span aria-hidden="true">·</span> </span><button type="button" class="lank-knapp nav-link" id="foresla">Предложете цитат</button></p>
+          </figure>
+          <form class="forslag" id="f-forslag" novalidate hidden>
+            <div class="forslag-huvud"><b>Изпратете своето предложение</b><button type="button" class="lank-knapp nav-link" id="forslag-stang">Затвори</button></div>
+            <label class="falt"><span>Цитатът</span><textarea name="citat" rows="2" maxlength="400" required></textarea></label>
+            <label class="falt"><span>Кой го е казал? (по избор)</span><input name="vem" maxlength="80" autocomplete="off"></label>
+            <button class="btn liq" type="submit">Изпрати</button>
+            <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
+          </form>
           <p class="dov hej-under">Влязъл си като <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Смени името</button></span></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Как да ви наричаме?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Вашето име" required></label>
@@ -214,16 +225,49 @@
     <span data-k="err_wait">Твърде много опити. Изчакай малко.</span>
     <span data-k="welcome">Добре дошли</span>
     <span data-k="welcome_name">Добре дошли, {namn}</span>
-    <span data-k="quote_1">Happy adblocking!</span>
-    <span data-k="quote_2">Така интернетът е много по-тих.</span>
-    <span data-k="quote_3">И днес без реклами. Наслаждавайте се.</span>
-    <span data-k="quote_4">Тракерите още ви търсят.</span>
-    <span data-k="quote_5">{n} реклами, които никога не трябваше да виждате.</span>
-    <span data-k="quote_6">По-бързи страници, по-спокоен ум.</span>
-    <span data-k="quote_7">Мрежата такава, каквато трябваше да бъде.</span>
-    <span data-k="quote_8">Вниманието ви не се продава.</span>
-    <span data-k="quote_9">Изскачащи прозорци? Не съм чувал за тях.</span>
-    <span data-k="quote_10">Чистата мрежа е щастлива мрежа.</span>
+    <span data-k="quote_1">Който има защо да живее, може да понесе почти всяко как.</span>
+    <span data-k="quote_by_1">Фридрих Ницше</span>
+    <span data-k="quote_2">Неизследваният живот не си струва да се живее.</span>
+    <span data-k="quote_by_2">Сократ</span>
+    <span data-k="quote_3">По-често страдаме във въображението си, отколкото в действителността.</span>
+    <span data-k="quote_by_3">Сенека</span>
+    <span data-k="quote_4">Не защото нещата са трудни, не се осмеляваме. Трудни са, защото не се осмеляваме.</span>
+    <span data-k="quote_by_4">Сенека</span>
+    <span data-k="quote_5">Животът не е кратък, просто пилеем много от него.</span>
+    <span data-k="quote_by_5">Сенека</span>
+    <span data-k="quote_6">Не губи повече време да спориш какъв трябва да е добрият човек. Бъди такъв.</span>
+    <span data-k="quote_by_6">Марк Аврелий</span>
+    <span data-k="quote_7">Това, което стои на пътя, става път.</span>
+    <span data-k="quote_by_7">Марк Аврелий</span>
+    <span data-k="quote_8">Животът може да бъде разбран само назад, но трябва да бъде живян напред.</span>
+    <span data-k="quote_by_8">Сьорен Киркегор</span>
+    <span data-k="quote_9">Никой не влиза два пъти в една и съща река.</span>
+    <span data-k="quote_by_9">Хераклит</span>
+    <span data-k="quote_10">Когато вече не можем да променим ситуацията, сме предизвикани да променим себе си.</span>
+    <span data-k="quote_by_10">Виктор Франкъл</span>
+    <span data-k="quote_11">Който гледа навън, сънува. Който гледа навътре, се пробужда.</span>
+    <span data-k="quote_by_11">Карл Юнг</span>
+    <span data-k="quote_12">Пътешествие от хиляда мили започва с една крачка.</span>
+    <span data-k="quote_by_12">Лао Дзъ</span>
+    <span data-k="quote_13">Който знае, че има достатъчно, е богат.</span>
+    <span data-k="quote_by_13">Лао Дзъ</span>
+    <span data-k="quote_14">Трябва да си представим Сизиф щастлив.</span>
+    <span data-k="quote_by_14">Албер Камю</span>
+    <span data-k="quote_15">Човекът е осъден да бъде свободен.</span>
+    <span data-k="quote_by_15">Жан-Пол Сартр</span>
+    <span data-k="quote_16">Същественото е невидимо за очите.</span>
+    <span data-k="quote_by_16">Антоан дьо Сент-Екзюпери</span>
+    <span data-k="quote_17">Цялото нещастие на хората идва от това, че не могат да седят спокойно сами в една стая.</span>
+    <span data-k="quote_by_17">Блез Паскал</span>
+    <span data-k="quote_18">Границите на моя език са границите на моя свят.</span>
+    <span data-k="quote_by_18">Лудвиг Витгенщайн</span>
+    <span data-k="quote_19">Който се бори с чудовища, да внимава сам да не стане чудовище.</span>
+    <span data-k="quote_by_19">Фридрих Ницше</span>
+    <span data-k="quote_20">Не нещата ни тревожат, а мненията ни за тях.</span>
+    <span data-k="quote_by_20">Епиктет</span>
+    <span data-k="happy">Happy adblocking!</span>
+    <span data-k="suggest_thanks">Благодарим! Предложението е изпратено.</span>
+    <span data-k="err_suggest">Първо напишете цитата.</span>
     <span data-k="err_name">Въведете име с букви.</span>
     <span data-k="delete_confirm">Да изтрием ли акаунта и цялата статистика завинаги?</span>
   </template>

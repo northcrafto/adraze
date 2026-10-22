@@ -64,7 +64,7 @@
 .k-siffror { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 12px; margin-top: 16px; }
 
 /* Välkommen, <namn>: figuren hoppar upp och vinkar, bokstäverna reser sig en i taget, en orange linje ritas under namnet */
-.hej { display: flex; align-items: center; gap: clamp(16px, 3vw, 32px); min-width: 0; }
+.hej { display: flex; align-items: flex-start; gap: clamp(16px, 3vw, 32px); min-width: 0; }
 .hej-vink { width: clamp(76px, 9vw, 112px); flex: none; background: #fff; border-radius: 24px; padding: 10px 10px 2px; box-shadow: 0 1px 0 var(--linje); transform-origin: 50% 100%; animation: vink-in .9s var(--ease) .2s both; }
 .hej-vink img { display: block; width: 100%; height: auto; }
 @keyframes vink-in { from { opacity: 0; transform: translateY(24px) scale(.5) rotate(-10deg); } 55% { opacity: 1; transform: translateY(-6px) scale(1.05) rotate(3deg); } 80% { transform: translateY(1px) scale(.99) rotate(-1deg); } }
@@ -77,12 +77,25 @@
 .hej-namn svg { position: absolute; left: -3%; width: 106%; bottom: -.14em; height: .28em; overflow: visible; pointer-events: none; }
 .hej-namn path { fill: none; stroke: var(--accent); stroke-width: 7; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: rita-linje .8s var(--ease) forwards; animation-delay: var(--efter, 1s); }
 @keyframes rita-linje { to { stroke-dashoffset: 0; } }
-/* Dagens rad skrivs ut tecken för tecken när linjen ritats klart */
-.hej-citat { margin-top: 16px; min-height: 1.4em; font-size: clamp(17px, 1.6vw, 21px); font-weight: 600; letter-spacing: -0.01em; color: var(--ink); }
+/* Dagens citat skrivs ut tecken för tecken när linjen ritats klart, sedan tonas upphovspersonen in */
+.hej-citat { margin: 18px 0 0; max-width: 46ch; }
+.hej-etikett { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; animation: tona-in .5s ease both; animation-delay: var(--efter, 1s); }
+.hej-citat blockquote { margin: 0; min-height: 1.4em; font-size: clamp(17px, 1.6vw, 21px); line-height: 1.4; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); text-wrap: pretty; }
 .hej-citat .markor { display: inline-block; width: 2px; height: 1.05em; margin-left: 3px; vertical-align: -0.15em; background: var(--accent); border-radius: 1px; opacity: 0; }
 .hej-citat.skriver .markor { opacity: 1; }
 .hej-citat.klar .markor { animation: blinka 1s steps(1) 3 forwards; opacity: 1; }
 @keyframes blinka { 50% { opacity: 0; } to { opacity: 0; } }
+.hej-vem { margin-top: 6px; font-size: 14px; color: var(--dov); opacity: 0; transition: opacity .5s ease; }
+.hej-vem cite { font-style: normal; font-weight: 600; }
+.hej-vem .lank-knapp { font-size: 14px; }
+.hej-citat.klar .hej-vem, .hej-citat.direkt .hej-vem { opacity: 1; }
+.forslag { display: grid; gap: 12px; max-width: 460px; margin-top: 16px; padding: 18px; background: var(--yta); border: 1px solid var(--linje); border-radius: 20px; animation: tona-in .4s var(--ease) both; }
+.forslag[hidden] { display: none; }
+.forslag-huvud { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.forslag textarea { min-height: 76px; padding: 12px 16px; border-radius: 14px; border: 1.5px solid var(--linje); background: #fff; font: inherit; font-size: 17px; color: var(--ink); resize: vertical; transition: border-color .2s ease, box-shadow .2s ease; }
+.forslag textarea:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 4px rgb(255 75 31 / .14); }
+.forslag .btn { justify-self: start; }
+.forslag .meddelande { margin-top: 0; min-height: 0; }
 .hej-under { margin-top: 10px; animation: tona-in .6s ease both; animation-delay: var(--efter, 1s); }
 @keyframes tona-in { from { opacity: 0; transform: translateY(6px); } }
 .namn-form { display: flex; align-items: end; gap: 10px; margin-top: 18px; max-width: 440px; animation: tona-in .5s var(--ease) both; }
@@ -94,6 +107,8 @@
   .hej-vink, .hej-b, .hej-under, .namn-form { animation: none; }
   .hej-namn path { animation: none; stroke-dashoffset: 0; }
   .hej-citat .markor { display: none; }
+  .hej-etikett, .forslag { animation: none; }
+  .hej-vem { transition: none; }
 }
 .k-siffra { background: var(--yta); border: 1px solid var(--linje); border-radius: 22px; padding: 22px; }
 .k-siffra dt { font-size: clamp(34px, 4vw, 52px); font-weight: 700; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
@@ -137,7 +152,6 @@
   .k-siffra.stor { grid-column: 1 / -1; }
   .diagram { gap: 2px; height: 140px; }
   .konto { padding-top: 36px; }
-  .hej { align-items: flex-start; }
   .hej-vink { width: 64px; border-radius: 18px; padding: 7px 7px 1px; }
   .k-rubrik { margin-top: 40px; }
 }

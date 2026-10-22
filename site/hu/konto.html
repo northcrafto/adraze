@@ -146,7 +146,18 @@
         <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
-          <p class="hej-citat" id="hej-citat"><span></span><i class="markor" aria-hidden="true"></i></p>
+          <figure class="hej-citat" id="hej-citat">
+            <figcaption class="hej-etikett" hidden>A nap idézete</figcaption>
+            <blockquote><span></span><i class="markor" aria-hidden="true"></i></blockquote>
+            <p class="hej-vem"><span hidden>– <cite></cite> <span aria-hidden="true">·</span> </span><button type="button" class="lank-knapp nav-link" id="foresla">Idézet javaslása</button></p>
+          </figure>
+          <form class="forslag" id="f-forslag" novalidate hidden>
+            <div class="forslag-huvud"><b>Küldd be a javaslatod</b><button type="button" class="lank-knapp nav-link" id="forslag-stang">Bezárás</button></div>
+            <label class="falt"><span>Az idézet</span><textarea name="citat" rows="2" maxlength="400" required></textarea></label>
+            <label class="falt"><span>Ki mondta? (nem kötelező)</span><input name="vem" maxlength="80" autocomplete="off"></label>
+            <button class="btn liq" type="submit">Küldés</button>
+            <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
+          </form>
           <p class="dov hej-under">Bejelentkezve: <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Név módosítása</button></span></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Hogyan szólíthatunk?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="A keresztneved" required></label>
@@ -214,16 +225,49 @@
     <span data-k="err_wait">Túl sok próbálkozás. Várj egy kicsit.</span>
     <span data-k="welcome">Üdv</span>
     <span data-k="welcome_name">Üdv, {namn}</span>
-    <span data-k="quote_1">Happy adblocking!</span>
-    <span data-k="quote_2">Így sokkal csendesebb az internet.</span>
-    <span data-k="quote_3">Ma sincs reklám. Élvezd.</span>
-    <span data-k="quote_4">A követők még mindig keresnek.</span>
-    <span data-k="quote_5">{n} hirdetés, amit sosem kellett látnod.</span>
-    <span data-k="quote_6">Gyorsabb oldalak, nyugodtabb fej.</span>
-    <span data-k="quote_7">A web, ahogy lennie kellett.</span>
-    <span data-k="quote_8">A figyelmed nem eladó.</span>
-    <span data-k="quote_9">Felugró ablakok? Sosem hallottam róluk.</span>
-    <span data-k="quote_10">A tiszta web boldog web.</span>
+    <span data-k="quote_1">Akinek van miért élnie, szinte bármilyen hogyant elvisel.</span>
+    <span data-k="quote_by_1">Friedrich Nietzsche</span>
+    <span data-k="quote_2">A vizsgálatlan élet nem érdemes az életre.</span>
+    <span data-k="quote_by_2">Szókratész</span>
+    <span data-k="quote_3">Gyakrabban szenvedünk a képzeletünkben, mint a valóságban.</span>
+    <span data-k="quote_by_3">Seneca</span>
+    <span data-k="quote_4">Nem azért nem merünk, mert a dolgok nehezek, hanem azért nehezek, mert nem merünk.</span>
+    <span data-k="quote_by_4">Seneca</span>
+    <span data-k="quote_5">Az élet nem rövid, csak sokat elpazarlunk belőle.</span>
+    <span data-k="quote_by_5">Seneca</span>
+    <span data-k="quote_6">Ne vitatkozz többé arról, milyen a jó ember. Légy az.</span>
+    <span data-k="quote_by_6">Marcus Aurelius</span>
+    <span data-k="quote_7">Ami az utadba áll, az lesz az út.</span>
+    <span data-k="quote_by_7">Marcus Aurelius</span>
+    <span data-k="quote_8">Az életet csak visszafelé lehet megérteni, de előre kell élni.</span>
+    <span data-k="quote_by_8">Søren Kierkegaard</span>
+    <span data-k="quote_9">Senki sem léphet kétszer ugyanabba a folyóba.</span>
+    <span data-k="quote_by_9">Hérakleitosz</span>
+    <span data-k="quote_10">Ha már nem tudunk változtatni egy helyzeten, az a feladatunk, hogy magunkon változtassunk.</span>
+    <span data-k="quote_by_10">Viktor Frankl</span>
+    <span data-k="quote_11">Aki kifelé néz, álmodik. Aki befelé néz, felébred.</span>
+    <span data-k="quote_by_11">Carl Jung</span>
+    <span data-k="quote_12">Az ezer mérföldes utazás is egyetlen lépéssel kezdődik.</span>
+    <span data-k="quote_by_12">Laozi</span>
+    <span data-k="quote_13">Aki tudja, hogy elege van, az gazdag.</span>
+    <span data-k="quote_by_13">Laozi</span>
+    <span data-k="quote_14">Sziszüphoszt boldognak kell elképzelnünk.</span>
+    <span data-k="quote_by_14">Albert Camus</span>
+    <span data-k="quote_15">Az ember szabadságra van ítélve.</span>
+    <span data-k="quote_by_15">Jean-Paul Sartre</span>
+    <span data-k="quote_16">Ami igazán lényeges, az a szemnek láthatatlan.</span>
+    <span data-k="quote_by_16">Antoine de Saint-Exupéry</span>
+    <span data-k="quote_17">Az emberek minden boldogtalansága abból fakad, hogy nem tudnak nyugodtan egyedül ülni egy szobában.</span>
+    <span data-k="quote_by_17">Blaise Pascal</span>
+    <span data-k="quote_18">Nyelvem határai világom határait jelentik.</span>
+    <span data-k="quote_by_18">Ludwig Wittgenstein</span>
+    <span data-k="quote_19">Aki szörnyekkel harcol, vigyázzon, nehogy maga is szörnnyé váljon.</span>
+    <span data-k="quote_by_19">Friedrich Nietzsche</span>
+    <span data-k="quote_20">Nem a dolgok nyugtalanítanak minket, hanem a róluk alkotott véleményünk.</span>
+    <span data-k="quote_by_20">Epiktétosz</span>
+    <span data-k="happy">Happy adblocking!</span>
+    <span data-k="suggest_thanks">Köszönjük! A javaslatot elküldtük.</span>
+    <span data-k="err_suggest">Először írd be az idézetet.</span>
     <span data-k="err_name">Adj meg egy betűkből álló nevet.</span>
     <span data-k="delete_confirm">Véglegesen törlöd a fiókot és az összes statisztikát?</span>
   </template>
