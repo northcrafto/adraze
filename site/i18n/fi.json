@@ -131,6 +131,7 @@
   "install.title": "Eroon mainoksista nyt.",
   "install.text": "AdRaze on tulossa Chrome Web Storeen. Siihen asti voit asentaa sen käsin minuutissa.",
   "install.download": "Lataa AdRaze 0.1.1",
+  "install.text_store": "Ilmainen Chrome Web Storessa. Toimii Chromessa, Bravessa, Edgessä, Operassa ja Vivaldissa.",
   "install.step1": "Pura zip-tiedosto.",
   "install.step2": "Avaa <code>chrome://extensions</code> ja kytke <b>Kehittäjätila</b> päälle.",
   "install.step3": "Klikkaa <b>Lataa pakkaamaton laajennus</b> ja valitse purkamasi kansio.",

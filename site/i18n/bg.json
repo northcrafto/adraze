@@ -131,6 +131,7 @@
   "install.title": "Отърви се от рекламите сега.",
   "install.text": "AdRaze е на път към Chrome Web Store. Докато се появи там, можеш да го инсталираш ръчно за минута.",
   "install.download": "Изтегли AdRaze 0.1.1",
+  "install.text_store": "Безплатно в Уеб магазина на Chrome. Работи в Chrome, Brave, Edge, Opera и Vivaldi.",
   "install.step1": "Разархивирай zip файла.",
   "install.step2": "Отвори <code>chrome://extensions</code> и включи <b>Режим за програмисти</b>.",
   "install.step3": "Кликни <b>Зареждане на разпакетирано разширение</b> и избери разархивираната папка.",

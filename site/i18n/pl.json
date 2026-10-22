@@ -131,6 +131,7 @@
   "install.title": "Pozbądź się reklam już teraz.",
   "install.text": "AdRaze jest w drodze do Chrome Web Store. Zanim się tam pojawi, możesz zainstalować go ręcznie w minutę.",
   "install.download": "Pobierz AdRaze 0.1.1",
+  "install.text_store": "Za darmo w Chrome Web Store. Działa w Chrome, Brave, Edge, Operze i Vivaldi.",
   "install.step1": "Rozpakuj plik zip.",
   "install.step2": "Otwórz <code>chrome://extensions</code> i włącz <b>Tryb dewelopera</b>.",
   "install.step3": "Kliknij <b>Załaduj rozpakowane</b> i wybierz rozpakowany folder.",

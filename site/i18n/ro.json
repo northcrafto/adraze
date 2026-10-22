@@ -131,6 +131,7 @@
   "install.title": "Scapă de reclame chiar acum.",
   "install.text": "AdRaze e pe drum spre Chrome Web Store. Până apare acolo, îl poți instala manual într-un minut.",
   "install.download": "Descarcă AdRaze 0.1.1",
+  "install.text_store": "Gratuit în Magazinul web Chrome. Funcționează în Chrome, Brave, Edge, Opera și Vivaldi.",
   "install.step1": "Dezarhivează fișierul zip.",
   "install.step2": "Deschide <code>chrome://extensions</code> și activează <b>Modul pentru dezvoltatori</b>.",
   "install.step3": "Dă click pe <b>Încarcă extensia neîmpachetată</b> și alege folderul dezarhivat.",

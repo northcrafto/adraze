@@ -18,6 +18,8 @@ SPRAK = [
 ]
 SIDOR = {'index.src.html': '', 'integritet.src.html': 'integritet', 'konto.src.html': 'konto', 'statistik.src.html': 'statistik', 'stod.src.html': 'stod'}
 UTAN_SITEMAP = {'konto'}  # inloggningen ska inte indexeras
+# Sätt till butikslänken när Google har godkänt tillägget: knapparna går då direkt dit och zip-instruktionerna försvinner
+BUTIK = None  # 'https://chromewebstore.google.com/detail/cgdjdjgdoklomdphknggkhfghlglcppd'
 
 def ikon(namn):
     svg = re.sub(r'<title>.*?</title>', '', (rot / 'ikoner' / f'{namn}.svg').read_text())
@@ -49,6 +51,10 @@ for kod, namn in finns:
         sprakval = (f'<details class="sprak"><summary aria-label="{html.escape(t["nav.language"])}">{ikon("globe")}<span>{kod.upper()}</span></summary>'
                     f'<ul class="sprak-lista">{val}</ul></details>')
         ut = mall.replace('{{alternates}}', alternates).replace('{{sprakval}}', sprakval)
+        # <!--zip-->…<!--/zip--> visas tills butiken finns, <!--butik-->…<!--/butik--> efter
+        bort = 'zip' if BUTIK else 'butik'
+        ut = re.sub(rf'<!--{bort}-->.*?<!--/{bort}-->', '', ut, flags=re.S).replace('<!--zip-->', '').replace('<!--/zip-->', '').replace('<!--butik-->', '').replace('<!--/butik-->', '')
+        ut = ut.replace('{{installera}}', BUTIK or url(kod, '') + '#installera').replace('{{butik}}', BUTIK or '')
         ut = ut.replace('{{lang}}', kod).replace('{{hem}}', url(kod, '')).replace('{{pre}}', '' if kod == 'sv' else f'/{kod}')
         ut = re.sub(r'\{\{t:([a-z0-9_.]+)\}\}', lambda m: t[m.group(1)], ut)
         ut = re.sub(r'\{\{([a-z-]+)\}\}', lambda m: ikon(m.group(1)), ut)

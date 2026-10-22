@@ -131,6 +131,7 @@
   "install.title": "Znebi se oglasov zdaj.",
   "install.text": "AdRaze je na poti v Chrome Web Store. Dokler ga tam ni, ga lahko ročno namestiš v minuti.",
   "install.download": "Prenesi AdRaze 0.1.1",
+  "install.text_store": "Brezplačno v Spletni trgovini Chrome. Deluje v Chromu, Bravu, Edgeu, Operi in Vivaldiju.",
   "install.step1": "Razpakiraj datoteko zip.",
   "install.step2": "Odpri <code>chrome://extensions</code> in vklopi <b>Način za razvijalce</b>.",
   "install.step3": "Klikni <b>Naloži razpakirano</b> in izberi mapo, ki si jo razpakiral.",

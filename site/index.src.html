@@ -25,7 +25,7 @@
       <h1>{{t:hero.title}}</h1>
       <p class="lead">{{t:hero.lead}}</p>
       <div class="cta-rad">
-        <a href="#installera" class="btn btn-stor liq">{{chrome}}{{t:hero.cta}}</a>
+        <a href="{{installera}}" class="btn btn-stor liq">{{chrome}}{{t:hero.cta}}</a>
         <a href="#se-skillnaden" class="btn btn-stor liq-ghost">{{t:nav.difference}}</a>
       </div>
       <ul class="bevis">
@@ -308,7 +308,7 @@
     <div class="wrap installera-grid">
       <div>
         <h2>{{t:install.title}}</h2>
-        <p>{{t:install.text}}</p>
+        <!--zip--><p>{{t:install.text}}</p>
         <div class="cta-rad">
           <a href="/adraze-0.1.1.zip" class="btn btn-stor liq liq-mork" download>{{download-simple}}{{t:install.download}}</a>
         </div>
@@ -316,7 +316,11 @@
           <li>{{t:install.step1}}</li>
           <li>{{t:install.step2}}</li>
           <li>{{t:install.step3}}</li>
-        </ol>
+        </ol><!--/zip-->
+        <!--butik--><p>{{t:install.text_store}}</p>
+        <div class="cta-rad">
+          <a href="{{butik}}" class="btn btn-stor liq liq-mork">{{chrome}}{{t:nav.add_chrome}}</a>
+        </div><!--/butik-->
       </div>
       <img src="/illu/happy.svg" alt="" loading="lazy" class="installera-illu">
     </div>

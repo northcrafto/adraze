@@ -131,6 +131,7 @@
   "install.title": "Szabadulj meg a reklámoktól most.",
   "install.text": "Az AdRaze hamarosan a Chrome Web Store-ban is elérhető lesz. Addig kézzel is telepítheted egy perc alatt.",
   "install.download": "AdRaze 0.1.1 letöltése",
+  "install.text_store": "Ingyenes a Chrome Internetes áruházban. Működik Chrome-ban, Brave-ben, Edge-ben, Operában és Vivaldiban.",
   "install.step1": "Csomagold ki a zip-fájlt.",
   "install.step2": "Nyisd meg a <code>chrome://extensions</code> oldalt, és kapcsold be a <b>Fejlesztői módot</b>.",
   "install.step3": "Kattints a <b>Kicsomagolt bővítmény betöltése</b> gombra, és válaszd ki a kicsomagolt mappát.",

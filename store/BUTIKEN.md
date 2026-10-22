@@ -81,6 +81,12 @@ AdRaze blocks ads, trackers and other unwanted web content: ad and tracker reque
 
 Offentlig, alla regioner.
 
+## När Google har godkänt
+
+1. `site/bygg.py`: sätt `BUTIK = 'https://chromewebstore.google.com/detail/cgdjdjgdoklomdphknggkhfghlglcppd'`.
+2. `python3 bygg.py && vercel --prod` i `site/`. Alla "Lägg till i Chrome"-knappar (meny, hero, installera) går då direkt till butiken och zip-instruktionerna försvinner, på alla 26 språk.
+3. README: byt "on its way to the Chrome Web Store" mot butikslänken.
+
 ## Uppdatera för de som redan har AdRaze
 
 Chrome uppdaterar tillägg från butiken automatiskt. Vi behöver bara ladda upp en ny version:

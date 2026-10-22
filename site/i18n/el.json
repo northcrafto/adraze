@@ -131,6 +131,7 @@
   "install.title": "Ξεφορτώσου τις διαφημίσεις τώρα.",
   "install.text": "Το AdRaze έρχεται σύντομα στο Chrome Web Store. Μέχρι τότε, μπορείς να το εγκαταστήσεις χειροκίνητα σε ένα λεπτό.",
   "install.download": "Λήψη AdRaze 0.1.1",
+  "install.text_store": "Δωρεάν στο Chrome Web Store. Λειτουργεί σε Chrome, Brave, Edge, Opera και Vivaldi.",
   "install.step1": "Αποσυμπίεσε το αρχείο zip.",
   "install.step2": "Άνοιξε το <code>chrome://extensions</code> και ενεργοποίησε τη <b>Λειτουργία προγραμματιστή</b>.",
   "install.step3": "Κάνε κλικ στο <b>Φόρτωση μη πακεταρισμένης επέκτασης</b> και διάλεξε τον φάκελο που αποσυμπίεσες.",
