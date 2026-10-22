@@ -259,5 +259,15 @@
   "konto.name_placeholder": "Fornafnið þitt",
   "konto.name_save": "Vista",
   "konto.name_change": "Breyta nafni",
-  "konto.err_name": "Skrifaðu nafn með bókstöfum."
+  "konto.err_name": "Skrifaðu nafn með bókstöfum.",
+  "konto.quote_1": "Happy adblocking!",
+  "konto.quote_2": "Netið er miklu rólegra svona.",
+  "konto.quote_3": "Engar auglýsingar í dag heldur. Njóttu.",
+  "konto.quote_4": "Rakningarnar leita enn að þér.",
+  "konto.quote_5": "{n} auglýsingar sem þú þurftir aldrei að sjá.",
+  "konto.quote_6": "Hraðari síður, rólegri hugur.",
+  "konto.quote_7": "Vefurinn eins og hann átti að vera.",
+  "konto.quote_8": "Athygli þín er ekki til sölu.",
+  "konto.quote_9": "Sprettigluggar? Aldrei heyrt um þá.",
+  "konto.quote_10": "Hreinn vefur er glaður vefur."
 }

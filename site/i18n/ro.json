@@ -259,5 +259,15 @@
   "konto.name_placeholder": "Prenumele tău",
   "konto.name_save": "Salvează",
   "konto.name_change": "Schimbă numele",
-  "konto.err_name": "Scrie un nume format din litere."
+  "konto.err_name": "Scrie un nume format din litere.",
+  "konto.quote_1": "Happy adblocking!",
+  "konto.quote_2": "Internetul e mult mai liniștit așa.",
+  "konto.quote_3": "Nicio reclamă nici azi. Bucură-te.",
+  "konto.quote_4": "Trackerele încă te caută.",
+  "konto.quote_5": "{n} reclame pe care nu a trebuit să le vezi.",
+  "konto.quote_6": "Pagini mai rapide, minte mai liniștită.",
+  "konto.quote_7": "Webul așa cum a fost gândit.",
+  "konto.quote_8": "Atenția ta nu e de vânzare.",
+  "konto.quote_9": "Pop-up-uri? N-am auzit de ele.",
+  "konto.quote_10": "Un web curat e un web fericit."
 }

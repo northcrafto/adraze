@@ -259,5 +259,15 @@
   "konto.name_placeholder": "Adın",
   "konto.name_save": "Kaydet",
   "konto.name_change": "Adı değiştir",
-  "konto.err_name": "Harflerden oluşan bir ad yaz."
+  "konto.err_name": "Harflerden oluşan bir ad yaz.",
+  "konto.quote_1": "Happy adblocking!",
+  "konto.quote_2": "İnternet böyle çok daha sessiz.",
+  "konto.quote_3": "Bugün de reklam yok. Keyfini çıkar.",
+  "konto.quote_4": "Takipçiler hâlâ seni arıyor.",
+  "konto.quote_5": "Hiç görmek zorunda kalmadığın {n} reklam.",
+  "konto.quote_6": "Daha hızlı sayfalar, daha sakin bir kafa.",
+  "konto.quote_7": "Web olması gerektiği gibi.",
+  "konto.quote_8": "Dikkatin satılık değil.",
+  "konto.quote_9": "Açılır pencereler mi? Hiç duymadım.",
+  "konto.quote_10": "Temiz bir web, mutlu bir web."
 }

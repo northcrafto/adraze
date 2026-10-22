@@ -259,5 +259,15 @@
   "konto.name_placeholder": "Vaše ime",
   "konto.name_save": "Spremi",
   "konto.name_change": "Promijeni ime",
-  "konto.err_name": "Upišite ime slovima."
+  "konto.err_name": "Upišite ime slovima.",
+  "konto.quote_1": "Happy adblocking!",
+  "konto.quote_2": "Ovako je internet puno tiši.",
+  "konto.quote_3": "Ni danas reklama. Uživajte.",
+  "konto.quote_4": "Pratitelji vas još traže.",
+  "konto.quote_5": "{n} oglasa koje nikad niste morali vidjeti.",
+  "konto.quote_6": "Brže stranice, mirnija glava.",
+  "konto.quote_7": "Web kakav je trebao biti.",
+  "konto.quote_8": "Vaša pažnja nije na prodaju.",
+  "konto.quote_9": "Skočni prozori? Nikad čuo.",
+  "konto.quote_10": "Čist web je sretan web."
 }

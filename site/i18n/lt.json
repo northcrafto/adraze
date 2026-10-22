@@ -259,5 +259,15 @@
   "konto.name_placeholder": "Jūsų vardas",
   "konto.name_save": "Išsaugoti",
   "konto.name_change": "Keisti vardą",
-  "konto.err_name": "Įrašykite vardą raidėmis."
+  "konto.err_name": "Įrašykite vardą raidėmis.",
+  "konto.quote_1": "Happy adblocking!",
+  "konto.quote_2": "Taip internetas daug tylesnis.",
+  "konto.quote_3": "Ir šiandien jokių reklamų. Mėgaukitės.",
+  "konto.quote_4": "Sekikliai vis dar jūsų ieško.",
+  "konto.quote_5": "{n} reklamų, kurių niekada nereikėjo matyti.",
+  "konto.quote_6": "Greitesni puslapiai, ramesnė galva.",
+  "konto.quote_7": "Internetas, koks jis turėjo būti.",
+  "konto.quote_8": "Jūsų dėmesys neparduodamas.",
+  "konto.quote_9": "Iššokantys langai? Niekada negirdėjau.",
+  "konto.quote_10": "Švarus internetas – laimingas internetas."
 }

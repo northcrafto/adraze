@@ -259,5 +259,15 @@
   "konto.name_placeholder": "Je voornaam",
   "konto.name_save": "Opslaan",
   "konto.name_change": "Naam wijzigen",
-  "konto.err_name": "Vul een naam in met letters."
+  "konto.err_name": "Vul een naam in met letters.",
+  "konto.quote_1": "Happy adblocking!",
+  "konto.quote_2": "Zo is het internet een stuk rustiger.",
+  "konto.quote_3": "Ook vandaag geen reclame. Geniet ervan.",
+  "konto.quote_4": "De trackers zoeken je nog steeds.",
+  "konto.quote_5": "{n} advertenties die je nooit hoefde te zien.",
+  "konto.quote_6": "Snellere pagina’s, rustiger hoofd.",
+  "konto.quote_7": "Het web zoals het bedoeld was.",
+  "konto.quote_8": "Je aandacht is niet te koop.",
+  "konto.quote_9": "Pop-ups? Nooit van gehoord.",
+  "konto.quote_10": "Een schoon web is een blij web."
 }

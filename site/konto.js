@@ -230,6 +230,7 @@ async function visaKonto(status) {
   $('#s-sparare').textContent = tal.format(t.sparare);
   $('#s-farliga').textContent = tal.format(t.farliga);
   $('#s-popups').textContent = tal.format(t.popups + t.omdirigeringar);
+  visaCitat(t.reklam);
   ritaDiagram(data.dagar);
   visaEnheter(data.enheter, status);
 }
@@ -280,6 +281,32 @@ function halsa(namn) {
   // Linjen under namnet och raden under rubriken kommer när sista bokstaven landat
   $('#vy-in').style.setProperty('--efter', `${antal * 40 + 650}ms`);
 }
+// En ny rad vid varje inloggning: första gången alltid "Happy adblocking!", sedan slumpad men aldrig samma två gånger i rad
+let citatVisat = false;
+function visaCitat(reklam) {
+  if (citatVisat) return;
+  citatVisat = true;
+  let forra = null;
+  try { forra = localStorage.getItem('adraze-citat'); } catch {}
+  const mojliga = Array.from({ length: 10 }, (_, i) => String(i + 1)).filter((n) => n !== forra && (n !== '5' || reklam > 0));
+  const val = forra === null ? '1' : mojliga[Math.floor(Math.random() * mojliga.length)];
+  try { localStorage.setItem('adraze-citat', val); } catch {}
+  const text = T[`quote_${val}`].replace('{n}', tal.format(reklam));
+  const p = $('#hej-citat');
+  const ut = p.querySelector('span');
+  p.setAttribute('aria-label', text);
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { ut.textContent = text; return; }
+  const tecken = [...text];
+  const start = parseInt(getComputedStyle($('#vy-in')).getPropertyValue('--efter'), 10) || 1000;
+  let i = 0;
+  setTimeout(function skriv() {
+    p.classList.add('skriver');
+    ut.textContent = tecken.slice(0, ++i).join('');
+    if (i < tecken.length) setTimeout(skriv, 26 + Math.random() * 30);
+    else p.classList.replace('skriver', 'klar');
+  }, start + 350);
+}
+
 $('#byt-namn').addEventListener('click', () => {
   const form = $('#f-namn');
   form.hidden = false;

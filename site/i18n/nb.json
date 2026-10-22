@@ -259,5 +259,15 @@
   "konto.name_placeholder": "Fornavnet ditt",
   "konto.name_save": "Lagre",
   "konto.name_change": "Endre navn",
-  "konto.err_name": "Skriv et navn med bokstaver."
+  "konto.err_name": "Skriv et navn med bokstaver.",
+  "konto.quote_1": "Happy adblocking!",
+  "konto.quote_2": "Internett er mye roligere sånn.",
+  "konto.quote_3": "Ingen reklame i dag heller. Nyt det.",
+  "konto.quote_4": "Sporerne leter fortsatt etter deg.",
+  "konto.quote_5": "{n} annonser du aldri trengte å se.",
+  "konto.quote_6": "Raskere sider, roligere hode.",
+  "konto.quote_7": "Nettet slik det var ment.",
+  "konto.quote_8": "Oppmerksomheten din er ikke til salgs.",
+  "konto.quote_9": "Popups? Aldri hørt om dem.",
+  "konto.quote_10": "Et rent nett er et glad nett."
 }

@@ -259,5 +259,15 @@
   "konto.name_placeholder": "Tvoje křestní jméno",
   "konto.name_save": "Uložit",
   "konto.name_change": "Změnit jméno",
-  "konto.err_name": "Napiš jméno pomocí písmen."
+  "konto.err_name": "Napiš jméno pomocí písmen.",
+  "konto.quote_1": "Happy adblocking!",
+  "konto.quote_2": "Takhle je internet mnohem tišší.",
+  "konto.quote_3": "Ani dnes žádné reklamy. Užívej si.",
+  "konto.quote_4": "Sledovače tě pořád hledají.",
+  "konto.quote_5": "{n} reklam, které jsi nikdy nemusel vidět.",
+  "konto.quote_6": "Rychlejší stránky, klidnější hlava.",
+  "konto.quote_7": "Web, jak měl být.",
+  "konto.quote_8": "Tvoje pozornost není na prodej.",
+  "konto.quote_9": "Vyskakovací okna? Nikdy jsem o nich neslyšel.",
+  "konto.quote_10": "Čistý web je šťastný web."
 }
