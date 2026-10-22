@@ -251,5 +251,5 @@
   "stod.thanks_title": "Hvala za podporo!",
   "stod.thanks_text": "Dal si {belopp} kr. To nam veliko pomeni in nam pomaga razvijati AdRaze, zate.",
   "stod.error": "Nekaj je šlo narobe. Poskusi znova.",
-  "stod.limits": "Izberi znesek med 20 in 5.000 kr."
+  "stod.limits": "Izberi znesek med {min} in {max} kr."
 }

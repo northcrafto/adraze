@@ -251,5 +251,5 @@
   "stod.thanks_title": "Bedankt voor je steun!",
   "stod.thanks_text": "Je gaf {belopp} kr. Dat betekent veel en helpt ons AdRaze verder te ontwikkelen, voor jou.",
   "stod.error": "Er ging iets mis. Probeer het opnieuw.",
-  "stod.limits": "Kies een bedrag tussen 20 en 5.000 kr."
+  "stod.limits": "Kies een bedrag tussen {min} en {max} kr."
 }

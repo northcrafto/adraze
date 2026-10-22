@@ -251,5 +251,5 @@
   "stod.thanks_title": "Paldies par atbalstu!",
   "stod.thanks_text": "Tu ziedoji {belopp} kr. Tas daudz nozīmē un palīdz mums attīstīt AdRaze, tevis dēļ.",
   "stod.error": "Kaut kas nogāja greizi. Mēģini vēlreiz.",
-  "stod.limits": "Izvēlies summu no 20 līdz 5000 kr."
+  "stod.limits": "Izvēlies summu no {min} līdz {max} kr."
 }
