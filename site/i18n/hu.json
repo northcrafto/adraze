@@ -251,5 +251,5 @@
   "stod.thanks_title": "Köszönjük a támogatást!",
   "stod.thanks_text": "{belopp} kr-t adtál. Ez sokat jelent, és segít tovább fejleszteni az AdRaze-t, érted.",
   "stod.error": "Hiba történt. Próbáld újra.",
-  "stod.limits": "Válassz 20 és 5000 kr közötti összeget."
+  "stod.limits": "Válassz {min} és {max} kr közötti összeget."
 }

@@ -251,5 +251,5 @@
   "stod.thanks_title": "Ačiū už paramą!",
   "stod.thanks_text": "Skyrei {belopp} kr. Tai labai daug reiškia ir padeda toliau tobulinti AdRaze, dėl tavęs.",
   "stod.error": "Kažkas nepavyko. Bandyk dar kartą.",
-  "stod.limits": "Pasirink sumą nuo 20 iki 5000 kr."
+  "stod.limits": "Pasirink sumą nuo {min} iki {max} kr."
 }

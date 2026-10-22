@@ -251,5 +251,5 @@
   "stod.thanks_title": "Kiitos tuestasi!",
   "stod.thanks_text": "Annoit {belopp} kr. Se merkitsee paljon ja auttaa meitä kehittämään AdRazea, sinun hyväksesi.",
   "stod.error": "Jokin meni pieleen. Yritä uudelleen.",
-  "stod.limits": "Valitse summa väliltä 20–5 000 kr."
+  "stod.limits": "Valitse summa väliltä {min}–{max} kr."
 }

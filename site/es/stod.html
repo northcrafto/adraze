@@ -70,7 +70,7 @@
 </div>
 
 
-<main id="stodsida" data-api="https://api.adraze.app" data-lang="es" data-fel="Algo salió mal. Inténtalo de nuevo." data-gransfel="Elige una cantidad entre 20 y 5000 kr." data-tack="Has dado {belopp} kr. Significa mucho y nos ayuda a seguir desarrollando AdRaze, por ti.">
+<main id="stodsida" data-api="https://api.adraze.app" data-lang="es" data-fel="Algo salió mal. Inténtalo de nuevo." data-gransfel="Elige una cantidad entre {min} y {max} kr." data-tack="Has dado {belopp} kr. Significa mucho y nos ayuda a seguir desarrollando AdRaze, por ti.">
   <section class="sd">
     <div class="wrap sd-grid">
       <!-- Vänster: text och belopp -->
@@ -87,7 +87,7 @@
           </div>
           <label class="sd-eget">
             <span>O escribe tu propia cantidad</span>
-            <span class="sd-falt"><input id="sd-eget" type="number" inputmode="numeric" min="20" max="5000" step="1" placeholder="49"><b>kr</b></span>
+            <span class="sd-falt"><input id="sd-eget" type="text" inputmode="decimal" autocomplete="off" maxlength="12" placeholder="49"><b>kr</b></span>
           </label>
           <p class="sd-fel" id="sd-fel" role="alert" hidden></p>
           <button type="button" id="sd-fortsatt" class="btn btn-stor liq">Continuar al pago</button>

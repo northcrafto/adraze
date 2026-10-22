@@ -251,5 +251,5 @@
   "stod.thanks_title": "Aitäh toetuse eest!",
   "stod.thanks_text": "Sa andsid {belopp} kr. See tähendab palju ja aitab meil AdRaze'i edasi arendada, sinu jaoks.",
   "stod.error": "Midagi läks valesti. Proovi uuesti.",
-  "stod.limits": "Vali summa vahemikus 20–5000 kr."
+  "stod.limits": "Vali summa vahemikus {min}–{max} kr."
 }

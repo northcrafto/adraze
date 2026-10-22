@@ -251,5 +251,5 @@
   "stod.thanks_title": "Danke für deine Unterstützung!",
   "stod.thanks_text": "Du hast {belopp} kr gegeben. Das bedeutet uns viel und hilft uns, AdRaze weiterzuentwickeln, für dich.",
   "stod.error": "Etwas ist schiefgelaufen. Bitte versuch es noch einmal.",
-  "stod.limits": "Wähle einen Betrag zwischen 20 und 5.000 kr."
+  "stod.limits": "Wähle einen Betrag zwischen {min} und {max} kr."
 }

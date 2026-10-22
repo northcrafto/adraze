@@ -8,7 +8,15 @@
   let kassa = null;
 
   const visaFel = (text) => { $('sd-fel').textContent = text; $('sd-fel').hidden = !text; };
-  const valt = () => (eget.value ? Number(eget.value) : Number(chips.find((c) => c.getAttribute('aria-checked') === 'true')?.dataset.belopp));
+  // Stripes gränser i ören: minst 3 kr, högst 999 999,99 kr
+  const MIN = 300, MAX = 99_999_999;
+  const kr = (ore) => new Intl.NumberFormat(sida.dataset.lang, { minimumFractionDigits: ore % 100 ? 2 : 0, maximumFractionDigits: 2 }).format(ore / 100);
+  // Eget belopp tål både 12,50 och 12.50 samt mellanslag som tusentalsavgränsare
+  const tolka = (text) => {
+    const t = text.replace(/[\s\u00a0\u202f]/g, '').replace(',', '.');
+    return /^\d+(\.\d{1,2})?$/.test(t) ? Math.round(Number(t) * 100) : NaN;
+  };
+  const valt = () => (eget.value.trim() ? tolka(eget.value) : Number(chips.find((c) => c.getAttribute('aria-checked') === 'true')?.dataset.belopp) * 100);
 
   for (const c of chips) {
     c.addEventListener('click', () => {
@@ -23,12 +31,12 @@
   });
 
   async function oppna() {
-    const belopp = Math.round(valt());
-    if (!(belopp >= 20 && belopp <= 5000)) return visaFel(sida.dataset.gransfel);
+    const ore = valt();
+    if (!(ore >= MIN && ore <= MAX)) return visaFel(sida.dataset.gransfel.replace('{min}', kr(MIN)).replace('{max}', kr(MAX)));
     const knapp = $('sd-fortsatt');
     knapp.disabled = true;
     try {
-      const r = await fetch(`${API}/stod/kassa`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ belopp, sprak: sida.dataset.lang }) });
+      const r = await fetch(`${API}/stod/kassa`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ belopp: ore / 100, sprak: sida.dataset.lang }) });
       const d = await r.json();
       if (!d.ok) throw new Error(d.error);
       kassa?.destroy();
@@ -62,7 +70,7 @@
       if (d.status !== 'complete') return;
       $('sd-val').hidden = true;
       $('sd-tack').hidden = false;
-      $('sd-tack-text').textContent = sida.dataset.tack.replace('{belopp}', new Intl.NumberFormat(sida.dataset.lang).format(d.belopp));
+      $('sd-tack-text').textContent = sida.dataset.tack.replace('{belopp}', kr(Math.round(d.belopp * 100)));
       history.replaceState(null, '', location.pathname);
     }).catch(() => {});
   }

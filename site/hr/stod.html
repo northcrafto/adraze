@@ -70,7 +70,7 @@
 </div>
 
 
-<main id="stodsida" data-api="https://api.adraze.app" data-lang="hr" data-fel="Nešto je pošlo po zlu. Pokušaj ponovno." data-gransfel="Odaberi iznos između 20 i 5.000 kr." data-tack="Dao si {belopp} kr. To nam puno znači i pomaže nam razvijati AdRaze, zbog tebe.">
+<main id="stodsida" data-api="https://api.adraze.app" data-lang="hr" data-fel="Nešto je pošlo po zlu. Pokušaj ponovno." data-gransfel="Odaberi iznos između {min} i {max} kr." data-tack="Dao si {belopp} kr. To nam puno znači i pomaže nam razvijati AdRaze, zbog tebe.">
   <section class="sd">
     <div class="wrap sd-grid">
       <!-- Vänster: text och belopp -->
@@ -87,7 +87,7 @@
           </div>
           <label class="sd-eget">
             <span>Ili upiši vlastiti iznos</span>
-            <span class="sd-falt"><input id="sd-eget" type="number" inputmode="numeric" min="20" max="5000" step="1" placeholder="49"><b>kr</b></span>
+            <span class="sd-falt"><input id="sd-eget" type="text" inputmode="decimal" autocomplete="off" maxlength="12" placeholder="49"><b>kr</b></span>
           </label>
           <p class="sd-fel" id="sd-fel" role="alert" hidden></p>
           <button type="button" id="sd-fortsatt" class="btn btn-stor liq">Nastavi na plaćanje</button>
