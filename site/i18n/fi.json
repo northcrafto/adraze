@@ -154,7 +154,7 @@
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> estää mainokset ja seurannan Chromen sisäänrakennetulla suodatuksella.",
   "privacy.perm_hosts": "<b>Pääsy kaikille sivustoille:</b> tarvitaan tyhjien mainospaikkojen piilottamiseen ja ponnahdusikkunoiden pysäyttämiseen sivuilla, joilla käyt. Sivujen sisältöä ei lueta eikä lähetetä minnekään.",
   "privacy.perm_nav": "<b>webNavigation:</b> tunnistaa sivun avaamat ponnahdusikkunat ja sulkee ne, jos ne johtavat mainoksiin tai vaarallisille sivuille.",
-  "privacy.perm_scripting": "<b>scripting ja activeTab:</b> lisää tyylisääntöjä, jotka piilottavat mainokset, ja näyttää tilastot avoimelle välilehdelle.",
+  "privacy.perm_scripting": "<b>scripting:</b> lisää tyylisääntöjä, jotka piilottavat mainokset, ja näyttää tilastot avoimelle välilehdelle.",
   "privacy.perm_storage": "<b>storage:</b> tallentaa tauotetut sivustot ja laskurit paikallisesti.",
   "privacy.h_lists": "Suodatinlistat",
   "privacy.p_lists": "AdRazen mukana tulevat suodatinlistat EasyLististä, EasyPrivacystä, Frellwit's Swedish Filteristä, uBlock Originista, AdGuardista ja Peter Lowelta. Listat sisältyvät laajennukseen. Tietoja käymistäsi sivuista ei lähetetä kenellekään.",

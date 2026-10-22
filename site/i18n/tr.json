@@ -154,7 +154,7 @@
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> reklamları ve izleyicileri Chrome'un yerleşik filtreleriyle engeller.",
   "privacy.perm_hosts": "<b>Tüm sitelere erişim:</b> ziyaret ettiğin sayfalarda boş reklam alanlarını gizlemek ve açılır pencereleri durdurmak için gerekir. Sayfaların içeriği okunmaz ve hiçbir yere gönderilmez.",
   "privacy.perm_nav": "<b>webNavigation:</b> bir sayfanın açtığı açılır pencereleri tanımak ve reklama ya da tehlikeli sayfalara çıkıyorlarsa kapatmak için.",
-  "privacy.perm_scripting": "<b>scripting ve activeTab:</b> reklamları gizleyen stil kuralları ekler ve açık sekmenin istatistiklerini gösterir.",
+  "privacy.perm_scripting": "<b>scripting:</b> reklamları gizleyen stil kuralları ekler ve açık sekmenin istatistiklerini gösterir.",
   "privacy.perm_storage": "<b>storage:</b> duraklatılan sitelerini ve sayaçları yerel olarak saklar.",
   "privacy.h_lists": "Filtre listeleri",
   "privacy.p_lists": "AdRaze; EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard ve Peter Lowe filtre listeleriyle gelir. Listeler eklentinin içindedir. Ziyaret ettiğin sayfalarla ilgili hiçbir sorgu kimseye gönderilmez.",

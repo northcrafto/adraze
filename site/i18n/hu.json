@@ -154,7 +154,7 @@
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> a Chrome beépített szűrőivel blokkolja a reklámokat és a nyomkövetőket.",
   "privacy.perm_hosts": "<b>Hozzáférés minden webhelyhez:</b> az üres hirdetési helyek elrejtéséhez és a felugró ablakok megállításához kell a meglátogatott oldalakon. Az oldalak tartalmát nem olvassa, és sehová nem küldi.",
   "privacy.perm_nav": "<b>webNavigation:</b> felismeri az oldal által megnyitott felugró ablakokat, és bezárja őket, ha reklámra vagy veszélyes oldalra vezetnek.",
-  "privacy.perm_scripting": "<b>scripting és activeTab:</b> stílusszabályokat illeszt be, amelyek elrejtik a hirdetéseket, és statisztikát mutat a megnyitott lapról.",
+  "privacy.perm_scripting": "<b>scripting:</b> stílusszabályokat illeszt be, amelyek elrejtik a hirdetéseket, és statisztikát mutat a megnyitott lapról.",
   "privacy.perm_storage": "<b>storage:</b> helyben menti a szüneteltetett oldalakat és a számlálókat.",
   "privacy.h_lists": "Szűrőlisták",
   "privacy.p_lists": "Az AdRaze az EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard és Peter Lowe szűrőlistáival érkezik. A listák a bővítmény részei. Senkinek nem megy kérés arról, milyen oldalakat látogatsz.",

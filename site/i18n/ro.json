@@ -154,7 +154,7 @@
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> blochează reclamele și trackerele cu filtrele integrate în Chrome.",
   "privacy.perm_hosts": "<b>Acces la toate site-urile:</b> necesar pentru a ascunde spațiile goale de reclame și a opri pop-up-urile pe paginile pe care le vizitezi. Conținutul paginilor nu este citit și nu este trimis nicăieri.",
   "privacy.perm_nav": "<b>webNavigation:</b> pentru a recunoaște ferestrele pop-up deschise de o pagină și a le închide dacă duc la reclame sau site-uri periculoase.",
-  "privacy.perm_scripting": "<b>scripting și activeTab:</b> adaugă reguli de stil care ascund reclamele și arată statistici pentru fila deschisă.",
+  "privacy.perm_scripting": "<b>scripting:</b> adaugă reguli de stil care ascund reclamele și arată statistici pentru fila deschisă.",
   "privacy.perm_storage": "<b>storage:</b> salvează local site-urile puse pe pauză și contoarele.",
   "privacy.h_lists": "Liste de filtre",
   "privacy.p_lists": "AdRaze vine cu liste de filtre de la EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard și Peter Lowe. Listele sunt incluse în extensie. Nu se trimite nimănui nicio cerere despre paginile pe care le vizitezi.",

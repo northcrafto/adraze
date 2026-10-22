@@ -154,7 +154,7 @@
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> blokeerib reklaamid ja jälgijad Chrome'i sisseehitatud filtritega.",
   "privacy.perm_hosts": "<b>Juurdepääs kõigile veebisaitidele:</b> vajalik, et peita tühjad reklaamikohad ja peatada hüpikaknad lehtedel, mida külastad. Lehtede sisu ei loeta ega saadeta kuhugi.",
   "privacy.perm_nav": "<b>webNavigation:</b> et ära tunda lehe avatud hüpikaknad ja need sulgeda, kui need viivad reklaamile või ohtlikule lehele.",
-  "privacy.perm_scripting": "<b>scripting ja activeTab:</b> lisab stiilireeglid, mis peidavad reklaamid, ja näitab avatud vahelehe statistikat.",
+  "privacy.perm_scripting": "<b>scripting:</b> lisab stiilireeglid, mis peidavad reklaamid, ja näitab avatud vahelehe statistikat.",
   "privacy.perm_storage": "<b>storage:</b> salvestab peatatud saidid ja loendurid kohapeal.",
   "privacy.h_lists": "Filtrinimekirjad",
   "privacy.p_lists": "AdRaze sisaldab filtrinimekirju EasyListilt, EasyPrivacylt, Frellwit's Swedish Filterilt, uBlock Originilt, AdGuardilt ja Peter Lowe'lt. Nimekirjad on laienduse osa. Päringuid sinu külastatud lehtede kohta ei saadeta kellelegi.",

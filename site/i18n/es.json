@@ -154,7 +154,7 @@
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> bloquea anuncios y rastreadores con los filtros integrados de Chrome.",
   "privacy.perm_hosts": "<b>Acceso a todos los sitios web:</b> necesario para ocultar los huecos vacíos de anuncios y bloquear ventanas emergentes en las páginas que visitas. El contenido de las páginas no se lee ni se envía a ningún sitio.",
   "privacy.perm_nav": "<b>webNavigation:</b> para detectar las ventanas emergentes que abre una página y cerrarlas si llevan a publicidad o a webs peligrosas.",
-  "privacy.perm_scripting": "<b>scripting y activeTab:</b> añade reglas de estilo que ocultan anuncios y muestra estadísticas de la pestaña que tienes abierta.",
+  "privacy.perm_scripting": "<b>scripting:</b> añade reglas de estilo que ocultan anuncios y muestra estadísticas de la pestaña que tienes abierta.",
   "privacy.perm_storage": "<b>storage:</b> guarda en local tus webs pausadas y los contadores.",
   "privacy.h_lists": "Listas de filtros",
   "privacy.p_lists": "AdRaze incluye listas de filtros de EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard y Peter Lowe. Las listas vienen dentro de la extensión. No se envía a nadie ninguna consulta sobre las páginas que visitas.",

@@ -154,7 +154,7 @@
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> bloķē reklāmas un izsekotājus ar Chrome iebūvētajiem filtriem.",
   "privacy.perm_hosts": "<b>Piekļuve visām vietnēm:</b> vajadzīga, lai paslēptu tukšās reklāmu vietas un apturētu uznirstošos logus lapās, kuras apmeklē. Lapu saturs netiek lasīts un nekur netiek sūtīts.",
   "privacy.perm_nav": "<b>webNavigation:</b> lai atpazītu lapas atvērtus uznirstošos logus un aizvērtu tos, ja tie ved uz reklāmām vai bīstamām lapām.",
-  "privacy.perm_scripting": "<b>scripting un activeTab:</b> pievieno stila noteikumus, kas paslēpj reklāmas, un rāda statistiku atvērtajai cilnei.",
+  "privacy.perm_scripting": "<b>scripting:</b> pievieno stila noteikumus, kas paslēpj reklāmas, un rāda statistiku atvērtajai cilnei.",
   "privacy.perm_storage": "<b>storage:</b> lokāli saglabā apturētās vietnes un skaitītājus.",
   "privacy.h_lists": "Filtru saraksti",
   "privacy.p_lists": "AdRaze ietver filtru sarakstus no EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard un Peter Lowe. Saraksti ir iekļauti paplašinājumā. Nekādi pieprasījumi par apmeklētajām lapām nevienam netiek sūtīti.",

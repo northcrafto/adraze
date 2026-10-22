@@ -154,7 +154,7 @@
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> blokira oglase in sledilnike z vgrajenimi filtri v Chromu.",
   "privacy.perm_hosts": "<b>Dostop do vseh spletnih mest:</b> potreben, da se skrijejo prazna mesta za oglase in ustavijo pojavna okna na straneh, ki jih obiščeš. Vsebina strani se ne bere in se nikamor ne pošilja.",
   "privacy.perm_nav": "<b>webNavigation:</b> za prepoznavanje pojavnih oken, ki jih odpre stran, in njihovo zapiranje, če vodijo na oglase ali nevarne strani.",
-  "privacy.perm_scripting": "<b>scripting in activeTab:</b> doda slogovna pravila, ki skrijejo oglase, in prikaže statistiko za zavihek, ki ga imaš odprtega.",
+  "privacy.perm_scripting": "<b>scripting:</b> doda slogovna pravila, ki skrijejo oglase, in prikaže statistiko za zavihek, ki ga imaš odprtega.",
   "privacy.perm_storage": "<b>storage:</b> lokalno shrani ustavljene strani in števce.",
   "privacy.h_lists": "Seznami filtrov",
   "privacy.p_lists": "AdRaze vključuje sezname filtrov EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard in Peter Lowe. Seznami so del razširitve. Nikomur se ne pošiljajo poizvedbe o tem, katere strani obiskuješ.",
