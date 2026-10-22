@@ -252,5 +252,12 @@
   "stod.thanks_title": "Děkujeme za podporu!",
   "stod.thanks_text": "Přispěli jste {belopp} kr. Hodně to pro nás znamená a pomáhá nám dál vyvíjet AdRaze, pro vás.",
   "stod.error": "Něco se pokazilo. Zkuste to znovu.",
-  "stod.limits": "Vyberte částku mezi {min} a {max} kr."
+  "stod.limits": "Vyberte částku mezi {min} a {max} kr.",
+  "konto.welcome": "Vítej",
+  "konto.welcome_name": "Vítej, {namn}",
+  "konto.name_ask": "Jak ti máme říkat?",
+  "konto.name_placeholder": "Tvoje křestní jméno",
+  "konto.name_save": "Uložit",
+  "konto.name_change": "Změnit jméno",
+  "konto.err_name": "Napiš jméno pomocí písmen."
 }

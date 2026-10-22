@@ -252,5 +252,12 @@
   "stod.thanks_title": "Hvala na podršci!",
   "stod.thanks_text": "Dao si {belopp} kr. To nam puno znači i pomaže nam razvijati AdRaze, zbog tebe.",
   "stod.error": "Nešto je pošlo po zlu. Pokušaj ponovno.",
-  "stod.limits": "Odaberi iznos između {min} i {max} kr."
+  "stod.limits": "Odaberi iznos između {min} i {max} kr.",
+  "konto.welcome": "Dobro došli",
+  "konto.welcome_name": "Dobro došli, {namn}",
+  "konto.name_ask": "Kako da vas zovemo?",
+  "konto.name_placeholder": "Vaše ime",
+  "konto.name_save": "Spremi",
+  "konto.name_change": "Promijeni ime",
+  "konto.err_name": "Upišite ime slovima."
 }

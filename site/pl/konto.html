@@ -142,12 +142,22 @@
   <!-- Inloggad -->
   <section class="in" id="vy-in" hidden>
     <div class="in-topp">
-      <div>
-        <p class="dov">Zalogowano jako <b id="min-mejl"></b></p>
-        <h1>Zatrzymano łącznie</h1>
+      <div class="hej">
+        <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
+        <div class="hej-text">
+          <h1 class="hej-rubrik" id="hej"></h1>
+          <p class="dov hej-under">Zalogowano jako <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Zmień imię</button></span></p>
+          <form class="namn-form" id="f-namn" novalidate hidden>
+            <label class="falt"><span>Jak mamy się do ciebie zwracać?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Twoje imię" required></label>
+            <button class="btn liq" type="submit">Zapisz</button>
+          </form>
+          <p class="meddelande" id="namn-fel" role="alert" aria-live="polite"></p>
+        </div>
       </div>
       <button type="button" class="btn liq-ghost" id="logga-ut">Wyloguj się</button>
     </div>
+
+    <h2 class="k-rubrik">Zatrzymano łącznie</h2>
 
     <dl class="k-siffror">
       <div class="k-siffra stor"><dt id="s-reklam">0</dt><dd>reklamy</dd></div>
@@ -201,6 +211,9 @@
     <span data-k="err_login">Nieprawidłowy e-mail lub hasło.</span>
     <span data-k="err_exists">Konto z tym adresem e-mail już istnieje. Zaloguj się.</span>
     <span data-k="err_wait">Zbyt wiele prób. Odczekaj chwilę.</span>
+    <span data-k="welcome">Witaj</span>
+    <span data-k="welcome_name">Witaj, {namn}</span>
+    <span data-k="err_name">Wpisz imię złożone z liter.</span>
     <span data-k="delete_confirm">Trwale usunąć konto i wszystkie statystyki?</span>
   </template>
 </main>

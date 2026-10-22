@@ -142,12 +142,22 @@
   <!-- Inloggad -->
   <section class="in" id="vy-in" hidden>
     <div class="in-topp">
-      <div>
-        <p class="dov">Accesso effettuato come <b id="min-mejl"></b></p>
-        <h1>Fermati in totale</h1>
+      <div class="hej">
+        <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
+        <div class="hej-text">
+          <h1 class="hej-rubrik" id="hej"></h1>
+          <p class="dov hej-under">Accesso effettuato come <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Cambia nome</button></span></p>
+          <form class="namn-form" id="f-namn" novalidate hidden>
+            <label class="falt"><span>Come vuoi che ti chiamiamo?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Il tuo nome" required></label>
+            <button class="btn liq" type="submit">Salva</button>
+          </form>
+          <p class="meddelande" id="namn-fel" role="alert" aria-live="polite"></p>
+        </div>
       </div>
       <button type="button" class="btn liq-ghost" id="logga-ut">Esci</button>
     </div>
+
+    <h2 class="k-rubrik">Fermati in totale</h2>
 
     <dl class="k-siffror">
       <div class="k-siffra stor"><dt id="s-reklam">0</dt><dd>pubblicità</dd></div>
@@ -201,6 +211,9 @@
     <span data-k="err_login">Email o password errati.</span>
     <span data-k="err_exists">Esiste già un account con questa email. Accedi.</span>
     <span data-k="err_wait">Troppi tentativi. Aspetta un momento.</span>
+    <span data-k="welcome">Benvenuto</span>
+    <span data-k="welcome_name">Benvenuto, {namn}</span>
+    <span data-k="err_name">Scrivi un nome usando lettere.</span>
     <span data-k="delete_confirm">Eliminare l’account e tutte le statistiche per sempre?</span>
   </template>
 </main>

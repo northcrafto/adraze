@@ -252,5 +252,12 @@
   "stod.thanks_title": "Takk fyrir stuðninginn!",
   "stod.thanks_text": "Þú gafst {belopp} kr. Það skiptir miklu og hjálpar okkur að halda áfram að þróa AdRaze, fyrir þig.",
   "stod.error": "Eitthvað fór úrskeiðis. Reyndu aftur.",
-  "stod.limits": "Veldu upphæð á milli {min} og {max} kr."
+  "stod.limits": "Veldu upphæð á milli {min} og {max} kr.",
+  "konto.welcome": "Velkomin",
+  "konto.welcome_name": "Velkomin, {namn}",
+  "konto.name_ask": "Hvað eigum við að kalla þig?",
+  "konto.name_placeholder": "Fornafnið þitt",
+  "konto.name_save": "Vista",
+  "konto.name_change": "Breyta nafni",
+  "konto.err_name": "Skrifaðu nafn með bókstöfum."
 }

@@ -252,5 +252,12 @@
   "stod.thanks_title": "Благодарим за подкрепата!",
   "stod.thanks_text": "Даде {belopp} kr. Това означава много и ни помага да развиваме AdRaze, заради теб.",
   "stod.error": "Нещо се обърка. Опитай отново.",
-  "stod.limits": "Избери сума между {min} и {max} kr."
+  "stod.limits": "Избери сума между {min} и {max} kr.",
+  "konto.welcome": "Добре дошли",
+  "konto.welcome_name": "Добре дошли, {namn}",
+  "konto.name_ask": "Как да ви наричаме?",
+  "konto.name_placeholder": "Вашето име",
+  "konto.name_save": "Запази",
+  "konto.name_change": "Смени името",
+  "konto.err_name": "Въведете име с букви."
 }

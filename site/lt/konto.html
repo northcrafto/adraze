@@ -142,12 +142,22 @@
   <!-- Inloggad -->
   <section class="in" id="vy-in" hidden>
     <div class="in-topp">
-      <div>
-        <p class="dov">Prisijungta kaip <b id="min-mejl"></b></p>
-        <h1>Iš viso sustabdyta</h1>
+      <div class="hej">
+        <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
+        <div class="hej-text">
+          <h1 class="hej-rubrik" id="hej"></h1>
+          <p class="dov hej-under">Prisijungta kaip <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Keisti vardą</button></span></p>
+          <form class="namn-form" id="f-namn" novalidate hidden>
+            <label class="falt"><span>Kaip jus vadinti?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Jūsų vardas" required></label>
+            <button class="btn liq" type="submit">Išsaugoti</button>
+          </form>
+          <p class="meddelande" id="namn-fel" role="alert" aria-live="polite"></p>
+        </div>
       </div>
       <button type="button" class="btn liq-ghost" id="logga-ut">Atsijungti</button>
     </div>
+
+    <h2 class="k-rubrik">Iš viso sustabdyta</h2>
 
     <dl class="k-siffror">
       <div class="k-siffra stor"><dt id="s-reklam">0</dt><dd>reklamos</dd></div>
@@ -201,6 +211,9 @@
     <span data-k="err_login">Neteisingas el. pašto adresas arba slaptažodis.</span>
     <span data-k="err_exists">Paskyra su šiuo el. pašto adresu jau yra. Geriau prisijunkite.</span>
     <span data-k="err_wait">Per daug bandymų. Šiek tiek palaukite.</span>
+    <span data-k="welcome">Sveiki</span>
+    <span data-k="welcome_name">Sveiki, {namn}</span>
+    <span data-k="err_name">Įrašykite vardą raidėmis.</span>
     <span data-k="delete_confirm">Ištrinti paskyrą ir visą statistiką visam laikui?</span>
   </template>
 </main>

@@ -85,12 +85,22 @@
   <!-- Inloggad -->
   <section class="in" id="vy-in" hidden>
     <div class="in-topp">
-      <div>
-        <p class="dov">{{t:konto.signed_in_as}} <b id="min-mejl"></b></p>
-        <h1>{{t:konto.total_title}}</h1>
+      <div class="hej">
+        <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
+        <div class="hej-text">
+          <h1 class="hej-rubrik" id="hej"></h1>
+          <p class="dov hej-under">{{t:konto.signed_in_as}} <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">{{t:konto.name_change}}</button></span></p>
+          <form class="namn-form" id="f-namn" novalidate hidden>
+            <label class="falt"><span>{{t:konto.name_ask}}</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="{{t:konto.name_placeholder}}" required></label>
+            <button class="btn liq" type="submit">{{t:konto.name_save}}</button>
+          </form>
+          <p class="meddelande" id="namn-fel" role="alert" aria-live="polite"></p>
+        </div>
       </div>
       <button type="button" class="btn liq-ghost" id="logga-ut">{{t:konto.logout}}</button>
     </div>
+
+    <h2 class="k-rubrik">{{t:konto.total_title}}</h2>
 
     <dl class="k-siffror">
       <div class="k-siffra stor"><dt id="s-reklam">0</dt><dd>{{t:konto.stat_ads}}</dd></div>
@@ -144,6 +154,9 @@
     <span data-k="err_login">{{t:konto.err_login}}</span>
     <span data-k="err_exists">{{t:konto.err_exists}}</span>
     <span data-k="err_wait">{{t:konto.err_wait}}</span>
+    <span data-k="welcome">{{t:konto.welcome}}</span>
+    <span data-k="welcome_name">{{t:konto.welcome_name}}</span>
+    <span data-k="err_name">{{t:konto.err_name}}</span>
     <span data-k="delete_confirm">{{t:konto.delete_confirm}}</span>
   </template>
 </main>

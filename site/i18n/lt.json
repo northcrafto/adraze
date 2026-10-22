@@ -252,5 +252,12 @@
   "stod.thanks_title": "Ačiū už paramą!",
   "stod.thanks_text": "Skyrei {belopp} kr. Tai labai daug reiškia ir padeda toliau tobulinti AdRaze, dėl tavęs.",
   "stod.error": "Kažkas nepavyko. Bandyk dar kartą.",
-  "stod.limits": "Pasirink sumą nuo {min} iki {max} kr."
+  "stod.limits": "Pasirink sumą nuo {min} iki {max} kr.",
+  "konto.welcome": "Sveiki",
+  "konto.welcome_name": "Sveiki, {namn}",
+  "konto.name_ask": "Kaip jus vadinti?",
+  "konto.name_placeholder": "Jūsų vardas",
+  "konto.name_save": "Išsaugoti",
+  "konto.name_change": "Keisti vardą",
+  "konto.err_name": "Įrašykite vardą raidėmis."
 }
