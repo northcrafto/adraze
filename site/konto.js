@@ -281,23 +281,17 @@ function halsa(namn) {
   // Linjen under namnet och raden under rubriken kommer när sista bokstaven landat
   $('#vy-in').style.setProperty('--efter', `${antal * 40 + 650}ms`);
 }
-// Dagens citat: samma för alla hela dagen och nytt vid midnatt. Allra första inloggningen visar "Happy adblocking!"
+// Dagens citat: samma för alla hela dagen och nytt vid midnatt
 const ANTAL_CITAT = 20;
 let citatVisat = false;
 function visaCitat() {
   if (citatVisat) return;
   citatVisat = true;
-  let forst = false;
-  try { forst = !localStorage.getItem('adraze-citat'); localStorage.setItem('adraze-citat', '1'); } catch {}
   const idag = Math.floor((Date.now() - new Date().getTimezoneOffset() * 60_000) / 86_400_000);
   const nr = (idag % ANTAL_CITAT) + 1;
-  const text = forst ? T.happy : T[`quote_${nr}`];
+  const text = T[`quote_${nr}`];
   const p = $('#hej-citat');
-  if (!forst) {
-    p.querySelector('.hej-etikett').hidden = false;
-    p.querySelector('cite').textContent = T[`quote_by_${nr}`];
-    p.querySelector('.hej-vem > span').hidden = false;
-  }
+  p.querySelector('cite').textContent = T[`quote_by_${nr}`];
   const ut = p.querySelector('blockquote span');
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) { ut.textContent = text; p.classList.add('direkt'); return; }
   ut.setAttribute('aria-label', text);
