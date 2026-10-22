@@ -2,6 +2,11 @@
 
 Allt som behövs för att skicka in och uppdatera AdRaze. Konsol: https://chrome.google.com/webstore/devconsole
 
+- **Objekt-ID:** `cgdjdjgdoklomdphknggkhfghlglcppd` (skickad för granskning 2026-10-22, version 0.2.0)
+- **Butikssida (när den är publicerad):** https://chromewebstore.google.com/detail/cgdjdjgdoklomdphknggkhfghlglcppd
+- **Utgivare:** AdRaze, konto cetoari9@gmail.com (verifierad kontaktadress), icke-näringsidkare
+- **Kategori:** Integritet och säkerhet
+
 ## Bygga paketet
 
 ```sh
@@ -20,7 +25,7 @@ Höj `version` i `extension/manifest.json` före varje uppladdning. Storen avvis
 
 ### Butiksinformation (Store listing)
 
-- **Kategori:** Verktyg (Tools). Ingen annan passar bättre.
+- **Kategori:** Integritet och säkerhet
 - **Språk:** svenska
 - **Kort beskrivning** kommer från `description` i manifestet.
 - **Bilder:** `store/skarmdump-1..3.png` (1280×800), `store/kampanj-liten-440x280.png`, `store/kampanj-stor-1400x560.png` (valfri). Ikon 128 px finns i paketet. Gör om bilderna med `node store/rendera.cjs`.
