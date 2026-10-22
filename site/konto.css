@@ -59,8 +59,35 @@
 
 /* ---------- Inloggad ---------- */
 .in-topp { display: flex; align-items: end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
-.in-topp h1 { font-size: clamp(44px, 6vw, 80px); letter-spacing: -0.05em; margin-top: 6px; }
-.k-siffror { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 12px; margin-top: 36px; }
+.konto .in { padding-top: 8px; }
+.k-rubrik { font-size: 24px; letter-spacing: -0.02em; margin-top: 56px; }
+.k-siffror { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 12px; margin-top: 16px; }
+
+/* Välkommen, <namn>: figuren hoppar upp och vinkar, bokstäverna reser sig en i taget, en orange linje ritas under namnet */
+.hej { display: flex; align-items: center; gap: clamp(16px, 3vw, 32px); min-width: 0; }
+.hej-vink { width: clamp(76px, 9vw, 112px); flex: none; background: #fff; border-radius: 24px; padding: 10px 10px 2px; box-shadow: 0 1px 0 var(--linje); transform-origin: 50% 100%; animation: vink-in .9s var(--ease) .2s both; }
+.hej-vink img { display: block; width: 100%; height: auto; }
+@keyframes vink-in { from { opacity: 0; transform: translateY(24px) scale(.5) rotate(-10deg); } 55% { opacity: 1; transform: translateY(-6px) scale(1.05) rotate(3deg); } 80% { transform: translateY(1px) scale(.99) rotate(-1deg); } }
+.hej-text { min-width: 0; }
+.hej-rubrik { font-size: clamp(40px, 6vw, 80px); letter-spacing: -0.05em; line-height: 1.05; }
+.hej-ord { display: inline-block; white-space: nowrap; }
+.hej-b { display: inline-block; animation: bokstav .75s var(--ease) both; animation-delay: calc(var(--i) * 40ms + 300ms); }
+@keyframes bokstav { from { opacity: 0; transform: translateY(.5em) rotate(10deg); filter: blur(8px); } }
+.hej-namn { position: relative; display: inline-block; white-space: nowrap; }
+.hej-namn svg { position: absolute; left: -3%; width: 106%; bottom: -.14em; height: .28em; overflow: visible; pointer-events: none; }
+.hej-namn path { fill: none; stroke: var(--accent); stroke-width: 7; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: rita-linje .8s var(--ease) forwards; animation-delay: var(--efter, 1s); }
+@keyframes rita-linje { to { stroke-dashoffset: 0; } }
+.hej-under { margin-top: 14px; animation: tona-in .6s ease both; animation-delay: var(--efter, 1s); }
+@keyframes tona-in { from { opacity: 0; transform: translateY(6px); } }
+.namn-form { display: flex; align-items: end; gap: 10px; margin-top: 18px; max-width: 440px; animation: tona-in .5s var(--ease) both; }
+.namn-form .falt { flex: 1; min-width: 0; }
+.namn-form[hidden] { display: none; }
+.namn-form .btn { height: 52px; }
+#namn-fel { min-height: 0; margin-top: 8px; }
+@media (prefers-reduced-motion: reduce) {
+  .hej-vink, .hej-b, .hej-under, .namn-form { animation: none; }
+  .hej-namn path { animation: none; stroke-dashoffset: 0; }
+}
 .k-siffra { background: var(--yta); border: 1px solid var(--linje); border-radius: 22px; padding: 22px; }
 .k-siffra dt { font-size: clamp(34px, 4vw, 52px); font-weight: 700; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
 .k-siffra dd { margin: 10px 0 0; color: var(--dov); font-weight: 600; }
@@ -103,6 +130,9 @@
   .k-siffra.stor { grid-column: 1 / -1; }
   .diagram { gap: 2px; height: 140px; }
   .konto { padding-top: 36px; }
+  .hej { align-items: flex-start; }
+  .hej-vink { width: 64px; border-radius: 18px; padding: 7px 7px 1px; }
+  .k-rubrik { margin-top: 40px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .stapel i, .flik-markor, .kodrutor.skak { animation: none; transition: none; }

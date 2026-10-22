@@ -252,5 +252,12 @@
   "stod.thanks_title": "Paldies par atbalstu!",
   "stod.thanks_text": "Tu ziedoji {belopp} kr. Tas daudz nozīmē un palīdz mums attīstīt AdRaze, tevis dēļ.",
   "stod.error": "Kaut kas nogāja greizi. Mēģini vēlreiz.",
-  "stod.limits": "Izvēlies summu no {min} līdz {max} kr."
+  "stod.limits": "Izvēlies summu no {min} līdz {max} kr.",
+  "konto.welcome": "Laipni lūdzam",
+  "konto.welcome_name": "Laipni lūdzam, {namn}",
+  "konto.name_ask": "Kā mums tevi saukt?",
+  "konto.name_placeholder": "Tavs vārds",
+  "konto.name_save": "Saglabāt",
+  "konto.name_change": "Mainīt vārdu",
+  "konto.err_name": "Ieraksti vārdu ar burtiem."
 }

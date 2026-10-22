@@ -252,5 +252,12 @@
   "stod.thanks_title": "Obrigado pelo teu apoio!",
   "stod.thanks_text": "Deste {belopp} kr. Significa muito e ajuda-nos a continuar a desenvolver o AdRaze, por ti.",
   "stod.error": "Algo correu mal. Tenta novamente.",
-  "stod.limits": "Escolhe um valor entre {min} e {max} kr."
+  "stod.limits": "Escolhe um valor entre {min} e {max} kr.",
+  "konto.welcome": "Bem-vindo",
+  "konto.welcome_name": "Bem-vindo, {namn}",
+  "konto.name_ask": "Como devemos chamar você?",
+  "konto.name_placeholder": "Seu primeiro nome",
+  "konto.name_save": "Salvar",
+  "konto.name_change": "Mudar nome",
+  "konto.err_name": "Digite um nome com letras."
 }

@@ -252,5 +252,12 @@
   "stod.thanks_title": "Mulțumim pentru sprijin!",
   "stod.thanks_text": "Ai dat {belopp} kr. Contează mult și ne ajută să dezvoltăm în continuare AdRaze, pentru tine.",
   "stod.error": "Ceva n-a mers. Încearcă din nou.",
-  "stod.limits": "Alege o sumă între {min} și {max} kr."
+  "stod.limits": "Alege o sumă între {min} și {max} kr.",
+  "konto.welcome": "Bine ai venit",
+  "konto.welcome_name": "Bine ai venit, {namn}",
+  "konto.name_ask": "Cum să-ți spunem?",
+  "konto.name_placeholder": "Prenumele tău",
+  "konto.name_save": "Salvează",
+  "konto.name_change": "Schimbă numele",
+  "konto.err_name": "Scrie un nume format din litere."
 }

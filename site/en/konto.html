@@ -142,12 +142,22 @@
   <!-- Inloggad -->
   <section class="in" id="vy-in" hidden>
     <div class="in-topp">
-      <div>
-        <p class="dov">Signed in as <b id="min-mejl"></b></p>
-        <h1>Stopped in total</h1>
+      <div class="hej">
+        <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
+        <div class="hej-text">
+          <h1 class="hej-rubrik" id="hej"></h1>
+          <p class="dov hej-under">Signed in as <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Change name</button></span></p>
+          <form class="namn-form" id="f-namn" novalidate hidden>
+            <label class="falt"><span>What should we call you?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Your first name" required></label>
+            <button class="btn liq" type="submit">Save</button>
+          </form>
+          <p class="meddelande" id="namn-fel" role="alert" aria-live="polite"></p>
+        </div>
       </div>
       <button type="button" class="btn liq-ghost" id="logga-ut">Sign out</button>
     </div>
+
+    <h2 class="k-rubrik">Stopped in total</h2>
 
     <dl class="k-siffror">
       <div class="k-siffra stor"><dt id="s-reklam">0</dt><dd>ads</dd></div>
@@ -201,6 +211,9 @@
     <span data-k="err_login">Wrong email or password.</span>
     <span data-k="err_exists">There's already an account with that email. Sign in instead.</span>
     <span data-k="err_wait">Too many attempts. Wait a moment.</span>
+    <span data-k="welcome">Welcome</span>
+    <span data-k="welcome_name">Welcome, {namn}</span>
+    <span data-k="err_name">Enter a name using letters.</span>
     <span data-k="delete_confirm">Delete your account and all statistics for good?</span>
   </template>
 </main>

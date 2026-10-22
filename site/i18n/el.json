@@ -252,5 +252,12 @@
   "stod.thanks_title": "Ευχαριστούμε για τη στήριξη!",
   "stod.thanks_text": "Έδωσες {belopp} kr. Σημαίνει πολλά και μας βοηθά να εξελίσσουμε το AdRaze, για σένα.",
   "stod.error": "Κάτι πήγε στραβά. Δοκίμασε ξανά.",
-  "stod.limits": "Διάλεξε ποσό από {min} έως {max} kr."
+  "stod.limits": "Διάλεξε ποσό από {min} έως {max} kr.",
+  "konto.welcome": "Καλώς ήρθες",
+  "konto.welcome_name": "Καλώς ήρθες, {namn}",
+  "konto.name_ask": "Πώς να σε λέμε;",
+  "konto.name_placeholder": "Το μικρό σου όνομα",
+  "konto.name_save": "Αποθήκευση",
+  "konto.name_change": "Αλλαγή ονόματος",
+  "konto.err_name": "Γράψε ένα όνομα με γράμματα."
 }

@@ -252,5 +252,12 @@
   "stod.thanks_title": "Aitäh toetuse eest!",
   "stod.thanks_text": "Sa andsid {belopp} kr. See tähendab palju ja aitab meil AdRaze'i edasi arendada, sinu jaoks.",
   "stod.error": "Midagi läks valesti. Proovi uuesti.",
-  "stod.limits": "Vali summa vahemikus {min}–{max} kr."
+  "stod.limits": "Vali summa vahemikus {min}–{max} kr.",
+  "konto.welcome": "Tere tulemast",
+  "konto.welcome_name": "Tere tulemast, {namn}",
+  "konto.name_ask": "Kuidas me sind kutsume?",
+  "konto.name_placeholder": "Sinu eesnimi",
+  "konto.name_save": "Salvesta",
+  "konto.name_change": "Muuda nime",
+  "konto.err_name": "Kirjuta nimi tähtedega."
 }

@@ -142,12 +142,22 @@
   <!-- Inloggad -->
   <section class="in" id="vy-in" hidden>
     <div class="in-topp">
-      <div>
-        <p class="dov">Sesión iniciada como <b id="min-mejl"></b></p>
-        <h1>Frenado en total</h1>
+      <div class="hej">
+        <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
+        <div class="hej-text">
+          <h1 class="hej-rubrik" id="hej"></h1>
+          <p class="dov hej-under">Sesión iniciada como <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Cambiar nombre</button></span></p>
+          <form class="namn-form" id="f-namn" novalidate hidden>
+            <label class="falt"><span>¿Cómo quieres que te llamemos?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Tu nombre" required></label>
+            <button class="btn liq" type="submit">Guardar</button>
+          </form>
+          <p class="meddelande" id="namn-fel" role="alert" aria-live="polite"></p>
+        </div>
       </div>
       <button type="button" class="btn liq-ghost" id="logga-ut">Cerrar sesión</button>
     </div>
+
+    <h2 class="k-rubrik">Frenado en total</h2>
 
     <dl class="k-siffror">
       <div class="k-siffra stor"><dt id="s-reklam">0</dt><dd>anuncios</dd></div>
@@ -201,6 +211,9 @@
     <span data-k="err_login">Correo o contraseña incorrectos.</span>
     <span data-k="err_exists">Ya existe una cuenta con ese correo. Inicia sesión.</span>
     <span data-k="err_wait">Demasiados intentos. Espera un momento.</span>
+    <span data-k="welcome">Bienvenido</span>
+    <span data-k="welcome_name">Bienvenido, {namn}</span>
+    <span data-k="err_name">Escribe un nombre con letras.</span>
     <span data-k="delete_confirm">¿Eliminar la cuenta y todas las estadísticas para siempre?</span>
   </template>
 </main>

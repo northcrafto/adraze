@@ -142,12 +142,22 @@
   <!-- Inloggad -->
   <section class="in" id="vy-in" hidden>
     <div class="in-topp">
-      <div>
-        <p class="dov">Přihlášen(a) jako <b id="min-mejl"></b></p>
-        <h1>Celkem zastaveno</h1>
+      <div class="hej">
+        <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
+        <div class="hej-text">
+          <h1 class="hej-rubrik" id="hej"></h1>
+          <p class="dov hej-under">Přihlášen(a) jako <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Změnit jméno</button></span></p>
+          <form class="namn-form" id="f-namn" novalidate hidden>
+            <label class="falt"><span>Jak ti máme říkat?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Tvoje křestní jméno" required></label>
+            <button class="btn liq" type="submit">Uložit</button>
+          </form>
+          <p class="meddelande" id="namn-fel" role="alert" aria-live="polite"></p>
+        </div>
       </div>
       <button type="button" class="btn liq-ghost" id="logga-ut">Odhlásit se</button>
     </div>
+
+    <h2 class="k-rubrik">Celkem zastaveno</h2>
 
     <dl class="k-siffror">
       <div class="k-siffra stor"><dt id="s-reklam">0</dt><dd>reklamy</dd></div>
@@ -201,6 +211,9 @@
     <span data-k="err_login">Špatný e-mail nebo heslo.</span>
     <span data-k="err_exists">Účet s tímto e-mailem už existuje. Přihlaste se.</span>
     <span data-k="err_wait">Příliš mnoho pokusů. Chvíli počkejte.</span>
+    <span data-k="welcome">Vítej</span>
+    <span data-k="welcome_name">Vítej, {namn}</span>
+    <span data-k="err_name">Napiš jméno pomocí písmen.</span>
     <span data-k="delete_confirm">Trvale smazat účet a všechny statistiky?</span>
   </template>
 </main>

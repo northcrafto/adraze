@@ -142,12 +142,22 @@
   <!-- Inloggad -->
   <section class="in" id="vy-in" hidden>
     <div class="in-topp">
-      <div>
-        <p class="dov">Bejelentkezve: <b id="min-mejl"></b></p>
-        <h1>Összesen megállítva</h1>
+      <div class="hej">
+        <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
+        <div class="hej-text">
+          <h1 class="hej-rubrik" id="hej"></h1>
+          <p class="dov hej-under">Bejelentkezve: <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Név módosítása</button></span></p>
+          <form class="namn-form" id="f-namn" novalidate hidden>
+            <label class="falt"><span>Hogyan szólíthatunk?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="A keresztneved" required></label>
+            <button class="btn liq" type="submit">Mentés</button>
+          </form>
+          <p class="meddelande" id="namn-fel" role="alert" aria-live="polite"></p>
+        </div>
       </div>
       <button type="button" class="btn liq-ghost" id="logga-ut">Kijelentkezés</button>
     </div>
+
+    <h2 class="k-rubrik">Összesen megállítva</h2>
 
     <dl class="k-siffror">
       <div class="k-siffra stor"><dt id="s-reklam">0</dt><dd>reklám</dd></div>
@@ -201,6 +211,9 @@
     <span data-k="err_login">Hibás e-mail-cím vagy jelszó.</span>
     <span data-k="err_exists">Ezzel az e-mail-címmel már van fiók. Jelentkezz be inkább.</span>
     <span data-k="err_wait">Túl sok próbálkozás. Várj egy kicsit.</span>
+    <span data-k="welcome">Üdv</span>
+    <span data-k="welcome_name">Üdv, {namn}</span>
+    <span data-k="err_name">Adj meg egy betűkből álló nevet.</span>
     <span data-k="delete_confirm">Véglegesen törlöd a fiókot és az összes statisztikát?</span>
   </template>
 </main>

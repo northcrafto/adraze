@@ -223,6 +223,7 @@ async function visaKonto(status) {
   $('#vy-ut').hidden = true;
   $('#vy-in').hidden = false;
   $('#min-mejl').textContent = jag.email;
+  halsa(jag.namn);
   $('#radera-losen').hidden = !jag.losenord;
   const t = data.totalt;
   $('#s-reklam').textContent = tal.format(t.reklam);
@@ -232,6 +233,72 @@ async function visaKonto(status) {
   ritaDiagram(data.dagar);
   visaEnheter(data.enheter, status);
 }
+
+// ---------- Välkommen, <namn> ----------
+// Varje bokstav blir en egen span som animeras in i tur och ordning (ord hålls ihop så att radbrytningen blir rätt)
+const bokstaver = (text, start) => {
+  const delar = [...new Intl.Segmenter(document.documentElement.lang, { granularity: 'grapheme' }).segment(text)].map((g) => g.segment);
+  let i = start;
+  const ut = [];
+  let ord = null;
+  for (const tecken of delar) {
+    if (/\s/.test(tecken)) { ut.push(document.createTextNode(' ')); ord = null; continue; }
+    if (!ord) { ord = Object.assign(document.createElement('span'), { className: 'hej-ord' }); ut.push(ord); }
+    const b = Object.assign(document.createElement('span'), { className: 'hej-b', textContent: tecken });
+    b.style.setProperty('--i', i++);
+    ord.append(b);
+  }
+  return { noder: ut, antal: i - start };
+};
+let halsatMed = null;
+function halsa(namn) {
+  const form = $('#f-namn');
+  form.hidden = !!namn;
+  $('#byt-namn-rad').hidden = !namn;
+  if (halsatMed === namn) return; // rita inte om (och animera inte igen) när bara statistiken uppdateras
+  halsatMed = namn;
+  const h = $('#hej');
+  const text = namn ? T.welcome_name : T.welcome;
+  h.setAttribute('aria-label', text.replace('{namn}', namn));
+  const [fore, efter = ''] = text.split('{namn}');
+  const a = bokstaver(fore, 0);
+  const noder = [...a.noder];
+  let antal = a.antal;
+  if (namn) {
+    const n = bokstaver(namn, antal);
+    antal += n.antal;
+    const ram = Object.assign(document.createElement('span'), { className: 'hej-namn' });
+    ram.append(...n.noder);
+    ram.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" vector-effect="non-scaling-stroke" d="M3 9C38 3 80 2 112 6s58 6 85-1"/></svg>');
+    noder.push(ram);
+    const b = bokstaver(efter, antal);
+    antal += b.antal;
+    noder.push(...b.noder);
+  }
+  for (const n of noder) if (n.nodeType === 1) n.setAttribute('aria-hidden', 'true');
+  h.replaceChildren(...noder);
+  // Linjen under namnet och raden under rubriken kommer när sista bokstaven landat
+  $('#vy-in').style.setProperty('--efter', `${antal * 40 + 650}ms`);
+}
+$('#byt-namn').addEventListener('click', () => {
+  const form = $('#f-namn');
+  form.hidden = false;
+  form.namn.value = jag?.namn || '';
+  form.namn.focus();
+});
+$('#f-namn').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const f = e.currentTarget;
+  const felRad = $('#namn-fel');
+  const knapp = f.querySelector('[type=submit]');
+  felRad.textContent = '';
+  if (!f.namn.value.trim()) { f.namn.focus(); felRad.textContent = T.err_name; return; }
+  knapp.disabled = true;
+  api('/me/namn', { namn: f.namn.value }, { 400: T.err_name })
+    .then(({ namn }) => { jag.namn = namn; halsa(namn); })
+    .catch((fel) => { felRad.textContent = fel.message; })
+    .finally(() => { knapp.disabled = false; });
+});
 
 function ritaDiagram(dagar) {
   const perDag = new Map(dagar.map((d) => [d.day, d.reklam + d.sparare + d.farliga + d.popups + d.omdirigeringar]));

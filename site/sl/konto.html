@@ -142,12 +142,22 @@
   <!-- Inloggad -->
   <section class="in" id="vy-in" hidden>
     <div class="in-topp">
-      <div>
-        <p class="dov">Prijavljen kot <b id="min-mejl"></b></p>
-        <h1>Skupaj ustavljeno</h1>
+      <div class="hej">
+        <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
+        <div class="hej-text">
+          <h1 class="hej-rubrik" id="hej"></h1>
+          <p class="dov hej-under">Prijavljen kot <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Spremeni ime</button></span></p>
+          <form class="namn-form" id="f-namn" novalidate hidden>
+            <label class="falt"><span>Kako vas naj kličemo?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Vaše ime" required></label>
+            <button class="btn liq" type="submit">Shrani</button>
+          </form>
+          <p class="meddelande" id="namn-fel" role="alert" aria-live="polite"></p>
+        </div>
       </div>
       <button type="button" class="btn liq-ghost" id="logga-ut">Odjava</button>
     </div>
+
+    <h2 class="k-rubrik">Skupaj ustavljeno</h2>
 
     <dl class="k-siffror">
       <div class="k-siffra stor"><dt id="s-reklam">0</dt><dd>oglasi</dd></div>
@@ -201,6 +211,9 @@
     <span data-k="err_login">Napačen e-poštni naslov ali geslo.</span>
     <span data-k="err_exists">Račun s tem e-poštnim naslovom že obstaja. Raje se prijavi.</span>
     <span data-k="err_wait">Preveč poskusov. Malo počakaj.</span>
+    <span data-k="welcome">Dobrodošli</span>
+    <span data-k="welcome_name">Dobrodošli, {namn}</span>
+    <span data-k="err_name">Vpišite ime s črkami.</span>
     <span data-k="delete_confirm">Trajno izbrišem račun in vso statistiko?</span>
   </template>
 </main>

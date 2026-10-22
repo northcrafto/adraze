@@ -252,5 +252,12 @@
   "stod.thanks_title": "Desteğin için teşekkürler!",
   "stod.thanks_text": "{belopp} kr verdin. Bu bizim için çok değerli ve AdRaze'i senin için geliştirmeye devam etmemize yardımcı oluyor.",
   "stod.error": "Bir şeyler ters gitti. Tekrar dene.",
-  "stod.limits": "{min} ile {max} kr arasında bir tutar seç."
+  "stod.limits": "{min} ile {max} kr arasında bir tutar seç.",
+  "konto.welcome": "Hoş geldin",
+  "konto.welcome_name": "Hoş geldin, {namn}",
+  "konto.name_ask": "Sana nasıl hitap edelim?",
+  "konto.name_placeholder": "Adın",
+  "konto.name_save": "Kaydet",
+  "konto.name_change": "Adı değiştir",
+  "konto.err_name": "Harflerden oluşan bir ad yaz."
 }

@@ -252,5 +252,12 @@
   "stod.thanks_title": "Bedankt voor je steun!",
   "stod.thanks_text": "Je gaf {belopp} kr. Dat betekent veel en helpt ons AdRaze verder te ontwikkelen, voor jou.",
   "stod.error": "Er ging iets mis. Probeer het opnieuw.",
-  "stod.limits": "Kies een bedrag tussen {min} en {max} kr."
+  "stod.limits": "Kies een bedrag tussen {min} en {max} kr.",
+  "konto.welcome": "Welkom",
+  "konto.welcome_name": "Welkom, {namn}",
+  "konto.name_ask": "Hoe mogen we je noemen?",
+  "konto.name_placeholder": "Je voornaam",
+  "konto.name_save": "Opslaan",
+  "konto.name_change": "Naam wijzigen",
+  "konto.err_name": "Vul een naam in met letters."
 }
