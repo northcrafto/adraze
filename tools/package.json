@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Bygger AdRazes regelpaket från filterlistor",
   "scripts": {
-    "build": "node build.js --fetch"
+    "build": "node build.js --fetch",
+    "pack": "node pack.mjs"
   },
   "license": "GPL-3.0-only",
   "dependencies": {

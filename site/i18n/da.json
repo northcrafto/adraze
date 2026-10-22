@@ -154,7 +154,7 @@
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> blokerer reklamer og trackere med Chromes indbyggede filter.",
   "privacy.perm_hosts": "<b>Adgang til alle websites:</b> nødvendig for at skjule tomme annoncefelter og stoppe popups på de sider, du besøger. Indholdet på siderne læses ikke og sendes ingen steder hen.",
   "privacy.perm_nav": "<b>webNavigation:</b> til at genkende popup-vinduer, som en side åbner, og lukke dem, hvis de fører til reklamer eller farlige sider.",
-  "privacy.perm_scripting": "<b>scripting og activeTab:</b> indsætter stilregler, der skjuler annoncer, og viser statistik for den fane, du har åben.",
+  "privacy.perm_scripting": "<b>scripting:</b> indsætter stilregler, der skjuler annoncer, og viser statistik for den fane, du har åben.",
   "privacy.perm_storage": "<b>storage:</b> gemmer dine pausede sites og tællere lokalt.",
   "privacy.h_lists": "Filterlister",
   "privacy.p_lists": "AdRaze leveres med filterlister fra EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard og Peter Lowe. Listerne er indbygget i udvidelsen. Der sendes ingen forespørgsler om, hvilke sider du besøger, til nogen.",

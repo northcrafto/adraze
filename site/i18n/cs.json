@@ -154,7 +154,7 @@
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> blokuje reklamy a sledovací skripty pomocí vestavěných filtrů Chromu.",
   "privacy.perm_hosts": "<b>Přístup ke všem webům:</b> je potřeba ke skrytí prázdných reklamních ploch a zastavení vyskakovacích oken na stránkách, které navštívíte. Obsah stránek se nečte a nikam se neposílá.",
   "privacy.perm_nav": "<b>webNavigation:</b> slouží k rozpoznání vyskakovacích oken, která otevře stránka, a k jejich zavření, pokud vedou na reklamu nebo nebezpečné stránky.",
-  "privacy.perm_scripting": "<b>scripting a activeTab:</b> vkládá pravidla stylů, která skrývají reklamy, a zobrazuje statistiky pro otevřenou kartu.",
+  "privacy.perm_scripting": "<b>scripting:</b> vkládá pravidla stylů, která skrývají reklamy, a zobrazuje statistiky pro otevřenou kartu.",
   "privacy.perm_storage": "<b>storage:</b> lokálně ukládá pozastavené weby a počítadla.",
   "privacy.h_lists": "Seznamy filtrů",
   "privacy.p_lists": "AdRaze obsahuje seznamy filtrů od EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard a Peter Lowe. Seznamy jsou součástí rozšíření. Nikomu se neposílají žádné dotazy na to, jaké stránky navštěvujete.",

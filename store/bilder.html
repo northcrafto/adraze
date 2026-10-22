@@ -1,0 +1,55 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+@font-face { font-family: F; src: url("../site/fonts/familjen.woff2"); font-weight: 400 700; }
+* { margin: 0; box-sizing: border-box; }
+body { font-family: F, sans-serif; background: #000; }
+.bild { position: relative; overflow: hidden; background: #111113; color: #f2f2ef; }
+.skarm { width: 1280px; height: 800px; display: grid; grid-template-columns: 430px 1fr; align-items: center; padding: 0 0 0 72px; }
+h1 { font-size: 64px; line-height: .98; letter-spacing: -.045em; font-weight: 700; }
+h1 em { font-style: normal; color: #ff4b1f; }
+p { font-size: 22px; line-height: 1.35; color: #a7a7af; margin-top: 22px; max-width: 340px; }
+.logga { display: flex; gap: 12px; align-items: center; font-weight: 700; font-size: 26px; margin-bottom: 40px; }
+.logga img { width: 44px; }
+.scen { position: relative; height: 800px; }
+.sajt { position: absolute; left: 40px; top: 110px; width: 880px; border-radius: 14px; box-shadow: 0 30px 80px #0009; border: 1px solid #2a2a30; }
+.popup { position: absolute; left: 470px; top: 150px; width: 300px; border-radius: 14px; box-shadow: 0 30px 70px #000c; border: 1px solid #333; }
+.lista { list-style: none; padding: 0; margin-top: 30px; display: grid; gap: 14px; font-size: 22px; }
+.lista li::before { content: ""; display: inline-block; width: 10px; height: 10px; background: #ff4b1f; border-radius: 2px; margin-right: 14px; vertical-align: middle; }
+.tile { width: 440px; height: 280px; display: flex; flex-direction: column; justify-content: center; padding: 0 36px; }
+.tile img { width: 64px; margin-bottom: 18px; }
+.tile h2 { font-size: 40px; letter-spacing: -.04em; line-height: 1; }
+.tile span { color: #a7a7af; font-size: 18px; margin-top: 10px; }
+.marquee { width: 1400px; height: 560px; display: grid; grid-template-columns: 1fr 560px; align-items: center; padding-left: 90px; }
+.marquee h1 { font-size: 84px; }
+.marquee .logga img { width: 60px; } .marquee .logga { font-size: 34px; }
+.stor { width: 380px; justify-self: center; }
+</style>
+
+<div class="bild skarm" id="s1">
+  <div><div class="logga"><img src="kallor/adraze-mark-512.png">AdRaze</div>
+    <h1>Reklamen borta. <em>Sajten kvar.</em></h1>
+    <p>Stoppar reklam, spårare, popups och farliga omdirigeringar. Gratis, för alltid.</p></div>
+  <div class="scen"><img class="sajt" src="kallor/aftonbladet.png"><img class="popup" style="left:440px" src="kallor/popup-aftonbladet.png"></div>
+</div>
+
+<div class="bild skarm" id="s2">
+  <div><div class="logga"><img src="kallor/adraze-mark-512.png">AdRaze</div>
+    <h1><em>100</em> av 100 på adblock-tester.com</h1>
+    <p>Utan AdRaze: 41 poäng. Byggt på EasyList, EasyPrivacy och Frellwits svenska lista.</p></div>
+  <div class="scen"><img class="sajt" src="kallor/tester.png"><img class="popup" src="kallor/popup-tester.png"></div>
+</div>
+
+<div class="bild skarm" id="s3">
+  <div><div class="logga"><img src="kallor/adraze-mark-512.png">AdRaze</div>
+    <h1>Allt det jobbiga, <em>borta.</em></h1>
+    <ul class="lista"><li>Reklam och spårare</li><li>Reklam på YouTube</li><li>Kakrutor avvisas åt dig</li><li>Popunders och klickfällor</li><li>Farliga sidor stoppas</li></ul></div>
+  <div class="scen"><img class="popup" style="left:250px;top:120px;width:360px" src="kallor/popup-aftonbladet.png"></div>
+</div>
+
+<div class="bild tile" id="tile"><img src="kallor/adraze-mark-512.png"><h2>AdRaze</h2><span>Sveriges bästa adblocker</span></div>
+
+<div class="bild marquee" id="marquee">
+  <div><div class="logga"><img src="kallor/adraze-mark-512.png">AdRaze</div><h1>Reklamen borta.<br><em>Sajten kvar.</em></h1></div>
+  <img class="stor" src="kallor/popup-aftonbladet.png">
+</div>

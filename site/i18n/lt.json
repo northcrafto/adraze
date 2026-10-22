@@ -154,7 +154,7 @@
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> blokuoja reklamas ir sekiklius naudodamas integruotus Chrome filtrus.",
   "privacy.perm_hosts": "<b>Prieiga prie visų svetainių:</b> reikalinga, kad būtų galima paslėpti tuščias reklamų vietas ir sustabdyti iššokančius langus lankomose svetainėse. Puslapių turinys neskaitomas ir niekur nesiunčiamas.",
   "privacy.perm_nav": "<b>webNavigation:</b> kad atpažintų puslapio atidarytus iššokančius langus ir juos uždarytų, jei jie veda į reklamas ar pavojingas svetaines.",
-  "privacy.perm_scripting": "<b>scripting ir activeTab:</b> prideda stiliaus taisykles, slepiančias reklamas, ir rodo atidaryto skirtuko statistiką.",
+  "privacy.perm_scripting": "<b>scripting:</b> prideda stiliaus taisykles, slepiančias reklamas, ir rodo atidaryto skirtuko statistiką.",
   "privacy.perm_storage": "<b>storage:</b> vietoje saugo sustabdytas svetaines ir skaitiklius.",
   "privacy.h_lists": "Filtrų sąrašai",
   "privacy.p_lists": "AdRaze pateikiamas su filtrų sąrašais iš EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard ir Peter Lowe. Sąrašai yra plėtinio dalis. Jokios užklausos apie lankomas svetaines niekam nesiunčiamos.",

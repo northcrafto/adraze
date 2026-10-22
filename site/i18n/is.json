@@ -154,7 +154,7 @@
   "privacy.perm_dnr": "<b>declarativeNetRequest:</b> lokar á auglýsingar og rekjara með innbyggðri síun Chrome.",
   "privacy.perm_hosts": "<b>Aðgangur að öllum vefsvæðum:</b> þarf til að fela tóma auglýsingareiti og stöðva sprettiglugga á síðunum sem þú heimsækir. Efni síðnanna er hvorki lesið né sent neitt.",
   "privacy.perm_nav": "<b>webNavigation:</b> til að þekkja sprettiglugga sem síða opnar og loka þeim ef þeir leiða á auglýsingar eða hættulegar síður.",
-  "privacy.perm_scripting": "<b>scripting og activeTab:</b> setur inn stílreglur sem fela auglýsingar og sýnir tölfræði fyrir flipann sem þú ert með opinn.",
+  "privacy.perm_scripting": "<b>scripting:</b> setur inn stílreglur sem fela auglýsingar og sýnir tölfræði fyrir flipann sem þú ert með opinn.",
   "privacy.perm_storage": "<b>storage:</b> vistar síðurnar þar sem þú gerðir hlé og teljarana staðbundið.",
   "privacy.h_lists": "Síulistar",
   "privacy.p_lists": "AdRaze fylgja síulistar frá EasyList, EasyPrivacy, Frellwit's Swedish Filter, uBlock Origin, AdGuard og Peter Lowe. Listarnir eru innbyggðir í viðbótina. Engar fyrirspurnir um hvaða síður þú heimsækir eru sendar neinum.",
