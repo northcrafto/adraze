@@ -146,7 +146,18 @@
         <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
-          <p class="hej-citat" id="hej-citat"><span></span><i class="markor" aria-hidden="true"></i></p>
+          <figure class="hej-citat" id="hej-citat">
+            <figcaption class="hej-etikett" hidden>Zitat des Tages</figcaption>
+            <blockquote><span></span><i class="markor" aria-hidden="true"></i></blockquote>
+            <p class="hej-vem"><span hidden>– <cite></cite> <span aria-hidden="true">·</span> </span><button type="button" class="lank-knapp nav-link" id="foresla">Zitat vorschlagen</button></p>
+          </figure>
+          <form class="forslag" id="f-forslag" novalidate hidden>
+            <div class="forslag-huvud"><b>Schick uns deinen Vorschlag</b><button type="button" class="lank-knapp nav-link" id="forslag-stang">Schließen</button></div>
+            <label class="falt"><span>Das Zitat</span><textarea name="citat" rows="2" maxlength="400" required></textarea></label>
+            <label class="falt"><span>Wer hat es gesagt? (optional)</span><input name="vem" maxlength="80" autocomplete="off"></label>
+            <button class="btn liq" type="submit">Senden</button>
+            <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
+          </form>
           <p class="dov hej-under">Angemeldet als <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Namen ändern</button></span></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Wie sollen wir dich nennen?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Dein Vorname" required></label>
@@ -214,16 +225,49 @@
     <span data-k="err_wait">Zu viele Versuche. Warte einen Moment.</span>
     <span data-k="welcome">Willkommen</span>
     <span data-k="welcome_name">Willkommen, {namn}</span>
-    <span data-k="quote_1">Happy adblocking!</span>
-    <span data-k="quote_2">So ist das Internet viel ruhiger.</span>
-    <span data-k="quote_3">Auch heute keine Werbung. Genieß es.</span>
-    <span data-k="quote_4">Die Tracker suchen dich immer noch.</span>
-    <span data-k="quote_5">{n} Anzeigen, die du nie sehen musstest.</span>
-    <span data-k="quote_6">Schnellere Seiten, ruhigerer Kopf.</span>
-    <span data-k="quote_7">Das Web, wie es gedacht war.</span>
-    <span data-k="quote_8">Deine Aufmerksamkeit ist nicht zu verkaufen.</span>
-    <span data-k="quote_9">Popups? Nie gehört.</span>
-    <span data-k="quote_10">Ein sauberes Web ist ein fröhliches Web.</span>
+    <span data-k="quote_1">Wer ein Warum zum Leben hat, erträgt fast jedes Wie.</span>
+    <span data-k="quote_by_1">Friedrich Nietzsche</span>
+    <span data-k="quote_2">Ein ungeprüftes Leben ist nicht lebenswert.</span>
+    <span data-k="quote_by_2">Sokrates</span>
+    <span data-k="quote_3">Wir leiden öfter in der Vorstellung als in der Wirklichkeit.</span>
+    <span data-k="quote_by_3">Seneca</span>
+    <span data-k="quote_4">Nicht weil es schwer ist, wagen wir es nicht, sondern weil wir es nicht wagen, ist es schwer.</span>
+    <span data-k="quote_by_4">Seneca</span>
+    <span data-k="quote_5">Das Leben ist nicht kurz, wir verschwenden nur viel davon.</span>
+    <span data-k="quote_by_5">Seneca</span>
+    <span data-k="quote_6">Verschwende keine Zeit mehr mit der Frage, was ein guter Mensch ist. Sei einer.</span>
+    <span data-k="quote_by_6">Marcus Aurelius</span>
+    <span data-k="quote_7">Was im Weg steht, wird zum Weg.</span>
+    <span data-k="quote_by_7">Marcus Aurelius</span>
+    <span data-k="quote_8">Das Leben kann nur rückwärts verstanden, aber muss vorwärts gelebt werden.</span>
+    <span data-k="quote_by_8">Søren Kierkegaard</span>
+    <span data-k="quote_9">Niemand steigt zweimal in denselben Fluss.</span>
+    <span data-k="quote_by_9">Heraklit</span>
+    <span data-k="quote_10">Wenn wir eine Situation nicht mehr ändern können, sind wir gefordert, uns selbst zu ändern.</span>
+    <span data-k="quote_by_10">Viktor Frankl</span>
+    <span data-k="quote_11">Wer nach außen schaut, träumt. Wer nach innen schaut, erwacht.</span>
+    <span data-k="quote_by_11">C. G. Jung</span>
+    <span data-k="quote_12">Auch eine Reise von tausend Meilen beginnt mit einem einzigen Schritt.</span>
+    <span data-k="quote_by_12">Laozi</span>
+    <span data-k="quote_13">Wer weiß, dass er genug hat, ist reich.</span>
+    <span data-k="quote_by_13">Laozi</span>
+    <span data-k="quote_14">Wir müssen uns Sisyphos als glücklichen Menschen vorstellen.</span>
+    <span data-k="quote_by_14">Albert Camus</span>
+    <span data-k="quote_15">Der Mensch ist dazu verurteilt, frei zu sein.</span>
+    <span data-k="quote_by_15">Jean-Paul Sartre</span>
+    <span data-k="quote_16">Das Wesentliche ist für die Augen unsichtbar.</span>
+    <span data-k="quote_by_16">Antoine de Saint-Exupéry</span>
+    <span data-k="quote_17">Alles Unglück der Menschen kommt daher, dass sie nicht ruhig allein in einem Zimmer sitzen können.</span>
+    <span data-k="quote_by_17">Blaise Pascal</span>
+    <span data-k="quote_18">Die Grenzen meiner Sprache bedeuten die Grenzen meiner Welt.</span>
+    <span data-k="quote_by_18">Ludwig Wittgenstein</span>
+    <span data-k="quote_19">Wer mit Ungeheuern kämpft, mag zusehn, dass er nicht dabei zum Ungeheuer wird.</span>
+    <span data-k="quote_by_19">Friedrich Nietzsche</span>
+    <span data-k="quote_20">Nicht die Dinge beunruhigen uns, sondern unsere Meinungen über sie.</span>
+    <span data-k="quote_by_20">Epiktet</span>
+    <span data-k="happy">Happy adblocking!</span>
+    <span data-k="suggest_thanks">Danke! Dein Vorschlag wurde gesendet.</span>
+    <span data-k="err_suggest">Schreib zuerst das Zitat.</span>
     <span data-k="err_name">Gib einen Namen aus Buchstaben ein.</span>
     <span data-k="delete_confirm">Konto und alle Statistiken endgültig löschen?</span>
   </template>

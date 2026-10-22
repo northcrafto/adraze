@@ -146,7 +146,18 @@
         <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
-          <p class="hej-citat" id="hej-citat"><span></span><i class="markor" aria-hidden="true"></i></p>
+          <figure class="hej-citat" id="hej-citat">
+            <figcaption class="hej-etikett" hidden>Dienos citata</figcaption>
+            <blockquote><span></span><i class="markor" aria-hidden="true"></i></blockquote>
+            <p class="hej-vem"><span hidden>– <cite></cite> <span aria-hidden="true">·</span> </span><button type="button" class="lank-knapp nav-link" id="foresla">Pasiūlykite citatą</button></p>
+          </figure>
+          <form class="forslag" id="f-forslag" novalidate hidden>
+            <div class="forslag-huvud"><b>Atsiųskite savo pasiūlymą</b><button type="button" class="lank-knapp nav-link" id="forslag-stang">Uždaryti</button></div>
+            <label class="falt"><span>Citata</span><textarea name="citat" rows="2" maxlength="400" required></textarea></label>
+            <label class="falt"><span>Kas tai pasakė? (nebūtina)</span><input name="vem" maxlength="80" autocomplete="off"></label>
+            <button class="btn liq" type="submit">Siųsti</button>
+            <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
+          </form>
           <p class="dov hej-under">Prisijungta kaip <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Keisti vardą</button></span></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Kaip jus vadinti?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Jūsų vardas" required></label>
@@ -214,16 +225,49 @@
     <span data-k="err_wait">Per daug bandymų. Šiek tiek palaukite.</span>
     <span data-k="welcome">Sveiki</span>
     <span data-k="welcome_name">Sveiki, {namn}</span>
-    <span data-k="quote_1">Happy adblocking!</span>
-    <span data-k="quote_2">Taip internetas daug tylesnis.</span>
-    <span data-k="quote_3">Ir šiandien jokių reklamų. Mėgaukitės.</span>
-    <span data-k="quote_4">Sekikliai vis dar jūsų ieško.</span>
-    <span data-k="quote_5">{n} reklamų, kurių niekada nereikėjo matyti.</span>
-    <span data-k="quote_6">Greitesni puslapiai, ramesnė galva.</span>
-    <span data-k="quote_7">Internetas, koks jis turėjo būti.</span>
-    <span data-k="quote_8">Jūsų dėmesys neparduodamas.</span>
-    <span data-k="quote_9">Iššokantys langai? Niekada negirdėjau.</span>
-    <span data-k="quote_10">Švarus internetas – laimingas internetas.</span>
+    <span data-k="quote_1">Kas turi kodėl gyventi, gali pakelti beveik bet kokį kaip.</span>
+    <span data-k="quote_by_1">Friedrichas Nietzsche</span>
+    <span data-k="quote_2">Neištirtas gyvenimas nevertas gyventi.</span>
+    <span data-k="quote_by_2">Sokratas</span>
+    <span data-k="quote_3">Dažniau kenčiame vaizduotėje nei tikrovėje.</span>
+    <span data-k="quote_by_3">Seneka</span>
+    <span data-k="quote_4">Nedrįstame ne todėl, kad dalykai sunkūs. Jie sunkūs todėl, kad nedrįstame.</span>
+    <span data-k="quote_by_4">Seneka</span>
+    <span data-k="quote_5">Gyvenimas nėra trumpas, mes tiesiog daug jo iššvaistome.</span>
+    <span data-k="quote_by_5">Seneka</span>
+    <span data-k="quote_6">Nebešvaistyk laiko ginčydamasis, koks turi būti geras žmogus. Būk toks.</span>
+    <span data-k="quote_by_6">Markas Aurelijus</span>
+    <span data-k="quote_7">Tai, kas stovi kelyje, tampa keliu.</span>
+    <span data-k="quote_by_7">Markas Aurelijus</span>
+    <span data-k="quote_8">Gyvenimą galima suprasti tik žvelgiant atgal, bet gyventi jį reikia žvelgiant į priekį.</span>
+    <span data-k="quote_by_8">Sørenas Kierkegaardas</span>
+    <span data-k="quote_9">Niekas neįžengia į tą pačią upę du kartus.</span>
+    <span data-k="quote_by_9">Heraklitas</span>
+    <span data-k="quote_10">Kai nebegalime pakeisti situacijos, esame kviečiami pakeisti save.</span>
+    <span data-k="quote_by_10">Viktoras Franklis</span>
+    <span data-k="quote_11">Kas žiūri į išorę, sapnuoja. Kas žiūri į vidų, pabunda.</span>
+    <span data-k="quote_by_11">Carlas Jungas</span>
+    <span data-k="quote_12">Tūkstančio mylių kelionė prasideda vienu žingsniu.</span>
+    <span data-k="quote_by_12">Laozi</span>
+    <span data-k="quote_13">Kas žino, kad turi pakankamai, yra turtingas.</span>
+    <span data-k="quote_by_13">Laozi</span>
+    <span data-k="quote_14">Sizifą turime įsivaizduoti laimingą.</span>
+    <span data-k="quote_by_14">Albert’as Camus</span>
+    <span data-k="quote_15">Žmogus pasmerktas būti laisvas.</span>
+    <span data-k="quote_by_15">Jeanas Paulis Sartre’as</span>
+    <span data-k="quote_16">Svarbiausia akimis nematoma.</span>
+    <span data-k="quote_by_16">Antoine de Saint-Exupéry</span>
+    <span data-k="quote_17">Visa žmonių nelaimė kyla iš to, kad jie nemoka ramiai sėdėti vieni kambaryje.</span>
+    <span data-k="quote_by_17">Blaise’as Pascalis</span>
+    <span data-k="quote_18">Mano kalbos ribos yra mano pasaulio ribos.</span>
+    <span data-k="quote_by_18">Ludwigas Wittgensteinas</span>
+    <span data-k="quote_19">Kas kovoja su pabaisomis, tesaugo, kad pats netaptų pabaisa.</span>
+    <span data-k="quote_by_19">Friedrichas Nietzsche</span>
+    <span data-k="quote_20">Žmones trikdo ne daiktai, o jų nuomonė apie juos.</span>
+    <span data-k="quote_by_20">Epiktetas</span>
+    <span data-k="happy">Happy adblocking!</span>
+    <span data-k="suggest_thanks">Ačiū! Pasiūlymas išsiųstas.</span>
+    <span data-k="err_suggest">Pirmiausia įrašykite citatą.</span>
     <span data-k="err_name">Įrašykite vardą raidėmis.</span>
     <span data-k="delete_confirm">Ištrinti paskyrą ir visą statistiką visam laikui?</span>
   </template>

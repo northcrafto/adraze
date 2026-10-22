@@ -146,7 +146,18 @@
         <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
-          <p class="hej-citat" id="hej-citat"><span></span><i class="markor" aria-hidden="true"></i></p>
+          <figure class="hej-citat" id="hej-citat">
+            <figcaption class="hej-etikett" hidden>Günün sözü</figcaption>
+            <blockquote><span></span><i class="markor" aria-hidden="true"></i></blockquote>
+            <p class="hej-vem"><span hidden>– <cite></cite> <span aria-hidden="true">·</span> </span><button type="button" class="lank-knapp nav-link" id="foresla">Bir söz öner</button></p>
+          </figure>
+          <form class="forslag" id="f-forslag" novalidate hidden>
+            <div class="forslag-huvud"><b>Önerini gönder</b><button type="button" class="lank-knapp nav-link" id="forslag-stang">Kapat</button></div>
+            <label class="falt"><span>Söz</span><textarea name="citat" rows="2" maxlength="400" required></textarea></label>
+            <label class="falt"><span>Kim söyledi? (isteğe bağlı)</span><input name="vem" maxlength="80" autocomplete="off"></label>
+            <button class="btn liq" type="submit">Gönder</button>
+            <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
+          </form>
           <p class="dov hej-under">Giriş yapan: <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Adı değiştir</button></span></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Sana nasıl hitap edelim?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Adın" required></label>
@@ -214,16 +225,49 @@
     <span data-k="err_wait">Çok fazla deneme. Biraz bekle.</span>
     <span data-k="welcome">Hoş geldin</span>
     <span data-k="welcome_name">Hoş geldin, {namn}</span>
-    <span data-k="quote_1">Happy adblocking!</span>
-    <span data-k="quote_2">İnternet böyle çok daha sessiz.</span>
-    <span data-k="quote_3">Bugün de reklam yok. Keyfini çıkar.</span>
-    <span data-k="quote_4">Takipçiler hâlâ seni arıyor.</span>
-    <span data-k="quote_5">Hiç görmek zorunda kalmadığın {n} reklam.</span>
-    <span data-k="quote_6">Daha hızlı sayfalar, daha sakin bir kafa.</span>
-    <span data-k="quote_7">Web olması gerektiği gibi.</span>
-    <span data-k="quote_8">Dikkatin satılık değil.</span>
-    <span data-k="quote_9">Açılır pencereler mi? Hiç duymadım.</span>
-    <span data-k="quote_10">Temiz bir web, mutlu bir web.</span>
+    <span data-k="quote_1">Yaşamak için bir nedeni olan, hemen her nasıla katlanabilir.</span>
+    <span data-k="quote_by_1">Friedrich Nietzsche</span>
+    <span data-k="quote_2">Sorgulanmamış bir hayat yaşanmaya değmez.</span>
+    <span data-k="quote_by_2">Sokrates</span>
+    <span data-k="quote_3">Gerçekte olduğundan daha sık hayalimizde acı çekeriz.</span>
+    <span data-k="quote_by_3">Seneca</span>
+    <span data-k="quote_4">Cesaret edemememizin nedeni işlerin zor olması değil; cesaret edemediğimiz için zordurlar.</span>
+    <span data-k="quote_by_4">Seneca</span>
+    <span data-k="quote_5">Hayat kısa değil, sadece çoğunu boşa harcıyoruz.</span>
+    <span data-k="quote_by_5">Seneca</span>
+    <span data-k="quote_6">İyi bir insanın nasıl olması gerektiğini tartışarak daha fazla vakit kaybetme. Öyle biri ol.</span>
+    <span data-k="quote_by_6">Marcus Aurelius</span>
+    <span data-k="quote_7">Yolu kesen şey yolun kendisi olur.</span>
+    <span data-k="quote_by_7">Marcus Aurelius</span>
+    <span data-k="quote_8">Hayat ancak geriye bakarak anlaşılır, ama ileriye doğru yaşanmalıdır.</span>
+    <span data-k="quote_by_8">Søren Kierkegaard</span>
+    <span data-k="quote_9">Kimse aynı nehre iki kez giremez.</span>
+    <span data-k="quote_by_9">Herakleitos</span>
+    <span data-k="quote_10">Bir durumu artık değiştiremediğimizde, kendimizi değiştirmeye çağrılırız.</span>
+    <span data-k="quote_by_10">Viktor Frankl</span>
+    <span data-k="quote_11">Dışarıya bakan düş görür. İçeriye bakan uyanır.</span>
+    <span data-k="quote_by_11">Carl Jung</span>
+    <span data-k="quote_12">Bin millik bir yolculuk tek bir adımla başlar.</span>
+    <span data-k="quote_by_12">Laozi</span>
+    <span data-k="quote_13">Yeterince sahip olduğunu bilen zengindir.</span>
+    <span data-k="quote_by_13">Laozi</span>
+    <span data-k="quote_14">Sisifos’u mutlu hayal etmek gerekir.</span>
+    <span data-k="quote_by_14">Albert Camus</span>
+    <span data-k="quote_15">İnsan özgür olmaya mahkûmdur.</span>
+    <span data-k="quote_by_15">Jean-Paul Sartre</span>
+    <span data-k="quote_16">Asıl önemli olan gözle görülmez.</span>
+    <span data-k="quote_by_16">Antoine de Saint-Exupéry</span>
+    <span data-k="quote_17">İnsanların bütün mutsuzluğu, bir odada tek başına sessizce oturamamalarından gelir.</span>
+    <span data-k="quote_by_17">Blaise Pascal</span>
+    <span data-k="quote_18">Dilimin sınırları dünyamın sınırlarıdır.</span>
+    <span data-k="quote_by_18">Ludwig Wittgenstein</span>
+    <span data-k="quote_19">Canavarlarla savaşan, kendisinin de bir canavara dönüşmemesine dikkat etmeli.</span>
+    <span data-k="quote_by_19">Friedrich Nietzsche</span>
+    <span data-k="quote_20">İnsanları rahatsız eden şeyler değil, şeyler hakkındaki düşünceleridir.</span>
+    <span data-k="quote_by_20">Epiktetos</span>
+    <span data-k="happy">Happy adblocking!</span>
+    <span data-k="suggest_thanks">Teşekkürler! Önerin gönderildi.</span>
+    <span data-k="err_suggest">Önce sözü yaz.</span>
     <span data-k="err_name">Harflerden oluşan bir ad yaz.</span>
     <span data-k="delete_confirm">Hesap ve tüm istatistikler kalıcı olarak silinsin mi?</span>
   </template>

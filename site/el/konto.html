@@ -146,7 +146,18 @@
         <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
-          <p class="hej-citat" id="hej-citat"><span></span><i class="markor" aria-hidden="true"></i></p>
+          <figure class="hej-citat" id="hej-citat">
+            <figcaption class="hej-etikett" hidden>Η φράση της ημέρας</figcaption>
+            <blockquote><span></span><i class="markor" aria-hidden="true"></i></blockquote>
+            <p class="hej-vem"><span hidden>– <cite></cite> <span aria-hidden="true">·</span> </span><button type="button" class="lank-knapp nav-link" id="foresla">Πρότεινε μια φράση</button></p>
+          </figure>
+          <form class="forslag" id="f-forslag" novalidate hidden>
+            <div class="forslag-huvud"><b>Στείλε την πρότασή σου</b><button type="button" class="lank-knapp nav-link" id="forslag-stang">Κλείσιμο</button></div>
+            <label class="falt"><span>Η φράση</span><textarea name="citat" rows="2" maxlength="400" required></textarea></label>
+            <label class="falt"><span>Ποιος το είπε; (προαιρετικό)</span><input name="vem" maxlength="80" autocomplete="off"></label>
+            <button class="btn liq" type="submit">Αποστολή</button>
+            <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
+          </form>
           <p class="dov hej-under">Συνδεδεμένος ως <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Αλλαγή ονόματος</button></span></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Πώς να σε λέμε;</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Το μικρό σου όνομα" required></label>
@@ -214,16 +225,49 @@
     <span data-k="err_wait">Πάρα πολλές προσπάθειες. Περίμενε λίγο.</span>
     <span data-k="welcome">Καλώς ήρθες</span>
     <span data-k="welcome_name">Καλώς ήρθες, {namn}</span>
-    <span data-k="quote_1">Happy adblocking!</span>
-    <span data-k="quote_2">Έτσι το ίντερνετ είναι πολύ πιο ήσυχο.</span>
-    <span data-k="quote_3">Ούτε σήμερα διαφημίσεις. Απόλαυσέ το.</span>
-    <span data-k="quote_4">Οι ιχνηλάτες σε ψάχνουν ακόμα.</span>
-    <span data-k="quote_5">{n} διαφημίσεις που δεν χρειάστηκε ποτέ να δεις.</span>
-    <span data-k="quote_6">Πιο γρήγορες σελίδες, πιο ήρεμο μυαλό.</span>
-    <span data-k="quote_7">Ο ιστός όπως έπρεπε να είναι.</span>
-    <span data-k="quote_8">Η προσοχή σου δεν πωλείται.</span>
-    <span data-k="quote_9">Αναδυόμενα παράθυρα; Ποτέ δεν τα άκουσα.</span>
-    <span data-k="quote_10">Ένας καθαρός ιστός είναι ένας χαρούμενος ιστός.</span>
+    <span data-k="quote_1">Όποιος έχει ένα γιατί για να ζει, μπορεί να αντέξει σχεδόν κάθε πώς.</span>
+    <span data-k="quote_by_1">Φρίντριχ Νίτσε</span>
+    <span data-k="quote_2">Ο ανεξέταστος βίος δεν αξίζει να τον ζει κανείς.</span>
+    <span data-k="quote_by_2">Σωκράτης</span>
+    <span data-k="quote_3">Υποφέρουμε πιο συχνά στη φαντασία παρά στην πραγματικότητα.</span>
+    <span data-k="quote_by_3">Σενέκας</span>
+    <span data-k="quote_4">Δεν είναι επειδή τα πράγματα είναι δύσκολα που δεν τολμάμε. Είναι δύσκολα επειδή δεν τολμάμε.</span>
+    <span data-k="quote_by_4">Σενέκας</span>
+    <span data-k="quote_5">Η ζωή δεν είναι σύντομη, απλώς σπαταλάμε πολλή από αυτήν.</span>
+    <span data-k="quote_by_5">Σενέκας</span>
+    <span data-k="quote_6">Μη χάνεις άλλο χρόνο συζητώντας τι είναι ένας καλός άνθρωπος. Γίνε ένας.</span>
+    <span data-k="quote_by_6">Μάρκος Αυρήλιος</span>
+    <span data-k="quote_7">Αυτό που στέκεται εμπόδιο γίνεται ο δρόμος.</span>
+    <span data-k="quote_by_7">Μάρκος Αυρήλιος</span>
+    <span data-k="quote_8">Η ζωή μπορεί να κατανοηθεί μόνο προς τα πίσω, αλλά πρέπει να βιωθεί προς τα εμπρός.</span>
+    <span data-k="quote_by_8">Σέρεν Κίρκεγκωρ</span>
+    <span data-k="quote_9">Κανείς δεν μπαίνει δύο φορές στο ίδιο ποτάμι.</span>
+    <span data-k="quote_by_9">Ηράκλειτος</span>
+    <span data-k="quote_10">Όταν δεν μπορούμε πια να αλλάξουμε μια κατάσταση, καλούμαστε να αλλάξουμε τον εαυτό μας.</span>
+    <span data-k="quote_by_10">Βίκτορ Φρανκλ</span>
+    <span data-k="quote_11">Όποιος κοιτάζει έξω ονειρεύεται. Όποιος κοιτάζει μέσα ξυπνά.</span>
+    <span data-k="quote_by_11">Καρλ Γιουνγκ</span>
+    <span data-k="quote_12">Ένα ταξίδι χιλίων μιλίων αρχίζει με ένα μόνο βήμα.</span>
+    <span data-k="quote_by_12">Λάο Τσε</span>
+    <span data-k="quote_13">Όποιος ξέρει ότι έχει αρκετά είναι πλούσιος.</span>
+    <span data-k="quote_by_13">Λάο Τσε</span>
+    <span data-k="quote_14">Πρέπει να φανταστούμε τον Σίσυφο ευτυχισμένο.</span>
+    <span data-k="quote_by_14">Αλμπέρ Καμύ</span>
+    <span data-k="quote_15">Ο άνθρωπος είναι καταδικασμένος να είναι ελεύθερος.</span>
+    <span data-k="quote_by_15">Ζαν-Πωλ Σαρτρ</span>
+    <span data-k="quote_16">Το ουσιώδες είναι αόρατο στα μάτια.</span>
+    <span data-k="quote_by_16">Αντουάν ντε Σεντ-Εξιπερί</span>
+    <span data-k="quote_17">Όλη η δυστυχία των ανθρώπων πηγάζει από το ότι δεν μπορούν να κάθονται ήσυχοι μόνοι σε ένα δωμάτιο.</span>
+    <span data-k="quote_by_17">Μπλεζ Πασκάλ</span>
+    <span data-k="quote_18">Τα όρια της γλώσσας μου σημαίνουν τα όρια του κόσμου μου.</span>
+    <span data-k="quote_by_18">Λούντβιχ Βίτγκενσταϊν</span>
+    <span data-k="quote_19">Όποιος πολεμά τέρατα ας προσέχει να μη γίνει ο ίδιος τέρας.</span>
+    <span data-k="quote_by_19">Φρίντριχ Νίτσε</span>
+    <span data-k="quote_20">Δεν μας ταράζουν τα πράγματα, αλλά οι γνώμες μας γι’ αυτά.</span>
+    <span data-k="quote_by_20">Επίκτητος</span>
+    <span data-k="happy">Happy adblocking!</span>
+    <span data-k="suggest_thanks">Ευχαριστούμε! Η πρότασή σου στάλθηκε.</span>
+    <span data-k="err_suggest">Γράψε πρώτα τη φράση.</span>
     <span data-k="err_name">Γράψε ένα όνομα με γράμματα.</span>
     <span data-k="delete_confirm">Να διαγραφούν οριστικά ο λογαριασμός και όλα τα στατιστικά;</span>
   </template>

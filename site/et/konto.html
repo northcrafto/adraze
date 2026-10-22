@@ -146,7 +146,18 @@
         <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
-          <p class="hej-citat" id="hej-citat"><span></span><i class="markor" aria-hidden="true"></i></p>
+          <figure class="hej-citat" id="hej-citat">
+            <figcaption class="hej-etikett" hidden>Päeva tsitaat</figcaption>
+            <blockquote><span></span><i class="markor" aria-hidden="true"></i></blockquote>
+            <p class="hej-vem"><span hidden>– <cite></cite> <span aria-hidden="true">·</span> </span><button type="button" class="lank-knapp nav-link" id="foresla">Paku tsitaati</button></p>
+          </figure>
+          <form class="forslag" id="f-forslag" novalidate hidden>
+            <div class="forslag-huvud"><b>Saada oma ettepanek</b><button type="button" class="lank-knapp nav-link" id="forslag-stang">Sulge</button></div>
+            <label class="falt"><span>Tsitaat</span><textarea name="citat" rows="2" maxlength="400" required></textarea></label>
+            <label class="falt"><span>Kes seda ütles? (valikuline)</span><input name="vem" maxlength="80" autocomplete="off"></label>
+            <button class="btn liq" type="submit">Saada</button>
+            <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
+          </form>
           <p class="dov hej-under">Sisse logitud kui <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Muuda nime</button></span></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Kuidas me sind kutsume?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Sinu eesnimi" required></label>
@@ -214,16 +225,49 @@
     <span data-k="err_wait">Liiga palju katseid. Oota natuke.</span>
     <span data-k="welcome">Tere tulemast</span>
     <span data-k="welcome_name">Tere tulemast, {namn}</span>
-    <span data-k="quote_1">Happy adblocking!</span>
-    <span data-k="quote_2">Nii on internet palju vaiksem.</span>
-    <span data-k="quote_3">Ka täna pole reklaami. Naudi.</span>
-    <span data-k="quote_4">Jälgijad otsivad sind ikka veel.</span>
-    <span data-k="quote_5">{n} reklaami, mida sa kunagi nägema ei pidanud.</span>
-    <span data-k="quote_6">Kiiremad lehed, rahulikum meel.</span>
-    <span data-k="quote_7">Veeb sellisena, nagu see mõeldud oli.</span>
-    <span data-k="quote_8">Sinu tähelepanu pole müügiks.</span>
-    <span data-k="quote_9">Hüpikaknad? Pole kuulnudki.</span>
-    <span data-k="quote_10">Puhas veeb on rõõmus veeb.</span>
+    <span data-k="quote_1">Kellel on miks elada, see talub peaaegu iga kuidas.</span>
+    <span data-k="quote_by_1">Friedrich Nietzsche</span>
+    <span data-k="quote_2">Uurimata elu ei ole elamist väärt.</span>
+    <span data-k="quote_by_2">Sokrates</span>
+    <span data-k="quote_3">Me kannatame sagedamini kujutluses kui tegelikkuses.</span>
+    <span data-k="quote_by_3">Seneca</span>
+    <span data-k="quote_4">Me ei julge mitte sellepärast, et asjad on rasked. Need on rasked, sest me ei julge.</span>
+    <span data-k="quote_by_4">Seneca</span>
+    <span data-k="quote_5">Elu ei ole lühike, me lihtsalt raiskame sellest palju.</span>
+    <span data-k="quote_by_5">Seneca</span>
+    <span data-k="quote_6">Ära raiska enam aega vaidlemisele, milline peaks olema hea inimene. Ole selline.</span>
+    <span data-k="quote_by_6">Marcus Aurelius</span>
+    <span data-k="quote_7">See, mis seisab teel, saab teeks.</span>
+    <span data-k="quote_by_7">Marcus Aurelius</span>
+    <span data-k="quote_8">Elu saab mõista vaid tagasi vaadates, kuid elada tuleb seda edasi.</span>
+    <span data-k="quote_by_8">Søren Kierkegaard</span>
+    <span data-k="quote_9">Keegi ei astu kaks korda samasse jõkke.</span>
+    <span data-k="quote_by_9">Herakleitos</span>
+    <span data-k="quote_10">Kui me ei saa enam olukorda muuta, oleme kutsutud muutma iseennast.</span>
+    <span data-k="quote_by_10">Viktor Frankl</span>
+    <span data-k="quote_11">Kes vaatab väljapoole, see unistab. Kes vaatab sissepoole, see ärkab.</span>
+    <span data-k="quote_by_11">Carl Jung</span>
+    <span data-k="quote_12">Tuhande miili pikkune teekond algab ühest sammust.</span>
+    <span data-k="quote_by_12">Laozi</span>
+    <span data-k="quote_13">Kes teab, et tal on küllalt, on rikas.</span>
+    <span data-k="quote_by_13">Laozi</span>
+    <span data-k="quote_14">Sisyphost tuleb ette kujutada õnnelikuna.</span>
+    <span data-k="quote_by_14">Albert Camus</span>
+    <span data-k="quote_15">Inimene on mõistetud olema vaba.</span>
+    <span data-k="quote_by_15">Jean-Paul Sartre</span>
+    <span data-k="quote_16">Kõige tähtsam on silmale nähtamatu.</span>
+    <span data-k="quote_by_16">Antoine de Saint-Exupéry</span>
+    <span data-k="quote_17">Kogu inimeste õnnetus tuleb sellest, et nad ei oska rahulikult üksi toas istuda.</span>
+    <span data-k="quote_by_17">Blaise Pascal</span>
+    <span data-k="quote_18">Minu keele piirid on minu maailma piirid.</span>
+    <span data-k="quote_by_18">Ludwig Wittgenstein</span>
+    <span data-k="quote_19">Kes võitleb koletistega, hoidku, et ta ise koletiseks ei muutuks.</span>
+    <span data-k="quote_by_19">Friedrich Nietzsche</span>
+    <span data-k="quote_20">Inimesi ei häiri asjad, vaid nende arvamused asjadest.</span>
+    <span data-k="quote_by_20">Epiktetos</span>
+    <span data-k="happy">Happy adblocking!</span>
+    <span data-k="suggest_thanks">Aitäh! Ettepanek on saadetud.</span>
+    <span data-k="err_suggest">Kirjuta kõigepealt tsitaat.</span>
     <span data-k="err_name">Kirjuta nimi tähtedega.</span>
     <span data-k="delete_confirm">Kas kustutada konto ja kogu statistika jäädavalt?</span>
   </template>

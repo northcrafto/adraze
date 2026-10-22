@@ -146,7 +146,18 @@
         <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
-          <p class="hej-citat" id="hej-citat"><span></span><i class="markor" aria-hidden="true"></i></p>
+          <figure class="hej-citat" id="hej-citat">
+            <figcaption class="hej-etikett" hidden>Citát dňa</figcaption>
+            <blockquote><span></span><i class="markor" aria-hidden="true"></i></blockquote>
+            <p class="hej-vem"><span hidden>– <cite></cite> <span aria-hidden="true">·</span> </span><button type="button" class="lank-knapp nav-link" id="foresla">Navrhnúť citát</button></p>
+          </figure>
+          <form class="forslag" id="f-forslag" novalidate hidden>
+            <div class="forslag-huvud"><b>Pošli svoj návrh</b><button type="button" class="lank-knapp nav-link" id="forslag-stang">Zavrieť</button></div>
+            <label class="falt"><span>Citát</span><textarea name="citat" rows="2" maxlength="400" required></textarea></label>
+            <label class="falt"><span>Kto to povedal? (nepovinné)</span><input name="vem" maxlength="80" autocomplete="off"></label>
+            <button class="btn liq" type="submit">Odoslať</button>
+            <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
+          </form>
           <p class="dov hej-under">Prihlásený ako <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Zmeniť meno</button></span></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Ako ťa máme volať?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Tvoje krstné meno" required></label>
@@ -214,16 +225,49 @@
     <span data-k="err_wait">Príliš veľa pokusov. Chvíľu počkajte.</span>
     <span data-k="welcome">Vitaj</span>
     <span data-k="welcome_name">Vitaj, {namn}</span>
-    <span data-k="quote_1">Happy adblocking!</span>
-    <span data-k="quote_2">Takto je internet oveľa tichší.</span>
-    <span data-k="quote_3">Ani dnes žiadne reklamy. Užívaj si.</span>
-    <span data-k="quote_4">Sledovače ťa stále hľadajú.</span>
-    <span data-k="quote_5">{n} reklám, ktoré si nikdy nemusel vidieť.</span>
-    <span data-k="quote_6">Rýchlejšie stránky, pokojnejšia hlava.</span>
-    <span data-k="quote_7">Web, aký mal byť.</span>
-    <span data-k="quote_8">Tvoja pozornosť nie je na predaj.</span>
-    <span data-k="quote_9">Vyskakovacie okná? Nikdy som o nich nepočul.</span>
-    <span data-k="quote_10">Čistý web je šťastný web.</span>
+    <span data-k="quote_1">Kto má prečo žiť, znesie takmer každé ako.</span>
+    <span data-k="quote_by_1">Friedrich Nietzsche</span>
+    <span data-k="quote_2">Neskúmaný život nestojí za to, aby sa žil.</span>
+    <span data-k="quote_by_2">Sokrates</span>
+    <span data-k="quote_3">Častejšie trpíme v predstavách než v skutočnosti.</span>
+    <span data-k="quote_by_3">Seneca</span>
+    <span data-k="quote_4">Neodvažujeme sa nie preto, že sú veci ťažké. Sú ťažké preto, že sa neodvažujeme.</span>
+    <span data-k="quote_by_4">Seneca</span>
+    <span data-k="quote_5">Život nie je krátky, len z neho veľa premárnime.</span>
+    <span data-k="quote_by_5">Seneca</span>
+    <span data-k="quote_6">Nestrácaj už čas debatami o tom, aký má byť dobrý človek. Buď ním.</span>
+    <span data-k="quote_by_6">Marcus Aurelius</span>
+    <span data-k="quote_7">Čo stojí v ceste, sa stáva cestou.</span>
+    <span data-k="quote_by_7">Marcus Aurelius</span>
+    <span data-k="quote_8">Život možno pochopiť len spätne, ale žiť sa musí dopredu.</span>
+    <span data-k="quote_by_8">Søren Kierkegaard</span>
+    <span data-k="quote_9">Nikto nevstúpi dvakrát do tej istej rieky.</span>
+    <span data-k="quote_by_9">Herakleitos</span>
+    <span data-k="quote_10">Keď už nemôžeme zmeniť situáciu, sme vyzvaní zmeniť samých seba.</span>
+    <span data-k="quote_by_10">Viktor Frankl</span>
+    <span data-k="quote_11">Kto sa pozerá von, sníva. Kto sa pozerá dovnútra, prebúdza sa.</span>
+    <span data-k="quote_by_11">Carl Jung</span>
+    <span data-k="quote_12">Aj cesta dlhá tisíc míľ sa začína prvým krokom.</span>
+    <span data-k="quote_by_12">Laozi</span>
+    <span data-k="quote_13">Kto vie, že má dosť, je bohatý.</span>
+    <span data-k="quote_by_13">Laozi</span>
+    <span data-k="quote_14">Sizyfa si musíme predstaviť šťastného.</span>
+    <span data-k="quote_by_14">Albert Camus</span>
+    <span data-k="quote_15">Človek je odsúdený na slobodu.</span>
+    <span data-k="quote_by_15">Jean-Paul Sartre</span>
+    <span data-k="quote_16">To podstatné je očiam neviditeľné.</span>
+    <span data-k="quote_by_16">Antoine de Saint-Exupéry</span>
+    <span data-k="quote_17">Všetko nešťastie ľudí pochádza z toho, že nevedia pokojne sedieť sami v izbe.</span>
+    <span data-k="quote_by_17">Blaise Pascal</span>
+    <span data-k="quote_18">Hranice môjho jazyka sú hranicami môjho sveta.</span>
+    <span data-k="quote_by_18">Ludwig Wittgenstein</span>
+    <span data-k="quote_19">Kto bojuje s netvormi, nech si dáva pozor, aby sa sám nestal netvorom.</span>
+    <span data-k="quote_by_19">Friedrich Nietzsche</span>
+    <span data-k="quote_20">Ľudí neznepokojujú veci, ale ich názory na ne.</span>
+    <span data-k="quote_by_20">Epiktetos</span>
+    <span data-k="happy">Happy adblocking!</span>
+    <span data-k="suggest_thanks">Vďaka! Návrh bol odoslaný.</span>
+    <span data-k="err_suggest">Najprv napíš citát.</span>
     <span data-k="err_name">Napíš meno pomocou písmen.</span>
     <span data-k="delete_confirm">Natrvalo odstrániť účet a všetky štatistiky?</span>
   </template>

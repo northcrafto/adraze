@@ -146,7 +146,18 @@
         <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
-          <p class="hej-citat" id="hej-citat"><span></span><i class="markor" aria-hidden="true"></i></p>
+          <figure class="hej-citat" id="hej-citat">
+            <figcaption class="hej-etikett" hidden>Dagens citat</figcaption>
+            <blockquote><span></span><i class="markor" aria-hidden="true"></i></blockquote>
+            <p class="hej-vem"><span hidden>– <cite></cite> <span aria-hidden="true">·</span> </span><button type="button" class="lank-knapp nav-link" id="foresla">Föreslå ett citat</button></p>
+          </figure>
+          <form class="forslag" id="f-forslag" novalidate hidden>
+            <div class="forslag-huvud"><b>Skicka in ditt förslag</b><button type="button" class="lank-knapp nav-link" id="forslag-stang">Stäng</button></div>
+            <label class="falt"><span>Citatet</span><textarea name="citat" rows="2" maxlength="400" required></textarea></label>
+            <label class="falt"><span>Vem sa det? (valfritt)</span><input name="vem" maxlength="80" autocomplete="off"></label>
+            <button class="btn liq" type="submit">Skicka</button>
+            <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
+          </form>
           <p class="dov hej-under">Inloggad som <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Byt namn</button></span></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Vad ska vi kalla dig?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Ditt förnamn" required></label>
@@ -214,16 +225,49 @@
     <span data-k="err_wait">För många försök. Vänta en stund.</span>
     <span data-k="welcome">Välkommen</span>
     <span data-k="welcome_name">Välkommen, {namn}</span>
-    <span data-k="quote_1">Happy adblocking!</span>
-    <span data-k="quote_2">Internet är mycket tystare så här.</span>
-    <span data-k="quote_3">Ingen reklam idag heller. Njut.</span>
-    <span data-k="quote_4">Spårarna letar fortfarande efter dig.</span>
-    <span data-k="quote_5">{n} annonser du aldrig behövde se.</span>
-    <span data-k="quote_6">Snabbare sidor, lugnare huvud.</span>
-    <span data-k="quote_7">Webben som den var tänkt.</span>
-    <span data-k="quote_8">Din uppmärksamhet är inte till salu.</span>
-    <span data-k="quote_9">Popups? Aldrig hört talas om dem.</span>
-    <span data-k="quote_10">En ren webb är en glad webb.</span>
+    <span data-k="quote_1">Den som har ett varför att leva för kan uthärda nästan varje hur.</span>
+    <span data-k="quote_by_1">Friedrich Nietzsche</span>
+    <span data-k="quote_2">Ett liv som inte prövas är inte värt att leva.</span>
+    <span data-k="quote_by_2">Sokrates</span>
+    <span data-k="quote_3">Vi lider oftare i inbillningen än i verkligheten.</span>
+    <span data-k="quote_by_3">Seneca</span>
+    <span data-k="quote_4">Det är inte för att saker är svåra som vi inte vågar. Det är för att vi inte vågar som de är svåra.</span>
+    <span data-k="quote_by_4">Seneca</span>
+    <span data-k="quote_5">Livet är inte kort, vi slösar bara mycket av det.</span>
+    <span data-k="quote_by_5">Seneca</span>
+    <span data-k="quote_6">Slösa inte mer tid på att diskutera vad en god människa är. Var en.</span>
+    <span data-k="quote_by_6">Marcus Aurelius</span>
+    <span data-k="quote_7">Det som står i vägen blir vägen.</span>
+    <span data-k="quote_by_7">Marcus Aurelius</span>
+    <span data-k="quote_8">Livet kan bara förstås baklänges, men det måste levas framlänges.</span>
+    <span data-k="quote_by_8">Søren Kierkegaard</span>
+    <span data-k="quote_9">Ingen kliver ner i samma flod två gånger.</span>
+    <span data-k="quote_by_9">Herakleitos</span>
+    <span data-k="quote_10">När vi inte längre kan förändra en situation utmanas vi att förändra oss själva.</span>
+    <span data-k="quote_by_10">Viktor Frankl</span>
+    <span data-k="quote_11">Den som ser utåt drömmer. Den som ser inåt vaknar.</span>
+    <span data-k="quote_by_11">Carl Jung</span>
+    <span data-k="quote_12">En resa på tusen mil börjar med ett enda steg.</span>
+    <span data-k="quote_by_12">Laozi</span>
+    <span data-k="quote_13">Den som vet att han har nog är rik.</span>
+    <span data-k="quote_by_13">Laozi</span>
+    <span data-k="quote_14">Man måste föreställa sig Sisyfos lycklig.</span>
+    <span data-k="quote_by_14">Albert Camus</span>
+    <span data-k="quote_15">Människan är dömd att vara fri.</span>
+    <span data-k="quote_by_15">Jean-Paul Sartre</span>
+    <span data-k="quote_16">Det viktigaste är osynligt för ögonen.</span>
+    <span data-k="quote_by_16">Antoine de Saint-Exupéry</span>
+    <span data-k="quote_17">Människans olycka kommer av att hon inte kan sitta stilla ensam i ett rum.</span>
+    <span data-k="quote_by_17">Blaise Pascal</span>
+    <span data-k="quote_18">Mitt språks gränser är min världs gränser.</span>
+    <span data-k="quote_by_18">Ludwig Wittgenstein</span>
+    <span data-k="quote_19">Den som slåss mot monster ska se upp så att han inte själv blir ett monster.</span>
+    <span data-k="quote_by_19">Friedrich Nietzsche</span>
+    <span data-k="quote_20">Det är inte sakerna som oroar oss, utan våra tankar om dem.</span>
+    <span data-k="quote_by_20">Epiktetos</span>
+    <span data-k="happy">Happy adblocking!</span>
+    <span data-k="suggest_thanks">Tack! Förslaget är skickat.</span>
+    <span data-k="err_suggest">Skriv citatet först.</span>
     <span data-k="err_name">Skriv ett namn med bokstäver.</span>
     <span data-k="delete_confirm">Radera kontot och all statistik för gott?</span>
   </template>

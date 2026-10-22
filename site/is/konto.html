@@ -146,7 +146,18 @@
         <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
-          <p class="hej-citat" id="hej-citat"><span></span><i class="markor" aria-hidden="true"></i></p>
+          <figure class="hej-citat" id="hej-citat">
+            <figcaption class="hej-etikett" hidden>Tilvitnun dagsins</figcaption>
+            <blockquote><span></span><i class="markor" aria-hidden="true"></i></blockquote>
+            <p class="hej-vem"><span hidden>– <cite></cite> <span aria-hidden="true">·</span> </span><button type="button" class="lank-knapp nav-link" id="foresla">Stinga upp á tilvitnun</button></p>
+          </figure>
+          <form class="forslag" id="f-forslag" novalidate hidden>
+            <div class="forslag-huvud"><b>Sendu inn tillöguna þína</b><button type="button" class="lank-knapp nav-link" id="forslag-stang">Loka</button></div>
+            <label class="falt"><span>Tilvitnunin</span><textarea name="citat" rows="2" maxlength="400" required></textarea></label>
+            <label class="falt"><span>Hver sagði það? (valfrjálst)</span><input name="vem" maxlength="80" autocomplete="off"></label>
+            <button class="btn liq" type="submit">Senda</button>
+            <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
+          </form>
           <p class="dov hej-under">Innskráð(ur) sem <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Breyta nafni</button></span></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Hvað eigum við að kalla þig?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Fornafnið þitt" required></label>
@@ -214,16 +225,49 @@
     <span data-k="err_wait">Of margar tilraunir. Bíddu aðeins.</span>
     <span data-k="welcome">Velkomin</span>
     <span data-k="welcome_name">Velkomin, {namn}</span>
-    <span data-k="quote_1">Happy adblocking!</span>
-    <span data-k="quote_2">Netið er miklu rólegra svona.</span>
-    <span data-k="quote_3">Engar auglýsingar í dag heldur. Njóttu.</span>
-    <span data-k="quote_4">Rakningarnar leita enn að þér.</span>
-    <span data-k="quote_5">{n} auglýsingar sem þú þurftir aldrei að sjá.</span>
-    <span data-k="quote_6">Hraðari síður, rólegri hugur.</span>
-    <span data-k="quote_7">Vefurinn eins og hann átti að vera.</span>
-    <span data-k="quote_8">Athygli þín er ekki til sölu.</span>
-    <span data-k="quote_9">Sprettigluggar? Aldrei heyrt um þá.</span>
-    <span data-k="quote_10">Hreinn vefur er glaður vefur.</span>
+    <span data-k="quote_1">Sá sem hefur hvers vegna til að lifa fyrir getur þolað nánast hvaða hvernig sem er.</span>
+    <span data-k="quote_by_1">Friedrich Nietzsche</span>
+    <span data-k="quote_2">Órannsakað líf er ekki þess virði að lifa því.</span>
+    <span data-k="quote_by_2">Sókrates</span>
+    <span data-k="quote_3">Við þjáumst oftar í ímyndun en í raun.</span>
+    <span data-k="quote_by_3">Seneca</span>
+    <span data-k="quote_4">Það er ekki vegna þess að hlutirnir eru erfiðir sem við þorum ekki. Þeir eru erfiðir af því að við þorum ekki.</span>
+    <span data-k="quote_by_4">Seneca</span>
+    <span data-k="quote_5">Lífið er ekki stutt, við sóum bara miklu af því.</span>
+    <span data-k="quote_by_5">Seneca</span>
+    <span data-k="quote_6">Sóaðu ekki meiri tíma í að rökræða hvað góð manneskja er. Vertu ein.</span>
+    <span data-k="quote_by_6">Markús Árelíus</span>
+    <span data-k="quote_7">Það sem stendur í veginum verður vegurinn.</span>
+    <span data-k="quote_by_7">Markús Árelíus</span>
+    <span data-k="quote_8">Lífið verður aðeins skilið aftur á bak, en það verður að lifa því áfram.</span>
+    <span data-k="quote_by_8">Søren Kierkegaard</span>
+    <span data-k="quote_9">Enginn stígur tvisvar í sömu ána.</span>
+    <span data-k="quote_by_9">Herakleitos</span>
+    <span data-k="quote_10">Þegar við getum ekki lengur breytt aðstæðum erum við áskoruð að breyta sjálfum okkur.</span>
+    <span data-k="quote_by_10">Viktor Frankl</span>
+    <span data-k="quote_11">Sá sem horfir út á við dreymir. Sá sem horfir inn á við vaknar.</span>
+    <span data-k="quote_by_11">Carl Jung</span>
+    <span data-k="quote_12">Þúsund mílna ferð hefst á einu skrefi.</span>
+    <span data-k="quote_by_12">Laozi</span>
+    <span data-k="quote_13">Sá sem veit að hann hefur nóg er ríkur.</span>
+    <span data-k="quote_by_13">Laozi</span>
+    <span data-k="quote_14">Við verðum að ímynda okkur Sísýfos hamingjusaman.</span>
+    <span data-k="quote_by_14">Albert Camus</span>
+    <span data-k="quote_15">Maðurinn er dæmdur til að vera frjáls.</span>
+    <span data-k="quote_by_15">Jean-Paul Sartre</span>
+    <span data-k="quote_16">Það mikilvægasta er ósýnilegt augunum.</span>
+    <span data-k="quote_by_16">Antoine de Saint-Exupéry</span>
+    <span data-k="quote_17">Ógæfa mannsins stafar af því að hann getur ekki setið kyrr einn í herbergi.</span>
+    <span data-k="quote_by_17">Blaise Pascal</span>
+    <span data-k="quote_18">Takmörk tungumáls míns eru takmörk heims míns.</span>
+    <span data-k="quote_by_18">Ludwig Wittgenstein</span>
+    <span data-k="quote_19">Sá sem berst við skrímsli skal gæta þess að verða ekki sjálfur skrímsli.</span>
+    <span data-k="quote_by_19">Friedrich Nietzsche</span>
+    <span data-k="quote_20">Það eru ekki hlutirnir sem trufla okkur, heldur skoðanir okkar á þeim.</span>
+    <span data-k="quote_by_20">Epiktetos</span>
+    <span data-k="happy">Happy adblocking!</span>
+    <span data-k="suggest_thanks">Takk! Tillagan hefur verið send.</span>
+    <span data-k="err_suggest">Skrifaðu tilvitnunina fyrst.</span>
     <span data-k="err_name">Skrifaðu nafn með bókstöfum.</span>
     <span data-k="delete_confirm">Eyða aðgangnum og allri tölfræði fyrir fullt og allt?</span>
   </template>

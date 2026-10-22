@@ -146,7 +146,18 @@
         <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
-          <p class="hej-citat" id="hej-citat"><span></span><i class="markor" aria-hidden="true"></i></p>
+          <figure class="hej-citat" id="hej-citat">
+            <figcaption class="hej-etikett" hidden>Päivän lainaus</figcaption>
+            <blockquote><span></span><i class="markor" aria-hidden="true"></i></blockquote>
+            <p class="hej-vem"><span hidden>– <cite></cite> <span aria-hidden="true">·</span> </span><button type="button" class="lank-knapp nav-link" id="foresla">Ehdota lainausta</button></p>
+          </figure>
+          <form class="forslag" id="f-forslag" novalidate hidden>
+            <div class="forslag-huvud"><b>Lähetä ehdotuksesi</b><button type="button" class="lank-knapp nav-link" id="forslag-stang">Sulje</button></div>
+            <label class="falt"><span>Lainaus</span><textarea name="citat" rows="2" maxlength="400" required></textarea></label>
+            <label class="falt"><span>Kuka sen sanoi? (valinnainen)</span><input name="vem" maxlength="80" autocomplete="off"></label>
+            <button class="btn liq" type="submit">Lähetä</button>
+            <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
+          </form>
           <p class="dov hej-under">Kirjautuneena: <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Vaihda nimi</button></span></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Miksi saamme kutsua sinua?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Etunimesi" required></label>
@@ -214,16 +225,49 @@
     <span data-k="err_wait">Liian monta yritystä. Odota hetki.</span>
     <span data-k="welcome">Tervetuloa</span>
     <span data-k="welcome_name">Tervetuloa, {namn}</span>
-    <span data-k="quote_1">Happy adblocking!</span>
-    <span data-k="quote_2">Netti on näin paljon hiljaisempi.</span>
-    <span data-k="quote_3">Ei mainoksia tänäänkään. Nauti.</span>
-    <span data-k="quote_4">Seurantaohjelmat etsivät sinua yhä.</span>
-    <span data-k="quote_5">{n} mainosta, joita sinun ei tarvinnut nähdä.</span>
-    <span data-k="quote_6">Nopeammat sivut, rauhallisempi mieli.</span>
-    <span data-k="quote_7">Verkko sellaisena kuin se oli tarkoitettu.</span>
-    <span data-k="quote_8">Huomiosi ei ole myytävänä.</span>
-    <span data-k="quote_9">Ponnahdusikkunat? Ei koskaan kuultu.</span>
-    <span data-k="quote_10">Puhdas verkko on iloinen verkko.</span>
+    <span data-k="quote_1">Joka tietää, miksi elää, kestää lähes minkä tahansa miten.</span>
+    <span data-k="quote_by_1">Friedrich Nietzsche</span>
+    <span data-k="quote_2">Tutkimaton elämä ei ole elämisen arvoista.</span>
+    <span data-k="quote_by_2">Sokrates</span>
+    <span data-k="quote_3">Kärsimme useammin mielikuvituksessa kuin todellisuudessa.</span>
+    <span data-k="quote_by_3">Seneca</span>
+    <span data-k="quote_4">Emme jätä uskaltamatta siksi, että asiat ovat vaikeita. Ne ovat vaikeita, koska emme uskalla.</span>
+    <span data-k="quote_by_4">Seneca</span>
+    <span data-k="quote_5">Elämä ei ole lyhyt, me vain tuhlaamme siitä paljon.</span>
+    <span data-k="quote_by_5">Seneca</span>
+    <span data-k="quote_6">Älä tuhlaa enää aikaa väittelemällä siitä, millainen hyvän ihmisen pitäisi olla. Ole sellainen.</span>
+    <span data-k="quote_by_6">Marcus Aurelius</span>
+    <span data-k="quote_7">Se mikä on tiellä, muuttuu tieksi.</span>
+    <span data-k="quote_by_7">Marcus Aurelius</span>
+    <span data-k="quote_8">Elämä voidaan ymmärtää vain taaksepäin, mutta se on elettävä eteenpäin.</span>
+    <span data-k="quote_by_8">Søren Kierkegaard</span>
+    <span data-k="quote_9">Kukaan ei astu samaan virtaan kahdesti.</span>
+    <span data-k="quote_by_9">Herakleitos</span>
+    <span data-k="quote_10">Kun emme enää voi muuttaa tilannetta, meitä haastetaan muuttamaan itseämme.</span>
+    <span data-k="quote_by_10">Viktor Frankl</span>
+    <span data-k="quote_11">Joka katsoo ulospäin, uneksii. Joka katsoo sisäänpäin, herää.</span>
+    <span data-k="quote_by_11">Carl Jung</span>
+    <span data-k="quote_12">Tuhannen mailin matka alkaa yhdellä askeleella.</span>
+    <span data-k="quote_by_12">Laozi</span>
+    <span data-k="quote_13">Joka tietää, että hänellä on tarpeeksi, on rikas.</span>
+    <span data-k="quote_by_13">Laozi</span>
+    <span data-k="quote_14">Sisyfos on kuviteltava onnelliseksi.</span>
+    <span data-k="quote_by_14">Albert Camus</span>
+    <span data-k="quote_15">Ihminen on tuomittu olemaan vapaa.</span>
+    <span data-k="quote_by_15">Jean-Paul Sartre</span>
+    <span data-k="quote_16">Olennainen on silmille näkymätöntä.</span>
+    <span data-k="quote_by_16">Antoine de Saint-Exupéry</span>
+    <span data-k="quote_17">Ihmisen onnettomuus johtuu siitä, ettei hän osaa istua hiljaa yksin huoneessa.</span>
+    <span data-k="quote_by_17">Blaise Pascal</span>
+    <span data-k="quote_18">Kieleni rajat ovat maailmani rajat.</span>
+    <span data-k="quote_by_18">Ludwig Wittgenstein</span>
+    <span data-k="quote_19">Joka taistelee hirviöitä vastaan, varokoon, ettei itse muutu hirviöksi.</span>
+    <span data-k="quote_by_19">Friedrich Nietzsche</span>
+    <span data-k="quote_20">Eivät asiat itse järkytä meitä, vaan käsityksemme niistä.</span>
+    <span data-k="quote_by_20">Epiktetos</span>
+    <span data-k="happy">Happy adblocking!</span>
+    <span data-k="suggest_thanks">Kiitos! Ehdotus on lähetetty.</span>
+    <span data-k="err_suggest">Kirjoita lainaus ensin.</span>
     <span data-k="err_name">Kirjoita nimi kirjaimin.</span>
     <span data-k="delete_confirm">Poistetaanko tili ja kaikki tilastot pysyvästi?</span>
   </template>

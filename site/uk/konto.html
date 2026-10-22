@@ -146,7 +146,18 @@
         <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
-          <p class="hej-citat" id="hej-citat"><span></span><i class="markor" aria-hidden="true"></i></p>
+          <figure class="hej-citat" id="hej-citat">
+            <figcaption class="hej-etikett" hidden>Цитата дня</figcaption>
+            <blockquote><span></span><i class="markor" aria-hidden="true"></i></blockquote>
+            <p class="hej-vem"><span hidden>– <cite></cite> <span aria-hidden="true">·</span> </span><button type="button" class="lank-knapp nav-link" id="foresla">Запропонуйте цитату</button></p>
+          </figure>
+          <form class="forslag" id="f-forslag" novalidate hidden>
+            <div class="forslag-huvud"><b>Надішліть свою пропозицію</b><button type="button" class="lank-knapp nav-link" id="forslag-stang">Закрити</button></div>
+            <label class="falt"><span>Цитата</span><textarea name="citat" rows="2" maxlength="400" required></textarea></label>
+            <label class="falt"><span>Хто це сказав? (необов’язково)</span><input name="vem" maxlength="80" autocomplete="off"></label>
+            <button class="btn liq" type="submit">Надіслати</button>
+            <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
+          </form>
           <p class="dov hej-under">Ви ввійшли як <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Змінити ім’я</button></span></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Як до вас звертатися?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Ваше ім’я" required></label>
@@ -214,16 +225,49 @@
     <span data-k="err_wait">Забагато спроб. Зачекайте трохи.</span>
     <span data-k="welcome">Вітаємо</span>
     <span data-k="welcome_name">Вітаємо, {namn}</span>
-    <span data-k="quote_1">Happy adblocking!</span>
-    <span data-k="quote_2">Так інтернет набагато тихіший.</span>
-    <span data-k="quote_3">І сьогодні без реклами. Насолоджуйтеся.</span>
-    <span data-k="quote_4">Трекери досі вас шукають.</span>
-    <span data-k="quote_5">{n} оголошень, які вам ніколи не довелося бачити.</span>
-    <span data-k="quote_6">Швидші сторінки, спокійніша голова.</span>
-    <span data-k="quote_7">Інтернет, яким він мав бути.</span>
-    <span data-k="quote_8">Ваша увага не продається.</span>
-    <span data-k="quote_9">Спливаючі вікна? Ніколи про них не чув.</span>
-    <span data-k="quote_10">Чистий інтернет — щасливий інтернет.</span>
+    <span data-k="quote_1">Хто має навіщо жити, витримає майже будь-яке як.</span>
+    <span data-k="quote_by_1">Фрідріх Ніцше</span>
+    <span data-k="quote_2">Життя без самопізнання не варте того, щоб його жити.</span>
+    <span data-k="quote_by_2">Сократ</span>
+    <span data-k="quote_3">Ми частіше страждаємо в уяві, ніж насправді.</span>
+    <span data-k="quote_by_3">Сенека</span>
+    <span data-k="quote_4">Ми не наважуємося не тому, що речі важкі. Вони важкі, бо ми не наважуємося.</span>
+    <span data-k="quote_by_4">Сенека</span>
+    <span data-k="quote_5">Життя не коротке, просто ми багато його марнуємо.</span>
+    <span data-k="quote_by_5">Сенека</span>
+    <span data-k="quote_6">Не гай більше часу на суперечки про те, якою має бути добра людина. Будь нею.</span>
+    <span data-k="quote_by_6">Марк Аврелій</span>
+    <span data-k="quote_7">Те, що стоїть на шляху, стає шляхом.</span>
+    <span data-k="quote_by_7">Марк Аврелій</span>
+    <span data-k="quote_8">Життя можна зрозуміти, лише озираючись назад, але жити його треба вперед.</span>
+    <span data-k="quote_by_8">Серен К'єркегор</span>
+    <span data-k="quote_9">Ніхто не входить двічі в ту саму річку.</span>
+    <span data-k="quote_by_9">Геракліт</span>
+    <span data-k="quote_10">Коли ми більше не можемо змінити ситуацію, перед нами постає виклик змінити себе.</span>
+    <span data-k="quote_by_10">Віктор Франкл</span>
+    <span data-k="quote_11">Хто дивиться назовні, той мріє. Хто дивиться всередину, той прокидається.</span>
+    <span data-k="quote_by_11">Карл Юнг</span>
+    <span data-k="quote_12">Подорож у тисячу миль починається з одного кроку.</span>
+    <span data-k="quote_by_12">Лао-цзи</span>
+    <span data-k="quote_13">Хто знає, що має досить, той багатий.</span>
+    <span data-k="quote_by_13">Лао-цзи</span>
+    <span data-k="quote_14">Сізіфа слід уявляти щасливим.</span>
+    <span data-k="quote_by_14">Альбер Камю</span>
+    <span data-k="quote_15">Людина приречена бути вільною.</span>
+    <span data-k="quote_by_15">Жан-Поль Сартр</span>
+    <span data-k="quote_16">Найголовніше очима не побачиш.</span>
+    <span data-k="quote_by_16">Антуан де Сент-Екзюпері</span>
+    <span data-k="quote_17">Усе нещастя людей походить від того, що вони не вміють спокійно сидіти самі в кімнаті.</span>
+    <span data-k="quote_by_17">Блез Паскаль</span>
+    <span data-k="quote_18">Межі моєї мови означають межі мого світу.</span>
+    <span data-k="quote_by_18">Людвіг Вітгенштайн</span>
+    <span data-k="quote_19">Хто бореться з чудовиськами, хай стереже себе, щоб самому не стати чудовиськом.</span>
+    <span data-k="quote_by_19">Фрідріх Ніцше</span>
+    <span data-k="quote_20">Людей тривожать не речі, а їхні думки про них.</span>
+    <span data-k="quote_by_20">Епіктет</span>
+    <span data-k="happy">Happy adblocking!</span>
+    <span data-k="suggest_thanks">Дякуємо! Пропозицію надіслано.</span>
+    <span data-k="err_suggest">Спершу напишіть цитату.</span>
     <span data-k="err_name">Введіть ім’я літерами.</span>
     <span data-k="delete_confirm">Видалити акаунт і всю статистику назавжди?</span>
   </template>

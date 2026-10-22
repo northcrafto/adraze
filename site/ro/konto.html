@@ -146,7 +146,18 @@
         <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
-          <p class="hej-citat" id="hej-citat"><span></span><i class="markor" aria-hidden="true"></i></p>
+          <figure class="hej-citat" id="hej-citat">
+            <figcaption class="hej-etikett" hidden>Citatul zilei</figcaption>
+            <blockquote><span></span><i class="markor" aria-hidden="true"></i></blockquote>
+            <p class="hej-vem"><span hidden>– <cite></cite> <span aria-hidden="true">·</span> </span><button type="button" class="lank-knapp nav-link" id="foresla">Propune un citat</button></p>
+          </figure>
+          <form class="forslag" id="f-forslag" novalidate hidden>
+            <div class="forslag-huvud"><b>Trimite propunerea ta</b><button type="button" class="lank-knapp nav-link" id="forslag-stang">Închide</button></div>
+            <label class="falt"><span>Citatul</span><textarea name="citat" rows="2" maxlength="400" required></textarea></label>
+            <label class="falt"><span>Cine a spus-o? (opțional)</span><input name="vem" maxlength="80" autocomplete="off"></label>
+            <button class="btn liq" type="submit">Trimite</button>
+            <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
+          </form>
           <p class="dov hej-under">Conectat ca <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Schimbă numele</button></span></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Cum să-ți spunem?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Prenumele tău" required></label>
@@ -214,16 +225,49 @@
     <span data-k="err_wait">Prea multe încercări. Așteaptă puțin.</span>
     <span data-k="welcome">Bine ai venit</span>
     <span data-k="welcome_name">Bine ai venit, {namn}</span>
-    <span data-k="quote_1">Happy adblocking!</span>
-    <span data-k="quote_2">Internetul e mult mai liniștit așa.</span>
-    <span data-k="quote_3">Nicio reclamă nici azi. Bucură-te.</span>
-    <span data-k="quote_4">Trackerele încă te caută.</span>
-    <span data-k="quote_5">{n} reclame pe care nu a trebuit să le vezi.</span>
-    <span data-k="quote_6">Pagini mai rapide, minte mai liniștită.</span>
-    <span data-k="quote_7">Webul așa cum a fost gândit.</span>
-    <span data-k="quote_8">Atenția ta nu e de vânzare.</span>
-    <span data-k="quote_9">Pop-up-uri? N-am auzit de ele.</span>
-    <span data-k="quote_10">Un web curat e un web fericit.</span>
+    <span data-k="quote_1">Cine are un de ce pentru care să trăiască poate îndura aproape orice cum.</span>
+    <span data-k="quote_by_1">Friedrich Nietzsche</span>
+    <span data-k="quote_2">O viață necercetată nu merită trăită.</span>
+    <span data-k="quote_by_2">Socrate</span>
+    <span data-k="quote_3">Suferim mai des în imaginație decât în realitate.</span>
+    <span data-k="quote_by_3">Seneca</span>
+    <span data-k="quote_4">Nu pentru că lucrurile sunt grele nu îndrăznim, ci pentru că nu îndrăznim sunt grele.</span>
+    <span data-k="quote_by_4">Seneca</span>
+    <span data-k="quote_5">Viața nu e scurtă, doar risipim mult din ea.</span>
+    <span data-k="quote_by_5">Seneca</span>
+    <span data-k="quote_6">Nu mai pierde timpul discutând cum ar trebui să fie un om bun. Fii unul.</span>
+    <span data-k="quote_by_6">Marcus Aurelius</span>
+    <span data-k="quote_7">Ceea ce stă în cale devine calea.</span>
+    <span data-k="quote_by_7">Marcus Aurelius</span>
+    <span data-k="quote_8">Viața poate fi înțeleasă doar privind înapoi, dar trebuie trăită privind înainte.</span>
+    <span data-k="quote_by_8">Søren Kierkegaard</span>
+    <span data-k="quote_9">Nimeni nu intră de două ori în același râu.</span>
+    <span data-k="quote_by_9">Heraclit</span>
+    <span data-k="quote_10">Când nu mai putem schimba o situație, suntem provocați să ne schimbăm pe noi înșine.</span>
+    <span data-k="quote_by_10">Viktor Frankl</span>
+    <span data-k="quote_11">Cine privește în afară visează. Cine privește înăuntru se trezește.</span>
+    <span data-k="quote_by_11">Carl Jung</span>
+    <span data-k="quote_12">O călătorie de o mie de mile începe cu un singur pas.</span>
+    <span data-k="quote_by_12">Laozi</span>
+    <span data-k="quote_13">Cine știe că are destul este bogat.</span>
+    <span data-k="quote_by_13">Laozi</span>
+    <span data-k="quote_14">Trebuie să ni-l imaginăm pe Sisif fericit.</span>
+    <span data-k="quote_by_14">Albert Camus</span>
+    <span data-k="quote_15">Omul este condamnat să fie liber.</span>
+    <span data-k="quote_by_15">Jean-Paul Sartre</span>
+    <span data-k="quote_16">Esențialul este invizibil pentru ochi.</span>
+    <span data-k="quote_by_16">Antoine de Saint-Exupéry</span>
+    <span data-k="quote_17">Toată nefericirea oamenilor vine din faptul că nu pot sta liniștiți singuri într-o cameră.</span>
+    <span data-k="quote_by_17">Blaise Pascal</span>
+    <span data-k="quote_18">Limitele limbajului meu sunt limitele lumii mele.</span>
+    <span data-k="quote_by_18">Ludwig Wittgenstein</span>
+    <span data-k="quote_19">Cine se luptă cu monștrii să aibă grijă să nu devină el însuși monstru.</span>
+    <span data-k="quote_by_19">Friedrich Nietzsche</span>
+    <span data-k="quote_20">Nu lucrurile ne tulbură, ci părerile noastre despre ele.</span>
+    <span data-k="quote_by_20">Epictet</span>
+    <span data-k="happy">Happy adblocking!</span>
+    <span data-k="suggest_thanks">Mulțumim! Propunerea a fost trimisă.</span>
+    <span data-k="err_suggest">Scrie mai întâi citatul.</span>
     <span data-k="err_name">Scrie un nume format din litere.</span>
     <span data-k="delete_confirm">Ștergi definitiv contul și toate statisticile?</span>
   </template>

@@ -146,7 +146,18 @@
         <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
-          <p class="hej-citat" id="hej-citat"><span></span><i class="markor" aria-hidden="true"></i></p>
+          <figure class="hej-citat" id="hej-citat">
+            <figcaption class="hej-etikett" hidden>Citaat van de dag</figcaption>
+            <blockquote><span></span><i class="markor" aria-hidden="true"></i></blockquote>
+            <p class="hej-vem"><span hidden>– <cite></cite> <span aria-hidden="true">·</span> </span><button type="button" class="lank-knapp nav-link" id="foresla">Stel een citaat voor</button></p>
+          </figure>
+          <form class="forslag" id="f-forslag" novalidate hidden>
+            <div class="forslag-huvud"><b>Stuur je voorstel in</b><button type="button" class="lank-knapp nav-link" id="forslag-stang">Sluiten</button></div>
+            <label class="falt"><span>Het citaat</span><textarea name="citat" rows="2" maxlength="400" required></textarea></label>
+            <label class="falt"><span>Wie zei het? (optioneel)</span><input name="vem" maxlength="80" autocomplete="off"></label>
+            <button class="btn liq" type="submit">Versturen</button>
+            <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
+          </form>
           <p class="dov hej-under">Ingelogd als <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Naam wijzigen</button></span></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Hoe mogen we je noemen?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Je voornaam" required></label>
@@ -214,16 +225,49 @@
     <span data-k="err_wait">Te veel pogingen. Wacht even.</span>
     <span data-k="welcome">Welkom</span>
     <span data-k="welcome_name">Welkom, {namn}</span>
-    <span data-k="quote_1">Happy adblocking!</span>
-    <span data-k="quote_2">Zo is het internet een stuk rustiger.</span>
-    <span data-k="quote_3">Ook vandaag geen reclame. Geniet ervan.</span>
-    <span data-k="quote_4">De trackers zoeken je nog steeds.</span>
-    <span data-k="quote_5">{n} advertenties die je nooit hoefde te zien.</span>
-    <span data-k="quote_6">Snellere pagina’s, rustiger hoofd.</span>
-    <span data-k="quote_7">Het web zoals het bedoeld was.</span>
-    <span data-k="quote_8">Je aandacht is niet te koop.</span>
-    <span data-k="quote_9">Pop-ups? Nooit van gehoord.</span>
-    <span data-k="quote_10">Een schoon web is een blij web.</span>
+    <span data-k="quote_1">Wie een waarom heeft om voor te leven, kan bijna elk hoe verdragen.</span>
+    <span data-k="quote_by_1">Friedrich Nietzsche</span>
+    <span data-k="quote_2">Een ononderzocht leven is niet de moeite waard om te leven.</span>
+    <span data-k="quote_by_2">Socrates</span>
+    <span data-k="quote_3">We lijden vaker in onze verbeelding dan in werkelijkheid.</span>
+    <span data-k="quote_by_3">Seneca</span>
+    <span data-k="quote_4">Het is niet omdat dingen moeilijk zijn dat we niet durven. Het is omdat we niet durven dat ze moeilijk zijn.</span>
+    <span data-k="quote_by_4">Seneca</span>
+    <span data-k="quote_5">Het leven is niet kort, we verspillen er alleen veel van.</span>
+    <span data-k="quote_by_5">Seneca</span>
+    <span data-k="quote_6">Verspil geen tijd meer aan discussiëren over wat een goed mens is. Wees er een.</span>
+    <span data-k="quote_by_6">Marcus Aurelius</span>
+    <span data-k="quote_7">Wat in de weg staat, wordt de weg.</span>
+    <span data-k="quote_by_7">Marcus Aurelius</span>
+    <span data-k="quote_8">Het leven kan alleen achterwaarts begrepen worden, maar moet voorwaarts geleefd worden.</span>
+    <span data-k="quote_by_8">Søren Kierkegaard</span>
+    <span data-k="quote_9">Niemand stapt twee keer in dezelfde rivier.</span>
+    <span data-k="quote_by_9">Heraclitus</span>
+    <span data-k="quote_10">Wanneer we een situatie niet meer kunnen veranderen, worden we uitgedaagd onszelf te veranderen.</span>
+    <span data-k="quote_by_10">Viktor Frankl</span>
+    <span data-k="quote_11">Wie naar buiten kijkt, droomt. Wie naar binnen kijkt, ontwaakt.</span>
+    <span data-k="quote_by_11">Carl Jung</span>
+    <span data-k="quote_12">Een reis van duizend mijl begint met één stap.</span>
+    <span data-k="quote_by_12">Laozi</span>
+    <span data-k="quote_13">Wie weet dat hij genoeg heeft, is rijk.</span>
+    <span data-k="quote_by_13">Laozi</span>
+    <span data-k="quote_14">We moeten ons Sisyphus gelukkig voorstellen.</span>
+    <span data-k="quote_by_14">Albert Camus</span>
+    <span data-k="quote_15">De mens is veroordeeld tot vrijheid.</span>
+    <span data-k="quote_by_15">Jean-Paul Sartre</span>
+    <span data-k="quote_16">Het wezenlijke is onzichtbaar voor de ogen.</span>
+    <span data-k="quote_by_16">Antoine de Saint-Exupéry</span>
+    <span data-k="quote_17">Al het ongeluk van de mens komt voort uit het feit dat hij niet rustig alleen in een kamer kan zitten.</span>
+    <span data-k="quote_by_17">Blaise Pascal</span>
+    <span data-k="quote_18">De grenzen van mijn taal zijn de grenzen van mijn wereld.</span>
+    <span data-k="quote_by_18">Ludwig Wittgenstein</span>
+    <span data-k="quote_19">Wie met monsters vecht, moet oppassen dat hij zelf geen monster wordt.</span>
+    <span data-k="quote_by_19">Friedrich Nietzsche</span>
+    <span data-k="quote_20">Niet de dingen verontrusten ons, maar onze meningen erover.</span>
+    <span data-k="quote_by_20">Epictetus</span>
+    <span data-k="happy">Happy adblocking!</span>
+    <span data-k="suggest_thanks">Bedankt! Je voorstel is verstuurd.</span>
+    <span data-k="err_suggest">Schrijf eerst het citaat.</span>
     <span data-k="err_name">Vul een naam in met letters.</span>
     <span data-k="delete_confirm">Account en alle statistieken definitief verwijderen?</span>
   </template>

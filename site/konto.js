@@ -230,7 +230,7 @@ async function visaKonto(status) {
   $('#s-sparare').textContent = tal.format(t.sparare);
   $('#s-farliga').textContent = tal.format(t.farliga);
   $('#s-popups').textContent = tal.format(t.popups + t.omdirigeringar);
-  visaCitat(t.reklam);
+  visaCitat();
   ritaDiagram(data.dagar);
   visaEnheter(data.enheter, status);
 }
@@ -281,31 +281,58 @@ function halsa(namn) {
   // Linjen under namnet och raden under rubriken kommer när sista bokstaven landat
   $('#vy-in').style.setProperty('--efter', `${antal * 40 + 650}ms`);
 }
-// En ny rad vid varje inloggning: första gången alltid "Happy adblocking!", sedan slumpad men aldrig samma två gånger i rad
+// Dagens citat: samma för alla hela dagen och nytt vid midnatt. Allra första inloggningen visar "Happy adblocking!"
+const ANTAL_CITAT = 20;
 let citatVisat = false;
-function visaCitat(reklam) {
+function visaCitat() {
   if (citatVisat) return;
   citatVisat = true;
-  let forra = null;
-  try { forra = localStorage.getItem('adraze-citat'); } catch {}
-  const mojliga = Array.from({ length: 10 }, (_, i) => String(i + 1)).filter((n) => n !== forra && (n !== '5' || reklam > 0));
-  const val = forra === null ? '1' : mojliga[Math.floor(Math.random() * mojliga.length)];
-  try { localStorage.setItem('adraze-citat', val); } catch {}
-  const text = T[`quote_${val}`].replace('{n}', tal.format(reklam));
+  let forst = false;
+  try { forst = !localStorage.getItem('adraze-citat'); localStorage.setItem('adraze-citat', '1'); } catch {}
+  const idag = Math.floor((Date.now() - new Date().getTimezoneOffset() * 60_000) / 86_400_000);
+  const nr = (idag % ANTAL_CITAT) + 1;
+  const text = forst ? T.happy : T[`quote_${nr}`];
   const p = $('#hej-citat');
-  const ut = p.querySelector('span');
-  p.setAttribute('aria-label', text);
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { ut.textContent = text; return; }
+  if (!forst) {
+    p.querySelector('.hej-etikett').hidden = false;
+    p.querySelector('cite').textContent = T[`quote_by_${nr}`];
+    p.querySelector('.hej-vem > span').hidden = false;
+  }
+  const ut = p.querySelector('blockquote span');
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { ut.textContent = text; p.classList.add('direkt'); return; }
+  ut.setAttribute('aria-label', text);
   const tecken = [...text];
   const start = parseInt(getComputedStyle($('#vy-in')).getPropertyValue('--efter'), 10) || 1000;
+  const fart = tecken.length > 70 ? 14 : 22; // långa citat skrivs snabbare så att det inte drar ut på tiden
   let i = 0;
   setTimeout(function skriv() {
     p.classList.add('skriver');
     ut.textContent = tecken.slice(0, ++i).join('');
-    if (i < tecken.length) setTimeout(skriv, 26 + Math.random() * 30);
+    if (i < tecken.length) setTimeout(skriv, fart + Math.random() * fart);
     else p.classList.replace('skriver', 'klar');
   }, start + 350);
 }
+
+// Förslag på nya citat går till vår mejl via API:t
+const forslag = $('#f-forslag');
+$('#foresla').addEventListener('click', () => {
+  forslag.hidden = !forslag.hidden;
+  $('#forslag-svar').textContent = '';
+  if (!forslag.hidden) forslag.citat.focus();
+});
+$('#forslag-stang').addEventListener('click', () => { forslag.hidden = true; });
+forslag.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const svar = $('#forslag-svar');
+  const knapp = forslag.querySelector('[type=submit]');
+  svar.classList.remove('bra');
+  if (forslag.citat.value.trim().length < 3) { forslag.citat.focus(); svar.textContent = T.err_suggest; return; }
+  knapp.disabled = true;
+  api('/forslag', { citat: forslag.citat.value, vem: forslag.vem.value }, { 400: T.err_suggest })
+    .then(() => { forslag.reset(); svar.textContent = T.suggest_thanks; svar.classList.add('bra'); })
+    .catch((fel) => { svar.textContent = fel.message; })
+    .finally(() => { knapp.disabled = false; });
+});
 
 $('#byt-namn').addEventListener('click', () => {
   const form = $('#f-namn');
