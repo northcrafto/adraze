@@ -259,5 +259,15 @@
   "konto.name_placeholder": "Dein Vorname",
   "konto.name_save": "Speichern",
   "konto.name_change": "Namen ändern",
-  "konto.err_name": "Gib einen Namen aus Buchstaben ein."
+  "konto.err_name": "Gib einen Namen aus Buchstaben ein.",
+  "konto.quote_1": "Happy adblocking!",
+  "konto.quote_2": "So ist das Internet viel ruhiger.",
+  "konto.quote_3": "Auch heute keine Werbung. Genieß es.",
+  "konto.quote_4": "Die Tracker suchen dich immer noch.",
+  "konto.quote_5": "{n} Anzeigen, die du nie sehen musstest.",
+  "konto.quote_6": "Schnellere Seiten, ruhigerer Kopf.",
+  "konto.quote_7": "Das Web, wie es gedacht war.",
+  "konto.quote_8": "Deine Aufmerksamkeit ist nicht zu verkaufen.",
+  "konto.quote_9": "Popups? Nie gehört.",
+  "konto.quote_10": "Ein sauberes Web ist ein fröhliches Web."
 }

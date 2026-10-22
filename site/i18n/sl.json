@@ -259,5 +259,15 @@
   "konto.name_placeholder": "Vaše ime",
   "konto.name_save": "Shrani",
   "konto.name_change": "Spremeni ime",
-  "konto.err_name": "Vpišite ime s črkami."
+  "konto.err_name": "Vpišite ime s črkami.",
+  "konto.quote_1": "Happy adblocking!",
+  "konto.quote_2": "Tako je internet veliko tišji.",
+  "konto.quote_3": "Tudi danes brez oglasov. Uživajte.",
+  "konto.quote_4": "Sledilniki vas še vedno iščejo.",
+  "konto.quote_5": "{n} oglasov, ki jih nikoli niste morali videti.",
+  "konto.quote_6": "Hitrejše strani, mirnejša glava.",
+  "konto.quote_7": "Splet, kot je bil mišljen.",
+  "konto.quote_8": "Vaša pozornost ni naprodaj.",
+  "konto.quote_9": "Pojavna okna? Nikoli slišal zanje.",
+  "konto.quote_10": "Čist splet je srečen splet."
 }

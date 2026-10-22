@@ -259,5 +259,15 @@
   "konto.name_placeholder": "Ditt förnamn",
   "konto.name_save": "Spara",
   "konto.name_change": "Byt namn",
-  "konto.err_name": "Skriv ett namn med bokstäver."
+  "konto.err_name": "Skriv ett namn med bokstäver.",
+  "konto.quote_1": "Happy adblocking!",
+  "konto.quote_2": "Internet är mycket tystare så här.",
+  "konto.quote_3": "Ingen reklam idag heller. Njut.",
+  "konto.quote_4": "Spårarna letar fortfarande efter dig.",
+  "konto.quote_5": "{n} annonser du aldrig behövde se.",
+  "konto.quote_6": "Snabbare sidor, lugnare huvud.",
+  "konto.quote_7": "Webben som den var tänkt.",
+  "konto.quote_8": "Din uppmärksamhet är inte till salu.",
+  "konto.quote_9": "Popups? Aldrig hört talas om dem.",
+  "konto.quote_10": "En ren webb är en glad webb."
 }

@@ -259,5 +259,15 @@
   "konto.name_placeholder": "A keresztneved",
   "konto.name_save": "Mentés",
   "konto.name_change": "Név módosítása",
-  "konto.err_name": "Adj meg egy betűkből álló nevet."
+  "konto.err_name": "Adj meg egy betűkből álló nevet.",
+  "konto.quote_1": "Happy adblocking!",
+  "konto.quote_2": "Így sokkal csendesebb az internet.",
+  "konto.quote_3": "Ma sincs reklám. Élvezd.",
+  "konto.quote_4": "A követők még mindig keresnek.",
+  "konto.quote_5": "{n} hirdetés, amit sosem kellett látnod.",
+  "konto.quote_6": "Gyorsabb oldalak, nyugodtabb fej.",
+  "konto.quote_7": "A web, ahogy lennie kellett.",
+  "konto.quote_8": "A figyelmed nem eladó.",
+  "konto.quote_9": "Felugró ablakok? Sosem hallottam róluk.",
+  "konto.quote_10": "A tiszta web boldog web."
 }

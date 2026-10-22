@@ -259,5 +259,15 @@
   "konto.name_placeholder": "Twoje imię",
   "konto.name_save": "Zapisz",
   "konto.name_change": "Zmień imię",
-  "konto.err_name": "Wpisz imię złożone z liter."
+  "konto.err_name": "Wpisz imię złożone z liter.",
+  "konto.quote_1": "Happy adblocking!",
+  "konto.quote_2": "Tak internet jest dużo cichszy.",
+  "konto.quote_3": "Dziś też bez reklam. Ciesz się.",
+  "konto.quote_4": "Trackery wciąż cię szukają.",
+  "konto.quote_5": "{n} reklam, których nigdy nie musiałeś oglądać.",
+  "konto.quote_6": "Szybsze strony, spokojniejsza głowa.",
+  "konto.quote_7": "Sieć taka, jaka miała być.",
+  "konto.quote_8": "Twoja uwaga nie jest na sprzedaż.",
+  "konto.quote_9": "Wyskakujące okna? Nigdy o nich nie słyszałem.",
+  "konto.quote_10": "Czysta sieć to szczęśliwa sieć."
 }

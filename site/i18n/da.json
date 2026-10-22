@@ -259,5 +259,15 @@
   "konto.name_placeholder": "Dit fornavn",
   "konto.name_save": "Gem",
   "konto.name_change": "Skift navn",
-  "konto.err_name": "Skriv et navn med bogstaver."
+  "konto.err_name": "Skriv et navn med bogstaver.",
+  "konto.quote_1": "Happy adblocking!",
+  "konto.quote_2": "Internettet er meget roligere sådan her.",
+  "konto.quote_3": "Ingen reklamer i dag heller. Nyd det.",
+  "konto.quote_4": "Trackerne leder stadig efter dig.",
+  "konto.quote_5": "{n} annoncer du aldrig behøvede at se.",
+  "konto.quote_6": "Hurtigere sider, roligere hoved.",
+  "konto.quote_7": "Nettet, som det var tænkt.",
+  "konto.quote_8": "Din opmærksomhed er ikke til salg.",
+  "konto.quote_9": "Popups? Aldrig hørt om dem.",
+  "konto.quote_10": "Et rent net er et glad net."
 }

@@ -259,5 +259,15 @@
   "konto.name_placeholder": "Tavs vārds",
   "konto.name_save": "Saglabāt",
   "konto.name_change": "Mainīt vārdu",
-  "konto.err_name": "Ieraksti vārdu ar burtiem."
+  "konto.err_name": "Ieraksti vārdu ar burtiem.",
+  "konto.quote_1": "Happy adblocking!",
+  "konto.quote_2": "Tā internets ir daudz klusāks.",
+  "konto.quote_3": "Arī šodien bez reklāmām. Bauda.",
+  "konto.quote_4": "Izsekotāji joprojām tevi meklē.",
+  "konto.quote_5": "{n} reklāmas, kuras tev nekad nevajadzēja redzēt.",
+  "konto.quote_6": "Ātrākas lapas, mierīgāks prāts.",
+  "konto.quote_7": "Tīmeklis, kāds tam bija jābūt.",
+  "konto.quote_8": "Tava uzmanība nav pārdošanā.",
+  "konto.quote_9": "Uznirstošie logi? Neesmu dzirdējis.",
+  "konto.quote_10": "Tīrs tīmeklis ir laimīgs tīmeklis."
 }

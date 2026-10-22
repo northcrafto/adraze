@@ -259,5 +259,15 @@
   "konto.name_placeholder": "Etunimesi",
   "konto.name_save": "Tallenna",
   "konto.name_change": "Vaihda nimi",
-  "konto.err_name": "Kirjoita nimi kirjaimin."
+  "konto.err_name": "Kirjoita nimi kirjaimin.",
+  "konto.quote_1": "Happy adblocking!",
+  "konto.quote_2": "Netti on näin paljon hiljaisempi.",
+  "konto.quote_3": "Ei mainoksia tänäänkään. Nauti.",
+  "konto.quote_4": "Seurantaohjelmat etsivät sinua yhä.",
+  "konto.quote_5": "{n} mainosta, joita sinun ei tarvinnut nähdä.",
+  "konto.quote_6": "Nopeammat sivut, rauhallisempi mieli.",
+  "konto.quote_7": "Verkko sellaisena kuin se oli tarkoitettu.",
+  "konto.quote_8": "Huomiosi ei ole myytävänä.",
+  "konto.quote_9": "Ponnahdusikkunat? Ei koskaan kuultu.",
+  "konto.quote_10": "Puhdas verkko on iloinen verkko."
 }

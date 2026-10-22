@@ -259,5 +259,15 @@
   "konto.name_placeholder": "Ton prénom",
   "konto.name_save": "Enregistrer",
   "konto.name_change": "Changer de nom",
-  "konto.err_name": "Saisis un nom composé de lettres."
+  "konto.err_name": "Saisis un nom composé de lettres.",
+  "konto.quote_1": "Happy adblocking!",
+  "konto.quote_2": "Internet est bien plus calme comme ça.",
+  "konto.quote_3": "Pas de pub aujourd’hui non plus. Profite.",
+  "konto.quote_4": "Les traqueurs te cherchent encore.",
+  "konto.quote_5": "{n} pubs que tu n’as jamais eu à voir.",
+  "konto.quote_6": "Des pages plus rapides, l’esprit plus calme.",
+  "konto.quote_7": "Le web tel qu’il devait être.",
+  "konto.quote_8": "Ton attention n’est pas à vendre.",
+  "konto.quote_9": "Des pop-ups ? Jamais entendu parler.",
+  "konto.quote_10": "Un web propre est un web heureux."
 }

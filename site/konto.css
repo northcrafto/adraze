@@ -77,7 +77,13 @@
 .hej-namn svg { position: absolute; left: -3%; width: 106%; bottom: -.14em; height: .28em; overflow: visible; pointer-events: none; }
 .hej-namn path { fill: none; stroke: var(--accent); stroke-width: 7; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: rita-linje .8s var(--ease) forwards; animation-delay: var(--efter, 1s); }
 @keyframes rita-linje { to { stroke-dashoffset: 0; } }
-.hej-under { margin-top: 14px; animation: tona-in .6s ease both; animation-delay: var(--efter, 1s); }
+/* Dagens rad skrivs ut tecken för tecken när linjen ritats klart */
+.hej-citat { margin-top: 16px; min-height: 1.4em; font-size: clamp(17px, 1.6vw, 21px); font-weight: 600; letter-spacing: -0.01em; color: var(--ink); }
+.hej-citat .markor { display: inline-block; width: 2px; height: 1.05em; margin-left: 3px; vertical-align: -0.15em; background: var(--accent); border-radius: 1px; opacity: 0; }
+.hej-citat.skriver .markor { opacity: 1; }
+.hej-citat.klar .markor { animation: blinka 1s steps(1) 3 forwards; opacity: 1; }
+@keyframes blinka { 50% { opacity: 0; } to { opacity: 0; } }
+.hej-under { margin-top: 10px; animation: tona-in .6s ease both; animation-delay: var(--efter, 1s); }
 @keyframes tona-in { from { opacity: 0; transform: translateY(6px); } }
 .namn-form { display: flex; align-items: end; gap: 10px; margin-top: 18px; max-width: 440px; animation: tona-in .5s var(--ease) both; }
 .namn-form .falt { flex: 1; min-width: 0; }
@@ -87,6 +93,7 @@
 @media (prefers-reduced-motion: reduce) {
   .hej-vink, .hej-b, .hej-under, .namn-form { animation: none; }
   .hej-namn path { animation: none; stroke-dashoffset: 0; }
+  .hej-citat .markor { display: none; }
 }
 .k-siffra { background: var(--yta); border: 1px solid var(--linje); border-radius: 22px; padding: 22px; }
 .k-siffra dt { font-size: clamp(34px, 4vw, 52px); font-weight: 700; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
