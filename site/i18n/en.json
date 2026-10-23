@@ -363,5 +363,15 @@
   "kolla.err_full": "The queue is full right now. Try again in a moment.",
   "kolla.err_open": "The page could not be opened.",
   "kolla.err_generic": "Something went wrong. Try again.",
-  "nav.check": "Check a site"
+  "nav.check": "Check a site",
+  "konto.avatar_add": "Add profile picture",
+  "konto.avatar_change": "Change profile picture",
+  "konto.avatar_title": "Place your image",
+  "konto.avatar_hint": "Drag the image so that it fits correctly in the circle. Zoom with the slider or scroll wheel.",
+  "konto.avatar_zoom": "Zoom",
+  "konto.avatar_save": "Save",
+  "konto.avatar_cancel": "Cancel",
+  "konto.avatar_remove": "Remove the image",
+  "konto.avatar_other": "Choose another image",
+  "konto.avatar_bad": "The image could not be read. Choose a JPG, PNG or WebP."
 }

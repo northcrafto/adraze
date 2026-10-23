@@ -224,6 +224,7 @@ async function visaKonto(status) {
   $('#vy-in').hidden = false;
   $('#min-mejl').textContent = jag.email;
   halsa(jag.namn);
+  visaAvatar(jag.avatar);
   $('#radera-losen').hidden = !jag.losenord;
   const t = data.totalt;
   $('#s-reklam').textContent = tal.format(t.reklam);
@@ -234,6 +235,140 @@ async function visaKonto(status) {
   ritaDiagram(data.dagar);
   visaEnheter(data.enheter, status);
 }
+
+// ---------- Profilbild ----------
+// Bilden väljs, placeras i en cirkel (dra för att flytta, zooma med reglaget/hjulet/nyp) och sparas som 256×256 JPEG.
+// Det som syns i cirkeln är exakt det som sparas.
+function visaAvatar(avatar) {
+  const img = $('#min-avatar');
+  img.hidden = !avatar;
+  if (avatar) img.src = avatar; else img.removeAttribute('src');
+  $('#avatar-knapp').classList.toggle('har-bild', !!avatar);
+  const text = avatar ? T.avatar_change : T.avatar_add;
+  $('#byt-avatar').textContent = text;
+  $('#avatar-knapp').setAttribute('aria-label', text);
+  $('#avatar-bort').hidden = !avatar;
+}
+
+const AV = { bild: null, zoom: 1, x: 0, y: 0, bas: 1 }; // x/y = bildens mitt relativt cirkelns mitt, i scenpixlar
+const avDialog = $('#avatar-dialog');
+const avScen = $('#avatar-scen');
+const avImg = $('#avatar-bild');
+const avZoom = $('#avatar-zoom');
+const scenStorlek = () => avScen.clientWidth;
+
+// Bilden får aldrig lämna tomrum i cirkeln
+function avBegrans() {
+  const s = scenStorlek(), skala = AV.bas * AV.zoom;
+  const maxX = Math.max(0, (AV.bild.naturalWidth * skala - s) / 2);
+  const maxY = Math.max(0, (AV.bild.naturalHeight * skala - s) / 2);
+  AV.x = Math.min(maxX, Math.max(-maxX, AV.x));
+  AV.y = Math.min(maxY, Math.max(-maxY, AV.y));
+}
+function avRita() {
+  if (!AV.bild) return;
+  avBegrans();
+  const skala = AV.bas * AV.zoom;
+  avImg.style.width = AV.bild.naturalWidth * skala + 'px';
+  avImg.style.height = AV.bild.naturalHeight * skala + 'px';
+  avImg.style.transform = `translate(calc(-50% + ${AV.x}px), calc(-50% + ${AV.y}px))`;
+}
+function avSattZoom(z, kring) {
+  const ny = Math.min(4, Math.max(1, z));
+  // Zooma kring pekaren/mitten så att punkten under fingret står still
+  if (kring) { const f = ny / AV.zoom; AV.x = kring.x - (kring.x - AV.x) * f; AV.y = kring.y - (kring.y - AV.y) * f; }
+  else { const f = ny / AV.zoom; AV.x *= f; AV.y *= f; }
+  AV.zoom = ny;
+  avZoom.value = String(ny);
+  avRita();
+}
+
+function oppnaAvatarFil() { $('#avatar-fil').value = ''; $('#avatar-fil').click(); }
+$('#avatar-knapp').addEventListener('click', oppnaAvatarFil);
+$('#byt-avatar').addEventListener('click', oppnaAvatarFil);
+$('#avatar-ny').addEventListener('click', oppnaAvatarFil);
+$('#avatar-fil').addEventListener('change', async (e) => {
+  const fil = e.target.files && e.target.files[0];
+  if (!fil) return;
+  $('#avatar-fel').textContent = '';
+  const url = URL.createObjectURL(fil);
+  const bild = new Image();
+  try { bild.src = url; await bild.decode(); } catch { URL.revokeObjectURL(url); visaMeddelandeIn(T.avatar_bad); return; }
+  if (AV.bild && AV.bild.src.startsWith('blob:')) URL.revokeObjectURL(AV.bild.src);
+  AV.bild = bild; AV.zoom = 1; AV.x = 0; AV.y = 0;
+  avImg.src = url;
+  if (!avDialog.open) avDialog.showModal();
+  AV.bas = scenStorlek() / Math.min(bild.naturalWidth, bild.naturalHeight); // kortaste sidan fyller cirkeln
+  avZoom.value = '1';
+  avRita();
+});
+function visaMeddelandeIn(text) { if (avDialog.open) $('#avatar-fel').textContent = text; else $('#namn-fel').textContent = text; }
+
+// Dra (mus + finger) och nyp för att zooma
+const pekare = new Map();
+let nypStart = null;
+avScen.addEventListener('pointerdown', (e) => {
+  if (!AV.bild) return;
+  avScen.setPointerCapture(e.pointerId);
+  pekare.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pekare.size === 2) { const [a, b] = [...pekare.values()]; nypStart = { d: Math.hypot(a.x - b.x, a.y - b.y), zoom: AV.zoom }; }
+  avScen.classList.add('drar');
+});
+avScen.addEventListener('pointermove', (e) => {
+  const forra = pekare.get(e.pointerId);
+  if (!forra) return;
+  const nu = { x: e.clientX, y: e.clientY };
+  pekare.set(e.pointerId, nu);
+  if (pekare.size === 2 && nypStart) {
+    const [a, b] = [...pekare.values()];
+    avSattZoom(nypStart.zoom * Math.hypot(a.x - b.x, a.y - b.y) / nypStart.d);
+  } else if (pekare.size === 1) {
+    AV.x += nu.x - forra.x; AV.y += nu.y - forra.y;
+    avRita();
+  }
+});
+const slapp = (e) => { pekare.delete(e.pointerId); if (pekare.size < 2) nypStart = null; if (!pekare.size) avScen.classList.remove('drar'); };
+avScen.addEventListener('pointerup', slapp);
+avScen.addEventListener('pointercancel', slapp);
+avScen.addEventListener('wheel', (e) => {
+  if (!AV.bild) return;
+  e.preventDefault();
+  const r = avScen.getBoundingClientRect();
+  avSattZoom(AV.zoom * Math.exp(-e.deltaY * 0.0015), { x: e.clientX - r.left - r.width / 2, y: e.clientY - r.top - r.height / 2 });
+}, { passive: false });
+avZoom.addEventListener('input', () => avSattZoom(Number(avZoom.value)));
+avScen.addEventListener('keydown', (e) => {
+  const steg = { ArrowLeft: [8, 0], ArrowRight: [-8, 0], ArrowUp: [0, 8], ArrowDown: [0, -8] }[e.key];
+  if (steg && AV.bild) { e.preventDefault(); AV.x += steg[0]; AV.y += steg[1]; avRita(); }
+});
+
+// Spara: rita exakt cirkelns innehåll på en 256×256-canvas
+$('#avatar-spara').addEventListener('click', async () => {
+  if (!AV.bild) return;
+  const knapp = $('#avatar-spara');
+  const UT = 256, s = scenStorlek(), skala = AV.bas * AV.zoom;
+  const canvas = Object.assign(document.createElement('canvas'), { width: UT, height: UT });
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, UT, UT);
+  const k = UT / s;
+  const w = AV.bild.naturalWidth * skala * k, h = AV.bild.naturalHeight * skala * k;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(AV.bild, UT / 2 + AV.x * k - w / 2, UT / 2 + AV.y * k - h / 2, w, h);
+  let bild = canvas.toDataURL('image/jpeg', 0.88);
+  if (bild.length > 115_000) bild = canvas.toDataURL('image/jpeg', 0.72);
+  knapp.disabled = true;
+  try {
+    const r = await api('/me/avatar', { bild });
+    visaAvatar(r.avatar);
+    avDialog.close();
+  } catch (e) { $('#avatar-fel').textContent = e.message; }
+  finally { knapp.disabled = false; }
+});
+$('#avatar-bort').addEventListener('click', async () => {
+  try { await api('/me/avatar', { bild: null }); visaAvatar(null); avDialog.close(); } catch (e) { $('#avatar-fel').textContent = e.message; }
+});
+window.addEventListener('resize', () => { if (avDialog.open && AV.bild) { const z = AV.zoom; AV.bas = scenStorlek() / Math.min(AV.bild.naturalWidth, AV.bild.naturalHeight); AV.zoom = z; avRita(); } });
 
 // ---------- Välkommen, <namn> ----------
 // Varje bokstav blir en egen span som animeras in i tur och ordning (ord hålls ihop så att radbrytningen blir rätt)

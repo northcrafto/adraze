@@ -363,5 +363,15 @@
   "kolla.err_full": "La coda è piena in questo momento. Riprova tra poco.",
   "kolla.err_open": "Non è stato possibile aprire la pagina.",
   "kolla.err_generic": "Qualcosa è andato storto. Riprova.",
-  "nav.check": "Analizza un sito"
+  "nav.check": "Analizza un sito",
+  "konto.avatar_add": "Aggiungi l'immagine del profilo",
+  "konto.avatar_change": "Cambia l'immagine del profilo",
+  "konto.avatar_title": "Posiziona la tua immagine",
+  "konto.avatar_hint": "Trascina l'immagine in modo che si adatti correttamente al cerchio. Zoom con il dispositivo di scorrimento o la rotella di scorrimento.",
+  "konto.avatar_zoom": "Zoom",
+  "konto.avatar_save": "Salva",
+  "konto.avatar_cancel": "Cancellare",
+  "konto.avatar_remove": "Rimuovi l'immagine",
+  "konto.avatar_other": "Scegli un'altra immagine",
+  "konto.avatar_bad": "Impossibile leggere l'immagine. Scegli un JPG, PNG o WebP."
 }

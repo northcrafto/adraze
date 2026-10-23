@@ -363,5 +363,15 @@
   "kolla.err_full": "Järjekord on praegu täis. Proovi hetke pärast uuesti.",
   "kolla.err_open": "Lehte ei õnnestunud avada.",
   "kolla.err_generic": "Midagi läks valesti. Proovi uuesti.",
-  "nav.check": "Kontrolli saiti"
+  "nav.check": "Kontrolli saiti",
+  "konto.avatar_add": "Lisa profiilipilt",
+  "konto.avatar_change": "Muuda profiilipilti",
+  "konto.avatar_title": "Asetage oma pilt",
+  "konto.avatar_hint": "Lohistage pilti nii, et see mahuks õigesti ringi. Suumige liuguri või kerimisrattaga.",
+  "konto.avatar_zoom": "Suumi",
+  "konto.avatar_save": "Salvesta",
+  "konto.avatar_cancel": "Tühista",
+  "konto.avatar_remove": "Eemaldage pilt",
+  "konto.avatar_other": "Valige teine ​​pilt",
+  "konto.avatar_bad": "Pilti ei saanud lugeda. Valige JPG, PNG või WebP."
 }

@@ -363,5 +363,15 @@
   "kolla.err_full": "Röðin er full núna. Reyndu aftur eftir smástund.",
   "kolla.err_open": "Ekki tókst að opna síðuna.",
   "kolla.err_generic": "Eitthvað fór úrskeiðis. Reyndu aftur.",
-  "nav.check": "Athuga síðu"
+  "nav.check": "Athuga síðu",
+  "konto.avatar_add": "Bættu við prófílmynd",
+  "konto.avatar_change": "Breyta prófílmynd",
+  "konto.avatar_title": "Settu myndina þína",
+  "konto.avatar_hint": "Dragðu myndina þannig að hún passi rétt í hringinn. Aðdráttur með sleðann eða skrunhjólinu.",
+  "konto.avatar_zoom": "Aðdráttur",
+  "konto.avatar_save": "Vista",
+  "konto.avatar_cancel": "Hætta við",
+  "konto.avatar_remove": "Fjarlægðu myndina",
+  "konto.avatar_other": "Veldu aðra mynd",
+  "konto.avatar_bad": "Ekki var hægt að lesa myndina. Veldu JPG, PNG eða WebP."
 }

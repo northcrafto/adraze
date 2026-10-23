@@ -363,5 +363,15 @@
   "kolla.err_full": "Coada e plină acum. Încearcă din nou peste puțin timp.",
   "kolla.err_open": "Pagina nu a putut fi deschisă.",
   "kolla.err_generic": "Ceva n-a mers bine. Încearcă din nou.",
-  "nav.check": "Verifică un site"
+  "nav.check": "Verifică un site",
+  "konto.avatar_add": "Adăugați o poză de profil",
+  "konto.avatar_change": "Schimbați poza de profil",
+  "konto.avatar_title": "Pune imaginea ta",
+  "konto.avatar_hint": "Trageți imaginea astfel încât să se potrivească corect în cerc. Măriți cu glisorul sau rotița de defilare.",
+  "konto.avatar_zoom": "Zoom",
+  "konto.avatar_save": "Salva",
+  "konto.avatar_cancel": "Anula",
+  "konto.avatar_remove": "Eliminați imaginea",
+  "konto.avatar_other": "Alege o altă imagine",
+  "konto.avatar_bad": "Imaginea nu a putut fi citită. Alegeți un JPG, PNG sau WebP."
 }

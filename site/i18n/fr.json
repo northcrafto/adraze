@@ -363,5 +363,15 @@
   "kolla.err_full": "La file d'attente est pleine. Réessayez dans un instant.",
   "kolla.err_open": "La page n'a pas pu être ouverte.",
   "kolla.err_generic": "Une erreur s'est produite. Réessayez.",
-  "nav.check": "Analyser un site"
+  "nav.check": "Analyser un site",
+  "konto.avatar_add": "Ajouter une photo de profil",
+  "konto.avatar_change": "Changer la photo de profil",
+  "konto.avatar_title": "Placez votre image",
+  "konto.avatar_hint": "Faites glisser l'image pour qu'elle s'insère correctement dans le cercle. Zoomez avec le curseur ou la molette de défilement.",
+  "konto.avatar_zoom": "Zoom",
+  "konto.avatar_save": "Sauvegarder",
+  "konto.avatar_cancel": "Annuler",
+  "konto.avatar_remove": "Supprimer l'image",
+  "konto.avatar_other": "Choisissez une autre image",
+  "konto.avatar_bad": "L'image n'a pas pu être lue. Choisissez un JPG, PNG ou WebP."
 }

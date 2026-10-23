@@ -363,5 +363,15 @@
   "kolla.err_full": "A sor most tele van. Próbáld újra egy kicsit később.",
   "kolla.err_open": "Az oldalt nem sikerült megnyitni.",
   "kolla.err_generic": "Hiba történt. Próbáld újra.",
-  "nav.check": "Oldal ellenőrzése"
+  "nav.check": "Oldal ellenőrzése",
+  "konto.avatar_add": "Profilkép hozzáadása",
+  "konto.avatar_change": "Profilkép módosítása",
+  "konto.avatar_title": "Helyezze el a képet",
+  "konto.avatar_hint": "Húzza a képet úgy, hogy az megfelelően illeszkedjen a körbe. Nagyítás a csúszkával vagy a görgővel.",
+  "konto.avatar_zoom": "Zoomolás",
+  "konto.avatar_save": "Megtakarítás",
+  "konto.avatar_cancel": "Mégsem",
+  "konto.avatar_remove": "Távolítsa el a képet",
+  "konto.avatar_other": "Válasszon másik képet",
+  "konto.avatar_bad": "A kép nem olvasható. Válasszon JPG, PNG vagy WebP fájlt."
 }

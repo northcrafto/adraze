@@ -145,7 +145,11 @@
   <section class="in" id="vy-in" hidden>
     <div class="in-topp">
       <div class="hej">
-        <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
+        <button type="button" class="hej-vink" id="avatar-knapp" aria-label="Lisa profiilipilt">
+          <img class="vink-gif" src="/mail/vinkar.gif" alt="" width="200" height="259">
+          <img class="min-avatar" id="min-avatar" alt="" width="256" height="256" hidden>
+          <span class="avatar-penna" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"/></svg></span>
+        </button>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
           <figure class="hej-citat" id="hej-citat">
@@ -160,7 +164,7 @@
             <button class="btn liq" type="submit">Saada</button>
             <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
           </form>
-          <p class="dov hej-under">Sisse logitud kui <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Muuda nime</button></span></p>
+          <p class="dov hej-under">Sisse logitud kui <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Muuda nime</button></span> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-avatar">Lisa profiilipilt</button></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Kuidas me sind kutsume?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Sinu eesnimi" required></label>
             <button class="btn liq" type="submit">Salvesta</button>
@@ -202,9 +206,32 @@
     </details>
   </section>
 
+  <!-- Profilbild: välj bild → placera i cirkeln (dra + zooma) → spara -->
+  <input type="file" id="avatar-fil" accept="image/*" hidden>
+  <dialog class="avatar-dialog" id="avatar-dialog" aria-labelledby="avatar-rubrik">
+    <form method="dialog" class="avatar-ruta">
+      <h2 id="avatar-rubrik">Asetage oma pilt</h2>
+      <p class="dov">Lohistage pilti nii, et see mahuks õigesti ringi. Suumige liuguri või kerimisrattaga.</p>
+      <div class="avatar-scen" id="avatar-scen" tabindex="0"><img id="avatar-bild" alt="" draggable="false"><div class="avatar-mask" aria-hidden="true"></div></div>
+      <label class="avatar-zoom"><span>Suumi</span><input type="range" id="avatar-zoom" min="1" max="4" step="0.01" value="1"></label>
+      <p class="meddelande" id="avatar-fel" role="alert" aria-live="polite"></p>
+      <div class="avatar-knappar">
+        <button type="button" class="lank-knapp nav-link" id="avatar-ny">Valige teine ​​pilt</button>
+        <button type="button" class="lank-knapp nav-link farlig" id="avatar-bort" hidden>Eemaldage pilt</button>
+        <span class="avatar-hoger">
+          <button type="submit" class="btn liq-ghost" value="avbryt">Tühista</button>
+          <button type="button" class="btn liq" id="avatar-spara">Salvesta</button>
+        </span>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Texter som skriptet behöver, på sidans språk -->
   <template id="texter">
     <span data-k="ext_none">AdRaze pole selles brauseris installitud.</span>
+    <span data-k="avatar_add">Lisa profiilipilt</span>
+    <span data-k="avatar_change">Muuda profiilipilti</span>
+    <span data-k="avatar_bad">Pilti ei saanud lugeda. Valige JPG, PNG või WebP.</span>
     <span data-k="ext_install">Installi AdRaze</span>
     <span data-k="ext_connect">Ühenda see brauser</span>
     <span data-k="ext_connected">See brauser on ühendatud ja saadab statistikat.</span>

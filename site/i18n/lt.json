@@ -363,5 +363,15 @@
   "kolla.err_full": "Eilė šiuo metu pilna. Bandyk dar kartą po akimirkos.",
   "kolla.err_open": "Puslapio nepavyko atidaryti.",
   "kolla.err_generic": "Kažkas nepavyko. Bandyk dar kartą.",
-  "nav.check": "Tikrinti svetainę"
+  "nav.check": "Tikrinti svetainę",
+  "konto.avatar_add": "Pridėti profilio nuotrauką",
+  "konto.avatar_change": "Keisti profilio nuotrauką",
+  "konto.avatar_title": "Padėkite savo atvaizdą",
+  "konto.avatar_hint": "Vilkite vaizdą, kad jis tinkamai tilptų apskritime. Didinkite mastelį naudodami slankiklį arba slinkties ratuką.",
+  "konto.avatar_zoom": "Padidinti",
+  "konto.avatar_save": "Išsaugoti",
+  "konto.avatar_cancel": "Atšaukti",
+  "konto.avatar_remove": "Pašalinkite vaizdą",
+  "konto.avatar_other": "Pasirinkite kitą vaizdą",
+  "konto.avatar_bad": "Nepavyko perskaityti vaizdo. Pasirinkite JPG, PNG arba WebP."
 }

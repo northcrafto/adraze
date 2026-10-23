@@ -67,6 +67,32 @@
 .hej { display: flex; align-items: flex-start; gap: clamp(16px, 3vw, 32px); min-width: 0; }
 .hej-vink { width: clamp(76px, 9vw, 112px); flex: none; background: #fff; border-radius: 24px; padding: 10px 10px 2px; box-shadow: 0 1px 0 var(--linje); transform-origin: 50% 100%; animation: vink-in .9s var(--ease) .2s both; }
 .hej-vink img { display: block; width: 100%; height: auto; }
+/* Profilbilden ersätter vinkande gubben när den finns; pennan visar att rutan går att klicka */
+button.hej-vink { all: unset; box-sizing: border-box; position: relative; width: clamp(76px, 9vw, 112px); flex: none; background: #fff; border-radius: 24px; padding: 10px 10px 2px; box-shadow: 0 1px 0 var(--linje); transform-origin: 50% 100%; animation: vink-in .9s var(--ease) .2s both; cursor: pointer; }
+button.hej-vink:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 3px; }
+.hej-vink.har-bild { padding: 0; border-radius: 50%; overflow: visible; background: none; box-shadow: none; }
+.hej-vink.har-bild .vink-gif { display: none; }
+.min-avatar { display: block; width: 100%; height: auto; aspect-ratio: 1; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 1px var(--linje); }
+.avatar-penna { position: absolute; right: -4px; bottom: -4px; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: var(--ink); color: var(--bg); box-shadow: 0 0 0 3px var(--bg); transition: background .2s, transform .2s var(--ease); }
+button.hej-vink:hover .avatar-penna { background: var(--accent); color: #fff; transform: scale(1.08); }
+
+/* Placera bilden */
+.avatar-dialog { border: 0; padding: 0; margin: auto; inset: 0; background: transparent; max-width: calc(100vw - 32px); max-height: calc(100dvh - 32px); overflow: auto; }
+.avatar-dialog::backdrop { background: rgb(17 17 19 / .55); backdrop-filter: blur(4px); }
+.avatar-ruta { width: min(420px, calc(100vw - 32px)); background: var(--yta); color: var(--ink); border-radius: 28px; padding: 26px; display: grid; gap: 14px; }
+.avatar-ruta h2 { font-size: 26px; letter-spacing: -0.03em; }
+.avatar-scen { position: relative; width: 100%; aspect-ratio: 1; overflow: hidden; border-radius: 20px; background: #111113; cursor: grab; touch-action: none; user-select: none; }
+.avatar-scen.drar { cursor: grabbing; }
+.avatar-scen:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 3px; }
+.avatar-scen img { position: absolute; left: 50%; top: 50%; max-width: none; pointer-events: none; will-change: transform; }
+/* Cirkeln = det som sparas; utanför tonas ner */
+.avatar-mask { position: absolute; inset: 0; pointer-events: none; border-radius: 50%; box-shadow: 0 0 0 9999px rgb(17 17 19 / .58); outline: 2px solid rgb(255 255 255 / .9); outline-offset: -1px; }
+.avatar-zoom { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; }
+.avatar-zoom input { accent-color: var(--accent); width: 100%; }
+.avatar-knappar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.avatar-hoger { margin-left: auto; display: flex; gap: 10px; }
+.lank-knapp.farlig { color: var(--accent); }
+@media (max-width: 420px) { .avatar-hoger { margin-left: 0; width: 100%; } .avatar-hoger .btn { flex: 1; } }
 @keyframes vink-in { from { opacity: 0; transform: translateY(24px) scale(.5) rotate(-10deg); } 55% { opacity: 1; transform: translateY(-6px) scale(1.05) rotate(3deg); } 80% { transform: translateY(1px) scale(.99) rotate(-1deg); } }
 .hej-text { min-width: 0; }
 .hej-rubrik { font-size: clamp(40px, 6vw, 80px); letter-spacing: -0.05em; line-height: 1.05; }

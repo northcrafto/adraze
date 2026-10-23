@@ -145,7 +145,11 @@
   <section class="in" id="vy-in" hidden>
     <div class="in-topp">
       <div class="hej">
-        <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
+        <button type="button" class="hej-vink" id="avatar-knapp" aria-label="Добавете профилна снимка">
+          <img class="vink-gif" src="/mail/vinkar.gif" alt="" width="200" height="259">
+          <img class="min-avatar" id="min-avatar" alt="" width="256" height="256" hidden>
+          <span class="avatar-penna" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"/></svg></span>
+        </button>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
           <figure class="hej-citat" id="hej-citat">
@@ -160,7 +164,7 @@
             <button class="btn liq" type="submit">Изпрати</button>
             <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
           </form>
-          <p class="dov hej-under">Влязъл си като <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Смени името</button></span></p>
+          <p class="dov hej-under">Влязъл си като <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Смени името</button></span> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-avatar">Добавете профилна снимка</button></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Как да ви наричаме?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Вашето име" required></label>
             <button class="btn liq" type="submit">Запази</button>
@@ -202,9 +206,32 @@
     </details>
   </section>
 
+  <!-- Profilbild: välj bild → placera i cirkeln (dra + zooma) → spara -->
+  <input type="file" id="avatar-fil" accept="image/*" hidden>
+  <dialog class="avatar-dialog" id="avatar-dialog" aria-labelledby="avatar-rubrik">
+    <form method="dialog" class="avatar-ruta">
+      <h2 id="avatar-rubrik">Поставете вашето изображение</h2>
+      <p class="dov">Плъзнете изображението, така че да пасне правилно в кръга. Мащабиране с плъзгача или колелцето за превъртане.</p>
+      <div class="avatar-scen" id="avatar-scen" tabindex="0"><img id="avatar-bild" alt="" draggable="false"><div class="avatar-mask" aria-hidden="true"></div></div>
+      <label class="avatar-zoom"><span>мащабиране</span><input type="range" id="avatar-zoom" min="1" max="4" step="0.01" value="1"></label>
+      <p class="meddelande" id="avatar-fel" role="alert" aria-live="polite"></p>
+      <div class="avatar-knappar">
+        <button type="button" class="lank-knapp nav-link" id="avatar-ny">Изберете друго изображение</button>
+        <button type="button" class="lank-knapp nav-link farlig" id="avatar-bort" hidden>Премахнете изображението</button>
+        <span class="avatar-hoger">
+          <button type="submit" class="btn liq-ghost" value="avbryt">Отказ</button>
+          <button type="button" class="btn liq" id="avatar-spara">Запазване</button>
+        </span>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Texter som skriptet behöver, på sidans språk -->
   <template id="texter">
     <span data-k="ext_none">AdRaze не е инсталиран в този браузър.</span>
+    <span data-k="avatar_add">Добавете профилна снимка</span>
+    <span data-k="avatar_change">Промяна на профилна снимка</span>
+    <span data-k="avatar_bad">Изображението не може да бъде прочетено. Изберете JPG, PNG или WebP.</span>
     <span data-k="ext_install">Инсталирай AdRaze</span>
     <span data-k="ext_connect">Свържи този браузър</span>
     <span data-k="ext_connected">Този браузър е свързан и изпраща статистика.</span>

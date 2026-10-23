@@ -363,5 +363,15 @@
   "kolla.err_full": "Red je trenutno pun. Pokušaj ponovno za malo.",
   "kolla.err_open": "Stranicu nije bilo moguće otvoriti.",
   "kolla.err_generic": "Nešto je pošlo po zlu. Pokušaj ponovno.",
-  "nav.check": "Provjeri stranicu"
+  "nav.check": "Provjeri stranicu",
+  "konto.avatar_add": "Dodaj profilnu sliku",
+  "konto.avatar_change": "Promjena profilne slike",
+  "konto.avatar_title": "Postavite svoju sliku",
+  "konto.avatar_hint": "Povucite sliku tako da ispravno stane u krug. Zumirajte pomoću klizača ili kotačića.",
+  "konto.avatar_zoom": "Zum",
+  "konto.avatar_save": "Uštedjeti",
+  "konto.avatar_cancel": "Otkazati",
+  "konto.avatar_remove": "Uklonite sliku",
+  "konto.avatar_other": "Odaberite drugu sliku",
+  "konto.avatar_bad": "Slika se ne može pročitati. Odaberite JPG, PNG ili WebP."
 }

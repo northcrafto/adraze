@@ -363,5 +363,15 @@
   "kolla.err_full": "Rad je teraz plný. Skúste to o chvíľu znova.",
   "kolla.err_open": "Stránku sa nepodarilo otvoriť.",
   "kolla.err_generic": "Niečo sa pokazilo. Skúste to znova.",
-  "nav.check": "Skontrolovať web"
+  "nav.check": "Skontrolovať web",
+  "konto.avatar_add": "Pridať profilovú fotku",
+  "konto.avatar_change": "Zmeniť profilový obrázok",
+  "konto.avatar_title": "Umiestnite svoj obrázok",
+  "konto.avatar_hint": "Potiahnite obrázok tak, aby správne zapadol do kruhu. Priblíženie pomocou posúvača alebo rolovacieho kolieska.",
+  "konto.avatar_zoom": "Zoom",
+  "konto.avatar_save": "Uložiť",
+  "konto.avatar_cancel": "Zrušiť",
+  "konto.avatar_remove": "Odstráňte obrázok",
+  "konto.avatar_other": "Vyberte iný obrázok",
+  "konto.avatar_bad": "Obrázok sa nedal prečítať. Vyberte JPG, PNG alebo WebP."
 }
