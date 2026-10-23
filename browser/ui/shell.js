@@ -522,7 +522,7 @@ window.skoll.onAdblockHit((type) => { const k = { ad: 'ads', tracker: 'trackers'
 renderStats();
 $('adblock').addEventListener('click', () => setAdblock($('adblock').classList.contains('off')));
 
-/* ── Krypto (kräver inloggning + Pro) ── */
+/* ── Falk (kräver inloggning + Pro) ── */
 let kryptoOpen = false;
 function kryptoMode() { return account ? (account.pro ? 'pro' : 'nopro') : 'signedout'; }
 let pendingKryptoAfterLogin = false;
@@ -685,7 +685,7 @@ $('set-search').addEventListener('input', () => {
 $('set-search').addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('set-search').value) { e.stopPropagation(); $('set-search').value = ''; $('set-search').dispatchEvent(new Event('input')); } });
 $('tgl-protection').addEventListener('change', (e) => setProtection(e.target.checked));
 $('tgl-adblock').addEventListener('change', (e) => setAdblock(e.target.checked));
-/* Krypto-kategori */
+/* Falk-kategori */
 $('open-krypto-btn').addEventListener('click', () => {
   closeSettings();
   openKrypto(true);
@@ -741,7 +741,7 @@ if ($('seg-light')) $('seg-light').addEventListener('click', () => setTheme('lig
 if ($('seg-dark')) $('seg-dark').addEventListener('click', () => setTheme('dark'));
 setTheme(theme);
 
-/* ── Krypto-agent: låt AI:n ändra inställningar via naturligt språk ── */
+/* ── Falk-agent: låt AI:n ändra inställningar via naturligt språk ── */
 function kryptoOnOff(v) { v = ('' + (v || '')).toLowerCase().trim(); return !/(^av$|off|nej|stäng|stang|inaktiv|false|^0$|\bav\b)/.test(v); }
 function matchEngine(v) {
   v = ('' + (v || '')).toLowerCase();
@@ -915,7 +915,7 @@ function doLogout(reopenKrypto) {
   if (typeof applyKidIndicator === 'function') applyKidIndicator();
   if (t) { try { window.auth.logout(t); } catch {} }
   setLoginView('login');
-  if (reopenKrypto !== false && kryptoOpen) openKrypto(true);  // lås Krypto igen
+  if (reopenKrypto !== false && kryptoOpen) openKrypto(true);  // lås Falk igen
 }
 function busyBtn(id, busy, busyText, text) {
   const b = $(id); if (!b) return; b.disabled = busy; b.style.opacity = busy ? '0.7' : '1'; b.textContent = busy ? busyText : text;
@@ -1910,9 +1910,9 @@ function walletEditForm(id) {
 }
 function openWallet() { openSettings(); showSettingsCat('wallet'); renderWallet(); }
 $('wallet-add-btn') && $('wallet-add-btn').addEventListener('click', () => { wlEditing = 'new'; renderWallet(); setTimeout(() => { const f = document.querySelector('#wallet-list .wl-in[data-f=number]'); if (f) f.focus(); }, 0); });
-$('wl-buy-toggle') && $('wl-buy-toggle').addEventListener('change', (e) => { try { localStorage.setItem('adraze-krypto-buy', e.target.checked ? '1' : '0'); } catch {} showToast(e.target.checked ? '🤖 Krypto får nu handla åt dig – du godkänner varje köp.' : 'Krypto handlar inte längre åt dig.'); });
+$('wl-buy-toggle') && $('wl-buy-toggle').addEventListener('change', (e) => { try { localStorage.setItem('adraze-krypto-buy', e.target.checked ? '1' : '0'); } catch {} showToast(e.target.checked ? '🤖 Falk får nu handla åt dig – du godkänner varje köp.' : 'Falk handlar inte längre åt dig.'); });
 
-/* ── Krypto handlar åt användaren (tillstånd + säkerhetskoll + bekräftelse) ── */
+/* ── Falk handlar åt användaren (tillstånd + säkerhetskoll + bekräftelse) ── */
 function kbuyAllowed() { try { return localStorage.getItem('adraze-krypto-buy') === '1'; } catch { return false; } }
 function cardLabel(c) { return (c.brand || 'Kort') + ' •• ' + (c.last4 || '····'); }
 function kbuyOverlay(inner) {
@@ -1933,10 +1933,10 @@ function startKryptoPurchase(val) {
 function showBuyConsent(order) {
   const ov = kbuyOverlay(
     '<div style="font-size:32px;text-align:center;margin-bottom:8px">🛍️</div>'
-    + '<div style="font-size:18px;font-weight:800;text-align:center;color:var(--color-navy-900);margin-bottom:8px">Låta Krypto handla åt dig?</div>'
-    + '<p style="font-size:13.5px;color:rgb(28 43 58 / .62);text-align:center;line-height:1.55;margin-bottom:18px">Krypto vill kunna köpa saker åt dig med dina sparade kort. Du får alltid <b>godkänna varje köp</b> innan betalning – och kan stänga av det när som helst i AdRaze Wallet.</p>'
+    + '<div style="font-size:18px;font-weight:800;text-align:center;color:var(--color-navy-900);margin-bottom:8px">Låta Falk handla åt dig?</div>'
+    + '<p style="font-size:13.5px;color:rgb(28 43 58 / .62);text-align:center;line-height:1.55;margin-bottom:18px">Falk vill kunna köpa saker åt dig med dina sparade kort. Du får alltid <b>godkänna varje köp</b> innan betalning – och kan stänga av det när som helst i AdRaze Wallet.</p>'
     + '<div style="display:flex;gap:9px"><button id="kbuy-no" class="btn btn-ghost" style="flex:1;height:44px">Nej tack</button><button id="kbuy-yes" class="btn btn-safe" style="flex:1;height:44px">Tillåt</button></div>');
-  ov.querySelector('#kbuy-no').addEventListener('click', () => { ov.remove(); showToast('Krypto handlar inte utan ditt tillstånd.'); });
+  ov.querySelector('#kbuy-no').addEventListener('click', () => { ov.remove(); showToast('Falk handlar inte utan ditt tillstånd.'); });
   ov.querySelector('#kbuy-yes').addEventListener('click', () => { try { localStorage.setItem('adraze-krypto-buy', '1'); } catch {} const t = $('wl-buy-toggle'); if (t) t.checked = true; ov.remove(); showBuyConfirm(order); });
 }
 async function showBuyConfirm(order) {
@@ -1945,7 +1945,7 @@ async function showBuyConfirm(order) {
     const ov = kbuyOverlay(
       '<div style="font-size:32px;text-align:center;margin-bottom:8px">💳</div>'
       + '<div style="font-size:17px;font-weight:800;text-align:center;color:var(--color-navy-900);margin-bottom:8px">Inget kort sparat</div>'
-      + '<p style="font-size:13.5px;color:rgb(28 43 58 / .62);text-align:center;margin-bottom:18px">Lägg till ett kort i AdRaze Wallet så kan Krypto betala åt dig.</p>'
+      + '<p style="font-size:13.5px;color:rgb(28 43 58 / .62);text-align:center;margin-bottom:18px">Lägg till ett kort i AdRaze Wallet så kan Falk betala åt dig.</p>'
       + '<div style="display:flex;gap:9px"><button id="kbuy-cancel" class="btn btn-ghost" style="flex:1;height:44px">Avbryt</button><button id="kbuy-wallet" class="btn btn-safe" style="flex:1;height:44px">Öppna Wallet</button></div>');
     ov.querySelector('#kbuy-cancel').addEventListener('click', () => ov.remove());
     ov.querySelector('#kbuy-wallet').addEventListener('click', () => { ov.remove(); openWallet(); });
@@ -1953,7 +1953,7 @@ async function showBuyConfirm(order) {
   }
   const opts = cards.map((c, i) => '<option value="' + i + '">' + escapeHtml(cardLabel(c)) + '</option>').join('');
   const ov = kbuyOverlay(
-    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><span style="font-size:26px">🤖</span><div style="font-size:16px;font-weight:800;color:var(--color-navy-900)">Krypto vill göra ett köp åt dig</div></div>'
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><span style="font-size:26px">🤖</span><div style="font-size:16px;font-weight:800;color:var(--color-navy-900)">Falk vill göra ett köp åt dig</div></div>'
     + '<div style="background:var(--color-paper);border:1px solid var(--color-line);border-radius:14px;padding:14px 16px;margin-bottom:14px">'
     +   '<div style="font-size:15px;font-weight:700;color:var(--color-navy-900)">' + escapeHtml(order.desc) + '</div>'
     +   '<div style="font-size:13px;color:rgb(28 43 58 / .6);margin-top:2px">från ' + escapeHtml(order.merchant) + '</div>'
@@ -1968,7 +1968,7 @@ async function showBuyConfirm(order) {
   const scan = ov.querySelector('#kbuy-scan');
   const renderScan = () => {
     const c = cards[+ov.querySelector('#kbuy-card').value] || cards[0];
-    scan.innerHTML = '<div style="font-weight:700;margin-bottom:4px">🔎 Kryptos koll innan betalning</div>'
+    scan.innerHTML = '<div style="font-weight:700;margin-bottom:4px">🔎 Falks koll innan betalning</div>'
       + '✓ Betalar med ' + escapeHtml(cardLabel(c)) + '<br>'
       + '✓ Mottagare: ' + escapeHtml(order.merchant) + '<br>'
       + '⚠ Dubbelkolla: rätt vara (<b>' + escapeHtml(order.desc) + '</b>)' + (order.amount ? ' och rätt summa (<b>' + escapeHtml(order.amount) + '</b>)' : '') + '?';
@@ -2051,7 +2051,7 @@ function runHackerIntro(force) {
   document.addEventListener('keydown', (e) => { if (ov.style.display !== 'none' && (e.key === 'Enter' || e.key === 'Escape' || e.key === ' ')) finish(); });
 }
 
-/* ── Krypto-vägvisare: pekar på Krypto-knappen och förklarar vad den gör ── */
+/* ── Falk-vägvisare: pekar på Falk-knappen och förklarar vad den gör ── */
 function runKryptoCoach() { return; // AdRaze: ingen hacker-vägvisare
   try { if (localStorage.getItem('prowl-krypto-coach-v2')) return; } catch {}
   const btn = $('krypto-btn'), co = $('kcoach'); if (!btn || !co) return;
@@ -2147,7 +2147,7 @@ function recommend(a) {
     payout = '0 kr i början — men du lär dig fortast här.';
     steps.push('Kör TryHackMe-banorna som tränar ' + QN.vuln[a.vuln] + '.');
     steps.push('När du känner dig redo: ta ett VDP-program på HackerOne (rykte, inte pengar) för att öva skarpt.');
-    steps.push('Hittar du något — Krypto → Skriv rapport gör rapporten åt dig.');
+    steps.push('Hittar du något — Falk → Skriv rapport gör rapporten åt dig.');
   } else if (a.payout === 'hogt' || a.level === 'van') {
     platform = 'HackerOne'; url = 'https://hackerone.com'; initial = 'h';
     why = 'Störst utbud av välbetalda program och flest mål. Här finns de stora bountysen — men också mest konkurrens, så välj program med brett scope.';
@@ -2170,7 +2170,7 @@ function recommend(a) {
   if (!steps.length) {
     steps.push('Öppna ' + platform + ' och leta ett program som tar ' + QN.vuln[a.vuln] + ' och passar ' + QN.target[a.target] + '.');
     steps.push('Läs scope-sidan NOGA — testa bara det som uttryckligen står i scope.');
-    steps.push('Hittar du något: Krypto → Skriv rapport gör en färdig rapport åt dig.');
+    steps.push('Hittar du något: Falk → Skriv rapport gör en färdig rapport åt dig.');
   }
   const prompt = 'Jag är ' + QN.level[a.level] + ', vill helst jaga ' + QN.vuln[a.vuln] + ', siktar på ' + QN.payout[a.payout] + ' och gillar ' + QN.target[a.target] + '. Ge mig en konkret startplan: vilket program eller plattform ska jag börja på, hur hittar jag rätt scope, och exakt vad gör jag först?';
   return { platform, url, initial, why, payout, tip, warning, steps, prompt };
@@ -2185,7 +2185,7 @@ function renderResult() {
     + (r.tip ? '<div class="qr-chip"><b>Din grej:</b> ' + escapeHtml(r.tip) + '</div>' : '') + '</div>'
     + (r.warning ? '<div class="qr-warn">⚠️ ' + escapeHtml(r.warning) + '</div>' : '')
     + '<ol class="qr-steps">' + r.steps.map((s, i) => '<li><span class="n">' + (i + 1) + '</span><span>' + escapeHtml(s) + '</span></li>').join('') + '</ol>'
-    + '<div class="qr-actions"><button class="qr-btn primary" id="qr-open">Öppna ' + escapeHtml(r.platform) + '</button><button class="qr-btn ghost" id="qr-plan">Få en plan av Krypto</button></div>'
+    + '<div class="qr-actions"><button class="qr-btn primary" id="qr-open">Öppna ' + escapeHtml(r.platform) + '</button><button class="qr-btn ghost" id="qr-plan">Få en plan av Falk</button></div>'
     + '<button class="qr-retake" id="qr-retake">Gör om quizet</button>';
   $('qr-open').addEventListener('click', () => { closeQuiz(); if (active) guardedNavigate(active, r.url); });
   $('qr-plan').addEventListener('click', () => { closeQuiz(); openKrypto(true); setTimeout(() => { try { window.view.kryptoPrefill(r.prompt); } catch {} }, 750); });
@@ -2458,7 +2458,7 @@ function updateAllowTimer() {
   if (txt) txt.textContent = a.host.replace(/^www\./, '').slice(0, 16) + ' ' + mm + ':' + ('0' + ss).slice(-2) + (acts.length > 1 ? ' +' + (acts.length - 1) : '');
   chip.style.display = 'inline-flex';
 }
-// Exponera för Krypto-agenten ("blockera X för barnet")
+// Exponera för Falk-agenten ("blockera X för barnet")
 window.famBlockFor = function (childName, hosts) {
   if (account && account.isChild) return 0;   // bara föräldern styr spärrar
   const c = fam.children.find((x) => x.name.toLowerCase() === String(childName || '').toLowerCase()) || famActive() || fam.children[0];
@@ -2794,7 +2794,7 @@ function famChildCard(c) {
     + (c.code ? '<div class="fam-loginrow" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 6px;">' + (c.sessions ? '<span style="font-size:11.5px;font-weight:700;color:#178a5a;background:rgba(23,138,90,.1);border-radius:20px;padding:3px 10px;">\u25cf ' + escapeHtml(tn('Inloggad nu', '')) + '</span>' : '<span style="font-size:11.5px;color:var(--color-navy-600);background:rgba(28,43,58,.06);border-radius:20px;padding:3px 10px;">Inte inloggad</span>') + '<button data-a="rotate" style="font-size:12px;font-weight:700;color:#2f8fd4;background:rgba(47,143,212,.1);border:1px solid rgba(47,143,212,.25);border-radius:8px;padding:5px 11px;cursor:pointer;">Byt kod</button>' + (c.sessions ? '<button data-a="sessions" style="font-size:12px;font-weight:700;color:#2f8fd4;background:rgba(47,143,212,.12);border:1px solid rgba(47,143,212,.3);border-radius:8px;padding:5px 11px;cursor:pointer;">🌍 ' + escapeHtml(tn('Visa enheter', '')) + '</button>' : '') + '</div>' : '')
     + '<div class="fam-sub">Blockerade sidor</div>' + tags + allowsHtml
     + '<div class="fam-addsite"><input class="fam-in" placeholder="t.ex. exempel.se" spellcheck="false" /><button class="btn btn-safe flex-none" style="height:40px;padding:0 14px;">Blockera</button></div>'
-    + '<div class="fam-krypto">💬 ' + escapeHtml(tn('Säg till Krypto: "blockera de här sidorna för {n}" — eller "tillåt X för {n} i en timme".', c.name)).replace('Krypto', '<b>Krypto</b>') + '</div>'
+    + '<div class="fam-krypto">💬 ' + escapeHtml(tn('Säg till Falk: "blockera de här sidorna för {n}" — eller "tillåt X för {n} i en timme".', c.name)).replace('Falk', '<b>Falk</b>') + '</div>'
     + '<button class="fam-histbtn" data-a="hist" style="display:block;font-size:12.5px;font-weight:700;color:#2f8fd4;background:rgba(47,143,212,.08);border:1px solid rgba(47,143,212,.25);border-radius:9px;padding:8px 12px;cursor:pointer;margin-top:10px;">📜 ' + escapeHtml(tn('Se historik för {n}', c.name)) + '</button>'
     + '<button class="fam-del" data-a="del">' + escapeHtml(tn('Ta bort {n} ur familjen', c.name)) + '</button></div>';
 }

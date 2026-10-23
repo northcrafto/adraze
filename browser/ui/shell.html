@@ -105,8 +105,8 @@
     <button id="adblock" class="pill" title="AdRaze – blockerar reklam och spårare">
       <img src="adraze-mark.png" alt="AdRaze" class="ab-mark" width="18" height="18"><span id="adcount" class="tabular-nums">0</span>
     </button>
-    <button id="krypto-btn" class="pill pill-accent off" title="Krypto: din säkerhetsassistent">
-      <img src="krypto-owl-face.png" alt="" style="width:18px;height:18px;object-fit:contain;flex:none;">Krypto AI
+    <button id="krypto-btn" class="pill pill-accent off" title="Falk: din säkerhetsassistent">
+      <img src="adraze-mark.png" alt="" style="width:18px;height:18px;object-fit:contain;flex:none;">Falk AI
     </button>
     <button id="chatt-btn" class="icon-btn relative" title="Chatt: vänner och grupper"><svg class="ic"><use href="#i-chat" /></svg><span id="chatt-badge" style="display:none;position:absolute;top:1px;right:0;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--color-terra);color:#fff;font-size:9.5px;font-weight:800;line-height:16px;text-align:center;box-shadow:0 0 0 2px var(--color-chrome,#eef2f6)"></span></button>
     <button id="net-btn" class="icon-btn" title="Nätverksinspektör – se all trafik">
@@ -246,7 +246,7 @@
       </div>
     </div>
 
-    <!-- Krypto-vägvisare (första gången) — visar VAD Krypto gör och VAR den finns -->
+    <!-- Falk-vägvisare (första gången) — visar VAD Falk gör och VAR den finns -->
     <style>
       #kcoach { position: fixed; inset: 0; z-index: 190; background: rgba(5,12,22,.5); }
       #kcoach-ring { position: fixed; border: 2px solid var(--color-terra); border-radius: 12px; pointer-events: none;
@@ -300,8 +300,8 @@
     <div id="kcoach" style="display:none">
       <div id="kcoach-ring"></div>
       <div id="kcoach-card">
-        <div class="kc-title">Möt Krypto — din copilot 🖤</div>
-        <p class="kc-sub">Din inbyggda bug bounty-assistent sitter alltid <b>här uppe</b>. Klicka på <b>Krypto</b> när du vill — den har fyra lägen:</p>
+        <div class="kc-title">Möt Falk — din copilot 🖤</div>
+        <p class="kc-sub">Din inbyggda bug bounty-assistent sitter alltid <b>här uppe</b>. Klicka på <b>Falk</b> när du vill — den har fyra lägen:</p>
         <div class="kc-modes">
           <div><b>Fråga</b> — bolla mål, verktyg och nästa steg i jakten</div>
           <div><b>Skriv rapport</b> — dina fynd → färdig HackerOne-rapport</div>
@@ -309,7 +309,7 @@
           <div><b>Kritik</b> — granska rapporten hårt innan du skickar</div>
         </div>
         <div class="kc-actions">
-          <button id="kcoach-open">Öppna Krypto</button>
+          <button id="kcoach-open">Öppna Falk</button>
           <button id="kcoach-later">Senare</button>
         </div>
       </div>
@@ -642,7 +642,7 @@
             <button class="set-tab" style="--i:10" data-cat="integritet"><svg class="ic"><use href="#i-shield" /></svg>Integritet &amp; säkerhet</button>
             <button class="set-tab" style="--i:11" data-cat="tillagg"><svg class="ic"><use href="#i-settings" /></svg>Tillägg</button>
             <button class="set-tab" style="--i:12" data-cat="losenord"><svg class="ic"><use href="#i-key" /></svg>Autofyll &amp; lösenord</button>
-            <button class="set-tab" style="--i:13" data-cat="krypto"><svg class="ic"><use href="#i-chat" /></svg>Krypto</button>
+            <button class="set-tab" style="--i:13" data-cat="krypto"><svg class="ic"><use href="#i-chat" /></svg>Falk</button>
             <button class="set-tab" style="--i:14" data-cat="kalender"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2"/><path d="M16 2.5v4M8 2.5v4M3 10h18"/></svg>AdRaze Calendar</button>
             <button class="set-tab" style="--i:15" data-cat="om"><svg class="ic"><use href="#i-shield-check" /></svg>Om</button>
             <p id="set-search-none" class="set-search-none" hidden>Inget hittades.</p>
@@ -703,14 +703,14 @@
           </div>
 
           <div class="set-panel hidden" data-cat="krypto">
-            <h2 class="set-h">Krypto</h2>
-            <p class="set-lead mb-4" style="max-width:440px;">Krypto är din inbyggda säkerhetsassistent. Fråga om misstänkta mejl, länkar, lösenord eller vad som helst kring din trygghet på nätet.</p>
+            <h2 class="set-h">Falk</h2>
+            <p class="set-lead mb-4" style="max-width:440px;">Falk är din inbyggda säkerhetsassistent. Fråga om misstänkta mejl, länkar, lösenord eller vad som helst kring din trygghet på nätet.</p>
             <div class="set-row">
               <span class="set-ico" style="color:var(--color-terra);"><svg class="ic ic-sm"><use href="#i-chat" /></svg></span>
-              <div class="set-txt"><div class="set-title">Visa Krypto-knappen</div><div class="set-desc">Snabbknappen i verktygsraden.</div></div>
+              <div class="set-txt"><div class="set-title">Visa Falk-knappen</div><div class="set-desc">Snabbknappen i verktygsraden.</div></div>
               <label class="switch"><input id="tgl-krypto" type="checkbox" checked /><span class="track"></span></label>
             </div>
-            <button id="open-krypto-btn" class="btn mt-5 text-white" style="height:42px;background:var(--color-terra);">Öppna Krypto</button>
+            <button id="open-krypto-btn" class="btn mt-5 text-white" style="height:42px;background:var(--color-terra);">Öppna Falk</button>
           </div>
 
           <div class="set-panel hidden" data-cat="tillagg">
@@ -728,7 +728,7 @@
             </div>
             <div class="set-row">
               <span class="set-ico" style="color:var(--color-terra);"><svg class="ic ic-sm"><use href="#i-chat" /></svg></span>
-              <div class="set-txt"><div class="set-title">Krypto-assistent</div><div class="set-desc">Din AI för säkerhetsfrågor.</div></div>
+              <div class="set-txt"><div class="set-title">Falk-assistent</div><div class="set-desc">Din AI för säkerhetsfrågor.</div></div>
               <span class="badge-built">Inbyggt</span>
             </div>
           </div>
@@ -795,7 +795,7 @@
             <div style="margin-top:20px;border-top:1px solid var(--color-line);padding-top:16px;">
               <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;">
                 <input type="checkbox" id="wl-buy-toggle" style="margin-top:3px;width:18px;height:18px;accent-color:var(--color-safe);flex:none;">
-                <span><span style="font-weight:700;font-size:14px;color:var(--color-navy-900);">🤖 Låt Krypto handla åt mig</span><br><span style="font-size:12.5px;color:rgb(28 43 58 / .6);line-height:1.5;">Be Krypto köpa saker (t.ex. mat) med dina sparade kort. Du godkänner alltid varje köp – med en säkerhetskoll – innan betalning.</span></span>
+                <span><span style="font-weight:700;font-size:14px;color:var(--color-navy-900);">🤖 Låt Falk handla åt mig</span><br><span style="font-size:12.5px;color:rgb(28 43 58 / .6);line-height:1.5;">Be Falk köpa saker (t.ex. mat) med dina sparade kort. Du godkänner alltid varje köp – med en säkerhetskoll – innan betalning.</span></span>
               </label>
             </div>
           </div>
