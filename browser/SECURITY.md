@@ -1,6 +1,6 @@
 # Security policy
 
-Vaka is a browser whose whole point is protecting people. Security reports are the most valuable contribution you can make.
+AdRaze is a browser whose whole point is protecting people. Security reports are the most valuable contribution you can make.
 
 ## Reporting a vulnerability
 
@@ -12,14 +12,14 @@ Include as much as you can:
 
 - What the vulnerability is and what an attacker could do with it.
 - Steps to reproduce, ideally with a minimal page or script.
-- Which Vaka version and operating system you tested on.
+- Which AdRaze version and operating system you tested on.
 
 You will get a first reply within a few days. We will keep you updated while the fix is being made, and credit you in the release notes if you want.
 
 ## What is in scope
 
 - The browser itself: tab isolation, the protection engine, download handling, the dangerous-site warning.
-- The password manager and Vaka Wallet (both are end-to-end encrypted on the device — anything that breaks that is critical).
+- The password manager and AdRaze Wallet (both are end-to-end encrypted on the device — anything that breaks that is critical).
 - The Krypto panel and the account flow inside the browser.
 - Auto-update handling.
 

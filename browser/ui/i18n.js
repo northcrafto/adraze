@@ -2,7 +2,9 @@
    Språkfilerna (ui/locales/<lang>.json = { "svensk sträng": "översättning" }) laddas synkront
    via preload (window.locale.load). Byte av språk sparas i localStorage och laddar om fönstret. */
 (function () {
-  const KEY = 'vaka-lang';
+  // engångsflytt: gamla nycklar från Vaka-tiden (vaka-*) → adraze-*
+  try { for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && k.startsWith('vaka-')) { const n = 'adraze-' + k.slice(5); if (localStorage.getItem(n) === null) localStorage.setItem(n, localStorage.getItem(k)); localStorage.removeItem(k); } } } catch {}
+  const KEY = 'adraze-lang';
   const RTL = new Set(['ar', 'he', 'fa', 'ur']);
   // Språk som visas i väljaren (native namn). Måste ha en genererad fil i ui/locales/ (utom sv).
   const LANGS = [

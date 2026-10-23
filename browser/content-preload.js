@@ -409,7 +409,7 @@ function readCard(f) {
 
 /* ── Kortväljaren ── */
 const IS_TOP = (() => { try { return window.top === window; } catch { return false; } })();
-const WL_MSG = '__vakaWallet';
+const WL_MSG = '__adrazeWallet';
 const WL_KEYS = ['ArrowDown', 'ArrowUp', 'Enter', 'Escape'];
 let wlHost = null, wlShadow = null, wlRows = [], wlIdx = -1, wlBusy = false;
 let wlAnchor = null;      // () => DOMRect i den här ramens vy
@@ -506,7 +506,7 @@ function wlShow(menu, anchor, onPick, darkRef, isStatic) {
   wlClose();
   wlAnchor = anchor; wlOnPick = onPick; wlStatic = !!isStatic;
   const L = menu.labels || {};
-  wlHost = document.createElement('vaka-wallet-picker');
+  wlHost = document.createElement('adraze-wallet-picker');
   const sh = wlHost.attachShadow({ mode: 'closed' });
   wlShadow = sh;
   const st = document.createElement('style'); st.textContent = WL_CSS; sh.appendChild(st);
@@ -627,9 +627,9 @@ function wlHandleMessage(e) {
     if (IS_TOP) { if (wlChildWin === e.source) wlClose(); } else wlUp(d);
   }
 }
-/* Felsökning: starta med VAKA_WALLET_DEBUG=1 → varje beslut hamnar i
+/* Felsökning: starta med ADRAZE_WALLET_DEBUG=1 → varje beslut hamnar i
  * <userData>/wallet-debug.log. Av som standard, inget loggas annars. */
-const WL_DEBUG = (() => { try { return !!process.env.VAKA_WALLET_DEBUG; } catch { return false; } })();
+const WL_DEBUG = (() => { try { return !!process.env.ADRAZE_WALLET_DEBUG; } catch { return false; } })();
 function wlLog(what, extra) {
   if (!WL_DEBUG) return;
   try { ipcRenderer.send('wallet:debug', { what, top: IS_TOP, url: location.href.slice(0, 120), ...(extra || {}) }); } catch {}
@@ -736,7 +736,7 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 try {
   let lastFs = null;
   document.addEventListener('fullscreenchange', () => { if (document.fullscreenElement) lastFs = document.fullscreenElement; });
-  window.__vakaRefull = () => {
+  window.__adrazeRefull = () => {
     try { if (lastFs && lastFs.isConnected && !document.fullscreenElement) lastFs.requestFullscreen().catch(() => {}); } catch {}
   };
 } catch {}

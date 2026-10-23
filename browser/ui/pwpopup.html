@@ -65,7 +65,7 @@
     <div class="done"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span id="done-t">Lösenordet är sparat</span></div>
   </div>
   <script>
-    // Översättning: samma ordlista som skalet (vaka-lang i localStorage delas, samma file://-origin).
+    // Översättning: samma ordlista som skalet (adraze-lang i localStorage delas, samma file://-origin).
     window.locale = { load: (l) => { try { return require('electron').ipcRenderer.sendSync('i18n:load', l) || {}; } catch (e) { return {}; } } };
   </script>
   <script src="i18n.js"></script>

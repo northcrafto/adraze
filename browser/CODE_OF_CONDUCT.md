@@ -1,6 +1,6 @@
 # Code of conduct
 
-Vaka is built for families, kids and people who are not security experts. The community around it should feel the same way: welcoming, patient and honest.
+AdRaze is built for families, kids and people who are not security experts. The community around it should feel the same way: welcoming, patient and honest.
 
 ## We expect
 
