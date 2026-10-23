@@ -900,6 +900,7 @@ function loginAs(token, email, pro, name) {
   if (pendingKryptoAfterLogin) { pendingKryptoAfterLogin = false; openKrypto(true); }
   else if (kryptoOpen) openKrypto(true);
   if (pendingChattAfterLogin) { pendingChattAfterLogin = false; openChatt(true); }
+  setTimeout(() => { try { refreshPro(); } catch {} }, 400);   // Pro-status från servern (Google-inloggningen vet den inte)
 }
 function doLogout(reopenKrypto) {
   chattOpen = false; chattUnread = 0;
