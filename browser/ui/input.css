@@ -643,3 +643,6 @@ textarea.cal-in { resize: vertical; min-height: 60px; }
 .nt-stat-n { font-size: 28px; font-weight: 700; line-height: 1; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
 .nt-stat-l { margin-top: 8px; display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; color: rgb(255 255 255 / .62); }
 .nt-stat-l i { width: 7px; height: 7px; border-radius: 1px; flex: none; }
+
+/* loggan: ljusare skuggor i mörkt läge */
+:root[data-theme="dark"] img[src="adraze-mark.png"] { content: url(adraze-mark-dark.png); }

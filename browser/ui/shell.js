@@ -203,7 +203,7 @@ function detectFavLight(url) {
 function favHtml(tab) {
   if (tab.incognito) return '<span class="fav"><svg class="ic" style="width:15px;height:15px"><use href="#i-incognito" /></svg></span>';
   if (tab.isSettings) return '<span class="fav"><svg class="ic" style="width:15px;height:15px"><use href="#i-settings" /></svg></span>';
-  if (!tab.url) return '<span class="fav"><img src="adraze-mark.svg" alt=""></span>';
+  if (!tab.url) return '<span class="fav"><img src="adraze-mark.png" alt=""></span>';
   let origin = ''; try { origin = new URL(tab.url).origin; } catch {}
   const real = origin ? origin + '/favicon.ico' : '';
   const src = tab.favicon || real;
