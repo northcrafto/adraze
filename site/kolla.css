@@ -1,0 +1,134 @@
+/* Kolla en sajt: inmatning, steg medan den kör, betyg, före/efter, siffror, listorna */
+#kolla [hidden] { display: none !important; }
+.ko-dold { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.ko-hjalte {
+  background: var(--mork); color: #fff; padding: 96px 0 88px;
+  --sig-btn: #ffffff; --sig-btn-ink: var(--ink);
+}
+.ko-fore { font-weight: 600; color: var(--accent); font-size: 18px; letter-spacing: -0.01em; }
+.ko-hjalte h1 { margin-top: 14px; font-size: clamp(48px, 8.4vw, 124px); letter-spacing: -0.06em; line-height: .92; max-width: 13ch; }
+.ko-lead { margin-top: 26px; max-width: 52ch; color: #a7a7af; font-size: 19px; }
+
+.ko-form {
+  margin-top: 40px; display: flex; gap: 8px; max-width: 760px;
+  background: var(--mork-yta); border: 1.5px solid #2c2c33; border-radius: 999px; padding: 6px;
+  transition: border-color .2s ease;
+}
+.ko-form:focus-within { border-color: var(--accent); }
+.ko-form input {
+  flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: #fff;
+  font: 600 19px/1 "Familjen Grotesk", system-ui, sans-serif; padding: 0 22px; letter-spacing: -0.01em;
+}
+.ko-form input::placeholder { color: #6d6d76; }
+.ko-form .btn { flex: none; }
+.ko-form .btn svg { transition: transform .25s var(--ease); }
+.ko-form .btn:hover svg { transform: translateX(3px); }
+.ko-fel { margin-top: 14px; color: #ff8a6b; font-weight: 600; }
+.ko-exempel { margin-top: 22px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: #8b8b93; font-size: 15px; }
+.ko-exempel button {
+  font: inherit; color: #d6d6db; background: none; border: 1px solid #34343c; border-radius: 999px; padding: 6px 14px; cursor: pointer;
+  transition: border-color .2s ease, color .2s ease;
+}
+.ko-exempel button:hover { border-color: var(--accent); color: #fff; }
+
+/* ---------- medan den kör ---------- */
+.ko-kor { padding: 88px 0; border-bottom: 1px solid var(--linje); }
+.ko-vard { font-weight: 600; color: var(--dov); font-size: 17px; word-break: break-all; }
+.ko-steg { margin-top: 22px; display: grid; gap: 16px; }
+.ko-steg li { display: flex; align-items: center; gap: 18px; font-size: clamp(24px, 3.4vw, 40px); font-weight: 700; letter-spacing: -0.035em; color: #b9b9b2; transition: color .3s ease; }
+.ko-prick { width: 18px; height: 18px; border-radius: 50%; border: 2px solid currentColor; flex: none; position: relative; }
+.ko-steg li.pa { color: var(--ink); }
+.ko-steg li.pa .ko-prick { border-color: var(--accent); }
+.ko-steg li.pa .ko-prick::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid var(--accent); animation: ko-puls 1.1s ease-out infinite; }
+.ko-steg li.klar { color: var(--ink); }
+.ko-steg li.klar .ko-prick { background: var(--ink); border-color: var(--ink); }
+@keyframes ko-puls { from { opacity: 1; transform: scale(.6); } to { opacity: 0; transform: scale(1.5); } }
+.ko-kor-not { margin-top: 28px; color: var(--dov); }
+
+/* ---------- resultatet ---------- */
+.ko-res { padding: 72px 0 96px; }
+.ko-farlig {
+  display: flex; gap: 22px; align-items: flex-start; background: #2a0d06; color: #fff; border-radius: 26px; padding: 34px; margin-bottom: 28px;
+}
+.ko-farlig > svg { width: 52px; height: 52px; color: var(--accent); flex: none; }
+.ko-farlig h2 { font-size: clamp(30px, 4.2vw, 52px); letter-spacing: -0.045em; }
+.ko-farlig p { margin-top: 12px; max-width: 56ch; color: #f0c6b9; font-size: 18px; }
+
+.ko-topp { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 32px; align-items: center; }
+.ko-betyg {
+  width: clamp(130px, 15vw, 190px); aspect-ratio: 1; border-radius: 30px; display: grid; place-content: center; text-align: center;
+  background: var(--ink); color: #fff;
+}
+.ko-betyg span { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: #a7a7af; }
+.ko-betyg b { font-size: clamp(84px, 10vw, 124px); line-height: .9; letter-spacing: -0.06em; }
+.ko-betyg[data-b="A"] b, .ko-betyg[data-b="B"] b { color: #7ee08a; }
+.ko-betyg[data-b="C"] b { color: #ffd166; }
+.ko-betyg[data-b="D"] b, .ko-betyg[data-b="E"] b, .ko-betyg[data-b="F"] b { color: var(--accent); }
+.ko-topp h2 { margin-top: 10px; font-size: clamp(32px, 4.6vw, 60px); letter-spacing: -0.045em; max-width: 20ch; }
+.ko-not { margin-top: 14px; color: var(--dov); font-size: 15px; max-width: 60ch; }
+
+.ko-bilder { margin-top: 52px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.ko-bilder figure { position: relative; border-radius: 20px; overflow: hidden; border: 1px solid var(--linje); background: var(--yta); }
+.ko-bilder img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; }
+.ko-bilder figcaption { position: absolute; top: 14px; left: 14px; }
+.ko-tagg { display: inline-block; font-size: 14px; font-weight: 700; padding: 7px 13px; border-radius: 999px; }
+.ko-tagg-utan { background: var(--ink); color: #fff; }
+.ko-tagg-med { background: var(--accent); color: var(--ink); }
+
+.ko-tabell-ram { margin-top: 14px; background: var(--yta); border: 1px solid var(--linje); border-radius: 26px; padding: 10px 28px; overflow-x: auto; }
+.ko-tabell { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.ko-tabell th, .ko-tabell td { padding: 16px 8px; text-align: right; border-bottom: 1px solid var(--linje); white-space: nowrap; }
+.ko-tabell tr:last-child th, .ko-tabell tr:last-child td { border-bottom: 0; }
+.ko-tabell th:first-child { text-align: left; font-weight: 600; color: var(--dov); }
+.ko-tabell thead th { font-size: 14px; color: var(--dov); font-weight: 600; }
+.ko-tabell td { font-size: clamp(22px, 2.6vw, 32px); font-weight: 700; letter-spacing: -0.03em; }
+.ko-tabell td:last-child { color: var(--accent); }
+.ko-tabell td small { font-size: .55em; color: var(--dov); font-weight: 600; margin-left: 2px; }
+
+.ko-motorer { margin-top: 14px; display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
+.ko-motor-grupp { background: var(--yta); border: 1px solid var(--linje); border-radius: 26px; padding: 28px; }
+.ko-motor-rubrik { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 16px; }
+.ko-motor-rubrik p { font-weight: 700; }
+.ko-motor-rubrik p.flaggad { color: var(--accent); }
+.ko-motor-grupp ul { margin-top: 18px; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); column-gap: 24px; }
+.ko-motor-grupp li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--linje); font-size: 15px; }
+.ko-motor-grupp li b { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; white-space: nowrap; }
+.ko-motor-grupp li b svg { width: 17px; height: 17px; }
+.ko-motor-grupp li.ren b { color: #1f9d55; }
+.ko-motor-grupp li.flaggad b { color: var(--accent); }
+.ko-motor-grupp li.okand b { color: var(--dov); }
+
+.ko-knappar { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 12px; }
+
+/* ---------- installera + så mäter vi ---------- */
+.ko-cta { background: var(--accent); padding: 88px 0; }
+.ko-cta-inner { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 32px; }
+.ko-cta h2 { font-size: clamp(40px, 6vw, 84px); letter-spacing: -0.05em; max-width: 14ch; }
+.ko-cta p { margin-top: 16px; font-size: 19px; max-width: 44ch; }
+.ko-hur { padding: 104px 0; }
+.ko-hur-lista { margin-top: 44px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.ko-hur-lista li { background: var(--yta); border: 1px solid var(--linje); border-radius: 26px; padding: 28px; }
+.ko-hur-lista span { font-weight: 700; color: var(--accent); }
+.ko-hur-lista p { margin-top: 36px; color: var(--dov); font-size: 16px; }
+
+@media (max-width: 900px) {
+  .ko-motorer, .ko-bilder { grid-template-columns: 1fr; }
+  .ko-hur-lista { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .ko-hjalte { padding: 64px 0 60px; }
+  .ko-form { flex-direction: column; border-radius: 24px; padding: 8px; }
+  .ko-form input { height: 52px; padding: 0 14px; }
+  .ko-form .btn { width: 100%; }
+  .ko-topp { grid-template-columns: 1fr; gap: 20px; }
+  .ko-tabell-ram { padding: 4px 14px; }
+  .ko-tabell th, .ko-tabell td { padding: 13px 4px; }
+  .ko-tabell thead th { font-size: 12px; white-space: normal; line-height: 1.2; }
+  .ko-tabell th:first-child { font-size: 14px; white-space: normal; }
+  .ko-tabell td { font-size: 20px; padding-left: 10px; }
+  .ko-farlig { flex-direction: column; padding: 26px; }
+  .ko-hur-lista { grid-template-columns: 1fr; }
+  .ko-hur-lista p { margin-top: 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .ko-steg li.pa .ko-prick::after { animation: none; } }

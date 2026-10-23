@@ -16,7 +16,7 @@ SPRAK = [
     ('el', 'Ελληνικά'), ('hr', 'Hrvatski'), ('sl', 'Slovenščina'), ('et', 'Eesti'), ('lv', 'Latviešu'), ('lt', 'Lietuvių'),
     ('uk', 'Українська'), ('tr', 'Türkçe'),
 ]
-SIDOR = {'index.src.html': '', 'integritet.src.html': 'integritet', 'konto.src.html': 'konto', 'statistik.src.html': 'statistik', 'stod.src.html': 'stod'}
+SIDOR = {'index.src.html': '', 'integritet.src.html': 'integritet', 'konto.src.html': 'konto', 'statistik.src.html': 'statistik', 'stod.src.html': 'stod', 'kolla.src.html': 'kolla'}
 UTAN_SITEMAP = {'konto'}  # inloggningen ska inte indexeras
 # Sätt till butikslänken när Google har godkänt tillägget: knapparna går då direkt dit och zip-instruktionerna försvinner
 BUTIK = None  # 'https://chromewebstore.google.com/detail/cgdjdjgdoklomdphknggkhfghlglcppd'

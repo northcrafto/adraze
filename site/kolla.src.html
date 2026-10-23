@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{t:kolla.meta_title}}</title>
+<meta name="description" content="{{t:kolla.meta_description}}">
+<link rel="icon" href="/favicon.png">
+{{alternates}}
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/kolla.css">
+</head>
+<body class="ko-sida">
+{{topp}}
+
+<main id="kolla" data-api="https://api.adraze.app" data-lang="{{lang}}"
+  data-t-queue="{{t:kolla.step_queue}}" data-t-grade="{{t:kolla.grade_text}}" data-t-grade-clean="{{t:kolla.grade_text_clean}}"
+  data-t-engines="{{t:kolla.engines_count}}" data-t-engines-clean="{{t:kolla.engines_clean}}" data-t-danger="{{t:kolla.danger_text}}"
+  data-t-copied="{{t:kolla.copied}}"
+  data-t-clean="{{t:kolla.res_clean}}" data-t-flagged="{{t:kolla.res_flagged}}" data-t-unknown="{{t:kolla.res_unknown}}"
+  data-e-adress="{{t:kolla.err_address}}" data-e-finns_inte="{{t:kolla.err_notfound}}" data-e-for_manga="{{t:kolla.err_limit}}"
+  data-e-full="{{t:kolla.err_full}}" data-e-oppna="{{t:kolla.err_open}}" data-e-okant="{{t:kolla.err_generic}}">
+
+  <!-- Inmatningen -->
+  <section class="ko-hjalte">
+    <div class="wrap">
+      <p class="ko-fore">{{t:kolla.pre}}</p>
+      <h1>{{t:kolla.title}}</h1>
+      <p class="ko-lead">{{t:kolla.lead}}</p>
+      <form id="ko-form" class="ko-form" novalidate>
+        <label class="ko-dold" for="ko-url">{{t:kolla.label}}</label>
+        <input id="ko-url" name="url" type="text" inputmode="url" autocomplete="url" spellcheck="false" autocapitalize="off" placeholder="{{t:kolla.placeholder}}" maxlength="2000" required>
+        <button class="btn btn-stor liq" type="submit">{{t:kolla.button}}{{arrow-right}}</button>
+      </form>
+      <p class="ko-fel" id="ko-fel" role="alert" hidden></p>
+      <p class="ko-exempel">{{t:kolla.examples}}
+        <button type="button" data-exempel="aftonbladet.se">aftonbladet.se</button>
+        <button type="button" data-exempel="expressen.se">expressen.se</button>
+        <button type="button" data-exempel="blocket.se">blocket.se</button>
+        <button type="button" data-exempel="dn.se">dn.se</button>
+      </p>
+    </div>
+  </section>
+
+  <!-- Medan den kör -->
+  <section class="ko-kor" id="ko-kor" hidden aria-live="polite">
+    <div class="wrap">
+      <p class="ko-vard" id="ko-kor-vard"></p>
+      <ol class="ko-steg">
+        <li data-steg="listor"><span class="ko-prick"></span>{{t:kolla.step_lists}}</li>
+        <li data-steg="utan"><span class="ko-prick"></span>{{t:kolla.step_without}}</li>
+        <li data-steg="med"><span class="ko-prick"></span>{{t:kolla.step_with}}</li>
+      </ol>
+      <p class="ko-kor-not" id="ko-kor-not">{{t:kolla.step_note}}</p>
+    </div>
+  </section>
+
+  <!-- Resultatet -->
+  <section class="ko-res" id="ko-res" hidden>
+    <div class="wrap">
+
+      <!-- Farlig sida: öppnades aldrig -->
+      <div class="ko-farlig" id="ko-farlig" hidden>
+        {{warning-octagon}}
+        <div>
+          <h2>{{t:kolla.danger_title}}</h2>
+          <p id="ko-farlig-text"></p>
+          <p>{{t:kolla.danger_cta}}</p>
+        </div>
+      </div>
+
+      <!-- Betyget -->
+      <div class="ko-topp" id="ko-topp">
+        <div class="ko-betyg" id="ko-betyg" data-b="">
+          <span>{{t:kolla.grade_label}}</span>
+          <b id="ko-betyg-b"></b>
+        </div>
+        <div class="ko-topp-text">
+          <p class="ko-vard" id="ko-vard"></p>
+          <h2 id="ko-sammanfattning"></h2>
+          <p class="ko-not" id="ko-godkande" hidden>{{t:kolla.consent_note}}</p>
+        </div>
+      </div>
+
+      <!-- Före / efter -->
+      <div class="ko-bilder" id="ko-bilder">
+        <figure>
+          <figcaption><span class="ko-tagg ko-tagg-utan">{{t:kolla.shot_without}}</span></figcaption>
+          <img id="ko-bild-utan" alt="{{t:kolla.shot_without}}" width="1280" height="800" loading="lazy">
+        </figure>
+        <figure>
+          <figcaption><span class="ko-tagg ko-tagg-med">{{t:kolla.shot_with}}</span></figcaption>
+          <img id="ko-bild-med" alt="{{t:kolla.shot_with}}" width="1280" height="800" loading="lazy">
+        </figure>
+      </div>
+
+      <!-- Siffrorna -->
+      <div class="ko-tabell-ram" id="ko-siffror">
+        <table class="ko-tabell">
+          <thead><tr><th></th><th>{{t:kolla.shot_without}}</th><th>{{t:kolla.shot_with}}</th></tr></thead>
+          <tbody>
+            <tr data-rad="reklam"><th>{{t:kolla.row_ads}}</th><td></td><td></td></tr>
+            <tr data-rad="sparare"><th>{{t:kolla.row_trackers}}</th><td></td><td></td></tr>
+            <tr data-rad="kakor"><th>{{t:kolla.row_cookies}}</th><td></td><td></td></tr>
+            <tr data-rad="tredjeparter"><th>{{t:kolla.row_companies}}</th><td></td><td></td></tr>
+            <tr data-rad="forfragningar"><th>{{t:kolla.row_requests}}</th><td></td><td></td></tr>
+            <tr data-rad="bytes"><th>{{t:kolla.row_data}}</th><td></td><td></td></tr>
+            <tr data-rad="laddtid"><th>{{t:kolla.row_time}}</th><td></td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Listorna, som VirusTotal -->
+      <div class="ko-motorer">
+        <div class="ko-motor-grupp">
+          <div class="ko-motor-rubrik"><h3>{{t:kolla.engines_title}}</h3><p id="ko-motor-summa"></p></div>
+          <ul id="ko-motorer-sakerhet"></ul>
+        </div>
+        <div class="ko-motor-grupp">
+          <div class="ko-motor-rubrik"><h3>{{t:kolla.engines_ads_title}}</h3></div>
+          <ul id="ko-motorer-reklam"></ul>
+        </div>
+      </div>
+
+      <template id="ko-ikoner"><i data-i="ren">{{check}}</i><i data-i="flaggad">{{flag}}</i></template>
+      <div class="ko-knappar">
+        <button type="button" class="btn btn-stor liq" id="ko-dela">{{t:kolla.share}}</button>
+        <button type="button" class="btn btn-stor liq-ghost" id="ko-igen">{{t:kolla.again}}</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Installera -->
+  <section class="ko-cta">
+    <div class="wrap ko-cta-inner">
+      <div>
+        <h2>{{t:kolla.cta_title}}</h2>
+        <p>{{t:kolla.cta_text}}</p>
+      </div>
+      <a href="{{installera}}" class="btn btn-stor liq liq-mork">{{chrome}}{{t:nav.add_chrome}}</a>
+    </div>
+  </section>
+
+  <!-- Så mäter vi -->
+  <section class="ko-hur">
+    <div class="wrap">
+      <h2>{{t:kolla.how_title}}</h2>
+      <ol class="ko-hur-lista">
+        <li><span>01</span><p>{{t:kolla.how1}}</p></li>
+        <li><span>02</span><p>{{t:kolla.how2}}</p></li>
+        <li><span>03</span><p>{{t:kolla.how3}}</p></li>
+        <li><span>04</span><p>{{t:kolla.how4}}</p></li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer class="fot">
+  <div class="wrap fot-grid">
+    <div><a href="{{hem}}" class="logo"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a><p>{{t:footer.tagline}}</p></div>
+    <ul>
+      <li><a class="nav-link" href="{{hem}}">{{t:privacy.back}}</a></li>
+      <li><a class="nav-link" href="{{pre}}/statistik">{{t:footer.stats}}</a></li>
+      <li><a class="nav-link" href="{{pre}}/integritet">{{t:footer.privacy}}</a></li>
+    </ul>
+  </div>
+</footer>
+<script src="/kolla.js" defer></script>
+<script src="/main.js"></script>
+</body>
+</html>
