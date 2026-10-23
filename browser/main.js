@@ -1755,13 +1755,13 @@ function checkMacUpdate() {
   const f = globalThis.fetch;
   if (!f) return;
   let toasted = '';                     // en notis per version – aldrig samma tjat varje koll
-  const ping = () => f('https://api.github.com/repos/northcrafto/vaka-dl/releases/latest', { headers: { 'User-Agent': 'AdRaze' } })
+  const ping = () => f('https://api.github.com/repos/northcrafto/adraze-dl/releases/latest', { headers: { 'User-Agent': 'AdRaze' } })
     .then((r) => r.json())
     .then((j) => {
       const latest = ((j && j.tag_name) || '').replace(/^v/, '');
       if (latest && semverGt(latest, app.getVersion()) && latest !== toasted) {
         toasted = latest;
-        broadcast('toast', T('En ny version finns') + ' (' + latest + ') — ' + T('ladda ner på') + ' vaka-web-lovat.vercel.app');
+        broadcast('toast', T('En ny version finns') + ' (' + latest + ') — ' + T('ladda ner på') + ' github.com/northcrafto/adraze-dl/releases');
       }
     }).catch(() => {});
   setTimeout(ping, 6000);
@@ -1769,8 +1769,8 @@ function checkMacUpdate() {
 }
 
 function startAutoUpdate() {
-  // AdRaze har inget eget releaserepo än; Vakas (vaka-dl) får inte användas, då skulle appen bytas mot Vaka
-  if (!process.env.ADRAZE_UPDATES) return;
+  // releaser i northcrafto/adraze-dl (aldrig vaka-dl – då skulle appen bytas mot Vaka)
+  if (process.env.ADRAZE_NO_UPDATES) return;
   if (process.platform === 'darwin') { checkMacUpdate(); return; }  // mac: notis (osignerad)
   if (!autoUpdater) return;
   const log = (m) => { try { fs.appendFileSync(path.join(app.getPath('userData'), 'update.log'), m + '\n'); } catch {} };
