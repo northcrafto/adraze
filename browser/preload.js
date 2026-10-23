@@ -27,7 +27,7 @@ contextBridge.exposeInMainWorld('auth', {
   resetConfirm: (email, code, password) => ipcRenderer.invoke('auth:reset-confirm', { email, code, password }),
   session: (token) => ipcRenderer.invoke('auth:session', { token }),
   logout: (token) => ipcRenderer.invoke('auth:logout', { token }),
-  deleteAccount: (token) => ipcRenderer.invoke('auth:delete', { token }),
+  deleteAccount: (token, password) => ipcRenderer.invoke('auth:delete', { token, password }),
   remember: (account) => ipcRenderer.invoke('auth:remember', account),
   recall: () => ipcRenderer.invoke('auth:recall'),
   forget: () => ipcRenderer.invoke('auth:forget'),
@@ -36,6 +36,7 @@ contextBridge.exposeInMainWorld('auth', {
 contextBridge.exposeInMainWorld('family', {
   createChild: (token, name, age) => ipcRenderer.invoke('family:child', { token, name, age }),
   join: (code) => ipcRenderer.invoke('family:join', { code }),
+  approve: (code, approval) => ipcRenderer.invoke('family:approve', { code, approval }),
   children: (token) => ipcRenderer.invoke('family:children', { token }),
   setBlocklist: (token, child_id, blocklist) => ipcRenderer.invoke('family:blocklist', { token, child_id, blocklist }),
   allow: (token, child_id, host, minutes) => ipcRenderer.invoke('family:allow', { token, child_id, host, minutes }),
