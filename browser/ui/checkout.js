@@ -13,20 +13,20 @@
   const APPEARANCE = {
     theme: 'night',
     variables: {
-      colorPrimary: '#e08a62', colorBackground: '#1b1b1e', colorText: '#f2f2f4', colorTextSecondary: '#9a9ca3',
-      colorTextPlaceholder: '#5d5d64', colorDanger: '#ff8a84', fontFamily: '-apple-system, "Segoe UI", Roboto, system-ui, sans-serif',
-      fontSizeBase: '14px', borderRadius: '12px', spacingUnit: '4px',
+      colorPrimary: '#ff4b1f', colorBackground: '#1b1b1e', colorText: '#f2f2f4', colorTextSecondary: '#a1a1a8',
+      colorTextPlaceholder: '#5f5f66', colorDanger: '#ff9a8a', fontFamily: 'Inter, -apple-system, "Segoe UI", Roboto, system-ui, sans-serif',
+      fontSizeBase: '14px', borderRadius: '9px', spacingUnit: '4px',
     },
     rules: {
-      '.Input': { border: '1px solid #2e2e33', boxShadow: 'none', padding: '11px 12px' },
-      '.Input:focus': { border: '1px solid #e08a62', boxShadow: '0 0 0 3px rgba(224,138,98,.18)' },
-      '.Input--invalid': { border: '1px solid #ff8a84' },
-      '.Label': { color: '#8d8f97', fontSize: '11.5px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: '6px' },
-      '.Tab': { border: '1px solid #2e2e33', backgroundColor: '#1b1b1e' },
-      '.Tab--selected': { border: '1px solid #e08a62', boxShadow: 'inset 0 0 0 1px #e08a62', backgroundColor: '#241a15' },
-      '.TabLabel': { color: '#9a9ca3', fontWeight: '600' }, '.TabIcon': { fill: '#9a9ca3' },
-      '.TabLabel--selected': { color: '#f2f2f4' }, '.TabIcon--selected': { fill: '#e08a62' },
-      '.Block': { border: '1px solid #26262a', backgroundColor: '#151517' },
+      '.Input': { border: '1px solid #34343a', boxShadow: 'none', padding: '11px 12px' },
+      '.Input:focus': { border: '1px solid #f2f2f4', boxShadow: '0 0 0 3px rgba(255,75,31,.14)' },
+      '.Input--invalid': { border: '1px solid #ff9a8a' },
+      '.Label': { color: '#a1a1a8', fontSize: '12.5px', fontWeight: '500', marginBottom: '6px' },
+      '.Tab': { border: '1px solid #34343a', backgroundColor: '#1b1b1e' },
+      '.Tab--selected': { border: '1px solid #ff4b1f', boxShadow: 'inset 0 0 0 1px #ff4b1f', backgroundColor: '#1f1a18' },
+      '.TabLabel': { color: '#a1a1a8', fontWeight: '600' }, '.TabIcon': { fill: '#a1a1a8' },
+      '.TabLabel--selected': { color: '#f2f2f4' }, '.TabIcon--selected': { fill: '#ff4b1f' },
+      '.Block': { border: '1px solid #26262a', backgroundColor: '#161618' },
     },
   };
 
@@ -54,7 +54,7 @@
     if (my !== seq) return;
     if (!r || !r.ok) {
       $('loading').style.display = 'none';
-      if (r && r.error === 'already_pro') { setError('Du har redan Pro på det här kontot. Tryck på tillbaka och sedan "Jag har aktiverat Pro".'); return; }
+      if (r && r.error === 'already_pro') { setError('Du har redan Pro på det här kontot. Tryck på tillbaka och sedan "Jag har redan Pro".'); return; }
       if (r && r.needLogin) { setError('Logga in först (kontoknappen uppe till höger).'); return; }
       setError((r && r.message) || 'Kunde inte förbereda betalningen. Kontrollera uppkopplingen och försök igen.');
       return;
@@ -85,7 +85,7 @@
       $('done-title').textContent = 'Credits påfyllda';
       $('done-text').textContent = c && c.ok && c.credits != null ? 'Tack! Du har nu ' + c.credits.toLocaleString('sv-SE') + ' tokens i credits.' : 'Tack! Betalningen är genomförd. Dina credits fylls på inom kort.';
     } else if (!(c && c.ok && c.pro)) {
-      $('done-text').textContent = 'Betalningen är genomförd. Pro aktiveras på kontot inom någon minut – tryck "Jag har aktiverat Pro" om det dröjer.';
+      $('done-text').textContent = 'Betalningen är genomförd. Pro aktiveras på kontot inom någon minut – tryck "Jag har redan Pro" om det dröjer.';
     }
     document.body.classList.add('paid');
   }

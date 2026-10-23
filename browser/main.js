@@ -591,7 +591,7 @@ function inloggadSvar(j) {
   if (!j.ok) return j;
   if (j.steg === 'kod') return { ok: true, needCode: true, email: j.email };
   if (j.enhet) sparaEnhet(j.enhet);
-  return { ok: true, token: j.token, email: (j.me && j.me.email) || '', name: (j.me && j.me.namn) || '', pro: false };
+  return { ok: true, token: j.token, email: (j.me && j.me.email) || '', name: (j.me && j.me.namn) || '', pro: !!(j.me && j.me.pro) };
 }
 ipcMain.handle('auth:login', async (_e, d) => inloggadSvar(await adrazeApi('/auth/login', { email: d && d.email, password: d && d.password, app: true, enhet: lasEnhet() || undefined })));
 // Google: inloggningen öppnas i en vanlig AdRaze-flik mot adraze.app/app-google. Flikarna ser ut som
@@ -624,7 +624,7 @@ ipcMain.handle('auth:reset-request', async (_e, d) => adrazeApi('/auth/forgot', 
 ipcMain.handle('auth:reset-confirm', async (_e, d) => inloggadSvar(await adrazeApi('/auth/reset', { email: d && d.email, code: d && d.code, password: d && d.password, app: true })));
 ipcMain.handle('auth:session', async (_e, d) => {
   const j = await adrazeApi('/me', null, d && d.token, 'GET');
-  return j.ok ? { ok: true, email: j.me.email, name: j.me.namn || '', avatar: j.me.avatar || null, pro: false } : j;
+  return j.ok ? { ok: true, email: j.me.email, name: j.me.namn || '', avatar: j.me.avatar || null, pro: !!j.me.pro } : j;
 });
 // Profilbilden hör till AdRaze-kontot (samma som på adraze.app) och visas även i chatten.
 ipcMain.handle('auth:avatar', (_e, d) => adrazeApi('/me/avatar', { bild: (d && typeof d.image === 'string') ? d.image : null }, d && d.token));
@@ -1524,8 +1524,8 @@ ipcMain.handle('net:detail', async (e, id) => {
   };
 });
 
-/* Falk-chatt: proxar till Säkerkolls AI-API med fönstrets kontonummer, så
- * kontonumret aldrig behöver ligga i panelen. Samma /ai/chat som webbens assistent. */
+/* Falk-chatt: proxar till AdRazes server med fönstrets token, så token aldrig
+ * behöver ligga i panelen. */
 const KRYPTO_LOG = path.join(app.getPath('userData'), 'krypto-chat.log');
 function klog(o) { try { fs.appendFileSync(KRYPTO_LOG, new Date().toISOString() + ' ' + JSON.stringify(o) + '\n'); } catch {} }
 /* Egen kassa: panelen (ui/checkout.html) ber om en betalningsavsikt och bekräftar
@@ -1534,12 +1534,14 @@ async function billingCall(e, pathname, body) {
   const ctx = e.sender.__ctx; const token = ctx && ctx.authToken;
   if (!token) return { ok: false, error: 'no_session', needLogin: true };
   try {
-    const r = await fetch(SKOLL + '/api/sakerkoll/vaka/billing/' + pathname, {
-      method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' },
-      body: JSON.stringify(Object.assign({}, body || {}, { token })), signal: AbortSignal.timeout(30000),
+    // AdRazes egen server (pro.js): Stripe-prenumeration på AdRaze-kontot
+    const r = await fetch(ADRAZE_API + '/pro/' + pathname, {
+      method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json', authorization: 'Bearer ' + token },
+      body: JSON.stringify(body || {}), signal: AbortSignal.timeout(30000),
     });
     const j = await r.json().catch(() => ({}));
-    if (!r.ok && !j.error) j.error = 'http_' + r.status;
+    if (r.status === 401) return { ok: false, error: 'no_session', needLogin: true };
+    if (!r.ok || !j.ok) return { ok: false, error: j.error === 'already_pro' ? 'already_pro' : 'http_' + r.status, message: j.message || j.error || 'Något gick fel. Försök igen.' };
     return j;
   } catch { return { ok: false, error: 'unreachable', message: 'Kunde inte nå servern. Kontrollera din uppkoppling.' }; }
 }
@@ -1549,16 +1551,18 @@ ipcMain.handle('krypto:chat', async (e, messages) => {
   const ctx = e.sender.__ctx;
   const token = ctx && ctx.authToken;
   if (!token) { klog({ stage: 'no-token' }); return { ok: false, needLogin: true, message: 'Logga in med din mejl (kontoknappen) för att låsa upp Falk.' }; }
-  const payload = { vaka_token: token, edition: 'vaka', messages: (Array.isArray(messages) ? messages : []).slice(-16) };
+  const payload = { messages: (Array.isArray(messages) ? messages : []).slice(-16) };
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
-      const r = await fetch(SKOLL + '/api/sakerkoll/ai/chat', {
-        method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' },
-        body: JSON.stringify(payload), signal: AbortSignal.timeout(60000),
+      // AdRazes egen server (pro.js /falk/chat), bara för Pro
+      const r = await fetch(ADRAZE_API + '/falk/chat', {
+        method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json', authorization: 'Bearer ' + token },
+        body: JSON.stringify(payload), signal: AbortSignal.timeout(70000),
       });
       const json = await r.json().catch(() => ({}));
-      if (!r.ok || !json.ok) { klog({ stage: 'http', attempt, status: r.status, error: json.error, msgCount: payload.messages.length }); return { ok: false, error: json.error, message: json.message || 'Något gick fel. Försök igen om en stund.' }; }
-      klog({ stage: 'ok', attempt, used: json.used });
+      if (r.status === 401) return { ok: false, needLogin: true, message: 'Logga in igen för att använda Falk.' };
+      if (!r.ok || !json.ok) { klog({ stage: 'http', attempt, status: r.status, error: json.error }); return { ok: false, error: json.error, message: json.message || json.error || 'Något gick fel. Försök igen om en stund.' }; }
+      klog({ stage: 'ok', attempt });
       return { ok: true, reply: json.reply };
     } catch (err) {
       klog({ stage: 'throw', attempt, err: String(err && (err.name || err.message || err)) });
