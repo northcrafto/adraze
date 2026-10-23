@@ -118,9 +118,10 @@
 }
 @media (max-width: 600px) {
   .ko-hjalte { padding: 64px 0 60px; }
-  .ko-form { flex-direction: column; border-radius: 24px; padding: 8px; }
-  .ko-form input { height: 52px; padding: 0 14px; }
-  .ko-form .btn { width: 100%; }
+  .ko-form { flex-direction: column; gap: 8px; border-radius: 26px; padding: 8px; }
+  /* flex: none, annars kollapsar höjden när formuläret staplas lodrätt */
+  .ko-form input { flex: none; height: 64px; padding: 0 18px; font-size: 20px; border-radius: 18px; background: #24242a; }
+  .ko-form .btn { width: 100%; height: 58px; }
   .ko-topp { grid-template-columns: 1fr; gap: 20px; }
   .ko-tabell-ram { padding: 4px 14px; }
   .ko-tabell th, .ko-tabell td { padding: 13px 4px; }
