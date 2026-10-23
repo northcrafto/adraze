@@ -138,6 +138,7 @@ contextBridge.exposeInMainWorld('view', {
   onMenuZoom: (cb) => ipcRenderer.on('menu-zoom', (_e, d) => cb(d)),
   onMenuPrint: (cb) => ipcRenderer.on('menu-print', () => cb()),
   onCloseTab: (cb) => ipcRenderer.on('close-tab', () => cb()),
+  onCloseTabId: (cb) => ipcRenderer.on('close-tab-id', (_e, id) => cb(id)),
   onConfirmClose: (cb) => ipcRenderer.on('confirm-close', () => cb()),
   doClose: () => ipcRenderer.send('win:do-close'),
   openCloseConfirm: (n) => ipcRenderer.send('open-close-confirm', n),

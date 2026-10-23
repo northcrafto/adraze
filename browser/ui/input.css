@@ -128,6 +128,8 @@ svg { display: block; }
   }
   .pill:hover { background: var(--color-paper); }
   .pill.off { opacity: .5; }
+  .ab-mark { width: 18px; height: 18px; object-fit: contain; flex: none; }
+  .pill.off .ab-mark { filter: grayscale(1); }
   .pill-accent { @apply text-white; background: var(--color-terra); border-color: transparent; }
   .pill-accent:hover { background: #e63f15; }
   .pill-accent.off { filter: grayscale(.55); opacity: .8; }
