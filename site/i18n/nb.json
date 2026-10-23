@@ -363,5 +363,15 @@
   "kolla.err_full": "Køen er full akkurat nå. Prøv igjen om litt.",
   "kolla.err_open": "Siden kunne ikke åpnes.",
   "kolla.err_generic": "Noe gikk galt. Prøv igjen.",
-  "nav.check": "Sjekk en side"
+  "nav.check": "Sjekk en side",
+  "konto.avatar_add": "Legg til profilbilde",
+  "konto.avatar_change": "Bytt profilbilde",
+  "konto.avatar_title": "Plasser bildet ditt",
+  "konto.avatar_hint": "Dra bildet slik at det passer riktig inn i sirkelen. Zoom med glidebryteren eller rullehjulet.",
+  "konto.avatar_zoom": "Zoom",
+  "konto.avatar_save": "Spare",
+  "konto.avatar_cancel": "Kansellere",
+  "konto.avatar_remove": "Fjern bildet",
+  "konto.avatar_other": "Velg et annet bilde",
+  "konto.avatar_bad": "Bildet kunne ikke leses. Velg en JPG, PNG eller WebP."
 }

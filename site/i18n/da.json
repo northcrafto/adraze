@@ -363,5 +363,15 @@
   "kolla.err_full": "Køen er fuld lige nu. Prøv igen om lidt.",
   "kolla.err_open": "Siden kunne ikke åbnes.",
   "kolla.err_generic": "Noget gik galt. Prøv igen.",
-  "nav.check": "Tjek en side"
+  "nav.check": "Tjek en side",
+  "konto.avatar_add": "Tilføj profilbillede",
+  "konto.avatar_change": "Skift profilbillede",
+  "konto.avatar_title": "Placer dit billede",
+  "konto.avatar_hint": "Træk billedet, så det passer korrekt i cirklen. Zoom med skyderen eller rullehjulet.",
+  "konto.avatar_zoom": "Zoom",
+  "konto.avatar_save": "Spare",
+  "konto.avatar_cancel": "Ophæve",
+  "konto.avatar_remove": "Fjern billedet",
+  "konto.avatar_other": "Vælg et andet billede",
+  "konto.avatar_bad": "Billedet kunne ikke læses. Vælg en JPG, PNG eller WebP."
 }

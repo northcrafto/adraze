@@ -363,5 +363,15 @@
   "kolla.err_full": "Kolejka jest teraz pełna. Spróbuj ponownie za chwilę.",
   "kolla.err_open": "Nie udało się otworzyć strony.",
   "kolla.err_generic": "Coś poszło nie tak. Spróbuj ponownie.",
-  "nav.check": "Sprawdź stronę"
+  "nav.check": "Sprawdź stronę",
+  "konto.avatar_add": "Dodaj zdjęcie profilowe",
+  "konto.avatar_change": "Zmień zdjęcie profilowe",
+  "konto.avatar_title": "Umieść swój obraz",
+  "konto.avatar_hint": "Przeciągnij obraz tak, aby pasował prawidłowo do okręgu. Powiększ za pomocą suwaka lub kółka przewijania.",
+  "konto.avatar_zoom": "Brzęczenie",
+  "konto.avatar_save": "Ratować",
+  "konto.avatar_cancel": "Anulować",
+  "konto.avatar_remove": "Usuń obraz",
+  "konto.avatar_other": "Wybierz inny obraz",
+  "konto.avatar_bad": "Nie można odczytać obrazu. Wybierz plik JPG, PNG lub WebP."
 }

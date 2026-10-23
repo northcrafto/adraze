@@ -363,5 +363,15 @@
   "kolla.err_full": "Die Warteschlange ist gerade voll. Versuch es gleich noch einmal.",
   "kolla.err_open": "Die Seite konnte nicht geöffnet werden.",
   "kolla.err_generic": "Etwas ist schiefgelaufen. Versuch es noch einmal.",
-  "nav.check": "Seite prüfen"
+  "nav.check": "Seite prüfen",
+  "konto.avatar_add": "Profilbild hinzufügen",
+  "konto.avatar_change": "Profilbild ändern",
+  "konto.avatar_title": "Platzieren Sie Ihr Bild",
+  "konto.avatar_hint": "Ziehen Sie das Bild so, dass es richtig in den Kreis passt. Zoomen Sie mit dem Schieberegler oder Scrollrad.",
+  "konto.avatar_zoom": "Zoom",
+  "konto.avatar_save": "Speichern",
+  "konto.avatar_cancel": "Stornieren",
+  "konto.avatar_remove": "Entfernen Sie das Bild",
+  "konto.avatar_other": "Wählen Sie ein anderes Bild",
+  "konto.avatar_bad": "Das Bild konnte nicht gelesen werden. Wählen Sie ein JPG, PNG oder WebP."
 }

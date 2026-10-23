@@ -145,7 +145,11 @@
   <section class="in" id="vy-in" hidden>
     <div class="in-topp">
       <div class="hej">
-        <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
+        <button type="button" class="hej-vink" id="avatar-knapp" aria-label="Dodaj zdjęcie profilowe">
+          <img class="vink-gif" src="/mail/vinkar.gif" alt="" width="200" height="259">
+          <img class="min-avatar" id="min-avatar" alt="" width="256" height="256" hidden>
+          <span class="avatar-penna" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"/></svg></span>
+        </button>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
           <figure class="hej-citat" id="hej-citat">
@@ -160,7 +164,7 @@
             <button class="btn liq" type="submit">Wyślij</button>
             <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
           </form>
-          <p class="dov hej-under">Zalogowano jako <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Zmień imię</button></span></p>
+          <p class="dov hej-under">Zalogowano jako <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Zmień imię</button></span> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-avatar">Dodaj zdjęcie profilowe</button></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Jak mamy się do ciebie zwracać?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Twoje imię" required></label>
             <button class="btn liq" type="submit">Zapisz</button>
@@ -202,9 +206,32 @@
     </details>
   </section>
 
+  <!-- Profilbild: välj bild → placera i cirkeln (dra + zooma) → spara -->
+  <input type="file" id="avatar-fil" accept="image/*" hidden>
+  <dialog class="avatar-dialog" id="avatar-dialog" aria-labelledby="avatar-rubrik">
+    <form method="dialog" class="avatar-ruta">
+      <h2 id="avatar-rubrik">Umieść swój obraz</h2>
+      <p class="dov">Przeciągnij obraz tak, aby pasował prawidłowo do okręgu. Powiększ za pomocą suwaka lub kółka przewijania.</p>
+      <div class="avatar-scen" id="avatar-scen" tabindex="0"><img id="avatar-bild" alt="" draggable="false"><div class="avatar-mask" aria-hidden="true"></div></div>
+      <label class="avatar-zoom"><span>Brzęczenie</span><input type="range" id="avatar-zoom" min="1" max="4" step="0.01" value="1"></label>
+      <p class="meddelande" id="avatar-fel" role="alert" aria-live="polite"></p>
+      <div class="avatar-knappar">
+        <button type="button" class="lank-knapp nav-link" id="avatar-ny">Wybierz inny obraz</button>
+        <button type="button" class="lank-knapp nav-link farlig" id="avatar-bort" hidden>Usuń obraz</button>
+        <span class="avatar-hoger">
+          <button type="submit" class="btn liq-ghost" value="avbryt">Anulować</button>
+          <button type="button" class="btn liq" id="avatar-spara">Ratować</button>
+        </span>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Texter som skriptet behöver, på sidans språk -->
   <template id="texter">
     <span data-k="ext_none">AdRaze nie jest zainstalowany w tej przeglądarce.</span>
+    <span data-k="avatar_add">Dodaj zdjęcie profilowe</span>
+    <span data-k="avatar_change">Zmień zdjęcie profilowe</span>
+    <span data-k="avatar_bad">Nie można odczytać obrazu. Wybierz plik JPG, PNG lub WebP.</span>
     <span data-k="ext_install">Zainstaluj AdRaze</span>
     <span data-k="ext_connect">Połącz tę przeglądarkę</span>
     <span data-k="ext_connected">Ta przeglądarka jest połączona i wysyła statystyki.</span>

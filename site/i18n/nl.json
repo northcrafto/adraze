@@ -363,5 +363,15 @@
   "kolla.err_full": "De wachtrij is nu vol. Probeer het zo opnieuw.",
   "kolla.err_open": "De pagina kon niet worden geopend.",
   "kolla.err_generic": "Er ging iets mis. Probeer het opnieuw.",
-  "nav.check": "Check een site"
+  "nav.check": "Check een site",
+  "konto.avatar_add": "Profielfoto toevoegen",
+  "konto.avatar_change": "Profielfoto wijzigen",
+  "konto.avatar_title": "Plaats uw afbeelding",
+  "konto.avatar_hint": "Sleep de afbeelding zodat deze correct in de cirkel past. Zoom met de schuifregelaar of het scrollwiel.",
+  "konto.avatar_zoom": "Zoom",
+  "konto.avatar_save": "Redden",
+  "konto.avatar_cancel": "Annuleren",
+  "konto.avatar_remove": "Verwijder de afbeelding",
+  "konto.avatar_other": "Kies een andere afbeelding",
+  "konto.avatar_bad": "De afbeelding kon niet worden gelezen. Kies een JPG, PNG of WebP."
 }

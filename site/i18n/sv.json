@@ -363,5 +363,15 @@
   "kolla.err_full": "Det är full kö just nu. Försök igen om en stund.",
   "kolla.err_open": "Sidan gick inte att öppna.",
   "kolla.err_generic": "Något gick fel. Försök igen.",
-  "nav.check": "Kolla en sajt"
+  "nav.check": "Kolla en sajt",
+  "konto.avatar_add": "Lägg till profilbild",
+  "konto.avatar_change": "Byt profilbild",
+  "konto.avatar_title": "Placera din bild",
+  "konto.avatar_hint": "Dra bilden så att den sitter rätt i cirkeln. Zooma med reglaget eller scrollhjulet.",
+  "konto.avatar_zoom": "Zoom",
+  "konto.avatar_save": "Spara",
+  "konto.avatar_cancel": "Avbryt",
+  "konto.avatar_remove": "Ta bort bilden",
+  "konto.avatar_other": "Välj en annan bild",
+  "konto.avatar_bad": "Bilden gick inte att läsa. Välj en JPG, PNG eller WebP."
 }

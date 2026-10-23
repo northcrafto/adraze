@@ -363,5 +363,15 @@
   "kolla.err_full": "A fila está cheia neste momento. Tente novamente daqui a pouco.",
   "kolla.err_open": "Não foi possível abrir a página.",
   "kolla.err_generic": "Algo correu mal. Tente novamente.",
-  "nav.check": "Analisar um site"
+  "nav.check": "Analisar um site",
+  "konto.avatar_add": "Adicionar foto de perfil",
+  "konto.avatar_change": "Alterar foto do perfil",
+  "konto.avatar_title": "Coloque sua imagem",
+  "konto.avatar_hint": "Arraste a imagem para que ela caiba corretamente no círculo. Aplique zoom com o controle deslizante ou roda de rolagem.",
+  "konto.avatar_zoom": "Zoom",
+  "konto.avatar_save": "Salvar",
+  "konto.avatar_cancel": "Cancelar",
+  "konto.avatar_remove": "Remova a imagem",
+  "konto.avatar_other": "Escolha outra imagem",
+  "konto.avatar_bad": "A imagem não pôde ser lida. Escolha um JPG, PNG ou WebP."
 }

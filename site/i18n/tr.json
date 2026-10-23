@@ -363,5 +363,15 @@
   "kolla.err_full": "Sıra şu anda dolu. Biraz sonra tekrar dene.",
   "kolla.err_open": "Sayfa açılamadı.",
   "kolla.err_generic": "Bir şeyler ters gitti. Tekrar dene.",
-  "nav.check": "Site kontrol et"
+  "nav.check": "Site kontrol et",
+  "konto.avatar_add": "Profil resmi ekle",
+  "konto.avatar_change": "Profil resmini değiştir",
+  "konto.avatar_title": "Resminizi yerleştirin",
+  "konto.avatar_hint": "Görüntüyü daireye doğru şekilde sığacak şekilde sürükleyin. Kaydırıcıyı veya kaydırma tekerleğini kullanarak yakınlaştırın.",
+  "konto.avatar_zoom": "Yakınlaştır",
+  "konto.avatar_save": "Kaydetmek",
+  "konto.avatar_cancel": "İptal etmek",
+  "konto.avatar_remove": "Resmi kaldır",
+  "konto.avatar_other": "Başka bir resim seçin",
+  "konto.avatar_bad": "Resim okunamadı. Bir JPG, PNG veya WebP seçin."
 }

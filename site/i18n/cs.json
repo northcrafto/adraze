@@ -363,5 +363,15 @@
   "kolla.err_full": "Fronta je teď plná. Zkuste to za chvíli znovu.",
   "kolla.err_open": "Stránku se nepodařilo otevřít.",
   "kolla.err_generic": "Něco se pokazilo. Zkuste to znovu.",
-  "nav.check": "Zkontrolovat web"
+  "nav.check": "Zkontrolovat web",
+  "konto.avatar_add": "Přidat profilový obrázek",
+  "konto.avatar_change": "Změnit profilový obrázek",
+  "konto.avatar_title": "Umístěte svůj obrázek",
+  "konto.avatar_hint": "Přetáhněte obrázek tak, aby správně zapadl do kruhu. Zoom with the slider or scroll wheel.",
+  "konto.avatar_zoom": "Přiblížení",
+  "konto.avatar_save": "Uložit",
+  "konto.avatar_cancel": "Zrušit",
+  "konto.avatar_remove": "Odstraňte obrázek",
+  "konto.avatar_other": "Vyberte jiný obrázek",
+  "konto.avatar_bad": "Obrázek nelze přečíst. Vyberte JPG, PNG nebo WebP."
 }

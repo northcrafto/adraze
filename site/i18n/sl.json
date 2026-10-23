@@ -363,5 +363,15 @@
   "kolla.err_full": "Vrsta je trenutno polna. Poskusi znova čez trenutek.",
   "kolla.err_open": "Strani ni bilo mogoče odpreti.",
   "kolla.err_generic": "Nekaj je šlo narobe. Poskusi znova.",
-  "nav.check": "Preveri spletno mesto"
+  "nav.check": "Preveri spletno mesto",
+  "konto.avatar_add": "Dodajte sliko profila",
+  "konto.avatar_change": "Spremeni sliko profila",
+  "konto.avatar_title": "Postavite svojo sliko",
+  "konto.avatar_hint": "Povlecite sliko tako, da se pravilno prilega krogu. Povečava z drsnikom ali kolescem za pomikanje.",
+  "konto.avatar_zoom": "Zoom",
+  "konto.avatar_save": "Shrani",
+  "konto.avatar_cancel": "Prekliči",
+  "konto.avatar_remove": "Odstranite sliko",
+  "konto.avatar_other": "Izberite drugo sliko",
+  "konto.avatar_bad": "Slike ni bilo mogoče prebrati. Izberite JPG, PNG ali WebP."
 }

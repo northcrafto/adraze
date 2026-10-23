@@ -363,5 +363,15 @@
   "kolla.err_full": "Jono on juuri nyt täynnä. Yritä hetken päästä uudelleen.",
   "kolla.err_open": "Sivua ei voitu avata.",
   "kolla.err_generic": "Jokin meni pieleen. Yritä uudelleen.",
-  "nav.check": "Tarkista sivusto"
+  "nav.check": "Tarkista sivusto",
+  "konto.avatar_add": "Lisää profiilikuva",
+  "konto.avatar_change": "Vaihda profiilikuva",
+  "konto.avatar_title": "Aseta kuvasi",
+  "konto.avatar_hint": "Vedä kuvaa niin, että se sopii oikein ympyrään. Zoomaa liukusäätimellä tai vierityspyörällä.",
+  "konto.avatar_zoom": "Zoomaa",
+  "konto.avatar_save": "Tallentaa",
+  "konto.avatar_cancel": "Peruuttaa",
+  "konto.avatar_remove": "Poista kuva",
+  "konto.avatar_other": "Valitse toinen kuva",
+  "konto.avatar_bad": "Kuvaa ei voitu lukea. Valitse JPG, PNG tai WebP."
 }

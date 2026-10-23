@@ -363,5 +363,15 @@
   "kolla.err_full": "Rinda šobrīd ir pilna. Mēģini vēlreiz pēc brīža.",
   "kolla.err_open": "Lapu neizdevās atvērt.",
   "kolla.err_generic": "Kaut kas nogāja greizi. Mēģini vēlreiz.",
-  "nav.check": "Pārbaudīt vietni"
+  "nav.check": "Pārbaudīt vietni",
+  "konto.avatar_add": "Pievienojiet profila attēlu",
+  "konto.avatar_change": "Mainīt profila attēlu",
+  "konto.avatar_title": "Novietojiet savu attēlu",
+  "konto.avatar_hint": "Velciet attēlu, lai tas pareizi ietilptu aplī. Tālummainiet ar slīdni vai ritināšanas ritenīti.",
+  "konto.avatar_zoom": "Tālummaiņa",
+  "konto.avatar_save": "Saglabāt",
+  "konto.avatar_cancel": "Atcelt",
+  "konto.avatar_remove": "Noņemiet attēlu",
+  "konto.avatar_other": "Izvēlieties citu attēlu",
+  "konto.avatar_bad": "Attēlu nevarēja nolasīt. Izvēlieties JPG, PNG vai WebP."
 }

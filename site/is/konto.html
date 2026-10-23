@@ -145,7 +145,11 @@
   <section class="in" id="vy-in" hidden>
     <div class="in-topp">
       <div class="hej">
-        <div class="hej-vink" aria-hidden="true"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
+        <button type="button" class="hej-vink" id="avatar-knapp" aria-label="Bættu við prófílmynd">
+          <img class="vink-gif" src="/mail/vinkar.gif" alt="" width="200" height="259">
+          <img class="min-avatar" id="min-avatar" alt="" width="256" height="256" hidden>
+          <span class="avatar-penna" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"/></svg></span>
+        </button>
         <div class="hej-text">
           <h1 class="hej-rubrik" id="hej"></h1>
           <figure class="hej-citat" id="hej-citat">
@@ -160,7 +164,7 @@
             <button class="btn liq" type="submit">Senda</button>
             <p class="meddelande" id="forslag-svar" role="status" aria-live="polite"></p>
           </form>
-          <p class="dov hej-under">Innskráð(ur) sem <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Breyta nafni</button></span></p>
+          <p class="dov hej-under">Innskráð(ur) sem <b id="min-mejl"></b><span id="byt-namn-rad"> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-namn">Breyta nafni</button></span> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp nav-link" id="byt-avatar">Bættu við prófílmynd</button></p>
           <form class="namn-form" id="f-namn" novalidate hidden>
             <label class="falt"><span>Hvað eigum við að kalla þig?</span><input name="namn" autocomplete="given-name" maxlength="40" placeholder="Fornafnið þitt" required></label>
             <button class="btn liq" type="submit">Vista</button>
@@ -202,9 +206,32 @@
     </details>
   </section>
 
+  <!-- Profilbild: välj bild → placera i cirkeln (dra + zooma) → spara -->
+  <input type="file" id="avatar-fil" accept="image/*" hidden>
+  <dialog class="avatar-dialog" id="avatar-dialog" aria-labelledby="avatar-rubrik">
+    <form method="dialog" class="avatar-ruta">
+      <h2 id="avatar-rubrik">Settu myndina þína</h2>
+      <p class="dov">Dragðu myndina þannig að hún passi rétt í hringinn. Aðdráttur með sleðann eða skrunhjólinu.</p>
+      <div class="avatar-scen" id="avatar-scen" tabindex="0"><img id="avatar-bild" alt="" draggable="false"><div class="avatar-mask" aria-hidden="true"></div></div>
+      <label class="avatar-zoom"><span>Aðdráttur</span><input type="range" id="avatar-zoom" min="1" max="4" step="0.01" value="1"></label>
+      <p class="meddelande" id="avatar-fel" role="alert" aria-live="polite"></p>
+      <div class="avatar-knappar">
+        <button type="button" class="lank-knapp nav-link" id="avatar-ny">Veldu aðra mynd</button>
+        <button type="button" class="lank-knapp nav-link farlig" id="avatar-bort" hidden>Fjarlægðu myndina</button>
+        <span class="avatar-hoger">
+          <button type="submit" class="btn liq-ghost" value="avbryt">Hætta við</button>
+          <button type="button" class="btn liq" id="avatar-spara">Vista</button>
+        </span>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Texter som skriptet behöver, på sidans språk -->
   <template id="texter">
     <span data-k="ext_none">AdRaze er ekki uppsett í þessum vafra.</span>
+    <span data-k="avatar_add">Bættu við prófílmynd</span>
+    <span data-k="avatar_change">Breyta prófílmynd</span>
+    <span data-k="avatar_bad">Ekki var hægt að lesa myndina. Veldu JPG, PNG eða WebP.</span>
     <span data-k="ext_install">Setja upp AdRaze</span>
     <span data-k="ext_connect">Tengja þennan vafra</span>
     <span data-k="ext_connected">Þessi vafri er tengdur og sendir tölfræði.</span>
