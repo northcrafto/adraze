@@ -57,7 +57,7 @@
     <div class="list" id="list"><div class="empty">Inga nedladdningar än.</div></div>
   </div>
   <script>
-    // Översättning: samma ordlista som skalet (vaka-lang i localStorage delas, samma file://-origin).
+    // Översättning: samma ordlista som skalet (adraze-lang i localStorage delas, samma file://-origin).
     window.locale = { load: (l) => { try { return require('electron').ipcRenderer.sendSync('i18n:load', l) || {}; } catch (e) { return {}; } } };
   </script>
   <script src="i18n.js"></script>

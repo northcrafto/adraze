@@ -65,6 +65,15 @@ AdRaze is on its way to the Chrome Web Store. Until then:
 
 Works in Chrome, Brave, Edge, Opera and other Chromium browsers (version 121 or later). In Brave you can turn off Shields if you want AdRaze to do all the blocking.
 
+## AdRaze Browser
+
+There is also a full desktop browser with AdRaze built in, in [`browser/`](browser). It uses the same rules as the extension, stops dangerous pages before they load, never blocks sign-in or 2FA pages, and has a password manager that only fills in when you ask.
+
+- **Linux:** [download AdRaze.AppImage](https://github.com/northcrafto/adraze-dl/releases/latest/download/AdRaze.AppImage). It updates itself.
+- **Windows:** coming to the Microsoft Store.
+
+See [browser/README.md](browser/README.md) for running it from source.
+
 ## Build from source
 
 Requires Node.js 18+.
@@ -130,4 +139,4 @@ Website illustrations from [unDraw](https://undraw.co), photos from [Pexels](htt
 
 ## License
 
-[GPL-3.0](LICENSE) © 2026 northcrafto
+[GPL-3.0](LICENSE) © 2026 northcrafto. The browser in `browser/` is [MPL-2.0](browser/LICENSE).

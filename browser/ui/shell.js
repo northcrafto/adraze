@@ -51,12 +51,12 @@ const ENGINES = {
   brave: { label: 'Brave Search', url: 'https://search.brave.com/search?q=' },
   startpage: { label: 'Startpage', url: 'https://www.startpage.com/sp/search?query=' },
 };
-/* Inkognito söker alltid via AdRaze Sök (vår egen, loggar inget). Finns inte i vanliga listan. */
-const INCOG_ENGINE = { label: 'AdRaze Sök', url: 'https://vaka-sok.vercel.app/search?q=' };
+/* Inkognito söker alltid via DuckDuckGo (loggar inget). */
+const INCOG_ENGINE = { label: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=' };
 let searchEngine = 'google';
 try { const e = localStorage.getItem('skoll-engine'); if (e && ENGINES[e]) searchEngine = e; } catch {}
 function searchUrl(q) {
-  // Vanligt: vald sökmotor. Inkognito: alltid AdRaze Sök (ingen logg).
+  // Vanligt: vald sökmotor. Inkognito: alltid DuckDuckGo (ingen logg).
   if (active && active.incognito) return INCOG_ENGINE.url + encodeURIComponent(q);
   return (ENGINES[searchEngine] || ENGINES.google).url + encodeURIComponent(q);
 }
@@ -1160,10 +1160,10 @@ function msgEl(m) {
   if (allow) allow.addEventListener('click', (e) => { e.stopPropagation(); allowMenu(allow.dataset.host, allow.dataset.child, allow); });  // öppna tidsmeny (15 min / 1 h / 3 h / alltid)
   return d;
 }
-function socHiddenSet() { try { return new Set(JSON.parse(localStorage.getItem('vaka-hidden-msgs') || '[]')); } catch { return new Set(); } }
+function socHiddenSet() { try { return new Set(JSON.parse(localStorage.getItem('adraze-hidden-msgs') || '[]')); } catch { return new Set(); } }
 function hideMsgLocal(id) {
   const s = socHiddenSet(); s.add(id);
-  try { localStorage.setItem('vaka-hidden-msgs', JSON.stringify([...s])); } catch {}
+  try { localStorage.setItem('adraze-hidden-msgs', JSON.stringify([...s])); } catch {}
   const el = document.querySelector('.fr-msg[data-id="' + id + '"]'); if (el) el.remove();
 }
 function setChatAvatar(chatAvatar) {
@@ -1365,7 +1365,7 @@ function saveShortcuts(l) { localStorage.setItem('skoll-shortcuts', JSON.stringi
 // Engångsmigrering till hacker-genvägar (pivot till hacker-browser)
 // Sätt defaults BARA om det saknas genvägar helt — skriv ALDRIG över användarens egna
 // (skyddar mot att migrerings-flaggan tappas och genvägarna nollställs vid uppdatering).
-try { if (!localStorage.getItem('skoll-shortcuts')) localStorage.setItem('skoll-shortcuts', JSON.stringify(DEFAULT_SHORTCUTS)); localStorage.setItem('vaka-normal-shortcuts', '1'); } catch {}
+try { if (!localStorage.getItem('skoll-shortcuts')) localStorage.setItem('skoll-shortcuts', JSON.stringify(DEFAULT_SHORTCUTS)); localStorage.setItem('adraze-normal-shortcuts', '1'); } catch {}
 let addingShortcut = false;
 
 function topSites() {
@@ -1508,7 +1508,7 @@ function updateSug(q) {
   const seq = ++sugSeq;
   sugTimer = setTimeout(async () => {
     let list = [];
-    try { list = await window.view.suggest(query, incog ? 'vaka' : searchEngine); } catch { list = []; }   // inkognito: förslag från AdRaze Sök
+    try { list = await window.view.suggest(query, incog ? 'duckduckgo' : searchEngine); } catch { list = []; }   // inkognito: förslag från DuckDuckGo
     if (seq !== sugSeq || document.activeElement !== inp || (inp.value || '').trim() !== query) return;   // gammalt svar → släng
     const keep = hist.slice(0, 4);
     const seen = new Set(keep.map((h) => h.host));
@@ -1971,10 +1971,10 @@ function walletEditForm(id) {
 }
 function openWallet() { openSettings(); showSettingsCat('wallet'); renderWallet(); }
 $('wallet-add-btn') && $('wallet-add-btn').addEventListener('click', () => { wlEditing = 'new'; renderWallet(); setTimeout(() => { const f = document.querySelector('#wallet-list .wl-in[data-f=number]'); if (f) f.focus(); }, 0); });
-$('wl-buy-toggle') && $('wl-buy-toggle').addEventListener('change', (e) => { try { localStorage.setItem('vaka-krypto-buy', e.target.checked ? '1' : '0'); } catch {} showToast(e.target.checked ? '🤖 Krypto får nu handla åt dig – du godkänner varje köp.' : 'Krypto handlar inte längre åt dig.'); });
+$('wl-buy-toggle') && $('wl-buy-toggle').addEventListener('change', (e) => { try { localStorage.setItem('adraze-krypto-buy', e.target.checked ? '1' : '0'); } catch {} showToast(e.target.checked ? '🤖 Krypto får nu handla åt dig – du godkänner varje köp.' : 'Krypto handlar inte längre åt dig.'); });
 
 /* ── Krypto handlar åt användaren (tillstånd + säkerhetskoll + bekräftelse) ── */
-function kbuyAllowed() { try { return localStorage.getItem('vaka-krypto-buy') === '1'; } catch { return false; } }
+function kbuyAllowed() { try { return localStorage.getItem('adraze-krypto-buy') === '1'; } catch { return false; } }
 function cardLabel(c) { return (c.brand || 'Kort') + ' •• ' + (c.last4 || '····'); }
 function kbuyOverlay(inner) {
   const ov = document.createElement('div'); ov.id = 'kbuy-modal';
@@ -1998,7 +1998,7 @@ function showBuyConsent(order) {
     + '<p style="font-size:13.5px;color:rgb(28 43 58 / .62);text-align:center;line-height:1.55;margin-bottom:18px">Krypto vill kunna köpa saker åt dig med dina sparade kort. Du får alltid <b>godkänna varje köp</b> innan betalning – och kan stänga av det när som helst i AdRaze Wallet.</p>'
     + '<div style="display:flex;gap:9px"><button id="kbuy-no" class="btn btn-ghost" style="flex:1;height:44px">Nej tack</button><button id="kbuy-yes" class="btn btn-safe" style="flex:1;height:44px">Tillåt</button></div>');
   ov.querySelector('#kbuy-no').addEventListener('click', () => { ov.remove(); showToast('Krypto handlar inte utan ditt tillstånd.'); });
-  ov.querySelector('#kbuy-yes').addEventListener('click', () => { try { localStorage.setItem('vaka-krypto-buy', '1'); } catch {} const t = $('wl-buy-toggle'); if (t) t.checked = true; ov.remove(); showBuyConfirm(order); });
+  ov.querySelector('#kbuy-yes').addEventListener('click', () => { try { localStorage.setItem('adraze-krypto-buy', '1'); } catch {} const t = $('wl-buy-toggle'); if (t) t.checked = true; ov.remove(); showBuyConfirm(order); });
 }
 async function showBuyConfirm(order) {
   let cards = []; try { cards = await window.wallet.list(); } catch {}
@@ -2096,13 +2096,13 @@ setTimeout(sendBounds, 300);
 
 /* ── Hacker-intro (enkel välkomst, första gången) ── */
 function runHackerIntro(force) {
-  try { if (!force && localStorage.getItem('vaka-hacker-intro-v3')) return; } catch {}
+  try { if (!force && localStorage.getItem('adraze-hacker-intro-v3')) return; } catch {}
   const ov = $('hxintro'); if (!ov) return;
   ov.style.display = 'flex'; void ov.offsetWidth; ov.classList.remove('gone');
   let done = false;
   function finish() {
     if (done) return; done = true;
-    try { localStorage.setItem('vaka-hacker-intro-v3', '1'); } catch {}
+    try { localStorage.setItem('adraze-hacker-intro-v3', '1'); } catch {}
     ov.classList.add('gone');
     setTimeout(() => { ov.style.display = 'none'; }, 550);
     const s = $('nt-search'); if (s) try { s.focus(); } catch {}
@@ -2458,7 +2458,7 @@ if ($('np-filter')) $('np-filter').addEventListener('input', () => { netFilter =
 window.net.onRow((r) => { netRows.set(r.id, r); if (netOpen) scheduleNetRender(); });
 
 /* ── Familj: föräldrapanel, barn-blocklistor, öppen insyn ── */
-const FAM_KEY = 'vaka-family';
+const FAM_KEY = 'adraze-family';
 function famLoad() { try { const f = JSON.parse(localStorage.getItem(FAM_KEY)); if (f && Array.isArray(f.children)) return f; } catch {} return { children: [], activeChild: null }; }
 function famSave() { try { localStorage.setItem(FAM_KEY, JSON.stringify(fam)); } catch {} }
 let fam = famLoad();

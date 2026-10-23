@@ -76,7 +76,7 @@
   async function pay() {
     if (!stripe || !elements || !current) return;
     setError(''); $('pay').disabled = true; $('pay-label').textContent = 'Betalar …';
-    const { error, paymentIntent } = await stripe.confirmPayment({ elements, redirect: 'if_required', confirmParams: { return_url: 'https://vaka-web-lovat.vercel.app/' } });
+    const { error, paymentIntent } = await stripe.confirmPayment({ elements, redirect: 'if_required', confirmParams: { return_url: 'https://adraze.app/' } });
     if (error) { setError(error.message || 'Betalningen gick inte igenom.'); $('pay').disabled = false; $('pay-label').textContent = 'Betala ' + fmt(current.amount, current.currency); return; }
     if (paymentIntent && paymentIntent.status !== 'succeeded' && paymentIntent.status !== 'processing') { setError('Betalningen är inte klar (' + paymentIntent.status + ').'); $('pay').disabled = false; $('pay-label').textContent = 'Försök igen'; return; }
     let c;

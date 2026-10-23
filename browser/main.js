@@ -9,7 +9,7 @@
  * routas till rätt fönster via `event.sender`.
  */
 const { app, BrowserWindow, WebContentsView, ipcMain, session, Menu, clipboard, dialog, shell, safeStorage, components, screen, net } = require('electron');
-app.setName('AdRaze');  // egen datamapp (~/.config/AdRaze), skild från Vaka
+app.setName('AdRaze');  // egen datamapp (~/.config/AdRaze)
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -55,7 +55,7 @@ function makeCtx(win, incognito) {
     visibleTab: null,
     bounds: { x: 0, y: 96, width: 1280, height: 700 },
     topInset: 0, leftInset: 0, defaultZoom: 1,
-    kryptoView: null, kryptoOpen: false, kryptoFull: false, vakaToken: null,
+    kryptoView: null, kryptoOpen: false, kryptoFull: false, authToken: null,
     net: null, netOpen: false,          // nätverksinspektör (Wireshark-lik, via CDP)
     htmlFull: false, _wasFull: false,   // HTML5-video/element i helskärm
   };
@@ -505,7 +505,7 @@ function ensureView(ctx, tabId) {
     if (involuntary) {
       setFull(ctx, true);
       setTimeout(() => {
-        try { wc.executeJavaScriptInIsolatedWorld(999, [{ code: 'window.__vakaRefull && window.__vakaRefull()' }], true); } catch {}
+        try { wc.executeJavaScriptInIsolatedWorld(999, [{ code: 'window.__adrazeRefull && window.__adrazeRefull()' }], true); } catch {}
         // Gick sidan inte tillbaka i helskärm (ingen gest godkänd) får fönstret
         // inte stå kvar utan flikrad. Då gäller vanlig exit.
         setTimeout(async () => {
@@ -548,7 +548,7 @@ ipcMain.handle('skoll:adblock-toggle', async (_e, on) => {
 ipcMain.handle('adraze:open-anyway', (_e, url) => { adblock.openAnyway(String(url || '')); return true; });
 ipcMain.handle('skoll:adblock-state', () => ({ on: adblockOn, count: adblockCount }));
 /* AdRaze mejl-inloggning: proxar till backend (send-code/verify-code/session/logout). */
-async function vakaAuthCall(pathname, body) {
+async function authCall(pathname, body) {
   try {
     const r = await fetch(SKOLL + '/api/sakerkoll/vaka/auth/' + pathname, {
       method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' },
@@ -559,17 +559,21 @@ async function vakaAuthCall(pathname, body) {
     return j;
   } catch (e) { return { ok: false, error: 'unreachable', message: 'Kunde inte nå servern. Kontrollera din uppkoppling.' }; }
 }
-ipcMain.handle('auth:login', (_e, d) => vakaAuthCall('login', { email: d && d.email, password: d && d.password }));
-ipcMain.handle('auth:signup', (_e, d) => vakaAuthCall('signup', { email: d && d.email, password: d && d.password, name: d && d.name }));
-ipcMain.handle('auth:verify-code', (_e, d) => vakaAuthCall('verify-code', { email: d && d.email, code: d && d.code }));
-ipcMain.handle('auth:reset-request', (_e, d) => vakaAuthCall('reset-request', { email: d && d.email }));
-ipcMain.handle('auth:reset-confirm', (_e, d) => vakaAuthCall('reset-confirm', { email: d && d.email, code: d && d.code, password: d && d.password }));
-ipcMain.handle('auth:session', (_e, d) => vakaAuthCall('session', { token: d && d.token }));
-ipcMain.handle('auth:logout', (_e, d) => vakaAuthCall('logout', { token: d && d.token }));
-ipcMain.handle('auth:delete', (_e, d) => vakaAuthCall('delete', { token: d && d.token }));
+ipcMain.handle('auth:login', (_e, d) => authCall('login', { email: d && d.email, password: d && d.password }));
+ipcMain.handle('auth:signup', (_e, d) => authCall('signup', { email: d && d.email, password: d && d.password, name: d && d.name }));
+ipcMain.handle('auth:verify-code', (_e, d) => authCall('verify-code', { email: d && d.email, code: d && d.code }));
+ipcMain.handle('auth:reset-request', (_e, d) => authCall('reset-request', { email: d && d.email }));
+ipcMain.handle('auth:reset-confirm', (_e, d) => authCall('reset-confirm', { email: d && d.email, code: d && d.code, password: d && d.password }));
+ipcMain.handle('auth:session', (_e, d) => authCall('session', { token: d && d.token }));
+ipcMain.handle('auth:logout', (_e, d) => authCall('logout', { token: d && d.token }));
+ipcMain.handle('auth:delete', (_e, d) => authCall('delete', { token: d && d.token }));
 /* Session speglas krypterat i OS-nyckelringen (safeStorage) så inloggningen överlever
  * även om skalets localStorage skulle tömmas. Bara token+profil, aldrig lösenord. */
-const SESSION_FILE = path.join(app.getPath('userData'), 'vaka-session.dat');
+// engångsflytt av filer från Vaka-tiden (vaka-*.dat/.key → adraze-*)
+for (const n of ['session.dat', 'wallet.dat', 'wallet.key']) {
+  try { const ud = app.getPath('userData'), o = path.join(ud, 'vaka-' + n), u = path.join(ud, 'adraze-' + n); if (fs.existsSync(o) && !fs.existsSync(u)) fs.renameSync(o, u); } catch {}
+}
+const SESSION_FILE = path.join(app.getPath('userData'), 'adraze-session.dat');
 ipcMain.handle('auth:remember', (_e, acc) => {
   try {
     if (!acc || !acc.token) return { ok: false };
@@ -810,8 +814,8 @@ function trUi(sv) { const v = localeDict(uiLang)[sv]; return v == null ? sv : v;
  * nyckelring via Electrons safeStorage (Keychain/libsecret/DPAPI) – finns ingen
  * nyckelring hamnar den i en chmod 600-fil. Vi (företaget) kan alltså inte läsa
  * korten, och inget kort-nummer syns i klartext på disk. */
-const WALLET_FILE = path.join(app.getPath('userData'), 'vaka-wallet.dat');
-const WALLET_KEY_FILE = path.join(app.getPath('userData'), 'vaka-wallet.key');
+const WALLET_FILE = path.join(app.getPath('userData'), 'adraze-wallet.dat');
+const WALLET_KEY_FILE = path.join(app.getPath('userData'), 'adraze-wallet.key');
 let _walletKey = null;
 function walletKey() {
   if (_walletKey) return _walletKey;
@@ -883,10 +887,10 @@ ipcMain.handle('wallet:menu', () => ({
   cards: loadCards().map(cardPublic),
   labels: { choose: trUi('Välj kort'), manage: trUi('Hantera kort'), exp: trUi('Giltigt till') },
 }));
-/* Felsökningslogg från kortväljaren (bara när VAKA_WALLET_DEBUG=1 satts). */
+/* Felsökningslogg från kortväljaren (bara när ADRAZE_WALLET_DEBUG=1 satts). */
 ipcMain.on('wallet:debug', (_e, d) => {
   try {
-    if (!process.env.VAKA_WALLET_DEBUG) return;
+    if (!process.env.ADRAZE_WALLET_DEBUG) return;
     fs.appendFileSync(path.join(app.getPath('userData'), 'wallet-debug.log'),
       new Date().toISOString() + ' ' + JSON.stringify(d) + '\n');
   } catch {}
@@ -1108,7 +1112,6 @@ ipcMain.on('app:quit', () => app.quit());
 const SUGGEST_URLS = {
   google: (q) => 'https://suggestqueries.google.com/complete/search?client=firefox&hl=sv&q=' + encodeURIComponent(q),
   duckduckgo: (q) => 'https://duckduckgo.com/ac/?type=list&q=' + encodeURIComponent(q),
-  vaka: (q) => 'https://vaka-sok.vercel.app/api/suggest?q=' + encodeURIComponent(q),   // inkognito: vår egen, ingen logg
   brave: (q) => 'https://search.brave.com/api/suggest?q=' + encodeURIComponent(q),
   startpage: (q) => 'https://duckduckgo.com/ac/?type=list&q=' + encodeURIComponent(q),
 };
@@ -1238,7 +1241,7 @@ function loadKrypto(ctx, mode) {
 ipcMain.on('krypto:toggle', (e, open, mode, token) => {
   const ctx = ctxFor(e); if (!ctx) return;
   ctx.kryptoOpen = !!open;
-  if (token) ctx.vakaToken = token;   // vaka-session-token för Krypto-chattens API-anrop
+  if (token) ctx.authToken = token;   // sessionstoken för Krypto-chattens API-anrop
   if (ctx.kryptoOpen) {
     if (!ctx.kryptoView) {
       ctx.kryptoView = new WebContentsView({ webPreferences: { preload: path.join(__dirname, 'krypto-preload.js'), contextIsolation: true } });
@@ -1255,7 +1258,7 @@ ipcMain.on('krypto:toggle', (e, open, mode, token) => {
             ctx.kryptoView._mode = 'checkout';
             ctx.kryptoView.webContents.loadFile(path.join(__dirname, 'ui', 'checkout.html'), { hash: plan }).catch(() => {});
           }
-          else if (url.includes('/back')) { ctx.kryptoView._mode = null; loadKrypto(ctx, ctx.vakaToken ? 'nopro' : 'signedout'); }
+          else if (url.includes('/back')) { ctx.kryptoView._mode = null; loadKrypto(ctx, ctx.authToken ? 'nopro' : 'signedout'); }
           else if (url.includes('login')) sendTo(ctx, 'open-login');
           else if (url.includes('recheck')) sendTo(ctx, 'krypto-recheck');
         } else if (!url.startsWith('file:')) {
@@ -1360,8 +1363,8 @@ const KRYPTO_LOG = path.join(app.getPath('userData'), 'krypto-chat.log');
 function klog(o) { try { fs.appendFileSync(KRYPTO_LOG, new Date().toISOString() + ' ' + JSON.stringify(o) + '\n'); } catch {} }
 /* Egen kassa: panelen (ui/checkout.html) ber om en betalningsavsikt och bekräftar
  * köpet via oss – token läggs på här, så sidan ser varken token eller nyckel. */
-async function vakaBillingCall(e, pathname, body) {
-  const ctx = e.sender.__ctx; const token = ctx && ctx.vakaToken;
+async function billingCall(e, pathname, body) {
+  const ctx = e.sender.__ctx; const token = ctx && ctx.authToken;
   if (!token) return { ok: false, error: 'no_session', needLogin: true };
   try {
     const r = await fetch(SKOLL + '/api/sakerkoll/vaka/billing/' + pathname, {
@@ -1373,11 +1376,11 @@ async function vakaBillingCall(e, pathname, body) {
     return j;
   } catch { return { ok: false, error: 'unreachable', message: 'Kunde inte nå servern. Kontrollera din uppkoppling.' }; }
 }
-ipcMain.handle('billing:intent', (e, plan) => vakaBillingCall(e, 'intent', { plan: String(plan || 'pro_month') }));
-ipcMain.handle('billing:confirm', (e, d) => vakaBillingCall(e, 'confirm', { subscription: d && d.subscription, payment_intent: d && d.payment_intent }));
+ipcMain.handle('billing:intent', (e, plan) => billingCall(e, 'intent', { plan: String(plan || 'pro_month') }));
+ipcMain.handle('billing:confirm', (e, d) => billingCall(e, 'confirm', { subscription: d && d.subscription, payment_intent: d && d.payment_intent }));
 ipcMain.handle('krypto:chat', async (e, messages) => {
   const ctx = e.sender.__ctx;
-  const token = ctx && ctx.vakaToken;
+  const token = ctx && ctx.authToken;
   if (!token) { klog({ stage: 'no-token' }); return { ok: false, needLogin: true, message: 'Logga in med din mejl (kontoknappen) för att låsa upp Krypto.' }; }
   const payload = { vaka_token: token, edition: 'vaka', messages: (Array.isArray(messages) ? messages : []).slice(-16) };
   for (let attempt = 1; attempt <= 2; attempt++) {
@@ -1407,7 +1410,7 @@ ipcMain.on('krypto:action', (e, a) => {
     if (name === 'inkognito' || name === 'incognito') { createWindow(true); return; }
     if (name === 'nedladdningar' || name === 'downloads') { sendTo(ctx, 'open-downloads'); return; }
     if (name === 'losenord' || name === 'autofyll' || name === 'autofill') { sendTo(ctx, 'open-passwords'); return; }
-    if (name === 'wallet' || name === 'planbok' || name === 'kort' || name === 'vaka wallet') { sendTo(ctx, 'open-settings', 'wallet'); return; }
+    if (name === 'wallet' || name === 'planbok' || name === 'kort' || name === 'adraze wallet') { sendTo(ctx, 'open-settings', 'wallet'); return; }
     // sokmotor / adblock / realtidsskydd / minska_rorelse sköts i skalet
     sendTo(ctx, 'krypto-set', a);
   } catch {}
@@ -1484,7 +1487,7 @@ function createWindow(incognito) {
   // blir inaktivt ritas skuggan tunnare, och Chromium krymper då felaktigt
   // själva innehållsytan (electron/electron#48588). Ett maximerat fönster
   // blev 1372x912 på en 1920x1080-skärm i samma ögonblick som fokus gick till
-  // den andra skärmen (Cetto 2026-09-04, VAKA_WIN_DEBUG-logg). Vakten: är
+  // den andra skärmen (Cetto 2026-09-04, ADRAZE_WIN_DEBUG-logg). Vakten: är
   // fönstret maximerat men mindre än det BRUKAR bli maximerat på just den
   // skärmen, sätt tillbaka storleken.
   //
@@ -1546,14 +1549,14 @@ function createWindow(incognito) {
       }, 40);
     } catch {}
   });
-  // Tillfällig felsökning (VAKA_WIN_DEBUG=1): logga fönstrets läge vid varje händelse.
-  if (process.env.VAKA_WIN_DEBUG) {
+  // Tillfällig felsökning (ADRAZE_WIN_DEBUG=1): logga fönstrets läge vid varje händelse.
+  if (process.env.ADRAZE_WIN_DEBUG) {
     const fs = require('fs'); const os = require('os');
     const logf = path.join(os.homedir(), '.config', 'AdRaze', 'win-debug.log');
     const log = (ev) => { try { const b = win.getBounds(); fs.appendFileSync(logf, `${new Date().toISOString()} ${ev} bounds=${b.x},${b.y} ${b.width}x${b.height} max=${win.isMaximized()} full=${win.isFullScreen()} focus=${win.isFocused()} htmlFull=${!!ctx.htmlFull} wanted=${!!ctx.fullWanted}\n`); } catch {} };
     for (const ev of ['blur', 'focus', 'resize', 'resized', 'move', 'moved', 'maximize', 'unmaximize', 'enter-full-screen', 'leave-full-screen', 'minimize', 'restore', 'show', 'hide']) win.on(ev, () => log(ev));
     log('start');
-    if (process.env.VAKA_WIN_DEBUG_MAX) setTimeout(() => { try { win.maximize(); } catch {} }, 2500);
+    if (process.env.ADRAZE_WIN_DEBUG_MAX) setTimeout(() => { try { win.maximize(); } catch {} }, 2500);
   }
   win.on('leave-full-screen', () => {
     applyBounds(ctx);
@@ -1769,7 +1772,7 @@ function checkMacUpdate() {
 }
 
 function startAutoUpdate() {
-  // releaser i northcrafto/adraze-dl (aldrig vaka-dl – då skulle appen bytas mot Vaka)
+  // releaser i northcrafto/adraze-dl
   if (process.env.ADRAZE_NO_UPDATES) return;
   if (process.windowsStore) return;               // Microsoft Store sköter uppdateringarna själv
   if (process.platform === 'darwin') { checkMacUpdate(); return; }  // mac: notis (osignerad)

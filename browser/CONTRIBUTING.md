@@ -1,20 +1,20 @@
-# Contributing to Vaka
+# Contributing to AdRaze
 
-Thanks for wanting to help. Vaka is a small project with a big goal: a browser that protects ordinary people by default, without spying on them. Every contribution counts, whether it is a bug report, a translation fix or a new feature.
+Thanks for wanting to help. AdRaze is a small project with a big goal: a browser that protects ordinary people by default, without spying on them. Every contribution counts, whether it is a bug report, a translation fix or a new feature.
 
 ## Ways to contribute
 
-- **Report bugs** — open an issue with the bug template. Include your OS, Vaka version (Settings → About) and steps to reproduce.
+- **Report bugs** — open an issue with the bug template. Include your OS, AdRaze version (Settings → About) and steps to reproduce.
 - **Suggest features** — open an issue with the feature template. Explain the problem before the solution.
 - **Improve translations** — the UI ships in 54 languages under `ui/locales/`. Swedish strings are the source keys; `tools/gen_i18n.js` regenerates the dictionaries.
-- **Fix filter breakage** — if the protection engine breaks a site, add an exception to `filters/vaka-unbreak.txt` and describe the site in your PR.
+- **Fix site breakage** — blocking rules live in the extension (`../extension`); fix them there and the browser picks them up with `npm run sync`.
 - **Write code** — see below.
 
 ## Development setup
 
 ```bash
-git clone https://github.com/vaka-browser/vaka.git
-cd vaka
+git clone https://github.com/northcrafto/adraze.git
+cd adraze/browser
 npm install          # downloads the castLabs Electron build (Widevine-enabled)
 npm start            # runs the browser from source
 ```
@@ -24,8 +24,8 @@ Requirements: Node.js 22 or newer. The first `npm install` fetches Electron from
 Useful flags while developing:
 
 - `--remote-debugging-port=9333` — attach Chrome DevTools or a CDP script to the shell and tabs.
-- `VAKA_NO_COSMETICS=1` — disable cosmetic filtering and scriptlets when hunting a site breakage.
-- `VAKA_FILTER_DROP='regex'` — drop matching filter rules before parsing.
+- `ADRAZE_DEBUG=1` — log every blocked request to the terminal.
+- `ADRAZE_NO_UPDATES=1` — skip the update check.
 
 ## Project layout
 
@@ -37,11 +37,9 @@ Useful flags while developing:
 | `scanner.js` | Dangerous-site checks and content analysis. |
 | `auth.js` | Account session handling. |
 | `ui/` | The browser shell (`shell.html`, `shell.js`, `input.css` → `tailwind.css`), Krypto panel, checkout, settings. |
-| `adblock-brave.js` | Brave's adblock-rust engine (via adblock-rs): list loading, cache, network blocking, popup rules. |
-| `adblock-preload.js` | Cosmetic filtering inside pages: hide selectors, generic class/id hiding, scriptlets. |
-| `native/adblock/` | Prebuilt adblock-rs binaries per platform (built by the `adblock-native` workflow). |
-| `filters/` | Brave's default filter lists plus `vaka-unbreak.txt`; `tools/update_filters.sh` refreshes them. |
-| `tools/` | Maintenance scripts (filter updates, translation generation). |
+| `adblock-adraze.js` | The AdRaze engine: network rules, cosmetic CSS, cookie banners, danger checks. |
+| `adraze-preload.js` | Runs the extension's page scripts inside tabs. |
+| `tools/` | Rule sync, translations, release and MSIX scripts. |
 | `build/` | Icons and packaging hooks. |
 
 The shell CSS is written in `ui/input.css` and compiled with Tailwind:

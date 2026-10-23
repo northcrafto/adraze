@@ -167,7 +167,7 @@ svg { display: block; }
   .engine-opt.on .engine-radio { border-color: var(--color-terra); }
   .engine-opt.on .engine-radio::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--color-terra); }
 
-  /* ── Vaka Wallet ── */
+  /* ── AdRaze Wallet ── */
   .wl-secure { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--color-safe); background: rgba(23,138,90,.07); border: 1px solid rgba(23,138,90,.18); border-radius: 10px; padding: 9px 12px; }
   .wl-secure svg { flex: none; }
   .wl-card { border: 1px solid var(--color-line); border-radius: 10px; overflow: hidden; background: #fff; }
