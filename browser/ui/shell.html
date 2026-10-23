@@ -108,6 +108,7 @@
     <button id="krypto-btn" class="pill pill-accent off" title="Krypto: din säkerhetsassistent">
       <img src="krypto-owl-face.png" alt="" style="width:18px;height:18px;object-fit:contain;flex:none;">Krypto AI
     </button>
+    <button id="chatt-btn" class="icon-btn relative" title="Chatt: vänner och grupper"><svg class="ic"><use href="#i-chat" /></svg><span id="chatt-badge" style="display:none;position:absolute;top:1px;right:0;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--color-terra);color:#fff;font-size:9.5px;font-weight:800;line-height:16px;text-align:center;box-shadow:0 0 0 2px var(--color-chrome,#eef2f6)"></span></button>
     <button id="net-btn" class="icon-btn" title="Nätverksinspektör – se all trafik">
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2 5 4-14 2 9h2l1-2 1 2h2"/></svg>
     </button>
@@ -623,23 +624,28 @@
     <div id="settings" class="hidden absolute inset-0 z-[70] set-shell">
       <button id="settings-close" class="set-close icon-btn w-9 h-9 z-20" title="Stäng"><svg class="ic ic-sm"><use href="#i-close" /></svg></button>
       <aside class="set-rail">
-        <div class="set-brand"><svg class="ic" viewBox="0 0 24 24"><use href="#i-settings" /></svg>Inställningar</div>
-          <nav id="settings-nav" class="flex flex-col gap-0.5">
+        <div class="set-brand"><img src="adraze-mark.png" alt="" width="22" height="22"><span>Inställningar</span></div>
+        <label class="set-search"><svg class="ic ic-sm"><use href="#i-search" /></svg><input id="set-search" type="search" placeholder="Sök i inställningar" autocomplete="off" spellcheck="false"></label>
+          <nav id="settings-nav" class="flex flex-col">
+            <div class="set-glbl">Du</div>
             <button class="set-tab" style="--i:1" data-cat="konto"><svg class="ic"><use href="#i-user" /></svg>Konto</button>
             <button class="set-tab" style="--i:2" data-cat="vanner"><svg class="ic"><use href="#i-chat" /></svg>Vänner &amp; chatt</button>
-            <button class="set-tab" style="--i:3" data-cat="utseende"><svg class="ic"><use href="#i-image" /></svg>Utseende</button>
-            <button class="set-tab" style="--i:4" data-cat="sok"><svg class="ic"><use href="#i-globe" /></svg>Sökmotor</button>
-            <button class="set-tab" style="--i:5" data-cat="integritet"><svg class="ic"><use href="#i-shield" /></svg>Integritet &amp; säkerhet</button>
-            <button class="set-tab" style="--i:6" data-cat="krypto"><svg class="ic"><use href="#i-chat" /></svg>Krypto</button>
-            <button class="set-tab" style="--i:7" data-cat="tillagg"><svg class="ic"><use href="#i-settings" /></svg>Tillägg</button>
-            <button class="set-tab" style="--i:8" data-cat="losenord"><svg class="ic"><use href="#i-key" /></svg>Autofyll &amp; lösenord</button>
-            <button class="set-tab" style="--i:9" data-cat="familj"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Familj</button>
-            <button class="set-tab" style="--i:10" data-cat="wallet"><svg class="ic"><use href="#i-card" /></svg>AdRaze Wallet</button>
-            <button class="set-tab" style="--i:11" data-cat="kalender"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2"/><path d="M16 2.5v4M8 2.5v4M3 10h18"/></svg>AdRaze Calendar</button>
-            <button class="set-tab" style="--i:12" data-cat="nedladdningar"><svg class="ic"><use href="#i-download" /></svg>Nedladdningar</button>
-            <button class="set-tab" style="--i:13" data-cat="sprak"><svg class="ic"><use href="#i-globe" /></svg>Språk</button>
-            <button class="set-tab" style="--i:14" data-cat="tillganglighet"><svg class="ic"><use href="#i-eye" /></svg>Tillgänglighet</button>
+            <button class="set-tab" style="--i:3" data-cat="familj"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Familj</button>
+            <button class="set-tab" style="--i:4" data-cat="wallet"><svg class="ic"><use href="#i-card" /></svg>AdRaze Wallet</button>
+            <div class="set-glbl">Webbläsaren</div>
+            <button class="set-tab" style="--i:5" data-cat="utseende"><svg class="ic"><use href="#i-image" /></svg>Utseende</button>
+            <button class="set-tab" style="--i:6" data-cat="sok"><svg class="ic"><use href="#i-globe" /></svg>Sökmotor</button>
+            <button class="set-tab" style="--i:7" data-cat="sprak"><svg class="ic"><use href="#i-globe" /></svg>Språk</button>
+            <button class="set-tab" style="--i:8" data-cat="nedladdningar"><svg class="ic"><use href="#i-download" /></svg>Nedladdningar</button>
+            <button class="set-tab" style="--i:9" data-cat="tillganglighet"><svg class="ic"><use href="#i-eye" /></svg>Tillgänglighet</button>
+            <div class="set-glbl">Skydd</div>
+            <button class="set-tab" style="--i:10" data-cat="integritet"><svg class="ic"><use href="#i-shield" /></svg>Integritet &amp; säkerhet</button>
+            <button class="set-tab" style="--i:11" data-cat="tillagg"><svg class="ic"><use href="#i-settings" /></svg>Tillägg</button>
+            <button class="set-tab" style="--i:12" data-cat="losenord"><svg class="ic"><use href="#i-key" /></svg>Autofyll &amp; lösenord</button>
+            <button class="set-tab" style="--i:13" data-cat="krypto"><svg class="ic"><use href="#i-chat" /></svg>Krypto</button>
+            <button class="set-tab" style="--i:14" data-cat="kalender"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2"/><path d="M16 2.5v4M8 2.5v4M3 10h18"/></svg>AdRaze Calendar</button>
             <button class="set-tab" style="--i:15" data-cat="om"><svg class="ic"><use href="#i-shield-check" /></svg>Om</button>
+            <p id="set-search-none" class="set-search-none" hidden>Inget hittades.</p>
           </nav>
       </aside>
       <main class="set-main">
@@ -873,11 +879,6 @@
                 </div>
               </div>
               <input type="file" id="kn-avatar-file" accept="image/*" style="display:none;" />
-              <div class="kn-uedit">
-                <label class="kn-lbl">Användarnamn <span style="opacity:.55;font-weight:500;">– för vänner &amp; chatt</span></label>
-                <div class="kn-uwrap"><span class="kn-at">@</span><input id="kn-username" class="kn-uin" placeholder="dittnamn" maxlength="20" spellcheck="false" autocomplete="off" /><button id="kn-save-prof" class="kn-usave" type="button">Spara</button></div>
-                <div id="kn-prof-msg" class="kn-msg"></div>
-              </div>
               <div class="kn-rows" id="kn-rows"></div>
               <div class="kn-actions">
                 <button id="kn-logout" class="btn btn-ghost" style="height:42px;padding:0 20px;">Logga ut</button>
@@ -895,45 +896,13 @@
           </div>
 
           <style>
-            .fr-add { display: flex; gap: 8px; margin-bottom: 16px; }
-            .fr-sub { font-size: 11.5px; font-weight: 700; color: var(--color-navy-700); text-transform: uppercase; letter-spacing: .03em; margin: 14px 0 8px; }
-            .fr-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid var(--color-line); border-radius: 13px; padding: 9px 12px; margin-bottom: 8px; }
-            .fr-open { cursor: pointer; } .fr-open:hover { border-color: #2f8fd4; background: rgba(47,143,212,.04); }
-            .fr-id { display: flex; align-items: center; gap: 10px; min-width: 0; }
-            .fr-name { font-size: 14px; font-weight: 700; color: var(--color-navy-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-            .fr-fam { width: 38px; height: 38px; border-radius: 50%; background: #eaf3fb; display: grid; place-items: center; font-size: 19px; flex: none; }
-            .fr-go { color: var(--color-navy-600); font-size: 20px; flex: none; }
-            .fr-none { font-size: 12.5px; color: rgb(28 43 58 / .45); padding: 4px 2px; }
             .fr-note { font-size: 13px; color: rgb(28 43 58 / .65); background: var(--color-paper); border: 1px solid var(--color-line); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; line-height: 1.5; }
-            .fr-acc { height: 32px; padding: 0 12px; border-radius: 9px; border: 0; background: var(--color-safe); color: #fff; font-weight: 700; font-size: 12.5px; cursor: pointer; }
-            .fr-dec { width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--color-line); background: #fff; color: var(--color-navy-700); cursor: pointer; }
-            .fr-chat-head { display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--color-line); margin-bottom: 10px; }
-            .fr-chat-head span { font-size: 15px; font-weight: 800; color: var(--color-navy-900); }
-            .fr-back { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--color-line); background: #fff; font-size: 20px; color: var(--color-navy-900); cursor: pointer; line-height: 1; flex: none; }
-            .fr-msgs { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 4px 2px; }
-            .fr-msg { display: flex; gap: 8px; align-items: flex-end; max-width: 82%; }
-            .fr-msg.mine { align-self: flex-end; flex-direction: row-reverse; }
-            .fr-bub { background: var(--color-paper); border: 1px solid var(--color-line); border-radius: 14px; padding: 7px 12px; font-size: 13.5px; color: var(--color-navy-900); word-break: break-word; }
-            .fr-msg.mine .fr-bub { background: #2f8fd4; border-color: transparent; color: #fff; }
-            .fr-bub-name { font-size: 10.5px; font-weight: 700; opacity: .7; margin-bottom: 1px; }
-            .fr-msg.mine .fr-bub-name { display: none; }
-            .fr-send { display: flex; gap: 8px; margin-top: 10px; }
-            .fr-chat-av { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--color-line); background: #eaf3fb; display: grid; place-items: center; font-size: 17px; cursor: pointer; overflow: hidden; flex: none; padding: 0; }
-            .fr-ed { font-size: 10.5px; opacity: .6; }
-            .fr-edit-in { border: 0; background: rgba(255,255,255,.3); color: inherit; border-radius: 6px; padding: 2px 6px; outline: none; font-size: 13.5px; width: 180px; max-width: 55vw; }
-            .fr-allow { display: block; margin-top: 8px; height: 32px; padding: 0 12px; border-radius: 9px; border: 0; background: var(--color-safe); color: #fff; font-weight: 700; font-size: 12.5px; cursor: pointer; }
-            .fr-allow:hover { filter: brightness(1.05); } .fr-allow:disabled { opacity: .7; cursor: default; }
           </style>
           <div class="set-panel hidden" data-cat="vanner">
             <h2 class="set-h">Vänner &amp; chatt</h2>
-            <p class="set-lead mb-4">Lägg till vänner med användarnamn och chatta – ni ses bara som era användarnamn, inga riktiga namn.</p>
-            <div id="fr-list"><div id="fr-body"></div></div>
-            <div id="fr-chat" style="display:none;flex-direction:column;height:430px;">
-              <div class="fr-chat-head"><button id="fr-back" class="fr-back" type="button">‹</button><button id="fr-chat-av" class="fr-chat-av" type="button" title="Byt chattbild">👪</button><span id="fr-chat-title">Chatt</span></div>
-              <input type="file" id="fr-chat-av-file" accept="image/*" style="display:none;">
-              <div id="fr-msgs" class="fr-msgs"></div>
-              <div class="fr-send"><input id="fr-send-in" class="fam-in" placeholder="Skriv ett meddelande…" style="flex:1;" /><button id="fr-send-btn" class="btn btn-safe flex-none" type="button" style="height:40px;padding:0 16px;">Skicka</button></div>
-            </div>
+            <p class="set-lead mb-4">Lägg till vänner med användarnamn och chatta, en och en eller i grupper. Ni ses bara som era användarnamn.</p>
+            <div id="fr-body"></div>
+          </div>
           </div>
 
           <div class="set-panel hidden" data-cat="om">

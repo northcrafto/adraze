@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'none'; connect-src 'none'; font-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Chatt</title>
+<link rel="stylesheet" href="chatt.css" />
+<script src="chatt-tema.js"></script>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <img class="logo logo-light" src="adraze-mark.png" alt="" width="22" height="22"><img class="logo logo-dark" src="adraze-mark-dark.png" alt="" width="22" height="22">
+    <span class="tb-title">Chatt</span>
+    <span class="tb-e2e" title="Änd-till-änd-krypterat">krypterat</span>
+    <span class="grow"></span>
+    <button class="tb-me" id="btn-profile" type="button" title="Din profil" hidden><span class="avatar" id="my-avatar" translate="no">?</span></button>
+    <button class="tb-btn" id="btn-settings" type="button" title="Chattinställningar" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    <button class="tb-btn" id="btn-expand" type="button" title="Helskärm"><svg class="fs-on" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg><svg class="fs-off" viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/></svg></button>
+    <button class="tb-btn" id="btn-close" type="button" title="Stäng chatten"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </header>
+
+  <!-- Hämtar -->
+  <section class="view" id="view-loading"><div class="center-note"><span class="spin"></span><span>Hämtar…</span></div></section>
+
+  <!-- Fel (servern nås inte) -->
+  <section class="view" id="view-error" hidden>
+    <div class="auth-card">
+      <h2>Chatten går inte att nå just nu</h2>
+      <p class="lead" id="error-text">Kontrollera din uppkoppling och försök igen.</p>
+      <button class="btn" id="btn-retry" type="button">Försök igen</button>
+    </div>
+  </section>
+
+  <!-- Avstängd -->
+  <section class="view" id="view-suspended" hidden>
+    <div class="auth-card">
+      <h2>Chatten är avstängd</h2>
+      <p class="lead" id="suspended-text"></p>
+    </div>
+  </section>
+
+  <!-- Välj användarnamn (första gången) -->
+  <section class="view" id="view-create" hidden>
+    <div class="auth-card" id="form-create">
+      <h2>Välj ett användarnamn</h2>
+      <p class="lead">Dina vänner hittar dig på användarnamnet. Ditt riktiga namn och din mejl syns aldrig. Allt du skriver krypteras på din dator innan det skickas: bara du och de du chattar med kan läsa det, aldrig AdRaze.</p>
+      <label class="field"><span class="lbl">Användarnamn</span><input type="text" id="create-username" placeholder="välj ett användarnamn" autocomplete="off" spellcheck="false" maxlength="20"></label>
+      <button class="btn" id="btn-create" type="button">Fortsätt</button>
+      <p class="msg-error" id="create-error"></p>
+      <p class="hint">3–20 tecken: bokstäver, siffror och _.</p>
+    </div>
+    <div class="auth-card" id="form-created" hidden>
+      <div class="msg-ok big">✓ Klart!</div>
+      <p class="lead">Det här är din hemliga kod. Den låser upp chatten på en ny dator och skyddar dina nycklar.</p>
+      <div class="code-box"><div class="code-val" id="created-code" translate="no"></div></div>
+      <button class="btn secondary small" id="btn-copy-code" type="button">Kopiera kod</button>
+      <div class="warn-box"><strong>Spara koden nu.</strong> Utan koden kan du inte läsa dina meddelanden på en annan dator. Lägg den i en lösenordshanterare, eller sätt ett lösenord i din profil så kan du få fram koden igen.</div>
+      <label class="check"><input type="checkbox" id="confirm-saved"> Jag har sparat min kod på ett säkert ställe.</label>
+      <button class="btn" id="btn-enter" type="button" disabled>Till chatten →</button>
+    </div>
+  </section>
+
+  <!-- Lås upp på en ny dator -->
+  <section class="view" id="view-unlock" hidden>
+    <div class="auth-card" id="form-unlock">
+      <h2>Lås upp chatten</h2>
+      <p class="lead">Du chattar som <b id="unlock-name" translate="no">—</b>. Skriv din hemliga kod för att låsa upp dina meddelanden på den här datorn.</p>
+      <label class="field"><span class="lbl">Din kod</span><input type="text" id="unlock-code" class="mono-in" placeholder="koden du sparade" autocomplete="off" inputmode="numeric"></label>
+      <button class="btn" id="btn-unlock" type="button">Lås upp</button>
+      <p class="msg-error" id="unlock-error"></p>
+      <p class="hint"><button class="link-btn" id="btn-forgot" type="button">Glömt koden?</button></p>
+    </div>
+    <div class="auth-card" id="form-forgot" hidden>
+      <h2>Glömt koden?</h2>
+      <p class="lead">Har du sparat ett lösenord i din chattprofil? Skriv det så visas din kod.</p>
+      <label class="field"><span class="lbl">Lösenord</span><input type="password" id="forgot-pw" placeholder="lösenordet du valde" autocomplete="current-password"></label>
+      <button class="btn" id="btn-forgot-go" type="button">Visa min kod</button>
+      <p class="msg-error" id="forgot-error"></p>
+      <div id="forgot-result" hidden>
+        <div class="code-box"><div class="code-val" id="forgot-code" translate="no"></div></div>
+        <p class="hint">Skriv upp koden på ett säkert ställe.</p>
+        <button class="btn" id="btn-forgot-login" type="button">Lås upp med koden</button>
+      </div>
+      <p class="hint"><button class="link-btn" id="btn-forgot-back" type="button">← Tillbaka</button></p>
+      <p class="hint">Inget lösenord sparat? Då går koden tyvärr inte att få fram. Den finns bara hos dig.</p>
+    </div>
+  </section>
+
+  <!-- Chatten -->
+  <section class="view" id="view-app" hidden>
+    <div class="rec-nudge" id="rec-nudge">
+      <div class="grow"><b>Tappa inte bort din kod.</b> Sätt ett lösenord så kan du alltid få fram koden om du glömmer den.</div>
+      <button class="btn small" id="rec-nudge-go" type="button">Sätt lösenord</button>
+      <button class="x" id="rec-nudge-x" type="button" aria-label="Dölj">×</button>
+    </div>
+    <div class="layout" id="layout">
+      <aside class="sidebar" id="sidebar">
+        <div class="side-sec">
+          <div class="side-title">Lägg till vän</div>
+          <div class="add-row">
+            <input type="text" id="add-username" placeholder="användarnamn" autocomplete="off" spellcheck="false" maxlength="20">
+            <button class="btn small" id="btn-add" type="button">Lägg till</button>
+          </div>
+          <p class="msg-error" id="add-msg"></p>
+        </div>
+        <div class="side-sec" id="incoming-sec" hidden>
+          <div class="side-title">Vänförfrågningar</div>
+          <div id="incoming-list" translate="no"></div>
+        </div>
+        <div class="side-sec">
+          <div class="side-head">
+            <div class="side-title">Grupper</div>
+            <button class="mini-btn" id="btn-new-group" type="button">+ Ny grupp</button>
+          </div>
+          <div id="groups-list" translate="no"></div>
+        </div>
+        <div class="side-sec">
+          <div class="side-title">Vänner</div>
+          <div id="contacts-list" translate="no"></div>
+        </div>
+        <div class="side-sec" id="outgoing-sec" hidden>
+          <div class="side-title">Väntar på svar</div>
+          <div id="outgoing-list" translate="no"></div>
+        </div>
+      </aside>
+
+      <main class="chat" id="chat">
+        <div class="chat-empty" id="chat-empty"><p>Välj en vän eller grupp för att börja skriva. Allt krypteras innan det lämnar din dator.</p></div>
+        <div id="chat-active" class="chat-active" hidden>
+          <div class="chat-head">
+            <button class="back" id="chat-back" type="button" aria-label="Tillbaka" title="Tillbaka"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+            <span class="avatar" id="peer-avatar" translate="no">?</span>
+            <span class="peer-name" id="peer-name" translate="no">—</span>
+            <span class="grow"></span>
+            <button class="icon-btn" id="chat-info" type="button" hidden>Medlemmar <span id="grp-count" translate="no">0</span></button>
+          </div>
+          <div class="chat-body" id="chat-body" translate="no"></div>
+          <div class="chat-foot-wrap" id="chat-foot-wrap">
+            <div class="reply-bar" id="reply-bar">
+              <div class="rb-body"><span class="rb-who" id="reply-who" translate="no">Svarar</span><span class="rb-text" id="reply-text" translate="no"></span></div>
+              <button class="rb-x" id="reply-cancel" type="button" aria-label="Avbryt svar" title="Avbryt svar">×</button>
+            </div>
+            <div class="st-panel" id="st-panel">
+              <div class="st-panel-head"><span class="grow">Mina stickers</span><button type="button" id="st-del-toggle">Ta bort</button><button type="button" id="st-close" aria-label="Stäng">✕</button></div>
+              <div class="st-grid" id="st-grid"></div>
+            </div>
+            <div class="attach-preview" id="attach-preview">
+              <img id="attach-thumb" alt="">
+              <span class="ap-meta" id="attach-meta">bild</span>
+              <button class="ap-remove" id="attach-remove" type="button" aria-label="Ta bort bild" title="Ta bort bild">×</button>
+            </div>
+            <div class="chat-foot">
+              <button class="attach-btn" id="chat-attach" type="button" aria-label="Skicka bild" title="Skicka bild"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15.5l-5-5L5 21"/></svg></button>
+              <input type="file" id="chat-file" accept="image/*" hidden>
+              <button class="attach-btn" id="chat-sticker" type="button" aria-label="Stickers" title="Stickers"><svg viewBox="0 0 24 24"><path d="M15.5 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"/><path d="M15 3v4a2 2 0 0 0 2 2h4"/><path d="M8 13h.01M16 13h.01"/><path d="M10 16.5s.8 1 2 1 2-1 2-1"/></svg></button>
+              <input type="file" id="sticker-file" accept="image/*" hidden>
+              <textarea id="chat-input" rows="1" placeholder="Skriv ett meddelande…" maxlength="4000"></textarea>
+              <button class="btn send" id="chat-send" type="button">Skicka</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+</div>
+
+<!-- Profil -->
+<div class="modal-overlay" id="profile-modal">
+  <div class="modal profile">
+    <div class="pf-cover"><button class="pf-close" id="profile-close" type="button" aria-label="Stäng"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="pf-body">
+      <div class="pf-top">
+        <div class="pf-av-wrap">
+          <div class="pf-avatar" id="profile-avatar" translate="no">?</div>
+          <button class="cam-badge" id="cam-badge" type="button" title="Byt profilbild" hidden><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button>
+          <input type="file" id="avatar-input" accept="image/jpeg,image/png,image/webp" hidden>
+        </div>
+        <div class="pf-names"><div class="pf-username" id="profile-username" translate="no">—</div></div>
+      </div>
+      <div class="pf-stats">
+        <div class="pf-stat"><div class="pf-k">Har chattat</div><div class="pf-v" id="profile-since">—</div></div>
+        <div class="pf-stat"><div class="pf-k">Vänner</div><div class="pf-v" id="profile-friends" translate="no">0</div></div>
+      </div>
+      <div class="pf-sec">
+        <div class="bs-title">Om</div>
+        <p class="pf-bio" id="profile-bio" translate="no">—</p>
+        <button class="link-btn" id="profile-bio-editbtn" type="button" hidden>Redigera beskrivning</button>
+        <div id="profile-bio-edit" hidden>
+          <textarea id="profile-bio-input" rows="3" maxlength="300" placeholder="Skriv en kort beskrivning om dig själv"></textarea>
+          <div class="acc-actions"><button class="btn small" id="profile-bio-save" type="button">Spara</button><button class="link-btn" id="profile-bio-cancel" type="button">Avbryt</button><span class="grow"></span><span class="mono" id="profile-bio-count">0/300</span></div>
+        </div>
+      </div>
+      <div id="account-sec" class="acc-sec" hidden>
+        <div class="bs-title">Konto</div>
+        <div class="acc-card">
+          <div class="acc-row">
+            <div><div class="acc-h">Användarnamn</div><div class="acc-p" id="acc-name-cur" translate="no">—</div></div>
+            <button class="btn secondary small" id="acc-name-btn" type="button">Byt</button>
+          </div>
+          <div class="acc-form" id="acc-name-form">
+            <input type="text" id="acc-name-new" maxlength="20" placeholder="nytt användarnamn" autocomplete="off" spellcheck="false">
+            <input type="text" id="acc-name-code" placeholder="din kod (för att bekräfta)" autocomplete="off" inputmode="numeric" hidden>
+            <div class="acc-p">Ditt gamla namn blir ledigt för andra. Dina vänner och meddelanden följer med. Högst 3 byten per vecka.</div>
+            <div class="acc-actions"><button class="btn small" id="acc-name-save" type="button">Spara namn</button><button class="link-btn" id="acc-name-cancel" type="button">Avbryt</button></div>
+            <div class="acc-msg" id="acc-name-msg"></div>
+          </div>
+        </div>
+        <div class="acc-card">
+          <div class="acc-row">
+            <div><div class="acc-h">Lösenord för din kod</div><div class="acc-p" id="acc-rec-status">…</div></div>
+            <button class="btn secondary small" id="acc-rec-btn" type="button">Sätt lösenord</button>
+          </div>
+          <div class="acc-form" id="acc-rec-form">
+            <input type="password" id="acc-rec-pw" placeholder="välj lösenord (minst 8 tecken)" autocomplete="new-password">
+            <input type="password" id="acc-rec-pw2" placeholder="upprepa lösenordet" autocomplete="new-password">
+            <input type="text" id="acc-rec-code" placeholder="din kod (för att bekräfta)" autocomplete="off" inputmode="numeric" hidden>
+            <div class="acc-p">Tappar du bort koden väljer du "Glömt koden?" när du låser upp chatten och skriver lösenordet, så visas koden. Koden krypteras med lösenordet på din dator: servern ser varken lösenordet eller koden.</div>
+            <div class="acc-actions"><button class="btn small" id="acc-rec-save" type="button">Spara lösenord</button><button class="link-btn" id="acc-rec-cancel" type="button">Avbryt</button></div>
+            <div class="acc-msg" id="acc-rec-msg"></div>
+          </div>
+          <div class="acc-links" id="acc-rec-links" hidden>
+            <button class="link-btn" id="acc-show-btn" type="button">Visa min kod</button>
+          </div>
+          <div class="acc-form" id="acc-show-form">
+            <input type="password" id="acc-show-pw" placeholder="ditt lösenord" autocomplete="current-password">
+            <div class="acc-actions"><button class="btn small" id="acc-show-go" type="button">Visa min kod</button><button class="link-btn" id="acc-show-remove" type="button">Ta bort lösenordet</button><button class="link-btn" id="acc-show-cancel" type="button">Stäng</button></div>
+            <div class="acc-code" id="acc-show-code" translate="no" hidden></div>
+            <div class="acc-msg" id="acc-show-msg"></div>
+          </div>
+        </div>
+      </div>
+      <div class="profile-others" id="profile-others" hidden>
+        <button type="button" id="profile-remove">Ta bort vän</button>
+        <button type="button" id="profile-report">Rapportera</button>
+        <button type="button" id="profile-block">Blockera</button>
+      </div>
+      <div id="bubble-sec" class="bs-sec" hidden>
+        <div class="bs-title">Din pratbubbla</div>
+        <p class="bs-sub">Välj ett djur som blir din bubbla och en färg. Alla du chattar med ser den.</p>
+        <div class="bs-preview" id="bs-preview" translate="no"></div>
+        <div class="bs-label">Djur</div>
+        <div class="bs-frames" id="bs-frames"></div>
+        <div class="bs-label">Färg</div>
+        <div class="bs-swatches" id="bs-swatches"></div>
+        <div class="bs-status" id="bs-status"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chattinställningar -->
+<div class="modal-overlay" id="modal-settings">
+  <div class="modal">
+    <h3>Chattinställningar</h3>
+    <p class="sub">Gäller ditt chattkonto. Valen under Integritet sparas på servern och följer med till alla dina datorer.</p>
+    <div class="set-title">Integritet</div>
+    <label class="set-row"><span class="set-txt"><span class="set-h">Läskvitton</span><span class="set-d">Visa "Öppnat" när du har läst. Stänger du av ser du inte heller andras.</span></span><input type="checkbox" class="sw" data-priv="read_receipts"></label>
+    <label class="set-row"><span class="set-txt"><span class="set-h">Visa när jag skriver</span><span class="set-d">Andra ser tre prickar medan du skriver.</span></span><input type="checkbox" class="sw" data-priv="typing"></label>
+    <label class="set-row"><span class="set-txt"><span class="set-h">Ta emot vänförfrågningar</span><span class="set-d">Av: ingen ny kan lägga till dig.</span></span><input type="checkbox" class="sw" id="priv-requests"></label>
+    <p class="msg-error" id="priv-msg"></p>
+    <div class="set-title">Den här datorn</div>
+    <label class="set-row"><span class="set-txt"><span class="set-h">Enter skickar</span><span class="set-d">Av: Ctrl+Enter skickar och Enter ger ny rad.</span></span><input type="checkbox" class="sw" data-chat="enter"></label>
+    <label class="set-row"><span class="set-txt"><span class="set-h">Ljud vid nytt meddelande</span><span class="set-d">Ett kort, mjukt pling.</span></span><input type="checkbox" class="sw" data-chat="sound"></label>
+    <label class="set-row"><span class="set-txt"><span class="set-h">Skrivbordsnotiser</span><span class="set-d">När chatten är stängd. Innehållet visas aldrig i notisen.</span></span><input type="checkbox" class="sw" data-chat="notify"></label>
+    <label class="set-row"><span class="set-txt"><span class="set-h">Sudda bilder</span><span class="set-d">Klicka på en bild för att visa den.</span></span><input type="checkbox" class="sw" data-chat="blur"></label>
+    <label class="set-row"><span class="set-txt"><span class="set-h">Kompakt</span><span class="set-d">Tätare meddelanden.</span></span><input type="checkbox" class="sw" data-chat="compact"></label>
+    <div class="set-title">Blockerade</div>
+    <ul class="block-list" id="block-list" translate="no"></ul>
+    <div class="add-row"><input type="text" id="block-name" placeholder="användarnamn" autocomplete="off" spellcheck="false" maxlength="20"><button class="btn secondary small" id="block-go" type="button">Blockera</button></div>
+    <p class="msg-error" id="block-msg"></p>
+    <div class="set-title">Säkerhet</div>
+    <div class="set-row"><span class="set-txt"><span class="set-h">Glöm nyckeln på den här datorn</span><span class="set-d">Nästa gång behöver du din kod för att låsa upp chatten här.</span></span><button class="btn secondary small" id="forget-key" type="button">Glöm</button></div>
+    <div class="danger-zone">
+      <div class="set-h">Radera chattprofilen</div>
+      <div class="set-d">Användarnamn, vänner, grupper och alla meddelanden försvinner för alltid. Ditt AdRaze-konto finns kvar.</div>
+      <button class="link-btn danger" id="del-open" type="button">Radera chattprofilen…</button>
+      <div class="acc-form" id="del-form">
+        <input type="text" id="del-name" placeholder="skriv ditt användarnamn" autocomplete="off" spellcheck="false">
+        <input type="text" id="del-code" placeholder="din kod" autocomplete="off" inputmode="numeric">
+        <div class="acc-actions"><button class="btn small danger" id="del-go" type="button">Radera för alltid</button><button class="link-btn" id="del-cancel" type="button">Avbryt</button></div>
+        <div class="acc-msg" id="del-msg"></div>
+      </div>
+    </div>
+    <div class="modal-actions"><button class="btn" id="settings-close" type="button">Klar</button></div>
+  </div>
+</div>
+
+<!-- Sticker-sax -->
+<div class="stx-ov" id="stx-ov" role="dialog" aria-label="Gör sticker">
+  <button class="stx-x" id="stx-x" type="button" aria-label="Stäng">×</button>
+  <div class="stx-top"><span id="stx-title">Rita runt det du vill ha</span><small id="stx-sub">Dra med musen runt motivet. Släpp för att klippa ut.</small></div>
+  <div class="stx-stage" id="stx-stage"><canvas id="stx-canvas"></canvas></div>
+  <div class="stx-bar">
+    <button type="button" id="stx-redo" disabled>Rita om</button>
+    <button type="button" id="stx-whole">Hela bilden</button>
+    <button type="button" id="stx-save" disabled>Spara sticker</button>
+    <button type="button" class="primary" id="stx-send" disabled>Spara och skicka</button>
+  </div>
+</div>
+
+<!-- Bild i helskärm -->
+<div class="lightbox" id="lightbox"><img id="lightbox-img" alt=""></div>
+<!-- Högerklicksmeny för meddelanden -->
+<div class="ctx-menu" id="ctx-menu" role="menu"></div>
+
+<!-- Ny grupp -->
+<div class="modal-overlay" id="modal-create-group">
+  <div class="modal">
+    <h3>Ny grupp</h3>
+    <p class="sub">Ge gruppen ett namn och välj vilka vänner som ska vara med. Allt krypteras: servern ser aldrig namnet eller meddelandena.</p>
+    <label class="field"><span class="lbl">Gruppnamn</span><input type="text" id="group-name" placeholder="t.ex. fikagänget" autocomplete="off" maxlength="60"></label>
+    <span class="lbl">Välj medlemmar</span>
+    <div class="pick-list" id="group-pick" translate="no"></div>
+    <p class="msg-error" id="group-create-msg"></p>
+    <div class="modal-actions">
+      <button class="btn secondary" id="group-cancel" type="button">Avbryt</button>
+      <button class="btn" id="group-create-go" type="button">Skapa grupp</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rapportera -->
+<div class="modal-overlay" id="modal-report">
+  <div class="modal">
+    <div id="rp-form">
+      <h3 id="rp-title">Rapportera</h3>
+      <p class="sub">Varför vill du rapportera det här? Vi granskar varje rapport.</p>
+      <div class="rp-quote" id="rp-quote" translate="no" hidden></div>
+      <div class="rp-reasons" id="rp-reasons"></div>
+      <textarea id="rp-details" maxlength="1000" placeholder="Berätta gärna mer (valfritt)"></textarea>
+      <label class="check"><input type="checkbox" id="rp-block"> <span id="rp-block-label">Blockera också personen</span></label>
+      <p class="rp-note" id="rp-note"></p>
+      <p class="msg-error" id="rp-msg"></p>
+      <div class="modal-actions">
+        <button class="btn secondary" id="rp-cancel" type="button">Avbryt</button>
+        <button class="btn" id="rp-send" type="button">Skicka rapport</button>
+      </div>
+    </div>
+    <div class="rp-done" id="rp-done" hidden>
+      <div class="big">Tack för att du säger till</div>
+      <p class="sub" id="rp-done-sub">Vi granskar rapporten. Personen får inte veta vem som rapporterade.</p>
+      <div class="modal-actions center"><button class="btn" id="rp-ok" type="button">Stäng</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Öppna länk (säkerhetskoll) -->
+<div class="modal-overlay" id="modal-link">
+  <div class="modal">
+    <h3>Öppna länken?</h3>
+    <p class="sub tight">Länken går till:</p>
+    <div class="lk-host" id="lk-host" translate="no"></div>
+    <div class="lk-url" id="lk-url" translate="no"></div>
+    <div class="lk-status" id="lk-status"><span class="ico">⏳</span><div>Kollar länken mot listor över farliga sajter…</div></div>
+    <p class="lk-tip">AdRaze har inte kontaktat sajten: förhandsvisningar hämtas av vår server, aldrig av din dator. Länken öppnas i en ny flik. Skriv aldrig in BankID-, kort- eller inloggningsuppgifter på en sida du fått länk till.</p>
+    <div class="modal-actions">
+      <button class="btn secondary" id="lk-cancel" type="button">Avbryt</button>
+      <button class="btn secondary" id="lk-deep" type="button">Kolla grundligt</button>
+      <button class="btn" id="lk-open" type="button">Öppna</button>
+    </div>
+  </div>
+</div>
+
+<!-- Gruppen: medlemmar och inställningar -->
+<div class="modal-overlay" id="modal-members">
+  <div class="modal">
+    <div class="mm-head">
+      <button class="mm-av" id="mm-avatar" type="button" title="Byt gruppbild" translate="no">#</button>
+      <div><h3 id="mm-title" translate="no">Gruppen</h3><p class="sub tight" id="mm-sub">Medlemmar och inställningar.</p></div>
+    </div>
+    <input type="file" id="mm-avatar-file" accept="image/jpeg,image/png,image/webp" hidden>
+    <div id="mm-list" translate="no"></div>
+    <p class="msg-error" id="mm-msg"></p>
+    <div class="modal-actions">
+      <button class="btn secondary" id="mm-add" type="button">Lägg till vän</button>
+      <button class="btn secondary" id="mm-rename" type="button">Byt namn</button>
+      <button class="btn secondary" id="mm-avatar-rm" type="button" hidden>Ta bort bild</button>
+      <button class="btn secondary danger-o" id="mm-leave" type="button">Lämna grupp</button>
+      <button class="btn" id="mm-close" type="button">Stäng</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lägg till i gruppen -->
+<div class="modal-overlay" id="modal-add-member">
+  <div class="modal">
+    <h3>Lägg till i gruppen</h3>
+    <p class="sub">Välj bland dina vänner som inte redan är med.</p>
+    <div class="pick-list" id="addmem-pick" translate="no"></div>
+    <p class="msg-error" id="addmem-msg"></p>
+    <div class="modal-actions">
+      <button class="btn secondary" id="addmem-cancel" type="button">Avbryt</button>
+      <button class="btn" id="addmem-go" type="button">Lägg till</button>
+    </div>
+  </div>
+</div>
+
+<!-- Egen dialog (alert/confirm/prompt fungerar inte snyggt i en panel) -->
+<div class="modal-overlay top" id="modal-dialog">
+  <div class="modal small">
+    <p class="dlg-text" id="dlg-text"></p>
+    <input type="text" id="dlg-input" maxlength="4000" hidden>
+    <div class="modal-actions">
+      <button class="btn secondary" id="dlg-cancel" type="button">Avbryt</button>
+      <button class="btn" id="dlg-ok" type="button">OK</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="i18n.js"></script>
+<script src="chatt.js"></script>
+</body>
+</html>

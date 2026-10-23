@@ -29,6 +29,7 @@ contextBridge.exposeInMainWorld('auth', {
   session: (token) => ipcRenderer.invoke('auth:session', { token }),
   logout: (token) => ipcRenderer.invoke('auth:logout', { token }),
   deleteAccount: (token, password) => ipcRenderer.invoke('auth:delete', { token, password }),
+  setAvatar: (token, image) => ipcRenderer.invoke('auth:avatar', { token, image }),
   remember: (account) => ipcRenderer.invoke('auth:remember', account),
   recall: () => ipcRenderer.invoke('auth:recall'),
   forget: () => ipcRenderer.invoke('auth:forget'),
@@ -50,17 +51,6 @@ contextBridge.exposeInMainWorld('family', {
   logoutSession: (token, child_id, sid) => ipcRenderer.invoke('family:logout-session', { token, child_id, sid }),
 });
 
-contextBridge.exposeInMainWorld('social', {
-  me: (token) => ipcRenderer.invoke('social:me', { token }),
-  profile: (token, username, avatar) => ipcRenderer.invoke('social:profile', { token, username, avatar }),
-  friendRequest: (token, username) => ipcRenderer.invoke('social:friend-request', { token, username }),
-  friendRespond: (token, username, accept) => ipcRenderer.invoke('social:friend-respond', { token, username, accept }),
-  friends: (token) => ipcRenderer.invoke('social:friends', { token }),
-  messages: (token, chat, since) => ipcRenderer.invoke('social:messages', { token, chat, since }),
-  send: (token, chat, body) => ipcRenderer.invoke('social:send', { token, chat, body }),
-  edit: (token, id, body) => ipcRenderer.invoke('social:edit', { token, id, body }),
-  chatAvatar: (token, chat, avatar) => ipcRenderer.invoke('social:chatavatar', { token, chat, avatar }),
-});
 
 contextBridge.exposeInMainWorld('session', {
   setkey: (key) => ipcRenderer.invoke('session:setkey', { key }),
@@ -151,6 +141,10 @@ contextBridge.exposeInMainWorld('view', {
   destroy: (id) => ipcRenderer.send('view:destroy', id),
   kryptoToggle: (open, mode, account) => ipcRenderer.send('krypto:toggle', open, mode, account),
   kryptoPrefill: (text) => ipcRenderer.send('krypto:prefill', text),
+  chattToggle: (open, opts) => ipcRenderer.send('chatt:toggle', open, opts),
+  chattTheme: (theme) => ipcRenderer.send('chatt:theme', theme),
+  onChattUnread: (cb) => ipcRenderer.on('chatt-unread', (_e, n) => cb(n)),
+  onChattClosed: (cb) => ipcRenderer.on('chatt-closed', () => cb()),
   onOpenLogin: (cb) => ipcRenderer.on('open-login', () => cb()),
   onKryptoRecheck: (cb) => ipcRenderer.on('krypto-recheck', () => cb()),
   platform: process.platform,

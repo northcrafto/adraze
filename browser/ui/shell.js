@@ -522,6 +522,7 @@ function kryptoMode() { return account ? (account.pro ? 'pro' : 'nopro') : 'sign
 let pendingKryptoAfterLogin = false;
 function openKrypto(open) {
   if (open && !account) { pendingKryptoAfterLogin = true; openLogin(); return; }
+  if (open && chattOpen) { chattOpen = false; chattSync(); }   // en sidopanel i taget
   kryptoOpen = open;
   window.view.kryptoToggle(open, kryptoMode(), account ? account.token : null);
   $('krypto-btn').classList.toggle('off', !open);
@@ -602,9 +603,9 @@ function renderSetHero() {
   const av = $('set-hero-avatar'), nm = $('set-hero-name'), em = $('set-hero-email'), side = $('set-hero-side');
   if (!av) return;
   if (!account) {
-    av.innerHTML = '<svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>';
+    av.innerHTML = '<img class="set-hero-mark" src="adraze-mark.png" alt="">'; av.classList.remove('has-img');
     nm.textContent = 'AdRaze'; em.textContent = 'Inte inloggad';
-    side.innerHTML = '<button class="pill pill-accent" id="set-hero-login" style="height:34px;">Logga in</button>';
+    side.innerHTML = '<button class="set-btn liq" id="set-hero-login">Logga in</button>';
     const b = $('set-hero-login'); if (b) b.addEventListener('click', () => { closeSettings(); openLogin(); });
     return;
   }
@@ -612,11 +613,11 @@ function renderSetHero() {
   const pic = (socMe && socMe.avatar) ? socMe.avatar : null;
   av.innerHTML = pic ? '<img src="' + pic + '" alt="">' : escapeHtml((name[0] || '?').toUpperCase());
   nm.textContent = name;
-  em.textContent = account.isChild ? 'Barnkonto' : (account.email || '');
-  side.innerHTML = (account.pro ? '<span class="set-chip">✦ AdRaze Pro</span>' : '<span class="set-chip dim">Gratis</span>');
+  em.textContent = account.isChild ? 'Familjens regler gäller' : (account.email || '');
+  side.innerHTML = account.isChild ? '<span class="set-chip">Barnkonto</span>' : '';
+  av.classList.toggle('has-img', !!pic);
 }
 function closeSettings() {
-  if (typeof stopChatPoll === 'function') stopChatPoll();
   $('settings').classList.add('hidden');
   const st = settingsTab;
   if (st && tabs.indexOf(st) >= 0) {
@@ -634,7 +635,6 @@ function showSettingsCat(cat) {
   if (cat === 'wallet' && typeof renderWallet === 'function') renderWallet();
   if (cat === 'konto' && typeof renderKonto === 'function') renderKonto();
   if (cat === 'vanner' && typeof renderFriends === 'function') renderFriends();
-  if (cat !== 'vanner' && typeof stopChatPoll === 'function') stopChatPoll();
   if (cat === 'kalender' && typeof renderCal === 'function') renderCal();
   if (cat === 'familj' && typeof renderFam === 'function') { renderFam(); applyKidIndicator(); if (typeof famSyncParent === 'function') famSyncParent(); }
 }
@@ -654,6 +654,29 @@ function renderEngines() {
 $('settings-btn').addEventListener('click', openSettings);
 $('settings-close').addEventListener('click', closeSettings);
 document.querySelectorAll('#settings-nav .set-tab').forEach((b) => b.addEventListener('click', () => showSettingsCat(b.dataset.cat)));
+/* Sök i inställningar: visar flikarna vars namn eller rader (rubrik/beskrivning) innehåller ordet.
+   Träff i en rad → fliken öppnas så man ser den. Gruppetiketter döljs när hela gruppen är borta. */
+$('set-search').addEventListener('input', () => {
+  const ord = $('set-search').value.trim().toLowerCase();
+  let forsta = null, nagon = false;
+  document.querySelectorAll('#settings-nav .set-tab').forEach((b) => {
+    if (b.style.display === 'none' && !b.dataset.sokDold) return;   // utloggad-spärrad flik rörs inte
+    const panel = document.querySelector('#settings .set-panel[data-cat="' + b.dataset.cat + '"]');
+    const text = (b.textContent + ' ' + (panel ? [...panel.querySelectorAll('.set-h, .set-title, .set-desc')].map((e) => e.textContent).join(' ') : '')).toLowerCase();
+    const traff = !ord || text.includes(ord);
+    b.dataset.sokDold = traff ? '' : '1';
+    b.classList.toggle('sok-dold', !traff);
+    if (traff) { nagon = true; if (!forsta) forsta = b; }
+  });
+  document.querySelectorAll('#settings-nav .set-glbl').forEach((g) => {
+    let n = g.nextElementSibling, syns = false;
+    while (n && n.classList.contains('set-tab')) { if (!n.classList.contains('sok-dold') && n.style.display !== 'none') syns = true; n = n.nextElementSibling; }
+    g.classList.toggle('sok-dold', !syns);
+  });
+  $('set-search-none').hidden = nagon;
+  if (ord && forsta && !document.querySelector('#settings-nav .set-tab.on:not(.sok-dold)')) showSettingsCat(forsta.dataset.cat);
+});
+$('set-search').addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('set-search').value) { e.stopPropagation(); $('set-search').value = ''; $('set-search').dispatchEvent(new Event('input')); } });
 $('tgl-protection').addEventListener('change', (e) => setProtection(e.target.checked));
 $('tgl-adblock').addEventListener('change', (e) => setAdblock(e.target.checked));
 /* Krypto-kategori */
@@ -702,6 +725,7 @@ function setTheme(t) {
   theme = t === 'dark' ? 'dark' : 'light';
   document.documentElement.dataset.theme = theme;
   try { localStorage.setItem('skoll-theme', theme); } catch {}
+  try { window.view.chattTheme(theme); } catch {}
   updateTitlebar();
   const l = $('seg-light'), d = $('seg-dark');
   if (l) l.classList.toggle('on', theme === 'light');
@@ -799,7 +823,8 @@ $('settings-reset').addEventListener('click', () => {
 let account = null;   // { email, token, pro }
 // Deklareras HÄR (före updateAccountBtn() vid uppstart) – låg den längre ner kastade
 // let-TDZ "Cannot access 'socMe' before initialization" för inloggade → vit skärm, inga flikar.
-let socMe = null, socChat = null, socChatName = '', socPoll = null, socLastTs = 0, socMembers = {}, socSeen = {}, socLoading = false;
+let socMe = null;   // { avatar } från AdRaze-kontot
+let chattOpen = false, chattUnread = 0, pendingChattAfterLogin = false;   // chattpanelen (chattSync körs via updateAccountBtn redan vid start)
 try { account = JSON.parse(localStorage.getItem('skoll-account')); } catch {}
 if (account && !account.token) account = null;  // gammalt kontonummer-format → nollställ
 let pendingEmail = null;
@@ -824,6 +849,7 @@ function updateAccountBtn() {
   if (av) { btn.innerHTML = '<img src="' + av + '" alt="" class="acct-av">'; btn.classList.add('has-av'); }
   else { btn.innerHTML = '<svg class="ic"><use href="#i-user" /></svg>'; btn.classList.remove('has-av'); }
   greet(); if (typeof applyAuthGates === 'function') applyAuthGates();
+  if (typeof chattSync === 'function') chattSync();   // nytt konto / utloggad → chattpanelen rivs (inget kvar i minnet)
   // Kontobyte utan omstart: historiken är per konto → flytta ev. gammal global historik och rita om startsida + historikpanel
   try { migrateHistoryToAccount(); } catch {}
   try { if (typeof renderShortcuts === 'function' && $('shortcuts')) renderShortcuts(); } catch {}
@@ -866,8 +892,10 @@ function loginAs(token, email, pro, name) {
   try { startParentSync(); } catch {}
   if (pendingKryptoAfterLogin) { pendingKryptoAfterLogin = false; openKrypto(true); }
   else if (kryptoOpen) openKrypto(true);
+  if (pendingChattAfterLogin) { pendingChattAfterLogin = false; openChatt(true); }
 }
 function doLogout(reopenKrypto) {
+  chattOpen = false; chattUnread = 0;
   const t = account && account.token;
   const sk = account ? accountKey(account) : null;
   account = null; socMe = null; localStorage.removeItem('skoll-account'); updateAccountBtn();
@@ -1079,12 +1107,8 @@ async function renderKonto() {
   if (account.email && !account.isChild) rows.push(['Mejl', account.email]);
   $('kn-rows').innerHTML = rows.map((r) => '<div class="kn-row"><span class="k">' + r[0] + '</span><span class="v">' + escapeHtml(r[1]) + '</span></div>').join('');
   const dz = $('kn-danger'); if (dz) dz.style.display = account.isChild ? 'none' : 'block';
-  const pm = $('kn-prof-msg'); if (pm) pm.textContent = '';
   await loadSocMe();
-  if (socMe) {
-    const un = $('kn-username'); if (un) un.value = socMe.username || '';
-    if (socMe.avatar) $('kn-avatar').innerHTML = '<img src="' + socMe.avatar + '" alt="">';
-  }
+  if (socMe && socMe.avatar) $('kn-avatar').innerHTML = '<img src="' + socMe.avatar + '" alt="">';
   if (typeof renderSetHero === 'function') renderSetHero();
 }
 function showConfirmDelete() {
@@ -1108,162 +1132,40 @@ function showConfirmDelete() {
     close(); doLogout(false); renderKonto(); showToast('Ditt konto är borttaget.');
   });
 }
-/* ── Socialt: profil, vänner & chatt ── */
+/* ── Profilbild (AdRaze-kontots, samma som på adraze.app) ── */
 async function loadSocMe() {
-  if (!account || !account.token) { socMe = null; return null; }
-  try { const r = await window.social.me(account.token); if (r && r.ok) socMe = r; } catch {}
+  if (!account || !account.token || account.isChild) { socMe = null; return null; }
+  try { const r = await window.auth.session(account.token); if (r && r.ok) socMe = { avatar: r.avatar || null }; } catch {}
   return socMe;
 }
-function socAvatar(av, name, size) {
-  const s = size || 38;
-  if (av) return '<img src="' + av + '" style="width:' + s + 'px;height:' + s + 'px;border-radius:50%;object-fit:cover;flex:none;">';
-  const init = ((name || '?')[0] || '?').toUpperCase();
-  return '<span style="width:' + s + 'px;height:' + s + 'px;border-radius:50%;background:linear-gradient(135deg,#2f5f88,#2f8fd4);color:#fff;display:grid;place-items:center;font-weight:800;font-size:' + Math.round(s * 0.42) + 'px;flex:none;">' + escapeHtml(init) + '</span>';
+function closeMsgMenu() { const m = $('fr-msgmenu'); if (m) m.remove(); }   // tidsmenyn (Tillåt …) i Familj
+
+/* ── Chatt: E2E-chatten (vänner, DM, grupper) i en egen panel, se ui/chatt.html ── */
+function chattOpts() { return { token: (account && account.token) || null, child: !!(account && account.isChild), theme, lang: (window.i18n && window.i18n.lang) || 'sv' }; }
+function chattSync() { try { if (!account || account.isChild) chattOpen = false; window.view.chattToggle(chattOpen, chattOpts()); } catch {} renderChattBtn(); }
+function openChatt(open) {
+  if (open && !account) { pendingChattAfterLogin = true; openLogin(); return; }
+  if (open && account.isChild) { showToast(t('Chatten finns inte för barnkonton. Prata med dina föräldrar i stället.')); return; }
+  if (open && kryptoOpen) openKrypto(false);   // en sidopanel i taget
+  chattOpen = !!open;
+  chattSync();
 }
-async function renderFriends() {
+function renderChattBtn() {
+  const b = $('chatt-btn'); if (!b) return;
+  b.classList.toggle('active', chattOpen);
+  const bd = $('chatt-badge');
+  if (bd) { bd.textContent = chattUnread > 99 ? '99+' : String(chattUnread); bd.style.display = (chattUnread > 0 && !chattOpen && account && !account.isChild) ? 'block' : 'none'; }
+}
+$('chatt-btn') && $('chatt-btn').addEventListener('click', () => openChatt(!chattOpen));
+window.view.onChattClosed(() => { chattOpen = false; renderChattBtn(); });
+window.view.onChattUnread((n) => { chattUnread = n || 0; renderChattBtn(); });
+// Inställningar → Vänner & chatt: kort förklaring + öppna-knapp (själva chatten är panelen)
+function renderFriends() {
   const wrap = $('fr-body'); if (!wrap) return;
-  if ($('fr-list')) $('fr-list').style.display = 'block';
-  if ($('fr-chat')) $('fr-chat').style.display = 'none';
-  stopChatPoll();
-  if (!account) { wrap.innerHTML = '<div class="fr-note">Logga in för att lägga till vänner och chatta.</div><button id="fr-login" class="btn btn-safe" style="height:40px;padding:0 16px;">Logga in</button>'; const _l = $('fr-login'); if (_l) _l.addEventListener('click', () => openLogin()); return; }
-  await loadSocMe();
-  if (!socMe || !socMe.username) {
-    wrap.innerHTML = '<div class="fr-note">Välj ett <b>användarnamn</b> i Konto-fliken först, så kan du lägga till vänner.</div><button id="fr-go-konto" class="btn btn-safe" style="height:40px;padding:0 16px;">Gå till Konto</button>';
-    const g = $('fr-go-konto'); if (g) g.addEventListener('click', () => showSettingsCat('konto'));
-    return;
-  }
-  let data = {}; try { data = await window.social.friends(account.token); } catch {}
-  const friends = (data && data.friends) || [], incoming = (data && data.incoming) || [];
-  let html = '<div class="fr-add"><input id="fr-add-in" class="fam-in" placeholder="@användarnamn" spellcheck="false" style="flex:1;"><button id="fr-add-btn" class="btn btn-safe flex-none" style="height:40px;padding:0 14px;">Lägg till</button></div>';
-  if (incoming.length) {
-    html += '<div class="fr-sub">Vänförfrågningar</div>';
-    html += incoming.map((f) => '<div class="fr-row"><div class="fr-id">' + socAvatar(f.avatar, f.username) + '<span class="fr-name">@' + escapeHtml(f.username || '') + '</span></div><div style="display:flex;gap:6px;flex:none;"><button class="fr-acc" data-u="' + escapeHtml(f.username) + '">Acceptera</button><button class="fr-dec" data-u="' + escapeHtml(f.username) + '">×</button></div></div>').join('');
-  }
-  html += '<div class="fr-sub">Chattar</div>';
-  html += '<div class="fr-row fr-open" data-chat="family" data-name="Familjechatt"><div class="fr-id"><span class="fr-fam">👪</span><span class="fr-name">Familjechatt</span></div><span class="fr-go">›</span></div>';
-  if (friends.length) html += friends.map((f) => '<div class="fr-row fr-open" data-chat="dm:' + escapeHtml(f.username) + '" data-name="@' + escapeHtml(f.username) + '"><div class="fr-id">' + socAvatar(f.avatar, f.username) + '<span class="fr-name">@' + escapeHtml(f.username || '') + '</span></div><span class="fr-go">›</span></div>').join('');
-  else html += '<div class="fr-none">Inga vänner än – lägg till någon med deras användarnamn.</div>';
-  wrap.innerHTML = html;
-  $('fr-add-btn').addEventListener('click', socAddFriend);
-  $('fr-add-in').addEventListener('keydown', (e) => { if (e.key === 'Enter') socAddFriend(); });
-  wrap.querySelectorAll('.fr-acc').forEach((b) => b.addEventListener('click', async () => { await window.social.friendRespond(account.token, b.dataset.u, true); renderFriends(); }));
-  wrap.querySelectorAll('.fr-dec').forEach((b) => b.addEventListener('click', async () => { await window.social.friendRespond(account.token, b.dataset.u, false); renderFriends(); }));
-  wrap.querySelectorAll('.fr-open').forEach((r) => r.addEventListener('click', () => openChat(r.dataset.chat, r.dataset.name)));
-}
-async function socAddFriend() {
-  const inp = $('fr-add-in'); if (!inp) return;
-  const un = (inp.value || '').trim().replace(/^@/, ''); if (!un) return;
-  const r = await window.social.friendRequest(account.token, un).catch(() => ({ ok: false }));
-  if (!r || !r.ok) { showToast((r && r.message) || 'Kunde inte lägga till.'); return; }
-  inp.value = '';
-  showToast(r.state === 'friends' ? 'Ni är vänner nu!' : r.state === 'sent' ? 'Vänförfrågan skickad.' : 'Förfrågan finns redan.');
-  renderFriends();
-}
-function openChat(chat, name) {
-  socChat = chat; socChatName = name || 'Chatt'; socLastTs = 0; socSeen = {}; socMembers = {};
-  $('fr-list').style.display = 'none'; $('fr-chat').style.display = 'flex';
-  $('fr-chat-title').textContent = socChatName;
-  $('fr-msgs').innerHTML = '';
-  setChatAvatar(null);
-  loadMessages();
-  stopChatPoll(); socPoll = setInterval(loadMessages, 3000);
-}
-function stopChatPoll() { if (socPoll) { clearInterval(socPoll); socPoll = null; } }
-function closeChat() { stopChatPoll(); socChat = null; renderFriends(); }
-async function loadMessages() {
-  if (!socChat || !account || socLoading) return;   // in-flight-vakt → ingen stapling vid seg uppkoppling
-  socLoading = true;
-  let r; try { r = await window.social.messages(account.token, socChat, socLastTs); } catch { socLoading = false; return; }
-  socLoading = false;
-  if (!r || !r.ok) return;
-  if (r.members) Object.assign(socMembers, r.members);   // avatarer cachas (skickas en gång per svar)
-  setChatAvatar(r.chatAvatar);
-  const box = $('fr-msgs'); if (!box) return;
-  const hidden = socHiddenSet();
-  let added = false;
-  (r.messages || []).forEach((m) => {
-    if (m.ts > socLastTs) socLastTs = m.ts;
-    if (socSeen[m.id] || hidden.has(m.id)) return;   // dedup + lokalt raderade
-    socSeen[m.id] = true; box.appendChild(msgEl(m)); added = true;
-  });
-  if (added) box.scrollTop = box.scrollHeight;
-}
-function msgEl(m) {
-  const d = document.createElement('div'); d.className = 'fr-msg' + (m.mine ? ' mine' : '');
-  d.dataset.id = m.id;
-  const av = socMembers[m.username];
-  const lov = (m.body.match(/\[lov:([^\]]+)\]/) || [])[1];   // barnets "be om lov"-begäran
-  const cleanBody = m.body.replace(/\s*\[lov:[^\]]+\]\s*/, ' ').trim();
-  let extra = '';
-  if (lov && socChat === 'family' && account && !account.isChild) {  // förälder ser tillåt-knapp
-    extra = '<button class="fr-allow" data-host="' + escapeHtml(lov) + '" data-child="' + escapeHtml(m.username || '') + '">✓ Tillåt ' + escapeHtml(lov) + '</button>';
-  }
-  d.innerHTML = (m.mine ? '' : socAvatar(av, m.username, 30)) + '<div class="fr-bub"><div class="fr-bub-name">@' + escapeHtml(m.username || '') + '</div>' + escapeHtml(cleanBody) + (m.edited ? ' <span class="fr-ed">(ändrad)</span>' : '') + extra + '</div>';
-  const bub = d.querySelector('.fr-bub'); bub.style.cursor = 'pointer';
-  bub.addEventListener('click', (e) => { if (e.target.classList.contains('fr-allow')) return; e.stopPropagation(); msgMenu(m, bub); });
-  const allow = d.querySelector('.fr-allow');
-  if (allow) allow.addEventListener('click', (e) => { e.stopPropagation(); allowMenu(allow.dataset.host, allow.dataset.child, allow); });  // öppna tidsmeny (15 min / 1 h / 3 h / alltid)
-  return d;
-}
-function socHiddenSet() { try { return new Set(JSON.parse(localStorage.getItem('adraze-hidden-msgs') || '[]')); } catch { return new Set(); } }
-function hideMsgLocal(id) {
-  const s = socHiddenSet(); s.add(id);
-  try { localStorage.setItem('adraze-hidden-msgs', JSON.stringify([...s])); } catch {}
-  const el = document.querySelector('.fr-msg[data-id="' + id + '"]'); if (el) el.remove();
-}
-function setChatAvatar(chatAvatar) {
-  const el = $('fr-chat-av'); if (!el) return;
-  let av = chatAvatar;
-  if (!av && socChat && socChat.indexOf('dm:') === 0) av = socMembers[socChat.slice(3)];
-  el.innerHTML = av ? '<img src="' + av + '" style="width:100%;height:100%;object-fit:cover;">' : (socChat === 'family' ? '👪' : '@');
-  el.style.cursor = (socChat === 'family') ? 'pointer' : 'default';
-}
-function refreshChat() { const box = $('fr-msgs'); if (box) box.innerHTML = ''; socLastTs = 0; socSeen = {}; loadMessages(); }
-function closeMsgMenu() { const m = $('fr-msgmenu'); if (m) m.remove(); }
-function msgMenu(m, anchorEl) {
-  closeMsgMenu();
-  const menu = document.createElement('div'); menu.id = 'fr-msgmenu';
-  menu.style.cssText = 'position:fixed;z-index:250;background:#fff;border:1px solid var(--color-line);border-radius:12px;box-shadow:0 12px 34px rgba(8,20,35,.22);padding:5px;min-width:158px;';
-  const item = (label, danger, fn) => {
-    const b = document.createElement('button'); b.textContent = label;
-    b.style.cssText = 'display:block;width:100%;text-align:left;padding:9px 12px;border:0;background:none;border-radius:8px;font-size:13px;cursor:pointer;color:' + (danger ? '#b23636' : 'var(--color-navy-900)') + ';';
-    b.addEventListener('mouseenter', () => (b.style.background = 'var(--color-paper)'));
-    b.addEventListener('mouseleave', () => (b.style.background = 'none'));
-    b.addEventListener('click', (e) => { e.stopPropagation(); closeMsgMenu(); fn(); });
-    menu.appendChild(b);
-  };
-  item('Kopiera', false, () => { try { navigator.clipboard.writeText(m.body); } catch {} showToast('Kopierat'); });
-  if (m.mine) item('Redigera', false, () => startEdit(m));
-  item('Radera för mig', true, () => hideMsgLocal(m.id));
-  document.body.appendChild(menu);
-  const r = anchorEl.getBoundingClientRect();
-  menu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - menu.offsetWidth - 8)) + 'px';
-  menu.style.top = Math.min(r.bottom + 4, window.innerHeight - menu.offsetHeight - 8) + 'px';
-  setTimeout(() => document.addEventListener('click', closeMsgMenu, { once: true }), 0);
-}
-function startEdit(m) {
-  const bub = document.querySelector('.fr-msg[data-id="' + m.id + '"] .fr-bub'); if (!bub) return;
-  bub.innerHTML = '<input class="fr-edit-in">';
-  const inp = bub.querySelector('.fr-edit-in'); inp.value = m.body; inp.focus(); inp.select();
-  let done = false;
-  const save = async () => {
-    if (done) return; done = true;
-    const nb = (inp.value || '').trim();
-    if (!nb || nb === m.body) { refreshChat(); return; }
-    const r = await window.social.edit(account.token, m.id, nb).catch(() => ({ ok: false }));
-    if (!r || !r.ok) showToast('Kunde inte redigera.');
-    refreshChat();
-  };
-  inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') save(); else if (e.key === 'Escape') { done = true; refreshChat(); } });
-  inp.addEventListener('blur', save);
-}
-async function socSend() {
-  const inp = $('fr-send-in'); if (!inp || !socChat) return;
-  const body = (inp.value || '').trim(); if (!body) return;
-  inp.value = '';
-  const r = await window.social.send(account.token, socChat, body).catch(() => ({ ok: false }));
-  if (!r || !r.ok) { showToast('Kunde inte skicka.'); inp.value = body; return; }
-  loadMessages();
+  if (!account) { wrap.innerHTML = '<div class="fr-note">' + escapeHtml(t('Logga in för att lägga till vänner och chatta.')) + '</div><button id="fr-login" class="btn btn-safe" style="height:40px;padding:0 16px;">' + escapeHtml(t('Logga in')) + '</button>'; const _l = $('fr-login'); if (_l) _l.addEventListener('click', () => openLogin()); return; }
+  if (account.isChild) { wrap.innerHTML = '<div class="fr-note">' + escapeHtml(t('Chatten finns inte för barnkonton. Prata med dina föräldrar i stället.')) + '</div>'; return; }
+  wrap.innerHTML = '<div class="fr-note">' + escapeHtml(t('Allt du skriver krypteras på din dator innan det skickas. Bara du och de du chattar med kan läsa det, aldrig AdRaze.')) + '</div><button id="fr-open-chatt" class="btn btn-safe" style="height:40px;padding:0 16px;">' + escapeHtml(t('Öppna chatten')) + '</button>';
+  $('fr-open-chatt').addEventListener('click', () => { closeSettings(); openChatt(true); });
 }
 /* Profil: bild-uppladdning + användarnamn (i Konto) */
 function knResizeImage(file, size) {
@@ -1288,24 +1190,15 @@ function knResizeImage(file, size) {
 }
 async function knHandleAvatar(e) {
   const file = e.target.files && e.target.files[0]; if (!file || !account) return;
-  const dataUrl = await knResizeImage(file, 96).catch(() => null);
+  const dataUrl = await knResizeImage(file, 256).catch(() => null);
   e.target.value = '';
   if (!dataUrl) { showToast('Kunde inte läsa bilden.'); return; }
-  const r = await window.social.profile(account.token, undefined, dataUrl).catch(() => ({ ok: false }));
+  const r = await window.auth.setAvatar(account.token, dataUrl).catch(() => ({ ok: false }));
   if (!r || !r.ok) { showToast((r && r.message) || 'Kunde inte spara bilden.'); return; }
-  socMe = socMe || {}; socMe.avatar = dataUrl;
-  $('kn-avatar').innerHTML = '<img src="' + dataUrl + '" alt="">';
+  socMe = socMe || {}; socMe.avatar = r.avatar || dataUrl;
+  $('kn-avatar').innerHTML = '<img src="' + socMe.avatar + '" alt="">';
   try { updateAccountBtn(); } catch {}   // uppdatera profilbilden i kontoknappen direkt
   showToast('Profilbild uppdaterad.');
-}
-async function knSaveProfile() {
-  if (!account) return;
-  const un = ($('kn-username').value || '').trim().replace(/^@/, '');
-  const msg = $('kn-prof-msg');
-  const r = await window.social.profile(account.token, un || undefined, undefined).catch(() => ({ ok: false }));
-  if (!r || !r.ok) { if (msg) { msg.textContent = (r && r.message) || 'Kunde inte spara.'; msg.style.color = '#c25340'; } return; }
-  socMe = socMe || {}; socMe.username = r.username;
-  if (msg) { msg.textContent = 'Sparat ✓'; msg.style.color = 'var(--color-safe)'; }
 }
 // Visa/dölj-lösenord (öga-knapparna)
 document.querySelectorAll('.pw-eye').forEach((b) => {
@@ -1322,20 +1215,6 @@ $('kn-login') && $('kn-login').addEventListener('click', () => openLogin());
 $('kn-delete') && $('kn-delete').addEventListener('click', showConfirmDelete);
 $('kn-avatar') && $('kn-avatar').addEventListener('click', () => { const f = $('kn-avatar-file'); if (f) f.click(); });
 $('kn-avatar-file') && $('kn-avatar-file').addEventListener('change', knHandleAvatar);
-$('kn-save-prof') && $('kn-save-prof').addEventListener('click', knSaveProfile);
-$('fr-back') && $('fr-back').addEventListener('click', closeChat);
-$('fr-send-btn') && $('fr-send-btn').addEventListener('click', socSend);
-$('fr-send-in') && $('fr-send-in').addEventListener('keydown', (e) => { if (e.key === 'Enter') socSend(); });
-$('fr-chat-av') && $('fr-chat-av').addEventListener('click', () => { if (socChat === 'family') { const f = $('fr-chat-av-file'); if (f) f.click(); } });
-$('fr-chat-av-file') && $('fr-chat-av-file').addEventListener('change', async (e) => {
-  const file = e.target.files && e.target.files[0]; e.target.value = '';
-  if (!file || !socChat) return;
-  const dataUrl = await knResizeImage(file, 96).catch(() => null);
-  if (!dataUrl) { showToast('Kunde inte läsa bilden.'); return; }
-  const r = await window.social.chatAvatar(account.token, socChat, dataUrl).catch(() => ({ ok: false }));
-  if (!r || !r.ok) { showToast((r && r.message) || 'Kunde inte spara bilden.'); return; }
-  setChatAvatar(dataUrl); showToast('Chattbild uppdaterad.');
-});
 $('login-close').addEventListener('click', () => { pendingKryptoAfterLogin = false; closeLogin(); });
 $('qr-close').addEventListener('click', () => { if (active) active.overlay = null; $('qr').classList.add('hidden'); showActiveTab(); });
 $('login-email').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('login-pw').focus(); });
@@ -2602,13 +2481,12 @@ function allowLabel(minutes) { return minutes >= 60 ? (minutes % 60 === 0 ? (min
 async function doAllow(host, childName, minutes) {
   if (typeof famSyncParent === 'function') await famSyncParent();
   const ok = await famAllowFor(childName, host, minutes);
-  if (ok) { try { await window.social.send(account.token, 'family', '✅ ' + host + ' är tillåten i ' + allowLabel(minutes) + ' nu.'); } catch {} if (typeof showToast === 'function') showToast('Tillät ' + host + ' i ' + allowLabel(minutes)); }
+  if (ok) { if (typeof showToast === 'function') showToast('Tillät ' + host + ' i ' + allowLabel(minutes)); }
   else if (typeof showToast === 'function') showToast('Kunde inte tillåta.');
 }
 async function doAllowAlways(host, childName) {
   if (typeof famSyncParent === 'function') await famSyncParent();
   if (typeof window.famUnblockFor === 'function') window.famUnblockFor(childName, [host]);
-  try { await window.social.send(account.token, 'family', '✅ ' + host + ' är tillåten nu.'); } catch {}
   if (typeof showToast === 'function') showToast('Tillät ' + host + ' för alltid');
 }
 function allowMenu(host, childName, anchorEl) {
@@ -2627,7 +2505,7 @@ function allowMenu(host, childName, anchorEl) {
   menu.style.top = Math.min(r.bottom + 4, window.innerHeight - menu.offsetHeight - 8) + 'px';
   setTimeout(() => document.addEventListener('click', closeMsgMenu, { once: true }), 0);
 }
-// Helskärms-blockeringssida för barnet + "be om lov" i familjechatten
+// Helskärms-blockeringssida för barnet (föräldern tillåter sidan i AdRaze Familj)
 function showBlockScreen(url) {
   let host; try { host = new URL(normalizeUrl(url)).hostname.replace(/^www\./, ''); } catch { host = String(url || ''); }
   try { window.view.hide(); } catch {}   // dölj webbvyn så rutan täcker sidan
@@ -2639,21 +2517,15 @@ function showBlockScreen(url) {
     + '<div style="font-size:52px;margin-bottom:10px">🔒</div>'
     + '<div style="font-size:20px;font-weight:800;color:var(--color-navy-900);margin-bottom:6px">Den här sidan är blockerad</div>'
     + '<div style="font-size:14px;color:#2f8fd4;font-weight:700;margin-bottom:14px">' + escapeHtml(host) + '</div>'
-    + '<p style="font-size:14px;color:rgb(28 43 58 / .65);line-height:1.6;margin-bottom:20px">Dina föräldrar kan se att du försökte gå hit — men ingen fara. 😊<br>Vill du besöka sidan? Fråga i <b>familjechatten</b> så kan de säga ja.</p>'
+    + '<p style="font-size:14px;color:rgb(28 43 58 / .65);line-height:1.6;margin-bottom:20px">Dina föräldrar kan se att du försökte gå hit — men ingen fara. 😊<br>Vill du besöka sidan? Fråga dina föräldrar, så kan de tillåta den i <b>AdRaze Familj</b>.</p>'
     + '<div id="kidblock-msg" style="font-size:13px;color:var(--color-safe);font-weight:700;min-height:18px;margin-bottom:10px"></div>'
-    + '<div style="display:flex;gap:10px"><button id="kidblock-back" style="flex:1;height:46px;border:1.5px solid var(--color-line);background:#fff;color:var(--color-navy-900);border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;">Tillbaka</button><button id="kidblock-ask" class="btn btn-safe" style="flex:1;height:46px">🙋 Be om lov</button></div>'
+    + '<div style="display:flex;gap:10px"><button id="kidblock-back" class="btn btn-safe" style="flex:1;height:46px">Tillbaka</button></div>'
     + '</div>';
   ov.style.display = 'flex';
   ov.querySelector('#kidblock-back').onclick = () => {
     ov.style.display = 'none';
     if (active && active.url && famBlocked(active.url)) { active.url = ''; if (addressInput) addressInput.value = ''; }  // fortfarande blockerad → hem
     if (typeof showActiveTab === 'function') showActiveTab();
-  };
-  ov.querySelector('#kidblock-ask').onclick = async () => {
-    const btn = ov.querySelector('#kidblock-ask'); btn.disabled = true; btn.textContent = 'Skickar…';
-    let r; try { r = await window.social.send(account.token, 'family', '🙋 [lov:' + host + '] Får jag besöka ' + host + '?'); } catch { r = { ok: false }; }
-    if (r && r.ok) { ov.querySelector('#kidblock-msg').textContent = '✅ Skickat till familjechatten! Vänta på svar.'; btn.textContent = 'Skickat'; }
-    else { ov.querySelector('#kidblock-msg').textContent = 'Kunde inte skicka just nu. Försök igen.'; btn.disabled = false; btn.textContent = '🙋 Be om lov'; }
   };
 }
 function renderFam() {
@@ -2717,7 +2589,7 @@ function renderFamChild(host) {
   const now = Date.now();
   const al = ((c && c.allows) || []).filter((a) => a && a.until > now);
   if (al.length) html += '<div class="fam-sub">Öppet en stund till</div><div class="fam-bl">' + al.map((a) => '<span class="fam-tag" style="background:rgba(23,138,90,.08);border-color:rgba(23,138,90,.25);padding-right:12px;">✓ ' + escapeHtml(a.host) + ' <span style="opacity:.6">till ' + fmtTime(a.until) + '</span></span>').join('') + '</div>';
-  html += '<div class="fam-krypto">💬 Vill du besöka en blockerad sida? Tryck <b>”Be om lov”</b> när sidan blockeras, eller fråga dina föräldrar i <b>familjechatten</b>.</div>';
+  html += '<div class="fam-krypto">💬 Vill du besöka en blockerad sida? Fråga dina föräldrar, så kan de tillåta den i <b>AdRaze Familj</b>.</div>';
   html += '</div>';
   host.innerHTML = html;
 }
