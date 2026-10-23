@@ -46,19 +46,20 @@ function updateTitlebar() {
 
 /* ── URL-hjälp ── */
 const ENGINES = {
+  adraze: { label: 'AdRaze Search', url: 'https://search.adraze.app/search?q=' },
   google: { label: 'Google', url: 'https://www.google.com/search?q=' },
   duckduckgo: { label: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=' },
   brave: { label: 'Brave Search', url: 'https://search.brave.com/search?q=' },
   startpage: { label: 'Startpage', url: 'https://www.startpage.com/sp/search?query=' },
 };
-/* Inkognito söker alltid via DuckDuckGo (loggar inget). */
-const INCOG_ENGINE = { label: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=' };
-let searchEngine = 'google';
+/* Inkognito söker alltid via AdRaze Search (vår egen motor, loggar inget). */
+const INCOG_ENGINE = { label: 'AdRaze Search', url: 'https://search.adraze.app/search?q=' };
+let searchEngine = 'adraze';
 try { const e = localStorage.getItem('skoll-engine'); if (e && ENGINES[e]) searchEngine = e; } catch {}
 function searchUrl(q) {
-  // Vanligt: vald sökmotor. Inkognito: alltid DuckDuckGo (ingen logg).
+  // Vanligt: vald sökmotor. Inkognito: alltid AdRaze Search (ingen logg).
   if (active && active.incognito) return INCOG_ENGINE.url + encodeURIComponent(q);
-  return (ENGINES[searchEngine] || ENGINES.google).url + encodeURIComponent(q);
+  return (ENGINES[searchEngine] || ENGINES.adraze).url + encodeURIComponent(q);
 }
 function normalizeUrl(raw) {
   let s = (raw || '').trim();
@@ -146,7 +147,7 @@ function switchTab(tab) {
   active = tab;
   document.body.classList.toggle('incog', !!tab.incognito);
   updateTitlebar();
-  $('search-engine').textContent = tab.incognito ? INCOG_ENGINE.label : (ENGINES[searchEngine] || ENGINES.google).label;
+  $('search-engine').textContent = tab.incognito ? INCOG_ENGINE.label : (ENGINES[searchEngine] || ENGINES.adraze).label;
   addressInput.value = tab.url ? pretty(tab.url) : '';
   setShield(tab.url ? (protectionOn ? (tab.verdict ? tab.verdict.status : 'ok') : 'off') : 'home');
   hideOverlayElements();
@@ -739,6 +740,7 @@ setTheme(theme);
 function kryptoOnOff(v) { v = ('' + (v || '')).toLowerCase().trim(); return !/(^av$|off|nej|stäng|stang|inaktiv|false|^0$|\bav\b)/.test(v); }
 function matchEngine(v) {
   v = ('' + (v || '')).toLowerCase();
+  if (/adraze/.test(v)) return 'adraze';
   if (/duck|ddg/.test(v)) return 'duckduckgo';
   if (/brave/.test(v)) return 'brave';
   if (/startpage|start ?page/.test(v)) return 'startpage';
@@ -1439,12 +1441,12 @@ function updateSug(q) {
   const seq = ++sugSeq;
   sugTimer = setTimeout(async () => {
     let list = [];
-    try { list = await window.view.suggest(query, incog ? 'duckduckgo' : searchEngine); } catch { list = []; }   // inkognito: förslag från DuckDuckGo
+    try { list = await window.view.suggest(query, incog ? 'adraze' : searchEngine); } catch { list = []; }   // inkognito: förslag från AdRaze Search
     if (seq !== sugSeq || document.activeElement !== inp || (inp.value || '').trim() !== query) return;   // gammalt svar → släng
     const keep = hist.slice(0, 4);
     const seen = new Set(keep.map((h) => h.host));
     const extra = list.filter((t) => t && !seen.has(t.toLowerCase())).slice(0, 8 - keep.length).map((t) => ({ search: true, q: t }));
-    sug.engineLabel = incog ? INCOG_ENGINE.label : (ENGINES[searchEngine] || ENGINES.google).label;
+    sug.engineLabel = incog ? INCOG_ENGINE.label : (ENGINES[searchEngine] || ENGINES.adraze).label;
     sug.items = keep.concat(extra);
     if (sug.items.length) { renderSug(); openSug(); }
   }, 140);

@@ -384,7 +384,7 @@ function buildContextMenu(ctx, wc, params) {
     const sel = params.selectionText.trim();
     const short = sel.length > 24 ? sel.slice(0, 24) + '…' : sel;
     t.push({ label: T('Kopiera'), role: 'copy' });
-    t.push({ label: T('Sök på Google efter') + ` "${short}"`, click: () => sendTo(ctx, 'open-new-tab', 'https://www.google.com/search?q=' + encodeURIComponent(sel)) });
+    t.push({ label: T('Sök med AdRaze Search efter') + ` "${short}"`, click: () => sendTo(ctx, 'open-new-tab', 'https://search.adraze.app/search?q=' + encodeURIComponent(sel)) });
     t.push({ type: 'separator' });
   }
   t.push({ label: T('Spara som…'), click: () => savePage(ctx, wc) });
@@ -1276,6 +1276,7 @@ ipcMain.on('app:quit', () => app.quit());
  * en lista strängar; fel eller timeout ger en tom lista, aldrig ett undantag
  * till skalet. Inkognito frågar aldrig hit (skalet avgör). */
 const SUGGEST_URLS = {
+  adraze: (q) => 'https://search.adraze.app/api/suggest?q=' + encodeURIComponent(q),
   google: (q) => 'https://suggestqueries.google.com/complete/search?client=firefox&hl=sv&q=' + encodeURIComponent(q),
   duckduckgo: (q) => 'https://duckduckgo.com/ac/?type=list&q=' + encodeURIComponent(q),
   brave: (q) => 'https://search.brave.com/api/suggest?q=' + encodeURIComponent(q),
@@ -1285,7 +1286,7 @@ ipcMain.handle('omni:suggest', async (_e, arg) => {
   try {
     const q = String((arg && arg.q) || '').trim().slice(0, 200);
     if (!q) return [];
-    const mk = SUGGEST_URLS[(arg && arg.engine) || 'google'] || SUGGEST_URLS.google;
+    const mk = SUGGEST_URLS[(arg && arg.engine) || 'adraze'] || SUGGEST_URLS.adraze;
     const ac = new AbortController(); const t = setTimeout(() => ac.abort(), 1500);
     const res = await net.fetch(mk(q), { signal: ac.signal, headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' } });
     clearTimeout(t);
