@@ -1,4 +1,4 @@
-/* Egen kassa i Krypto-panelen (Stripe Payment Element), samma upplägg som
+/* Egen kassa i Falk-panelen (Stripe Payment Element), samma upplägg som
  * Skribias /checkout. Huvudprocessen (window.billing) pratar med backend och
  * lägger på kontots token; den här sidan ser aldrig nyckeln eller kortet
  * (kortfälten är Stripes egna iframes). Bara kort – inga omdirigeringar. */
@@ -42,7 +42,7 @@
     $('credits-note').style.display = credits ? '' : 'none';
     const ss = $('secure-sub'); if (ss) ss.style.display = credits ? 'none' : '';
     $('title').textContent = credits ? 'Köp extra credits' : 'Skaffa ' + BRAND + ' Pro';
-    $('lead').textContent = credits ? 'Betalas en gång. Fylls på direkt efter betalningen.' : 'Krypto och allt annat i Pro låses upp på ditt konto direkt efter betalningen.';
+    $('lead').textContent = credits ? 'Betalas en gång. Fylls på direkt efter betalningen.' : 'Falk och allt annat i Pro låses upp på ditt konto direkt efter betalningen.';
   }
 
   async function prepare() {

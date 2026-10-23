@@ -4,7 +4,7 @@
  * Arkitektur: varje FÖNSTER är en BrowserWindow som renderar "chrome"
  * (flikar/verktygsrad/startsida/varning) som HTML. Varje fliks webbsida är en
  * WebContentsView som huvudprocessen placerar i fönstrets innehållsyta.
- * Allt fönster-tillstånd (flikar, synlig flik, mått, Krypto-panel) ligger i ett
+ * Allt fönster-tillstånd (flikar, synlig flik, mått, Falk-panel) ligger i ett
  * per-fönster "ctx"-objekt i `wins`, nycklat på skalets webContents-id. IPC
  * routas till rätt fönster via `event.sender`.
  */
@@ -263,9 +263,9 @@ function applyBounds(ctx) {
     if (ctx.chattView) ctx.chattView.setVisible(false);
     return;
   }
-  const full = ctx.kryptoOpen && ctx.kryptoFull;              // Krypto i helskärm (täcker webbytan)
+  const full = ctx.kryptoOpen && ctx.kryptoFull;              // Falk i helskärm (täcker webbytan)
   const kw = (ctx.kryptoOpen && !full) ? KRYPTO_W : 0;        // sidopanelens bredd (0 i helskärm – panelen ligger ovanpå)
-  const cw = (ctx.chattOpen && !ctx.chattFull) ? CHATT_W : 0; // chattens sidopanel (till vänster om Krypto om båda är öppna)
+  const cw = (ctx.chattOpen && !ctx.chattFull) ? CHATT_W : 0; // chattens sidopanel (till vänster om Falk om båda är öppna)
   const nh = ctx.netOpen ? NET_H : 0;                         // nätverksinspektörens höjd (dockad längst ner)
   const R = Math.round;
   if (ctx.visibleTab && ctx.views.has(ctx.visibleTab)) {
@@ -1393,7 +1393,7 @@ ipcMain.on('open-app-menu', (e) => {
   Menu.buildFromTemplate(t).popup({ window: ctx.win });
 });
 
-/* ── Krypto-panel (per fönster) ── */
+/* ── Falk-panel (per fönster) ── */
 function loadKrypto(ctx, mode) {
   if (!ctx.kryptoView) return;
   if (ctx.kryptoView._mode === mode) return;   // redan rätt innehåll
@@ -1408,7 +1408,7 @@ function loadKrypto(ctx, mode) {
 ipcMain.on('krypto:toggle', (e, open, mode, token) => {
   const ctx = ctxFor(e); if (!ctx) return;
   ctx.kryptoOpen = !!open;
-  if (token) ctx.authToken = token;   // sessionstoken för Krypto-chattens API-anrop
+  if (token) ctx.authToken = token;   // sessionstoken för Falk-chattens API-anrop
   if (ctx.kryptoOpen) {
     if (!ctx.kryptoView) {
       ctx.kryptoView = new WebContentsView({ webPreferences: { preload: path.join(__dirname, 'krypto-preload.js'), contextIsolation: true } });
@@ -1438,12 +1438,12 @@ ipcMain.on('krypto:toggle', (e, open, mode, token) => {
   }
   applyBounds(ctx);
 });
-// Skicka en färdig fråga (från "Var ska jag börja?"-quizet) in i Krypto-panelen.
+// Skicka en färdig fråga (från "Var ska jag börja?"-quizet) in i Falk-panelen.
 ipcMain.on('krypto:prefill', (e, text) => {
   const ctx = ctxFor(e) || e.sender.__ctx; if (!ctx || !ctx.kryptoView) return;
   try { ctx.kryptoView.webContents.send('krypto-prefill', String(text || '')); } catch {}
 });
-// Krypto helskärm på/av: panelen täcker hela webbytan (enklare att läsa/skriva långa rapporter).
+// Falk helskärm på/av: panelen täcker hela webbytan (enklare att läsa/skriva långa rapporter).
 ipcMain.on('krypto:expand', (e, full) => {
   const ctx = ctxFor(e) || e.sender.__ctx; if (!ctx) return;
   ctx.kryptoFull = !!full;
@@ -1524,7 +1524,7 @@ ipcMain.handle('net:detail', async (e, id) => {
   };
 });
 
-/* Krypto-chatt: proxar till Säkerkolls AI-API med fönstrets kontonummer, så
+/* Falk-chatt: proxar till Säkerkolls AI-API med fönstrets kontonummer, så
  * kontonumret aldrig behöver ligga i panelen. Samma /ai/chat som webbens assistent. */
 const KRYPTO_LOG = path.join(app.getPath('userData'), 'krypto-chat.log');
 function klog(o) { try { fs.appendFileSync(KRYPTO_LOG, new Date().toISOString() + ' ' + JSON.stringify(o) + '\n'); } catch {} }
@@ -1548,7 +1548,7 @@ ipcMain.handle('billing:confirm', (e, d) => billingCall(e, 'confirm', { subscrip
 ipcMain.handle('krypto:chat', async (e, messages) => {
   const ctx = e.sender.__ctx;
   const token = ctx && ctx.authToken;
-  if (!token) { klog({ stage: 'no-token' }); return { ok: false, needLogin: true, message: 'Logga in med din mejl (kontoknappen) för att låsa upp Krypto.' }; }
+  if (!token) { klog({ stage: 'no-token' }); return { ok: false, needLogin: true, message: 'Logga in med din mejl (kontoknappen) för att låsa upp Falk.' }; }
   const payload = { vaka_token: token, edition: 'vaka', messages: (Array.isArray(messages) ? messages : []).slice(-16) };
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
@@ -1562,13 +1562,13 @@ ipcMain.handle('krypto:chat', async (e, messages) => {
       return { ok: true, reply: json.reply };
     } catch (err) {
       klog({ stage: 'throw', attempt, err: String(err && (err.name || err.message || err)) });
-      if (attempt === 2) return { ok: false, message: 'Kunde inte nå Krypto just nu. Kontrollera din uppkoppling och försök igen.' };
+      if (attempt === 2) return { ok: false, message: 'Kunde inte nå Falk just nu. Kontrollera din uppkoppling och försök igen.' };
       await new Promise((r) => setTimeout(r, 800)); // kort backoff, försök igen en gång
     }
   }
 });
 
-// Krypto som agent: panelen skickar hit kommandon (t.ex. byt sökmotor, av/på skydd).
+// Falk som agent: panelen skickar hit kommandon (t.ex. byt sökmotor, av/på skydd).
 // Fönster-/process-actions körs här; UI-inställningar rel:as vidare till skalet.
 ipcMain.on('krypto:action', (e, a) => {
   try {
@@ -1585,7 +1585,7 @@ ipcMain.on('krypto:action', (e, a) => {
 
 /* ────────── Kortkommandon (Chromium-lika) ──────────
  * Acceleratorerna i popup-menyerna är bara etiketter. Riktiga genvägar fångas
- * här via before-input-event på VARJE webContents (skal + flik-vyer + Krypto),
+ * här via before-input-event på VARJE webContents (skal + flik-vyer + Falk),
  * så de funkar även när fokus ligger i en webbsida. */
 function ctxForWc(wc) { return wins.get(wc.id) || wc.__ctx || null; }
 function activeView(ctx) { return ctx && ctx.visibleTab ? ctx.views.get(ctx.visibleTab) : null; }

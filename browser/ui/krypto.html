@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Krypto</title>
+<title>Falk</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root { --terra: #e08a62; --terra-deep: #c2643f; --terra-soft: #f2b795; --ink: #f2f2f4; --dim: #9a9ca3; --line: rgba(255,255,255,.08);
@@ -20,8 +20,8 @@
   }
   header .dot { width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center;
     background: rgba(224,138,98,.14); border: 1px solid rgba(224,138,98,.3); color: var(--terra); }
-  /* Ugglan: Kryptos märke (AdRaze = hålla vakt). Ansiktet i små ytor, hela ugglan
-     i välkomstvyn och när Krypto tänker: då flyger den och tittar runt. */
+  /* Ugglan: Falks märke (AdRaze = hålla vakt). Ansiktet i små ytor, hela ugglan
+     i välkomstvyn och när Falk tänker: då flyger den och tittar runt. */
   .owl { display: block; width: 22px; height: 22px; object-fit: contain; transform-origin: 50% 60%; }
   header .dot { background: transparent; border-color: transparent; overflow: visible; }
   body.thinking header .dot { background: rgba(224,138,98,.16); border-color: rgba(224,138,98,.45); box-shadow: 0 0 0 4px rgba(224,138,98,.08), 0 0 22px rgba(224,138,98,.35); }
@@ -186,7 +186,7 @@
 <body>
   <header>
     <span class="dot" id="hdr-dot"><img class="owl" src="krypto-owl-face.png" alt=""></span>
-    <span class="t">Krypto<small id="convtitle">Din säkerhetsassistent</small></span>
+    <span class="t">Falk<small id="convtitle">Din säkerhetsassistent</small></span>
     <span class="grow"></span>
     <button class="hbtn" id="fullbtn" title="Helskärm">
       <svg id="full-ic-open" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
@@ -195,7 +195,7 @@
     <button class="hbtn" id="convbtn" title="Alla samtal (/samtal)">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/></svg>
     </button>
-    <button class="hbtn" id="membtn" title="Vad Krypto minns (/minne)">
+    <button class="hbtn" id="membtn" title="Vad Falk minns (/minne)">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 0 0-5.9-.6A3 3 0 0 0 4 9.5a3 3 0 0 0 0 5A3 3 0 0 0 8 19a3 3 0 0 0 4 1 3 3 0 0 0 4-1 3 3 0 0 0 4-4.5 3 3 0 0 0 0-5A3 3 0 0 0 17.9 4.4 3 3 0 0 0 12 5Z"/><path d="M12 5v15"/></svg>
       <span class="badge" id="membadge">0</span>
     </button>
@@ -219,7 +219,7 @@
   <!-- Minne -->
   <div id="mempanel" class="panel">
     <div class="p-head">
-      <div style="flex:1"><div class="t">Krypto minns</div><div class="sub">Ändra, ta bort eller lägg till själv.</div></div>
+      <div style="flex:1"><div class="t">Falk minns</div><div class="sub">Ändra, ta bort eller lägg till själv.</div></div>
       <button class="hbtn" id="memclose" title="Stäng"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     </div>
     <div class="p-list" id="mplist"></div>
@@ -238,12 +238,12 @@
       <button class="modechip" data-mode="kritik">Kritik</button>
     </div>
     <div class="inwrap">
-      <textarea id="inp" rows="1" placeholder="Fråga Krypto — eller skriv / för kommandon" spellcheck="false"></textarea>
+      <textarea id="inp" rows="1" placeholder="Fråga Falk — eller skriv / för kommandon" spellcheck="false"></textarea>
       <button id="send" title="Skicka">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
       </button>
     </div>
-    <div class="foot-note">Krypto kan ha fel. Dela aldrig lösenord eller BankID.</div>
+    <div class="foot-note">Falk kan ha fel. Dela aldrig lösenord eller BankID.</div>
   </footer>
 
   <script src="i18n.js"></script>
@@ -328,12 +328,12 @@
       el.innerHTML = '<span class="av">' + (role === 'user' ? AV_USER : AV_KRYPTO) + '</span><div class="bubble"></div>';
       el.querySelector('.bubble').innerHTML = html; log.appendChild(el); scrollBottom(); return el;
     }
-    var WELCOME_SV = 'Hej! Jag är Krypto, din säkerhetsassistent i AdRaze. Klistra in en misstänkt länk, ett mejl eller ett SMS så säger jag om det är en bluff — eller be mig ändra en inställning åt dig. Skriv / för kommandon.';
+    var WELCOME_SV = 'Hej! Jag är Falk, din säkerhetsassistent i AdRaze. Klistra in en misstänkt länk, ett mejl eller ett SMS så säger jag om det är en bluff — eller be mig ändra en inställning åt dig. Skriv / för kommandon.';
     function welcome() {
       var tr = (typeof window.t === 'function') ? window.t : (x) => x;
       var el = document.createElement('div'); el.className = 'hero';
       var sugg = ['Är den här länken en bluff?', 'Kolla om det här mejlet är äkta', 'Vad kan du hjälpa mig med?'];
-      el.innerHTML = '<span class="big">' + OWL_BIG + '</span><h1>' + esc(tr('Hej, jag är Krypto.')) + '</h1>'
+      el.innerHTML = '<span class="big">' + OWL_BIG + '</span><h1>' + esc(tr('Hej, jag är Falk.')) + '</h1>'
         + '<p>' + esc(tr('Klistra in en misstänkt länk, ett mejl eller ett SMS så säger jag om det är en bluff. Eller be mig ändra en inställning. Skriv / för kommandon.')) + '</p>'
         + '<div class="sugg">' + sugg.map((q) => '<button type="button"><span>›</span>' + esc(tr(q)) + '</button>').join('') + '</div>';
       el.querySelectorAll('.sugg button').forEach((b, i) => b.addEventListener('click', () => { inp.value = tr(sugg[i]); inp.focus(); inp.dispatchEvent(new Event('input')); }));
@@ -344,17 +344,17 @@
     function render() { log.innerHTML = ''; if (!history.length) { welcome(); return; } for (const m of history) bubble(m.role, fmt(m.content)); }
     function memCard(kind, text) {
       const el = document.createElement('div'); el.className = 'memcard' + (kind === 'del' ? ' del' : '');
-      el.innerHTML = '<span class="mi">' + BRAIN + '</span><div class="mtxt"><b>' + (kind === 'del' ? 'Krypto glömde' : 'Krypto sparade ett minne') + '</b><span class="mval">' + esc(text) + '</span></div>';
+      el.innerHTML = '<span class="mi">' + BRAIN + '</span><div class="mtxt"><b>' + (kind === 'del' ? 'Falk glömde' : 'Falk sparade ett minne') + '</b><span class="mval">' + esc(text) + '</span></div>';
       log.appendChild(el); scrollBottom();
     }
     function recallChip() { const el = document.createElement('div'); el.className = 'recall'; el.innerHTML = BRAIN + ' minns dig'; log.appendChild(el); scrollBottom(); }
 
-    /* ── Läges-system (Krypto som brain) ── */
+    /* ── Läges-system (Falk som brain) ── */
     const MODE_PLACEHOLDER = {
-      fraga: 'Fråga Krypto — eller skriv / för kommandon',
-      rapport: 'Klistra in ditt fynd så skriver Krypto rapporten…',
-      skicka: 'Klistra in rapporten så gör Krypto den inlämningsklar…',
-      kritik: 'Klistra in rapporten så granskar Krypto den hårt…',
+      fraga: 'Fråga Falk — eller skriv / för kommandon',
+      rapport: 'Klistra in ditt fynd så skriver Falk rapporten…',
+      skicka: 'Klistra in rapporten så gör Falk den inlämningsklar…',
+      kritik: 'Klistra in rapporten så granskar Falk den hårt…',
     };
     const MODE_BLOCKS = {
       fraga:
@@ -431,12 +431,12 @@
       const mems = memGet();
       const memList = mems.length ? mems.map((m, i) => (i + 1) + '. ' + m.text).join('\n') : '(inga minnen än)';
       const sys =
-        'KONTEXT (visas inte för användaren): Du är Krypto, den personliga säkerhetsassistenten inuti **AdRaze** – ' +
+        'KONTEXT (visas inte för användaren): Du är Falk, den personliga säkerhetsassistenten inuti **AdRaze** – ' +
         'en trygg svensk webbläsare för hela familjen. Du hjälper vanliga människor att vara trygga på nätet: granska ' +
         'misstänkta länkar, mejl och SMS och säg rakt ut om något är en bluff eller phishing, förklara lösenord, integritet ' +
         'och bedrägerier på ett enkelt sätt, och svara på frågor om själva webbläsaren. Var varm, tydlig och konkret – hoppa ' +
         'teknisk jargong. Du hjälper ALDRIG till med att hacka, attackera eller kringgå säkerhet. Webbläsaren har ' +
-        'annonsblockerare, inkognitoläge, lösenordshanterare, familjeskydd, AdRaze Wallet och dig (Krypto) i sidopanelen.\n\n' +
+        'annonsblockerare, inkognitoläge, lösenordshanterare, familjeskydd, AdRaze Wallet och dig (Falk) i sidopanelen.\n\n' +
         'Du har ett MINNE om användaren så du inte glömmer VIKTIGA saker mellan samtal. Styr det med taggar sist i ditt svar ' +
         '(systemet fångar och döljer dem – användaren ser dem aldrig):\n' +
         '• Spara ett varaktigt faktum om PERSONEN: [[minne+ faktumet]]  (t.ex. [[minne+ Heter Cetto]] eller [[minne+ 18 år gammal]])\n' +
@@ -463,7 +463,7 @@
         'Sparade minnen om användaren just nu:\n' + memList;
       return [
         { role: 'user', content: sys },
-        { role: 'assistant', content: 'Uppfattat – jag är Krypto, din säkerhetsassistent i AdRaze, och håller mina minnen om dig uppdaterade.' },
+        { role: 'assistant', content: 'Uppfattat – jag är Falk, din säkerhetsassistent i AdRaze, och håller mina minnen om dig uppdaterade.' },
       ];
     }
     function processMemoryTags(reply) {
@@ -494,11 +494,11 @@
       { const h = log.querySelector('.hero'); if (h) h.remove(); }   // välkomstvyn försvinner när samtalet börjar
       bubble('user', fmt(text)); updateConvTitle();
       busy = true; sendBtn.disabled = true; document.body.classList.add('thinking');
-      const typing = bubble('krypto', '<span class="think">' + OWL_FLY + '<span class="tt">' + esc((typeof window.t === 'function') ? window.t('Krypto tänker') : 'Krypto tänker') + '…</span></span>', 'typing');
+      const typing = bubble('krypto', '<span class="think">' + OWL_FLY + '<span class="tt">' + esc((typeof window.t === 'function') ? window.t('Falk tänker') : 'Falk tänker') + '…</span></span>', 'typing');
       const messages = buildPriming().concat(history.slice(-12));
       let res;
       try { res = await window.krypto.chat(messages); }
-      catch { res = { ok: false, message: 'Kunde inte nå Krypto just nu.' }; }
+      catch { res = { ok: false, message: 'Kunde inte nå Falk just nu.' }; }
       typing.remove(); document.body.classList.remove('thinking');
       if (res && res.ok) {
         const { text: clean0, events, recalled } = processMemoryTags(res.reply || '');
@@ -518,7 +518,7 @@
     const COMMANDS = [
       { name: '/nytt', desc: 'Starta ett nytt samtal', run: newConvo },
       { name: '/samtal', desc: 'Visa alla dina samtal', run: () => togglePanel('convpanel', true) },
-      { name: '/minne', desc: 'Visa & ändra vad Krypto minns', run: () => togglePanel('mempanel', true) },
+      { name: '/minne', desc: 'Visa & ändra vad Falk minns', run: () => togglePanel('mempanel', true) },
     ];
     function runCommand(text) {
       const cmd = text.trim().toLowerCase().split(/\s+/)[0];
@@ -554,7 +554,7 @@
     function renderConvList() {
       const host = $('convlist'); host.innerHTML = '';
       const ordered = convos.slice().sort((a, b) => b.ts - a.ts);
-      if (ordered.length === 1 && !ordered[0].messages.length) { host.innerHTML = '<div class="p-empty">Inga tidigare samtal än.<br>Skriv något till Krypto så dyker de upp här.</div>'; return; }
+      if (ordered.length === 1 && !ordered[0].messages.length) { host.innerHTML = '<div class="p-empty">Inga tidigare samtal än.<br>Skriv något till Falk så dyker de upp här.</div>'; return; }
       for (const c of ordered) {
         const row = document.createElement('div'); row.className = 'convrow' + (c.id === activeId ? ' active' : '');
         const preview = (MODE_LABEL[c.mode || 'fraga'] || 'Fråga') + ' · ' + (c.messages.length) + ' meddelanden · ' + ago(c.ts);
@@ -567,7 +567,7 @@
     }
     function renderMemList() {
       const list = memGet(); const host = $('mplist'); host.innerHTML = '';
-      if (!list.length) { host.innerHTML = '<div class="p-empty">Krypto har inga minnen om dig än.<br>Lägg till något själv nedan, eller berätta något i chatten.</div>'; return; }
+      if (!list.length) { host.innerHTML = '<div class="p-empty">Falk har inga minnen om dig än.<br>Lägg till något själv nedan, eller berätta något i chatten.</div>'; return; }
       for (const m of list.slice().reverse()) {
         const row = document.createElement('div'); row.className = 'mprow';
         row.innerHTML = '<div class="mv">' + esc(m.text) + '</div>'
