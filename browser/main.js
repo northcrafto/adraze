@@ -449,7 +449,7 @@ function ensureView(ctx, tabId) {
     // annonssajter (popunder) och dödas helt.
     if (details.disposition === 'new-window' || (details.features && details.features.length)) {
       if (sameSite(url, from) || popupTrustedHost(url)) {
-        return { action: 'allow', overrideBrowserWindowOptions: { width: 520, height: 680, resizable: true, autoHideMenuBar: true } };
+        return { action: 'allow', overrideBrowserWindowOptions: { width: 520, height: 680, resizable: true, autoHideMenuBar: true, webPreferences: { preload: path.join(__dirname, 'content-preload.js'), contextIsolation: true, sandbox: false, nodeIntegration: false } } };   // samma Chrome-förklädnad som flikarna, annars stoppar Google inloggningen
       }
       // Korsdomän-fönster från en okänd sajt = popunder. Dör helt – blir inte ens en flik.
       // (Vanliga länkar med target=_blank har inga fönster-features och blir flik som vanligt.)
@@ -489,7 +489,7 @@ function ensureView(ctx, tabId) {
     if (isMain && code === -20 && adblock.isDanger(url)) sendTo(ctx, 'adraze-danger', tabId, url);
   });
   wc.on('did-navigate', (_e, url) => sendTo(ctx, 'did-navigate', tabId, url, canGo(wc, -1), canGo(wc, 1)));
-  wc.on('did-navigate-in-page', (_e, url, isMain) => { if (isMain) sendTo(ctx, 'did-navigate', tabId, url, canGo(wc, -1), canGo(wc, 1)); });
+  wc.on('did-navigate-in-page', (_e, url, isMain) => { if (isMain) { sendTo(ctx, 'did-navigate', tabId, url, canGo(wc, -1), canGo(wc, 1)); googleKlar(ctx, tabId, url); } });
   wc.on('page-title-updated', (_e, title) => sendTo(ctx, 'title', tabId, title));
   wc.on('page-favicon-updated', (_e, favs) => sendTo(ctx, 'favicon', tabId, (favs || [])[0] || null));
   wc.on('did-start-loading', () => sendTo(ctx, 'loading', tabId, true));
@@ -583,45 +583,29 @@ function inloggadSvar(j) {
   return { ok: true, token: j.token, email: (j.me && j.me.email) || '', name: (j.me && j.me.namn) || '', pro: false };
 }
 ipcMain.handle('auth:login', async (_e, d) => inloggadSvar(await adrazeApi('/auth/login', { email: d && d.email, password: d && d.password, app: true, enhet: lasEnhet() || undefined })));
-// Google: eget litet fönster mot adraze.app/app-google (Googles knapp kräver adraze.app som ursprung).
-// Sidan lägger nyckeln i #klar=… när servern godkänt – vi läser den här och stänger fönstret.
-// Egen minnes-session (ingen "persist:") så att Google-kakorna inte blandas med flikarna.
+// Google: inloggningen öppnas i en vanlig AdRaze-flik mot adraze.app/app-google. Flikarna ser ut som
+// riktiga Chrome för Google (content-preload) – ett separat Electron-fönster stoppas av Google
+// ("webbläsaren kanske inte är säker"). Sidan lägger nyckeln i #klar=…, fliken fångas här och stängs.
 const ADRAZE_SITE = process.env.ADRAZE_SITE || 'https://adraze.app';
-let googleWin = null;
+let googleVantar = null;   // { resolve, ctx, timer }
+function googleKlar(ctx, tabId, url) {
+  if (!googleVantar || !url) return;
+  try {
+    const x = new URL(url);
+    if (x.origin !== new URL(ADRAZE_SITE).origin || x.pathname !== '/app-google' || !x.hash.startsWith('#klar=')) return;
+    const d = JSON.parse(decodeURIComponent(x.hash.slice(6)));
+    if (!d || typeof d.token !== 'string') return;
+    if (d.enhet) sparaEnhet(d.enhet);
+    const v = googleVantar; googleVantar = null; clearTimeout(v.timer);
+    sendTo(ctx, 'close-tab-id', tabId);
+    v.resolve({ ok: true, token: d.token, email: d.email || '', name: d.namn || '', pro: false });
+  } catch {}
+}
 ipcMain.handle('auth:google', (e) => new Promise((resolve) => {
-  if (googleWin && !googleWin.isDestroyed()) { googleWin.focus(); return resolve({ ok: false, error: 'busy' }); }
   const ctx = ctxFor(e);
-  const sess = session.fromPartition('adraze-google');
-  if (!sess.__adrazeKlar) { sess.__adrazeKlar = true; try { sess.setUserAgent(app.userAgentFallback); applyClientHints(sess); } catch {} }
-  const site = new URL(ADRAZE_SITE).origin;
-  const tillaten = (u) => { try { const x = new URL(u); return x.origin === site || /(^|\.)google\.com$/.test(x.hostname) || /(^|\.)gstatic\.com$/.test(x.hostname); } catch { return false; } };
-  const win = googleWin = new BrowserWindow({
-    width: 460, height: 620, parent: ctx && ctx.win, modal: false, autoHideMenuBar: true, show: false,
-    title: 'Logga in i AdRaze', backgroundColor: '#f7f6f3',
-    webPreferences: { session: sess, contextIsolation: true, sandbox: true, nodeIntegration: false },
-  });
-  let klar = false;
-  const avsluta = (svar) => { if (klar) return; klar = true; resolve(svar); if (!win.isDestroyed()) win.close(); };
-  const lasHash = (u) => {
-    try {
-      const x = new URL(u);
-      if (x.origin !== site || !x.hash.startsWith('#klar=')) return;
-      const d = JSON.parse(decodeURIComponent(x.hash.slice(6)));
-      if (!d || typeof d.token !== 'string') return;
-      if (d.enhet) sparaEnhet(d.enhet);
-      avsluta({ ok: true, token: d.token, email: d.email || '', name: d.namn || '', pro: false });
-    } catch {}
-  };
-  win.webContents.on('did-navigate-in-page', (_ev, u) => lasHash(u));
-  win.webContents.on('did-navigate', (_ev, u) => lasHash(u));
-  win.webContents.on('will-navigate', (ev, u) => { if (!tillaten(u)) ev.preventDefault(); });
-  // Googles knapp öppnar sitt kontoval som popup (window.opener behövs för svaret)
-  win.webContents.setWindowOpenHandler(({ url }) => tillaten(url)
-    ? { action: 'allow', overrideBrowserWindowOptions: { width: 500, height: 640, autoHideMenuBar: true, parent: win, webPreferences: { session: sess, contextIsolation: true, sandbox: true } } }
-    : { action: 'deny' });
-  win.once('ready-to-show', () => win.show());
-  win.on('closed', () => { googleWin = null; if (!klar) { klar = true; resolve({ ok: false, error: 'cancelled' }); } });
-  win.loadURL(site + '/app-google').catch(() => avsluta({ ok: false, error: 'unreachable', message: 'Kunde inte nå adraze.app.' }));
+  if (googleVantar) { clearTimeout(googleVantar.timer); googleVantar.resolve({ ok: false, error: 'cancelled' }); }
+  googleVantar = { resolve, timer: setTimeout(() => { if (googleVantar && googleVantar.resolve === resolve) { googleVantar = null; resolve({ ok: false, error: 'cancelled' }); } }, 10 * 60_000) };
+  sendTo(ctx, 'open-new-tab', ADRAZE_SITE + '/app-google');
 }));
 ipcMain.handle('auth:signup', async (_e, d) => inloggadSvar(await adrazeApi('/auth/signup', { email: d && d.email, password: d && d.password, namn: d && d.name, app: true })));
 ipcMain.handle('auth:verify-code', async (_e, d) => inloggadSvar(await adrazeApi('/auth/verify', { email: d && d.email, code: d && d.code, app: true })));

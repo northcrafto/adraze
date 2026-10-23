@@ -737,7 +737,7 @@ function applyKryptoSetting(a) {
   if (!a || !a.name) return;
   const name = ('' + a.name).toLowerCase().replace(/[åä]/g, 'a').replace(/ö/g, 'o');
   const val = a.value; let msg = '';
-  if (name === 'adblock' || name === 'annonsblockerare') { const on = kryptoOnOff(val); setAdblock(on); msg = 'Annonsblockerare ' + (on ? 'på' : 'av'); }
+  if (name === 'adblock' || name === 'annonsblockerare') { const on = kryptoOnOff(val); setAdblock(on); msg = 'AdRaze ' + (on ? 'på' : 'av'); }
   else if (name === 'realtidsskydd' || name === 'skydd') { const on = kryptoOnOff(val); setProtection(on); msg = 'Realtidsskydd ' + (on ? 'på' : 'av'); }
   else if (name === 'minska_rorelse' || name === 'reduce_motion' || name === 'rorelse') { const on = kryptoOnOff(val); setReduceMotion(on); msg = 'Minska rörelse ' + (on ? 'på' : 'av'); }
   else if (name === 'sokmotor' || name === 'sok') { const k = matchEngine(val); if (k && setEngine(k)) msg = 'Sökmotor: ' + ENGINES[k].label; }
@@ -903,12 +903,13 @@ async function doLogin() {
 async function doGoogle(errId, btnId) {
   const err = $(errId);
   err.style.display = 'none';
+  closeLogin();   // inloggningen sker i en flik – rutan stängs så fliken syns
   $(btnId).disabled = true;
   let r; try { r = await window.auth.google(); } catch { r = { ok: false }; }
   $(btnId).disabled = false;
-  if (r && r.ok) { loginAs(r.token, r.email, r.pro, r.name); closeLogin(); return; }
-  if (r && (r.error === 'cancelled' || r.error === 'busy')) return;
-  err.textContent = (r && r.message) || 'Google-inloggningen misslyckades.'; err.style.display = 'block';
+  if (r && r.ok) { loginAs(r.token, r.email, r.pro, r.name); return; }
+  if (r && r.error === 'cancelled') return;
+  openLogin(); err.textContent = (r && r.message) || 'Google-inloggningen misslyckades.'; err.style.display = 'block';
 }
 async function doSignup() {
   const name = $('signup-name').value.trim();
@@ -1713,6 +1714,7 @@ window.view.onOpenSettings((cat) => { openSettings(); if (cat) showSettingsCat(c
 window.view.onMenuZoom((dir) => { if (active && active.url) window.view.zoom(active.id, dir); });
 window.view.onMenuPrint(() => { if (active && active.url) window.view.print(active.id); });
 window.view.onCloseTab(() => { if (active) closeTab(active); });
+window.view.onCloseTabId((id) => { const t = tabs.find((x) => x.id === id); if (t) closeTab(t); });
 window.view.onFocusAddress(() => { addressInput.focus(); addressInput.select(); });
 // Klick/fokus i adressfältet → visa HELA URL:en (https://…), markerad så den är lätt att ändra.
 addressInput.addEventListener('focus', () => {
