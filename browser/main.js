@@ -28,6 +28,7 @@ const { AdrazeAdblock, registerScheme: registerAdblockScheme } = require('./adbl
 registerAdblockScheme();   // före app.ready
 
 const KRYPTO_W = 400;
+const CHATT_W = 420;        // chattens sidopanel (helskärm = hela webbytan)
 const NET_H = 340;          // nätverksinspektörens dockade höjd
 const NET_MAX = 800;        // max antal requests i bufferten per fönster
 const wins = new Map();                 // skalets webContents-id -> ctx
@@ -56,6 +57,7 @@ function makeCtx(win, incognito) {
     bounds: { x: 0, y: 96, width: 1280, height: 700 },
     topInset: 0, leftInset: 0, defaultZoom: 1,
     kryptoView: null, kryptoOpen: false, kryptoFull: false, authToken: null,
+    chattView: null, chattOpen: false, chattFull: false, chattToken: null, chattChild: false, chattBoot: null,
     net: null, netOpen: false,          // nätverksinspektör (Wireshark-lik, via CDP)
     htmlFull: false, _wasFull: false,   // HTML5-video/element i helskärm
   };
@@ -258,14 +260,23 @@ function applyBounds(ctx) {
     const cb = ctx.win.getContentBounds();
     ctx.views.get(ctx.visibleTab).setBounds({ x: 0, y: 0, width: Math.round(cb.width), height: Math.round(cb.height) });
     if (ctx.kryptoView) ctx.kryptoView.setVisible(false);
+    if (ctx.chattView) ctx.chattView.setVisible(false);
     return;
   }
   const full = ctx.kryptoOpen && ctx.kryptoFull;              // Krypto i helskärm (täcker webbytan)
   const kw = (ctx.kryptoOpen && !full) ? KRYPTO_W : 0;        // sidopanelens bredd (0 i helskärm – panelen ligger ovanpå)
+  const cw = (ctx.chattOpen && !ctx.chattFull) ? CHATT_W : 0; // chattens sidopanel (till vänster om Krypto om båda är öppna)
   const nh = ctx.netOpen ? NET_H : 0;                         // nätverksinspektörens höjd (dockad längst ner)
   const R = Math.round;
   if (ctx.visibleTab && ctx.views.has(ctx.visibleTab)) {
-    ctx.views.get(ctx.visibleTab).setBounds({ x: R(b.x + ctx.leftInset), y: R(b.y + ctx.topInset), width: R(b.width - kw - ctx.leftInset), height: R(b.height - ctx.topInset - nh) });
+    ctx.views.get(ctx.visibleTab).setBounds({ x: R(b.x + ctx.leftInset), y: R(b.y + ctx.topInset), width: Math.max(0, R(b.width - kw - cw - ctx.leftInset)), height: R(b.height - ctx.topInset - nh) });
+  }
+  if (ctx.chattView) {
+    ctx.chattView.setVisible(ctx.chattOpen);
+    if (ctx.chattOpen) {
+      if (ctx.chattFull) ctx.chattView.setBounds({ x: R(b.x + ctx.leftInset), y: R(b.y), width: Math.max(0, R(b.width - kw - ctx.leftInset)), height: R(b.height) });
+      else ctx.chattView.setBounds({ x: R(b.x + b.width - kw - CHATT_W), y: R(b.y), width: CHATT_W, height: R(b.height) });
+    }
   }
   if (ctx.kryptoView) {
     ctx.kryptoView.setVisible(ctx.kryptoOpen);
@@ -275,7 +286,7 @@ function applyBounds(ctx) {
     }
   }
 }
-function raiseKrypto(ctx) { if (ctx && ctx.kryptoView) ctx.win.contentView.addChildView(ctx.kryptoView); }
+function raiseKrypto(ctx) { if (ctx && ctx.chattView) ctx.win.contentView.addChildView(ctx.chattView); if (ctx && ctx.kryptoView) ctx.win.contentView.addChildView(ctx.kryptoView); }
 function showOnly(ctx, tabId) {
   const now = Date.now();
   if (ctx.visibleTab && ctx.visibleTab !== tabId) ctx.lastActive.set(ctx.visibleTab, now); // starta ledig-klockan för fliken vi lämnar
@@ -613,8 +624,10 @@ ipcMain.handle('auth:reset-request', async (_e, d) => adrazeApi('/auth/forgot', 
 ipcMain.handle('auth:reset-confirm', async (_e, d) => inloggadSvar(await adrazeApi('/auth/reset', { email: d && d.email, code: d && d.code, password: d && d.password, app: true })));
 ipcMain.handle('auth:session', async (_e, d) => {
   const j = await adrazeApi('/me', null, d && d.token, 'GET');
-  return j.ok ? { ok: true, email: j.me.email, name: j.me.namn || '', pro: false } : j;
+  return j.ok ? { ok: true, email: j.me.email, name: j.me.namn || '', avatar: j.me.avatar || null, pro: false } : j;
 });
+// Profilbilden hör till AdRaze-kontot (samma som på adraze.app) och visas även i chatten.
+ipcMain.handle('auth:avatar', (_e, d) => adrazeApi('/me/avatar', { bild: (d && typeof d.image === 'string') ? d.image : null }, d && d.token));
 ipcMain.handle('auth:logout', async (_e, d) => { await adrazeApi('/barn/logout', {}, d && d.token); return adrazeApi('/auth/logout', {}, d && d.token); });
 ipcMain.handle('auth:delete', (_e, d) => adrazeApi('/me/delete', { password: (d && d.password) || '' }, d && d.token));
 /* Session speglas krypterat i OS-nyckelringen (safeStorage) så inloggningen överlever
@@ -690,27 +703,108 @@ ipcMain.handle('family:logout-session', async (_e, d) => {
   const j = await adrazeApi('/familj/logga-ut-inloggning', { barn_id: d && d.child_id, sid: d && d.sid }, d && d.token);
   return j.ok ? { ok: true, ended: j.avslutade } : j;
 });
-/* AdRaze Socialt: profil (användarnamn+bild), vänner, chatt. */
-async function socialCall(pathname, body) {
-  try {
-    const r = await fetch(SKOLL + '/api/sakerkoll/social/' + pathname, {
-      method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' },
-      body: JSON.stringify(body || {}), signal: AbortSignal.timeout(20000),
-    });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok && !j.error) j.error = 'http_' + r.status;
-    return j;
-  } catch (e) { return { ok: false, error: 'unreachable', message: 'Kunde inte nå servern.' }; }
+/* ── Chatt (E2E, samma som Säkerkoll-communityn) mot AdRaze-kontot ──
+ * Sidan (ui/chatt.html) ligger i en egen WebContentsView med egen partition, så den aldrig delar
+ * lagring med skalet (där kontots token ligger) eller med webbsidor. Den pratar bara med
+ * huvudprocessen: chatt:api lägger på kontots token och anropar ADRAZE_API + '/chatt' + sökväg.
+ * Privata nyckeln skapas och används bara i sidan (WebCrypto) och sparas i partitionens IndexedDB. */
+const CHATT_PARTITION = 'persist:adraze-chatt';
+let chattSessionReady = false;
+function chattSession() {
+  const s = session.fromPartition(CHATT_PARTITION);
+  if (!chattSessionReady) {
+    chattSessionReady = true;
+    const ok = new Set(['notifications', 'clipboard-sanitized-write']);
+    try { s.setPermissionRequestHandler((_wc, perm, cb) => cb(ok.has(perm))); } catch {}
+    try { s.setPermissionCheckHandler((_wc, perm) => ok.has(perm)); } catch {}
+    try { trackDownloads(s); } catch {}   // "Ladda ner bild" hamnar i webbläsarens nedladdningar
+  }
+  return s;
 }
-ipcMain.handle('social:me', (_e, d) => socialCall('me', { token: d && d.token }));
-ipcMain.handle('social:profile', (_e, d) => socialCall('profile', { token: d && d.token, username: d && d.username, avatar: d && d.avatar }));
-ipcMain.handle('social:friend-request', (_e, d) => socialCall('friend/request', { token: d && d.token, username: d && d.username }));
-ipcMain.handle('social:friend-respond', (_e, d) => socialCall('friend/respond', { token: d && d.token, username: d && d.username, accept: d && d.accept }));
-ipcMain.handle('social:friends', (_e, d) => socialCall('friends', { token: d && d.token }));
-ipcMain.handle('social:messages', (_e, d) => socialCall('messages', { token: d && d.token, chat: d && d.chat, since: d && d.since }));
-ipcMain.handle('social:send', (_e, d) => socialCall('send', { token: d && d.token, chat: d && d.chat, body: d && d.body }));
-ipcMain.handle('social:edit', (_e, d) => socialCall('edit', { token: d && d.token, id: d && d.id, body: d && d.body }));
-ipcMain.handle('social:chatavatar', (_e, d) => socialCall('chatavatar', { token: d && d.token, chat: d && d.chat, avatar: d && d.avatar }));
+function chattDestroy(ctx) {
+  if (!ctx || !ctx.chattView) return;
+  const v = ctx.chattView; ctx.chattView = null;
+  try { ctx.win.contentView.removeChildView(v); } catch {}
+  try { v.webContents.close(); } catch {}
+}
+function chattCreate(ctx) {
+  const v = new WebContentsView({ webPreferences: {
+    preload: path.join(__dirname, 'chatt-preload.js'), contextIsolation: true, sandbox: true, partition: CHATT_PARTITION, spellcheck: true,
+  } });
+  chattSession();
+  ctx.chattView = v;
+  ctx.win.contentView.addChildView(v);
+  const wc = v.webContents;
+  wc.__ctx = ctx;
+  // Panelen får ALDRIG navigera bort från chatt.html: länkar (efter säkerhetsrutan) öppnas som ny flik.
+  wc.setWindowOpenHandler(({ url }) => { if (/^https?:\/\//i.test(url)) sendTo(ctx, 'open-new-tab', url); return { action: 'deny' }; });
+  wc.on('will-navigate', (ev, url) => { ev.preventDefault(); if (/^https?:\/\//i.test(url)) sendTo(ctx, 'open-new-tab', url); });
+  wc.on('render-process-gone', () => { if (ctx.chattView === v) { chattDestroy(ctx); if (ctx.chattOpen) { chattCreate(ctx); applyBounds(ctx); raiseKrypto(ctx); } } });
+  wc.loadFile(path.join(__dirname, 'ui', 'chatt.html')).catch(() => {});
+}
+// Skalet säger till vid öppna/stäng och vid in-/utloggning och kontobyte.
+// Nytt konto (eller utloggad/barnkonto) = vyn rivs, så inget från förra kontot finns kvar i minnet.
+ipcMain.on('chatt:toggle', (e, open, o) => {
+  const ctx = ctxFor(e); if (!ctx) return;
+  o = o || {};
+  const token = typeof o.token === 'string' && o.token ? o.token : null;
+  const child = !!o.child;
+  const lang = String(o.lang || 'sv').replace(/[^a-zA-Z-]/g, '') || 'sv';
+  const theme = o.theme === 'dark' ? 'dark' : 'light';
+  if (token !== ctx.chattToken || child !== ctx.chattChild || (ctx.chattBoot && ctx.chattBoot.lang !== lang)) {
+    chattDestroy(ctx);
+    ctx.chattToken = token; ctx.chattChild = child; ctx.chattFull = false;
+  }
+  ctx.chattBoot = { lang, theme };
+  ctx.chattOpen = !!open && !!token && !child;
+  if (ctx.chattOpen && !ctx.chattView) chattCreate(ctx);
+  applyBounds(ctx);
+  if (ctx.chattOpen) { raiseKrypto(ctx); try { ctx.chattView.webContents.focus(); } catch {} }
+  if (ctx.chattView) { try { ctx.chattView.webContents.send('chatt-visible', ctx.chattOpen); ctx.chattView.webContents.send('chatt-theme', theme); } catch {} }
+});
+ipcMain.on('chatt:theme', (e, theme) => {
+  const ctx = ctxFor(e); if (!ctx) return;
+  if (ctx.chattBoot) ctx.chattBoot.theme = theme === 'dark' ? 'dark' : 'light';
+  if (ctx.chattView) { try { ctx.chattView.webContents.send('chatt-theme', theme === 'dark' ? 'dark' : 'light'); } catch {} }
+});
+// Från chattsidan
+function chattCtx(e) {
+  const ctx = e.sender.__ctx;
+  return (ctx && ctx.chattView && ctx.chattView.webContents === e.sender) ? ctx : null;
+}
+ipcMain.on('chatt:boot', (e) => { const ctx = chattCtx(e); e.returnValue = ctx && ctx.chattBoot ? ctx.chattBoot : { lang: 'sv', theme: 'light' }; });
+ipcMain.on('chatt:expand', (e, full) => { const ctx = chattCtx(e); if (!ctx) return; ctx.chattFull = !!full; applyBounds(ctx); raiseKrypto(ctx); });
+ipcMain.on('chatt:close', (e) => { const ctx = chattCtx(e); if (!ctx) return; ctx.chattOpen = false; ctx.chattFull = false; applyBounds(ctx); sendTo(ctx, 'chatt-closed'); try { e.sender.send('chatt-visible', false); } catch {} });
+ipcMain.on('chatt:unread', (e, n) => { const ctx = chattCtx(e); if (ctx) sendTo(ctx, 'chatt-unread', Math.max(0, Math.min(9999, parseInt(n, 10) || 0))); });
+const CHATT_PATH_RE = /^\/[a-z0-9][a-z0-9/_-]{0,80}$/;
+ipcMain.handle('chatt:api', async (e, d) => {
+  const ctx = chattCtx(e);
+  if (!ctx) return { status: 403, json: { ok: false, error: 'Fel avsändare.' } };
+  if (ctx.chattChild) return { status: 403, json: { ok: false, error: 'Chatten finns inte för barnkonton.' } };
+  const token = ctx.chattToken;
+  if (!token) return { status: 401, json: { ok: false, error: 'Logga in för att chatta.' } };
+  d = d || {};
+  const method = d.method === 'POST' ? 'POST' : 'GET';
+  const p = String(d.path || '');
+  if (!CHATT_PATH_RE.test(p) || p.includes('//')) return { status: 400, json: { ok: false, error: 'Ogiltig sökväg.' } };
+  let qs = '';
+  if (d.query && typeof d.query === 'object') {
+    const u = new URLSearchParams();
+    for (const [k, v] of Object.entries(d.query)) if (v != null && /^[a-z_]{1,30}$/.test(k)) u.set(k, String(v).slice(0, 200));
+    const t = u.toString(); if (t) qs = '?' + t;
+  }
+  let body;
+  if (method === 'POST') { try { body = JSON.stringify(d.body && typeof d.body === 'object' ? d.body : {}); } catch { body = '{}'; } }
+  if (body && body.length > 3_500_000) return { status: 413, json: { ok: false, error: 'För stort.' } };
+  try {
+    const headers = { accept: 'application/json', authorization: 'Bearer ' + token };
+    if (body) headers['content-type'] = 'application/json';
+    const r = await fetch(ADRAZE_API + '/chatt' + p + qs, { method, headers, body, signal: AbortSignal.timeout(body && body.length > 100000 ? 90000 : 30000) });
+    if (ctx.chattToken !== token) return { status: 401, json: { ok: false, error: 'Kontot byttes.' } };   // svar till ett konto som inte längre är inloggat
+    const json = await r.json().catch(() => ({}));
+    return { status: r.status, json };
+  } catch { return { status: 0, json: { ok: false, error: 'Kunde inte nå servern. Kontrollera din uppkoppling.' } }; }
+});
 
 /* ── Lösenord — PER KONTO, låsta när man är utloggad ── */
 const PW_FILE = path.join(app.getPath('userData'), 'skoll-passwords.json');   // legacy (migreras in i kontot vid första inlogg)
@@ -1652,6 +1746,7 @@ function createWindow(incognito) {
     ctx.views.forEach((v) => { try { v.webContents.close(); } catch {} });
     ctx.views.clear();
     if (ctx.kryptoView) { try { ctx.kryptoView.webContents.close(); } catch {} ctx.kryptoView = null; }
+    chattDestroy(ctx);
     wins.delete(id);
   });
   return win;

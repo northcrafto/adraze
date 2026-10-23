@@ -28,7 +28,10 @@
     try { DICT = (window.locale && window.locale.load(cur)) || {}; } catch { DICT = {}; }
   }
 
+  // translate="no" (HTML-standard) = rör inte innehållet, t.ex. chattmeddelanden och användarnamn
+  function skip(node) { const el = node.nodeType === 1 ? node : node.parentElement; return !!(el && el.closest && el.closest('[translate="no"]')); }
   function trText(node) {
+    if (skip(node)) return;
     const raw = node.nodeValue;
     if (!raw) return;
     const k = raw.trim();
@@ -37,7 +40,7 @@
     if (v != null && v !== k) node.nodeValue = raw.replace(k, v);
   }
   function trAttrs(el) {
-    if (!el.getAttribute) return;
+    if (!el.getAttribute || skip(el)) return;
     for (const a of ['placeholder', 'title', 'aria-label']) {
       const val = el.getAttribute(a);
       if (!val) continue;
