@@ -492,63 +492,38 @@
       </div>
     </div>
 
-    <!-- Inloggning — svart kortvy i samma stil som inställningarna (2026-09-05) -->
-    <div id="login" class="hidden absolute inset-0 z-[70] grid place-items-center p-6">
+    <!-- Inloggning — enkel kolumn, följer ljust/mörkt läge (2026-10-23) -->
+    <div id="login" class="hidden absolute inset-0 z-[70]">
+      <button id="login-close" class="lg-close" title="Stäng"><svg class="ic ic-sm"><use href="#i-close" /></svg></button>
       <div class="lg-card">
-        <button id="login-close" class="lg-close" title="Stäng"><svg class="ic ic-sm"><use href="#i-close" /></svg></button>
-        <div class="lg-brand"><span class="lg-mark"><img src="adraze-mark.png" alt="" width="34" height="34"></span><span class="lg-brand-name">AdRaze</span></div>
-
-        <div id="lg-seg" class="lg-seg">
-          <button id="to-login" type="button" class="lg-seg-btn on" data-view="login">Logga in</button>
-          <button id="to-signup" type="button" class="lg-seg-btn" data-view="signup">Skapa konto</button>
-        </div>
+        <div class="lg-brand"><img src="adraze-mark.png" alt="" width="28" height="28"><span class="lg-brand-name">AdRaze</span></div>
 
         <!-- Logga in (mejl + lösenord) -->
         <div id="login-form" class="lg-view">
-          <div class="lg-head">
-            <h1 class="lg-h">Logga in</h1>
-            <p class="lg-lead">Välkommen tillbaka till AdRaze.</p>
-          </div>
-          <label class="lg-lbl">Mejladress</label>
+          <h1 class="lg-h">Logga in</h1>
+          <p class="lg-lead">Inget konto? <button id="to-signup" type="button" class="lg-link">Skapa ett</button></p>
+          <label class="lg-lbl" for="login-email">Mejladress</label>
+          <div class="lg-field"><input id="login-email" type="email" inputmode="email" autocomplete="email" placeholder="du@exempel.se" class="lg-in" /></div>
+          <div class="lg-lblrow"><label class="lg-lbl" for="login-pw">Lösenord</label><button id="to-reset" type="button" class="lg-link dim">Glömt lösenord?</button></div>
           <div class="lg-field">
-            <span class="lg-fi"><svg class="ic ic-sm"><use href="#i-user" /></svg></span>
-            <input id="login-email" type="email" inputmode="email" autocomplete="email" placeholder="du@exempel.se" class="lg-in" />
-          </div>
-          <label class="lg-lbl">Lösenord</label>
-          <div class="lg-field">
-            <span class="lg-fi"><svg class="ic ic-sm"><use href="#i-lock" /></svg></span>
-            <input id="login-pw" type="password" autocomplete="current-password" placeholder="Ditt lösenord" class="lg-in" />
+            <input id="login-pw" type="password" autocomplete="current-password" class="lg-in" />
             <button type="button" class="pw-eye lg-eye" data-target="login-pw" title="Visa lösenord"><svg class="ic ic-sm"><use href="#i-eye" /></svg></button>
           </div>
-          <div class="lg-right"><button id="to-reset" type="button" class="lg-link">Glömt lösenord?</button></div>
           <div id="login-error" class="lg-err" style="display:none;"></div>
           <button id="login-submit" class="lg-btn">Logga in</button>
-          <button id="to-child" type="button" class="lg-kid-entry">
-            <span class="lg-kid-ico"><svg class="ic ic-sm"><use href="#i-user" /></svg></span>
-            <span class="lg-kid-txt"><span class="lg-kid-q">Är du ett barn?</span><span class="lg-kid-a">Logga in med din kod</span></span>
-            <span class="lg-kid-arrow">→</span>
-          </button>
+          <button id="to-child" type="button" class="lg-alt">Är du ett barn? <span>Logga in med din kod →</span></button>
         </div>
 
         <!-- Skapa konto (namn + mejl + lösenord) -->
         <div id="login-signup" class="lg-view" style="display:none;">
-          <div class="lg-head">
-            <h1 class="lg-h">Skapa konto</h1>
-            <p class="lg-lead">Kom igång med AdRaze på en minut.</p>
-          </div>
-          <label class="lg-lbl">Namn</label>
+          <h1 class="lg-h">Skapa konto</h1>
+          <p class="lg-lead">Har du redan ett konto? <button id="to-login" type="button" class="lg-link">Logga in</button></p>
+          <label class="lg-lbl" for="signup-name">Namn</label>
+          <div class="lg-field"><input id="signup-name" autocomplete="name" maxlength="40" class="lg-in" /></div>
+          <label class="lg-lbl" for="signup-email">Mejladress</label>
+          <div class="lg-field"><input id="signup-email" type="email" inputmode="email" autocomplete="email" placeholder="du@exempel.se" class="lg-in" /></div>
+          <label class="lg-lbl" for="signup-pw">Lösenord</label>
           <div class="lg-field">
-            <span class="lg-fi"><svg class="ic ic-sm"><use href="#i-user" /></svg></span>
-            <input id="signup-name" autocomplete="name" maxlength="40" placeholder="Ditt namn" class="lg-in" />
-          </div>
-          <label class="lg-lbl">Mejladress</label>
-          <div class="lg-field">
-            <span class="lg-fi"><svg class="ic ic-sm"><use href="#i-user" /></svg></span>
-            <input id="signup-email" type="email" inputmode="email" autocomplete="email" placeholder="du@exempel.se" class="lg-in" />
-          </div>
-          <label class="lg-lbl">Lösenord</label>
-          <div class="lg-field">
-            <span class="lg-fi"><svg class="ic ic-sm"><use href="#i-lock" /></svg></span>
             <input id="signup-pw" type="password" autocomplete="new-password" placeholder="Minst 6 tecken" class="lg-in" />
             <button type="button" class="pw-eye lg-eye" data-target="signup-pw" title="Visa lösenord"><svg class="ic ic-sm"><use href="#i-eye" /></svg></button>
           </div>
@@ -558,13 +533,10 @@
 
         <!-- Verifiering (2FA-kod — både logga in och skapa konto) -->
         <div id="login-code" class="lg-view" style="display:none;">
-          <div class="lg-head">
-            <span class="lg-ico"><svg class="ic"><use href="#i-lock" /></svg></span>
-            <h1 class="lg-h">Verifiera din mejl</h1>
-            <p class="lg-lead">Vi skickade en 6-siffrig kod till<br><span id="code-email-shown" class="lg-strong"></span></p>
-          </div>
+          <h1 class="lg-h">Verifiera din mejl</h1>
+          <p class="lg-lead">Vi skickade en 6-siffrig kod till <span id="code-email-shown" class="lg-strong"></span></p>
           <input id="login-code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" class="lg-code" />
-          <div id="code-error" class="lg-err center" style="display:none;"></div>
+          <div id="code-error" class="lg-err" style="display:none;"></div>
           <button id="code-submit" class="lg-btn">Verifiera</button>
           <div class="lg-row">
             <button id="code-back" type="button" class="lg-link dim">← Tillbaka</button>
@@ -574,36 +546,23 @@
 
         <!-- Glömt lösenord: begär kod -->
         <div id="login-reset" class="lg-view" style="display:none;">
-          <div class="lg-head">
-            <span class="lg-ico"><svg class="ic"><use href="#i-key" /></svg></span>
-            <h1 class="lg-h">Glömt lösenord?</h1>
-            <p class="lg-lead">Skriv din mejl så skickar vi en återställningskod.</p>
-          </div>
-          <label class="lg-lbl">Mejladress</label>
-          <div class="lg-field">
-            <span class="lg-fi"><svg class="ic ic-sm"><use href="#i-user" /></svg></span>
-            <input id="reset-email" type="email" inputmode="email" autocomplete="email" placeholder="du@exempel.se" class="lg-in" />
-          </div>
+          <h1 class="lg-h">Glömt lösenord?</h1>
+          <p class="lg-lead">Skriv din mejl så skickar vi en återställningskod.</p>
+          <label class="lg-lbl" for="reset-email">Mejladress</label>
+          <div class="lg-field"><input id="reset-email" type="email" inputmode="email" autocomplete="email" placeholder="du@exempel.se" class="lg-in" /></div>
           <div id="reset-error" class="lg-err" style="display:none;"></div>
           <button id="reset-send" class="lg-btn">Skicka kod</button>
-          <div class="lg-row center"><button id="reset-back" type="button" class="lg-link dim">← Tillbaka till inloggning</button></div>
+          <div class="lg-row"><button id="reset-back" type="button" class="lg-link dim">← Tillbaka till inloggning</button></div>
         </div>
 
         <!-- Glömt lösenord: kod + nytt lösenord -->
         <div id="login-reset-confirm" class="lg-view" style="display:none;">
-          <div class="lg-head">
-            <span class="lg-ico"><svg class="ic"><use href="#i-key" /></svg></span>
-            <h1 class="lg-h">Nytt lösenord</h1>
-            <p class="lg-lead">Skriv koden vi mejlade och välj ett nytt lösenord.</p>
-          </div>
-          <label class="lg-lbl">Kod</label>
+          <h1 class="lg-h">Nytt lösenord</h1>
+          <p class="lg-lead">Skriv koden vi mejlade och välj ett nytt lösenord.</p>
+          <label class="lg-lbl" for="reset-code">Kod</label>
+          <div class="lg-field"><input id="reset-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" class="lg-in mono" /></div>
+          <label class="lg-lbl" for="reset-pw">Nytt lösenord</label>
           <div class="lg-field">
-            <span class="lg-fi"><svg class="ic ic-sm"><use href="#i-lock" /></svg></span>
-            <input id="reset-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" class="lg-in mono" />
-          </div>
-          <label class="lg-lbl">Nytt lösenord</label>
-          <div class="lg-field">
-            <span class="lg-fi"><svg class="ic ic-sm"><use href="#i-lock" /></svg></span>
             <input id="reset-pw" type="password" autocomplete="new-password" placeholder="Minst 6 tecken" class="lg-in" />
             <button type="button" class="pw-eye lg-eye" data-target="reset-pw" title="Visa lösenord"><svg class="ic ic-sm"><use href="#i-eye" /></svg></button>
           </div>
@@ -617,28 +576,20 @@
 
         <!-- Inloggad -->
         <div id="login-account-view" class="lg-view" style="display:none;">
-          <div class="lg-head">
-            <span class="lg-ico ok"><svg class="ic"><use href="#i-shield-check" /></svg></span>
-            <h1 class="lg-h">Inloggad</h1>
-            <p class="lg-lead"><span id="login-email-shown" class="lg-strong"></span></p>
-            <span id="login-pro-badge" class="lg-chip" style="display:none;">✦ AdRaze Pro</span>
-          </div>
-          <div class="lg-status"><svg class="ic ic-sm"><use href="#i-shield-check" /></svg><span>Skydd aktivt på den här datorn</span></div>
+          <h1 class="lg-h">Inloggad</h1>
+          <p class="lg-lead"><span id="login-email-shown" class="lg-strong"></span> <span id="login-pro-badge" class="lg-chip" style="display:none;">Pro</span></p>
+          <div class="lg-status"><i></i><span>Skydd aktivt på den här datorn</span></div>
           <button id="logout-btn" class="lg-btn ghost">Logga ut</button>
         </div>
 
         <!-- Logga in som barn (hemlig kod) -->
         <div id="login-child" class="lg-view" style="display:none;">
-          <div class="lg-head">
-            <span class="lg-ico kid"><svg class="ic"><use href="#i-user" /></svg></span>
-            <h1 class="lg-h">Logga in som barn</h1>
-            <p class="lg-lead">Skriv den hemliga koden du fick av din förälder.</p>
-          </div>
-          <label class="lg-lbl center">Din kod</label>
+          <h1 class="lg-h">Logga in som barn</h1>
+          <p class="lg-lead">Skriv den hemliga koden du fick av din förälder.</p>
           <input id="child-code-input" autocomplete="off" spellcheck="false" maxlength="12" placeholder="EMMA-7X4K" class="lg-code kid" />
-          <div id="child-error" class="lg-err center" style="display:none;"></div>
-          <button id="child-submit" class="lg-btn kid">Logga in</button>
-          <div class="lg-row center"><button id="child-back" type="button" class="lg-link dim">← Tillbaka</button></div>
+          <div id="child-error" class="lg-err" style="display:none;"></div>
+          <button id="child-submit" class="lg-btn">Logga in</button>
+          <div class="lg-row"><button id="child-back" type="button" class="lg-link dim">← Tillbaka</button></div>
         </div>
       </div>
     </div>

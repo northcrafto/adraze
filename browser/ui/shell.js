@@ -832,7 +832,6 @@ function updateAccountBtn() {
 function setLoginView(name) {
   const map = { login: 'login-form', signup: 'login-signup', code: 'login-code', reset: 'login-reset', resetconfirm: 'login-reset-confirm', account: 'login-account-view', child: 'login-child' };
   for (const k in map) { const el = $(map[k]); if (el) el.style.display = (k === name) ? 'block' : 'none'; }
-  const seg = $('lg-seg'); if (seg) { seg.style.display = (name === 'login' || name === 'signup') ? 'flex' : 'none'; seg.querySelectorAll('.lg-seg-btn').forEach((b) => b.classList.toggle('on', b.dataset.view === name)); }
 }
 function openLogin() {
   window.view.hide(); hideInfobar();
