@@ -1,9 +1,12 @@
 name: Build rules
 
 on:
+  # Bara när tillägget eller filterverktygen ändras, inte vid webbläsar- eller sajtändringar.
   push:
     branches: [main]
+    paths: ["extension/**", "tools/**", ".github/workflows/build.yml"]
   pull_request:
+    paths: ["extension/**", "tools/**", ".github/workflows/build.yml"]
   schedule:
     - cron: "0 5 * * 1" # every Monday: check that the latest filter lists still compile
   workflow_dispatch:
@@ -20,6 +23,9 @@ jobs:
           cache-dependency-path: tools/package-lock.json
       - name: Install
         working-directory: tools
+        # GCC 15 på nya runners: abseil i @eyeo/abp2dnr saknar #include <cstdint>
+        env:
+          CXXFLAGS: "-include cstdint"
         run: |
           npm ci
           npx playwright-core install --with-deps chromium
