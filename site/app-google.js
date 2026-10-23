@@ -18,6 +18,8 @@ async function post(sokvag, kropp) {
   if (!window.google) return;
   google.accounts.id.initialize({
     client_id: clientId,
+    use_fedcm_for_button: false,   // Electron saknar FedCM → vanlig popup
+    use_fedcm_for_prompt: false,
     callback: async ({ credential }) => {
       visa('Loggar in…', true);
       try {
