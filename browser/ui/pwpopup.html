@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  /* "Spara lösenordet?" som i Brave: flytande ruta uppe till höger under adressfältet, med
+     användarnamn och lösenord som går att rätta innan man sparar. Tema skickas som ?theme=dark. */
+  :root { --bg: #fff; --line: #e4e4e8; --fg: #16181d; --sub: #6b6d75; --in: #f6f6f8; --in-line: #dcdce1;
+          --soft: #f1f1f3; --soft-h: #e7e7ea; --accent: #ff4b1f; --ok: #12925a;
+          --shadow: 0 16px 40px rgba(17,17,19,.22), 0 2px 8px rgba(17,17,19,.08); }
+  :root[data-theme="dark"] { --bg: #1c1c1f; --line: #2c2c30; --fg: #f2f2f4; --sub: rgba(242,242,244,.55); --in: #141416; --in-line: #34343a;
+          --soft: rgba(255,255,255,.08); --soft-h: rgba(255,255,255,.14); --shadow: 0 16px 40px rgba(0,0,0,.55), 0 2px 8px rgba(0,0,0,.3); }
+  html, body { margin: 0; background: transparent; overflow: hidden; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .card { margin: 8px 10px 16px; background: var(--bg); border-radius: 8px; border: 1px solid var(--line);
+    box-shadow: var(--shadow); padding: 16px 16px 14px; color: var(--fg); animation: pop .14s ease-out; }
+  @keyframes pop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+  .top { display: flex; align-items: center; gap: 10px; }
+  .key { flex: none; width: 28px; height: 28px; border-radius: 6px; display: grid; place-items: center; background: var(--soft); color: var(--fg); }
+  .key svg, .eye svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+  h1 { flex: 1; font-size: 14.5px; font-weight: 700; margin: 0; letter-spacing: -.01em; }
+  .x { flex: none; border: 0; background: transparent; cursor: pointer; color: var(--sub); width: 26px; height: 26px; border-radius: 5px; font-size: 18px; line-height: 1; }
+  .x:hover { background: var(--soft); color: var(--fg); }
+  .site { margin: 6px 0 12px 38px; font-size: 12.5px; color: var(--sub); overflow-wrap: anywhere; }
+  label { display: block; font-size: 11.5px; font-weight: 600; color: var(--sub); margin: 0 0 4px; }
+  .f { margin-bottom: 10px; }
+  .pw { position: relative; }
+  input { box-sizing: border-box; width: 100%; height: 36px; padding: 0 10px; border-radius: 5px; border: 1px solid var(--in-line);
+    background: var(--in); color: var(--fg); font: 13.5px system-ui, sans-serif; outline: none; }
+  input:focus { border-color: var(--accent); }
+  #pass { padding-right: 38px; letter-spacing: .02em; }
+  .eye { position: absolute; right: 4px; top: 4px; width: 28px; height: 28px; border: 0; border-radius: 4px; background: transparent; color: var(--sub); cursor: pointer; display: grid; place-items: center; }
+  .eye:hover { background: var(--soft); color: var(--fg); }
+  .row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+  button.b { height: 32px; padding: 0 14px; border-radius: 5px; font-weight: 650; font-size: 13px; cursor: pointer; border: 0; }
+  .b.soft { background: var(--soft); color: var(--fg); }
+  .b.soft:hover { background: var(--soft-h); }
+  .b.acc { background: var(--accent); color: #fff; }
+  .b.acc:hover { filter: brightness(1.06); }
+  .done { display: none; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; }
+  .done svg { width: 18px; height: 18px; fill: none; stroke: var(--ok); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .card.saved .form, .card.saved .row, .card.saved .site { display: none; }
+  .card.saved .done { display: flex; }
+  .card.saved .top { display: none; }
+  button:focus { outline: none; }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+  <div class="card" id="card">
+    <div class="top">
+      <span class="key"><svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/></svg></span>
+      <h1 id="title">Spara lösenordet?</h1>
+      <button class="x" id="close" title="Stäng">&times;</button>
+    </div>
+    <div class="site" id="site"></div>
+    <div class="form">
+      <div class="f"><label for="user">Användarnamn</label><input id="user" spellcheck="false" autocomplete="off"></div>
+      <div class="f"><label for="pass">Lösenord</label><div class="pw"><input id="pass" type="password" spellcheck="false" autocomplete="off">
+        <button class="eye" id="eye" title="Visa lösenordet"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
+    </div>
+    <div class="row">
+      <button class="b soft" id="never">Aldrig</button>
+      <button class="b acc" id="save">Spara</button>
+    </div>
+    <div class="done"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span id="done-t">Lösenordet är sparat</span></div>
+  </div>
+  <script>
+    // Översättning: samma ordlista som skalet (vaka-lang i localStorage delas, samma file://-origin).
+    window.locale = { load: (l) => { try { return require('electron').ipcRenderer.sendSync('i18n:load', l) || {}; } catch (e) { return {}; } } };
+  </script>
+  <script src="i18n.js"></script>
+  <script>
+    const { ipcRenderer } = require('electron');
+    const q = new URLSearchParams(location.search);
+    if (q.get('theme') === 'dark') document.documentElement.dataset.theme = 'dark';
+    const $ = (id) => document.getElementById(id);
+    const tt = (s) => (typeof window.t === 'function') ? window.t(s) : s;
+    let cred = null, hovered = false, idle = null, typing = false;
+    const close = () => ipcRenderer.send('pw:popup-close');
+    function reportSize() { try { ipcRenderer.send('pw:popup-size', Math.ceil($('card').getBoundingClientRect().bottom) + 16); } catch {} }
+    // Stängs av sig själv efter en stund, men aldrig medan musen är över eller man skriver i den
+    function armIdle(ms) { clearTimeout(idle); idle = setTimeout(() => { if (hovered || typing) armIdle(4000); else close(); }, ms); }
+    document.body.addEventListener('mouseenter', () => { hovered = true; });
+    document.body.addEventListener('mouseleave', () => { hovered = false; });
+    document.addEventListener('focusin', () => { typing = true; });
+    ipcRenderer.on('pw-cred', (_e, c) => {
+      cred = c || null;
+      let host = cred && cred.origin; try { host = new URL(cred.origin).hostname.replace(/^www\./, ''); } catch {}
+      $('site').textContent = host || '';
+      $('user').value = (cred && cred.username) || '';
+      $('pass').value = (cred && cred.password) || '';
+      if (cred && cred.update) { $('title').textContent = tt('Uppdatera lösenordet?'); $('save').textContent = tt('Uppdatera'); $('never').textContent = tt('Inte nu'); }
+      reportSize(); armIdle(30000);
+    });
+    $('eye').onclick = () => { const p = $('pass'); p.type = p.type === 'password' ? 'text' : 'password'; };
+    $('close').onclick = close;
+    $('never').onclick = async () => {
+      if (cred && !cred.update) { try { await ipcRenderer.invoke('pw:never', cred.origin); } catch {} }
+      close();
+    };
+    $('save').onclick = async () => {
+      if (!cred || !$('pass').value) return close();
+      $('save').disabled = true;
+      try { await ipcRenderer.invoke('pw:save', { origin: cred.origin, username: $('user').value.trim(), password: $('pass').value }); } catch {}
+      $('done-t').textContent = tt(cred.update ? 'Lösenordet är uppdaterat' : 'Lösenordet är sparat');
+      $('card').classList.add('saved');
+      reportSize(); setTimeout(close, 1300);
+    };
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); if (e.key === 'Enter' && !$('card').classList.contains('saved')) $('save').click(); });
+    reportSize();
+  </script>
+</body>
+</html>

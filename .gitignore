@@ -20,3 +20,9 @@ node_modules/
 # Skapas av Chrome när tillägget laddas okomprimerat
 extension/_metadata/
 __pycache__/
+
+# Webbläsaren: regler kopieras från extension/ (npm run sync)
+browser/node_modules/
+browser/dist/
+browser/dist-installer/
+browser/adraze/
