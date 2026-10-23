@@ -682,8 +682,9 @@ textarea.cal-in { resize: vertical; min-height: 60px; }
 /* ── Startsidans statistik: tre fyrkantiga rutor ── */
 .nt-stats { margin-top: 44px; width: min(468px, 92%); }
 .nt-stats-head { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgb(255 255 255 / .55); margin-bottom: 8px; }
-.nt-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.nt-stat { padding: 14px 16px 13px; border-radius: 6px; background: rgb(8 14 24 / .55); border: 1px solid rgb(255 255 255 / .1); backdrop-filter: blur(10px); }
+.nt-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-radius: 10px; background: rgb(8 14 24 / .55); border: 1px solid rgb(255 255 255 / .1); backdrop-filter: blur(10px); overflow: hidden; }
+.nt-stat { padding: 14px 18px 13px; }
+.nt-stat + .nt-stat { border-left: 1px solid rgb(255 255 255 / .1); }
 .nt-stat-n { font-size: 28px; font-weight: 700; line-height: 1; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
 .nt-stat-l { margin-top: 8px; display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; color: rgb(255 255 255 / .62); }
 .nt-stat-l i { width: 7px; height: 7px; border-radius: 1px; flex: none; }
