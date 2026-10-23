@@ -906,7 +906,7 @@ async function doSignup() {
   const err = $('signup-error');
   if (!name) { err.textContent = 'Fyll i ditt namn.'; err.style.display = 'block'; return; }
   if (!EMAIL_RE.test(email)) { err.textContent = 'Fyll i en giltig mejladress.'; err.style.display = 'block'; return; }
-  if (pw.length < 6) { err.textContent = 'Lösenordet måste vara minst 6 tecken.'; err.style.display = 'block'; return; }
+  if (pw.length < 8) { err.textContent = 'Lösenordet måste vara minst 8 tecken.'; err.style.display = 'block'; return; }
   err.style.display = 'none';
   busyBtn('signup-submit', true, 'Skapar konto…', 'Skapa konto');
   let r; try { r = await window.auth.signup(email, pw, name); } catch { r = { ok: false }; }
@@ -960,7 +960,7 @@ async function doResetConfirm() {
   const pw = $('reset-pw').value;
   const err = $('reset-confirm-error');
   if (code.length !== 6) { err.textContent = 'Koden är 6 siffror.'; err.style.display = 'block'; return; }
-  if (pw.length < 6) { err.textContent = 'Lösenordet måste vara minst 6 tecken.'; err.style.display = 'block'; return; }
+  if (pw.length < 8) { err.textContent = 'Lösenordet måste vara minst 8 tecken.'; err.style.display = 'block'; return; }
   err.style.display = 'none';
   busyBtn('reset-confirm-submit', true, 'Sparar…', 'Återställ lösenord');
   let r; try { r = await window.auth.resetConfirm(pendingResetEmail, code, pw); } catch { r = { ok: false }; }
@@ -975,19 +975,52 @@ async function doResetResend() {
   $('reset-confirm-error').style.display = 'none';
   try { await window.auth.resetRequest(pendingResetEmail); showToast('Ny kod skickad.'); } catch {}
 }
-/* ── Barn loggar in med hemlig kod (familjeskydd) ── */
+/* ── Barn loggar in: barnkoden, sedan en kod som mejlas till föräldern (varje inloggning) ── */
+let childPendingCode = null;
+function showChildStep(n) {
+  $('child-step1').style.display = n === 1 ? 'block' : 'none';
+  $('child-step2').style.display = n === 2 ? 'block' : 'none';
+  $('child-resend').style.display = n === 2 ? 'inline' : 'none';
+  $('child-submit').textContent = n === 2 ? 'Logga in' : 'Fortsätt';
+  $('child-error').style.display = 'none';
+  setTimeout(() => $(n === 2 ? 'child-approval-input' : 'child-code-input').focus(), 20);
+}
+async function childAskParent(code) {
+  let r; try { r = await window.family.join(code); } catch { r = { ok: false }; }
+  return r || { ok: false };
+}
 async function doChildLogin() {
-  const code = ($('child-code-input').value || '').trim().toUpperCase();
   const err = $('child-error');
-  if (code.length < 4) { err.textContent = 'Skriv koden du fick av din förälder.'; err.style.display = 'block'; return; }
+  if (!childPendingCode) {
+    const code = ($('child-code-input').value || '').trim().toUpperCase();
+    if (code.length < 4) { err.textContent = 'Skriv koden du fick av din förälder.'; err.style.display = 'block'; return; }
+    err.style.display = 'none';
+    busyBtn('child-submit', true, 'Skickar…', 'Fortsätt');
+    const r = await childAskParent(code);
+    busyBtn('child-submit', false, 'Skickar…', 'Fortsätt');
+    if (!r.ok) { err.textContent = r.message || 'Fel kod. Fråga din förälder.'; err.style.display = 'block'; return; }
+    childPendingCode = code;
+    $('child-approval-input').value = '';
+    showChildStep(2);
+    return;
+  }
+  const approval = ($('child-approval-input').value || '').replace(/\D/g, '');
+  if (approval.length !== 6) { err.textContent = 'Koden är 6 siffror.'; err.style.display = 'block'; return; }
   err.style.display = 'none';
   busyBtn('child-submit', true, 'Loggar in…', 'Logga in');
-  let r; try { r = await window.family.join(code); } catch { r = { ok: false }; }
+  let r; try { r = await window.family.approve(childPendingCode, approval); } catch { r = { ok: false }; }
   busyBtn('child-submit', false, 'Loggar in…', 'Logga in');
-  if (!r || !r.ok || !r.child) { err.textContent = (r && r.message) || 'Fel kod. Fråga din förälder.'; err.style.display = 'block'; return; }
+  if (!r || !r.ok || !r.child) { err.textContent = (r && r.message) || 'Fel kod. Fråga din förälder igen.'; err.style.display = 'block'; return; }
+  childPendingCode = null;
   await enterChildMode(r.token, r.child);
   closeLogin();
   showToast('Inloggad som ' + r.child.name);
+}
+async function doChildResend() {
+  if (!childPendingCode) return;
+  const r = await childAskParent(childPendingCode);
+  if (r.ok) showToast('Ny kod skickad till din förälder.');
+  else { $('child-error').textContent = r.message || 'Kunde inte skicka en ny kod.'; $('child-error').style.display = 'block'; }
 }
 async function enterChildMode(token, child) {
   account = { token, email: '', pro: false, name: child.name, isChild: true, childId: child.id };
@@ -1049,7 +1082,8 @@ function showConfirmDelete() {
   ov.innerHTML = '<div style="width:min(420px,94vw);background:#fff;border-radius:18px;padding:24px;box-shadow:0 30px 70px rgba(8,20,35,.4)">'
     + '<div style="font-size:34px;text-align:center;margin-bottom:8px">⚠️</div>'
     + '<div style="font-size:18px;font-weight:800;color:var(--color-navy-900);text-align:center;margin-bottom:8px">Ta bort kontot?</div>'
-    + '<p style="font-size:13.5px;color:rgb(28 43 58 / .6);text-align:center;margin-bottom:18px;line-height:1.5">Ditt konto och all data (Pro, barn, inställningar) raderas permanent. Det går inte att ångra.</p>'
+    + '<p style="font-size:13.5px;color:rgb(28 43 58 / .6);text-align:center;margin-bottom:14px;line-height:1.5">Ditt AdRaze-konto, dina barnkonton och din statistik raderas permanent. Det gäller även på adraze.app. Det går inte att ångra.</p>'
+    + '<input id="kn-del-pw" type="password" autocomplete="current-password" placeholder="Ditt lösenord" style="width:100%;height:42px;padding:0 12px;border:1px solid #dcdad4;border-radius:6px;margin-bottom:14px;font-size:14px;outline:none">'
     + '<div style="display:flex;gap:9px"><button id="kn-del-cancel" class="btn btn-ghost" style="flex:1;height:44px">Avbryt</button><button id="kn-del-yes" class="kn-del-btn" style="flex:1;height:44px">Ja, ta bort</button></div></div>';
   document.body.appendChild(ov);
   const close = () => ov.remove();
@@ -1057,7 +1091,7 @@ function showConfirmDelete() {
   ov.querySelector('#kn-del-cancel').addEventListener('click', close);
   ov.querySelector('#kn-del-yes').addEventListener('click', async () => {
     const btn = ov.querySelector('#kn-del-yes'); btn.disabled = true; btn.textContent = 'Tar bort…';
-    let r; try { r = await window.auth.deleteAccount(account.token); } catch { r = { ok: false }; }
+    let r; try { r = await window.auth.deleteAccount(account.token, ov.querySelector('#kn-del-pw').value); } catch { r = { ok: false }; }
     if (!r || !r.ok) { btn.disabled = false; btn.textContent = 'Ja, ta bort'; showToast((r && r.message) || 'Kunde inte ta bort kontot.'); return; }
     close(); doLogout(false); renderKonto(); showToast('Ditt konto är borttaget.');
   });
@@ -1316,10 +1350,15 @@ $('reset-confirm-submit').addEventListener('click', doResetConfirm);
 $('reset-confirm-back').addEventListener('click', () => setLoginView('reset'));
 $('reset-resend').addEventListener('click', doResetResend);
 $('logout-btn').addEventListener('click', () => doLogout());
-$('to-child').addEventListener('click', () => { $('child-code-input').value = ''; $('child-error').style.display = 'none'; setLoginView('child'); setTimeout(() => $('child-code-input').focus(), 20); });
-$('child-back').addEventListener('click', () => { setLoginView('login'); setTimeout(() => $('login-email').focus(), 20); });
+$('to-child').addEventListener('click', () => { childPendingCode = null; $('child-code-input').value = ''; setLoginView('child'); showChildStep(1); });
+$('child-back').addEventListener('click', () => {
+  if (childPendingCode) { childPendingCode = null; showChildStep(1); return; }
+  setLoginView('login'); setTimeout(() => $('login-email').focus(), 20);
+});
+$('child-resend').addEventListener('click', doChildResend);
 $('child-submit').addEventListener('click', doChildLogin);
 $('child-code-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') doChildLogin(); });
+$('child-approval-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') doChildLogin(); });
 updateAccountBtn();
 // (session-återställningen flyttad till filens SLUT — se nedan)
 
@@ -2961,6 +3000,7 @@ function showChildCode(name, code) {
     + '<div style="font-size:34px;margin-bottom:6px">🎉</div>'
     + '<div style="font-size:18px;font-weight:800;color:var(--color-navy-900);margin-bottom:6px">' + escapeHtml(name) + ' är tillagd!</div>'
     + '<p style="font-size:13.5px;color:rgb(28 43 58 / .6);margin-bottom:16px">Ge den här koden till ' + escapeHtml(name) + '. På barnets dator: <b>Logga in → "Logga in med din kod"</b>.</p>'
+    + '<p style="font-size:12.5px;color:rgb(28 43 58 / .55);margin:-6px 0 16px">Varje gång ' + escapeHtml(name) + ' loggar in får du en sexsiffrig kod på mejlen som ' + escapeHtml(name) + ' måste skriva in. Barnkoden ensam räcker inte.</p>'
     + '<div style="font-family:ui-monospace,monospace;font-size:26px;font-weight:800;letter-spacing:.14em;color:#1f6ea8;background:rgba(47,143,212,.08);border:1px solid rgba(47,143,212,.28);border-radius:12px;padding:14px">' + escapeHtml(code) + '</div>'
     + '<div style="display:flex;gap:9px;margin-top:18px"><button id="fam-code-copy" class="btn btn-safe" style="flex:1;height:42px">Kopiera kod</button><button id="fam-code-done" class="btn btn-ghost" style="height:42px;padding:0 16px">Klar</button></div></div>';
   document.body.appendChild(ov);

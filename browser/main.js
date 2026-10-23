@@ -547,26 +547,52 @@ ipcMain.handle('skoll:adblock-toggle', async (_e, on) => {
 });
 ipcMain.handle('adraze:open-anyway', (_e, url) => { adblock.openAnyway(String(url || '')); return true; });
 ipcMain.handle('skoll:adblock-state', () => ({ on: adblockOn, count: adblockCount }));
-/* AdRaze mejl-inloggning: proxar till backend (send-code/verify-code/session/logout). */
-async function authCall(pathname, body) {
+/* AdRaze-kontot: samma konton som adraze.app (api.adraze.app). Webbläsaren skickar app:true och
+ * får sessionen som en nyckel (Bearer) i stället för kakor. Svaren översätts till skalets gamla form
+ * ({ ok, needCode, token, email, name, message, error }). */
+const ADRAZE_API = process.env.ADRAZE_API || 'https://api.adraze.app';
+async function adrazeApi(pathname, body, token, method) {
   try {
-    const r = await fetch(SKOLL + '/api/sakerkoll/vaka/auth/' + pathname, {
-      method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' },
-      body: JSON.stringify(body || {}), signal: AbortSignal.timeout(20000),
+    const headers = { accept: 'application/json' };
+    if (body) headers['content-type'] = 'application/json';
+    if (token) headers.authorization = 'Bearer ' + token;
+    const r = await fetch(ADRAZE_API + pathname, {
+      method: method || 'POST', headers, body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(20000),
     });
     const j = await r.json().catch(() => ({}));
-    if (!r.ok && !j.error) j.error = 'http_' + r.status;
+    if (!r.ok || !j.ok) return { ok: false, status: r.status, error: r.status === 401 ? 'no_session' : 'http_' + r.status, message: j.error || 'Något gick fel. Försök igen.' };
     return j;
-  } catch (e) { return { ok: false, error: 'unreachable', message: 'Kunde inte nå servern. Kontrollera din uppkoppling.' }; }
+  } catch { return { ok: false, error: 'unreachable', message: 'Kunde inte nå servern. Kontrollera din uppkoppling.' }; }
 }
-ipcMain.handle('auth:login', (_e, d) => authCall('login', { email: d && d.email, password: d && d.password }));
-ipcMain.handle('auth:signup', (_e, d) => authCall('signup', { email: d && d.email, password: d && d.password, name: d && d.name }));
-ipcMain.handle('auth:verify-code', (_e, d) => authCall('verify-code', { email: d && d.email, code: d && d.code }));
-ipcMain.handle('auth:reset-request', (_e, d) => authCall('reset-request', { email: d && d.email }));
-ipcMain.handle('auth:reset-confirm', (_e, d) => authCall('reset-confirm', { email: d && d.email, code: d && d.code, password: d && d.password }));
-ipcMain.handle('auth:session', (_e, d) => authCall('session', { token: d && d.token }));
-ipcMain.handle('auth:logout', (_e, d) => authCall('logout', { token: d && d.token }));
-ipcMain.handle('auth:delete', (_e, d) => authCall('delete', { token: d && d.token }));
+// Betrodd webbläsare (som kakan adr_e på sajten): efter en lyckad kod slipper man koden nästa gång
+const ENHET_FILE = path.join(app.getPath('userData'), 'adraze-enhet.dat');
+function lasEnhet() {
+  try {
+    const blob = fs.readFileSync(ENHET_FILE);
+    return (safeStorage && safeStorage.isEncryptionAvailable()) ? safeStorage.decryptString(blob) : blob.toString('utf8');
+  } catch { return ''; }
+}
+function sparaEnhet(t) {
+  if (!t) return;
+  try { fs.writeFileSync(ENHET_FILE, (safeStorage && safeStorage.isEncryptionAvailable()) ? safeStorage.encryptString(t) : Buffer.from(t, 'utf8'), { mode: 0o600 }); } catch {}
+}
+function inloggadSvar(j) {
+  if (!j.ok) return j;
+  if (j.steg === 'kod') return { ok: true, needCode: true, email: j.email };
+  if (j.enhet) sparaEnhet(j.enhet);
+  return { ok: true, token: j.token, email: (j.me && j.me.email) || '', name: (j.me && j.me.namn) || '', pro: false };
+}
+ipcMain.handle('auth:login', async (_e, d) => inloggadSvar(await adrazeApi('/auth/login', { email: d && d.email, password: d && d.password, app: true, enhet: lasEnhet() || undefined })));
+ipcMain.handle('auth:signup', async (_e, d) => inloggadSvar(await adrazeApi('/auth/signup', { email: d && d.email, password: d && d.password, namn: d && d.name, app: true })));
+ipcMain.handle('auth:verify-code', async (_e, d) => inloggadSvar(await adrazeApi('/auth/verify', { email: d && d.email, code: d && d.code, app: true })));
+ipcMain.handle('auth:reset-request', async (_e, d) => adrazeApi('/auth/forgot', { email: d && d.email }));
+ipcMain.handle('auth:reset-confirm', async (_e, d) => inloggadSvar(await adrazeApi('/auth/reset', { email: d && d.email, code: d && d.code, password: d && d.password, app: true })));
+ipcMain.handle('auth:session', async (_e, d) => {
+  const j = await adrazeApi('/me', null, d && d.token, 'GET');
+  return j.ok ? { ok: true, email: j.me.email, name: j.me.namn || '', pro: false } : j;
+});
+ipcMain.handle('auth:logout', async (_e, d) => { await adrazeApi('/barn/logout', {}, d && d.token); return adrazeApi('/auth/logout', {}, d && d.token); });
+ipcMain.handle('auth:delete', (_e, d) => adrazeApi('/me/delete', { password: (d && d.password) || '' }, d && d.token));
 /* Session speglas krypterat i OS-nyckelringen (safeStorage) så inloggningen överlever
  * även om skalets localStorage skulle tömmas. Bara token+profil, aldrig lösenord. */
 // engångsflytt av filer från Vaka-tiden (vaka-*.dat/.key → adraze-*)
@@ -594,30 +620,52 @@ ipcMain.handle('auth:recall', () => {
   } catch { return { ok: false }; }
 });
 ipcMain.handle('auth:forget', () => { try { if (fs.existsSync(SESSION_FILE)) fs.unlinkSync(SESSION_FILE); } catch {} return { ok: true }; });
-/* AdRaze Familj: förälder skapar barnkonto (kod), barn loggar in med kod, blocklist-synk. */
-async function familyCall(pathname, body) {
-  try {
-    const r = await fetch(SKOLL + '/api/sakerkoll/family/' + pathname, {
-      method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' },
-      body: JSON.stringify(body || {}), signal: AbortSignal.timeout(20000),
-    });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok && !j.error) j.error = 'http_' + r.status;
-    return j;
-  } catch (e) { return { ok: false, error: 'unreachable', message: 'Kunde inte nå servern. Kontrollera din uppkoppling.' }; }
-}
-ipcMain.handle('family:child', (_e, d) => familyCall('child', { token: d && d.token, name: d && d.name, age: d && d.age }));
-ipcMain.handle('family:join', (_e, d) => familyCall('join', { code: d && d.code }));
-ipcMain.handle('family:children', (_e, d) => familyCall('children', { token: d && d.token }));
-ipcMain.handle('family:blocklist', (_e, d) => familyCall('blocklist', { token: d && d.token, child_id: d && d.child_id, blocklist: d && d.blocklist }));
-ipcMain.handle('family:me', (_e, d) => familyCall('me', { token: d && d.token }));
-ipcMain.handle('family:allow', (_e, d) => familyCall('allow', { token: d && d.token, child_id: d && d.child_id, host: d && d.host, minutes: d && d.minutes }));
-ipcMain.handle('family:history-add', (_e, d) => familyCall('history/add', { token: d && d.token, url: d && d.url, title: d && d.title }));
-ipcMain.handle('family:history', (_e, d) => familyCall('history', { token: d && d.token, child_id: d && d.child_id }));
-ipcMain.handle('family:logout-child', (_e, d) => familyCall('logout-child', { token: d && d.token, child_id: d && d.child_id }));
-ipcMain.handle('family:rotate-code', (_e, d) => familyCall('rotate-code', { token: d && d.token, child_id: d && d.child_id }));
-ipcMain.handle('family:sessions', (_e, d) => familyCall('sessions', { token: d && d.token, child_id: d && d.child_id }));
-ipcMain.handle('family:logout-session', (_e, d) => familyCall('logout-session', { token: d && d.token, child_id: d && d.child_id, sid: d && d.sid }));
+/* AdRaze Familj (api.adraze.app): föräldern skapar barnkonton; barnet loggar in med sin barnkod
+ * och en kod som mejlas till föräldern vid varje inloggning. Svaren översätts till skalets form. */
+const barnUt = (c) => ({ id: c.id, name: c.namn, age: c.alder, code: c.kod, blocklist: c.blocklista || [], allows: c.tillat || [], last_seen: c.senast || 0, sessions: c.inloggningar || 0 });
+ipcMain.handle('family:child', async (_e, d) => {
+  const j = await adrazeApi('/familj/barn', { namn: d && d.name, alder: d && d.age }, d && d.token);
+  return j.ok ? { ok: true, child: { id: j.barn.id, name: j.barn.namn, age: j.barn.alder }, code: j.kod } : j;
+});
+ipcMain.handle('family:join', async (_e, d) => {
+  const j = await adrazeApi('/barn/start', { kod: d && d.code, enhet: process.platform === 'win32' ? 'Windows' : process.platform === 'darwin' ? 'Mac' : 'Linux' });
+  return j.ok ? { ok: true, needApproval: true, name: j.namn } : j;
+});
+ipcMain.handle('family:approve', async (_e, d) => {
+  const j = await adrazeApi('/barn/verifiera', { kod: d && d.code, godkannande: d && d.approval });
+  return j.ok ? { ok: true, token: j.token, child: { id: j.barn.id, name: j.barn.namn, age: j.barn.alder } } : j;
+});
+ipcMain.handle('family:children', async (_e, d) => {
+  const j = await adrazeApi('/familj/lista', {}, d && d.token);
+  return j.ok ? { ok: true, children: j.barn.map(barnUt) } : j;
+});
+ipcMain.handle('family:blocklist', (_e, d) => adrazeApi('/familj/blocklista', { barn_id: d && d.child_id, blocklista: d && d.blocklist }, d && d.token));
+ipcMain.handle('family:me', async (_e, d) => {
+  const j = await adrazeApi('/barn/jag', {}, d && d.token);
+  return j.ok ? { ok: true, isChild: true, name: j.namn, age: j.alder, blocklist: j.blocklista, allows: j.tillat } : j;
+});
+ipcMain.handle('family:allow', (_e, d) => adrazeApi('/familj/tillat', { barn_id: d && d.child_id, host: d && d.host, minuter: d && d.minutes }, d && d.token));
+ipcMain.handle('family:history-add', (_e, d) => adrazeApi('/barn/historik', { url: d && d.url, titel: d && d.title }, d && d.token));
+ipcMain.handle('family:history', async (_e, d) => {
+  const j = await adrazeApi('/familj/historik', { barn_id: d && d.child_id }, d && d.token);
+  return j.ok ? { ok: true, history: j.historik.map((h) => ({ url: h.url, title: h.titel || '', ts: h.ts })) } : j;
+});
+ipcMain.handle('family:logout-child', async (_e, d) => {
+  const j = await adrazeApi('/familj/logga-ut', { barn_id: d && d.child_id }, d && d.token);
+  return j.ok ? { ok: true, ended: j.avslutade } : j;
+});
+ipcMain.handle('family:rotate-code', async (_e, d) => {
+  const j = await adrazeApi('/familj/byt-kod', { barn_id: d && d.child_id }, d && d.token);
+  return j.ok ? { ok: true, code: j.kod, ended: j.avslutade } : j;
+});
+ipcMain.handle('family:sessions', async (_e, d) => {
+  const j = await adrazeApi('/familj/inloggningar', { barn_id: d && d.child_id }, d && d.token);
+  return j.ok ? { ok: true, name: j.namn, sessions: j.inloggningar.map((x) => ({ sid: x.sid, ip: x.ip, created_at: x.skapad, last_seen: x.senast, geo: null })) } : j;
+});
+ipcMain.handle('family:logout-session', async (_e, d) => {
+  const j = await adrazeApi('/familj/logga-ut-inloggning', { barn_id: d && d.child_id, sid: d && d.sid }, d && d.token);
+  return j.ok ? { ok: true, ended: j.avslutade } : j;
+});
 /* AdRaze Socialt: profil (användarnamn+bild), vänner, chatt. */
 async function socialCall(pathname, body) {
   try {
