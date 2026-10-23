@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld('skoll', {
 
 contextBridge.exposeInMainWorld('auth', {
   login: (email, password) => ipcRenderer.invoke('auth:login', { email, password }),
+  google: () => ipcRenderer.invoke('auth:google'),
   signup: (email, password, name) => ipcRenderer.invoke('auth:signup', { email, password, name }),
   verifyCode: (email, code) => ipcRenderer.invoke('auth:verify-code', { email, code }),
   resetRequest: (email) => ipcRenderer.invoke('auth:reset-request', { email }),

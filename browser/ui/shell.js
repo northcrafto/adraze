@@ -899,6 +899,17 @@ async function doLogin() {
   if (r.needCode) { pendingEmail = email; pendingSubmit = { type: 'login', email, password: pw }; showCodeStep(); return; }
   loginAs(r.token, r.email, r.pro, r.name); closeLogin();
 }
+// Google: webbläsaren öppnar adraze.app/app-google i ett eget fönster och får tillbaka nyckeln
+async function doGoogle(errId, btnId) {
+  const err = $(errId);
+  err.style.display = 'none';
+  $(btnId).disabled = true;
+  let r; try { r = await window.auth.google(); } catch { r = { ok: false }; }
+  $(btnId).disabled = false;
+  if (r && r.ok) { loginAs(r.token, r.email, r.pro, r.name); closeLogin(); return; }
+  if (r && (r.error === 'cancelled' || r.error === 'busy')) return;
+  err.textContent = (r && r.message) || 'Google-inloggningen misslyckades.'; err.style.display = 'block';
+}
 async function doSignup() {
   const name = $('signup-name').value.trim();
   const email = $('signup-email').value.trim().toLowerCase();
@@ -1329,6 +1340,8 @@ $('qr-close').addEventListener('click', () => { if (active) active.overlay = nul
 $('login-email').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('login-pw').focus(); });
 $('login-pw').addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
 $('login-submit').addEventListener('click', doLogin);
+$('login-google').addEventListener('click', () => doGoogle('login-error', 'login-google'));
+$('signup-google').addEventListener('click', () => doGoogle('signup-error', 'signup-google'));
 $('to-signup').addEventListener('click', () => { $('signup-name').value = ''; $('signup-email').value = ''; $('signup-pw').value = ''; $('signup-error').style.display = 'none'; setLoginView('signup'); setTimeout(() => $('signup-name').focus(), 20); });
 $('to-login').addEventListener('click', () => { setLoginView('login'); setTimeout(() => $('login-email').focus(), 20); });
 $('signup-name').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('signup-email').focus(); });
