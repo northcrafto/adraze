@@ -1771,6 +1771,7 @@ function checkMacUpdate() {
 function startAutoUpdate() {
   // releaser i northcrafto/adraze-dl (aldrig vaka-dl – då skulle appen bytas mot Vaka)
   if (process.env.ADRAZE_NO_UPDATES) return;
+  if (process.windowsStore) return;               // Microsoft Store sköter uppdateringarna själv
   if (process.platform === 'darwin') { checkMacUpdate(); return; }  // mac: notis (osignerad)
   if (!autoUpdater) return;
   const log = (m) => { try { fs.appendFileSync(path.join(app.getPath('userData'), 'update.log'), m + '\n'); } catch {} };
