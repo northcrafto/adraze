@@ -504,9 +504,14 @@ try { const s = JSON.parse(localStorage.getItem('skoll-stats')); if (s) stats = 
 const countedDangers = new Set();
 function renderStats() {
   const f = (n) => (n || 0).toLocaleString('sv-SE');
-  if ($('stat-ads')) $('stat-ads').textContent = f(stats.ads);
-  if ($('stat-trackers')) $('stat-trackers').textContent = f(stats.trackers);
-  if ($('stat-dangers')) $('stat-dangers').textContent = f(stats.dangers);
+  // Uppskattning som Braves: ~30 kB och ~50 ms sparas per stoppad annons/spårare.
+  const n = (stats.ads || 0) + (stats.trackers || 0);
+  const mb = (n * 30) / 1024, sek = n * 0.05;
+  const [bv, bu] = mb >= 1024 ? [(mb / 1024).toLocaleString('sv-SE', { maximumFractionDigits: 1 }), 'GB'] : [f(Math.round(mb)), 'MB'];
+  const [tv, tu] = sek >= 3600 ? [(sek / 3600).toLocaleString('sv-SE', { maximumFractionDigits: 1 }), (window.t ? window.t('timmar') : 'timmar')] : sek >= 60 ? [f(Math.round(sek / 60)), (window.t ? window.t('minuter') : 'minuter')] : [f(Math.round(sek)), (window.t ? window.t('sekunder') : 'sekunder')];
+  if ($('stat-blocked')) $('stat-blocked').textContent = f(n);
+  if ($('stat-band')) { $('stat-band').textContent = bv; $('stat-band-u').textContent = bu; }
+  if ($('stat-time')) { $('stat-time').textContent = tv; $('stat-time-u').textContent = tu; }
 }
 function bumpStat(key, n) {
   stats[key] = (stats[key] || 0) + (n || 1);
