@@ -61,7 +61,37 @@
     return null;
   };
 
+  // Googles och YouTubes egen samtyckesruta ("Innan du fortsätter till YouTube") är inte en vanlig CMP
+  // och har inga stabila klasser, så vi letar reda på "Avvisa alla" i rutan/mellansidan och klickar den.
+  function googleSamtycke() {
+    const host = location.hostname;
+    const mellansida = /(^|\.)consent\.(youtube|google)\.com$/.test(host);
+    const yt = /(^|\.)youtube(-nocookie)?\.com$/.test(host) || /(^|\.)google\.[a-z.]+$/.test(host);
+    if (!mellansida && !yt) return;
+    let scope;
+    if (mellansida) scope = document;      // hela sidan ÄR samtyckesrutan
+    else {
+      scope = document.querySelector('ytd-consent-bump-v2-lightbox, tp-yt-paper-dialog[role="dialog"], #consent-bump, .consent-bump');
+      if (!scope) return;                  // ingen ruta på youtube.com → inget att göra
+    }
+    for (const b of scope.querySelectorAll('button, [role="button"], a[role="button"]')) {
+      if (!b.isConnected) continue;
+      const txt = (b.innerText || b.textContent || b.getAttribute("aria-label") || "").trim();
+      if (!txt || txt.length > 120) continue;
+      if (!NEJ.test(txt) || JA.test(txt) || BETAL.test(txt)) continue;
+      if (/fler|more|alternativ|options|customize|anpassa|manage|hantera|inställ|settings|learn|läs mer|logga in|sign in/i.test(txt)) continue;
+      const ggr = klickade.get(b) || 0;
+      if (ggr >= 3) continue;
+      klickade.set(b, ggr + 1);
+      b.click();
+      if (!ggr) { klar = true; chrome.runtime.sendMessage({ typ: "kaka-avvisad", cmp: "youtube" }).catch(() => {}); }
+      return;
+    }
+  }
+
   function leta() {
+    googleSamtycke();
+    if (klar) return;
     for (const [namn, sel, varden] of RUTOR) {
       const knapp = hitta(sel, varden);
       if (!knapp || !knapp.isConnected) continue;
