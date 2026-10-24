@@ -1569,6 +1569,21 @@ async function billingCall(e, pathname, body) {
     return j;
   } catch { return { ok: false, error: 'unreachable', message: 'Kunde inte nå servern. Kontrollera din uppkoppling.' }; }
 }
+// Inställningar › Konto: Pro-status, säga upp och ångra uppsägningen (skalet, inte panelen)
+async function proCall(e, method, pathname, tok) {
+  const ctx = ctxFor(e) || e.sender.__ctx; const token = (typeof tok === 'string' && tok) || (ctx && ctx.authToken);
+  if (!token) return { ok: false, error: 'no_session' };
+  try {
+    const r = await fetch(ADRAZE_API + '/pro/' + pathname, { method, headers: { accept: 'application/json', 'content-type': 'application/json', authorization: 'Bearer ' + token },
+      body: method === 'POST' ? '{}' : undefined, signal: AbortSignal.timeout(20000) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.ok) return { ok: false, message: j.message || j.error || 'Något gick fel. Försök igen.' };
+    return j;
+  } catch { return { ok: false, message: 'Kunde inte nå servern. Kontrollera din uppkoppling.' }; }
+}
+ipcMain.handle('pro:status', (e, t) => proCall(e, 'GET', 'status', t));
+ipcMain.handle('pro:cancel', (e, t) => proCall(e, 'POST', 'cancel', t));
+ipcMain.handle('pro:resume', (e, t) => proCall(e, 'POST', 'resume', t));
 ipcMain.handle('billing:intent', (e, plan) => billingCall(e, 'intent', { plan: String(plan || 'pro_month') }));
 ipcMain.handle('billing:confirm', (e, d) => billingCall(e, 'confirm', { subscription: d && d.subscription, payment_intent: d && d.payment_intent }));
 ipcMain.handle('krypto:chat', async (e, messages) => {

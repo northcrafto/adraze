@@ -751,3 +751,21 @@ textarea.cal-in { resize: vertical; min-height: 60px; }
   background: rgb(20 20 22 / .06); color: inherit; }
 :root[data-theme="dark"] .permbar-btn { background: rgb(255 255 255 / .08); }
 .permbar-btn.on { background: #ff4b1f !important; color: #fff; }
+
+/* Konto › AdRaze Pro */
+#settings .pro-box { margin-top: 16px; padding: 16px 18px; border: 1px solid var(--s-line); border-radius: 12px; background: var(--s-surface); }
+#settings .pro-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+#settings .pro-t { font-size: 14.5px; font-weight: 650; color: var(--s-ink); }
+#settings .pro-d { font-size: 13px; line-height: 1.5; color: var(--s-mut); margin-top: 2px; }
+#settings .pro-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+#settings .pro-actions:empty, #settings .pro-actions:not(:has(button:not([hidden]))) { display: none; }
+#settings .pro-confirm { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--s-line); }
+#settings .pro-confirm p { font-size: 13px; line-height: 1.55; color: var(--s-ink); }
+#settings .pro-err { margin-top: 10px; font-size: 12.5px; color: #d0402f; }
+:root[data-theme="dark"] #settings .pro-err { color: #ff8a7a; }
+#settings .pro-box { margin-bottom: 18px; }
+#settings #pro-cancel-go { color: #d0402f !important; box-shadow: inset 0 0 0 1.5px rgb(208 64 47 / .45); }
+#settings #pro-cancel-go::before { background: #d0402f !important; }
+#settings #pro-cancel-go:is(:hover, :focus-visible) { color: #fff !important; }
+:root[data-theme="dark"] #settings #pro-cancel-go { color: #ff8a7a !important; }
+:root[data-theme="dark"] #settings #pro-cancel-go:is(:hover, :focus-visible) { color: #fff !important; }
