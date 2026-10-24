@@ -1,4 +1,4 @@
-// Bro mellan adraze.app/konto och tillägget: sidan visar att tillägget finns och lämnar över kontots nyckel
+// Bro mellan kontosidan (accounts.adraze.app) och tillägget: sidan visar att tillägget finns och lämnar över kontots nyckel
 (() => {
   document.documentElement.dataset.adraze = chrome.runtime.getManifest().version;
   window.addEventListener("message", async (e) => {

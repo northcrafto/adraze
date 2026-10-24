@@ -167,6 +167,8 @@ async function raknaNu(tabId, typ) {
 // ---------- Statistik per dag (visas på kontosidan när tillägget är kopplat) ----------
 // Dagssummor i storage.local.dagar = { "2026-10-21": { reklam, sparare, farliga, popups, omdirigeringar } }
 const API = "https://api.adraze.app";
+// Kontosidan bor på accounts.adraze.app (adraze.app/konto förr, kvar så att gamla flikar fungerar)
+const kontoSida = (url) => /^https:\/\/(accounts\.)?adraze\.app\//.test(url || "");
 const KATEGORI = { ads: "reklam", privacy: "sparare", security: "farliga" };
 const idag = () => new Date().toLocaleDateString("sv-SE");
 async function laggTillDag(okning) {
@@ -306,15 +308,15 @@ chrome.runtime.onMessage.addListener((msg, sender, svara) => {
       try { natverk = (await chrome.declarativeNetRequest.getMatchedRules({ tabId: msg.tabId })).rulesMatchedInfo.length; } catch {}
       const totalt = (await chrome.storage.local.get("totalt")).totalt || { popups: 0, omdirigeringar: 0 };
       svara({ ...tab, pausad: suffix(host).some((n) => lista.includes(n)), kakor: await kakorPa(host), kakor_flik: tab.kakor || 0, natverk, totalt });
-    } else if (msg.typ === "konto-koppla" && sender.url?.startsWith("https://adraze.app/")) {
-      // Från content/konto.js på adraze.app/konto: spara nyckeln och skicka statistiken direkt
+    } else if (msg.typ === "konto-koppla" && kontoSida(sender.url)) {
+      // Från content/konto.js på accounts.adraze.app: spara nyckeln och skicka statistiken direkt
       await chrome.storage.local.set({ konto: { token: String(msg.token), email: String(msg.email || "") } });
       ko = ko.then(hamtaStoppade).then(synka).catch(() => {});
       svara(true);
     } else if (msg.typ === "konto-status") {
       const { konto } = await chrome.storage.local.get("konto");
       svara({ kopplad: !!konto?.token, email: konto?.email || "" });
-    } else if (msg.typ === "konto-koppla-bort" && sender.url?.startsWith("https://adraze.app/")) {
+    } else if (msg.typ === "konto-koppla-bort" && kontoSida(sender.url)) {
       await chrome.storage.local.remove("konto");
       svara(true);
     } else if (msg.typ === "pausa") {

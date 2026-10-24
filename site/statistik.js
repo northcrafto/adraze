@@ -42,9 +42,7 @@
 
   // Din egen siffra, om du är inloggad (flaggan sätts av kontosidan)
   async function egen() {
-    let inloggad = false;
-    try { inloggad = localStorage.getItem('adraze-inloggad') === '1'; } catch {}
-    if (!inloggad) return;
+    if (!/(?:^|; )adraze-inloggad=1/.test(document.cookie)) return;
     const r = await fetch(`${API}/me`, { credentials: 'include' });
     if (!r.ok) return;
     const { totalt } = await r.json();

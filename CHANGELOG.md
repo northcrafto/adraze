@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Account page moved to accounts.adraze.app: the extension now connects to your account there too (adraze.app/konto redirects).
+
 ## 0.2.0 (2026-10-22)
 
 - Cookie banners: AdRaze rejects non-essential cookies by clicking "Reject all" or "Only necessary" in about 25 common consent tools (OneTrust, Cookiebot, Didomi, Sourcepoint, Usercentrics, consentmanager, CookieYes, Complianz and others), including Didomi banners where the reject button is one layer in. Banners are hidden with the EasyList Cookie List so they never flash. Banners with no free reject button ("pay or accept") are hidden and nothing is accepted; a paid reject button is never clicked. Pages that lock scrolling while the banner is open scroll again.

@@ -22,6 +22,26 @@
       ],
       "destination": "https://adraze.app/$1",
       "permanent": true
+    },
+    {
+      "source": "/konto",
+      "destination": "https://accounts.adraze.app/",
+      "permanent": true
+    },
+    {
+      "source": "/:lang(en|nb|da|fi|is|de|nl|fr|es|pt|it|pl|cs|sk|hu|ro|bg|el|hr|sl|et|lv|lt|uk|tr)/konto",
+      "destination": "https://accounts.adraze.app/:lang/",
+      "permanent": true
+    },
+    {
+      "source": "/download",
+      "destination": "https://download.adraze.app/",
+      "permanent": true
+    },
+    {
+      "source": "/ladda-ner",
+      "destination": "https://download.adraze.app/",
+      "permanent": true
     }
   ],
   "headers": [

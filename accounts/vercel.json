@@ -1,0 +1,57 @@
+{
+  "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/konto",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/:lang(en|nb|da|fi|is|de|nl|fr|es|pt|it|pl|cs|sk|hu|ro|bg|el|hr|sl|et|lv|lt|uk|tr)/konto",
+      "destination": "/:lang/",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "adraze-accounts.vercel.app"
+        }
+      ],
+      "destination": "https://accounts.adraze.app/$1",
+      "permanent": true
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' https://js.stripe.com https://*.js.stripe.com https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://api.adraze.app https://*.stripe.com https://*.googleusercontent.com; font-src 'self'; connect-src 'self' https://api.adraze.app https://api.stripe.com https://*.stripe.com https://accounts.google.com/gsi/ https://cdn.jsdelivr.net; frame-src https://js.stripe.com https://*.js.stripe.com https://hooks.stripe.com https://checkout.stripe.com https://accounts.google.com/gsi/; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), usb=(), payment=(self \"https://js.stripe.com\")"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin-allow-popups"
+        }
+      ]
+    }
+  ]
+}

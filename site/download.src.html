@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{t:dl.meta_title}}</title>
+<meta name="description" content="{{t:dl.meta_description}}">
+<link rel="icon" href="/favicon.png">
+{{alternates}}
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/download.css">
+</head>
+<body class="dl-sida">
+{{topp}}
+
+<main class="dl" id="dl" data-version="{{t:dl.version}}">
+  <section class="wrap dl-topp">
+    <h1>{{t:dl.title}}</h1>
+    <p class="dl-ingress">{{t:dl.lead}}</p>
+  </section>
+
+  <section class="wrap" aria-labelledby="dl-browser">
+    <h2 class="dl-rubrik" id="dl-browser">{{browser}}{{t:dl.browser}}</h2>
+    <div class="dl-kort-rad">
+      <article class="dl-kort dl-aktiv" data-os="linux">
+        <div class="dl-os">{{linux-logo}}<h3>Linux</h3></div>
+        <p>{{t:dl.linux_note}}</p>
+        <a class="btn btn-stor liq" href="/linux">{{download-simple}}{{t:dl.linux_btn}}</a>
+        <p class="dl-version" id="dl-version" hidden></p>
+      </article>
+      <article class="dl-kort" data-os="windows">
+        <div class="dl-os">{{windows-logo}}<h3>Windows</h3></div>
+        <p>{{t:dl.windows_note}}</p>
+        <span class="dl-snart">{{t:dl.soon}}</span>
+      </article>
+      <article class="dl-kort" data-os="mac">
+        <div class="dl-os">{{apple-logo}}<h3>macOS</h3></div>
+        <p>{{t:dl.mac_note}}</p>
+        <span class="dl-snart">{{t:dl.soon}}</span>
+      </article>
+    </div>
+
+    <div class="dl-terminal">
+      <p>{{terminal-window}}{{t:dl.terminal}}</p>
+      <div class="dl-rad">
+        <code id="dl-kommando">curl -fsSL https://download.adraze.app/install.sh | sh</code>
+        <button type="button" class="dl-kopiera" id="dl-kopiera" data-klar="{{t:dl.copied}}">{{copy}}<span>{{t:dl.copy}}</span></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap" aria-labelledby="dl-ext">
+    <h2 class="dl-rubrik" id="dl-ext">{{chrome}}{{t:dl.ext}}</h2>
+    <article class="dl-kort dl-bred">
+      <p>{{t:dl.ext_note}}</p>
+      <a class="btn btn-stor liq" href="{{installera}}">{{chrome}}{{t:nav.add_chrome}}</a>
+    </article>
+  </section>
+
+  <p class="wrap dl-not">{{t:dl.free}} <a class="nav-link" href="https://github.com/northcrafto/adraze-dl/releases">{{t:dl.all_releases}}</a></p>
+</main>
+
+<footer class="fot">
+  <div class="wrap fot-grid">
+    <div><a href="{{hem}}" class="logo"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a><p>{{t:footer.tagline}}</p></div>
+    <ul>
+      <li><a class="nav-link" href="{{pre}}/statistik">{{t:footer.stats}}</a></li>
+      <li><a class="nav-link" href="{{pre}}/integritet">{{t:footer.privacy}}</a></li>
+      <li><a class="nav-link" href="{{pre}}/stod">{{t:nav.support}}</a></li>
+      <li><a class="nav-link" href="https://github.com/northcrafto/adraze">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+<script src="/download.js" defer></script>
+<script src="/main.js"></script>
+</body>
+</html>

@@ -193,8 +193,13 @@ function fragaTillagg(typ, data = {}) {
   });
 }
 const minEnhet = () => { try { return Number(localStorage.getItem('adraze-enhet')) || 0; } catch { return 0; } };
-// Flagga som startsidan läser för att visa "Mitt konto" i stället för "Logga in"
-const markeraInloggad = (ja) => { try { ja ? localStorage.setItem('adraze-inloggad', '1') : localStorage.removeItem('adraze-inloggad'); } catch {} };
+// Flagga som adraze.app läser för att visa "Mitt konto" i stället för "Logga in". Kontot bor på
+// accounts.adraze.app, så flaggan är en kaka för hela adraze.app (localStorage delas inte mellan subdomäner).
+const markeraInloggad = (ja) => {
+  const dom = location.hostname.endsWith('adraze.app') ? '; domain=adraze.app' : '';
+  document.cookie = `adraze-inloggad=${ja ? '1' : ''}; path=/${dom}; max-age=${ja ? 90 * 86400 : 0}; secure; samesite=lax`;
+  try { localStorage.removeItem('adraze-inloggad'); } catch {}
+};
 const sparaEnhet = (id) => { try { id ? localStorage.setItem('adraze-enhet', String(id)) : localStorage.removeItem('adraze-enhet'); } catch {} };
 
 async function koppla(email) {

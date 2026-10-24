@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logga in i AdRaze</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.png">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/app-google.css">
+</head>
+<body>
+<!-- Öppnas av AdRaze-webbläsaren i ett eget fönster: Google-inloggning → nyckeln lämnas till webbläsaren -->
+<main class="ag" id="ag" data-api="https://api.adraze.app">
+  <img class="ag-mark" src="/logo-mark.svg" alt="" width="56" height="56">
+  <h1>Logga in i AdRaze</h1>
+  <p class="ag-lead" id="ag-lead">Fortsätt med ditt Google-konto.</p>
+  <div id="google-knapp"></div>
+  <p class="ag-msg" id="ag-msg" role="status"></p>
+</main>
+<script src="/app-google.js" defer></script>
+</body>
+</html>
