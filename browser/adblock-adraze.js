@@ -13,6 +13,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { AdblockMotor } = require('./adblock-motor');   // vår egen C++-nätverksmotor
 const redirektResurser = require('./adblock-redirects');   // ofarliga stub-resurser för $redirect
+const dnsP = require('dns').promises;                      // CNAME-avmaskering
 let electron = null; try { electron = require('electron'); } catch {}
 
 const RES_SCHEME = 'adraze-res';
@@ -103,6 +104,8 @@ class AdrazeAdblock {
     this.version = 'AdRaze ' + (this.read('VERSION') || '').trim();
     this.fortsatt = new Set();     // värdar man valt att öppna ändå från varningen (den här sessionen)
     this.stubs = new Map();
+    this.cnameCache = new Map();   // värd → { mal: cname-mål|null, tid }
+    this.cnameInflight = new Map();// pågående CNAME-uppslag (undvik dubbla)
     this.lockbete = 'data-' + crypto.randomUUID().slice(0, 8);
   }
   read(rel) { try { return fs.readFileSync(path.join(this.dir, rel), 'utf8'); } catch { return null; } }
@@ -262,6 +265,46 @@ class AdrazeAdblock {
       });
     } catch (e) { console.warn('[adraze] schema:', String(e)); }
   }
+  // ── CNAME-avmaskering ──
+  // Värt att slå upp CNAME för? (har punkt, ingen IP, ingen lokal värd)
+  cnameMojlig(host) {
+    if (!host || host.indexOf(':') >= 0) return false;                               // IPv6/port
+    if (/^\d+\.\d+\.\d+\.\d+$/.test(host)) return false;                              // IPv4
+    if (/(^|\.)(localhost|local|lan|home|internal|test)$/i.test(host)) return false;
+    // Maskering sitter alltid på en subdomän (smetrics.brand.com); rena apex-spårare ligger redan
+    // i listorna och fångas av vanlig matchning. Så vi slår bara upp CNAME för ≥3 etiketter.
+    return host.split('.').length >= 3;
+  }
+  // Slå upp värdens CNAME-mål (cachat 10 min, 400 ms tak, ett uppslag per värd åt gången)
+  async cnameMal(host) {
+    const c = this.cnameCache.get(host);
+    if (c && Date.now() - c.tid < 600000) return c.mal;
+    if (this.cnameInflight.has(host)) return this.cnameInflight.get(host);
+    const p = (async () => {
+      let mal = null;
+      try {
+        const rec = await Promise.race([
+          dnsP.resolveCname(host),
+          new Promise((_r, rej) => setTimeout(() => rej(new Error('timeout')), 400)),
+        ]);
+        if (Array.isArray(rec) && rec[0]) mal = String(rec[0]).toLowerCase().replace(/\.$/, '');
+      } catch { /* ingen CNAME (vanligast) eller timeout → mal = null */ }
+      this.cnameCache.set(host, { mal, tid: Date.now() });
+      this.cnameInflight.delete(host);
+      return mal;
+    })();
+    this.cnameInflight.set(host, p);
+    return p;
+  }
+  // Döljer värden en spårare? Matcha om mot CNAME-målet (som tredjepart). Returnerar { block, redirect } eller null.
+  async cnameBlock(host, url, resourceType, kallVard) {
+    const mal = await this.cnameMal(host);
+    if (!mal || mal === host || bas(mal) === bas(host)) return null;   // ingen CNAME eller samma domän
+    let cu; try { const u = new URL(url); u.hostname = mal; cu = u.href; } catch { return null; }
+    const b = this.motor.blockera(cu, kallVard, resourceType, true);   // CNAME-målet = tredjepart
+    return b.block ? b : null;
+  }
+
   // $redirect: byt resursen mot en ofarlig stub (serveras från eget schema, cachas per namn)
   redirektUrl(namn) {
     const r = redirektResurser.hamta(namn); if (!r) return null;
@@ -292,27 +335,38 @@ class AdrazeAdblock {
         // Inloggnings-/2FA-sidor (GitHub, Google-konto, Microsoft …): blockera ingenting på dem
         if (typ !== 'main_frame' && kalla && this.allowHost(kalla)) { cb({}); return; }
         if (d.webContents && !d.webContents.isDestroyed() && this.allowHost(d.webContents.getURL() || '')) { cb({}); return; }
-        // C++-motorn först: ren nätverksblockering (reklam/spårare) ur hela filterlistorna
+        // JS-indexet (farliga sidor, redirect-regler, rubriker) — körs om motorn släpper igenom
+        const jsMatch = () => {
+          const r = this.match(this.fraga(d.url, typ, kalla));
+          if (!r) { cb({}); return; }
+          this.onBlocked(d.url, r.kat, typ);
+          const red = r.typ === 'redirect' && r.action.redirect;
+          // Stoppad huvudsida: did-fail-load (ERR_BLOCKED_BY_CLIENT) får skalet att visa varningen
+          if (red && red.url && !red.extensionPath) { const s = this.stubUrlFor(red.url); cb(s ? { redirectURL: s } : (/^https?:/.test(red.url) ? { redirectURL: red.url } : { cancel: true })); return; }
+          cb({ cancel: true });
+        };
+        // Blockad från motorn (ren blockering eller $redirect-stub)
+        const blockera = (b, kat) => {
+          this.onBlocked(d.url, kat, typ);
+          const stub = b.redirect ? this.redirektUrl(b.redirect) : null;
+          cb(stub ? { redirectURL: stub } : { cancel: true });
+        };
+        // C++-motorn: ren nätverksblockering (reklam/spårare) ur hela filterlistorna
         if (this.motor && typ !== 'main_frame') {
           const vard = hostAv(d.url);
           const kallVard = hostAv(kalla) || vard;
           const tredje = !!vard && !!kallVard && bas(vard) !== bas(kallVard);
           const b = this.motor.blockera(d.url, kallVard, d.resourceType, tredje);
-          if (b.block) {
-            this.onBlocked(d.url, 'ad', typ);
-            // Har filtret en $redirect-resurs vi känner? Byt ut i stället för att avbryta.
-            const stub = b.redirect ? this.redirektUrl(b.redirect) : null;
-            cb(stub ? { redirectURL: stub } : { cancel: true });
+          if (b.block) { blockera(b, 'ad'); return; }
+          // CNAME-avmaskering: spårare som gömmer sig bakom en förstaparts-subdomän
+          if (this.cnameMojlig(vard)) {
+            this.cnameBlock(vard, d.url, d.resourceType, kallVard)
+              .then((res) => { if (res && res.block) blockera(res, 'tracker'); else jsMatch(); })
+              .catch(() => jsMatch());
             return;
           }
         }
-        const r = this.match(this.fraga(d.url, typ, kalla));
-        if (!r) { cb({}); return; }
-        this.onBlocked(d.url, r.kat, typ);
-        const red = r.typ === 'redirect' && r.action.redirect;
-        // Stoppad huvudsida: did-fail-load (ERR_BLOCKED_BY_CLIENT) får skalet att visa varningen
-        if (red && red.url && !red.extensionPath) { const s = this.stubUrlFor(red.url); cb(s ? { redirectURL: s } : (/^https?:/.test(red.url) ? { redirectURL: red.url } : { cancel: true })); return; }
-        cb({ cancel: true });
+        jsMatch();
       });
       // modifyHeaders-reglerna: lägg till CSP på vissa sajter (stänger av popunder-ramar, workers m.m.)
       sess.webRequest.onHeadersReceived({ urls: ['<all_urls>'] }, (d, cb) => {
