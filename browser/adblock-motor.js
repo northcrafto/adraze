@@ -5,6 +5,7 @@
  * på JS-matchningen av sig själv (motor = null). */
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 // Rålistor som motorn äter (ligger i adraze/lists/, kopieras dit av tools/sync-adraze.sh)
 const LISTOR = [
@@ -25,10 +26,37 @@ function ladda() {
 }
 
 class AdblockMotor {
-  constructor(listDir) {
+  constructor(listDir, cacheFil) {
     this.listDir = listDir;
+    this.cacheFil = cacheFil || null;   // diskcache (userData), hoppar över omtolkning vid oförändrade listor
     this.motor = null;
     this.antal = 0;
+  }
+  // Nyckel som ändras så fort någon lista ändras (namn + storlek + ändringstid + motorversion)
+  cacheKey() {
+    const h = crypto.createHash('sha1'); h.update('v1');
+    for (const fil of LISTOR) {
+      try { const s = fs.statSync(path.join(this.listDir, fil)); h.update(fil + ':' + s.size + ':' + Math.round(s.mtimeMs)); }
+      catch { h.update(fil + ':0'); }
+    }
+    return h.digest('hex');
+  }
+  // Läs tillbaka från cachen om nyckeln stämmer. true = motorn fylld ur cachen.
+  laddaCache(m, key) {
+    try {
+      if (!this.cacheFil || fs.readFileSync(this.cacheFil + '.meta', 'utf8').trim() !== key) return false;
+      return m.deserialisera(fs.readFileSync(this.cacheFil));
+    } catch { return false; }
+  }
+  sparaCache(m, key) {
+    if (!this.cacheFil) return;
+    try {
+      fs.mkdirSync(path.dirname(this.cacheFil), { recursive: true });
+      const tmp = this.cacheFil + '.tmp';
+      fs.writeFileSync(tmp, m.serialisera());     // skriv + byt namn = aldrig en halv fil
+      fs.renameSync(tmp, this.cacheFil);
+      fs.writeFileSync(this.cacheFil + '.meta', key);
+    } catch (e) { console.warn('[adblock] kunde inte spara cache:', String(e && e.message || e)); }
   }
   // true om motorn gick att ladda och fick regler
   bygg() {
@@ -38,6 +66,12 @@ class AdblockMotor {
     try {
       const m = new mod.Adblock();
       const t0 = Date.now();
+      const key = this.cacheKey();
+      if (this.laddaCache(m, key) && m.antal()) {
+        this.antal = m.antal(); this.motor = m;
+        console.log('[adblock] C++-motor (cache): ' + this.antal + ' filter på ' + (Date.now() - t0) + ' ms');
+        return true;
+      }
       for (const fil of LISTOR) {
         let text; try { text = fs.readFileSync(path.join(this.listDir, fil), 'utf8'); } catch { continue; }
         try { m.laggLista(text); } catch (e) { console.warn('[adblock] lista', fil, String(e)); }
@@ -46,6 +80,7 @@ class AdblockMotor {
       if (!this.antal) { console.warn('[adblock] C++-motor fick inga regler (saknas listorna?)'); return false; }
       this.motor = m;
       console.log('[adblock] C++-motor: ' + this.antal + ' filter på ' + (Date.now() - t0) + ' ms');
+      this.sparaCache(m, key);
       return true;
     } catch (e) { console.warn('[adblock] C++-motor fel:', String(e && e.message || e)); return false; }
   }
