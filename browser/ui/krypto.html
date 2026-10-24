@@ -175,14 +175,21 @@
   #sidebtn { display: none; }
   #scrim { display: none; }
   @media (max-width: 719px) {
-    body:not(.full) #side { position: absolute; left: 0; top: 0; bottom: 0; transform: translateX(-102%); transition: transform .28s cubic-bezier(.4,0,.2,1); box-shadow: 16px 0 40px rgb(0 0 0 / .5); }
-    body:not(.full).side-open #side { transform: none; }
+    /* Menyn glider in ovanpå chatten, skuggan och mörkläggningen tonar med */
+    body:not(.full) #side { position: absolute; left: 0; top: 0; bottom: 0; transform: translate3d(-100%,0,0); box-shadow: none;
+      transition: transform .42s cubic-bezier(.32,.72,0,1), box-shadow .42s ease; will-change: transform; }
+    body:not(.full).side-open #side { transform: translate3d(0,0,0); box-shadow: 16px 0 40px rgb(0 0 0 / .45); }
     body:not(.full) #sidebtn { display: grid; }
-    body:not(.full).side-open #scrim { display: block; position: absolute; inset: 0; z-index: 15; background: rgb(0 0 0 / .45); }
+    body:not(.full) #scrim { display: block; position: absolute; inset: 0; z-index: 15; background: rgb(0 0 0 / .45);
+      opacity: 0; visibility: hidden; transition: opacity .42s ease, visibility 0s linear .42s; }
+    body:not(.full).side-open #scrim { opacity: 1; visibility: visible; transition: opacity .42s ease; }
     body:not(.full) header .dot { display: none; }
   }
+  @media (prefers-reduced-motion: reduce) { #side, #scrim { transition: none !important; } }
   @media (min-width: 720px) { #sideclose { display: none; } }
   body.full #sideclose { display: none; }
+  /* Samtal, minnen och nytt samtal finns i sidomenyn, så de dubbla knapparna uppe till höger göms */
+  #membtn, #newchat { display: none; }
   #convbtn { display: none; }
 
   /* Hälsningen när samtalet är tomt: mitt i ytan, med ditt namn */
