@@ -12,6 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { AdblockMotor } = require('./adblock-motor');   // vår egen C++-nätverksmotor
+const redirektResurser = require('./adblock-redirects');   // ofarliga stub-resurser för $redirect
 let electron = null; try { electron = require('electron'); } catch {}
 
 const RES_SCHEME = 'adraze-res';
@@ -261,6 +262,13 @@ class AdrazeAdblock {
       });
     } catch (e) { console.warn('[adraze] schema:', String(e)); }
   }
+  // $redirect: byt resursen mot en ofarlig stub (serveras från eget schema, cachas per namn)
+  redirektUrl(namn) {
+    const r = redirektResurser.hamta(namn); if (!r) return null;
+    const key = 'rr-' + namn.replace(/[^a-z0-9._-]/gi, '');
+    if (!this.stubs.has(key)) this.stubs.set(key, { mime: r.mime, body: r.body });
+    return RES_SCHEME + '://r/' + key;
+  }
   // Chromium vägrar omdirigera till data:-URL:er, så små ersättningsfiler serveras från eget schema
   stubUrlFor(dataUrl) {
     const m = /^data:([^;,]+)(;base64)?,(.*)$/s.exec(dataUrl || ''); if (!m) return null;
@@ -289,7 +297,14 @@ class AdrazeAdblock {
           const vard = hostAv(d.url);
           const kallVard = hostAv(kalla) || vard;
           const tredje = !!vard && !!kallVard && bas(vard) !== bas(kallVard);
-          if (this.motor.blockera(d.url, kallVard, d.resourceType, tredje)) { this.onBlocked(d.url, 'ad', typ); cb({ cancel: true }); return; }
+          const b = this.motor.blockera(d.url, kallVard, d.resourceType, tredje);
+          if (b.block) {
+            this.onBlocked(d.url, 'ad', typ);
+            // Har filtret en $redirect-resurs vi känner? Byt ut i stället för att avbryta.
+            const stub = b.redirect ? this.redirektUrl(b.redirect) : null;
+            cb(stub ? { redirectURL: stub } : { cancel: true });
+            return;
+          }
         }
         const r = this.match(this.fraga(d.url, typ, kalla));
         if (!r) { cb({}); return; }
