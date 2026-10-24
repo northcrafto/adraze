@@ -1,0 +1,54 @@
+/* download.adraze.app: mörk sida med ett kort per system */
+.dl-sida { background: var(--mork); }
+.dl { color: #fff; padding: 88px 0 104px; --sig-btn: #ffffff; --sig-btn-ink: var(--ink); }
+.dl h1 { font-size: clamp(46px, 6.4vw, 92px); letter-spacing: -0.05em; line-height: .95; }
+.dl section { padding: 0; }
+.dl-ingress { margin-top: 24px; font-size: 19px; max-width: 52ch; color: #c9c9cf; }
+
+.dl-rubrik { display: flex; align-items: center; gap: 12px; margin: 72px 0 20px; font-size: 22px; letter-spacing: -0.02em; }
+.dl-rubrik svg { width: 26px; height: 26px; color: var(--accent); }
+
+.dl-kort-rad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.dl-kort {
+  display: flex; flex-direction: column; gap: 14px; align-items: flex-start;
+  padding: 28px; border-radius: 24px; background: var(--mork-yta); border: 1.5px solid #2a2a30;
+  transition: border-color .15s;
+}
+.dl-kort > p { color: #a7a7af; font-size: 15px; flex: 1; }
+.dl-kort .btn { margin-top: 6px; }
+.dl-ditt { border-color: #4a4a52; }
+.dl-aktiv.dl-ditt { border-color: var(--accent); }
+.dl-os { display: flex; align-items: center; gap: 12px; }
+.dl-os svg { width: 30px; height: 30px; }
+.dl-os h3 { font-size: 24px; letter-spacing: -0.03em; }
+.dl-snart { margin-top: 6px; padding: 8px 14px; border-radius: 999px; border: 1.5px solid #3a3a42; color: #8b8b94; font-size: 14px; font-weight: 600; }
+.dl-version { font-size: 13px; color: #8b8b94; font-variant-numeric: tabular-nums; }
+.dl-version[hidden] { display: none; }
+
+.dl-terminal { margin-top: 16px; padding: 24px 28px; border-radius: 24px; background: var(--mork-yta); border: 1.5px solid #2a2a30; }
+.dl-terminal > p { display: flex; align-items: center; gap: 10px; color: #c9c9cf; font-size: 15px; }
+.dl-terminal > p svg { width: 20px; height: 20px; color: var(--accent); }
+.dl-rad { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding: 6px 6px 6px 18px; border-radius: 14px; background: #0b0b0d; border: 1px solid #2a2a30; }
+.dl-rad code { flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; font: 15px/1.5 ui-monospace, "JetBrains Mono", Menlo, monospace; color: #f2f2ef; padding: 8px 0; }
+.dl-kopiera {
+  all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; flex: none;
+  padding: 10px 14px; border-radius: 10px; background: #1c1c20; color: #fff; font-size: 14px; font-weight: 600;
+  transition: background .15s;
+}
+.dl-kopiera svg { width: 18px; height: 18px; }
+.dl-kopiera:hover { background: #2a2a30; }
+.dl-kopiera:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.dl-bred { flex-direction: row; align-items: center; justify-content: space-between; gap: 24px; }
+.dl-bred > p { flex: 1; font-size: 17px; color: #c9c9cf; }
+.dl-bred .btn { margin-top: 0; }
+.dl-not { margin-top: 48px; color: #8b8b94; font-size: 15px; }
+.dl-not a { color: #fff; }
+
+@media (max-width: 900px) {
+  .dl { padding: 56px 0 80px; }
+  .dl-kort-rad { grid-template-columns: 1fr; }
+  .dl-rubrik { margin-top: 56px; }
+  .dl-bred { flex-direction: column; align-items: stretch; }
+  .dl-kopiera span { display: none; }
+}
