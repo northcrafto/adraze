@@ -399,6 +399,28 @@ async function savePage(ctx, wc) {
   const r = await dialog.showSaveDialog(ctx.win, { defaultPath: 'sida.html', filters: [{ name: 'Webbsida', extensions: ['html'] }] });
   if (!r.canceled && r.filePath) { try { await wc.savePage(r.filePath, 'HTMLComplete'); } catch {} }
 }
+// Gissa ett filnamn för en bild utifrån adressen (data:-URL → tillägg från typen)
+function bildFilnamn(src) {
+  try {
+    if (/^data:/i.test(src)) {
+      const typ = (src.match(/^data:image\/([a-z0-9+.-]+)/i) || [])[1] || 'png';
+      return 'bild.' + typ.replace('jpeg', 'jpg').replace('svg+xml', 'svg');
+    }
+    const u = new URL(src);
+    let namn = decodeURIComponent(u.pathname.split('/').pop() || '');
+    if (!namn || !/\.[a-z0-9]{2,5}$/i.test(namn)) namn = (namn || 'bild') + '.jpg';
+    return namn;
+  } catch { return 'bild.jpg'; }
+}
+// "Spara bild som…": visa sparadialogen SJÄLV och ladda ner till den valda sökvägen (fungerar
+// oavsett inställningen "Fråga var filen ska sparas"; namnet "…som…" lovar att man får välja).
+async function sparaBildSom(ctx, wc, src) {
+  if (!src) return;
+  const r = await dialog.showSaveDialog(ctx.win, { defaultPath: path.join(webb.downloadDir(), bildFilnamn(src)) });
+  if (r.canceled || !r.filePath) return;
+  nastaLaddningSokvag = r.filePath;
+  try { wc.downloadURL(src); } catch { nastaLaddningSokvag = ''; }
+}
 async function showQR(ctx, url) {
   try { const dataUrl = await QRCode.toDataURL(url, { width: 260, margin: 1, color: { dark: '#0e2a47', light: '#ffffff' } }); sendTo(ctx, 'show-qr', url, dataUrl); } catch {}
 }
@@ -435,7 +457,7 @@ function buildContextMenu(ctx, wc, params) {
     t.push({ type: 'separator' });
   }
   if (params.mediaType === 'image' && params.srcURL) {
-    t.push({ label: T('Spara bild som…'), click: () => wc.downloadURL(params.srcURL) });
+    t.push({ label: T('Spara bild som…'), click: () => sparaBildSom(ctx, wc, params.srcURL) });
     t.push({ label: T('Kopiera bildadress'), click: () => clipboard.writeText(params.srcURL) });
     t.push({ type: 'separator' });
   }
@@ -1240,12 +1262,16 @@ async function scanDownload(rec) {
   rec.scan = ((cloud && cloud.clean) || CLAMSCAN) ? 'clean' : 'unscanned';
   broadcast('download-update', rec);
 }
+let nastaLaddningSokvag = '';   // sökväg vald i "Spara bild som…" (används av nästa will-download)
 function trackDownloads(sess) {
   sess.on('will-download', (_e, item) => {
     const id = 'd' + Date.now() + Math.floor(Math.random() * 1000);
     let savePath = path.join(webb.downloadDir(), item.getFilename());
-    // "Fråga var filen ska sparas": då visar Chromium sparadialogen själv och sökvägen läses efteråt
-    if (webb.prefs.askDownload) { savePath = ''; try { item.setSaveDialogOptions({ defaultPath: path.join(webb.downloadDir(), item.getFilename()) }); } catch {} }
+    const vald = nastaLaddningSokvag; nastaLaddningSokvag = '';
+    // "Spara bild som…" har redan valt sökväg → spara dit direkt, ingen extra dialog
+    if (vald) { savePath = vald; try { item.setSavePath(vald); } catch {} }
+    // Inställningen "Fråga var filen ska sparas": Chromium visar sparadialogen själv
+    else if (webb.prefs.askDownload) { savePath = ''; try { item.setSaveDialogOptions({ defaultPath: savePath }); } catch {} }
     else { try { item.setSavePath(savePath); } catch {} }
     dlItems.set(id, item);
     const rec = { id, filename: item.getFilename(), url: item.getURL(), path: savePath, total: item.getTotalBytes(), received: 0, state: 'progressing', scan: null };
