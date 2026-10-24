@@ -24,6 +24,7 @@
   @keyframes falk-pulse { 50% { opacity: .45; } }
   header .t { font-weight: 650; font-size: 14px; overflow: hidden; line-height: 1.2; }
   header .t small { display: block; font-weight: 500; font-size: 11.5px; color: var(--mut); white-space: nowrap; text-overflow: ellipsis; overflow: hidden; max-width: 170px; }
+  header .t small.live { color: var(--ink); opacity: .78; }
   header .grow { flex: 1; }
   .hbtn { position: relative; width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; cursor: pointer; color: var(--mut); background: transparent; border: 0; transition: background .15s, color .15s; }
   .hbtn:hover { background: rgb(255 255 255 / .06); color: var(--ink); }
@@ -68,16 +69,17 @@
   .sugg button span { order: 2; color: var(--faint); font-size: 16px; line-height: 1; transition: color .15s, transform .2s; }
   .sugg button:hover span { color: var(--accent); transform: translateX(2px); }
 
-  /* Minnen som sparas under samtalet */
-  .memcard { display: flex; gap: 10px; align-items: center; align-self: stretch; padding: 10px 12px; border-radius: 10px; font-size: 12.5px; line-height: 1.45;
-    background: var(--surface); box-shadow: inset 2px 0 0 var(--accent), inset 0 0 0 1px var(--line); color: var(--ink); animation: msgin .25s ease-out both; overflow: hidden; }
-  .memcard .mi { flex: 0 0 auto; color: var(--accent-ink); display: grid; place-items: center; }
-  .memcard .mtxt b { display: block; font-weight: 600; font-size: 11.5px; color: var(--mut); margin-bottom: 1px; }
-  .memcard.del { box-shadow: inset 2px 0 0 #6f6f76, inset 0 0 0 1px var(--line); }
-  .memcard.del .mi { color: var(--mut); }
-  .memcard.del .mval { text-decoration: line-through; color: var(--mut); }
-  .memcard.leaving { animation: memout .3s ease-in forwards; }
-  @keyframes memout { to { opacity: 0; transform: translateX(10px); } }
+  /* Det Falk gör (sparar minnen, öppnar saker): en lugn grå rad med ikon, ingen ruta */
+  .step { align-self: flex-start; display: inline-flex; align-items: center; gap: 7px; max-width: 100%; padding: 2px 0; border: 0; background: none;
+    font: inherit; font-size: 12.5px; line-height: 1.4; color: var(--mut); text-align: left; animation: msgin .25s ease-out both; }
+  .step svg { flex: none; width: 15px; height: 15px; color: var(--mut); }
+  .step b { font-weight: 550; color: var(--ink); opacity: .82; }
+  .step .sv { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .step.del .sv { text-decoration: line-through; }
+  button.step { cursor: pointer; }
+  button.step:hover b { opacity: 1; text-decoration: underline; text-underline-offset: 3px; }
+  .step.run b::after { content: ""; display: inline-block; width: 14px; text-align: left; animation: falk-dots 1.2s steps(4) infinite; }
+  .steps { align-self: stretch; display: flex; flex-direction: column; gap: 2px; }
   .recall { align-self: flex-start; display: inline-flex; gap: 6px; align-items: center; font-size: 11.5px; font-weight: 600; color: var(--mut);
     padding: 3px 10px; border-radius: 999px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
   .recall svg { color: var(--accent-ink); width: 13px; height: 13px; }
@@ -200,7 +202,7 @@
   .hero h1 em { display: block; font-style: normal; color: var(--mut); font-weight: 600; }
   .hero p { margin: 6px auto 0; }
   .sugg { max-width: 460px; margin: 22px auto 0; }
-  @media (prefers-reduced-motion: reduce) { .msg, .hero, .memcard { animation: none; } body.thinking header .owl { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .msg, .hero, .step { animation: none; } body.thinking header .owl { animation: none; } }
 </style>
 <style>#modes{display:none}</style>
 </head>
@@ -379,12 +381,43 @@
     const OWL_BIG = '<img src="krypto-owl.png" alt="">';
     const OWL_FLY = '<img class="owl-fly" src="krypto-owl.png" alt="">';
     function render() { log.innerHTML = ''; if (!history.length) { welcome(); return; } for (const m of history) bubble(m.role, fmt(m.content)); }
-    function memCard(kind, text) {
-      const el = document.createElement('div'); el.className = 'memcard' + (kind === 'del' ? ' del' : '');
-      el.innerHTML = '<span class="mi">' + BRAIN + '</span><div class="mtxt"><b>' + (kind === 'del' ? 'Falk glömde' : 'Falk sparade ett minne') + '</b><span class="mval">' + esc(text) + '</span></div>';
-      log.appendChild(el); scrollBottom();
+    // En rad som visar vad Falk gör. Minnesrader öppnar minnena vid klick.
+    function stepRow(icon, label, val, cls, onClick) {
+      const el = document.createElement(onClick ? 'button' : 'div'); el.className = 'step' + (cls ? ' ' + cls : '');
+      if (onClick) { el.type = 'button'; el.addEventListener('click', onClick); }
+      el.innerHTML = icon + '<b>' + esc(label) + '</b>' + (val ? '<span class="sv">' + esc(val) + '</span>' : '');
+      return el;
     }
-    function recallChip() { const el = document.createElement('div'); el.className = 'recall'; el.innerHTML = BRAIN + ' minns dig'; log.appendChild(el); scrollBottom(); }
+    function memCard(kind, text) {
+      const el = stepRow(BRAIN, kind === 'del' ? tx('Glömde') : tx('Minnet uppdaterat'), text, kind === 'del' ? 'del' : '', () => togglePanel('mempanel', true));
+      log.appendChild(el); scrollBottom(); return el;
+    }
+    function recallChip() { log.appendChild(stepRow(BRAIN, tx('Kom ihåg vad den vet om dig'), '', '', () => togglePanel('mempanel', true))); scrollBottom(); }
+    function tx(x) { return (typeof window.t === 'function') ? window.t(x) : x; }
+    const GEAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>';
+    const SHIELD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>';
+    const CART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L22 8H6"/></svg>';
+    const OPEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>';
+    // Vad varje [[gör:…]] visas som i chatten
+    function actionStep(a) {
+      const v = a.value || '', av = /^(av|off|nej)$/i.test(v);
+      const [x, y, z] = v.split('|').map((p) => p.trim());
+      switch (a.name) {
+        case 'sokmotor': return [GEAR, tx('Bytte sökmotor'), x];
+        case 'adblock': return [SHIELD, av ? tx('Stängde av annonsblockeraren') : tx('Slog på annonsblockeraren'), ''];
+        case 'realtidsskydd': return [SHIELD, av ? tx('Stängde av realtidsskyddet') : tx('Slog på realtidsskyddet'), ''];
+        case 'minska_rorelse': return [GEAR, av ? tx('Slog på animationer igen') : tx('Minskade rörelse'), ''];
+        case 'inkognito': return [OPEN, tx('Öppnade ett inkognitofönster'), ''];
+        case 'nedladdningar': return [OPEN, tx('Öppnade nedladdningar'), ''];
+        case 'losenord': return [OPEN, tx('Öppnade lösenord'), ''];
+        case 'blockera': return [SHIELD, tx('Blockerade för') + ' ' + x, (y || '').split(',').join(', ')];
+        case 'tillat': return [SHIELD, tx('Tillät för') + ' ' + x, y + (z ? ' · ' + z + ' min' : '')];
+        case 'köp': return [CART, tx('Förbereder köp'), [x, y, z].filter(Boolean).join(' · ')];
+        default: return [GEAR, tx('Ändrade en inställning'), a.name];
+      }
+    }
+    // Status uppe i rubriken, så man ser vad Falk gör även när panelen är smal
+    function setStatus(t) { const el = $('convtitle'); if (t) { el.textContent = t; el.classList.add('live'); } else { el.classList.remove('live'); updateConvTitle(); } }
 
     /* ── Läges-system (Falk som brain) ── */
     const MODE_PLACEHOLDER = {
@@ -486,7 +519,7 @@
         'faktum om personen. Skriv aldrig ut taggarnas innehåll som vanlig text.\n\n' +
         'Du kan även STYRA webbläsaren åt användaren. När hen ber dig ändra en inställning, lägg till EXAKT en tagg ' +
         'på formen [[gör:NAMN=VÄRDE]] sist i svaret (systemet fångar och döljer den) OCH bekräfta kort och vänligt i vanlig text. Kommandon:\n' +
-        '• Byt sökmotor: [[gör:sokmotor=google]] (även duckduckgo, brave, startpage)\n' +
+        '• Byt sökmotor: [[gör:sokmotor=google]] (även adraze för AdRaze Search, duckduckgo, brave, startpage)\n' +
         '• Annonsblockerare på/av: [[gör:adblock=på]] eller [[gör:adblock=av]]\n' +
         '• Realtidsskydd (varning för farliga sidor) på/av: [[gör:realtidsskydd=på]] / [[gör:realtidsskydd=av]]\n' +
         '• Minska rörelse (mindre animationer): [[gör:minska_rorelse=på]] / [[gör:minska_rorelse=av]]\n' +
@@ -530,7 +563,7 @@
       history.push({ role: 'user', content: text }); touchConvo(text); saveConvos();
       { const h = log.querySelector('.hero'); if (h) h.remove(); }   // välkomstvyn försvinner när samtalet börjar
       bubble('user', fmt(text)); updateConvTitle();
-      busy = true; sendBtn.disabled = true; document.body.classList.add('thinking');
+      busy = true; sendBtn.disabled = true; document.body.classList.add('thinking'); setStatus(tx('Tänker') + '…');
       const typing = bubble('krypto', '<span class="think">' + OWL_FLY + '<span class="tt">' + esc((typeof window.t === 'function') ? window.t('Falk tänker') : 'Falk tänker') + '</span></span>', 'typing');
       const messages = buildPriming().concat(history.slice(-12));
       let res;
@@ -539,13 +572,27 @@
       typing.remove(); document.body.classList.remove('thinking');
       if (res && res.ok) {
         const { text: clean0, events, recalled } = processMemoryTags(res.reply || '');
-        const { text: clean } = processActionTags(clean0);
-        if (recalled) recallChip();
+        const { text: clean, actions } = processActionTags(clean0);
+        // Det Falk gjorde visas först, rad för rad, och sen svaret
+        const steps = [];
+        if (recalled) steps.push([BRAIN, tx('Kom ihåg vad den vet om dig'), '', '', true]);
+        for (const ev of events) steps.push([BRAIN, ev.kind === 'del' ? tx('Glömde') : tx('Minnet uppdaterat'), ev.text, ev.kind === 'del' ? 'del' : '', true]);
+        for (const a of actions) steps.push(actionStep(a));
+        if (steps.length) {
+          const box = document.createElement('div'); box.className = 'steps'; log.appendChild(box);
+          for (const [ic, lb, val, cls, mem] of steps) {
+            setStatus(lb + '…');
+            const row = stepRow(ic, lb, val, (cls || '') + ' run', mem ? () => togglePanel('mempanel', true) : null);
+            box.appendChild(row); scrollBottom();
+            await new Promise((ok) => setTimeout(ok, 380));
+            row.classList.remove('run');
+          }
+        }
+        setStatus('');
         bubble('krypto', fmt(clean || '(tomt svar)'));
         history.push({ role: 'assistant', content: clean }); saveConvos();
-        for (const ev of events) memCard(ev.kind, ev.text);
       } else {
-        history.pop(); saveConvos();
+        history.pop(); saveConvos(); setStatus('');
         bubble('krypto', fmt((res && res.message) || 'Något gick fel. Försök igen om en stund.'));
       }
       busy = false; sendBtn.disabled = false; inp.focus();
