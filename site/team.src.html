@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Supportpanelen – AdRaze</title>
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="/favicon.png">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/support.css">
+</head>
+<body class="tm-sida">
+<!-- Teamets panel: bara konton i SUPPORT_TEAM kommer åt API:t -->
+<header class="tm-topp">
+  <a href="/" class="logo"><img src="/logo-mark.svg" alt="" width="28" height="28">adraze <span>support</span></a>
+  <p id="tm-jag"></p>
+</header>
+
+<main id="tm" class="tm" data-api="https://api.adraze.app">
+  <p class="tm-info" id="tm-info">Hämtar ärenden …</p>
+  <div class="tm-ut" id="tm-ut" hidden>
+    <h1>Logga in för att svara på ärenden</h1>
+    <p id="tm-ut-text">Panelen är bara för AdRaze-teamet.</p>
+    <a class="btn btn-stor liq" href="{{konto}}">Logga in</a>
+  </div>
+
+  <div class="tm-grid" id="tm-grid" hidden>
+    <aside class="tm-sidolist">
+      <div class="tm-filter" role="tablist">
+        <button type="button" role="tab" data-f="aktiva" aria-selected="true">Att göra <b id="tm-n-aktiva"></b></button>
+        <button type="button" role="tab" data-f="besvarad" aria-selected="false">Besvarade</button>
+        <button type="button" role="tab" data-f="stangd" aria-selected="false">Avslutade</button>
+        <button type="button" role="tab" data-f="alla" aria-selected="false">Alla</button>
+      </div>
+      <ul class="tm-lista" id="tm-lista"></ul>
+      <p class="tm-tom" id="tm-tom" hidden>Inga ärenden här.</p>
+    </aside>
+
+    <section class="tm-arende" id="tm-arende">
+      <p class="tm-valj" id="tm-valj">Välj ett ärende till vänster.</p>
+      <div id="tm-vy" hidden>
+        <header class="tm-arende-topp">
+          <div>
+            <p class="ar-nr" id="tm-nr"></p>
+            <h2 id="tm-amne"></h2>
+            <p class="tm-fran" id="tm-fran"></p>
+          </div>
+          <div class="tm-status" role="group" aria-label="Status">
+            <button type="button" data-s="oppen">Öppen</button>
+            <button type="button" data-s="besvarad">Besvarad</button>
+            <button type="button" data-s="stangd">Avslutad</button>
+          </div>
+        </header>
+        <ol class="ar-trad" id="tm-trad"></ol>
+        <form class="ar-svar" id="tm-form" novalidate>
+          <label class="falt"><span>Svar till kunden (mejlas direkt)</span><textarea name="text" rows="5" required maxlength="5000"></textarea></label>
+          <p class="sup-fel" id="tm-fel" role="alert" hidden></p>
+          <button class="btn btn-stor liq" type="submit" id="tm-skicka">{{arrow-right}}<span>Skicka svaret</span></button>
+        </form>
+      </div>
+    </section>
+  </div>
+</main>
+<script src="/team.js" defer></script>
+</body>
+</html>

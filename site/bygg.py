@@ -12,6 +12,7 @@ rot = pathlib.Path(__file__).parent
 SAJT = 'https://adraze.app'
 KONTO = 'https://accounts.adraze.app'
 LADDA = 'https://download.adraze.app'
+HJALP = 'https://support.adraze.app'
 # Kod, namn på språket självt (ordning = ordning i språkväljaren)
 SPRAK = [
     ('sv', 'Svenska'), ('en', 'English'), ('nb', 'Norsk'), ('da', 'Dansk'), ('fi', 'Suomi'), ('is', 'Íslenska'),
@@ -23,13 +24,16 @@ SPRAK = [
 # Källa → (sajt, sökväg på sajten)
 SIDOR = {'index.src.html': (SAJT, ''), 'integritet.src.html': (SAJT, 'integritet'), 'statistik.src.html': (SAJT, 'statistik'),
          'stod.src.html': (SAJT, 'stod'), 'kolla.src.html': (SAJT, 'kolla'),
-         'konto.src.html': (KONTO, ''), 'download.src.html': (LADDA, '')}
-MAPP = {SAJT: rot, KONTO: rot.parent / 'accounts', LADDA: rot.parent / 'download'}
-UTAN_SITEMAP = {KONTO}  # inloggningen ska inte indexeras
+         'konto.src.html': (KONTO, ''), 'download.src.html': (LADDA, ''),
+         'support.src.html': (HJALP, ''), 'arende.src.html': (HJALP, 'arende'), 'team.src.html': (HJALP, 'team')}
+MAPP = {SAJT: rot, KONTO: rot.parent / 'accounts', LADDA: rot.parent / 'download', HJALP: rot.parent / 'support'}
+UTAN_SITEMAP = {(KONTO, ''), (HJALP, 'arende'), (HJALP, 'team')}  # inloggning, ärenden och teampanelen ska inte indexeras
+BARA_SV = {'team.src.html'}  # teamets panel finns bara på svenska
 # Filer som subdomänerna serverar själva (kopieras från site/ vid varje bygge)
 TILLGANGAR = {
     KONTO: ['style.css', 'konto.css', 'konto.js', 'main.js', 'fonts', 'mail/vinkar.gif', 'logo-mark.svg', 'favicon.png',
             'app-google.html', 'app-google.css', 'app-google.js'],
+    HJALP: ['style.css', 'support.css', 'support.js', 'arende.js', 'team.js', 'main.js', 'fonts', 'mail/vinkar.gif', 'logo-mark.svg', 'favicon.png'],
     LADDA: ['style.css', 'download.css', 'download.js', 'main.js', 'fonts', 'logo-mark.svg', 'favicon.png', 'install.sh', 'adraze-512.png', 'os',
             '4bbbc2d76725e865a25008fd19941943.txt'],  # IndexNow-nyckeln (måste ligga på samma värd)
 }
@@ -63,6 +67,7 @@ for sajt, filer in TILLGANGAR.items():
 for kod, namn in finns:
     t = {**sv, **json.loads((rot / 'i18n' / f'{kod}.json').read_text())}
     for src, (sajt, sida) in SIDOR.items():
+        if src in BARA_SV and kod != 'sv': continue
         # Länkar till huvudsajten blir fullständiga på subdomänerna
         hem = '' if sajt == SAJT else SAJT
         # Gemensam topp med hamburgarmeny för alla sidor (före ikonerna, {{topp}} ser ut som ett ikonnamn)
@@ -81,7 +86,7 @@ for kod, namn in finns:
         ut = re.sub(rf'<!--{bort}-->.*?<!--/{bort}-->', '', ut, flags=re.S).replace('<!--zip-->', '').replace('<!--/zip-->', '').replace('<!--butik-->', '').replace('<!--/butik-->', '')
         ut = ut.replace('{{installera}}', BUTIK or hem + url(kod, '') + '#installera').replace('{{butik}}', BUTIK or '')
         ut = ut.replace('{{lang}}', kod).replace('{{hem}}', hem + url(kod, '')).replace('{{pre}}', hem + ('' if kod == 'sv' else f'/{kod}'))
-        ut = ut.replace('{{konto}}', KONTO + url(kod, '')).replace('{{ladda}}', LADDA + url(kod, ''))
+        ut = ut.replace('{{konto}}', KONTO + url(kod, '')).replace('{{ladda}}', LADDA + url(kod, '')).replace('{{hjalp}}', HJALP + url(kod, ''))
         ut = re.sub(r'\{\{t:([a-z0-9_.]+)\}\}', lambda m: t[m.group(1)], ut)
         ut = re.sub(r'\{\{([a-z-]+)\}\}', lambda m: ikon(m.group(1)), ut)
         assert '{{' not in ut, re.findall(r'\{\{.*?\}\}', ut)[:3]
@@ -92,11 +97,12 @@ print('byggde', len(finns), 'språk:', ' '.join(k for k, _ in finns))
 
 # Sitemap med alla språkversioner, en per sajt
 for sajt, mapp in MAPP.items():
-    if sajt in UTAN_SITEMAP:
+    sidor = [v for s, v in SIDOR.values() if s == sajt and (s, v) not in UTAN_SITEMAP]
+    if not sidor:
         (mapp / 'robots.txt').write_text('User-agent: *\nDisallow: /\n')
         continue
     rader = []
-    for sida in [v for s, v in SIDOR.values() if s == sajt]:
+    for sida in sidor:
         for kod, _ in finns:
             alt = ''.join(f'<xhtml:link rel="alternate" hreflang="{k}" href="{sajt}{url(k, sida)}"/>' for k, _ in finns)
             rader.append(f'<url><loc>{sajt}{url(kod, sida)}</loc>{alt}</url>')

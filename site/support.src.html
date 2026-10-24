@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{t:sup.meta_title}}</title>
+<meta name="description" content="{{t:sup.meta_description}}">
+<link rel="icon" href="/favicon.png">
+{{alternates}}
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/support.css">
+</head>
+<body class="sup-sida">
+{{topp}}
+
+<main id="sup" data-api="https://api.adraze.app" data-lang="{{lang}}" data-inloggad="{{t:sup.logged_in}}" data-tack="{{t:sup.thanks_text}}" data-fel="{{t:sup.error}}" data-skickar="{{t:sup.sending}}">
+  <section class="sup-hero">
+    <div class="wrap sup-grid">
+      <div class="sup-intro">
+        <h1>{{t:sup.title}}</h1>
+        <p class="sup-ingress">{{t:sup.lead}}</p>
+        <img class="sup-vinkar" src="/mail/vinkar.gif" alt="" width="200" height="259">
+      </div>
+
+      <div class="sup-kort">
+        <form id="sup-form" novalidate>
+          <fieldset class="sup-amnen">
+            <legend>{{t:sup.topic}}</legend>
+            <label><input type="radio" name="kategori" value="tillagg" checked><span>{{t:sup.cat_tillagg}}</span></label>
+            <label><input type="radio" name="kategori" value="webblasare"><span>{{t:sup.cat_webblasare}}</span></label>
+            <label><input type="radio" name="kategori" value="konto"><span>{{t:sup.cat_konto}}</span></label>
+            <label><input type="radio" name="kategori" value="betalning"><span>{{t:sup.cat_betalning}}</span></label>
+            <label><input type="radio" name="kategori" value="annat"><span>{{t:sup.cat_annat}}</span></label>
+          </fieldset>
+          <div class="sup-tva">
+            <label class="falt"><span>{{t:sup.name}}</span><input name="namn" autocomplete="name" maxlength="60"></label>
+            <label class="falt" id="sup-mejl"><span>{{t:sup.email}}</span><input type="email" name="email" autocomplete="email" required maxlength="254"></label>
+          </div>
+          <p class="sup-inne" id="sup-inne" hidden></p>
+          <label class="falt"><span>{{t:sup.subject}}</span><input name="amne" required maxlength="140"></label>
+          <label class="falt"><span>{{t:sup.message}}</span><textarea name="text" rows="6" required maxlength="5000" aria-describedby="sup-hjalp"></textarea></label>
+          <p class="sup-hjalp" id="sup-hjalp">{{t:sup.message_help}}</p>
+          <!-- Fälla för robotar: osynlig för människor -->
+          <label class="sup-falla" aria-hidden="true">Webbplats<input name="webbplats" tabindex="-1" autocomplete="off"></label>
+          <p class="sup-fel" id="sup-fel" role="alert" hidden></p>
+          <button class="btn btn-stor liq" type="submit" id="sup-skicka">{{arrow-right}}<span>{{t:sup.send}}</span></button>
+        </form>
+
+        <div class="sup-tack" id="sup-tack" hidden>
+          {{check}}
+          <h2>{{t:sup.thanks_title}}</h2>
+          <p id="sup-tack-text"></p>
+          <div class="sup-knappar">
+            <a class="btn btn-stor liq" id="sup-oppna" href="/arende">{{t:sup.open_case}}</a>
+            <button class="btn btn-stor liq-ghost" type="button" id="sup-ny">{{t:sup.new_case}}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sup-mina" id="sup-mina" hidden>
+    <div class="wrap">
+      <h2>{{t:sup.mine_title}}</h2>
+      <ul class="sup-lista" id="sup-lista"></ul>
+      <template id="sup-status">
+        <span data-s="oppen">{{t:sup.status_oppen}}</span>
+        <span data-s="besvarad">{{t:sup.status_besvarad}}</span>
+        <span data-s="stangd">{{t:sup.status_stangd}}</span>
+      </template>
+    </div>
+  </section>
+
+  <section class="sup-sjalv">
+    <div class="wrap">
+      <h2>{{t:sup.self_title}}</h2>
+      <div class="sup-sjalv-grid">
+        <a class="sup-lank bar-hover" href="{{pre}}/#fragor"><b>{{t:sup.self_faq}}</b><span>{{t:sup.self_faq_text}}</span>{{arrow-right}}</a>
+        <a class="sup-lank bar-hover" href="{{pre}}/kolla"><b>{{t:sup.self_check}}</b><span>{{t:sup.self_check_text}}</span>{{arrow-right}}</a>
+        <a class="sup-lank bar-hover" href="{{ladda}}"><b>{{t:sup.self_download}}</b><span>{{t:sup.self_download_text}}</span>{{arrow-right}}</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="fot">
+  <div class="wrap fot-grid">
+    <div><a href="{{hem}}" class="logo"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a><p>{{t:footer.tagline}}</p></div>
+    <ul>
+      <li><a class="nav-link" href="{{ladda}}">{{t:nav.download}}</a></li>
+      <li><a class="nav-link" href="{{pre}}/integritet">{{t:footer.privacy}}</a></li>
+      <li><a class="nav-link" href="{{pre}}/stod">{{t:nav.support}}</a></li>
+    </ul>
+  </div>
+</footer>
+<script src="/support.js" defer></script>
+<script src="/main.js"></script>
+</body>
+</html>

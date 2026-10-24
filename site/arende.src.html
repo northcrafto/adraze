@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{t:case.meta_title}}</title>
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="/favicon.png">
+{{alternates}}
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/support.css">
+</head>
+<body class="sup-sida">
+{{topp}}
+
+<main id="ar" class="ar" data-api="https://api.adraze.app" data-lang="{{lang}}" data-du="{{t:case.you}}" data-team="{{t:case.team}}" data-fel="{{t:sup.error}}" data-skickar="{{t:sup.sending}}">
+  <div class="wrap ar-wrap">
+    <a class="nav-link ar-tillbaka" href="{{pre}}/">{{t:case.back}}</a>
+    <p class="ar-laddar" id="ar-laddar">{{t:case.loading}}</p>
+    <p class="ar-saknas" id="ar-saknas" hidden>{{t:case.not_found}}</p>
+
+    <article id="ar-vy" hidden>
+      <header class="ar-topp">
+        <div>
+          <p class="ar-nr" id="ar-nr"></p>
+          <h1 id="ar-amne"></h1>
+        </div>
+        <span class="ar-status" id="ar-status"></span>
+      </header>
+      <ol class="ar-trad" id="ar-trad" aria-live="polite"></ol>
+      <p class="ar-stangd" id="ar-stangd" hidden>{{t:case.closed}}</p>
+      <form class="ar-svar" id="ar-form" novalidate>
+        <label class="falt"><span>{{t:case.reply}}</span><textarea name="text" rows="4" required maxlength="5000"></textarea></label>
+        <p class="sup-fel" id="ar-fel" role="alert" hidden></p>
+        <button class="btn btn-stor liq" type="submit" id="ar-skicka">{{arrow-right}}<span>{{t:case.send}}</span></button>
+      </form>
+    </article>
+    <template id="ar-statustext">
+      <span data-s="oppen">{{t:sup.status_oppen}}</span>
+      <span data-s="besvarad">{{t:sup.status_besvarad}}</span>
+      <span data-s="stangd">{{t:sup.status_stangd}}</span>
+    </template>
+  </div>
+</main>
+
+<footer class="fot">
+  <div class="wrap fot-grid">
+    <div><a href="{{hem}}" class="logo"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a><p>{{t:footer.tagline}}</p></div>
+  </div>
+</footer>
+<script src="/arende.js" defer></script>
+<script src="/main.js"></script>
+</body>
+</html>
