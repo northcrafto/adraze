@@ -14,6 +14,7 @@ const crypto = require('crypto');
 const { AdblockMotor } = require('./adblock-motor');   // vår egen C++-nätverksmotor
 const redirektResurser = require('./adblock-redirects');   // ofarliga stub-resurser för $redirect
 const dnsP = require('dns').promises;                      // CNAME-avmaskering
+const scriptlets = require('./adblock-scriptlets');        // ##+js(...) → injicerbar kod
 let electron = null; try { electron = require('electron'); } catch {}
 
 const RES_SCHEME = 'adraze-res';
@@ -106,6 +107,7 @@ class AdrazeAdblock {
     this.stubs = new Map();
     this.cnameCache = new Map();   // värd → { mal: cname-mål|null, tid }
     this.cnameInflight = new Map();// pågående CNAME-uppslag (undvik dubbla)
+    this.scriptletCache = new Map();// värd → ihopbyggd scriptlet-kod
     this.lockbete = 'data-' + crypto.randomUUID().slice(0, 8);
   }
   read(rel) { try { return fs.readFileSync(path.join(this.dir, rel), 'utf8'); } catch { return null; } }
@@ -268,6 +270,18 @@ class AdrazeAdblock {
       });
     } catch (e) { console.warn('[adraze] schema:', String(e)); }
   }
+  // Ihopbyggd scriptlet-kod för en värd (cachad). Tom sträng = inga scriptlets.
+  scriptletKod(host) {
+    if (!this.motor || !host) return '';
+    const c = this.scriptletCache.get(host);
+    if (c !== undefined) return c;
+    let kod = '';
+    try { kod = scriptlets.bygg(this.motor.scriptletsFor(host)); } catch {}
+    if (this.scriptletCache.size > 2000) this.scriptletCache.clear();   // håll cachen rimlig
+    this.scriptletCache.set(host, kod);
+    return kod;
+  }
+
   // ── CNAME-avmaskering ──
   // Värt att slå upp CNAME för? (har punkt, ingen IP, ingen lokal värd)
   cnameMojlig(host) {
@@ -418,7 +432,8 @@ class AdrazeAdblock {
       if (!this.index || !this.isOn()) { e.returnValue = ut; return; }
       let topp = ''; try { topp = hostAv(e.sender.getURL()); } catch {}
       if (this.allowHost('https://' + (topp || host) + '/')) { e.returnValue = ut; return; }
-      e.returnValue = { pa: true, skript: this.skript };
+      // scriptlets gäller den aktuella ramens värd → bygg per host (lätt, cachas)
+      e.returnValue = { pa: true, skript: { ...this.skript, scriptlets: this.scriptletKod(String(host || topp || '')) } };
     });
     ipcMain.on('adraze:css', (e, host) => { e.returnValue = { css: this.cssFor(String(host || '')), lockbete: this.lockbete }; });
     // Kakhanteraren är på så fort blockeraren är på (inte bara på sajter med egen kak-CSS),

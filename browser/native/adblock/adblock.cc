@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <set>
 #include <cstdint>
 
 namespace {
@@ -103,6 +104,9 @@ struct Motor {
   std::vector<Filter> block, tillat;
   std::unordered_map<std::string, std::vector<uint32_t>> blockTok, tillatTok;  // token → index
   std::vector<uint32_t> blockGen, tillatGen;                                   // tokenlösa
+  // Scriptlets (##+js): injiceras i sidan per värd. Varje post = innehållet i +js(...) ("namn, arg1, …")
+  std::unordered_map<std::string, std::vector<std::string>> skriptPer, skriptUnd;  // värd → scriptlets / undantag
+  std::vector<std::string> skriptGen;                                              // generiska (alla sidor)
 
   // Plocka ett nyckelord (längsta a-z0-9-sträng ≥ 3) ur mönstret som hink-nyckel
   static std::string token(const std::string& p) {
@@ -117,7 +121,34 @@ struct Motor {
 
   void lagg(const std::string& rad) {
     if (rad.empty() || rad[0] == '!' || rad[0] == '[') return;            // kommentar
-    // kosmetik och scriptlets hanteras av content-skripten, inte här
+
+    // Scriptlet-filter: värd##+js(namn, arg…) och värd#@#+js(…) (undantag)
+    {
+      size_t p = rad.find("##+js(");
+      bool und = false;
+      if (p == std::string::npos) { size_t q = rad.find("#@#+js("); if (q != std::string::npos) { p = q; und = true; } }
+      if (p != std::string::npos) {
+        size_t open = rad.find("+js(", p); if (open == std::string::npos) return; open += 4;
+        size_t close = rad.rfind(')');
+        if (close != std::string::npos && close >= open) {
+          std::string inside = rad.substr(open, close - open);
+          std::string hosts = rad.substr(0, p);
+          if (hosts.empty()) { if (!und) skriptGen.push_back(inside); }
+          else {
+            size_t a = 0;
+            while (a <= hosts.size()) {
+              size_t b = hosts.find(',', a);
+              std::string h = hosts.substr(a, b == std::string::npos ? std::string::npos : b - a);
+              if (!h.empty() && h[0] != '~') { for (char& c : h) c = lower(c); (und ? skriptUnd : skriptPer)[h].push_back(inside); }
+              if (b == std::string::npos) break; a = b + 1;
+            }
+          }
+        }
+        return;
+      }
+    }
+
+    // övrig kosmetik hanteras av content-skripten (cosmetic.js), inte här
     if (rad.find("##") != std::string::npos || rad.find("#@#") != std::string::npos ||
         rad.find("#?#") != std::string::npos || rad.find("#$#") != std::string::npos) return;
 
@@ -277,9 +308,25 @@ struct Motor {
     return b;
   }
 
+  // Scriptlets som ska injiceras på en värd (värden + föräldradomäner, minus undantag, avdubblat)
+  std::vector<std::string> scriptletsFor(std::string host) {
+    for (char& c : host) c = lower(c);
+    std::vector<std::string> ut;
+    if (skriptPer.empty() && skriptGen.empty()) return ut;
+    std::vector<std::string> suffix; suffix.push_back(host);
+    for (size_t i = 0; i < host.size(); i++) if (host[i] == '.') suffix.push_back(host.substr(i + 1));
+    std::set<std::string> und; bool undAlla = false;
+    for (auto& h : suffix) { auto it = skriptUnd.find(h); if (it != skriptUnd.end()) for (auto& s : it->second) { if (s.empty()) undAlla = true; else und.insert(s); } }
+    if (undAlla) return ut;
+    std::set<std::string> sedd;
+    for (auto& s : skriptGen) if (!und.count(s) && sedd.insert(s).second) ut.push_back(s);
+    for (auto& h : suffix) { auto it = skriptPer.find(h); if (it != skriptPer.end()) for (auto& s : it->second) if (!und.count(s) && sedd.insert(s).second) ut.push_back(s); }
+    return ut;
+  }
+
   // ── Serialisering: spara det tolkade tillståndet till en binär klump och läsa tillbaka det,
   //    så uppstarten slipper tolka om ~2 MB listtext varje gång. ──
-  static const uint8_t VERSION = 1;
+  static const uint8_t VERSION = 2;   // 2 = med scriptlets
   static void u32(std::string& o, uint32_t v) { for (int i = 0; i < 4; i++) o += (char)((v >> (i * 8)) & 0xff); }
   static void str(std::string& o, const std::string& s) { u32(o, (uint32_t)s.size()); o += s; }
   static void skrivFilter(std::string& o, const std::vector<Filter>& v) {
@@ -294,9 +341,15 @@ struct Motor {
       str(o, f.redirect);
     }
   }
+  static void skrivVekt(std::string& o, const std::vector<std::string>& v) { u32(o, (uint32_t)v.size()); for (const auto& s : v) str(o, s); }
+  static void skrivMap(std::string& o, const std::unordered_map<std::string, std::vector<std::string>>& m) {
+    u32(o, (uint32_t)m.size());
+    for (const auto& kv : m) { str(o, kv.first); skrivVekt(o, kv.second); }
+  }
   std::string serialisera() const {
     std::string o; o += "ADRZ"; o += (char)VERSION;
     skrivFilter(o, block); skrivFilter(o, tillat);
+    skrivMap(o, skriptPer); skrivMap(o, skriptUnd); skrivVekt(o, skriptGen);
     return o;
   }
 
@@ -326,13 +379,22 @@ struct Motor {
     }
     return true;
   }
+  static bool lasVekt(Lasare& r, std::vector<std::string>& v) { uint32_t n = r.u32(); if (r.fel || n > r.kvar) return false; for (uint32_t i = 0; i < n; i++) { v.push_back(r.str()); if (r.fel) return false; } return true; }
+  bool lasMap(Lasare& r, std::unordered_map<std::string, std::vector<std::string>>& m) {
+    uint32_t n = r.u32(); if (r.fel || n > r.kvar) return false;
+    for (uint32_t i = 0; i < n; i++) { std::string k = r.str(); if (r.fel) return false; if (!lasVekt(r, m[k])) return false; }
+    return true;
+  }
+  void rensa() {
+    block.clear(); tillat.clear(); blockTok.clear(); tillatTok.clear(); blockGen.clear(); tillatGen.clear();
+    skriptPer.clear(); skriptUnd.clear(); skriptGen.clear();
+  }
   bool deserialisera(const char* data, size_t len) {
     if (len < 5 || data[0] != 'A' || data[1] != 'D' || data[2] != 'R' || data[3] != 'Z' || (uint8_t)data[4] != VERSION) return false;
-    block.clear(); tillat.clear(); blockTok.clear(); tillatTok.clear(); blockGen.clear(); tillatGen.clear();
+    rensa();
     Lasare r{ data + 5, len - 5 };
-    if (!lasFilter(r, false) || !lasFilter(r, true) || r.fel) {
-      block.clear(); tillat.clear(); blockTok.clear(); tillatTok.clear(); blockGen.clear(); tillatGen.clear();
-      return false;
+    if (!lasFilter(r, false) || !lasFilter(r, true) || !lasMap(r, skriptPer) || !lasMap(r, skriptUnd) || !lasVekt(r, skriptGen) || r.fel) {
+      rensa(); return false;
     }
     return true;
   }
@@ -350,6 +412,7 @@ public:
       InstanceMethod("antal", &Adblock::Antal),
       InstanceMethod("serialisera", &Adblock::Serialisera),
       InstanceMethod("deserialisera", &Adblock::Deserialisera),
+      InstanceMethod("scriptlets", &Adblock::Scriptlets),
     });
     exports.Set("Adblock", f);
     return exports;
@@ -389,6 +452,15 @@ private:
   }
   Napi::Value Antal(const Napi::CallbackInfo& info) {
     return Napi::Number::New(info.Env(), (double)(motor.block.size() + motor.tillat.size()));
+  }
+  // Scriptlets att injicera på en värd — array av strängar ("namn, arg1, …")
+  Napi::Value Scriptlets(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    std::string host = info[0].As<Napi::String>();
+    std::vector<std::string> v = motor.scriptletsFor(host);
+    Napi::Array a = Napi::Array::New(env, v.size());
+    for (size_t i = 0; i < v.size(); i++) a.Set((uint32_t)i, Napi::String::New(env, v[i]));
+    return a;
   }
   // Returnerar en Buffer med det tolkade tillståndet (för diskcache)
   Napi::Value Serialisera(const Napi::CallbackInfo& info) {

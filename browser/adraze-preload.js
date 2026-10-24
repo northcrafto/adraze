@@ -44,8 +44,9 @@ const { ipcRenderer, webFrame } = require('electron');
   };
   const chrome = { runtime: { sendMessage: (msg) => { try { return Promise.resolve(svara(msg)); } catch (e) { return Promise.reject(e); } } } };
 
-  // Sidans egen värld först, så vakten hinner före sidans skript
+  // Sidans egen värld först, så vakten (och scriptlets) hinner före sidans skript
   const huvud = [start.skript.guard];
+  if (start.skript.scriptlets) huvud.push(start.skript.scriptlets);   // ##+js(...) för den här värden
   if (/(^|\.)youtube(-nocookie)?\.com$/.test(location.hostname)) huvud.push(start.skript.youtube);
   for (const s of huvud) if (s) { try { webFrame.executeJavaScript(s).catch(() => {}); } catch {} }
 
