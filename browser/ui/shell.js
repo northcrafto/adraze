@@ -117,8 +117,14 @@ function saveOpenTabs() {
     localStorage.setItem(OPEN_TABS_KEY, JSON.stringify(urls));
   } catch {}
 }
+// Vid start: 'tidigare' (förra flikarna + startsidan), 'ny' (bara en ny flik) eller 'sida' (en viss adress)
+let startMode = 'tidigare', startUrl = '';
+try { const m = localStorage.getItem('adraze-start'); if (m === 'ny' || m === 'sida') startMode = m; startUrl = localStorage.getItem('adraze-start-url') || ''; } catch {}
+function startAddress(v) { v = (v || '').trim(); if (!v) return ''; if (/^[a-z]+:\/\//i.test(v)) return v; return (/^(localhost|\d+\.\d+\.\d+\.\d+)(:|\/|$)/i.test(v) ? 'http://' : 'https://') + v; }
 function restoreTabs() {
   if (windowIncognito) { createTab(null); return; }
+  if (startMode === 'ny') { createTab(null); return; }
+  if (startMode === 'sida' && startAddress(startUrl)) { createTab(startAddress(startUrl)); return; }
   let urls = [];
   try { urls = JSON.parse(localStorage.getItem(OPEN_TABS_KEY) || '[]'); } catch {}
   urls = (Array.isArray(urls) ? urls : []).filter((u) => typeof u === 'string' && u);
@@ -155,6 +161,7 @@ function switchTab(tab) {
   if (tab.overlay) { window.view.hide(); const el = $(tab.overlay); if (el) el.classList.remove('hidden'); }
   else showActiveTab();
   renderTabs(); updateNavButtons(); updateStar();
+  try { permSwitched(); } catch {}
 }
 function closeTab(tab) {
   if (!tab || tab._closing) return;
@@ -426,9 +433,11 @@ $('infobar-stay').addEventListener('click', () => {
 /* ── Varningsskärm ── */
 let pending = null;
 function showDanger(tab, url, verdict) {
-  if (url && !countedDangers.has(url)) { countedDangers.add(url); bumpStat('dangers', 1); }  // räkna en gång per farlig sida
+  if (verdict.status !== 'warn' && url && !countedDangers.has(url)) { countedDangers.add(url); bumpStat('dangers', 1); }  // räkna en gång per farlig sida
   if (tab === active) window.view.hide();
   $('danger-title').textContent = verdict.title || 'Den här sidan ser farlig ut';
+  const sub = $('danger-sub');
+  if (sub) { if (!sub.dataset.orig) sub.dataset.orig = sub.innerHTML; if (verdict.sub) sub.textContent = verdict.sub; else sub.innerHTML = sub.dataset.orig; }
   $('danger-target').textContent = url;
   const box = $('danger-reasons'); box.innerHTML = '';
   (verdict.reasons || []).forEach((r) => {
@@ -442,6 +451,7 @@ function showDanger(tab, url, verdict) {
 function hideDanger() { $('danger').classList.add('hidden'); }
 $('danger-proceed').addEventListener('click', () => {
   if (!pending) return; const { tab, url } = pending; hideDanger();
+  if (pending.httpHost) { window.view.allowHttp(pending.httpHost); guardedNavigate(tab, url, { bypass: true }); return; }
   Promise.resolve(window.view.adrazeOpenAnyway(url)).catch(() => {}).then(() => guardedNavigate(tab, url, { bypass: true }));
 });
 // AdRaze-blockeraren stoppade en sida från sin lista över bedrägerier/skadlig kod
@@ -637,6 +647,8 @@ function closeSettings() {
 }
 function showSettingsCat(cat) {
   if (cat === 'uppdatering' || cat === 'om') refreshUpdatePanel(false);
+  if ($('clear-box')) $('clear-box').hidden = true;
+  if (cat === 'integritet' || cat === 'nedladdningar' || cat === 'utseende' || cat === 'start') refreshWebbPanel();
   document.querySelectorAll('#settings-nav .set-tab').forEach((b) => b.classList.toggle('on', b.dataset.cat === cat));
   document.querySelectorAll('#settings .set-panel').forEach((p) => p.classList.toggle('hidden', p.dataset.cat !== cat));
   if (cat === 'wallet' && typeof renderWallet === 'function') renderWallet();
@@ -1550,6 +1562,140 @@ function showToast(msg) {
 $('menu-btn').addEventListener('click', () => window.view.openMenu());
 window.view.onToast((m) => showToast(m));
 window.view.onUpdateReady((v) => { showUpdateBanner(v); refreshUpdatePanel(false); });
+// ── Webbinställningar: Vid start, bokmärkesfält, teckenstorlek, endast HTTPS, säker DNS, rensa data, behörigheter, nedladdningar ──
+const tw = (k) => (typeof window.t === 'function') ? window.t(k) : k;
+const PERM_LABEL = { camera: 'Kamera', microphone: 'Mikrofon', geolocation: 'Plats', notifications: 'Notiser', 'clipboard-read': 'Läsa urklipp', midi: 'MIDI-enheter' };
+let webbPrefs = null;
+async function refreshWebbPanel() {
+  try { webbPrefs = await window.view.webbGet(); } catch { webbPrefs = null; }
+  // Vid start
+  document.querySelectorAll('#start-opts .engine-opt').forEach((b) => b.classList.toggle('on', b.dataset.start === startMode));
+  $('start-url-wrap').hidden = startMode !== 'sida'; $('start-url').value = startUrl;
+  $('tgl-bmbar').checked = bmbarOn;
+  if (!webbPrefs) return;
+  $('sel-font').value = String(webbPrefs.fontSize);
+  if (!$('sel-font').value) $('sel-font').value = '16';
+  $('tgl-https').checked = !!webbPrefs.httpsOnly;
+  $('sel-dns').value = webbPrefs.dns;
+  $('dl-dir').textContent = webbPrefs.downloadDir; $('dl-dir-reset').hidden = !webbPrefs.downloadDirCustom;
+  $('tgl-askdl').checked = !!webbPrefs.askDownload;
+  renderPerms();
+}
+function seg(opts, val, on) {
+  const w = document.createElement('div'); w.className = 'seg flex-none';
+  for (const [v, l] of opts) { const b = document.createElement('button'); b.className = 'seg-btn' + (v === val ? ' on' : ''); b.textContent = tw(l); b.addEventListener('click', () => { w.querySelectorAll('.seg-btn').forEach((x) => x.classList.toggle('on', x === b)); on(v); }); w.appendChild(b); }
+  return w;
+}
+function renderPerms() {
+  const d = $('perm-defaults'); d.innerHTML = '';
+  for (const k of ['camera', 'microphone', 'geolocation', 'notifications']) {
+    const row = document.createElement('div'); row.className = 'set-row';
+    row.innerHTML = '<div class="set-txt"><div class="set-title">' + escapeHtml(tw(PERM_LABEL[k])) + '</div></div>';
+    row.appendChild(seg([['ask', 'Fråga först'], ['block', 'Blockera']], webbPrefs.permDefaults[k] === 'block' ? 'block' : 'ask', (v) => window.view.webbSet('permDefault', { kind: k, value: v })));
+    d.appendChild(row);
+  }
+  const list = $('perm-sites'); list.innerHTML = '';
+  const sites = Object.keys(webbPrefs.perms || {}).sort();
+  if (!sites.length) { list.innerHTML = '<p class="perm-none">' + escapeHtml(tw('Inga sajter har frågat än. När du tillåter eller blockerar något hamnar det här.')) + '</p>'; return; }
+  for (const o of sites) {
+    const box = document.createElement('div'); box.className = 'perm-site';
+    const host = o.replace(/^https?:\/\//, '');
+    box.innerHTML = '<div class="perm-head"><b>' + escapeHtml(host) + '</b><button type="button">' + escapeHtml(tw('Glöm sajten')) + '</button></div>';
+    box.querySelector('.perm-head button').addEventListener('click', async () => { await window.view.webbSet('permForget', o); refreshWebbPanel(); });
+    for (const [k, v] of Object.entries(webbPrefs.perms[o])) {
+      const line = document.createElement('div'); line.className = 'perm-line';
+      line.innerHTML = '<span>' + escapeHtml(tw(PERM_LABEL[k] || k)) + '</span>';
+      line.appendChild(seg([['allow', 'Tillåt'], ['block', 'Blockera']], v, (nv) => window.view.webbSet('perm', { origin: o, kind: k, value: nv })));
+      box.appendChild(line);
+    }
+    list.appendChild(box);
+  }
+}
+document.querySelectorAll('#start-opts .engine-opt').forEach((b) => b.addEventListener('click', () => {
+  startMode = b.dataset.start; try { localStorage.setItem('adraze-start', startMode); } catch {}
+  refreshWebbPanel(); if (startMode === 'sida') $('start-url').focus();
+}));
+$('start-url').addEventListener('change', () => { startUrl = $('start-url').value.trim(); try { localStorage.setItem('adraze-start-url', startUrl); } catch {} });
+$('start-url-cur').addEventListener('click', () => {
+  const t = tabs.slice().reverse().find((x) => x.url && /^https?:/i.test(x.url) && !x.incognito);
+  if (!t) { showToast(tw('Öppna sidan i en flik först.')); return; }
+  startUrl = t.url; $('start-url').value = startUrl; try { localStorage.setItem('adraze-start-url', startUrl); } catch {}
+});
+$('tgl-bmbar').addEventListener('change', (e) => { bmbarOn = e.target.checked; try { localStorage.setItem('adraze-bmbar', bmbarOn ? '1' : '0'); } catch {} renderBookmarkBar(); });
+$('sel-font').addEventListener('change', (e) => { window.view.webbSet('fontSize', e.target.value); showToast(tw('Ny teckenstorlek gäller flikar du öppnar från och med nu.')); });
+$('tgl-https').addEventListener('change', (e) => window.view.webbSet('httpsOnly', e.target.checked));
+$('sel-dns').addEventListener('change', (e) => window.view.webbSet('dns', e.target.value));
+$('tgl-askdl').addEventListener('change', (e) => window.view.webbSet('askDownload', e.target.checked));
+$('dl-dir-btn').addEventListener('click', async () => { const d = await window.view.webbPickDir(); if (d) refreshWebbPanel(); });
+$('dl-dir-reset').addEventListener('click', async () => { await window.view.webbSet('downloadDir', ''); refreshWebbPanel(); });
+// Rensa webbdata
+function openClearBox() { $('clear-box').hidden = false; $('clear-hist').disabled = historyLocked(); if (historyLocked()) $('clear-hist').checked = false; $('clear-box').scrollIntoView({ block: 'nearest' }); }
+$('clear-open').addEventListener('click', () => { if ($('clear-box').hidden) openClearBox(); else $('clear-box').hidden = true; });
+$('clear-cancel').addEventListener('click', () => { $('clear-box').hidden = true; });
+$('clear-go').addEventListener('click', async () => {
+  const hist = $('clear-hist').checked && !historyLocked(), cookies = $('clear-cookies').checked, cache = $('clear-cache').checked;
+  if (!hist && !cookies && !cache) return;
+  const btn = $('clear-go'); btn.disabled = true;
+  if (hist) {
+    const ms = parseInt($('clear-range').value, 10) || 0;
+    if (!ms) clearHistory(); else { const cut = Date.now() - ms; saveHistory(getHistory().filter((e) => (e.t || 0) < cut)); }
+    if (typeof historyOpen !== 'undefined' && historyOpen) renderHistory();
+  }
+  if (cookies || cache) {
+    // Skalets egna inställningar ligger i samma lagring som webbsidornas: spara undan och lägg tillbaka
+    const keep = {}; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); keep[k] = localStorage.getItem(k); } } catch {}
+    try { await window.view.webbClear({ cookies, cache }); } catch {}
+    try { for (const k of Object.keys(keep)) if (localStorage.getItem(k) !== keep[k]) localStorage.setItem(k, keep[k]); } catch {}
+  }
+  btn.disabled = false; $('clear-box').hidden = true;
+  showToast(tw('Webbdata rensad.'));
+});
+// Behörighetsfrågan: visas för fliken som frågade, köas om den inte är aktiv
+const permQ = [];
+let permCur = null;
+function permText(q) {
+  const host = q.origin.replace(/^https?:\/\//, '');
+  const names = q.kinds.map((k) => tw(PERM_LABEL[k] || k).toLowerCase());
+  const what = names.length > 1 ? names.slice(0, -1).join(', ') + ' ' + tw('och') + ' ' + names[names.length - 1] : names[0];
+  return host + ' ' + tw('vill använda') + ' ' + what;
+}
+function permNext() {
+  if (permCur) return;
+  const i = permQ.findIndex((q) => active && q.tabId === active.id);
+  if (i < 0) return;
+  permCur = permQ.splice(i, 1)[0];
+  $('permbar-text').textContent = permText(permCur);
+  $('permbar-remember').checked = true;
+  $('permbar').style.display = 'flex'; window.view.insetTop(56);
+}
+// Byter man flik läggs frågan tillbaka i kön och den nya flikens fråga (om någon) visas
+function permSwitched() {
+  if (permCur && (!active || permCur.tabId !== active.id)) { permQ.unshift(permCur); permCur = null; $('permbar').style.display = 'none'; window.view.insetTop(0); }
+  permNext();
+}
+function permAnswer(allow) {
+  if (!permCur) return;
+  window.view.permAnswer(permCur.id, allow, $('permbar-remember').checked);
+  permCur = null; $('permbar').style.display = 'none'; window.view.insetTop(0); permNext();
+}
+$('permbar-allow').addEventListener('click', () => permAnswer(true));
+$('permbar-block').addEventListener('click', () => permAnswer(false));
+window.view.onPermAsk((q) => { permQ.push(q); permNext(); });
+window.view.onPermCancel((id) => {
+  const i = permQ.findIndex((q) => q.id === id); if (i >= 0) permQ.splice(i, 1);
+  if (permCur && permCur.id === id) { permCur = null; $('permbar').style.display = 'none'; window.view.insetTop(0); permNext(); }
+});
+// Endast HTTPS: sajten saknar säker anslutning → samma skärm som farliga sidor, men med vår egen text
+window.view.onHttpsFailed((id, url) => {
+  const t = byId(id); if (!t) return;
+  let host = ''; try { host = new URL(url).hostname; } catch {}
+  t.url = url; if (t === active) addressInput.value = pretty(url);
+  showDanger(t, url, { status: 'warn', title: tw('Sidan har ingen säker anslutning'), sub: tw('Sidan går bara att öppna utan kryptering.'), reasons: [
+    tw('Du har Endast HTTPS på, men') + ' ' + host + ' ' + tw('svarar inte säkert.'),
+    tw('Det du skickar till sidan, till exempel lösenord, kan läsas av andra på nätverket.')] });
+  pending.httpHost = host;
+});
+
 // Inställningar → Programuppdatering
 let updState = null, updWhen = 0;
 async function refreshUpdatePanel(force) {
@@ -1635,7 +1781,7 @@ function showDefaultBrowserBanner() {
     bar.remove();
   });
 }
-window.view.onOpenSettings((cat) => { openSettings(); if (cat) showSettingsCat(cat); });
+window.view.onOpenSettings((cat) => { openSettings(); if (cat === 'rensa') { showSettingsCat('integritet'); openClearBox(); } else if (cat) showSettingsCat(cat); });
 window.view.onMenuZoom((dir) => { if (active && active.url) window.view.zoom(active.id, dir); });
 window.view.onMenuPrint(() => { if (active && active.url) window.view.print(active.id); });
 window.view.onCloseTab(() => { if (active) closeTab(active); });
@@ -1750,12 +1896,14 @@ function bmShort(e) {
   try { if (!t || t === e.url) t = new URL(e.url).hostname.replace(/^www\./, ''); } catch {}
   return t.length > 22 ? t.slice(0, 21) + '…' : t;
 }
+let bmbarOn = true;
+try { bmbarOn = localStorage.getItem('adraze-bmbar') !== '0'; } catch {}
 // Bokmärkesfältet: sparade sidor som klickbara chips under adressfältet (à la Brave).
 function renderBookmarkBar() {
   const bar = $('bmbar'); if (!bar) return;
   const list = getBookmarks();
   const tb = $('toolbar');
-  if (!list.length) { bar.style.display = 'none'; bar.innerHTML = ''; if (tb) tb.classList.remove('has-bmbar'); sendBounds(); return; }
+  if (!list.length || !bmbarOn) { bar.style.display = 'none'; bar.innerHTML = ''; if (tb) tb.classList.remove('has-bmbar'); sendBounds(); return; }
   bar.style.display = 'flex';
   if (tb) tb.classList.add('has-bmbar');
   bar.innerHTML = list.map((e) => {

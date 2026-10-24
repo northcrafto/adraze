@@ -264,13 +264,14 @@ class AdrazeAdblock {
     return RES_SCHEME + '://r/' + h;
   }
 
-  install(sess) { this.sessions.add(sess); if (this.index && this.isOn()) this.enableOn(sess); else this.load(); }
+  install(sess) { this.sessions.add(sess); if (this.index && this.isOn()) this.enableOn(sess); else { if (this.forhand) this.baraForhand(sess); this.load(); } }
 
   enableOn(sess) {
     if (!this.index) return;
     this.serveOn(sess);
     try {
       sess.webRequest.onBeforeRequest({ urls: ['<all_urls>'] }, (d, cb) => {
+        const upp = this.forhand && this.forhand(d); if (upp) { cb({ redirectURL: upp }); return; }   // endast HTTPS
         if (!this.isOn() || !/^(https?|wss?):/i.test(d.url) || this.allowHost(d.url)) { cb({}); return; }
         const typ = TYPE_MAP[d.resourceType] || 'other';
         const kalla = typ === 'main_frame' ? (d.referrer || '') : ((d.frame && d.frame.url) || d.referrer || '');
@@ -313,8 +314,12 @@ class AdrazeAdblock {
       }
     } catch {}
   }
+  // Endast HTTPS ska fungera även när blockeraren är av: då en liten lyssnare som bara uppgraderar
+  baraForhand(sess) {
+    try { sess.webRequest.onBeforeRequest({ urls: ['http://*/*'] }, (d, cb) => { const u = this.forhand && this.forhand(d); cb(u ? { redirectURL: u } : {}); }); } catch {}
+  }
   disableOn(sess) {
-    try { sess.webRequest.onBeforeRequest(null); } catch {}
+    try { if (this.forhand) this.baraForhand(sess); else sess.webRequest.onBeforeRequest(null); } catch {}
     try { sess.webRequest.onHeadersReceived(null); } catch {}
     try {
       if (sess.unregisterPreloadScript) { if (sess.__adrazePreload) { sess.unregisterPreloadScript(sess.__adrazePreload); sess.__adrazePreload = null; } }
