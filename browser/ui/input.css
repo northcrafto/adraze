@@ -554,7 +554,7 @@ textarea.cal-in { resize: vertical; min-height: 60px; }
   font-size: 13.5px; font-weight: 600; background: var(--sig-btn) !important; color: var(--sig-btn-ink) !important;
   box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--sig-btn-ink) 20%, transparent); transition: color .6s ease, box-shadow .6s ease, transform .2s ease; }
 #settings .btn::before, #settings .set-btn::before, #settings .pill:not(.pill-accent)::before, #settings .btn-ghost::before, #settings .btn-safe::before {
-  content: ""; position: absolute; z-index: -1; left: -15%; width: 130%; bottom: 0; height: 165%; transform: translateY(100%);
+  content: ""; position: absolute; z-index: -1; left: -15%; width: 130%; bottom: 0; height: 165%; transform: translateY(104%);
   background: linear-gradient(180deg, var(--sig-fill-top) 0%, var(--sig-fill-bottom) 100%); border-radius: 46% 46% 0 0;
   transition: transform .95s cubic-bezier(.2,.75,.25,1); pointer-events: none; }
 #settings .pill:not(.pill-accent)::before, #settings .btn-ghost::before { background: var(--sig-accent); }
@@ -714,3 +714,40 @@ textarea.cal-in { resize: vertical; min-height: 60px; }
 #settings .upd-main { background: var(--s-ink) !important; color: var(--s-bg) !important; box-shadow: none; }
 #settings .upd-main::before { background: var(--s-accent) !important; }
 #settings .upd-main:is(:hover, :focus-visible) { color: #fff !important; }
+
+/* ── Webbinställningar (2026-10-24): Vid start, säker DNS, behörigheter, rensa data ── */
+#settings .set-h3 { margin: 34px 0 4px; font-size: 15px; font-weight: 650; letter-spacing: -.01em; color: var(--s-ink); }
+#settings .set-h3 + .set-lead { margin-bottom: 0; }
+#settings .set-select { height: 34px; padding: 0 30px 0 11px; border-radius: 8px; font-size: 13px; font-weight: 500; border: 1px solid var(--s-field-line); cursor: pointer;
+  appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--s-mut) 50%), linear-gradient(135deg, var(--s-mut) 50%, transparent 50%);
+  background-position: calc(100% - 15px) 15px, calc(100% - 10px) 15px; background-size: 5px 5px; background-repeat: no-repeat; }
+#settings .start-sub { display: block; font-size: 12.5px; color: var(--s-mut); margin-top: 1px; font-weight: 400; }
+#settings #start-url { background: var(--s-field); color: var(--s-ink); border-color: var(--s-field-line); font-size: 13.5px; }
+#settings .clear-box { margin-top: 10px; padding: 16px 18px; border: 1px solid var(--s-line); border-radius: 12px; background: var(--s-surface); }
+#settings .clear-range { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13.5px; font-weight: 600; color: var(--s-ink); padding-bottom: 12px; border-bottom: 1px solid var(--s-line); }
+#settings .clear-opt { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--s-line); cursor: pointer; }
+#settings .clear-opt input { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--s-accent); flex: none; }
+#settings .clear-opt b { display: block; font-size: 13.5px; font-weight: 600; color: var(--s-ink); }
+#settings .clear-opt small { display: block; font-size: 12.5px; color: var(--s-mut); margin-top: 1px; }
+#settings .clear-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+#settings .perm-site { margin-top: 18px; border: 1px solid var(--s-line); border-radius: 12px; background: var(--s-surface); overflow: hidden; }
+#settings .perm-head { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-bottom: 1px solid var(--s-line); }
+#settings .perm-head b { flex: 1; min-width: 0; font-size: 13.5px; font-weight: 600; color: var(--s-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#settings .perm-head button { font-size: 12.5px; font-weight: 600; color: var(--s-mut); background: none; border: 0; cursor: pointer; }
+#settings .perm-head button:hover { color: var(--s-ink); text-decoration: underline; text-underline-offset: 3px; }
+#settings .perm-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 18px; font-size: 13px; color: var(--s-ink); }
+#settings .perm-line + .perm-line { border-top: 1px solid var(--s-line); }
+#settings .perm-none { margin-top: 14px; font-size: 12.5px; color: var(--s-faint); }
+
+/* Frågan överst när en sida vill använda kamera, mikrofon, plats eller notiser */
+.permbar { position: absolute; top: 0; left: 0; right: 0; z-index: 61; height: 56px; display: flex; align-items: center; gap: 12px; padding: 0 16px;
+  background: #fff; color: #141416; border-bottom: 1px solid #e2e2de; box-shadow: 0 6px 20px rgb(20 20 22 / .1); }
+:root[data-theme="dark"] .permbar { background: #161618; color: #f2f2f4; border-bottom-color: #26262a; box-shadow: 0 6px 20px rgb(0 0 0 / .4); }
+.permbar-ico { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; flex: none; background: rgb(255 75 31 / .1); color: #ff4b1f; }
+.permbar-t { font-size: 13.5px; font-weight: 600; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.permbar-sub { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; opacity: .65; cursor: pointer; margin-top: 1px; }
+.permbar-sub input { accent-color: #ff4b1f; }
+.permbar-btn { height: 32px; padding: 0 14px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 0; cursor: pointer; flex: none;
+  background: rgb(20 20 22 / .06); color: inherit; }
+:root[data-theme="dark"] .permbar-btn { background: rgb(255 255 255 / .08); }
+.permbar-btn.on { background: #ff4b1f !important; color: #fff; }

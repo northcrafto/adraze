@@ -24,7 +24,8 @@ let autoUpdater = null;
 try { ({ autoUpdater } = require('electron-updater')); } catch {}
 
 // Riktig filtermotor (EasyList + EasyPrivacy) för nätverks-/kosmetisk blockering.
-const { AdrazeAdblock, registerScheme: registerAdblockScheme } = require('./adblock-adraze');   // AdRaze-blockeraren (samma regler som tillägget)
+const { AdrazeAdblock, registerScheme: registerAdblockScheme } = require('./adblock-adraze');
+const webb = require('./webbinst');   // säker DNS, endast HTTPS, behörigheter, nedladdningsmapp, teckenstorlek   // AdRaze-blockeraren (samma regler som tillägget)
 registerAdblockScheme();   // före app.ready
 
 const KRYPTO_W = 400;
@@ -164,6 +165,18 @@ const adblock = new AdrazeAdblock({
   },
   onCount: (typ) => broadcast('adblock:hit', typ),
 });
+adblock.forhand = (d) => webb.upgradeUrl(d);   // endast HTTPS (webbinst.js)
+// Behörighetsfrågor visas som en rad överst i skalet; svaret kommer tillbaka via perm:answer
+let permSeq = 0; const permWait = new Map();
+webb.setAsker((wc, origin, kinds) => new Promise((resolve) => {
+  const ctx = wc.__ctx; const id = ++permSeq;
+  const done = (a) => { if (!permWait.has(id)) return; permWait.delete(id); resolve(a); };
+  permWait.set(id, done);
+  sendTo(ctx, 'perm-ask', { id, tabId: wc.__tabId, origin, kinds });
+  setTimeout(() => { done({ allow: false, remember: false }); sendTo(ctx, 'perm-cancel', id); }, 90000);
+}));
+ipcMain.on('perm:answer', (_e, id, allow, remember) => { const f = permWait.get(id); if (f) f({ allow: !!allow, remember: !!remember }); });
+ipcMain.on('webb:allow-http', (_e, host) => { if (typeof host === 'string') webb.allowHttp(host); });
 function loadEngine() { return adblock.load().then((ok) => { if (ok) engine = adblock; return ok; }); }
 function enableEngineOn(sess) { adblock.enableOn(sess); }
 function disableEngineOn(sess) { adblock.disableOn(sess); }
@@ -226,7 +239,7 @@ let incognitoAdblockDone = false;
 function ensureIncognitoAdblock() {
   if (incognitoAdblockDone) return;
   incognitoAdblockDone = true;
-  try { const s = session.fromPartition('skoll-incognito'); applyClientHints(s); installAdblockOn(s); trackDownloads(s); } catch {}
+  try { const s = session.fromPartition('skoll-incognito'); applyClientHints(s); webb.installPermissions(s, true); installAdblockOn(s); trackDownloads(s); } catch {}
 }
 
 /* ── Tor (oanvänd – behållen som referens) ── */
@@ -435,11 +448,13 @@ function ensureView(ctx, tabId) {
   // från sidans JS (contextIsolation) och exponerar inget till sidan.
   const wp = { preload: path.join(__dirname, 'content-preload.js'), contextIsolation: true, sandbox: false, nodeIntegration: false, nodeIntegrationInSubFrames: true };
   if (incognito) wp.partition = 'skoll-incognito';
+  wp.defaultFontSize = webb.fontSize(); wp.defaultMonospaceFontSize = Math.round(webb.fontSize() * 13 / 16);
   const view = new WebContentsView({ webPreferences: wp });
   view.setVisible(false);
   ctx.win.contentView.addChildView(view);
   const wc = view.webContents;
   wc.__ctx = ctx;                       // för routing av innehålls-IPC (t.ex. pw:capture)
+  wc.__tabId = tabId;
   // Brave-stil popup-hantering: filtermotorn (EasyLists popup-/annons-regler) avgör.
   // Nedladdningar rörs ALDRIG av det här — en download går via session.will-download,
   // aldrig genom window.open/navigering. Därför är även window.open-nedladdningar säkra.
@@ -498,6 +513,9 @@ function ensureView(ctx, tabId) {
   // AdRaze stoppade huvudsidan (security-listan) → skalets röda varning i stället för en tom sida
   wc.on('did-fail-load', (_e, code, _desc, url, isMain) => {
     if (isMain && code === -20 && adblock.isDanger(url)) sendTo(ctx, 'adraze-danger', tabId, url);
+    // Endast HTTPS: sajten svarade inte säkert → skalet frågar om man vill fortsätta osäkert
+    const httpUrl = isMain ? webb.httpsFailed(wc, code, url) : null;
+    if (httpUrl) sendTo(ctx, 'https-failed', tabId, httpUrl);
   });
   wc.on('did-navigate', (_e, url) => sendTo(ctx, 'did-navigate', tabId, url, canGo(wc, -1), canGo(wc, 1)));
   wc.on('did-navigate-in-page', (_e, url, isMain) => { if (isMain) { sendTo(ctx, 'did-navigate', tabId, url, canGo(wc, -1), canGo(wc, 1)); googleKlar(ctx, tabId, url); } });
@@ -1165,17 +1183,20 @@ async function scanDownload(rec) {
 function trackDownloads(sess) {
   sess.on('will-download', (_e, item) => {
     const id = 'd' + Date.now() + Math.floor(Math.random() * 1000);
-    const savePath = path.join(app.getPath('downloads'), item.getFilename());
-    try { item.setSavePath(savePath); } catch {}
+    let savePath = path.join(webb.downloadDir(), item.getFilename());
+    // "Fråga var filen ska sparas": då visar Chromium sparadialogen själv och sökvägen läses efteråt
+    if (webb.prefs.askDownload) { savePath = ''; try { item.setSaveDialogOptions({ defaultPath: path.join(webb.downloadDir(), item.getFilename()) }); } catch {} }
+    else { try { item.setSavePath(savePath); } catch {} }
     dlItems.set(id, item);
     const rec = { id, filename: item.getFilename(), url: item.getURL(), path: savePath, total: item.getTotalBytes(), received: 0, state: 'progressing', scan: null };
     downloads.unshift(rec);
     broadcast('download-update', rec);
     try { const fw = BrowserWindow.getFocusedWindow(); let c = fw ? wins.get(fw.webContents.id) : null; if (!c) c = wins.values().next().value; if (c) openDlPopup(c); } catch {}
-    item.on('updated', (_e2, state) => { rec.received = item.getReceivedBytes(); rec.total = item.getTotalBytes() || rec.total; rec.state = item.isPaused() ? 'paused' : state; broadcast('download-update', rec); });
+    item.on('updated', (_e2, state) => { if (!rec.path) { try { rec.path = item.getSavePath() || ''; if (rec.path) rec.filename = path.basename(rec.path); } catch {} } rec.received = item.getReceivedBytes(); rec.total = item.getTotalBytes() || rec.total; rec.state = item.isPaused() ? 'paused' : state; broadcast('download-update', rec); });
     item.once('done', (_e2, state) => {
       dlItems.delete(id);
       rec.received = item.getReceivedBytes();
+      try { const p = item.getSavePath(); if (p) { rec.path = p; rec.filename = path.basename(p); } } catch {}
       if (state === 'completed') scanDownload(rec);
       else { rec.state = state; broadcast('download-update', rec); }
     });
@@ -1379,11 +1400,7 @@ ipcMain.on('open-app-menu', (e) => {
     { label: T('Skriv ut…'), accelerator: 'CmdOrCtrl+P', click: () => sendTo(ctx, 'menu-print') },
     { label: T('Fler verktyg'), submenu: [
       { label: T('Utvecklarverktyg'), accelerator: 'F12', click: () => { const v = ctx.views.get(ctx.visibleTab); if (v) try { v.webContents.openDevTools(); } catch {} } },
-      { label: T('Rensa surfdata'), click: () => {
-        try { session.defaultSession.clearStorageData(); } catch {}
-        try { session.fromPartition('skoll-incognito').clearStorageData(); } catch {}
-        sendTo(ctx, 'clear-data');
-      } },
+      { label: T('Rensa surfdata'), click: () => sendTo(ctx, 'open-settings', 'rensa') },
     ] },
     { type: 'separator' },
     { label: T('Hjälp & om'), click: () => sendTo(ctx, 'open-settings', 'om') },
@@ -1907,6 +1924,8 @@ app.whenReady().then(async () => {
     session.defaultSession.setUserAgent(app.userAgentFallback);
   } catch {}
   applyClientHints(session.defaultSession);
+  webb.setup(); webb.applyDns();
+  webb.installPermissions(session.defaultSession, false);
   installAdblockOn(session.defaultSession);
   trackDownloads(session.defaultSession);
   migrateGoogleCookieFix();

@@ -155,6 +155,17 @@
 
 
 
+    <!-- Webbplats vill använda kamera/mikrofon/plats/notiser -->
+    <div id="permbar" class="permbar" style="display:none">
+      <span class="permbar-ico" id="permbar-ico"><svg class="ic ic-sm"><use href="#i-shield" /></svg></span>
+      <div class="min-w-0 flex-1">
+        <div class="permbar-t" id="permbar-text"></div>
+        <label class="permbar-sub"><input type="checkbox" id="permbar-remember" checked> Kom ihåg för den här webbplatsen</label>
+      </div>
+      <button id="permbar-block" class="permbar-btn">Blockera</button>
+      <button id="permbar-allow" class="permbar-btn on">Tillåt</button>
+    </div>
+
     <!-- AdRaze Wallet: spara kort-notis -->
     <div id="wsavebar" class="absolute top-0 left-0 right-0 z-[60] flex items-center gap-3 px-4 text-navy-900" style="height:56px;display:none;background:#fff;border-bottom:1px solid var(--color-line);box-shadow:0 6px 20px rgba(14,42,71,.12);">
       <span class="grid place-items-center w-8 h-8 rounded-[7px] flex-none" style="background:var(--color-paper);color:var(--color-navy-700);"><svg class="ic ic-sm"><use href="#i-card" /></svg></span>
@@ -482,7 +493,7 @@
           <svg class="ic" style="width:34px;height:34px;stroke-width:1.6;"><use href="#i-shield-x" /></svg>
         </div>
         <h1 id="danger-title" class="mt-4 text-[24px] font-extrabold" style="color:var(--color-danger);">Den här sidan ser farlig ut</h1>
-        <p class="mt-1.5 text-[15px] text-navy-900/60">AdRazes AI har skannat sidan och tycker att du <b>inte</b> borde gå in här.</p>
+        <p id="danger-sub" class="mt-1.5 text-[15px] text-navy-900/60">AdRazes AI har skannat sidan och tycker att du <b>inte</b> borde gå in här.</p>
         <div id="danger-reasons" class="mt-5 text-left mx-auto max-w-[440px]"></div>
         <div class="mt-4 text-[12px] text-navy-900/40 break-all">Adress: <span id="danger-target" class="font-mono" style="color:var(--color-danger);"></span></div>
         <div class="mt-6 flex gap-3 justify-center">
@@ -634,6 +645,7 @@
             <button class="set-tab" style="--i:4" data-cat="wallet"><svg class="ic"><use href="#i-card" /></svg>AdRaze Wallet</button>
             <div class="set-glbl">Webbläsaren</div>
             <button class="set-tab" style="--i:5" data-cat="utseende"><svg class="ic"><use href="#i-image" /></svg>Utseende</button>
+            <button class="set-tab" style="--i:6" data-cat="start"><svg class="ic"><use href="#i-reload" /></svg>Vid start</button>
             <button class="set-tab" style="--i:6" data-cat="sok"><svg class="ic"><use href="#i-globe" /></svg>Sökmotor</button>
             <button class="set-tab" style="--i:7" data-cat="sprak"><svg class="ic"><use href="#i-globe" /></svg>Språk</button>
             <button class="set-tab" style="--i:8" data-cat="nedladdningar"><svg class="ic"><use href="#i-download" /></svg>Nedladdningar</button>
@@ -677,6 +689,32 @@
               <div class="set-txt"><div class="set-title">Toppsajter</div><div class="set-desc">Dina egna genvägar, eller de sidor du besöker oftast.</div></div>
               <div class="seg flex-none"><button id="seg-fav" class="seg-btn">Mina</button><button id="seg-freq" class="seg-btn">Mest besökta</button></div>
             </div>
+            <div class="set-row">
+              <span class="set-ico" style="color:var(--color-navy-700);"><svg class="ic ic-sm"><use href="#i-bookmark" /></svg></span>
+              <div class="set-txt"><div class="set-title">Visa bokmärkesfältet</div><div class="set-desc">Dina bokmärken under adressfältet.</div></div>
+              <label class="switch"><input id="tgl-bmbar" type="checkbox" /><span class="track"></span></label>
+            </div>
+            <div class="set-row">
+              <span class="set-ico" style="color:var(--color-navy-700);font-weight:700;font-size:13px;">Aa</span>
+              <div class="set-txt"><div class="set-title">Teckenstorlek</div><div class="set-desc">Textstorleken på webbsidor. Gäller flikar du öppnar efter ändringen.</div></div>
+              <select id="sel-font" class="set-select flex-none">
+                <option value="9">Mycket liten</option><option value="12">Liten</option><option value="16">Medel (rekommenderas)</option><option value="20">Stor</option><option value="24">Mycket stor</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="set-panel hidden" data-cat="start">
+            <h2 class="set-h">Vid start</h2>
+            <p class="set-lead">Vad AdRaze ska visa när du öppnar den.</p>
+            <div class="flex flex-col gap-2 mt-4" id="start-opts">
+              <button class="engine-opt flex items-center" data-start="tidigare"><span class="engine-radio"></span><span class="flex-1 text-left"><b class="block font-semibold">Fortsätt där du slutade</b><span class="start-sub">Flikarna från förra gången öppnas igen.</span></span></button>
+              <button class="engine-opt flex items-center" data-start="ny"><span class="engine-radio"></span><span class="flex-1 text-left"><b class="block font-semibold">Öppna en ny flik</b><span class="start-sub">Börja från startsidan varje gång.</span></span></button>
+              <button class="engine-opt flex items-center" data-start="sida"><span class="engine-radio"></span><span class="flex-1 text-left"><b class="block font-semibold">Öppna en viss sida</b><span class="start-sub">Till exempel din mejl eller en nyhetssajt.</span></span></button>
+            </div>
+            <div id="start-url-wrap" class="mt-3" hidden>
+              <input id="start-url" type="text" placeholder="t.ex. gmail.com" spellcheck="false" autocomplete="off" class="w-full" style="height:40px;padding:0 12px;border-radius:9px;border:1px solid;">
+              <div class="flex gap-2 mt-2"><button id="start-url-cur" class="pill" style="height:34px;">Använd aktuell sida</button></div>
+            </div>
           </div>
 
           <div class="set-panel hidden" data-cat="sok">
@@ -701,6 +739,41 @@
               <div class="set-txt"><div class="set-title">AdRaze</div><div class="set-desc">Blockerar reklam, spårare och popups på sidorna du besöker.</div></div>
               <label class="switch"><input id="tgl-adblock" type="checkbox" /><span class="track"></span></label>
             </div>
+            <div class="set-row">
+              <span class="set-ico" style="color:var(--color-navy-700);"><svg class="ic ic-sm"><use href="#i-lock" /></svg></span>
+              <div class="set-txt"><div class="set-title">Endast HTTPS</div><div class="set-desc">Öppnar alltid den säkra versionen av sidan och varnar om den saknas.</div></div>
+              <label class="switch"><input id="tgl-https" type="checkbox" /><span class="track"></span></label>
+            </div>
+            <div class="set-row">
+              <span class="set-ico" style="color:var(--color-navy-700);"><svg class="ic ic-sm"><use href="#i-globe" /></svg></span>
+              <div class="set-txt"><div class="set-title">Säker DNS</div><div class="set-desc">Krypterar uppslagen av webbadresser så att nätverket inte ser vilka sajter du besöker.</div></div>
+              <select id="sel-dns" class="set-select flex-none">
+                <option value="automatic">Automatisk</option><option value="cloudflare">Cloudflare (1.1.1.1)</option><option value="quad9">Quad9</option><option value="google">Google</option><option value="off">Av</option>
+              </select>
+            </div>
+
+            <h3 class="set-h3">Webbdata</h3>
+            <div class="set-row">
+              <span class="set-ico" style="color:var(--color-navy-700);"><svg class="ic ic-sm"><use href="#i-trash" /></svg></span>
+              <div class="set-txt"><div class="set-title">Rensa webbdata</div><div class="set-desc">Historik, cookies och sparade filer från sidor.</div></div>
+              <button id="clear-open" class="pill flex-none" style="height:34px;">Rensa…</button>
+            </div>
+            <div id="clear-box" class="clear-box" hidden>
+              <div class="clear-range"><span>Tidsperiod för historiken</span>
+                <select id="clear-range" class="set-select">
+                  <option value="3600000">Senaste timmen</option><option value="86400000">Senaste dygnet</option><option value="604800000">Senaste veckan</option><option value="2419200000">Senaste 4 veckorna</option><option value="0" selected>Från början</option>
+                </select>
+              </div>
+              <label class="clear-opt"><input type="checkbox" id="clear-hist" checked><span><b>Historik</b><small>Sidorna du har besökt.</small></span></label>
+              <label class="clear-opt"><input type="checkbox" id="clear-cookies" checked><span><b>Cookies och webbplatsdata</b><small>Loggar ut dig från de flesta sajter. Gäller all tid.</small></span></label>
+              <label class="clear-opt"><input type="checkbox" id="clear-cache" checked><span><b>Cachade bilder och filer</b><small>Frigör utrymme. Sidor kan laddas lite långsammare första gången.</small></span></label>
+              <div class="clear-actions"><button id="clear-cancel" class="pill" style="height:36px;">Avbryt</button><button id="clear-go" class="btn upd-main" style="height:36px;">Rensa data</button></div>
+            </div>
+
+            <h3 class="set-h3">Webbplatsbehörigheter</h3>
+            <p class="set-lead">Om sidor ska fråga först eller blockeras direkt.</p>
+            <div id="perm-defaults"></div>
+            <div id="perm-sites"></div>
           </div>
 
           <div class="set-panel hidden" data-cat="krypto">
@@ -812,8 +885,19 @@
 
           <div class="set-panel hidden" data-cat="nedladdningar">
             <h2 class="set-h">Nedladdningar</h2>
-            <p class="set-lead mb-3">Filer sparas automatiskt i din Nedladdningar-mapp.</p>
-            <div id="downloads-list"></div>
+            <p class="set-lead">Var filer sparas och vad som hänt med dem.</p>
+            <div class="set-row">
+              <span class="set-ico" style="color:var(--color-navy-700);"><svg class="ic ic-sm"><use href="#i-folder" /></svg></span>
+              <div class="set-txt"><div class="set-title">Plats</div><div class="set-desc" id="dl-dir">Nedladdningar</div></div>
+              <button id="dl-dir-reset" class="pill flex-none" style="height:34px;" hidden>Återställ</button>
+              <button id="dl-dir-btn" class="pill flex-none" style="height:34px;">Ändra</button>
+            </div>
+            <div class="set-row">
+              <span class="set-ico" style="color:var(--color-navy-700);"><svg class="ic ic-sm"><use href="#i-download" /></svg></span>
+              <div class="set-txt"><div class="set-title">Fråga var varje fil ska sparas</div><div class="set-desc">Visar en spararuta innan nedladdningen börjar.</div></div>
+              <label class="switch"><input id="tgl-askdl" type="checkbox" /><span class="track"></span></label>
+            </div>
+            <div class="mt-6" id="downloads-list"></div>
           </div>
 
           <div class="set-panel hidden" data-cat="sprak">
