@@ -11,7 +11,7 @@
     "sync": "bash tools/sync-adraze.sh",
     "prestart": "npm run sync",
     "prebuild:mac": "npm run sync",
-    "prebuild:linux": "npm run sync",
+    "prebuild:linux": "npm run sync && bash tools/build-native.sh",
     "prebuild:win": "npm run sync"
   },
   "author": "Cetto",
@@ -28,6 +28,7 @@
     "@tailwindcss/cli": "^4.3.3",
     "electron": "github:castlabs/electron-releases#v43.2.0+wvcus",
     "electron-builder": "^24.13.3",
+    "node-addon-api": "^8.9.2",
     "tailwindcss": "^4.3.3"
   },
   "build": {
@@ -46,7 +47,9 @@
       "!meta_test.js",
       "!scan_test.js",
       "!**/*.map",
-      "!**/.git/**"
+      "!**/.git/**",
+      "native/adblock/build/Release/adblock_core.node",
+      "adraze/lists/**"
     ],
     "win": {
       "target": [
@@ -82,7 +85,10 @@
       "uninstallerIcon": "build/icon.ico"
     },
     "afterPack": "build/afterPack.js",
-    "electronDist": "node_modules/electron/dist"
+    "electronDist": "node_modules/electron/dist",
+    "asarUnpack": [
+      "native/adblock/build/Release/*.node"
+    ]
   },
   "repository": {
     "type": "git",
