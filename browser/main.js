@@ -2001,5 +2001,28 @@ ipcMain.on('update:install', async () => {
   updInstalling = false;
   try { autoUpdater.quitAndInstall(false, true); } catch {}
 });
+// Inställningarnas "Programuppdatering": din version, den senaste på GitHub och om den redan är hämtad.
+let updLatest = { v: '', notes: '', date: '', at: 0 };
+async function latestRelease(force) {
+  if (!force && Date.now() - updLatest.at < 5 * 60 * 1000 && updLatest.v) return updLatest;
+  try {
+    const r = await fetch('https://api.github.com/repos/northcrafto/adraze-dl/releases/latest', { headers: { 'User-Agent': 'AdRaze' }, signal: AbortSignal.timeout(8000) });
+    const j = await r.json();
+    const v = ((j && j.tag_name) || '').replace(/^v/, '');
+    if (v) updLatest = { v, notes: String(j.body || '').slice(0, 600), date: j.published_at || '', at: Date.now() };
+  } catch {}
+  return updLatest;
+}
+ipcMain.handle('update:status', async (_e, force) => {
+  if (force) { try { await Promise.race([runUpdateCheck(), new Promise((r) => setTimeout(r, 8000))]); } catch {} }
+  const l = await latestRelease(!!force);
+  const current = app.getVersion();
+  return {
+    current, latest: l.v || current, notes: l.notes, date: l.date,
+    available: !!(l.v && semverGt(l.v, current)),
+    ready: !!(updDownloaded && semverGt(updDownloaded, current)), readyVersion: updDownloaded,
+    auto: !!autoUpdater && process.platform !== 'darwin' && !process.env.ADRAZE_NO_UPDATES,
+  };
+});
 app.on('will-quit', () => { if (torProc) { try { torProc.kill(); } catch {} } });
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });

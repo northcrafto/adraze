@@ -644,7 +644,8 @@
             <button class="set-tab" style="--i:12" data-cat="losenord"><svg class="ic"><use href="#i-key" /></svg>Autofyll &amp; lösenord</button>
             <button class="set-tab" style="--i:13" data-cat="krypto"><svg class="ic"><use href="#i-chat" /></svg>Falk</button>
             <button class="set-tab" style="--i:14" data-cat="kalender"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2"/><path d="M16 2.5v4M8 2.5v4M3 10h18"/></svg>AdRaze Calendar</button>
-            <button class="set-tab" style="--i:15" data-cat="om"><svg class="ic"><use href="#i-shield-check" /></svg>Om</button>
+            <button class="set-tab" style="--i:15" data-cat="uppdatering"><svg class="ic"><use href="#i-reload" /></svg>Programuppdatering<span class="upd-dot" id="upd-dot" hidden></span></button>
+            <button class="set-tab" style="--i:16" data-cat="om"><svg class="ic"><use href="#i-shield-check" /></svg>Om</button>
             <p id="set-search-none" class="set-search-none" hidden>Inget hittades.</p>
           </nav>
       </aside>
@@ -905,11 +906,43 @@
           </div>
           </div>
 
+          <div class="set-panel hidden" data-cat="uppdatering">
+            <h2 class="set-h">Programuppdatering</h2>
+            <p class="set-lead">AdRaze hämtar nya versioner själv i bakgrunden.</p>
+            <div class="upd-card" id="upd-card" data-state="checking">
+              <div class="upd-top">
+                <img src="adraze-mark.png" alt="" width="44" height="44" class="flex-none">
+                <div class="upd-txt">
+                  <div class="upd-title" id="upd-title">Söker efter uppdateringar…</div>
+                  <div class="upd-desc" id="upd-desc"></div>
+                </div>
+              </div>
+              <div class="upd-notes" id="upd-notes" hidden></div>
+              <div class="upd-actions">
+                <button id="upd-install" class="btn upd-main" hidden>Starta om och uppdatera</button>
+                <button id="upd-download" class="btn upd-main" hidden>Ladda ner</button>
+                <button id="upd-check" class="pill">Sök efter uppdateringar</button>
+              </div>
+            </div>
+            <div class="set-row">
+              <div class="set-txt"><div class="set-title">Din version</div></div>
+              <span class="upd-val" id="upd-cur">–</span>
+            </div>
+            <div class="set-row">
+              <div class="set-txt"><div class="set-title">Senaste versionen</div></div>
+              <span class="upd-val" id="upd-latest">–</span>
+            </div>
+            <div class="set-row">
+              <div class="set-txt"><div class="set-title">Senast kollat</div></div>
+              <span class="upd-val" id="upd-when">–</span>
+            </div>
+          </div>
+
           <div class="set-panel hidden" data-cat="om">
             <h2 class="set-h">Om</h2>
             <div class="flex items-center gap-3 mt-2">
               <img src="adraze-mark.png" alt="" width="48" height="48" class="flex-none">
-              <div><div class="text-[15px] font-extrabold text-navy-900">AdRaze</div><div class="text-[12.5px]" style="color:rgb(28 43 58 / .5);">Version 0.1.0 · byggd på Chromium (Electron)</div></div>
+              <div><div class="text-[15px] font-extrabold text-navy-900">AdRaze</div><div class="text-[12.5px]" style="color:rgb(28 43 58 / .5);"><span id="om-version">Version</span> · byggd på Chromium (Electron)</div></div>
             </div>
             <p class="set-lead mt-4" style="max-width:400px;">En trygg svensk webbläsare med inbyggt bluffskydd, annonsblockerare och privat läge.</p>
             <div class="set-row mt-4">

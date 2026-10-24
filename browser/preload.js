@@ -118,6 +118,7 @@ contextBridge.exposeInMainWorld('view', {
   onToast: (cb) => ipcRenderer.on('toast', (_e, m) => cb(m)),
   onUpdateReady: (cb) => ipcRenderer.on('update-ready', (_e, v) => cb(v)),
   installUpdate: () => ipcRenderer.send('update:install'),
+  updateStatus: (force) => ipcRenderer.invoke('update:status', !!force),
   onOpenHistory: (cb) => ipcRenderer.on('open-history', () => cb()),
   onOpenBookmarks: (cb) => ipcRenderer.on('open-bookmarks', () => cb()),
   onOpenDownloads: (cb) => ipcRenderer.on('open-downloads', () => cb()),
