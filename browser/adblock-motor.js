@@ -49,10 +49,12 @@ class AdblockMotor {
       return true;
     } catch (e) { console.warn('[adblock] C++-motor fel:', String(e && e.message || e)); return false; }
   }
-  // true = blockera. typ = Electrons resourceType. tredjePart = begäran går till annan sajt än källan.
+  // Returnerar { block, redirect } — redirect = resursnamn ('' = ren blockering). typ = Electrons
+  // resourceType; tredjePart = begäran går till annan sajt än källan.
   blockera(url, srcHost, typ, tredjePart) {
-    if (!this.motor) return false;
-    try { return this.motor.matcha(url || '', srcHost || '', typ || 'other', !!tredjePart); } catch { return false; }
+    if (!this.motor) return { block: false, redirect: '' };
+    try { return this.motor.matcha(url || '', srcHost || '', typ || 'other', !!tredjePart); }
+    catch { return { block: false, redirect: '' }; }
   }
 }
 

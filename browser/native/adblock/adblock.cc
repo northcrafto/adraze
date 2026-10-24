@@ -68,6 +68,13 @@ struct Filter {
   int tredje=0;                 // 0 valfri, 1 kräver third-party, -1 kräver first-party
   std::vector<std::string> domIn;   // domain= (måste vara en av dessa)
   std::vector<std::string> domEx;   // ~domain (får inte vara någon av dessa)
+  std::string redirect;             // $redirect=/$redirect-rule= : ersätt resursen med en ofarlig stub
+};
+
+// Resultat av en matchning
+struct Beslut {
+  bool block = false;
+  const std::string* redirect = nullptr;   // pekar på filtrets redirect-namn (tom = ren blockering)
 };
 
 // Matcha mönstret p (från pi) mot s (från si). Stödjer * och ^. mustEnd = måste sluta vid s-slut.
@@ -116,8 +123,8 @@ struct Motor {
 
     std::string s = rad;
     Filter f;
-    if (s.size() >= 2 && s[0] == '@' && s[1] == '@') { f.anchorStart=false; s = s.substr(2); }
-    bool exception = (rad.size() >= 2 && rad[0] == '@' && rad[1] == '@');
+    bool exception = (s.size() >= 2 && s[0] == '@' && s[1] == '@');
+    if (exception) s = s.substr(2);
 
     // optioner efter sista '$' (men inte '$' inuti en regex /.../)
     std::string opts;
@@ -148,6 +155,9 @@ struct Motor {
               if (b == std::string::npos) break; a = b + 1;
             }
           }
+          else if (name.rfind("redirect=", 0) == 0) f.redirect = name.substr(9);
+          else if (name.rfind("redirect-rule=", 0) == 0) f.redirect = name.substr(14);
+          else if (name.rfind("rewrite=abp-resource:", 0) == 0) f.redirect = name.substr(21);
           else if (name == "important" || name == "match-case" || name == "all" || name == "popup") { /* ignorera, påverkar ej blockbeslut i v1 */ }
           else {
             uint32_t t = typAvOption(name);
@@ -159,6 +169,8 @@ struct Motor {
       }
     }
     if (!stod) return;
+    // redirect-namnet kan ha ett prioritets-suffix (noopjs:10) — ta bort det
+    if (!f.redirect.empty()) { size_t c = f.redirect.find(':'); if (c != std::string::npos) f.redirect.erase(c); }
 
     // ankare
     if (s.size() >= 2 && s[0] == '|' && s[1] == '|') { f.anchorHost = true; s = s.substr(2); }
@@ -184,7 +196,7 @@ struct Motor {
   static bool traffar(const Filter& f, const std::string& url, size_t hostStart, size_t hostEnd,
                       const std::string& srcHost, uint32_t typ, bool tredjePart) {
     if (f.typPos && !(f.typPos & typ)) return false;
-    if (f.typNeg &  (f.typNeg & typ)) return false;
+    if (f.typNeg & typ) return false;
     if (f.tredje == 1 && !tredjePart) return false;
     if (f.tredje == -1 && tredjePart) return false;
     if (!f.domIn.empty()) {
@@ -223,12 +235,19 @@ struct Motor {
     return host.size() == d.size() || host[host.size() - d.size() - 1] == '.';
   }
 
-  bool kolla(const std::vector<Filter>& filter, const std::unordered_map<std::string, std::vector<uint32_t>>& tokMap,
+  // Returnerar det först matchande filtret, men föredrar ett med redirect (så en stub vinner
+   // över en ren blockering för samma resurs). nullptr = inget matchar.
+  const Filter* kolla(const std::vector<Filter>& filter, const std::unordered_map<std::string, std::vector<uint32_t>>& tokMap,
              const std::vector<uint32_t>& gen, const std::string& url, size_t hostStart, size_t hostEnd,
              const std::string& srcHost, uint32_t typ, bool tredjePart) {
-    for (uint32_t i : gen)
-      if (traffar(filter[i], url, hostStart, hostEnd, srcHost, typ, tredjePart)) return true;
-    // tokens ur url
+    const Filter* forsta = nullptr;
+    auto prova = [&](const Filter& f) -> bool {
+      if (!traffar(f, url, hostStart, hostEnd, srcHost, typ, tredjePart)) return false;
+      if (!f.redirect.empty()) { forsta = &f; return true; }   // redirect vinner direkt
+      if (!forsta) forsta = &f;
+      return false;
+    };
+    for (uint32_t i : gen) if (prova(filter[i])) return forsta;
     std::string cur;
     for (size_t i = 0; i <= url.size(); i++) {
       char c = i < url.size() ? url[i] : 0;
@@ -236,26 +255,26 @@ struct Motor {
       if (cur.size() >= 3) {
         auto it = tokMap.find(cur);
         if (it != tokMap.end())
-          for (uint32_t idx : it->second)
-            if (traffar(filter[idx], url, hostStart, hostEnd, srcHost, typ, tredjePart)) return true;
+          for (uint32_t idx : it->second) if (prova(filter[idx])) return forsta;
       }
       cur.clear();
     }
-    return false;
+    return forsta;
   }
 
-  // true = blockera
-  bool matcha(std::string url, const std::string& srcHost, uint32_t typ, bool tredjePart) {
+  Beslut matcha(std::string url, const std::string& srcHost, uint32_t typ, bool tredjePart) {
+    Beslut b;
     for (char& c : url) c = lower(c);
-    // hitta host-intervallet i url:en
     size_t hs = url.find("://");
     hs = (hs == std::string::npos) ? 0 : hs + 3;
     size_t he = hs;
     while (he < url.size() && url[he] != '/' && url[he] != '?' && url[he] != '#') he++;
-    // ta bort ev. användare@ och :port ur host-gränsen för ankar-matchning behåller vi enkelt
-    if (!kolla(block, blockTok, blockGen, url, hs, he, srcHost, typ, tredjePart)) return false;
-    if (kolla(tillat, tillatTok, tillatGen, url, hs, he, srcHost, typ, tredjePart)) return false;  // undantag vinner
-    return true;
+    const Filter* bf = kolla(block, blockTok, blockGen, url, hs, he, srcHost, typ, tredjePart);
+    if (!bf) return b;                                                                      // inget blockar
+    if (kolla(tillat, tillatTok, tillatGen, url, hs, he, srcHost, typ, tredjePart)) return b;  // undantag vinner
+    b.block = true;
+    if (!bf->redirect.empty()) b.redirect = &bf->redirect;
+    return b;
   }
 };
 
@@ -292,13 +311,19 @@ private:
     }
     return Napi::Number::New(info.Env(), (double)(motor.block.size() + motor.tillat.size()));
   }
+  // Returnerar { block: bool, redirect: string|'' }
   Napi::Value Matcha(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
     std::string url = info[0].As<Napi::String>();
     std::string srcHost = info[1].As<Napi::String>();
     uint32_t typ = typAvStrang(info[2].As<Napi::String>());
     bool tredje = info[3].As<Napi::Boolean>();
     for (char& c : srcHost) c = lower(c);
-    return Napi::Boolean::New(info.Env(), motor.matcha(url, srcHost, typ, tredje));
+    Beslut b = motor.matcha(url, srcHost, typ, tredje);
+    Napi::Object o = Napi::Object::New(env);
+    o.Set("block", Napi::Boolean::New(env, b.block));
+    o.Set("redirect", Napi::String::New(env, b.redirect ? *b.redirect : std::string()));
+    return o;
   }
   Napi::Value Antal(const Napi::CallbackInfo& info) {
     return Napi::Number::New(info.Env(), (double)(motor.block.size() + motor.tillat.size()));
