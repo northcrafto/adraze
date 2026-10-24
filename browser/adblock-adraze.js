@@ -11,6 +11,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { AdblockMotor } = require('./adblock-motor');   // vår egen C++-nätverksmotor
 let electron = null; try { electron = require('electron'); } catch {}
 
 const RES_SCHEME = 'adraze-res';
@@ -139,6 +140,10 @@ class AdrazeAdblock {
         }
       }
       this.index = index;
+      // Vår C++-motor tar nätverksblockeringen (full filtersyntax, 7× fler regler). JS-indexet
+      // ovan sköter fortfarande farliga sidor (security), omdirigeringar och CSP-rubriker.
+      try { this.motor = new AdblockMotor(path.join(this.dir, 'lists')); if (!this.motor.bygg()) this.motor = null; }
+      catch (e) { this.motor = null; console.warn('[adraze] motor:', String(e)); }
       this.popupHosts = new Set(this.json('data/popup-hosts.json', []));
       this.kos = this.json('data/cosmetic.json', { generic: [], specific: {}, exceptions: {}, genericHideExceptions: [] });
       this.kos.genericHide = new Set(this.kos.genericHideExceptions || []);
@@ -279,6 +284,13 @@ class AdrazeAdblock {
         // Inloggnings-/2FA-sidor (GitHub, Google-konto, Microsoft …): blockera ingenting på dem
         if (typ !== 'main_frame' && kalla && this.allowHost(kalla)) { cb({}); return; }
         if (d.webContents && !d.webContents.isDestroyed() && this.allowHost(d.webContents.getURL() || '')) { cb({}); return; }
+        // C++-motorn först: ren nätverksblockering (reklam/spårare) ur hela filterlistorna
+        if (this.motor && typ !== 'main_frame') {
+          const vard = hostAv(d.url);
+          const kallVard = hostAv(kalla) || vard;
+          const tredje = !!vard && !!kallVard && bas(vard) !== bas(kallVard);
+          if (this.motor.blockera(d.url, kallVard, d.resourceType, tredje)) { this.onBlocked(d.url, 'ad', typ); cb({ cancel: true }); return; }
+        }
         const r = this.match(this.fraga(d.url, typ, kalla));
         if (!r) { cb({}); return; }
         this.onBlocked(d.url, r.kat, typ);
