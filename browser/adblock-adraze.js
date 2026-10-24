@@ -146,8 +146,11 @@ class AdrazeAdblock {
       this.index = index;
       // Vår C++-motor tar nätverksblockeringen (full filtersyntax, 7× fler regler). JS-indexet
       // ovan sköter fortfarande farliga sidor (security), omdirigeringar och CSP-rubriker.
-      try { this.motor = new AdblockMotor(path.join(this.dir, 'lists')); if (!this.motor.bygg()) this.motor = null; }
-      catch (e) { this.motor = null; console.warn('[adraze] motor:', String(e)); }
+      try {
+        const cacheFil = (electron && electron.app) ? path.join(electron.app.getPath('userData'), 'adblock-cache.bin') : null;
+        this.motor = new AdblockMotor(path.join(this.dir, 'lists'), cacheFil);
+        if (!this.motor.bygg()) this.motor = null;
+      } catch (e) { this.motor = null; console.warn('[adraze] motor:', String(e)); }
       this.popupHosts = new Set(this.json('data/popup-hosts.json', []));
       this.kos = this.json('data/cosmetic.json', { generic: [], specific: {}, exceptions: {}, genericHideExceptions: [] });
       this.kos.genericHide = new Set(this.kos.genericHideExceptions || []);

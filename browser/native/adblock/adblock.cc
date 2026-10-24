@@ -276,6 +276,66 @@ struct Motor {
     if (!bf->redirect.empty()) b.redirect = &bf->redirect;
     return b;
   }
+
+  // ── Serialisering: spara det tolkade tillståndet till en binär klump och läsa tillbaka det,
+  //    så uppstarten slipper tolka om ~2 MB listtext varje gång. ──
+  static const uint8_t VERSION = 1;
+  static void u32(std::string& o, uint32_t v) { for (int i = 0; i < 4; i++) o += (char)((v >> (i * 8)) & 0xff); }
+  static void str(std::string& o, const std::string& s) { u32(o, (uint32_t)s.size()); o += s; }
+  static void skrivFilter(std::string& o, const std::vector<Filter>& v) {
+    u32(o, (uint32_t)v.size());
+    for (const auto& f : v) {
+      str(o, f.pat);
+      uint8_t flags = (f.anchorHost ? 1 : 0) | (f.anchorStart ? 2 : 0) | (f.anchorEnd ? 4 : 0) | (f.hasWild ? 8 : 0) | (f.hasSep ? 16 : 0);
+      o += (char)flags;
+      u32(o, f.typPos); u32(o, f.typNeg); o += (char)(int8_t)f.tredje;
+      u32(o, (uint32_t)f.domIn.size()); for (const auto& d : f.domIn) str(o, d);
+      u32(o, (uint32_t)f.domEx.size()); for (const auto& d : f.domEx) str(o, d);
+      str(o, f.redirect);
+    }
+  }
+  std::string serialisera() const {
+    std::string o; o += "ADRZ"; o += (char)VERSION;
+    skrivFilter(o, block); skrivFilter(o, tillat);
+    return o;
+  }
+
+  struct Lasare { const char* p; size_t kvar; bool fel = false;
+    uint32_t u32() { if (kvar < 4) { fel = true; return 0; } uint32_t v = 0; for (int i = 0; i < 4; i++) v |= (uint32_t)(uint8_t)p[i] << (i * 8); p += 4; kvar -= 4; return v; }
+    uint8_t u8() { if (!kvar) { fel = true; return 0; } uint8_t v = (uint8_t)*p; p++; kvar--; return v; }
+    std::string str() { uint32_t n = u32(); if (fel || n > kvar) { fel = true; return std::string(); } std::string s(p, n); p += n; kvar -= n; return s; }
+  };
+  bool lasFilter(Lasare& r, bool exception) {
+    uint32_t n = r.u32(); if (r.fel) return false;
+    auto& vec = exception ? tillat : block;
+    for (uint32_t i = 0; i < n; i++) {
+      Filter f;
+      f.pat = r.str();
+      uint8_t flags = r.u8();
+      f.anchorHost = flags & 1; f.anchorStart = flags & 2; f.anchorEnd = flags & 4; f.hasWild = flags & 8; f.hasSep = flags & 16;
+      f.typPos = r.u32(); f.typNeg = r.u32(); f.tredje = (int8_t)r.u8();
+      uint32_t di = r.u32(); if (r.fel || di > r.kvar) return false; for (uint32_t k = 0; k < di; k++) f.domIn.push_back(r.str());
+      uint32_t de = r.u32(); if (r.fel || de > r.kvar) return false; for (uint32_t k = 0; k < de; k++) f.domEx.push_back(r.str());
+      f.redirect = r.str();
+      if (r.fel) return false;
+      std::string tok = token(f.pat);
+      uint32_t idx = (uint32_t)vec.size();
+      vec.push_back(std::move(f));
+      if (exception) { if (tok.empty()) tillatGen.push_back(idx); else tillatTok[tok].push_back(idx); }
+      else           { if (tok.empty()) blockGen.push_back(idx);  else blockTok[tok].push_back(idx); }
+    }
+    return true;
+  }
+  bool deserialisera(const char* data, size_t len) {
+    if (len < 5 || data[0] != 'A' || data[1] != 'D' || data[2] != 'R' || data[3] != 'Z' || (uint8_t)data[4] != VERSION) return false;
+    block.clear(); tillat.clear(); blockTok.clear(); tillatTok.clear(); blockGen.clear(); tillatGen.clear();
+    Lasare r{ data + 5, len - 5 };
+    if (!lasFilter(r, false) || !lasFilter(r, true) || r.fel) {
+      block.clear(); tillat.clear(); blockTok.clear(); tillatTok.clear(); blockGen.clear(); tillatGen.clear();
+      return false;
+    }
+    return true;
+  }
 };
 
 }  // anonymt namespace (hjälpare + motor)
@@ -288,6 +348,8 @@ public:
       InstanceMethod("laggLista", &Adblock::LaggLista),
       InstanceMethod("matcha", &Adblock::Matcha),
       InstanceMethod("antal", &Adblock::Antal),
+      InstanceMethod("serialisera", &Adblock::Serialisera),
+      InstanceMethod("deserialisera", &Adblock::Deserialisera),
     });
     exports.Set("Adblock", f);
     return exports;
@@ -327,6 +389,17 @@ private:
   }
   Napi::Value Antal(const Napi::CallbackInfo& info) {
     return Napi::Number::New(info.Env(), (double)(motor.block.size() + motor.tillat.size()));
+  }
+  // Returnerar en Buffer med det tolkade tillståndet (för diskcache)
+  Napi::Value Serialisera(const Napi::CallbackInfo& info) {
+    std::string s = motor.serialisera();
+    return Napi::Buffer<char>::Copy(info.Env(), s.data(), s.size());
+  }
+  // Läser tillbaka en Buffer. true = lyckades (annars ska JS tolka om listorna).
+  Napi::Value Deserialisera(const Napi::CallbackInfo& info) {
+    if (!info[0].IsBuffer()) return Napi::Boolean::New(info.Env(), false);
+    Napi::Buffer<char> buf = info[0].As<Napi::Buffer<char>>();
+    return Napi::Boolean::New(info.Env(), motor.deserialisera(buf.Data(), buf.Length()));
   }
 };
 
