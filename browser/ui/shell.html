@@ -94,6 +94,7 @@
       <span id="shield" class="shield-wrap shield-home"><svg class="ic ic-sm"><use href="#i-shield" /></svg></span>
       <input id="address" type="text" spellcheck="false" placeholder="Sök tryggt eller skriv en adress"
              class="flex-1 bg-transparent outline-none text-[14px] text-navy-900 placeholder:text-navy-900/40" />
+      <button id="reader-btn" class="grid place-items-center w-7 h-7 rounded-lg flex-none" title="Läsläge" hidden><svg class="ic" viewBox="0 0 24 24" style="width:18px;height:18px" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg></button>
       <button id="bm-star" class="grid place-items-center w-7 h-7 rounded-lg flex-none" title="Spara sida i bokmärkesfältet"><svg class="ic" style="width:18px;height:18px"><use href="#i-bookmark" /></svg></button>
       <span id="search-engine" class="text-[11px] font-semibold text-navy-900/35 select-none">Google</span>
     </div>
@@ -805,10 +806,68 @@
               <div class="set-txt"><div class="set-title">Falk-assistent</div><div class="set-desc">Din AI för säkerhetsfrågor.</div></div>
               <span class="badge-built">Inbyggt</span>
             </div>
+
+            <style>
+              .ext-card { border: 1px solid var(--color-line); border-radius: 16px; padding: 16px 18px; margin-top: 20px; }
+              .ext-card h3 { font-size: 14.5px; font-weight: 800; color: var(--color-navy-900); margin-bottom: 3px; }
+              .ext-card .ext-lead { font-size: 12.5px; color: var(--color-navy-600); line-height: 1.5; margin-bottom: 13px; }
+              .ext-add { display: flex; gap: 8px; margin-bottom: 6px; }
+              .ext-add input { flex: 1; height: 40px; border: 1px solid var(--color-line); border-radius: 10px; padding: 0 12px; font-size: 13px; color: var(--color-navy-900); outline: none; background: #fff; }
+              .ext-add input:focus { border-color: var(--color-terra); }
+              .ext-msg { font-size: 12.5px; margin: 2px 0 2px; }
+              .ext-msg.err { color: #b23636; } .ext-msg.ok { color: var(--color-safe); }
+              .ext-note { font-size: 11.5px; color: rgb(28 43 58 / .5); line-height: 1.5; margin-top: 8px; }
+              .ext-item { display: flex; align-items: center; gap: 12px; padding: 11px 2px; border-top: 1px solid var(--color-line); }
+              .ext-ico { width: 34px; height: 34px; border-radius: 9px; background: var(--color-paper); display: grid; place-items: center; color: var(--color-navy-700); flex: none; }
+              .ext-nm { font-size: 13.5px; font-weight: 650; color: var(--color-navy-900); }
+              .ext-sub { font-size: 11.5px; color: var(--color-navy-600); }
+              .ext-del { font-size: 12px; color: var(--color-navy-600); background: none; border: 0; cursor: pointer; }
+              .ext-del:hover { color: #b23636; }
+            </style>
+            <div class="ext-card">
+              <h3>Lägg till från Chrome Web Store</h3>
+              <p class="ext-lead">Klistra in en länk från Chrome Web Store eller tilläggets id. Tillägget laddas ner och körs i AdRaze.</p>
+              <div class="ext-add">
+                <input id="ext-url" placeholder="https://chromewebstore.google.com/detail/… eller id" spellcheck="false" autocomplete="off" />
+                <button id="ext-add-btn" class="btn btn-safe flex-none" style="height:40px;padding:0 16px;">Lägg till</button>
+              </div>
+              <p id="ext-msg" class="ext-msg" hidden></p>
+              <div id="ext-list"></div>
+              <p class="ext-note">AdRaze kör Chromium, så de flesta tillägg fungerar. Enstaka som kräver Googles egna funktioner kanske inte gör det fullt ut. Installera bara tillägg du litar på.</p>
+            </div>
           </div>
 
+          <style>
+            .imp-card { border: 1px solid var(--color-line); border-radius: 16px; padding: 16px 18px; margin-bottom: 18px; }
+            .imp-card h3 { font-size: 14.5px; font-weight: 800; color: var(--color-navy-900); margin-bottom: 3px; }
+            .imp-card .imp-lead { font-size: 12.5px; color: var(--color-navy-600); line-height: 1.5; margin-bottom: 13px; }
+            .imp-src { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 13px; }
+            .imp-b { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 650; padding: 8px 13px; border-radius: 10px; border: 1px solid var(--color-line); background: #fff; color: var(--color-navy-900); cursor: pointer; }
+            .imp-b:hover { border-color: var(--color-terra); }
+            .imp-b.on { border-color: var(--color-terra); background: rgba(255,75,31,.07); color: var(--color-terra); }
+            .imp-opts { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 13px; }
+            .imp-opts label { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--color-navy-900); cursor: pointer; }
+            .imp-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+            .imp-msg { font-size: 12.5px; color: var(--color-safe); }
+            .imp-msg.err { color: #b23636; }
+            .imp-none { font-size: 12.5px; color: rgb(28 43 58 / .5); }
+          </style>
           <div class="set-panel hidden" data-cat="losenord">
             <h2 class="set-h">Autofyll &amp; lösenord</h2>
+            <div class="imp-card">
+              <h3>Importera från en annan webbläsare</h3>
+              <p class="imp-lead">Ta med dina bokmärken, historik och lösenord från Chrome, Brave, Edge eller Firefox. Inget skickas någonstans — allt stannar på den här datorn.</p>
+              <div id="imp-src" class="imp-src"></div>
+              <div class="imp-opts">
+                <label><input type="checkbox" id="imp-bm" checked> Bokmärken</label>
+                <label><input type="checkbox" id="imp-hist" checked> Historik</label>
+              </div>
+              <div class="imp-foot">
+                <button id="imp-go" class="btn btn-safe" style="height:40px;padding:0 16px;" disabled>Importera</button>
+                <button id="imp-csv" class="btn btn-ghost" style="height:40px;padding:0 16px;">Lösenord från CSV-fil…</button>
+                <span id="imp-msg" class="imp-msg" hidden></span>
+              </div>
+            </div>
             <p class="set-lead mb-3">Sparade inloggningar. AdRaze fyller i dem åt dig.</p>
             <div class="flex gap-2 mb-3">
               <input id="pw-add-origin" placeholder="https://sajt.se" class="pw-in flex-1" />
@@ -965,6 +1024,11 @@
               </div>
               <input type="file" id="kn-avatar-file" accept="image/*" style="display:none;" />
               <div class="kn-rows" id="kn-rows"></div>
+              <div class="set-row" id="synk-row">
+                <span class="set-ico"><svg class="ic ic-sm"><use href="#i-reload" /></svg></span>
+                <div class="set-txt"><div class="set-title">Synka bokmärken</div><div class="set-desc">Dina bokmärken följer med till alla enheter där du är inloggad.</div></div>
+                <label class="switch"><input type="checkbox" id="synk-toggle" /><span class="track"></span></label>
+              </div>
               <div class="pro-box" id="pro-box" hidden>
                 <div class="pro-top">
                   <div class="min-w-0">

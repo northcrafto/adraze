@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8" />
+<title>Sök på sidan</title>
+<style>
+  /* Sök på sidan: liten ruta uppe till höger över fliken (egen vy, som nedladdningsrutan) */
+  :root { --bg: #ffffff; --ink: #141416; --mut: #6b6b72; --line: #e2e2de; --field: #f4f4f2; --hover: rgb(20 20 22 / .06); --accent: #ff4b1f; --none: #d0402f; }
+  :root[data-theme="dark"] { --bg: #1b1b1e; --ink: #f2f2f4; --mut: #a1a1a8; --line: #2c2c31; --field: #26262a; --hover: rgb(255 255 255 / .08); --none: #ff8a7a; }
+  html, body { margin: 0; background: transparent; overflow: hidden; font-family: Inter, -apple-system, "Segoe UI", system-ui, sans-serif; }
+  .card { margin: 4px 10px 14px; height: 44px; display: flex; align-items: center; gap: 4px; padding: 0 6px 0 12px; background: var(--bg); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 12px 32px rgb(0 0 0 / .18), 0 2px 6px rgb(0 0 0 / .08); }
+  input { flex: 1; min-width: 0; height: 30px; border: 0; outline: 0; background: transparent; color: var(--ink); font: inherit; font-size: 13.5px; }
+  input::placeholder { color: var(--mut); }
+  .count { flex: none; font-size: 12px; color: var(--mut); font-variant-numeric: tabular-nums; padding: 0 8px; border-right: 1px solid var(--line); margin-right: 2px; }
+  .count.none { color: var(--none); }
+  button { flex: none; width: 30px; height: 30px; border: 0; border-radius: 8px; background: transparent; color: var(--mut); display: grid; place-items: center; cursor: pointer; }
+  button:hover { background: var(--hover); color: var(--ink); }
+  button:disabled { opacity: .35; pointer-events: none; }
+  svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <input id="q" type="text" placeholder="Sök på sidan" spellcheck="false" autocomplete="off" />
+    <span class="count" id="n" hidden></span>
+    <button id="prev" title="Föregående (Shift+Enter)"><svg viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></svg></button>
+    <button id="next" title="Nästa (Enter)"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+    <button id="close" title="Stäng (Esc)"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </div>
+<script>
+  const { ipcRenderer } = require('electron');
+  const q = document.getElementById('q'), n = document.getElementById('n');
+  const p = new URLSearchParams(location.search);
+  if (p.get('theme') === 'dark') document.documentElement.dataset.theme = 'dark';
+  const T = (k) => { try { const d = JSON.parse(p.get('t') || '{}'); return d[k] || k; } catch { return k; } };
+  q.placeholder = T('Sök på sidan');
+  let last = '';
+  function search(forward, next) {
+    const v = q.value;
+    if (!v) { n.hidden = true; last = ''; ipcRenderer.send('find:query', '', true, false); return; }
+    ipcRenderer.send('find:query', v, forward, next && v === last);
+    last = v;
+  }
+  q.addEventListener('input', () => search(true, false));
+  q.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); search(!e.shiftKey, true); }
+    else if (e.key === 'Escape') { e.preventDefault(); ipcRenderer.send('find:close'); }
+  });
+  document.getElementById('next').addEventListener('click', () => { search(true, true); q.focus(); });
+  document.getElementById('prev').addEventListener('click', () => { search(false, true); q.focus(); });
+  document.getElementById('close').addEventListener('click', () => ipcRenderer.send('find:close'));
+  ipcRenderer.on('find-result', (_e, r) => {
+    if (!q.value) { n.hidden = true; return; }
+    n.hidden = false; n.textContent = (r.total ? r.active : 0) + '/' + r.total;
+    n.classList.toggle('none', !r.total);
+  });
+  ipcRenderer.on('find-focus', (_e, text) => {
+    if (typeof text === 'string' && text) q.value = text;
+    q.focus(); q.select();
+    if (q.value) search(true, false);
+  });
+  ipcRenderer.on('find-step', (_e, forward) => search(forward, true));
+</script>
+</body>
+</html>

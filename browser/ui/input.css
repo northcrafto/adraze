@@ -769,3 +769,16 @@ textarea.cal-in { resize: vertical; min-height: 60px; }
 #settings #pro-cancel-go:is(:hover, :focus-visible) { color: #fff !important; }
 :root[data-theme="dark"] #settings #pro-cancel-go { color: #ff8a7a !important; }
 :root[data-theme="dark"] #settings #pro-cancel-go:is(:hover, :focus-visible) { color: #fff !important; }
+
+/* Fästa flikar: bara ikonen, smala och först i raden. Ljudknapp när fliken låter. */
+.tab.pinned { width: 40px !important; padding-left: 0; padding-right: 0; justify-content: center; gap: 0; }
+.tab.pinned .ttl, .tab.pinned .tclose { display: none; }
+.tab.pinned .tsound { position: absolute; right: 1px; top: 3px; width: 16px; height: 16px; border-radius: 99px; background: var(--color-paper, #f1f1ee); }
+.tab { position: relative; }
+.tab .tsound { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 5px; flex: none; color: currentColor; opacity: .7; border: 0; background: transparent; cursor: pointer; }
+.tab .tsound:hover { opacity: 1; background: rgb(14 42 71 / .07); }
+.tab .tsound.muted { opacity: .55; }
+:root[data-theme="dark"] .tab.pinned .tsound { background: #1d1d20; }
+#reader-btn { color: var(--color-muted); }
+#reader-btn:hover { background: rgb(14 42 71 / .06); }
+#reader-btn.on { color: var(--color-terra); }
