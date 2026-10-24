@@ -140,12 +140,79 @@
   body.full #log { max-width: 760px; margin: 0 auto; width: 100%; }
   body.full footer .inwrap, body.full .foot-note { max-width: 760px; margin-left: auto; margin-right: auto; }
   ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-thumb { background: rgb(255 255 255 / .1); border-radius: 8px; }
+  /* Sidomenyn (som ChatGPT-appen): nytt samtal, sök, minnen och alla samtal.
+     Bred panel/helskärm: alltid synlig. Smal panel: glider in från vänster. */
+  body { flex-direction: row; }
+  #main { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; height: 100%; }
+  #side { flex: 0 0 260px; width: 260px; height: 100%; display: flex; flex-direction: column; background: #0a0a0b; border-right: 1px solid var(--line); z-index: 20; }
+  .s-top { display: flex; align-items: center; gap: 9px; height: 52px; padding: 0 8px 0 14px; font-weight: 650; font-size: 14px; }
+  .s-top img { width: 22px; height: 22px; object-fit: contain; }
+  .s-top .grow { flex: 1; }
+  .s-nav { display: flex; flex-direction: column; gap: 1px; padding: 4px 8px 6px; }
+  .s-item { display: flex; align-items: center; gap: 10px; width: 100%; height: 36px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; color: var(--ink);
+    font: inherit; font-size: 13.5px; font-weight: 500; text-align: left; cursor: pointer; transition: background .15s; }
+  .s-item:hover { background: rgb(255 255 255 / .05); }
+  .s-item svg { width: 17px; height: 17px; flex: none; color: var(--mut); }
+  .s-item .n { margin-left: auto; font-size: 11.5px; color: var(--faint); }
+  .s-search { cursor: text; }
+  .s-search input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: transparent; color: var(--ink); font: inherit; font-size: 13.5px; }
+  .s-search input::placeholder { color: var(--ink); opacity: 1; }
+  .s-search:focus-within { background: var(--surface); }
+  .s-search:focus-within input::placeholder { color: var(--faint); }
+  .s-search input::-webkit-search-cancel-button { display: none; }
+  #s-list { flex: 1; overflow-y: auto; padding: 4px 8px 16px; }
+  .s-lbl { padding: 14px 10px 6px; font-size: 12px; font-weight: 600; color: var(--faint); }
+  .s-conv { position: relative; display: flex; align-items: center; width: 100%; height: 34px; padding: 0 34px 0 10px; border: 0; border-radius: 8px; background: transparent;
+    color: #d4d4d9; font: inherit; font-size: 13.5px; text-align: left; cursor: pointer; transition: background .15s, color .15s; }
+  .s-conv span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .s-conv:hover { background: rgb(255 255 255 / .05); color: var(--ink); }
+  .s-conv.on { background: var(--surface-2); color: var(--ink); }
+  .s-conv .x { position: absolute; right: 4px; top: 4px; width: 26px; height: 26px; border-radius: 6px; display: none; place-items: center; color: var(--faint); }
+  .s-conv:hover .x, .s-conv.on .x { display: grid; }
+  .s-conv .x:hover { color: #ff8a7a; background: rgb(255 255 255 / .06); }
+  .s-conv .x svg { width: 14px; height: 14px; }
+  .s-none { padding: 12px 10px; font-size: 12.5px; color: var(--faint); line-height: 1.5; }
+  #sidebtn { display: none; }
+  #scrim { display: none; }
+  @media (max-width: 719px) {
+    body:not(.full) #side { position: absolute; left: 0; top: 0; bottom: 0; transform: translateX(-102%); transition: transform .28s cubic-bezier(.4,0,.2,1); box-shadow: 16px 0 40px rgb(0 0 0 / .5); }
+    body:not(.full).side-open #side { transform: none; }
+    body:not(.full) #sidebtn { display: grid; }
+    body:not(.full).side-open #scrim { display: block; position: absolute; inset: 0; z-index: 15; background: rgb(0 0 0 / .45); }
+    body:not(.full) header .dot { display: none; }
+  }
+  @media (min-width: 720px) { #sideclose { display: none; } }
+  body.full #sideclose { display: none; }
+  #convbtn { display: none; }
+
+  /* Hälsningen när samtalet är tomt: mitt i ytan, med ditt namn */
+  .hero { margin: auto 0; align-items: center; text-align: center; padding: 24px 4px; }
+  .hero .big { width: 36px; height: 36px; margin-bottom: 14px; }
+  .hero .big img { width: 36px; height: 36px; }
+  .hero h1 { font-size: 26px; letter-spacing: -.03em; line-height: 1.2; }
+  .hero h1 em { display: block; font-style: normal; color: var(--mut); font-weight: 600; }
+  .hero p { margin: 6px auto 0; }
+  .sugg { max-width: 460px; margin: 22px auto 0; }
   @media (prefers-reduced-motion: reduce) { .msg, .hero, .memcard { animation: none; } body.thinking header .owl { animation: none; } }
 </style>
 <style>#modes{display:none}</style>
 </head>
 <body>
+  <aside id="side" aria-label="Samtal">
+    <div class="s-top"><img src="krypto-owl-face.png" alt="">Falk<span class="grow"></span>
+      <button class="hbtn" id="sideclose" title="Stäng menyn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <nav class="s-nav">
+      <button class="s-item" id="s-new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Nytt samtal</button>
+      <label class="s-item s-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="s-q" type="search" placeholder="Sök i samtal" autocomplete="off" spellcheck="false"></label>
+      <button class="s-item" id="s-mem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 0 0-5.9-.6A3 3 0 0 0 4 9.5a3 3 0 0 0 0 5A3 3 0 0 0 8 19a3 3 0 0 0 4 1 3 3 0 0 0 4-1 3 3 0 0 0 4-4.5 3 3 0 0 0 0-5A3 3 0 0 0 17.9 4.4 3 3 0 0 0 12 5Z"/><path d="M12 5v15"/></svg>Minnen<span class="n" id="s-memn"></span></button>
+    </nav>
+    <div id="s-list"></div>
+  </aside>
+  <div id="scrim"></div>
+  <div id="main">
   <header>
+    <button class="hbtn" id="sidebtn" title="Meny"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h10M4 17h16"/></svg></button>
     <span class="dot" id="hdr-dot"><img class="owl" src="krypto-owl-face.png" alt=""></span>
     <span class="t">Falk<small id="convtitle">Din säkerhetsassistent</small></span>
     <span class="grow"></span>
@@ -206,6 +273,7 @@
     </div>
     <div class="foot-note">Falk kan ha fel. Dela aldrig lösenord eller BankID.</div>
   </footer>
+  </div>
 
   <script src="i18n.js"></script>
   <script>
@@ -228,7 +296,7 @@
     }
     function cid() { return 'c' + Date.now() + Math.floor(Math.random() * 1000); }
     function titleFrom(msgs) { const u = (msgs || []).find((m) => m.role === 'user'); return u ? u.content.slice(0, 44) : 'Nytt samtal'; }
-    function saveConvos() { try { localStorage.setItem(CONV, JSON.stringify({ list: convos.slice(-50), activeId })); } catch {} }
+    function saveConvos() { try { localStorage.setItem(CONV, JSON.stringify({ list: convos.slice(-50), activeId })); } catch {} if (typeof renderSide === 'function') renderSide(); }
     function activeConvo() { return convos.find((c) => c.id === activeId); }
     function newConvo() {
       const c = { id: cid(), title: 'Nytt samtal', ts: Date.now(), messages: [], mode: (typeof kMode !== 'undefined' ? kMode : 'fraga') };
@@ -294,8 +362,9 @@
       var tr = (typeof window.t === 'function') ? window.t : (x) => x;
       var el = document.createElement('div'); el.className = 'hero';
       var sugg = ['Är den här länken en bluff?', 'Kolla om det här mejlet är äkta', 'Vad kan du hjälpa mig med?'];
-      el.innerHTML = '<span class="big">' + OWL_BIG + '</span><h1>' + esc(tr('Hej, jag är Falk.')) + '</h1>'
-        + '<p>' + esc(tr('Klistra in en misstänkt länk, ett mejl eller ett SMS så säger jag om det är en bluff. Eller be mig ändra en inställning. Skriv / för kommandon.')) + '</p>'
+      var hej = myName ? tr('Hej, {n}.').replace('{n}', myName) : tr('Hej!');
+      el.innerHTML = '<span class="big">' + OWL_BIG + '</span><h1>' + esc(hej) + '<em>' + esc(tr('Vad kan jag hjälpa dig med?')) + '</em></h1>'
+        + '<p>' + esc(tr('Klistra in en misstänkt länk, ett mejl eller ett sms så säger jag om det är en bluff.')) + '</p>'
         + '<div class="sugg">' + sugg.map((q) => '<button type="button"><span>→</span>' + esc(tr(q)) + '</button>').join('') + '</div>';
       el.querySelectorAll('.sugg button').forEach((b, i) => b.addEventListener('click', () => { inp.value = tr(sugg[i]); inp.focus(); inp.dispatchEvent(new Event('input')); }));
       log.appendChild(el); scrollBottom();
@@ -584,8 +653,44 @@
     $('memadd-btn').addEventListener('click', () => { const v = $('memadd-inp').value.trim(); if (v && memAdd(v)) { $('memadd-inp').value = ''; renderMemList(); } });
     $('memadd-inp').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('memadd-btn').click(); } });
 
+    /* ── Sidomenyn ── */
+    let myName = '';
+    function dayGroup(ts) {
+      const d = new Date(ts), t = new Date(); t.setHours(0, 0, 0, 0);
+      const diff = (t - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 86400000;
+      return diff <= 0 ? 'I dag' : diff === 1 ? 'I går' : diff < 7 ? 'Senaste veckan' : diff < 30 ? 'Senaste 30 dagarna' : 'Äldre';
+    }
+    function renderSide() {
+      const host = $('s-list'); if (!host) return;
+      const q = ($('s-q').value || '').trim().toLowerCase();
+      const list = convos.filter((c) => c.messages.length).sort((a, b) => b.ts - a.ts)
+        .filter((c) => !q || (c.title || '').toLowerCase().includes(q) || c.messages.some((m) => (m.content || '').toLowerCase().includes(q)));
+      host.innerHTML = '';
+      if (!list.length) { host.innerHTML = '<div class="s-none">' + (q ? 'Inga samtal matchar.' : 'Dina samtal med Falk hamnar här.') + '</div>'; return; }
+      let last = '';
+      for (const c of list) {
+        const g = dayGroup(c.ts);
+        if (g !== last) { const l = document.createElement('div'); l.className = 's-lbl'; l.textContent = g; host.appendChild(l); last = g; }
+        const b = document.createElement('button'); b.type = 'button'; b.className = 's-conv' + (c.id === activeId ? ' on' : '');
+        b.innerHTML = '<span>' + esc(c.title || 'Nytt samtal') + '</span><i class="x" title="Ta bort samtal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></i>';
+        b.addEventListener('click', (e) => { if (e.target.closest('.x')) { e.stopPropagation(); deleteConvo(c.id); return; } openConvo(c.id); closeSide(); });
+        host.appendChild(b);
+      }
+    }
+    function closeSide() { document.body.classList.remove('side-open'); }
+    $('sidebtn').addEventListener('click', () => document.body.classList.add('side-open'));
+    $('sideclose').addEventListener('click', closeSide);
+    $('scrim').addEventListener('click', closeSide);
+    $('s-new').addEventListener('click', () => { newConvo(); closeSide(); });
+    $('s-mem').addEventListener('click', () => { togglePanel('mempanel', true); closeSide(); });
+    $('s-q').addEventListener('input', renderSide);
+    $('s-q').addEventListener('keydown', (e) => { if (e.key === 'Escape') { $('s-q').value = ''; renderSide(); } });
+    const memN = () => { const n = memGet().length; $('s-memn').textContent = n ? n : ''; };
+    const _ub = updateBadge; updateBadge = function () { _ub(); memN(); };
+    try { window.krypto.me().then((r) => { myName = (r && r.name) || ''; if (!history.length) render(); }).catch(() => {}); } catch {}
+
     /* ── Start ── */
-    loadConvos(); applyModeUI((activeConvo() && activeConvo().mode) || kMode); updateBadge(); updateConvTitle(); render();
+    loadConvos(); applyModeUI((activeConvo() && activeConvo().mode) || kMode); updateBadge(); updateConvTitle(); render(); renderSide();
     setTimeout(() => inp.focus(), 60);
   </script>
 </body>

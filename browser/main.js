@@ -1444,6 +1444,13 @@ ipcMain.on('krypto:prefill', (e, text) => {
   try { ctx.kryptoView.webContents.send('krypto-prefill', String(text || '')); } catch {}
 });
 // Falk helskärm på/av: panelen täcker hela webbytan (enklare att läsa/skriva långa rapporter).
+// Förnamnet till Falks hälsning ("Hej, Cetto"). Bara namnet, aldrig token.
+ipcMain.handle('krypto:me', async (e) => {
+  const ctx = e.sender.__ctx; const token = ctx && ctx.authToken;
+  if (!token) return { name: '' };
+  const j = await adrazeApi('/me', null, token, 'GET');
+  return { name: (j.ok && j.me && j.me.namn) || '' };
+});
 ipcMain.on('krypto:expand', (e, full) => {
   const ctx = ctxFor(e) || e.sender.__ctx; if (!ctx) return;
   ctx.kryptoFull = !!full;

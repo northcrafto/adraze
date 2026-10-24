@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('krypto', {
   doAction: (a) => ipcRenderer.send('krypto:action', a),
   expand: (full) => ipcRenderer.send('krypto:expand', !!full),
   onPrefill: (cb) => ipcRenderer.on('krypto-prefill', (_e, t) => cb(t)),
+  me: () => ipcRenderer.invoke('krypto:me'),
 });
 /* Kassan (ui/checkout.html): huvudprocessen lägger på kontots token. */
 contextBridge.exposeInMainWorld('billing', {
