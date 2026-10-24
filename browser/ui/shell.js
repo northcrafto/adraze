@@ -675,6 +675,8 @@ function showSettingsCat(cat) {
   if (cat === 'familj' && typeof renderFam === 'function') { renderFam(); applyKidIndicator(); if (typeof famSyncParent === 'function') famSyncParent(); }
   if (cat === 'losenord') { if (typeof renderPasswords === 'function') renderPasswords(); if (typeof initImport === 'function') initImport(); }
   if (cat === 'tillagg' && typeof renderExt === 'function') renderExt();
+  if (cat === 'historik' && typeof renderHistPanel === 'function') { histFilter = ''; const s = $('hist-search'); if (s) s.value = ''; renderHistPanel(); }
+  if (cat === 'nedladdningar' && typeof loadDownloads === 'function') loadDownloads();
 }
 function renderEngines() {
   const list = $('engine-list'); if (!list) return; list.innerHTML = '';
@@ -2012,9 +2014,9 @@ function resetHistoryClear() {
   const t = $('history-clear-txt'); if (t) t.textContent = 'Rensa allt';
   const b = $('history-clear'); if (b) { b.style.color = 'var(--color-navy-700)'; b.style.borderColor = 'var(--color-line)'; }
 }
-function openHistory() { renderHistory(); $('history').classList.remove('hidden'); window.view.insetLeft(320); historyOpen = true; }
+function openHistory() { openSettings(); showSettingsCat('historik'); }
 function closeHistory() { $('history').classList.add('hidden'); window.view.insetLeft(0); historyOpen = false; resetHistoryClear(); }
-window.view.onOpenHistory(() => { historyOpen ? closeHistory() : openHistory(); });
+window.view.onOpenHistory(() => openHistory());
 $('history-close').addEventListener('click', closeHistory);
 $('history-clear').addEventListener('click', () => {
   if (!histClearArmed) {
@@ -2026,6 +2028,66 @@ $('history-clear').addEventListener('click', () => {
   }
   if (clearHistory()) { renderHistory(); showToast('Historiken är rensad.'); }
   else { resetHistoryClear(); showToast('Bara föräldern kan rensa historiken.'); }
+});
+
+/* ── Historik som egen inställningsflik (hela historiken, sök, besök, ta bort) ── */
+let histFilter = '';
+function histFmtDate(t) {
+  if (!t) return '';
+  const d = new Date(t), nu = new Date();
+  const sammaDag = d.toDateString() === nu.toDateString();
+  const igar = new Date(nu); igar.setDate(nu.getDate() - 1);
+  const klock = d.toLocaleTimeString(document.documentElement.lang || 'sv', { hour: '2-digit', minute: '2-digit' });
+  if (sammaDag) return (window.t ? window.t('I dag') : 'I dag') + ' ' + klock;
+  if (d.toDateString() === igar.toDateString()) return (window.t ? window.t('I går') : 'I går') + ' ' + klock;
+  return d.toLocaleDateString(document.documentElement.lang || 'sv', { day: 'numeric', month: 'short' }) + ' ' + klock;
+}
+function renderHistPanel() {
+  const list = $('hist-list'); if (!list) return;
+  list.innerHTML = '';
+  const locked = historyLocked();
+  const clr = $('hist-clear'); if (clr) clr.style.display = locked ? 'none' : '';
+  let h = getHistory();
+  if (histFilter) {
+    const q = histFilter.toLowerCase();
+    h = h.filter((e) => (e.title || '').toLowerCase().includes(q) || (e.url || '').toLowerCase().includes(q));
+  }
+  if (locked) {
+    list.innerHTML = '<div style="display:flex;gap:8px;padding:12px 14px;background:rgba(47,143,212,.07);color:var(--color-navy-700);font-size:12.5px;line-height:1.45">👁<span>Din historik sparas åt dina föräldrar och kan inte tas bort här.</span></div>';
+  }
+  if (!h.length) {
+    list.insertAdjacentHTML('beforeend', '<div style="padding:16px;color:#8ba3bf;font-size:13px">' + (histFilter ? 'Inget i historiken matchar.' : 'Ingen historik än.') + '</div>');
+    return;
+  }
+  h.forEach((e) => {
+    const row = document.createElement('div'); row.className = 'hist-row';
+    const fav = e.favicon
+      ? `<img class="hist-fav" src="${escapeHtml(e.favicon)}" onerror="this.outerHTML='<span class=hist-fav style=&quot;display:grid;place-items:center;color:#8ba3bf&quot;><svg class=ic style=&quot;width:13px;height:13px&quot;><use href=#i-globe /></svg></span>'">`
+      : `<span class="hist-fav" style="display:grid;place-items:center;color:#8ba3bf"><svg class="ic" style="width:13px;height:13px"><use href="#i-globe" /></svg></span>`;
+    row.innerHTML = fav
+      + `<div class="hist-txt"><div class="hist-title">${escapeHtml(e.title || e.url)}</div><div class="hist-url">${escapeHtml(e.url.replace(/^https?:\/\/(www\.)?/, ''))}</div></div>`
+      + `<span style="flex:none;font-size:11.5px;color:#8ba3bf;margin-right:4px;white-space:nowrap">${escapeHtml(histFmtDate(e.t))}</span>`
+      + (locked ? '' : `<button class="row-btn" title="Ta bort från historiken"><svg class="ic ic-sm"><use href="#i-trash" /></svg></button>`);
+    row.addEventListener('click', () => {   // besök sidan igen
+      closeSettings();
+      if (active) guardedNavigate(active, e.url); else { const t = createTab(e.url); switchTab(t); }
+    });
+    if (!locked) row.querySelector('.row-btn').addEventListener('click', (ev) => { ev.stopPropagation(); removeHistory(e.url); renderHistPanel(); });
+    list.appendChild(row);
+  });
+}
+if ($('hist-search')) $('hist-search').addEventListener('input', (e) => { histFilter = e.target.value.trim(); renderHistPanel(); });
+let histPanelArmed = 0;
+if ($('hist-clear')) $('hist-clear').addEventListener('click', () => {
+  const b = $('hist-clear'), t = $('hist-clear-txt');
+  if (!histPanelArmed) {
+    histPanelArmed = 1; if (t) t.textContent = (window.t ? window.t('Rensa allt?') : 'Rensa allt?'); b.classList.add('armed');
+    setTimeout(() => { if (histPanelArmed) { histPanelArmed = 0; if (t) t.textContent = (window.t ? window.t('Rensa allt') : 'Rensa allt'); b.classList.remove('armed'); } }, 4000);
+    return;
+  }
+  histPanelArmed = 0; if (t) t.textContent = (window.t ? window.t('Rensa allt') : 'Rensa allt'); b.classList.remove('armed');
+  if (clearHistory()) { renderHistPanel(); showToast('Historiken är rensad.'); }
+  else showToast('Bara föräldern kan rensa historiken.');
 });
 
 /* ── Bokmärken ── */
@@ -2218,12 +2280,13 @@ function hideThreat() { $('dlthreat').style.display = 'none'; threatId = null; }
 $('dlthreat-remove').addEventListener('click', () => { if (threatId) window.dl.removeThreat(threatId); hideThreat(); showToast('Filen togs bort.'); });
 $('dlthreat-keep').addEventListener('click', () => { if (threatId) window.dl.keepAnyway(threatId); hideThreat(); showToast('Filen behölls i Nedladdningar.'); });
 $('dlthreat-close').addEventListener('click', hideThreat);
-async function openDownloads() {
-  openSettings(); showSettingsCat('nedladdningar');
+// Hämtar nedladdningarna från huvudprocessen och ritar listan (körs både från knappen och fliken)
+async function loadDownloads() {
   const server = await window.dl.list().catch(() => []);
   (server || []).forEach((d) => dlMap.set(d.id, d));
   renderDownloads();
 }
+function openDownloads() { openSettings(); showSettingsCat('nedladdningar'); }
 window.view.onOpenDownloads(() => openDownloads());
 
 /* ── Lösenord ── */
