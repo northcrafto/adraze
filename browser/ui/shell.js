@@ -113,8 +113,9 @@ const OPEN_TABS_KEY = 'skoll-open-tabs';
 function saveOpenTabs() {
   if (windowIncognito) return;
   try {
-    const urls = tabs.filter((t) => !t.incognito && !t._closing && t.url).map((t) => t.url);
-    localStorage.setItem(OPEN_TABS_KEY, JSON.stringify(urls));
+    const keep = tabs.filter((t) => !t.incognito && !t._closing && t.url);
+    localStorage.setItem(OPEN_TABS_KEY, JSON.stringify(keep.map((t) => t.url)));
+    localStorage.setItem('adraze-pinned-tabs', JSON.stringify(keep.filter((t) => t.pinned).map((t) => t.url)));
   } catch {}
 }
 // Vid start: 'tidigare' (förra flikarna + startsidan), 'ny' (bara en ny flik) eller 'sida' (en viss adress)
@@ -123,13 +124,18 @@ try { const m = localStorage.getItem('adraze-start'); if (m === 'ny' || m === 's
 function startAddress(v) { v = (v || '').trim(); if (!v) return ''; if (/^[a-z]+:\/\//i.test(v)) return v; return (/^(localhost|\d+\.\d+\.\d+\.\d+)(:|\/|$)/i.test(v) ? 'http://' : 'https://') + v; }
 function restoreTabs() {
   if (windowIncognito) { createTab(null); return; }
-  if (startMode === 'ny') { createTab(null); return; }
-  if (startMode === 'sida' && startAddress(startUrl)) { createTab(startAddress(startUrl)); return; }
+  if (startMode !== 'tidigare') {
+    let pins = []; try { pins = JSON.parse(localStorage.getItem('adraze-pinned-tabs') || '[]'); } catch {}
+    for (const u of pins) if (typeof u === 'string' && u) setPinned(createTab(u), true);   // fästa flikar följer alltid med
+    if (startMode === 'sida' && startAddress(startUrl)) { createTab(startAddress(startUrl)); return; }
+    createTab(null); return;
+  }
   let urls = [];
   try { urls = JSON.parse(localStorage.getItem(OPEN_TABS_KEY) || '[]'); } catch {}
   urls = (Array.isArray(urls) ? urls : []).filter((u) => typeof u === 'string' && u);
+  let pins = []; try { pins = JSON.parse(localStorage.getItem('adraze-pinned-tabs') || '[]'); } catch {}
   const home = createTab(null);                                 // öppna alltid på huvudmenyn (hemfliken)
-  for (let i = 0; i < urls.length; i++) createTab(urls[i]);     // tidigare flikar återställs och finns kvar i flik-raden
+  for (let i = 0; i < urls.length; i++) { const t = createTab(urls[i]); if (pins.includes(urls[i])) setPinned(t, true); }   // tidigare flikar återställs och finns kvar i flik-raden
   switchTab(home);                                              // ...men vi landar alltid på huvudmenyn
 }
 // Full-sides-rutor (inställningar m.m.) hör till fliken de öppnades på.
@@ -161,6 +167,7 @@ function switchTab(tab) {
   if (tab.overlay) { window.view.hide(); const el = $(tab.overlay); if (el) el.classList.remove('hidden'); }
   else showActiveTab();
   renderTabs(); updateNavButtons(); updateStar();
+  try { updateReaderBtn(); } catch {}
   try { permSwitched(); } catch {}
 }
 function closeTab(tab) {
@@ -176,8 +183,11 @@ function closeTab(tab) {
   layoutTabs();
   setTimeout(() => finalizeClose(tab), 200);
 }
+// Senast stängda flikar (Ctrl+Shift+T öppnar dem igen, senaste först)
+const closedTabs = [];
 function finalizeClose(tab) {
   const i = tabs.indexOf(tab); if (i < 0) return;
+  if (tab.url && !tab.incognito && !tab.isSettings) { closedTabs.push({ url: tab.url, index: i, pinned: !!tab.pinned }); if (closedTabs.length > 25) closedTabs.shift(); }
   window.view.destroy(tab.id);
   tabs.splice(i, 1);
   saveOpenTabs();
@@ -231,10 +241,12 @@ function tabRoom() {
   for (const id of ['brandbar', 'newtab-btn', 'winctl']) { const e = $(id); if (e && e.offsetWidth) used += e.offsetWidth + 6; }
   return Math.max(TAB_MIN, strip.clientWidth - used);
 }
+const PIN_W = 40;
 function layoutTabs() {
   const host = $('tabs');
-  const n = Math.max(1, tabs.filter((t) => !t._closing).length);
-  const room = tabRoom();
+  const pinned = tabs.filter((t) => !t._closing && t.pinned).length;
+  const n = Math.max(1, tabs.filter((t) => !t._closing && !t.pinned).length);
+  const room = tabRoom() - pinned * (PIN_W + TAB_GAP);
   let w = tabWidthLock != null ? tabWidthLock : Math.floor((room - TAB_GAP * (n - 1)) / n);
   w = Math.max(TAB_MIN, Math.min(TAB_MAX, w));
   currentTabW = w;
@@ -254,15 +266,20 @@ function renderTabs() {
       el = document.createElement('div');
       el.dataset.tabid = tab.id;
       el.addEventListener('click', (e) => {
-        if (e.target.closest('.tclose')) { e.stopPropagation(); closeTab(tab); } else switchTab(tab);
+        if (e.target.closest('.tclose')) { e.stopPropagation(); closeTab(tab); }
+        else if (e.target.closest('.tsound')) { e.stopPropagation(); setMuted(tab, !tab.muted); }
+        else switchTab(tab);
       });
       el.addEventListener('auxclick', (e) => { if (e.button === 1) { e.preventDefault(); closeTab(tab); } });
+      el.addEventListener('contextmenu', (e) => { e.preventDefault(); tabMenu(tab); });
     }
     old.delete(String(tab.id));
-    const cls = 'tab' + (tab === active ? ' active' : '') + (tab.incognito ? ' incognito' : '') + (tab._closing ? ' closing' : '');
+    const cls = 'tab' + (tab === active ? ' active' : '') + (tab.incognito ? ' incognito' : '') + (tab._closing ? ' closing' : '') + (tab.pinned ? ' pinned' : '');
     if (el.className.replace(' entering', '') !== cls) el.className = cls + (el.classList.contains('entering') ? ' entering' : '');
     // Bygg om innehållet bara när det ändrats (annars blinkar favicons)
-    const html = `${favHtml(tab)}<span class="ttl">${escapeHtml(tab.title || 'Ny flik')}</span><button class="tclose" title="Stäng flik"><svg class="ic" style="width:13px;height:13px"><use href="#i-close" /></svg></button>`;
+    // Ljudikon när fliken spelar ljud eller är tystad; klick växlar ljud av/på
+    const snd = (tab.audible || tab.muted) ? `<button class="tsound${tab.muted ? ' muted' : ''}" title="${tab.muted ? 'Slå på ljudet' : 'Stäng av ljudet'}"><svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/>${tab.muted ? '<path d="m23 9-6 6M17 9l6 6"/>' : '<path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/>'}</svg></button>` : '';
+    const html = `${favHtml(tab)}<span class="ttl">${escapeHtml(tab.title || 'Ny flik')}</span>${snd}<button class="tclose" title="Stäng flik"><svg class="ic" style="width:13px;height:13px"><use href="#i-close" /></svg></button>`;
     if (el._html !== html) { el.innerHTML = html; el._html = html; }
     el.title = tab.title || '';
     const want = prev ? prev.nextSibling : host.firstChild;
@@ -656,6 +673,8 @@ function showSettingsCat(cat) {
   if (cat === 'vanner' && typeof renderFriends === 'function') renderFriends();
   if (cat === 'kalender' && typeof renderCal === 'function') renderCal();
   if (cat === 'familj' && typeof renderFam === 'function') { renderFam(); applyKidIndicator(); if (typeof famSyncParent === 'function') famSyncParent(); }
+  if (cat === 'losenord') { if (typeof renderPasswords === 'function') renderPasswords(); if (typeof initImport === 'function') initImport(); }
+  if (cat === 'tillagg' && typeof renderExt === 'function') renderExt();
 }
 function renderEngines() {
   const list = $('engine-list'); if (!list) return; list.innerHTML = '';
@@ -910,6 +929,7 @@ function loginAs(token, email, pro, name) {
   try { loadSocMe().then(() => updateAccountBtn()); } catch {}   // hämta NYA kontots profilbild → kontoknappen
   try { window.session.login(accountKey(account)); } catch {}   // återställ kontots webbsession (Gmail m.m. tillbaka) + lås upp lösenord
   try { startParentSync(); } catch {}
+  try { synkaInit(); } catch {}   // bokmärken mellan enheter
   if (pendingKryptoAfterLogin) { pendingKryptoAfterLogin = false; openKrypto(true); }
   else if (kryptoOpen) openKrypto(true);
   if (pendingChattAfterLogin) { pendingChattAfterLogin = false; openChatt(true); }
@@ -1128,6 +1148,11 @@ async function renderKonto() {
   if (account.email && !account.isChild) rows.push(['Mejl', account.email]);
   $('kn-rows').innerHTML = rows.map((r) => '<div class="kn-row"><span class="k">' + r[0] + '</span><span class="v">' + escapeHtml(r[1]) + '</span></div>').join('');
   const dz = $('kn-danger'); if (dz) dz.style.display = account.isChild ? 'none' : 'block';
+  const sr = $('synk-row');
+  if (sr) {
+    sr.style.display = account.isChild ? 'none' : 'flex';
+    const st = $('synk-toggle'); if (st) st.checked = synkPa();
+  }
   renderPro();
   await loadSocMe();
   if (socMe && socMe.avatar) $('kn-avatar').innerHTML = '<img src="' + socMe.avatar + '" alt="">';
@@ -1762,6 +1787,64 @@ window.view.onHttpsFailed((id, url) => {
   pending.httpHost = host;
 });
 
+// ── Läsläge: bokikonen i adressfältet syns när sidan har en artikel ──
+function updateReaderBtn() { const b = $('reader-btn'); if (!b) return; b.hidden = !(active && active.url && (active.readerable || active.readerOn)); b.classList.toggle('on', !!(active && active.readerOn)); b.title = (active && active.readerOn) ? tw('Avsluta läsläget') : tw('Läsläge'); }
+window.view.onReader((id, ok, on) => { const t = byId(id); if (!t) return; t.readerable = ok; t.readerOn = !!on; if (t === active) updateReaderBtn(); });
+$('reader-btn').addEventListener('click', () => { if (active) window.view.reader(active.id, document.documentElement.dataset.theme || 'light'); });
+
+// ── Fäst flik och ljud av ──
+function setPinned(tab, on) {
+  if (!tab) return;
+  tab.pinned = !!on;
+  const i = tabs.indexOf(tab); if (i < 0) return;
+  tabs.splice(i, 1);
+  const lastPin = tabs.reduce((n, t, j) => (t.pinned ? j + 1 : n), 0);   // fästa flikar ligger först
+  tabs.splice(on ? lastPin : lastPin, 0, tab);
+  renderTabs(); saveOpenTabs();
+}
+function setMuted(tab, on) { if (!tab) return; tab.muted = !!on; window.view.mute(tab.id, tab.muted); renderTabs(); }
+function tabMenu(tab) {
+  window.view.tabMenu({ id: tab.id, pinned: !!tab.pinned, muted: !!tab.muted, hasUrl: !!tab.url, count: tabs.length, canReopen: closedTabs.length > 0 });
+}
+window.view.onTabAudio((id, audible) => { const t = byId(id); if (t && t.audible !== audible) { t.audible = audible; renderTabs(); } });
+window.view.onTabAction((action, id) => {
+  const t = byId(id); if (!t && action !== 'reopen') return;
+  if (action === 'pin') setPinned(t, !t.pinned);
+  else if (action === 'mute') setMuted(t, !t.muted);
+  else if (action === 'close') closeTab(t);
+  else if (action === 'close-others') tabs.filter((x) => x !== t && !x.pinned).forEach((x) => closeTab(x));
+  else if (action === 'close-right') tabs.slice(tabs.indexOf(t) + 1).filter((x) => !x.pinned).forEach((x) => closeTab(x));
+  else if (action === 'duplicate') { if (t.url) { const n = createTab(t.url); switchTab(n); } }
+  else if (action === 'reload') { switchTab(t); window.view.reload && window.view.reload(t.id); }
+  else if (action === 'reopen') reopenClosedTab();
+});
+
+// ── Kortkommandon som huvudprocessen skickar hit ──
+window.view.onShortcut((name, arg) => {
+  if (name === 'reopen-tab') reopenClosedTab();
+  else if (name === 'switch-tab') {
+    if (tabs.length < 2 || !active) return;
+    const i = tabs.indexOf(active);
+    switchTab(tabs[(i + arg + tabs.length) % tabs.length]);
+  } else if (name === 'tab-index') {
+    const t = arg < 0 ? tabs[tabs.length - 1] : tabs[arg];
+    if (t) switchTab(t);
+  } else if (name === 'bookmark') {
+    if (active && active.url) $('bm-star').click();
+  } else if (name === 'toggle-bmbar') {
+    bmbarOn = !bmbarOn; try { localStorage.setItem('adraze-bmbar', bmbarOn ? '1' : '0'); } catch {}
+    renderBookmarkBar(); if ($('tgl-bmbar')) $('tgl-bmbar').checked = bmbarOn;
+  }
+});
+function reopenClosedTab() {
+  const c = closedTabs.pop(); if (!c) return;
+  const t = createTab(c.url);
+  const i = tabs.indexOf(t);
+  if (i >= 0 && c.index < tabs.length - 1) { tabs.splice(i, 1); tabs.splice(Math.min(c.index, tabs.length), 0, t); }
+  if (c.pinned) setPinned(t, true);
+  switchTab(t); saveOpenTabs();
+}
+
 // Inställningar → Programuppdatering
 let updState = null, updWhen = 0;
 async function refreshUpdatePanel(force) {
@@ -1950,13 +2033,75 @@ function getBookmarks() { try { const b = JSON.parse(localStorage.getItem('skoll
 function saveBookmarks(l) { try { localStorage.setItem('skoll-bookmarks', JSON.stringify(l)); } catch {} }
 function isBookmarked(url) { return getBookmarks().some((b) => b.url === url); }
 function updateStar() { $('bm-star').classList.toggle('on', !!(active && active.url && isBookmarked(active.url))); }
+// Lägg till / ta bort bokmärke via dessa så synk och gravstenar hålls i takt
+function addBookmark(e) {
+  const l = getBookmarks();
+  if (l.some((b) => b.url === e.url)) return;
+  l.unshift({ url: e.url, title: e.title || e.url, favicon: e.favicon || null, _t: Date.now() });
+  bmTombForget(e.url); saveBookmarks(l); synkaBokmarken();
+}
+function removeBookmark(url) {
+  saveBookmarks(getBookmarks().filter((b) => b.url !== url));
+  bmTombAdd(url); synkaBokmarken();
+}
 $('bm-star').addEventListener('click', () => {
   if (!active || !active.url) return;
-  let l = getBookmarks();
-  if (isBookmarked(active.url)) l = l.filter((b) => b.url !== active.url);
-  else l.unshift({ url: active.url, title: active.title || active.url, favicon: active.favicon || null });
-  saveBookmarks(l); updateStar(); renderBookmarkBar();
+  if (isBookmarked(active.url)) removeBookmark(active.url);
+  else addBookmark({ url: active.url, title: active.title || active.url, favicon: active.favicon || null });
+  updateStar(); renderBookmarkBar();
 });
+
+/* ── Synk mellan enheter (bokmärken) ── */
+// Gravstenar: url -> tidpunkt, så borttagningar sprids till andra enheter
+function bmTombs() { try { const o = JSON.parse(localStorage.getItem('skoll-bm-tomb')); return o && typeof o === 'object' ? o : {}; } catch { return {}; } }
+function bmTombSave(o) { try { localStorage.setItem('skoll-bm-tomb', JSON.stringify(o)); } catch {} }
+function bmTombAdd(url) { const o = bmTombs(); o[url] = Date.now(); bmTombSave(o); }
+function bmTombForget(url) { const o = bmTombs(); if (o[url]) { delete o[url]; bmTombSave(o); } }
+function synkPa() {
+  if (!account || !account.token || account.isChild) return false;
+  try { return localStorage.getItem('adraze-synk') !== '0'; } catch { return true; }
+}
+let synkTimer = null, synkPagar = false;
+function synkaBokmarken(direkt) {
+  if (!synkPa()) return;
+  clearTimeout(synkTimer);
+  synkTimer = setTimeout(() => doSynkBokmarken(), direkt ? 0 : 1200);
+}
+async function doSynkBokmarken() {
+  if (!synkPa() || synkPagar) return;
+  synkPagar = true;
+  try {
+    const bm = getBookmarks();
+    const poster = bm.map((b) => ({ url: b.url, title: b.title || b.url, favicon: b.favicon || null, _t: b._t || Date.now() }));
+    const tomb = bmTombs(); const borttagna = Object.keys(tomb).map((url) => ({ url, _t: tomb[url] }));
+    const r = await window.view.synkPush(account.token, 'bokmarken', poster, borttagna).catch(() => null);
+    if (r && r.ok && Array.isArray(r.poster)) slaIhopBokmarken(r.poster);
+  } finally { synkPagar = false; }
+}
+// Ersätt lokala listan med serverns sammanfogade sanning (behåll lokal favicon om servern saknar)
+function slaIhopBokmarken(serverPoster) {
+  const lokal = new Map(getBookmarks().map((b) => [b.url, b]));
+  const ny = serverPoster.map((p) => ({ url: p.url, title: p.title || p.url, favicon: p.favicon || (lokal.get(p.url) || {}).favicon || null, _t: p._t || Date.now() }));
+  ny.sort((a, b) => (b._t || 0) - (a._t || 0));
+  saveBookmarks(ny);
+  // gravstenar som servern redan känner till kan glömmas lokalt
+  const urls = new Set(ny.map((b) => b.url)); const o = bmTombs();
+  for (const u of Object.keys(o)) if (!urls.has(u)) {} // behåll tills 90 dygn gått på servern
+  renderBookmarkBar(); updateStar();
+}
+// Vid inloggning / start: hämta serverns lista och väv ihop med lokala ändringar
+async function synkaInit() {
+  if (!synkPa()) return;
+  // Tryck upp lokala först (så en ny enhets tomma lista inte raderar allt), servern svarar med unionen
+  await doSynkBokmarken();
+}
+(function wireSynkToggle() {
+  const t = document.getElementById('synk-toggle'); if (!t) return;
+  t.addEventListener('change', () => {
+    try { localStorage.setItem('adraze-synk', t.checked ? '1' : '0'); } catch {}
+    if (t.checked) synkaInit();
+  });
+})();
 function bmShort(e) {
   let t = e.title || '';
   try { if (!t || t === e.url) t = new URL(e.url).hostname.replace(/^www\./, ''); } catch {}
@@ -1989,7 +2134,7 @@ function renderBookmarkBar() {
     c.addEventListener('auxclick', (ev) => { if (ev.button === 1) { ev.preventDefault(); createTab(url); } });  // mittenklick = ny flik
     c.addEventListener('contextmenu', (ev) => {   // högerklick = ta bort från fältet (som Brave, fast utan meny)
       ev.preventDefault();
-      saveBookmarks(getBookmarks().filter((b) => b.url !== url)); renderBookmarkBar(); updateStar();
+      removeBookmark(url); renderBookmarkBar(); updateStar();
       try { showToast('Bokmärket togs bort'); } catch {}
     });
   });
@@ -2007,7 +2152,7 @@ function openBookmarks() {
     const row = document.createElement('div'); row.className = 'hist-row';
     row.innerHTML = `${rowFav(e.favicon)}<div class="hist-txt"><div class="hist-title">${escapeHtml(e.title)}</div><div class="hist-url">${escapeHtml(e.url.replace(/^https?:\/\/(www\.)?/, ''))}</div></div><button class="row-btn" title="Ta bort"><svg class="ic ic-sm"><use href="#i-trash" /></svg></button>`;
     row.addEventListener('click', () => { closeBookmarks(); if (active) guardedNavigate(active, e.url); });
-    row.querySelector('.row-btn').addEventListener('click', (ev) => { ev.stopPropagation(); saveBookmarks(getBookmarks().filter((x) => x.url !== e.url)); openBookmarks(); updateStar(); renderBookmarkBar(); });
+    row.querySelector('.row-btn').addEventListener('click', (ev) => { ev.stopPropagation(); removeBookmark(e.url); openBookmarks(); updateStar(); renderBookmarkBar(); });
     list.appendChild(row);
   });
   hideOverlayElements();
@@ -2096,8 +2241,87 @@ async function renderPasswords() {
     list.appendChild(row);
   });
 }
-function openPasswords() { openSettings(); showSettingsCat('losenord'); renderPasswords(); }
+function openPasswords() { openSettings(); showSettingsCat('losenord'); renderPasswords(); initImport(); }
 window.view.onOpenPasswords(() => openPasswords());
+
+/* ── Importera från en annan webbläsare ── */
+let impVal = null;        // { typ, id, profil, namn }
+let impLaddad = false;
+function impSettMsg(text, err) {
+  const m = $('imp-msg'); if (!m) return;
+  if (!text) { m.hidden = true; return; }
+  m.hidden = false; m.textContent = text; m.classList.toggle('err', !!err);
+}
+async function initImport() {
+  const wrap = $('imp-src'); if (!wrap || impLaddad) return;
+  impLaddad = true;
+  let lista = []; try { lista = await window.view.importKallor(); } catch {}
+  wrap.innerHTML = '';
+  if (!Array.isArray(lista) || !lista.length) {
+    wrap.innerHTML = '<span class="imp-none">Hittade ingen annan webbläsare på datorn. Du kan ändå importera lösenord från en CSV-fil nedan.</span>';
+    return;
+  }
+  // En knapp per källa+profil (flera profiler visas med profilnamnet)
+  for (const k of lista) {
+    for (const p of k.profiler) {
+      const flera = k.profiler.length > 1;
+      const b = document.createElement('button');
+      b.className = 'imp-b';
+      b.textContent = k.namn + (flera ? ' · ' + p.namn : '');
+      b.addEventListener('click', () => {
+        impVal = { typ: k.typ, id: k.id, profil: p.id, namn: b.textContent };
+        wrap.querySelectorAll('.imp-b').forEach((x) => x.classList.remove('on'));
+        b.classList.add('on');
+        $('imp-go').disabled = false;
+        impSettMsg('');
+      });
+      wrap.appendChild(b);
+    }
+  }
+}
+function mergeBokmarken(nya) {
+  const bm = getBookmarks(); const sedda = new Set(bm.map((b) => b.url));
+  let n = 0;
+  for (const x of nya) { if (x.url && !sedda.has(x.url)) { bm.push({ url: x.url, title: x.title || x.url, favicon: '', _t: Date.now() }); sedda.add(x.url); n++; } }
+  if (n) { saveBookmarks(bm); try { renderBookmarkBar(); } catch {} synkaBokmarken(); }
+  return n;
+}
+function mergeHistorik(nya) {
+  const h = getHistory(); const vid = new Map(h.map((e, i) => [e.url, i]));
+  let n = 0;
+  for (const x of nya) {
+    if (!x.url) continue;
+    const i = vid.get(x.url);
+    if (i == null) { h.push({ url: x.url, title: x.title || x.url, favicon: '', t: x.t || Date.now(), n: x.n || 1 }); vid.set(x.url, h.length - 1); n++; }
+    else if ((x.t || 0) > (h[i].t || 0)) { h[i].t = x.t; if (x.title) h[i].title = x.title; }
+  }
+  if (n) { h.sort((a, b) => (b.t || 0) - (a.t || 0)); saveHistory(h.slice(0, 500)); }
+  return n;
+}
+if ($('imp-go')) $('imp-go').addEventListener('click', async () => {
+  if (!impVal) return;
+  const bokmarken = $('imp-bm').checked, historik = $('imp-hist').checked;
+  if (!bokmarken && !historik) { impSettMsg('Välj bokmärken eller historik.', true); return; }
+  const btn = $('imp-go'); btn.disabled = true; impSettMsg('Importerar…');
+  let r; try { r = await window.view.importLas({ ...impVal, bokmarken, historik }); } catch (e) { r = { ok: false, fel: String(e) }; }
+  btn.disabled = false;
+  if (!r || !r.ok) { impSettMsg(r && r.fel ? r.fel : 'Kunde inte läsa webbläsaren.', true); return; }
+  const nb = bokmarken ? mergeBokmarken(r.bokmarken || []) : 0;
+  const nh = historik ? mergeHistorik(r.historik || []) : 0;
+  const delar = [];
+  if (bokmarken) delar.push(nb + ' bokmärken');
+  if (historik) delar.push(nh + ' sidor i historiken');
+  impSettMsg('Klart — ' + delar.join(' och ') + ' från ' + impVal.namn + '.');
+});
+if ($('imp-csv')) $('imp-csv').addEventListener('click', async () => {
+  const btn = $('imp-csv'); btn.disabled = true; impSettMsg('Läser filen…');
+  let r; try { r = await window.view.importLosenCsv(); } catch (e) { r = { ok: false, fel: String(e) }; }
+  btn.disabled = false;
+  if (!r || (!r.ok && r.avbruten)) { impSettMsg(''); return; }
+  if (!r.ok) { impSettMsg(r.fel || 'Kunde inte importera lösenorden.', true); return; }
+  impSettMsg('Klart — ' + r.antal + ' lösenord importerade.');
+  renderPasswords();
+});
 $('pw-add-btn').addEventListener('click', async () => {
   const origin = $('pw-add-origin').value.trim(); const username = $('pw-add-user').value.trim(); const password = $('pw-add-pass').value;
   if (!origin || !password) return;
@@ -2106,6 +2330,50 @@ $('pw-add-btn').addEventListener('click', async () => {
   $('pw-add-origin').value = ''; $('pw-add-user').value = ''; $('pw-add-pass').value = '';
   renderPasswords();
 });
+
+/* ── Chrome-tillägg ── */
+function extMsg(text, sort) {
+  const m = $('ext-msg'); if (!m) return;
+  if (!text) { m.hidden = true; return; }
+  m.hidden = false; m.textContent = text; m.className = 'ext-msg ' + (sort || '');
+}
+async function renderExt() {
+  const wrap = $('ext-list'); if (!wrap) return;
+  let lista = []; try { lista = await window.view.extList(); } catch {}
+  wrap.innerHTML = '';
+  for (const e of lista) {
+    const row = document.createElement('div'); row.className = 'ext-item';
+    row.innerHTML = `<span class="ext-ico"><svg class="ic ic-sm"><use href="#i-settings" /></svg></span>`
+      + `<div style="flex:1;min-width:0;"><div class="ext-nm">${escapeHtml(e.namn)}</div>`
+      + `<div class="ext-sub">${e.version ? 'v' + escapeHtml(e.version) + ' · ' : ''}${e.aktiv ? (e.kor ? 'På' : 'På (läses in vid omstart)') : 'Av'}</div></div>`
+      + `<label class="switch" style="flex:none;"><input type="checkbox" ${e.aktiv ? 'checked' : ''}><span class="track"></span></label>`
+      + `<button class="ext-del" title="Ta bort"><svg class="ic ic-sm"><use href="#i-trash" /></svg></button>`;
+    row.querySelector('input').addEventListener('change', async (ev) => {
+      const r = await window.view.extToggle(e.id, ev.target.checked).catch(() => null);
+      if (!r || !r.ok) { extMsg((r && r.fel) || 'Kunde inte ändra tillägget.', 'err'); }
+      renderExt();
+    });
+    row.querySelector('.ext-del').addEventListener('click', async () => {
+      await window.view.extRemove(e.id).catch(() => {});
+      renderExt();
+    });
+    wrap.appendChild(row);
+  }
+}
+if ($('ext-add-btn')) {
+  const add = async () => {
+    const inp = $('ext-url'); const text = inp.value.trim();
+    if (!text) return;
+    const btn = $('ext-add-btn'); btn.disabled = true; extMsg('Laddar ner…');
+    let r; try { r = await window.view.extAdd(text); } catch (e) { r = { ok: false, fel: String(e) }; }
+    btn.disabled = false;
+    if (!r || !r.ok) { extMsg((r && r.fel) || 'Kunde inte lägga till tillägget.', 'err'); return; }
+    inp.value = ''; extMsg('Klart — ' + r.tillagg.namn + ' installerat.', 'ok');
+    renderExt();
+  };
+  $('ext-add-btn').addEventListener('click', add);
+  $('ext-url').addEventListener('keydown', (e) => { if (e.key === 'Enter') add(); });
+}
 
 /* ── Spara lösenord: flytande notis uppe till höger (ui/pwpopup.html), vit i ljust läge, mörk i mörkt ── */
 window.pw.onOffer((c) => { try { window.pw.openPopup({ cred: c, theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light' }); } catch {} });
@@ -3160,7 +3428,7 @@ applyKidIndicator();
 
 // ── Session-återställning vid uppstart — MÅSTE köras SIST, efter att all state (fam, timers, konto) är deklarerad, annars TDZ-krasch som dödar hela boot ──
 // Rensa ALDRIG webbsessionen vid start: cookies (Google-inlogg m.m.) ska överleva att man stänger browsern.
-if (account && account.token) { try { window.session.setkey(accountKey(account)); } catch {} if (account.isChild) { syncChild(); startChildSync(); } else { refreshPro(); startParentSync(); } try { loadSocMe().then(() => updateAccountBtn()); } catch {} }   // hämta profilbild → visa i kontoknappen
+if (account && account.token) { try { window.session.setkey(accountKey(account)); } catch {} if (account.isChild) { syncChild(); startChildSync(); } else { refreshPro(); startParentSync(); try { synkaInit(); } catch {} } try { loadSocMe().then(() => updateAccountBtn()); } catch {} }   // hämta profilbild → visa i kontoknappen
 // Föll inloggningen bort ur localStorage men finns krypterad i nyckelringen? Återställ (efter servervalidering).
 if (!account || !account.token) {
   try { window.session.setkey(null); } catch {}   // utloggad → inget lösenordsvalv

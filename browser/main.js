@@ -25,7 +25,11 @@ try { ({ autoUpdater } = require('electron-updater')); } catch {}
 
 // Riktig filtermotor (EasyList + EasyPrivacy) för nätverks-/kosmetisk blockering.
 const { AdrazeAdblock, registerScheme: registerAdblockScheme } = require('./adblock-adraze');
-const webb = require('./webbinst');   // säker DNS, endast HTTPS, behörigheter, nedladdningsmapp, teckenstorlek   // AdRaze-blockeraren (samma regler som tillägget)
+const webb = require('./webbinst');
+const lasvy = require('./lasvy');   // läsläge (Readability)
+const importera = require('./importera');   // importera bokmärken/historik/lösenord från andra webbläsare
+const tillagg = require('./tillagg');        // Chrome-tillägg (Chrome Web Store)
+const sok = require('./sok');                 // sök på sidan (markerar i sidan, oberoende av findInPage)   // säker DNS, endast HTTPS, behörigheter, nedladdningsmapp, teckenstorlek   // AdRaze-blockeraren (samma regler som tillägget)
 registerAdblockScheme();   // före app.ready
 
 const KRYPTO_W = 400;
@@ -116,6 +120,50 @@ function openDlPopup(ctx) {
   view.webContents.loadFile(path.join(__dirname, 'ui', 'downloads.html'));
   view.webContents.on('did-finish-load', () => { view.webContents.send('dl-data', downloads); });
 }
+
+/* Sök på sidan (Ctrl+F): en liten vy uppe till höger över fliken, som nedladdningsrutan. */
+const FIND_W = 380, FIND_H = 62;
+function positionFind(ctx) {
+  if (!ctx || !ctx.findView || ctx.win.isDestroyed()) return;
+  const b = ctx.bounds || { x: 0, y: 92, width: ctx.win.getContentBounds().width };
+  const kw = (ctx.kryptoOpen && !ctx.kryptoFull) ? KRYPTO_W : 0;
+  try { ctx.findView.setBounds({ x: Math.round(b.x + b.width - kw - FIND_W - 10), y: Math.round(b.y + (ctx.topInset || 0)), width: FIND_W, height: FIND_H }); } catch {}
+}
+async function openFind(ctx, text) {
+  if (!ctx || !ctx.win || ctx.win.isDestroyed()) return;
+  const v = ctx.visibleTab && ctx.views.get(ctx.visibleTab); if (!v) return;
+  ctx.findTab = ctx.visibleTab;
+  if (!ctx.findView) {
+    let theme = 'light'; try { theme = await ctx.win.webContents.executeJavaScript('document.documentElement.dataset.theme || "light"'); } catch {}
+    const view = new WebContentsView({ webPreferences: { nodeIntegration: true, contextIsolation: false, transparent: true } });
+    try { view.setBackgroundColor('#00000000'); } catch {}
+    view.webContents.__ctx = ctx;
+    ctx.findView = view;
+    ctx.win.contentView.addChildView(view);
+    positionFind(ctx);
+    const t = JSON.stringify({ 'Sök på sidan': T('Sök på sidan') });
+    await view.webContents.loadFile(path.join(__dirname, 'ui', 'find.html'), { query: { theme, t } }).catch(() => {});
+  } else { try { ctx.win.contentView.addChildView(ctx.findView); } catch {} positionFind(ctx); }
+  try { ctx.findView.webContents.focus(); ctx.findView.webContents.send('find-focus', text || ''); } catch {}
+}
+function closeFind(ctx, keepFocus) {
+  if (!ctx || !ctx.findView) return;
+  const v = ctx.findTab && ctx.views.get(ctx.findTab);
+  if (v) { try { sok.rensa(v.webContents); } catch {} }
+  try { ctx.win.contentView.removeChildView(ctx.findView); } catch {}
+  try { ctx.findView.webContents.close(); } catch {}
+  ctx.findView = null; ctx.findTab = null;
+  if (!keepFocus && v) { try { v.webContents.focus(); } catch {} }
+}
+// Markerar och räknar träffar direkt i sidan (sok.js), oberoende av findInPage.
+ipcMain.on('find:query', async (e, text, forward, findNext) => {
+  const ctx = e.sender.__ctx; const v = ctx && ctx.findTab && ctx.views.get(ctx.findTab); if (!v) return;
+  if (!text) { try { sok.rensa(v.webContents); } catch {} return; }
+  const dir = findNext ? (forward !== false ? 1 : -1) : 0;   // ny sökning = 0, Enter/pil = ±1
+  const r = await sok.sok(v.webContents, String(text), dir);
+  try { if (ctx.findView) ctx.findView.webContents.send('find-result', { active: r.active, total: r.total }); } catch {}
+});
+ipcMain.on('find:close', (e) => closeFind(e.sender.__ctx));
 
 /* ────────── Adblocker (kurerad värdlista – demo) ────────── */
 const AD_HOSTS = [
@@ -268,6 +316,7 @@ function canGo(wc, dir) {
 }
 function applyBounds(ctx) {
   if (!ctx) return;
+  if (ctx.findView) positionFind(ctx);
   const b = ctx.bounds;
   if (ctx.htmlFull && ctx.visibleTab && ctx.views.has(ctx.visibleTab)) {   // video/element i helskärm → täck HELA fönstret (över verktygsrad + flikar)
     const cb = ctx.win.getContentBounds();
@@ -306,7 +355,9 @@ function showOnly(ctx, tabId) {
   ctx.visibleTab = tabId;
   ctx.lastActive.set(tabId, now);
   ctx.views.forEach((v, id) => v.setVisible(id === tabId));
+  if (ctx.findView && ctx.findTab !== tabId) closeFind(ctx, true);
   applyBounds(ctx); raiseKrypto(ctx);
+  if (ctx.findView) { try { ctx.win.contentView.addChildView(ctx.findView); } catch {} positionFind(ctx); }
 }
 /* Kasta en dold, oanvänd flik: riv WebContentsView (frigör renderer-processen)
  * och minns bara URL:en. Ljudande flikar och inkognito lämnas ifred. */
@@ -518,11 +569,20 @@ function ensureView(ctx, tabId) {
     if (httpUrl) sendTo(ctx, 'https-failed', tabId, httpUrl);
   });
   wc.on('did-navigate', (_e, url) => sendTo(ctx, 'did-navigate', tabId, url, canGo(wc, -1), canGo(wc, 1)));
+  if (ctx.mutedTabs && ctx.mutedTabs.has(tabId)) { try { wc.setAudioMuted(true); } catch {} }
+  wc.on('audio-state-changed', (ev) => sendTo(ctx, 'tab-audio', tabId, !!(ev && ev.audible)));
+  wc.on('found-in-page', (_e, r) => { if (ctx.findView && ctx.findTab === tabId) { try { ctx.findView.webContents.send('find-result', { active: r.activeMatchOrdinal, total: r.matches }); } catch {} } });
+  wc.on('did-start-navigation', (_e, _u, inPage, isMain) => { if (isMain && !inPage && ctx.findTab === tabId) closeFind(ctx, true); });
   wc.on('did-navigate-in-page', (_e, url, isMain) => { if (isMain) { sendTo(ctx, 'did-navigate', tabId, url, canGo(wc, -1), canGo(wc, 1)); googleKlar(ctx, tabId, url); } });
   wc.on('page-title-updated', (_e, title) => sendTo(ctx, 'title', tabId, title));
   wc.on('page-favicon-updated', (_e, favs) => sendTo(ctx, 'favicon', tabId, (favs || [])[0] || null));
   wc.on('did-start-loading', () => sendTo(ctx, 'loading', tabId, true));
-  wc.on('did-stop-loading', () => sendTo(ctx, 'loading', tabId, false));
+  wc.on('did-stop-loading', () => {
+    sendTo(ctx, 'loading', tabId, false);
+    if (wc.__reader) return;
+    lasvy.kanLasa(wc).then((ok) => { wc.__readerable = ok; sendTo(ctx, 'reader-available', tabId, ok, false); });
+  });
+  wc.on('did-start-navigation', (_e, _u, inPage, isMain) => { if (isMain && !inPage) { wc.__reader = false; sendTo(ctx, 'reader-available', tabId, false, false); } });
   wc.on('dom-ready', () => { try { if (ctx.defaultZoom !== 1) wc.setZoomFactor(ctx.defaultZoom); } catch {} });
   // Video/element går i helskärm (sidans egen fullscreen-knapp) → täck HELA skärmen
   wc.on('enter-html-full-screen', () => { ctx._wasFull = ctx.win.isFullScreen(); ctx.htmlFull = true; setFull(ctx, true); applyBounds(ctx); });
@@ -1280,6 +1340,43 @@ ipcMain.on('view:zoom', (e, id, dir) => {
 ipcMain.on('view:print', (e, id) => { const ctx = ctxFor(e); if (!ctx) return; const v = ctx.views.get(id); if (v) printPage(ctx, v.webContents); });
 ipcMain.on('view:back', (e, id) => { const ctx = ctxFor(e); if (!ctx) return; const v = ctx.views.get(id); if (v) try { v.webContents.navigationHistory.goBack(); } catch { v.webContents.goBack(); } });
 ipcMain.on('view:forward', (e, id) => { const ctx = ctxFor(e); if (!ctx) return; const v = ctx.views.get(id); if (v) try { v.webContents.navigationHistory.goForward(); } catch { v.webContents.goForward(); } });
+// Ljud av per flik (minns även om fliken kastas och laddas om)
+ipcMain.on('view:mute', (e, id, on) => {
+  const ctx = ctxFor(e); if (!ctx) return;
+  if (!ctx.mutedTabs) ctx.mutedTabs = new Set();
+  if (on) ctx.mutedTabs.add(id); else ctx.mutedTabs.delete(id);
+  const v = ctx.views.get(id); if (v) { try { v.webContents.setAudioMuted(!!on); } catch {} }
+});
+// Högerklick på en flik
+ipcMain.on('tab:menu', (e, info) => {
+  const ctx = ctxFor(e); if (!ctx || !info) return;
+  const go = (a) => () => sendTo(ctx, 'tab-action', a, info.id);
+  const m = [
+    { label: T('Ny flik'), click: () => sendTo(ctx, 'open-new-tab') },
+    { type: 'separator' },
+    { label: T('Läs in igen'), enabled: !!info.hasUrl, click: go('reload') },
+    { label: T('Duplicera'), enabled: !!info.hasUrl, click: go('duplicate') },
+    { label: info.pinned ? T('Lossa flik') : T('Fäst flik'), click: go('pin') },
+    { label: info.muted ? T('Slå på ljudet för webbplatsen') : T('Stäng av ljudet för fliken'), click: go('mute') },
+    { type: 'separator' },
+    { label: T('Stäng'), accelerator: 'CmdOrCtrl+W', click: go('close') },
+    { label: T('Stäng andra flikar'), enabled: info.count > 1, click: go('close-others') },
+    { label: T('Stäng flikar till höger'), enabled: info.count > 1, click: go('close-right') },
+    { type: 'separator' },
+    { label: T('Öppna stängd flik igen'), accelerator: 'CmdOrCtrl+Shift+T', enabled: !!info.canReopen, click: go('reopen') },
+  ];
+  Menu.buildFromTemplate(m).popup({ window: ctx.win });
+});
+// Läsläge av/på för en flik
+ipcMain.on('view:reader', async (e, id, theme) => {
+  const ctx = ctxFor(e); if (!ctx) return;
+  const v = ctx.views.get(id); if (!v) return;
+  const wc = v.webContents;
+  if (wc.__reader) { wc.__reader = false; wc.reload(); return; }
+  const ok = await lasvy.visa(wc, theme, { title: T('Läsläge'), min: T('min läsning'), smaller: T('Mindre text'), bigger: T('Större text'), exit: T('Avsluta läsläget') });
+  if (ok) { wc.__reader = true; sendTo(ctx, 'reader-available', id, true, true); }
+  else sendTo(ctx, 'toast', T('Hittade ingen artikel att visa i läsläge.'));
+});
 ipcMain.on('view:reload', (e, id) => { const ctx = ctxFor(e); if (!ctx) return; const v = ctx.views.get(id); if (v) v.webContents.reload(); });
 ipcMain.on('view:stop', (e, id) => { const ctx = ctxFor(e); if (!ctx) return; const v = ctx.views.get(id); if (v) v.webContents.stop(); });
 ipcMain.on('view:destroy', (e, id) => {
@@ -1581,6 +1678,15 @@ async function proCall(e, method, pathname, tok) {
     return j;
   } catch { return { ok: false, message: 'Kunde inte nå servern. Kontrollera din uppkoppling.' }; }
 }
+// Synk: bokmärken mellan enheter (kräver inloggning; token kommer från skalet)
+ipcMain.handle('synk:get', async (_e, token, sorts) => {
+  if (!token) return { ok: false, error: 'no_session' };
+  return adrazeApi('/synk/get', { sorts }, token);
+});
+ipcMain.handle('synk:push', async (_e, token, sorts, poster, borttagna) => {
+  if (!token) return { ok: false, error: 'no_session' };
+  return adrazeApi('/synk/push', { sorts, poster: poster || [], borttagna: borttagna || [] }, token);
+});
 ipcMain.handle('pro:status', (e, t) => proCall(e, 'GET', 'status', t));
 ipcMain.handle('pro:cancel', (e, t) => proCall(e, 'POST', 'cancel', t));
 ipcMain.handle('pro:resume', (e, t) => proCall(e, 'POST', 'resume', t));
@@ -1640,6 +1746,31 @@ function handleShortcut(wc, input) {
   const shift = input.shift;
   const k = (input.key || '').toLowerCase();
   if (mod && !shift && k === 't') { sendTo(ctx, 'open-new-tab'); return true; }
+  // Sök på sidan
+  if (mod && !shift && k === 'f') {
+    const v = activeView(ctx); if (!v) return false;
+    const sel = wc === v.webContents ? v.webContents.executeJavaScript('String(getSelection()||"").slice(0,200)').catch(() => '') : Promise.resolve('');
+    sel.then((t) => openFind(ctx, (t || '').includes('\n') ? '' : t));
+    return true;
+  }
+  if (k === 'f3' || (mod && k === 'g')) { const back = shift; if (ctx.findView) { try { ctx.findView.webContents.send('find-step', !back); } catch {} } else openFind(ctx, ''); return true; }
+  if (k === 'escape' && ctx.findView && activeView(ctx) && wc === activeView(ctx).webContents) { closeFind(ctx); return false; }
+  // Flikar
+  if (mod && shift && k === 't') { sendTo(ctx, 'shortcut', 'reopen-tab'); return true; }
+  if ((mod && k === 'tab') || (mod && (k === 'pagedown' || k === 'pageup'))) { sendTo(ctx, 'shortcut', 'switch-tab', (k === 'pageup' || (k === 'tab' && shift)) ? -1 : 1); return true; }
+  if (mod && !shift && /^[1-9]$/.test(k)) { sendTo(ctx, 'shortcut', 'tab-index', k === '9' ? -1 : Number(k) - 1); return true; }
+  if (mod && !shift && k === 'd') { sendTo(ctx, 'shortcut', 'bookmark'); return true; }
+  if (mod && shift && k === 'b') { sendTo(ctx, 'shortcut', 'toggle-bmbar'); return true; }
+  if (mod && !shift && k === 'h') { sendTo(ctx, 'open-history'); return true; }
+  if (mod && !shift && k === 'j') { openDlPopup(ctx); return true; }
+  if (mod && shift && k === 'delete') { sendTo(ctx, 'open-settings', 'rensa'); return true; }
+  if (mod && !shift && k === 's') { const v = activeView(ctx); if (v) savePage(ctx, v.webContents); return true; }
+  if (input.alt && !mod && (k === 'arrowleft' || k === 'arrowright')) {
+    const v = activeView(ctx); if (!v) return false;
+    const nav = v.webContents.navigationHistory;
+    try { if (k === 'arrowleft') { if (nav.canGoBack()) nav.goBack(); } else if (nav.canGoForward()) nav.goForward(); } catch {}
+    return true;
+  }
   if (mod && !shift && k === 'n') { createWindow(false); return true; }
   if (mod && shift && k === 'n') { createWindow(true); return true; }
   if (mod && !shift && k === 'w') { sendTo(ctx, 'close-tab'); return true; }
@@ -1940,6 +2071,23 @@ app.whenReady().then(async () => {
   } catch {}
   applyClientHints(session.defaultSession);
   webb.setup(); webb.applyDns();
+  importera.setup({
+    // Spara importerade lösenord i det aktiva valvet (samma avdubbling som pw:save)
+    sparaLosen: (lista) => {
+      const l = loadPw(); let antal = 0;
+      for (const c of lista) {
+        if (!c.origin || !c.password) continue;
+        if (l.find((p) => p.never && p.origin === c.origin)) continue;
+        const i = l.findIndex((p) => p.origin === c.origin && p.username === (c.username || ''));
+        const rec = { origin: c.origin, username: c.username || '', password: c.password, autofill: true };
+        if (i >= 0) l[i] = { ...l[i], ...rec }; else l.unshift({ id: 'p' + Date.now() + Math.floor(Math.random() * 1e6), ...rec });
+        antal++;
+      }
+      savePwList(l); return antal;
+    },
+  });
+  tillagg.setup();
+  tillagg.laddaSparade().catch(() => {});
   webb.installPermissions(session.defaultSession, false);
   installAdblockOn(session.defaultSession);
   trackDownloads(session.defaultSession);
