@@ -84,6 +84,11 @@ class AdblockMotor {
       return true;
     } catch (e) { console.warn('[adblock] C++-motor fel:', String(e && e.message || e)); return false; }
   }
+  // Scriptlets (##+js) som gäller en värd — array av strängar ("namn, arg1, …")
+  scriptletsFor(host) {
+    if (!this.motor || !this.motor.scriptlets) return [];
+    try { return this.motor.scriptlets(host || '') || []; } catch { return []; }
+  }
   // Returnerar { block, redirect } — redirect = resursnamn ('' = ren blockering). typ = Electrons
   // resourceType; tredjePart = begäran går till annan sajt än källan.
   blockera(url, srcHost, typ, tredjePart) {
