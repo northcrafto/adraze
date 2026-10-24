@@ -650,6 +650,7 @@
             <button class="set-tab" style="--i:6" data-cat="sok"><svg class="ic"><use href="#i-globe" /></svg>Sökmotor</button>
             <button class="set-tab" style="--i:7" data-cat="sprak"><svg class="ic"><use href="#i-globe" /></svg>Språk</button>
             <button class="set-tab" style="--i:8" data-cat="nedladdningar"><svg class="ic"><use href="#i-download" /></svg>Nedladdningar</button>
+            <button class="set-tab" style="--i:8" data-cat="historik"><svg class="ic"><use href="#i-reload" /></svg>Historik</button>
             <button class="set-tab" style="--i:9" data-cat="tillganglighet"><svg class="ic"><use href="#i-eye" /></svg>Tillgänglighet</button>
             <div class="set-glbl">Skydd</div>
             <button class="set-tab" style="--i:10" data-cat="integritet"><svg class="ic"><use href="#i-shield" /></svg>Integritet &amp; säkerhet</button>
@@ -957,6 +958,25 @@
               <label class="switch"><input id="tgl-askdl" type="checkbox" /><span class="track"></span></label>
             </div>
             <div class="mt-6" id="downloads-list"></div>
+          </div>
+
+          <style>
+            .hist-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+            .hist-search { flex: 1; min-width: 0; height: 38px; border: 1px solid var(--color-line); border-radius: 10px; padding: 0 12px; font-size: 13px; color: var(--color-navy-900); outline: none; background: #fff; }
+            .hist-search:focus { border-color: var(--color-terra); }
+            #hist-clear { flex: none; height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--color-line); background: #fff; color: var(--color-navy-700); font-size: 13px; font-weight: 650; cursor: pointer; white-space: nowrap; }
+            #hist-clear.armed { color: var(--color-danger); border-color: var(--color-danger); }
+            #hist-list { border: 1px solid var(--color-line); border-radius: 14px; overflow: hidden; }
+            #hist-list .hist-row { cursor: pointer; }
+          </style>
+          <div class="set-panel hidden" data-cat="historik">
+            <h2 class="set-h">Historik</h2>
+            <p class="set-lead mb-3">Sidor du har besökt. Klicka för att öppna igen, eller ta bort det du inte vill spara.</p>
+            <div class="hist-head">
+              <input id="hist-search" class="hist-search" type="search" placeholder="Sök i historiken" autocomplete="off" spellcheck="false" />
+              <button id="hist-clear"><span id="hist-clear-txt">Rensa allt</span></button>
+            </div>
+            <div id="hist-list"></div>
           </div>
 
           <div class="set-panel hidden" data-cat="sprak">
