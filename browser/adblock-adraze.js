@@ -337,7 +337,9 @@ class AdrazeAdblock {
       e.returnValue = { pa: true, skript: this.skript };
     });
     ipcMain.on('adraze:css', (e, host) => { e.returnValue = { css: this.cssFor(String(host || '')), lockbete: this.lockbete }; });
-    ipcMain.on('adraze:kakor', (e, host) => { e.returnValue = this.isOn() ? this.kakCssFor(String(host || '')) : ''; });
+    // Kakhanteraren är på så fort blockeraren är på (inte bara på sajter med egen kak-CSS),
+    // så content/kakor.js kan avvisa t.ex. YouTubes egen samtyckesruta som saknar CSS-regler.
+    ipcMain.on('adraze:kakor', (e, host) => { e.returnValue = { pa: this.isOn(), css: this.isOn() ? this.kakCssFor(String(host || '')) : '' }; });
     ipcMain.on('adraze:dolj-regler', (e, host, tokens) => { e.returnValue = this.doljRegler(String(host || ''), Array.isArray(tokens) ? tokens.map(String) : []); });
     ipcMain.on('adraze:rakna', (_e, typ) => { this.onCount(String(typ || '')); });
   }

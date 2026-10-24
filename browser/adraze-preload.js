@@ -23,9 +23,9 @@ const { ipcRenderer, webFrame } = require('electron');
         return { lockbete: r.css ? r.lockbete : null };
       }
       case 'kakor': {
-        const kak = ipcRenderer.sendSync('adraze:kakor', msg.host);
-        css(kak);
-        return { pa: !!kak };
+        const kak = ipcRenderer.sendSync('adraze:kakor', msg.host) || {};
+        css(kak.css || '');
+        return { pa: !!kak.pa };
       }
       case 'kak-dolj': {
         const KAK_DOLJ = {
