@@ -1128,10 +1128,76 @@ async function renderKonto() {
   if (account.email && !account.isChild) rows.push(['Mejl', account.email]);
   $('kn-rows').innerHTML = rows.map((r) => '<div class="kn-row"><span class="k">' + r[0] + '</span><span class="v">' + escapeHtml(r[1]) + '</span></div>').join('');
   const dz = $('kn-danger'); if (dz) dz.style.display = account.isChild ? 'none' : 'block';
+  renderPro();
   await loadSocMe();
   if (socMe && socMe.avatar) $('kn-avatar').innerHTML = '<img src="' + socMe.avatar + '" alt="">';
   if (typeof renderSetHero === 'function') renderSetHero();
 }
+// ── AdRaze Pro i Konto: status, säga upp och ångra ──
+const tp = (k) => (typeof window.t === 'function') ? window.t(k) : k;
+function proDate(ms) { try { return new Date(ms).toLocaleDateString(document.documentElement.lang || 'sv', { day: 'numeric', month: 'long', year: 'numeric' }); } catch { return ''; } }
+function proPrice(p) {
+  if (!p || p.belopp == null) return '';
+  const kr = Math.round(p.belopp / 100);
+  return kr + ' kr ' + (p.intervall === 'year' ? tp('per år') : tp('i månaden'));
+}
+let proBusy = false;
+async function renderPro() {
+  const box = $('pro-box'); if (!box) return;
+  if (!account || account.isChild) { box.hidden = true; return; }
+  box.hidden = false;
+  ['pro-cancel', 'pro-resume', 'pro-get'].forEach((id) => { $(id).hidden = true; });
+  $('pro-confirm').hidden = true; $('pro-err').hidden = true; $('pro-actions').hidden = false;
+  $('pro-desc').textContent = tp('Hämtar…'); $('pro-chip').textContent = ''; $('pro-chip').className = 'set-chip dim';
+  let st; try { st = await window.view.proStatus(account && account.token); } catch { st = null; }
+  if (!st || !st.ok) { $('pro-desc').textContent = (st && st.message) || tp('Kunde inte hämta din Pro-status.'); return; }
+  const sub = st.prenumeration;
+  box.dataset.until = st.until || '';
+  if (st.pro && sub && (sub.status === 'active' || sub.status === 'trialing')) {
+    if (sub.slutar) {
+      $('pro-chip').textContent = tp('Uppsagd'); $('pro-chip').className = 'set-chip dim';
+      $('pro-desc').textContent = tp('Pro gäller till') + ' ' + proDate(sub.periodSlut) + ' ' + tp('och förnyas inte.');
+      $('pro-resume').hidden = false;
+    } else {
+      $('pro-chip').textContent = tp('Aktiv'); $('pro-chip').className = 'set-chip';
+      $('pro-desc').textContent = [proPrice(sub), tp('Förnyas') + ' ' + proDate(sub.periodSlut) + '.'].filter(Boolean).join(' · ');
+      $('pro-cancel').hidden = false;
+    }
+  } else if (st.pro) {
+    $('pro-chip').textContent = tp('Aktiv'); $('pro-chip').className = 'set-chip';
+    $('pro-desc').textContent = new Date(st.until).getFullYear() >= 2099 ? tp('Pro för alltid på det här kontot.') : tp('Pro gäller till') + ' ' + proDate(st.until) + '.';
+  } else {
+    $('pro-chip').textContent = tp('Gratis'); $('pro-chip').className = 'set-chip dim';
+    $('pro-desc').textContent = tp('Falk, din AI-assistent, ingår i Pro för 79 kr i månaden.');
+    $('pro-get').hidden = false;
+  }
+}
+function proError(msg) { const e = $('pro-err'); e.textContent = msg; e.hidden = false; }
+$('pro-cancel').addEventListener('click', async () => {
+  let st = null; try { st = await window.view.proStatus(account && account.token); } catch {}
+  const end = st && st.prenumeration ? proDate(st.prenumeration.periodSlut) : '';
+  $('pro-confirm-txt').textContent = tp('Du behåller Pro till') + ' ' + end + '. ' + tp('Efter det förnyas den inte och du debiteras inte igen. Falk slutar då att fungera.');
+  $('pro-confirm').hidden = false; $('pro-actions').hidden = true;
+});
+$('pro-keep').addEventListener('click', () => { $('pro-confirm').hidden = true; $('pro-actions').hidden = false; });
+$('pro-cancel-go').addEventListener('click', async () => {
+  if (proBusy) return; proBusy = true; const b = $('pro-cancel-go'); b.disabled = true;
+  const r = await window.view.proCancel(account && account.token).catch(() => null);
+  proBusy = false; b.disabled = false;
+  if (!r || !r.ok) { proError((r && r.message) || tp('Det gick inte att säga upp just nu. Försök igen.')); return; }
+  showToast(tp('Pro är uppsagd. Du har kvar den till') + ' ' + proDate(r.until) + '.');
+  renderPro();
+});
+$('pro-resume').addEventListener('click', async () => {
+  if (proBusy) return; proBusy = true; const b = $('pro-resume'); b.disabled = true;
+  const r = await window.view.proResume(account && account.token).catch(() => null);
+  proBusy = false; b.disabled = false;
+  if (!r || !r.ok) { proError((r && r.message) || tp('Det gick inte just nu. Försök igen.')); return; }
+  showToast(tp('Pro fortsätter som vanligt.'));
+  renderPro();
+});
+$('pro-get').addEventListener('click', () => { try { closeSettings(); } catch {} openKrypto(true); });
+
 function showConfirmDelete() {
   if (!account || account.isChild || document.getElementById('kn-delmodal')) return;
   const ov = document.createElement('div'); ov.id = 'kn-delmodal';
