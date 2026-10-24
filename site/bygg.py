@@ -30,7 +30,7 @@ UTAN_SITEMAP = {KONTO}  # inloggningen ska inte indexeras
 TILLGANGAR = {
     KONTO: ['style.css', 'konto.css', 'konto.js', 'main.js', 'fonts', 'mail/vinkar.gif', 'logo-mark.svg', 'favicon.png',
             'app-google.html', 'app-google.css', 'app-google.js'],
-    LADDA: ['style.css', 'download.css', 'download.js', 'main.js', 'fonts', 'logo-mark.svg', 'favicon.png', 'install.sh', 'adraze-512.png',
+    LADDA: ['style.css', 'download.css', 'download.js', 'main.js', 'fonts', 'logo-mark.svg', 'favicon.png', 'install.sh', 'adraze-512.png', 'os',
             '4bbbc2d76725e865a25008fd19941943.txt'],  # IndexNow-nyckeln (måste ligga på samma värd)
 }
 # Sätt till butikslänken när Google har godkänt tillägget: knapparna går då direkt dit och zip-instruktionerna försvinner

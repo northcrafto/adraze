@@ -6,6 +6,7 @@
 <title>AdRaze letöltése – a böngésző és a bővítmény</title>
 <meta name="description" content="Töltsd le az AdRaze böngészőt Linuxra, vagy add hozzá az AdRaze-t a Chrome-hoz, a Brave-hez és az Edge-hez. Ingyenes és nyílt forráskódú.">
 <link rel="icon" href="/favicon.png">
+<link rel="preload" as="image" href="/os/tux.png">
 <link rel="alternate" hreflang="sv" href="https://download.adraze.app/">
 <link rel="alternate" hreflang="en" href="https://download.adraze.app/en/">
 <link rel="alternate" hreflang="nb" href="https://download.adraze.app/nb/">
@@ -72,51 +73,85 @@
 </div>
 
 
-<main class="dl" id="dl" data-version="Legújabb verzió: {v}">
-  <section class="wrap dl-topp">
-    <h1>AdRaze letöltése</h1>
-    <p class="dl-ingress">A böngésző, amely még betöltés előtt megállítja a reklámokat, és a bővítmény a böngésződhöz, amelyet már használsz.</p>
+<main id="dl" data-version="Legújabb verzió: {v}">
+  <!-- Linux: terminalraden är själva nedladdningen -->
+  <section class="dl-hero" id="linux">
+    <div class="wrap dl-hero-grid">
+      <div class="dl-hero-text">
+        <h1>AdRaze letöltése</h1>
+        <p class="dl-ingress">A böngésző, amely még betöltés előtt megállítja a reklámokat. Linuxon egyetlen sorral telepíted a terminálban.</p>
+        <div class="dl-rad">
+          <code id="dl-kommando">curl -fsSL https://download.adraze.app/install.sh | sh</code>
+          <button type="button" class="btn liq dl-kopiera" id="dl-kopiera" data-klar="Másolva"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M216,28H88A12,12,0,0,0,76,40V76H40A12,12,0,0,0,28,88V216a12,12,0,0,0,12,12H168a12,12,0,0,0,12-12V180h36a12,12,0,0,0,12-12V40A12,12,0,0,0,216,28ZM156,204H52V100H156Zm48-48H180V88a12,12,0,0,0-12-12H100V52H204Z"/></svg><span>Másolás</span></button>
+        </div>
+      </div>
+      <figure class="dl-tux">
+        <img src="/os/tux.png" alt="Tux" width="160" height="160">
+        <figcaption id="dl-version" hidden></figcaption>
+      </figure>
+    </div>
   </section>
 
-  <section class="wrap" aria-labelledby="dl-browser">
-    <h2 class="dl-rubrik" id="dl-browser"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M216,36H40A20,20,0,0,0,20,56V200a20,20,0,0,0,20,20H216a20,20,0,0,0,20-20V56A20,20,0,0,0,216,36Zm-4,24V84H44V60ZM44,196V108H212v88Z"/></svg>Az AdRaze böngésző</h2>
-    <div class="dl-kort-rad">
-      <article class="dl-kort dl-aktiv" data-os="linux">
-        <div class="dl-os"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M231.49,217.38a12,12,0,0,1-16.89-1.9C213.19,213.72,180,171.24,180,88A52,52,0,1,0,76,88c0,83.24-33.21,125.72-34.62,127.48A12,12,0,0,1,22.6,200.53C23,200,52,162.06,52,88a76,76,0,1,1,152,0c0,74.19,29.1,112.16,29.4,112.54A12,12,0,0,1,231.49,217.38ZM104,120a16,16,0,1,0-16-16A16,16,0,0,0,104,120Zm64-16a16,16,0,1,0-16,16A16,16,0,0,0,168,104ZM95.26,155l28,12a12,12,0,0,0,9.45,0l28-12A12,12,0,0,0,151.26,133l-23.27,10-23.27-10A12,12,0,0,0,95.26,155ZM128,184a57.12,57.12,0,0,0-38.66,15.15,12,12,0,0,0,16.23,17.69,32.86,32.86,0,0,1,44.85,0,12,12,0,1,0,16.23-17.69A57.1,57.1,0,0,0,128,184Z"/></svg><h3>Linux</h3></div>
-        <p>AppImage 64 bites Linuxra. Magától frissül.</p>
-        <a class="btn btn-stor liq" href="/linux"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M228,144v64a12,12,0,0,1-12,12H40a12,12,0,0,1-12-12V144a12,12,0,0,1,24,0v52H204V144a12,12,0,0,1,24,0Zm-108.49,8.49a12,12,0,0,0,17,0l40-40a12,12,0,0,0-17-17L140,115V32a12,12,0,0,0-24,0v83L96.49,95.51a12,12,0,0,0-17,17Z"/></svg>Letöltés Linuxra</a>
-        <p class="dl-version" id="dl-version" hidden></p>
-      </article>
-      <article class="dl-kort" data-os="windows">
-        <div class="dl-os"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M99.69,51.88a12,12,0,0,0-9.84-2.6l-60,10.91A12,12,0,0,0,20,72v36a12,12,0,0,0,12,12H92a12,12,0,0,0,12-12V61.09A12,12,0,0,0,99.69,51.88ZM80,96H44V82l36-6.54ZM215.69,30.79a12,12,0,0,0-9.84-2.6L129.85,42A12,12,0,0,0,120,53.82V108a12,12,0,0,0,12,12h76a12,12,0,0,0,12-12V40A12,12,0,0,0,215.69,30.79ZM196,96H144V63.83l52-9.45ZM92,136H32a12,12,0,0,0-12,12v36a12,12,0,0,0,9.85,11.81l60,10.91A12,12,0,0,0,104,194.91V148A12,12,0,0,0,92,136ZM80,180.53,44,174V160H80ZM208,136H132a12,12,0,0,0-12,12v54.18A12,12,0,0,0,129.85,214l76,13.82A12,12,0,0,0,220,216V148A12,12,0,0,0,208,136Zm-12,65.62-52-9.45V160h52Z"/></svg><h3>Windows</h3></div>
-        <p>Hamarosan a Microsoft Store-ban.</p>
-        <span class="dl-snart">Hamarosan</span>
-      </article>
-      <article class="dl-kort" data-os="mac">
-        <div class="dl-os"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M227,168a12,12,0,0,0-4.21-5.09C207.25,152.22,204,133.68,204,120c0-16.17,12.68-30.6,20.25-37.76a12,12,0,0,0,0-17.43C210.89,52.17,188.81,44,168,44a76.29,76.29,0,0,0-40,11.37,75.59,75.59,0,0,0-93.58,11A78.64,78.64,0,0,0,12,123.51,131,131,0,0,0,53.43,216,43.81,43.81,0,0,0,83.6,228h87.69a43.87,43.87,0,0,0,32.05-13.85,127.63,127.63,0,0,0,18.4-25.39c1.57-2.88,3-5.71,4.14-8.41C227.47,176.67,229.12,172.87,227,168Zm-41.23,29.82A19.78,19.78,0,0,1,171.29,204H83.6a19.85,19.85,0,0,1-13.7-5.42A107.18,107.18,0,0,1,36,122.88,54.49,54.49,0,0,1,51.5,83.28,50.86,50.86,0,0,1,88,68h.72A51.5,51.5,0,0,1,120.48,79.4a12,12,0,0,0,15,0A51.41,51.41,0,0,1,168,68a67.24,67.24,0,0,1,29.88,7.4C186.26,89.66,180,105.13,180,120c0,23.33,7.47,42.89,21.25,56.19A103.3,103.3,0,0,1,185.76,197.81ZM128.75,13A43.83,43.83,0,0,1,142.17,1.51a12,12,0,0,1,11.64,21,19.84,19.84,0,0,0-6.11,5.24A12,12,0,0,1,128.75,13Z"/></svg><h3>macOS</h3></div>
-        <p>Dolgozunk rajta.</p>
-        <span class="dl-snart">Hamarosan</span>
-      </article>
-    </div>
-
-    <div class="dl-terminal">
-      <p><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M72.5,150.63,100.79,128,72.5,105.37a12,12,0,1,1,15-18.74l40,32a12,12,0,0,1,0,18.74l-40,32a12,12,0,0,1-15-18.74ZM144,172h32a12,12,0,0,0,0-24H144a12,12,0,0,0,0,24ZM236,56V200a20,20,0,0,1-20,20H40a20,20,0,0,1-20-20V56A20,20,0,0,1,40,36H216A20,20,0,0,1,236,56Zm-24,4H44V196H212Z"/></svg>Vagy telepítsd egyetlen sorral a terminálban:</p>
-      <div class="dl-rad">
-        <code id="dl-kommando">curl -fsSL https://download.adraze.app/install.sh | sh</code>
-        <button type="button" class="dl-kopiera" id="dl-kopiera" data-klar="Másolva"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M216,28H88A12,12,0,0,0,76,40V76H40A12,12,0,0,0,28,88V216a12,12,0,0,0,12,12H168a12,12,0,0,0,12-12V180h36a12,12,0,0,0,12-12V40A12,12,0,0,0,216,28ZM156,204H52V100H156Zm48-48H180V88a12,12,0,0,0-12-12H100V52H204Z"/></svg><span>Másolás</span></button>
+  <section class="dl-hur">
+    <div class="wrap dl-hur-grid">
+      <ol class="dl-steg">
+        <li><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M216,28H88A12,12,0,0,0,76,40V76H40A12,12,0,0,0,28,88V216a12,12,0,0,0,12,12H168a12,12,0,0,0,12-12V180h36a12,12,0,0,0,12-12V40A12,12,0,0,0,216,28ZM156,204H52V100H156Zm48-48H180V88a12,12,0,0,0-12-12H100V52H204Z"/></svg><span>Másold ki a sort</span></li>
+        <li><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M72.5,150.63,100.79,128,72.5,105.37a12,12,0,1,1,15-18.74l40,32a12,12,0,0,1,0,18.74l-40,32a12,12,0,0,1-15-18.74ZM144,172h32a12,12,0,0,0,0-24H144a12,12,0,0,0,0,24ZM236,56V200a20,20,0,0,1-20,20H40a20,20,0,0,1-20-20V56A20,20,0,0,1,40,36H216A20,20,0,0,1,236,56Zm-24,4H44V196H212Z"/></svg><span>Illeszd be a terminálba</span></li>
+        <li><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M216,36H40A20,20,0,0,0,20,56V200a20,20,0,0,0,20,20H216a20,20,0,0,0,20-20V56A20,20,0,0,0,216,36Zm-4,24V84H44V60ZM44,196V108H212v88Z"/></svg><span>Indítsd az AdRaze-t az alkalmazásmenüből</span></li>
+      </ol>
+      <div class="dl-distros">
+        <p>Működik ezeken</p>
+        <ul aria-label="Működik ezeken">
+          <li><img src="/os/ubuntu.svg" alt="Ubuntu" width="36" height="36"></li>
+          <li><img src="/os/mint.svg" alt="Linux Mint" width="36" height="36"></li>
+          <li><img src="/os/debian.svg" alt="Debian" width="36" height="36"></li>
+          <li><img src="/os/fedora.svg" alt="Fedora" width="36" height="36"></li>
+          <li><img src="/os/arch.svg" alt="Arch Linux" width="36" height="36"></li>
+        </ul>
       </div>
     </div>
   </section>
 
-  <section class="wrap" aria-labelledby="dl-ext">
-    <h2 class="dl-rubrik" id="dl-ext"><svg class="ikon" aria-hidden="true" fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0 1 12 6.545h10.691A12 12 0 0 0 12 0zM1.931 5.47A11.943 11.943 0 0 0 0 12c0 6.012 4.42 10.991 10.189 11.864l3.953-6.847a5.45 5.45 0 0 1-6.865-2.29zm13.342 2.166a5.446 5.446 0 0 1 1.45 7.09l.002.001h-.002l-5.344 9.257c.206.01.413.016.621.016 6.627 0 12-5.373 12-12 0-1.54-.29-3.011-.818-4.364zM12 16.364a4.364 4.364 0 1 1 0-8.728 4.364 4.364 0 0 1 0 8.728Z"/></svg>A bővítmény</h2>
-    <article class="dl-kort dl-bred">
-      <p>Chrome-hoz, Brave-hez, Edge-hez és más Chromium-alapú böngészőkhöz.</p>
-      <a class="btn btn-stor liq" href="https://adraze.app/hu/#installera"><svg class="ikon" aria-hidden="true" fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0 1 12 6.545h10.691A12 12 0 0 0 12 0zM1.931 5.47A11.943 11.943 0 0 0 0 12c0 6.012 4.42 10.991 10.189 11.864l3.953-6.847a5.45 5.45 0 0 1-6.865-2.29zm13.342 2.166a5.446 5.446 0 0 1 1.45 7.09l.002.001h-.002l-5.344 9.257c.206.01.413.016.621.016 6.627 0 12-5.373 12-12 0-1.54-.29-3.011-.818-4.364zM12 16.364a4.364 4.364 0 1 1 0-8.728 4.364 4.364 0 0 1 0 8.728Z"/></svg>Hozzáadás a Chrome-hoz</a>
-    </article>
+  <!-- Windows och macOS: ljust block -->
+  <section class="dl-andra">
+    <div class="wrap">
+      <h2>Windows és macOS</h2>
+      <div class="dl-andra-grid">
+        <article class="dl-os" id="windows" data-os="windows">
+          <img src="/os/windows.svg" alt="" width="64" height="64">
+          <div>
+            <h3>Windows</h3>
+            <p>Hamarosan a Microsoft Store-ban.</p>
+          </div>
+          <span class="dl-snart">Hamarosan</span>
+        </article>
+        <article class="dl-os" id="mac" data-os="mac">
+          <img src="/os/apple.svg" alt="" width="64" height="64">
+          <div>
+            <h3>macOS</h3>
+            <p>Dolgozunk rajta.</p>
+          </div>
+          <span class="dl-snart">Hamarosan</span>
+        </article>
+      </div>
+    </div>
   </section>
 
-  <p class="wrap dl-not">Ingyenes és nyílt forráskódú. <a class="nav-link" href="https://github.com/northcrafto/adraze-dl/releases">Minden verzió a GitHubon</a></p>
+  <!-- Tillägget: orange block -->
+  <section class="dl-ext" id="tillagg">
+    <div class="wrap dl-ext-grid">
+      <div>
+        <h2>Megtartanád a saját böngésződet?</h2>
+        <p>Chrome-hoz, Brave-hez, Edge-hez és más Chromium-alapú böngészőkhöz.</p>
+      </div>
+      <ul class="dl-webblasare" aria-label="Chrome, Brave, Vivaldi">
+        <li><img src="/os/chrome.svg" alt="Chrome" width="44" height="44"></li>
+        <li><img src="/os/brave.svg" alt="Brave" width="44" height="44"></li>
+        <li><img src="/os/vivaldi.svg" alt="Vivaldi" width="44" height="44"></li>
+      </ul>
+      <a class="btn btn-stor liq liq-mork" href="https://adraze.app/hu/#installera"><svg class="ikon" aria-hidden="true" fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0 1 12 6.545h10.691A12 12 0 0 0 12 0zM1.931 5.47A11.943 11.943 0 0 0 0 12c0 6.012 4.42 10.991 10.189 11.864l3.953-6.847a5.45 5.45 0 0 1-6.865-2.29zm13.342 2.166a5.446 5.446 0 0 1 1.45 7.09l.002.001h-.002l-5.344 9.257c.206.01.413.016.621.016 6.627 0 12-5.373 12-12 0-1.54-.29-3.011-.818-4.364zM12 16.364a4.364 4.364 0 1 1 0-8.728 4.364 4.364 0 0 1 0 8.728Z"/></svg>Hozzáadás a Chrome-hoz</a>
+    </div>
+  </section>
 </main>
 
 <footer class="fot">
@@ -126,7 +161,7 @@
       <li><a class="nav-link" href="https://adraze.app/hu/statistik">Statisztika</a></li>
       <li><a class="nav-link" href="https://adraze.app/hu/integritet">Adatvédelem</a></li>
       <li><a class="nav-link" href="https://adraze.app/hu/stod">Támogass minket</a></li>
-      <li><a class="nav-link" href="https://github.com/northcrafto/adraze">GitHub</a></li>
+      <li><a class="nav-link" href="https://github.com/northcrafto/adraze-dl/releases">Minden verzió a GitHubon</a></li>
     </ul>
   </div>
 </footer>

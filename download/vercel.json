@@ -3,27 +3,17 @@
   "redirects": [
     {
       "source": "/linux",
-      "destination": "https://github.com/northcrafto/adraze-dl/releases/latest/download/AdRaze.AppImage",
-      "permanent": false
-    },
-    {
-      "source": "/linux/appimage",
-      "destination": "https://github.com/northcrafto/adraze-dl/releases/latest/download/AdRaze.AppImage",
-      "permanent": false
-    },
-    {
-      "source": "/AdRaze.AppImage",
-      "destination": "https://github.com/northcrafto/adraze-dl/releases/latest/download/AdRaze.AppImage",
+      "destination": "/#linux",
       "permanent": false
     },
     {
       "source": "/windows",
-      "destination": "/",
+      "destination": "/#windows",
       "permanent": false
     },
     {
       "source": "/mac",
-      "destination": "/",
+      "destination": "/#mac",
       "permanent": false
     },
     {

@@ -6,6 +6,7 @@
 <title>{{t:dl.meta_title}}</title>
 <meta name="description" content="{{t:dl.meta_description}}">
 <link rel="icon" href="/favicon.png">
+<link rel="preload" as="image" href="/os/tux.png">
 {{alternates}}
 <link rel="stylesheet" href="/style.css">
 <link rel="stylesheet" href="/download.css">
@@ -13,51 +14,85 @@
 <body class="dl-sida">
 {{topp}}
 
-<main class="dl" id="dl" data-version="{{t:dl.version}}">
-  <section class="wrap dl-topp">
-    <h1>{{t:dl.title}}</h1>
-    <p class="dl-ingress">{{t:dl.lead}}</p>
+<main id="dl" data-version="{{t:dl.version}}">
+  <!-- Linux: terminalraden är själva nedladdningen -->
+  <section class="dl-hero" id="linux">
+    <div class="wrap dl-hero-grid">
+      <div class="dl-hero-text">
+        <h1>{{t:dl.title}}</h1>
+        <p class="dl-ingress">{{t:dl.lead}}</p>
+        <div class="dl-rad">
+          <code id="dl-kommando">curl -fsSL https://download.adraze.app/install.sh | sh</code>
+          <button type="button" class="btn liq dl-kopiera" id="dl-kopiera" data-klar="{{t:dl.copied}}">{{copy}}<span>{{t:dl.copy}}</span></button>
+        </div>
+      </div>
+      <figure class="dl-tux">
+        <img src="/os/tux.png" alt="Tux" width="160" height="160">
+        <figcaption id="dl-version" hidden></figcaption>
+      </figure>
+    </div>
   </section>
 
-  <section class="wrap" aria-labelledby="dl-browser">
-    <h2 class="dl-rubrik" id="dl-browser">{{browser}}{{t:dl.browser}}</h2>
-    <div class="dl-kort-rad">
-      <article class="dl-kort dl-aktiv" data-os="linux">
-        <div class="dl-os">{{linux-logo}}<h3>Linux</h3></div>
-        <p>{{t:dl.linux_note}}</p>
-        <a class="btn btn-stor liq" href="/linux">{{download-simple}}{{t:dl.linux_btn}}</a>
-        <p class="dl-version" id="dl-version" hidden></p>
-      </article>
-      <article class="dl-kort" data-os="windows">
-        <div class="dl-os">{{windows-logo}}<h3>Windows</h3></div>
-        <p>{{t:dl.windows_note}}</p>
-        <span class="dl-snart">{{t:dl.soon}}</span>
-      </article>
-      <article class="dl-kort" data-os="mac">
-        <div class="dl-os">{{apple-logo}}<h3>macOS</h3></div>
-        <p>{{t:dl.mac_note}}</p>
-        <span class="dl-snart">{{t:dl.soon}}</span>
-      </article>
-    </div>
-
-    <div class="dl-terminal">
-      <p>{{terminal-window}}{{t:dl.terminal}}</p>
-      <div class="dl-rad">
-        <code id="dl-kommando">curl -fsSL https://download.adraze.app/install.sh | sh</code>
-        <button type="button" class="dl-kopiera" id="dl-kopiera" data-klar="{{t:dl.copied}}">{{copy}}<span>{{t:dl.copy}}</span></button>
+  <section class="dl-hur">
+    <div class="wrap dl-hur-grid">
+      <ol class="dl-steg">
+        <li>{{copy}}<span>{{t:dl.do_copy}}</span></li>
+        <li>{{terminal-window}}<span>{{t:dl.do_paste}}</span></li>
+        <li>{{browser}}<span>{{t:dl.do_start}}</span></li>
+      </ol>
+      <div class="dl-distros">
+        <p>{{t:dl.works_on}}</p>
+        <ul aria-label="{{t:dl.works_on}}">
+          <li><img src="/os/ubuntu.svg" alt="Ubuntu" width="36" height="36"></li>
+          <li><img src="/os/mint.svg" alt="Linux Mint" width="36" height="36"></li>
+          <li><img src="/os/debian.svg" alt="Debian" width="36" height="36"></li>
+          <li><img src="/os/fedora.svg" alt="Fedora" width="36" height="36"></li>
+          <li><img src="/os/arch.svg" alt="Arch Linux" width="36" height="36"></li>
+        </ul>
       </div>
     </div>
   </section>
 
-  <section class="wrap" aria-labelledby="dl-ext">
-    <h2 class="dl-rubrik" id="dl-ext">{{chrome}}{{t:dl.ext}}</h2>
-    <article class="dl-kort dl-bred">
-      <p>{{t:dl.ext_note}}</p>
-      <a class="btn btn-stor liq" href="{{installera}}">{{chrome}}{{t:nav.add_chrome}}</a>
-    </article>
+  <!-- Windows och macOS: ljust block -->
+  <section class="dl-andra">
+    <div class="wrap">
+      <h2>{{t:dl.other_title}}</h2>
+      <div class="dl-andra-grid">
+        <article class="dl-os" id="windows" data-os="windows">
+          <img src="/os/windows.svg" alt="" width="64" height="64">
+          <div>
+            <h3>Windows</h3>
+            <p>{{t:dl.windows_note}}</p>
+          </div>
+          <span class="dl-snart">{{t:dl.soon}}</span>
+        </article>
+        <article class="dl-os" id="mac" data-os="mac">
+          <img src="/os/apple.svg" alt="" width="64" height="64">
+          <div>
+            <h3>macOS</h3>
+            <p>{{t:dl.mac_note}}</p>
+          </div>
+          <span class="dl-snart">{{t:dl.soon}}</span>
+        </article>
+      </div>
+    </div>
   </section>
 
-  <p class="wrap dl-not">{{t:dl.free}} <a class="nav-link" href="https://github.com/northcrafto/adraze-dl/releases">{{t:dl.all_releases}}</a></p>
+  <!-- Tillägget: orange block -->
+  <section class="dl-ext" id="tillagg">
+    <div class="wrap dl-ext-grid">
+      <div>
+        <h2>{{t:dl.ext_title}}</h2>
+        <p>{{t:dl.ext_note}}</p>
+      </div>
+      <ul class="dl-webblasare" aria-label="Chrome, Brave, Vivaldi">
+        <li><img src="/os/chrome.svg" alt="Chrome" width="44" height="44"></li>
+        <li><img src="/os/brave.svg" alt="Brave" width="44" height="44"></li>
+        <li><img src="/os/vivaldi.svg" alt="Vivaldi" width="44" height="44"></li>
+      </ul>
+      <a class="btn btn-stor liq liq-mork" href="{{installera}}">{{chrome}}{{t:nav.add_chrome}}</a>
+    </div>
+  </section>
 </main>
 
 <footer class="fot">
@@ -67,7 +102,7 @@
       <li><a class="nav-link" href="{{pre}}/statistik">{{t:footer.stats}}</a></li>
       <li><a class="nav-link" href="{{pre}}/integritet">{{t:footer.privacy}}</a></li>
       <li><a class="nav-link" href="{{pre}}/stod">{{t:nav.support}}</a></li>
-      <li><a class="nav-link" href="https://github.com/northcrafto/adraze">GitHub</a></li>
+      <li><a class="nav-link" href="https://github.com/northcrafto/adraze-dl/releases">{{t:dl.all_releases}}</a></li>
     </ul>
   </div>
 </footer>

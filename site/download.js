@@ -4,14 +4,16 @@
 
   const knapp = $('dl-kopiera');
   knapp.addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText($('dl-kommando').textContent); } catch { return; }
+    const rad = $('dl-kommando').textContent;
+    try { await navigator.clipboard.writeText(rad); }
+    catch { getSelection().selectAllChildren($('dl-kommando')); return; } // utan urklipp: markera raden så den kan kopieras för hand
     const text = knapp.querySelector('span'), forut = text.textContent;
     text.textContent = knapp.dataset.klar;
     setTimeout(() => { text.textContent = forut; }, 1600);
   });
 
   const ua = navigator.userAgent;
-  const os = /Windows/.test(ua) ? 'windows' : /Mac OS X|Macintosh/.test(ua) ? 'mac' : /Linux|X11/.test(ua) && !/Android/.test(ua) ? 'linux' : null;
+  const os = /Windows/.test(ua) ? 'windows' : /Mac OS X|Macintosh/.test(ua) ? 'mac' : null;
   if (os) document.querySelector(`[data-os="${os}"]`)?.classList.add('dl-ditt');
 
   fetch('https://api.github.com/repos/northcrafto/adraze-dl/releases/latest')
