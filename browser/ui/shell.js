@@ -636,6 +636,7 @@ function closeSettings() {
   }
 }
 function showSettingsCat(cat) {
+  if (cat === 'uppdatering' || cat === 'om') refreshUpdatePanel(false);
   document.querySelectorAll('#settings-nav .set-tab').forEach((b) => b.classList.toggle('on', b.dataset.cat === cat));
   document.querySelectorAll('#settings .set-panel').forEach((p) => p.classList.toggle('hidden', p.dataset.cat !== cat));
   if (cat === 'wallet' && typeof renderWallet === 'function') renderWallet();
@@ -1548,7 +1549,44 @@ function showToast(msg) {
 }
 $('menu-btn').addEventListener('click', () => window.view.openMenu());
 window.view.onToast((m) => showToast(m));
-window.view.onUpdateReady((v) => showUpdateBanner(v));
+window.view.onUpdateReady((v) => { showUpdateBanner(v); refreshUpdatePanel(false); });
+// Inställningar → Programuppdatering
+let updState = null, updWhen = 0;
+async function refreshUpdatePanel(force) {
+  if (!window.view.updateStatus) return;
+  const tt = (k) => (typeof window.t === 'function') ? window.t(k) : k;
+  const card = $('upd-card'); if (!card) return;
+  if (force) { card.dataset.state = 'checking'; $('upd-title').textContent = tt('Söker efter uppdateringar…'); $('upd-desc').textContent = ''; $('upd-check').disabled = true; }
+  let st; try { st = await window.view.updateStatus(force); } catch { st = null; }
+  $('upd-check').disabled = false;
+  if (!st) { card.dataset.state = 'error'; $('upd-title').textContent = tt('Kunde inte söka efter uppdateringar'); $('upd-desc').textContent = tt('Kolla internetanslutningen och försök igen.'); return; }
+  updState = st; updWhen = Date.now();
+  $('upd-cur').textContent = st.current; $('upd-latest').textContent = st.latest;
+  $('upd-when').textContent = tt('Just nu');
+  const om = $('om-version'); if (om) om.textContent = tt('Version') + ' ' + st.current;
+  $('upd-dot').hidden = !st.available;
+  const notes = $('upd-notes');
+  $('upd-install').hidden = true; $('upd-download').hidden = true;
+  if (st.available) {
+    card.dataset.state = 'new';
+    $('upd-title').textContent = tt('En ny version finns') + ': AdRaze ' + st.latest;
+    if (st.ready) { $('upd-desc').textContent = tt('Den är redan hämtad. Starta om så är du klar.'); $('upd-install').hidden = false; }
+    else if (st.auto) { $('upd-desc').textContent = tt('Den hämtas i bakgrunden. Starta om när den är klar.'); $('upd-install').hidden = false; }
+    else { $('upd-desc').textContent = tt('Ladda ner den nya versionen och ersätt den du har.'); $('upd-download').hidden = false; }
+    if (st.notes) { notes.hidden = false; notes.innerHTML = '<b>' + escapeHtml(tt('Nytt i') + ' ' + st.latest) + '</b>' + escapeHtml(st.notes); } else notes.hidden = true;
+  } else {
+    card.dataset.state = 'ok';
+    $('upd-title').textContent = tt('AdRaze är uppdaterad');
+    $('upd-desc').textContent = tt('Du har den senaste versionen') + ' (' + st.current + ').';
+    notes.hidden = true;
+  }
+}
+$('upd-download')?.addEventListener('click', () => { try { closeSettings(); } catch {} createTab('https://github.com/northcrafto/adraze-dl/releases/latest'); });
+$('upd-check')?.addEventListener('click', () => refreshUpdatePanel(true));
+$('upd-install')?.addEventListener('click', () => { const b = $('upd-install'); b.disabled = true; b.textContent = (typeof window.t === 'function' ? window.t('Startar om…') : 'Startar om…'); window.view.installUpdate(); });
+setInterval(() => { if (updWhen && $('upd-when')) { const m = Math.round((Date.now() - updWhen) / 60000); const tt = (k) => (typeof window.t === 'function') ? window.t(k) : k; $('upd-when').textContent = m < 1 ? tt('Just nu') : (m + ' ' + tt('min sedan')); } }, 30000);
+setTimeout(() => refreshUpdatePanel(false), 7000);
+setInterval(() => refreshUpdatePanel(false), 30 * 60 * 1000);
 function showUpdateBanner(version) {
   // Fanns redan en banner (äldre version hämtad)? Bygg om den med den nya versionen,
   // och behåll "Startar om…" om användaren redan tryckt.
