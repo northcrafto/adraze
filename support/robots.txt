@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://support.adraze.app/sitemap.xml

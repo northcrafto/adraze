@@ -1,0 +1,148 @@
+/* support.adraze.app: mörk hero med formuläret i ett vitt kort, ljust block under; ärendetråden och teampanelen */
+.sup-sida { background: var(--bg); }
+#sup section, #ar section { padding: 0; }
+[hidden] { display: none !important; }
+
+/* Fält (samma form som kontosidan) */
+.falt { display: grid; gap: 6px; }
+.falt span { font-size: 14px; font-weight: 600; }
+.falt input, .falt textarea {
+  width: 100%; padding: 0 16px; border-radius: 14px; border: 1.5px solid var(--linje); background: #fff;
+  font: inherit; font-size: 16px; color: var(--ink); transition: border-color .2s ease, box-shadow .2s ease;
+}
+.falt input { height: 50px; }
+.falt textarea { padding: 14px 16px; resize: vertical; min-height: 140px; line-height: 1.55; }
+.falt input:focus, .falt textarea:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 4px rgb(255 75 31 / .14); }
+.falt [aria-invalid="true"] { border-color: var(--accent); }
+.sup-fel { color: #c2360f; font-weight: 600; font-size: 15px; }
+
+/* Hero */
+.sup-hero { background: var(--mork); color: #fff; padding: 80px 0 96px !important; }
+.sup-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 64px; align-items: start; }
+.sup-intro { position: sticky; top: 112px; }
+.sup-hero h1 { font-size: clamp(42px, 5.4vw, 76px); letter-spacing: -0.05em; line-height: .98; max-width: 10ch; }
+.sup-ingress { margin-top: 22px; font-size: 18px; max-width: 40ch; color: #c9c9cf; }
+.sup-vinkar { width: 168px; margin-top: 40px; padding: 14px 14px 0; background: #fff; border-radius: 24px; }
+
+.sup-kort { background: var(--yta); color: var(--ink); border-radius: 28px; padding: 32px; }
+#sup-form { display: grid; gap: 18px; }
+.sup-amnen { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.sup-amnen legend { font-size: 14px; font-weight: 600; margin-bottom: 10px; padding: 0; }
+.sup-amnen label { cursor: pointer; }
+.sup-amnen input { position: absolute; opacity: 0; pointer-events: none; }
+.sup-amnen span { display: inline-block; padding: 10px 16px; border-radius: 999px; border: 1.5px solid var(--linje); font-size: 15px; font-weight: 600; transition: border-color .15s, background .15s, color .15s; }
+.sup-amnen label:hover span { border-color: var(--dov); }
+.sup-amnen input:checked + span { background: var(--ink); border-color: var(--ink); color: #fff; }
+.sup-amnen input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sup-tva { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.sup-tva:has(#sup-mejl[hidden]) { grid-template-columns: minmax(0, 1fr); }
+.sup-inne { font-size: 14px; color: var(--dov); margin-top: -6px; }
+.sup-hjalp { font-size: 14px; color: var(--dov); margin-top: -10px; }
+.sup-falla { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+#sup-skicka { justify-self: start; }
+#sup-skicka svg, .ar-svar .btn svg { width: 18px; height: 18px; }
+
+.sup-tack { display: grid; gap: 14px; justify-items: start; padding: 8px 0; }
+.sup-tack > svg { width: 44px; height: 44px; color: var(--accent); }
+.sup-tack h2 { font-size: 32px; letter-spacing: -0.03em; }
+.sup-tack p { color: var(--dov); font-size: 17px; max-width: 46ch; }
+.sup-knappar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+
+/* Ljust block: dina ärenden + hitta själv */
+.sup-mina { padding: 80px 0 0 !important; }
+.sup-mina h2, .sup-sjalv h2 { font-size: clamp(28px, 3.2vw, 40px); letter-spacing: -0.04em; }
+.sup-lista { list-style: none; padding: 0; margin-top: 24px; display: grid; gap: 10px; }
+.sup-rad { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 18px; align-items: center; padding: 18px 22px; border-radius: 18px; background: var(--yta); border: 1px solid var(--linje); }
+.sup-rad b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sup-rad-nr { color: var(--dov); font-size: 14px; font-variant-numeric: tabular-nums; }
+.sup-pill { display: inline-block; padding: 5px 11px; border-radius: 999px; font-size: 13px; font-weight: 600; white-space: nowrap; background: #ececE8; color: var(--dov); }
+.sup-pill.s-oppen { background: #fff1ec; color: #b3330f; }
+.sup-pill.s-besvarad { background: #e9f6ee; color: #1d6b3c; }
+
+.sup-sjalv { padding: 80px 0 104px !important; }
+.sup-sjalv-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr); gap: 14px; margin-top: 24px; }
+.sup-lank { display: grid; gap: 6px; align-content: start; padding: 26px; border-radius: 22px; background: var(--yta); border: 1px solid var(--linje); color: var(--ink); text-decoration: none; }
+.sup-lank:first-child { background: var(--ink); color: #fff; border-color: var(--ink); }
+.sup-lank b { font-size: 20px; letter-spacing: -0.02em; }
+.sup-lank span { color: var(--dov); font-size: 15px; }
+.sup-lank:first-child span { color: #a7a7af; }
+.sup-lank svg { width: 20px; height: 20px; margin-top: 14px; color: var(--accent); }
+
+/* Ärendet (kundens vy) */
+.ar { padding: 56px 0 104px; min-height: calc(100dvh - 73px); }
+.ar-wrap { max-width: 820px; }
+.ar-tillbaka { font-size: 15px; font-weight: 600; color: var(--dov); }
+.ar-laddar, .ar-saknas { margin-top: 48px; font-size: 18px; color: var(--dov); }
+.ar-topp { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin-top: 28px; }
+.ar-nr { font-size: 14px; color: var(--dov); font-variant-numeric: tabular-nums; }
+.ar-topp h1 { font-size: clamp(28px, 4vw, 44px); letter-spacing: -0.04em; line-height: 1.05; margin-top: 6px; }
+.ar-status { margin-top: 6px; }
+.ar-trad { list-style: none; padding: 0; margin-top: 32px; display: grid; gap: 14px; }
+.ar-m { max-width: 82%; display: grid; gap: 6px; }
+.ar-du { justify-self: end; justify-items: end; }
+.ar-vem { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--dov); }
+.ar-text { padding: 14px 18px; border-radius: 20px; font-size: 16px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ar-du .ar-text { background: var(--ink); color: #fff; border-bottom-right-radius: 6px; }
+.ar-team .ar-text { background: var(--yta); border: 1px solid var(--linje); border-bottom-left-radius: 6px; }
+.ar-stangd { margin-top: 24px; padding: 14px 18px; border-radius: 14px; background: #ececE8; color: var(--dov); font-size: 15px; }
+.ar-svar { display: grid; gap: 14px; margin-top: 32px; padding-top: 28px; border-top: 1px solid var(--linje); }
+.ar-svar .btn { justify-self: start; }
+
+/* Teampanelen */
+.tm-sida { background: var(--bg); }
+.tm-topp { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 24px; background: var(--mork); color: #fff; }
+.tm-topp .logo span { color: var(--accent); font-weight: 600; margin-left: 4px; }
+.tm-topp p { color: #a7a7af; font-size: 14px; }
+.tm { padding: 24px; }
+.tm-info { color: var(--dov); }
+.tm-ut { max-width: 520px; margin: 64px auto; display: grid; gap: 16px; justify-items: start; }
+.tm-ut h1 { font-size: 32px; letter-spacing: -0.03em; }
+.tm-ut p { color: var(--dov); }
+.tm-grid { display: grid; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); gap: 20px; align-items: start; }
+.tm-sidolist { position: sticky; top: 24px; display: grid; gap: 12px; max-height: calc(100dvh - 120px); overflow: auto; }
+.tm-filter { display: flex; flex-wrap: wrap; gap: 6px; }
+.tm-filter button { all: unset; cursor: pointer; padding: 8px 13px; border-radius: 999px; border: 1.5px solid var(--linje); font-size: 14px; font-weight: 600; }
+.tm-filter button[aria-selected="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+.tm-filter b { margin-left: 4px; color: var(--accent); }
+.tm-filter button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tm-lista { list-style: none; padding: 0; display: grid; gap: 8px; }
+.tm-rad { all: unset; box-sizing: border-box; cursor: pointer; width: 100%; display: grid; gap: 4px; padding: 14px 16px; border-radius: 16px; background: var(--yta); border: 1.5px solid var(--linje); }
+.tm-rad[aria-current="true"] { border-color: var(--ink); }
+.tm-rad:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tm-rad-topp { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; }
+.tm-rad-topp b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tm-rad-topp time { color: var(--dov); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tm-rad-amne { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tm-rad-snutt { color: var(--dov); font-size: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tm-rad .sup-pill { justify-self: start; margin-top: 4px; }
+.tm-tom, .tm-valj { color: var(--dov); padding: 24px 4px; }
+.tm-arende { background: var(--yta); border: 1px solid var(--linje); border-radius: 24px; padding: 28px; min-height: 60dvh; }
+.tm-arende-topp { display: flex; justify-content: space-between; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+.tm-arende-topp h2 { font-size: 28px; letter-spacing: -0.03em; margin-top: 4px; }
+.tm-fran { color: var(--dov); font-size: 14px; margin-top: 4px; }
+.tm-status { display: flex; gap: 6px; }
+.tm-status button { all: unset; cursor: pointer; padding: 8px 13px; border-radius: 999px; border: 1.5px solid var(--linje); font-size: 14px; font-weight: 600; }
+.tm-status button[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+.tm-status button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tm .ar-team .ar-text { background: var(--bg); }
+
+@media (max-width: 900px) {
+  .sup-hero { padding: 40px 0 56px !important; }
+  .sup-grid { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .sup-intro { position: static; }
+  .sup-vinkar { display: none; }
+  .sup-kort { padding: 22px; border-radius: 22px; }
+  .sup-tva { grid-template-columns: minmax(0, 1fr); }
+  #sup-skicka, .ar-svar .btn { justify-self: stretch; }
+  .sup-rad { grid-template-columns: minmax(0, 1fr) auto; }
+  .sup-rad-nr { grid-row: 2; }
+  .sup-sjalv-grid { grid-template-columns: minmax(0, 1fr); }
+  .sup-mina { padding-top: 56px !important; }
+  .sup-sjalv { padding: 56px 0 72px !important; }
+  .ar { padding-top: 32px; }
+  .ar-m { max-width: 92%; }
+  .tm { padding: 12px; }
+  .tm-grid { grid-template-columns: minmax(0, 1fr); }
+  .tm-sidolist { position: static; max-height: none; }
+  .tm-arende { padding: 18px; }
+}
