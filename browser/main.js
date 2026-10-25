@@ -2167,7 +2167,7 @@ function startAutoUpdate() {
   const log = (m) => { try { fs.appendFileSync(path.join(app.getPath('userData'), 'update.log'), m + '\n'); } catch {} };
   try {
     autoUpdater.autoDownload = true;
-    autoUpdater.autoInstallOnAppQuit = true;
+    autoUpdater.autoInstallOnAppQuit = false;     // aldrig tyst byte vid stängning – bara via "Starta om & uppdatera"-notisen
     autoUpdater.on('checking-for-update', () => log('checking @ ' + app.getVersion()));
     autoUpdater.on('update-available', (i) => log('available ' + (i && i.version)));
     autoUpdater.on('update-not-available', (i) => log('up-to-date ' + (i && i.version)));
@@ -2176,7 +2176,6 @@ function startAutoUpdate() {
       log('downloaded ' + v);
       if (v && v === updDownloaded) return;     // samma fil igen (cache-träff vid omkoll) – tyst
       updDownloaded = v;
-      broadcast('toast', 'AdRaze ' + ((info && info.version) || '') + ' ' + T('är hämtad — uppdateras nästa gång du startar om.'));
       broadcast('update-ready', v);
     });
     autoUpdater.on('error', (e) => log('error ' + (e && e.message)));

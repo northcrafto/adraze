@@ -1861,7 +1861,7 @@ function reopenClosedTab() {
 }
 
 // Inställningar → Programuppdatering
-let updState = null, updWhen = 0;
+let updState = null, updWhen = 0, updSenare = '';
 async function refreshUpdatePanel(force) {
   if (!window.view.updateStatus) return;
   const tt = (k) => (typeof window.t === 'function') ? window.t(k) : k;
@@ -1871,6 +1871,8 @@ async function refreshUpdatePanel(force) {
   $('upd-check').disabled = false;
   if (!st) { card.dataset.state = 'error'; $('upd-title').textContent = tt('Kunde inte söka efter uppdateringar'); $('upd-desc').textContent = tt('Kolla internetanslutningen och försök igen.'); return; }
   updState = st; updWhen = Date.now();
+  // Hämtad men notisen missad (t.ex. hämtningen blev klar innan fönstret laddat) → visa den nu
+  if (st.ready && st.readyVersion !== updSenare && !document.getElementById('update-banner')) showUpdateBanner(st.readyVersion);
   $('upd-cur').textContent = st.current; $('upd-latest').textContent = st.latest;
   $('upd-when').textContent = tt('Just nu');
   const om = $('om-version'); if (om) om.textContent = tt('Version') + ' ' + st.current;
@@ -1911,7 +1913,7 @@ function showUpdateBanner(version) {
     + '<button id="upd-later" style="background:none;border:0;color:rgba(255,255,255,.7);font-size:13px;cursor:pointer;">' + escapeHtml(tt('Senare')) + '</button>';
   document.body.appendChild(bar);
   bar.querySelector('#upd-now').addEventListener('click', () => { bar.dataset.busy = '1'; bar.querySelector('#upd-now').textContent = tt('Startar om…'); try { window.view.installUpdate(); } catch {} });
-  bar.querySelector('#upd-later').addEventListener('click', () => bar.remove());
+  bar.querySelector('#upd-later').addEventListener('click', () => { updSenare = version || ''; bar.remove(); });
   if (busy) { bar.dataset.busy = '1'; bar.querySelector('#upd-now').textContent = tt('Startar om…'); }
 }
 // Nudge: om AdRaze inte är standardwebbläsare, visa en banner (som uppdateringsnotisen).
