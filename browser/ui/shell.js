@@ -116,6 +116,7 @@ function saveOpenTabs() {
     const keep = tabs.filter((t) => !t.incognito && !t._closing && t.url);
     localStorage.setItem(OPEN_TABS_KEY, JSON.stringify(keep.map((t) => t.url)));
     localStorage.setItem('adraze-pinned-tabs', JSON.stringify(keep.filter((t) => t.pinned).map((t) => t.url)));
+    localStorage.setItem('adraze-active-tab', String(keep.indexOf(active)));   // -1 = startsidan var öppen
   } catch {}
 }
 // Vid start: 'tidigare' (förra flikarna + startsidan), 'ny' (bara en ny flik) eller 'sida' (en viss adress)
@@ -134,9 +135,12 @@ function restoreTabs() {
   try { urls = JSON.parse(localStorage.getItem(OPEN_TABS_KEY) || '[]'); } catch {}
   urls = (Array.isArray(urls) ? urls : []).filter((u) => typeof u === 'string' && u);
   let pins = []; try { pins = JSON.parse(localStorage.getItem('adraze-pinned-tabs') || '[]'); } catch {}
-  const home = createTab(null);                                 // öppna alltid på huvudmenyn (hemfliken)
-  for (let i = 0; i < urls.length; i++) { const t = createTab(urls[i]); if (pins.includes(urls[i])) setPinned(t, true); }   // tidigare flikar återställs och finns kvar i flik-raden
-  switchTab(home);                                              // ...men vi landar alltid på huvudmenyn
+  let ai = -1; try { ai = parseInt(localStorage.getItem('adraze-active-tab') || '-1', 10); } catch {}   // läs innan createTab skriver över
+  const back = [];
+  for (let i = 0; i < urls.length; i++) { const t = createTab(urls[i]); back.push(t); if (pins.includes(urls[i])) setPinned(t, true); }
+  // Landa på fliken man var på när AdRaze stängdes (eller startsidan om det var den / inga flikar fanns)
+  switchTab(back[ai] || createTab(null));
+  saveOpenTabs();
 }
 // Full-sides-rutor (inställningar m.m.) hör till fliken de öppnades på.
 const OVERLAY_IDS = ['settings', 'login', 'bookmarks', 'bgpick', 'qr'];
@@ -169,6 +173,7 @@ function switchTab(tab) {
   renderTabs(); updateNavButtons(); updateStar();
   try { updateReaderBtn(); } catch {}
   try { permSwitched(); } catch {}
+  saveOpenTabs();
 }
 function closeTab(tab) {
   if (!tab || tab._closing) return;
