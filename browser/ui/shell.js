@@ -156,7 +156,7 @@ function showActiveTab() {
   } else {
     window.view.hide();
     if (active && active.incognito) { newtabpage.classList.add('hidden'); incogpage.classList.remove('hidden'); }
-    else { incogpage.classList.add('hidden'); newtabpage.classList.remove('hidden'); greet(); }
+    else { incogpage.classList.add('hidden'); newtabpage.classList.remove('hidden'); greet(); try { tabBg(active); } catch {} }
   }
 }
 function switchTab(tab) {
@@ -1619,17 +1619,63 @@ window.addEventListener('resize', () => { if (sug.open) positionSug(); });
 /* ── Bakgrundsval ── */
 const CURATED_BG = [10, 1018, 1039, 1043, 1015, 1057, 1061, 1069, 29, 164, 180, 225]
   .map((id) => ({ thumb: `https://picsum.photos/id/${id}/320/200`, full: `https://picsum.photos/id/${id}/1920/1080` }));
+// 'slump' = ny Pexels-bild för varje ny flik (standard). Listan byggs av tools/hamta-bakgrunder.py
+// och bilderna laddas direkt från images.pexels.com – ingen API-nyckel i appen.
+try { if (!localStorage.getItem('adraze-bg-slump-v1')) { localStorage.setItem('skoll-bg', 'slump'); localStorage.setItem('adraze-bg-slump-v1', '1'); } } catch {}
+function bgMode() { let bg = null; try { bg = localStorage.getItem('skoll-bg'); } catch {} return bg || 'slump'; }
+let bgLista = null, bgLaddar = null, bgNasta = null;
+function laddaBgLista() {
+  if (bgLista) return Promise.resolve(bgLista);
+  if (!bgLaddar) bgLaddar = fetch('bakgrunder.json').then((r) => r.json()).then((l) => (bgLista = Array.isArray(l) ? l : [])).catch(() => (bgLista = []));
+  return bgLaddar;
+}
+function bgUrl(p) {
+  const w = Math.min(3840, Math.round((screen.width || 1920) * (window.devicePixelRatio || 1) / 160) * 160);
+  return 'https://images.pexels.com/photos/' + p[0] + '/' + p[1] + '?auto=compress&cs=tinysrgb&w=' + w;
+}
+// Slumpa en bild som inte visats nyligen och förladda den, så nästa nya flik får den direkt.
+function slumpaBg() {
+  if (!bgLista || !bgLista.length) return null;
+  let sett = []; try { sett = JSON.parse(localStorage.getItem('adraze-bg-sett') || '[]'); } catch {}
+  let p = null;
+  for (let i = 0; i < 20; i++) { p = bgLista[Math.floor(Math.random() * bgLista.length)]; if (!sett.includes(p[0])) break; }
+  sett.push(p[0]); if (sett.length > 500) sett = sett.slice(-500);
+  try { localStorage.setItem('adraze-bg-sett', JSON.stringify(sett)); } catch {}
+  const bg = { url: bgUrl(p), credit: 'Foto: ' + p[2] + ' · Pexels', farg: p[3] };
+  const img = new Image(); img.onload = () => { bg.klar = true; }; img.src = bg.url;
+  return bg;
+}
+function visaBg(bg) {
+  const el = $('nt-bg');
+  el.style.backgroundColor = bg.farg || '';
+  const satt = () => { if (active && active.bg === bg) { el.style.backgroundImage = `url("${bg.url}")`; $('nt-credit').textContent = bg.credit; } };
+  if (bg.klar) { satt(); return; }
+  el.style.backgroundImage = 'none'; $('nt-credit').textContent = '';
+  const img = new Image(); img.onload = () => { bg.klar = true; satt(); }; img.src = bg.url;
+}
+// Anropas när en flik visar startsidan: fliken behåller sin bild, en ny flik får en ny.
+async function tabBg(tab) {
+  if (!tab || tab.incognito || bgMode() !== 'slump') return;
+  if (!tab.bg) {
+    await laddaBgLista();
+    if (tab.bg || active !== tab) return;
+    tab.bg = bgNasta || slumpaBg(); bgNasta = slumpaBg();
+    if (!tab.bg) return;
+  }
+  if (active === tab) visaBg(tab.bg);
+}
 function applyStoredBg() {
-  let bg = null; try { bg = localStorage.getItem('skoll-bg'); } catch {}
-  if (!bg || bg === 'daily') { loadDailyImage(); return; }
+  const bg = bgMode();
+  if (bg === 'slump') { tabBg(active); return; }
+  $('nt-bg').style.backgroundColor = '';
+  if (bg === 'daily') { loadDailyImage(); return; }
   $('nt-bg').style.backgroundImage = `url("${bg}")`;
   $('nt-credit').textContent = '';
 }
 function setBg(val) {
   try { localStorage.setItem('skoll-bg', val); } catch {}
   $('nt-credit').textContent = '';
-  if (val === 'daily') loadDailyImage();
-  else $('nt-bg').style.backgroundImage = `url("${val}")`;
+  applyStoredBg();
 }
 function renderBgGrid() {
   const g = $('bg-grid'); g.innerHTML = '';
@@ -1645,6 +1691,7 @@ function closeBgPick() { $('bgpick').classList.add('hidden'); }
 $('settings-bg-btn').addEventListener('click', openBgPick);
 $('bgpick-close').addEventListener('click', closeBgPick);
 $('bg-daily').addEventListener('click', () => { setBg('daily'); closeBgPick(); });
+$('bg-slump').addEventListener('click', () => { if (active) active.bg = null; setBg('slump'); closeBgPick(); });
 $('bg-upload-btn').addEventListener('click', () => $('bg-file').click());
 $('bg-file').addEventListener('change', (e) => {
   const f = e.target.files && e.target.files[0]; if (!f) return;
