@@ -2,7 +2,7 @@
 
 Allt som behövs för att skicka in och uppdatera AdRaze. Konsol: https://chrome.google.com/webstore/devconsole
 
-- **Objekt-ID:** `cgdjdjgdoklomdphknggkhfghlglcppd` (skickad för granskning 2026-10-22, version 0.2.0)
+- **Objekt-ID:** `cgdjdjgdoklomdphknggkhfghlglcppd` (skickad 2026-10-22, version 0.2.0; avslagen 2026-10-23 för "sökordsspam" = uppräkning av filterlistornas namn i beskrivningen – nämn aldrig andra adblockers/listor vid namn i butikstexten)
 - **Butikssida (när den är publicerad):** https://chromewebstore.google.com/detail/cgdjdjgdoklomdphknggkhfghlglcppd
 - **Utgivare:** AdRaze, konto cetoari9@gmail.com (verifierad kontaktadress), icke-näringsidkare
 - **Kategori:** Integritet och säkerhet
@@ -38,11 +38,11 @@ Höj `version` i `extension/manifest.json` före varje uppladdning. Storen avvis
 AdRaze stoppar reklam, spårare, popups och omdirigeringar till farliga sidor. Gratis, för alltid, och utan "godkänd reklam".
 
 Det här gör AdRaze:
-• Blockerar reklam och spårare med EasyList, EasyPrivacy, Frellwits svenska filter, uBlock Origins filter, AdGuard Popups och Peter Lowes lista.
+• Blockerar reklam, spårare och popups med välkända öppna filterlistor – inklusive en lista gjord för svenska sajter.
 • Döljer tomma annonsrutor så att sidan ser ren ut.
 • Tystar och hoppar över reklam på YouTube.
 • Avvisar onödiga kakor automatiskt i vanliga kakrutor. Rutor utan gratis nej döljs utan att något godkänns.
-• Stoppar popunders och osynliga klickfällor. Inloggning och betalning (BankID, Klarna, Swish, Google, Apple m.fl.) öppnas alltid.
+• Stoppar popunders och osynliga klickfällor. Inloggnings- och betalfönster öppnas alltid som vanligt.
 • Stoppar omdirigeringar till kända bluff- och skadeprogramssidor.
 • Pausa skyddet eller kakrutorna per sajt med ett klick.
 
