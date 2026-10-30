@@ -1565,18 +1565,6 @@ $('incog-search').addEventListener('keydown', (e) => { if (e.key === 'Enter' && 
 const suggestEl = $('omni-suggest');
 const sug = { items: [], sel: -1, input: null, anchor: null, open: false, comp: null };
 function domainOf(u) { try { return new URL(u).hostname.replace(/^www\./, '').toLowerCase(); } catch { return ''; } }
-function historyMatches(q) {
-  q = (q || '').trim().toLowerCase();
-  if (!q || (active && active.incognito)) return [];       // ingen historik-autocomplete i inkognito
-  const seen = new Set(); const scored = [];
-  for (const e of getHistory()) {
-    const host = domainOf(e.url); if (!host || seen.has(host)) continue;
-    if (!host.startsWith(q)) continue;                       // BARA domäner som BÖRJAR med det man skrivit
-    seen.add(host); scored.push({ url: e.url, host, title: e.title || host, favicon: e.favicon, n: e.n || 0 });
-  }
-  scored.sort((a, b) => (b.n || 0) - (a.n || 0));           // mest besökta först
-  return scored.slice(0, 7);
-}
 function bestCompletion(q) {
   q = (q || '').trim().toLowerCase();
   if (!q || /[\s/]/.test(q) || (active && active.incognito)) return null;
@@ -1589,22 +1577,91 @@ function positionSug() {
   const r = sug.anchor.getBoundingClientRect();
   suggestEl.style.left = r.left + 'px'; suggestEl.style.top = (r.bottom + 5) + 'px'; suggestEl.style.width = r.width + 'px';
 }
+// Brave-stil: en rad per förslag. Sökningar: det du skrivit normalt, resten fett.
+// Sidor: "Titel - adress" med adressen i blått och dina ord feta.
+function boldRest(text, typed) {
+  const t = (typed || '').toLowerCase();
+  if (t && text.toLowerCase().startsWith(t) && text.length > t.length) return escapeHtml(text.slice(0, t.length)) + '<b>' + escapeHtml(text.slice(t.length)) + '</b>';
+  return escapeHtml(text);
+}
+function boldWords(text, typed) {
+  const ord = (typed || '').toLowerCase().split(/\s+/).filter((w) => w.length > 0).sort((x, y) => y.length - x.length);
+  if (!ord.length) return escapeHtml(text);
+  const lc = text.toLowerCase(); const mark = new Array(text.length).fill(false);
+  for (const w of ord) for (const i of wordStarts(lc, w)) for (let k = i; k < i + w.length; k++) mark[k] = true;
+  let out = '', on = false;
+  for (let i = 0; i < text.length; i++) { if (mark[i] !== on) { out += mark[i] ? '<b>' : '</b>'; on = mark[i]; } out += escapeHtml(text[i]); }
+  return out + (on ? '</b>' : '');
+}
+// Var i texten ordet börjar som ett eget ord (som Brave: "y" matchar "YouTube", inte "mycket")
+function wordStarts(lc, w) {
+  const ut = []; let i = lc.indexOf(w);
+  while (i >= 0) { if (i === 0 || !/[\p{L}\p{N}]/u.test(lc[i - 1])) ut.push(i); i = lc.indexOf(w, i + 1); }
+  return ut;
+}
+function sugIcon(it) {
+  if (it.kind === 'past') return '<svg class="ic ic-sm"><use href="#i-history"/></svg>';
+  if (it.search) return '<svg class="ic ic-sm"><use href="#i-search"/></svg>';
+  return it.favicon ? `<img src="${escapeHtml(it.favicon)}" data-glob="sm" alt="">` : '<svg class="ic ic-sm"><use href="#i-globe"/></svg>';
+}
 function renderSug() {
   suggestEl.innerHTML = '';
+  const typed = sug.typed || '';
   sug.items.forEach((it, i) => {
-    const el = document.createElement('div'); el.className = 'sug' + (i === sug.sel ? ' sel' : '') + (it.search ? ' ssearch' : '');
-    if (it.search) {
-      // Sökförslag: förstoringsglas + frasen. Det man skrivit visas fet.
-      const q = it.q, typed = (sug.typed || '').toLowerCase();
-      const html = q.toLowerCase().startsWith(typed) && typed ? '<b>' + escapeHtml(q.slice(0, typed.length)) + '</b>' + escapeHtml(q.slice(typed.length)) : escapeHtml(q);
-      el.innerHTML = `<span class="sfav"><svg class="ic ic-sm"><use href="#i-search"/></svg></span><span class="smeta"><span class="surl">${html}</span><span class="stitle">${escapeHtml(sug.engineLabel || '')}</span></span>`;
-    } else {
-      const fav = it.favicon ? `<img src="${it.favicon}" data-glob="sm" alt="">` : '<svg class="ic ic-sm"><use href="#i-globe"/></svg>';
-      el.innerHTML = `<span class="sfav">${fav}</span><span class="smeta"><span class="surl">${escapeHtml(it.host)}</span><span class="stitle">${escapeHtml(it.title)}</span></span>`;
+    const el = document.createElement('div');
+    el.className = 'sug' + ((i === sug.sel || (sug.sel < 0 && i === 0)) ? ' sel' : '') + (it.search ? ' ssearch' : '');
+    let txt;
+    if (it.kind === 'typed') txt = `<span class="stext">${escapeHtml(it.q)}</span><span class="sdim"> - ${escapeHtml(sug.engineLabel || '')} ${escapeHtml(t('Sök'))}</span>`;
+    else if (it.search) txt = `<span class="stext">${boldRest(it.q, typed)}</span>`;
+    else {
+      const adr = pretty(it.url).replace(/^www\./, '');
+      const titel = it.title && it.title !== it.url && it.title !== it.host ? it.title : '';
+      txt = titel ? `<span class="stext">${boldWords(titel, typed)}</span><span class="sdim"> - </span><span class="slink">${boldWords(adr, typed)}</span>`
+                  : `<span class="stext">${boldWords(adr, typed)}</span>`;
     }
+    el.innerHTML = `<span class="sfav">${sugIcon(it)}</span><span class="sline">${txt}</span>`;
     el.addEventListener('mousedown', (ev) => { ev.preventDefault(); pickSug(it); });
     suggestEl.appendChild(el);
   });
+}
+// Vad du sökt på förut: frågan ur sökmotorernas adresser i historiken
+const SOK_PARAM = [[/(^|\.)google\.[a-z.]+$/, '/search', 'q'], [/^search\.brave\.com$/, '/search', 'q'], [/^search\.adraze\.app$/, '', 'q'],
+  [/^(html\.)?duckduckgo\.com$/, '', 'q'], [/^bing\.com$/, '/search', 'q'], [/^youtube\.com$/, '/results', 'search_query']];
+function searchQueryOf(url) {
+  try {
+    const u = new URL(url); const host = u.hostname.replace(/^www\./, '');
+    for (const [re, vag, param] of SOK_PARAM) if (re.test(host) && (!vag || u.pathname.startsWith(vag))) { const q = (u.searchParams.get(param) || '').trim(); return q || null; }
+  } catch {}
+  return null;
+}
+function localSug(query, comp) {
+  const q = query.toLowerCase(), ord = q.split(/\s+/).filter(Boolean);
+  const out = [];
+  if (comp) {
+    const h = getHistory().find((e) => domainOf(e.url) === comp.host) || {};
+    out.push({ url: comp.url, host: comp.host, title: h.title || comp.host, favicon: h.favicon });
+  }
+  if (/^[a-z]+:\/\//i.test(query) || /^[^\s]+\.[a-z]{2,}(\/|$)/i.test(query)) { if (!comp) out.push({ url: /^[a-z]+:\/\//i.test(query) ? query : 'https://' + query, host: domainOf('https://' + query.replace(/^[a-z]+:\/\//i, '')), title: '' }); }
+  else out.push({ search: true, kind: 'typed', q: query });
+  if (active && active.incognito) return out;                  // ingen historik i inkognito
+  const hist = getHistory();
+  const past = [], seenQ = new Set([q]);
+  for (const e of hist) {
+    const sq = searchQueryOf(e.url); if (!sq) continue;
+    const l = sq.toLowerCase(); if (seenQ.has(l) || !l.startsWith(q)) continue;
+    seenQ.add(l); past.push({ search: true, kind: 'past', q: sq }); if (past.length >= 3) break;
+  }
+  const sidor = [], seenU = new Set(comp ? [comp.host] : []);
+  for (const e of hist.slice().sort((x, y) => (y.n || 0) - (x.n || 0))) {
+    if (searchQueryOf(e.url)) continue;
+    const hay = ((e.title || '') + ' ' + pretty(e.url)).toLowerCase();
+    if (!ord.every((w) => wordStarts(hay, w).length)) continue;
+    const key = e.url.replace(/[#?].*$/, '').replace(/\/$/, '');
+    if (seenU.has(key) || (comp && domainOf(e.url) === comp.host && /^https?:\/\/[^/]+\/?$/i.test(e.url))) continue;   // sajten står redan överst
+    seenU.add(key); sidor.push({ url: e.url, host: domainOf(e.url), title: e.title, favicon: e.favicon }); if (sidor.length >= 3) break;
+  }
+  sug.pastQ = seenQ;
+  return out.concat(past, sidor);
 }
 function openSug() { if (!sug.open) { sug.open = true; window.view.hide(); } positionSug(); suggestEl.classList.add('on'); }
 function closeSug(restore) { suggestEl.classList.remove('on'); sug.items = []; sug.sel = -1; if (sug.open) { sug.open = false; if (restore !== false) showActiveTab(); } }
@@ -1623,11 +1680,11 @@ function updateSug(q) {
   const inp = sug.input; if (!inp) return;
   const query = (q || '').trim();
   sug.typed = query;
-  const hist = query ? historyMatches(query) : topSitesForSug();  // tomt fält → dina mest besökta sajter
-  sug.items = hist;
+  sug.engineLabel = (active && active.incognito) ? INCOG_ENGINE.label : (ENGINES[searchEngine] || ENGINES.adraze).label;
+  const lokala = query ? localSug(query, sug.comp) : topSitesForSug();   // tomt fält → dina mest besökta sajter
+  sug.items = lokala;
   if (sug.items.length && document.activeElement === inp) { renderSug(); openSug(); } else closeSug();
-  // Sökförslag från sökmotorn, som i Chrome: "v" → vercel.com ur historiken
-  // OCH "varför är …" från motorn. Inte i inkognito, inte för adresser.
+  // Förslag från sökmotorn läggs sist. Inte för adresser.
   clearTimeout(sugTimer);
   const incog = !!(active && active.incognito);
   if (!query || /^[a-z]+:\/\//i.test(query) || /^[^\s]+\.[a-z]{2,}(\/|$)/i.test(query)) return;
@@ -1635,14 +1692,12 @@ function updateSug(q) {
   sugTimer = setTimeout(async () => {
     let list = [];
     try { list = await window.view.suggest(query, incog ? 'adraze' : searchEngine); } catch { list = []; }   // inkognito: förslag från AdRaze Search
-    if (seq !== sugSeq || document.activeElement !== inp || (inp.value || '').trim() !== query) return;   // gammalt svar → släng
-    const keep = hist.slice(0, 4);
-    const seen = new Set(keep.map((h) => h.host));
-    const extra = list.filter((t) => t && !seen.has(t.toLowerCase())).slice(0, 8 - keep.length).map((t) => ({ search: true, q: t }));
-    sug.engineLabel = incog ? INCOG_ENGINE.label : (ENGINES[searchEngine] || ENGINES.adraze).label;
-    sug.items = keep.concat(extra);
+    if (seq !== sugSeq || document.activeElement !== inp || inp.value.slice(0, query.length).trim() !== query) return;   // gammalt svar → släng
+    const seen = sug.pastQ || new Set([query.toLowerCase()]);
+    const extra = list.filter((t) => t && !seen.has(t.toLowerCase())).slice(0, Math.max(0, 9 - lokala.length)).map((t) => ({ search: true, q: t }));
+    sug.items = lokala.concat(extra);
     if (sug.items.length) { renderSug(); openSug(); }
-  }, 140);
+  }, 120);
 }
 function pickSug(it) { closeSug(false); if (!active) return; if (it.search) { sug.input && (sug.input.value = it.q); guardedNavigate(active, it.q); } else guardedNavigate(active, it.url); }
 function attachAutocomplete(inp, anchor) {
@@ -1669,6 +1724,7 @@ function attachAutocomplete(inp, anchor) {
     if (e.key === 'Enter') {
       e.preventDefault();
       if (openList && sug.sel >= 0) { pickSug(sug.items[sug.sel]); return; }
+      if (openList && sug.items[0] && !sug.items[0].search && sug.comp && inp.value.toLowerCase() === sug.comp.host) { pickSug(sug.items[0]); return; }
       if (sug.comp && inp.value.toLowerCase() === sug.comp.host) { closeSug(false); if (active) guardedNavigate(active, sug.comp.url); return; }
       closeSug(false); if (active) guardedNavigate(active, inp.value);
     }
