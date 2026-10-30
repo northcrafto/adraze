@@ -267,7 +267,7 @@ svg { display: block; }
 /* ── Adressfält-autocomplete ── */
 #omni-suggest { position: fixed; z-index: 60; background: #fff; border: 1px solid var(--color-line); border-radius: 8px; box-shadow: 0 14px 38px rgb(14 42 71 / .20); overflow: hidden; padding: 6px; display: none; }
 #omni-suggest.on { display: block; }
-.sug { display: flex; align-items: center; gap: 11px; padding: 8px 11px; border-radius: 9px; cursor: pointer; }
+.sug { display: flex; align-items: center; gap: 12px; padding: 0 12px; height: 34px; border-radius: 7px; cursor: pointer; font-size: 13.5px; }
 .sug.sel, .sug:hover { background: var(--color-paper); }
 .sug .sfav { width: 18px; height: 18px; flex: none; display: grid; place-items: center; color: var(--color-navy-600); }
 .sug .sfav img { width: 16px; height: 16px; border-radius: 3px; object-fit: contain; }
@@ -732,3 +732,17 @@ body:has(#defbrowser-banner, #update-banner) .nt-stats { visibility: hidden; }
 
 /* Notiserna längst ned centreras i sidytan när Falk/chatten tar högerkolumnen */
 #update-banner, #defbrowser-banner { left: calc((100% - var(--pw, 0px)) / 2) !important; max-width: calc(100vw - var(--pw, 0px) - 24px) !important; }
+
+/* Brave-stil: en rad – text, grå " - ", blå adress; det du inte skrivit/dina ord feta */
+.sug .sline { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--color-navy-900); }
+.sug .stext { font-weight: 400; }
+.sug .sline b { font-weight: 700; }
+.sug .sdim { color: rgb(14 42 71 / .5); }
+.sug .slink { color: #1a62d6; }
+.sug .sfav svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+:root[data-theme="dark"] .sug .sline { color: #e9e9ec; }
+:root[data-theme="dark"] .sug .sdim { color: rgb(233 233 236 / .55); }
+:root[data-theme="dark"] .sug .slink { color: #8ab4f8; }
+body.incog .sug .sline { color: #efe9fb; }
+body.incog .sug .sdim { color: #a08cc4; }
+body.incog .sug .slink { color: #b9a2f5; }
