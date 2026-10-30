@@ -59,18 +59,6 @@ contextBridge.exposeInMainWorld('session', {
   logout: (key) => ipcRenderer.invoke('session:logout', { key }),
 });
 
-contextBridge.exposeInMainWorld('net', {
-  toggle: (open) => ipcRenderer.send('net:toggle', !!open),
-  clear: () => ipcRenderer.send('net:clear'),
-  detail: (id) => ipcRenderer.invoke('net:detail', id),
-  onRow: (cb) => ipcRenderer.on('net-row', (_e, r) => cb(r)),
-});
-
-contextBridge.exposeInMainWorld('tor', {
-  state: () => ipcRenderer.invoke('tor:state'),
-  onState: (cb) => ipcRenderer.on('tor-state', (_e, s) => cb(s)),
-});
-
 contextBridge.exposeInMainWorld('pw', {
   list: () => ipcRenderer.invoke('pw:list'),
   save: (c) => ipcRenderer.invoke('pw:save', c),

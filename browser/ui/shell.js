@@ -697,7 +697,6 @@ function showSettingsCat(cat) {
   if (cat === 'wallet' && typeof renderWallet === 'function') renderWallet();
   if (cat === 'konto' && typeof renderKonto === 'function') renderKonto();
   if (cat === 'vanner' && typeof renderFriends === 'function') renderFriends();
-  if (cat === 'kalender' && typeof renderCal === 'function') renderCal();
   if (cat === 'familj' && typeof renderFam === 'function') { renderFam(); applyKidIndicator(); if (typeof famSyncParent === 'function') famSyncParent(); }
   if (cat === 'losenord') { if (typeof renderPasswords === 'function') renderPasswords(); if (typeof initImport === 'function') initImport(); }
   if (cat === 'tillagg' && typeof renderExt === 'function') renderExt();
@@ -1428,16 +1427,21 @@ async function loadDailyImage() {
 }
 const DEFAULT_SHORTCUTS = [
   { label: 'Google', url: 'https://www.google.com' }, { label: 'YouTube', url: 'https://www.youtube.com' },
-  { label: 'Wikipedia', url: 'https://sv.wikipedia.org' }, { label: 'Säkerkoll', url: 'https://www.xn--skerkoll-0za.se' },
+  { label: 'Wikipedia', url: 'https://sv.wikipedia.org' },
   { label: 'SVT', url: 'https://www.svt.se' }, { label: 'Blocket', url: 'https://www.blocket.se' },
   { label: 'Aftonbladet', url: 'https://www.aftonbladet.se' },
 ];
 function getShortcuts() { try { const s = JSON.parse(localStorage.getItem('skoll-shortcuts')); if (Array.isArray(s)) return s; } catch {} return DEFAULT_SHORTCUTS.slice(); }
 function saveShortcuts(l) { localStorage.setItem('skoll-shortcuts', JSON.stringify(l)); }
-// Engångsmigrering till hacker-genvägar (pivot till hacker-browser)
-// Sätt defaults BARA om det saknas genvägar helt — skriv ALDRIG över användarens egna
-// (skyddar mot att migrerings-flaggan tappas och genvägarna nollställs vid uppdatering).
-try { if (!localStorage.getItem('skoll-shortcuts')) localStorage.setItem('skoll-shortcuts', JSON.stringify(DEFAULT_SHORTCUTS)); localStorage.setItem('adraze-normal-shortcuts', '1'); } catch {}
+// Sätt defaults BARA om det saknas genvägar helt — skriv ALDRIG över användarens egna.
+// Engångs: ta bort den gamla förvalda Säkerkoll-genvägen (ärvd från Vaka).
+try {
+  if (!localStorage.getItem('skoll-shortcuts')) localStorage.setItem('skoll-shortcuts', JSON.stringify(DEFAULT_SHORTCUTS));
+  if (!localStorage.getItem('adraze-utan-skoll')) {
+    saveShortcuts(getShortcuts().filter((s) => !/xn--skerkoll-0za\.se/.test(s.url || '')));
+    localStorage.setItem('adraze-utan-skoll', '1');
+  }
+} catch {}
 let addingShortcut = false;
 
 function topSites() {
@@ -2705,356 +2709,13 @@ function runHackerIntro(force) {
     ov.classList.add('gone');
     setTimeout(() => { ov.style.display = 'none'; }, 550);
     const s = $('nt-search'); if (s) try { s.focus(); } catch {}
-    setTimeout(runKryptoCoach, 500);   // visa vägvisaren efter intron
   }
   ov.addEventListener('click', finish);
   document.addEventListener('keydown', (e) => { if (ov.style.display !== 'none' && (e.key === 'Enter' || e.key === 'Escape' || e.key === ' ')) finish(); });
 }
 
-/* ── Falk-vägvisare: pekar på Falk-knappen och förklarar vad den gör ── */
-function runKryptoCoach() { return; // AdRaze: ingen hacker-vägvisare
-  try { if (localStorage.getItem('prowl-krypto-coach-v2')) return; } catch {}
-  const btn = $('krypto-btn'), co = $('kcoach'); if (!btn || !co) return;
-  const ring = $('kcoach-ring'), card = $('kcoach-card');
-  function place() {
-    const r = btn.getBoundingClientRect(); if (!r.width) return;
-    ring.style.left = (r.left - 6) + 'px'; ring.style.top = (r.top - 6) + 'px';
-    ring.style.width = (r.width + 12) + 'px'; ring.style.height = (r.height + 12) + 'px';
-    card.style.top = (r.bottom + 16) + 'px';
-    card.style.right = Math.max(12, window.innerWidth - r.right) + 'px';
-  }
-  place(); co.style.display = 'block';
-  const onResize = () => place();
-  window.addEventListener('resize', onResize);
-  function done() { co.style.display = 'none'; window.removeEventListener('resize', onResize); try { localStorage.setItem('prowl-krypto-coach-v2', '1'); } catch {} }
-  $('kcoach-later').onclick = done;
-  co.onclick = (e) => { if (e.target === co) done(); };
-  $('kcoach-open').onclick = () => { done(); try { btn.click(); } catch {} };
-}
-
 window.__hackerIntro = () => runHackerIntro(true);
-window.__kryptoCoach = () => { try { localStorage.removeItem('prowl-krypto-coach-v2'); } catch {}; runKryptoCoach(); };
 runHackerIntro(false);
-// Om intron redan visats (flaggan satt) hoppar den över — visa då vägvisaren ändå.
-setTimeout(() => { const ov = $('hxintro'); if (!ov || ov.style.display === 'none') runKryptoCoach(); }, 900);
-
-/* ── "Var ska jag börja?"-quiz — matchar nybörjaren mot rätt program ── */
-const QUIZ = [
-  { key: 'level', eyebrow: 'Steg 1 av 4', q: 'Hur van är du vid bug bounty?', opts: [
-    { v: 'ny', t: 'Helt ny', d: 'Aldrig hittat en bugg än' },
-    { v: 'lite', t: 'Testat lite', d: 'Kan grunderna, sökt lite' },
-    { v: 'van', t: 'Van hunter', d: 'Har rapporterat förut' },
-  ] },
-  { key: 'vuln', eyebrow: 'Steg 2 av 4', q: 'Vad vill du helst jaga?', opts: [
-    { v: 'idor', t: 'Åtkomstbuggar (IDOR/BOLA)', d: 'Se eller ändra andras data' },
-    { v: 'xss', t: 'XSS & injektioner', d: 'Skript, SQLi m.m.' },
-    { v: 'ssrf', t: 'SSRF / RCE', d: 'Avancerat och tungt' },
-    { v: 'recon', t: 'Recon & subdomäner', d: 'Hitta glömda system' },
-    { v: 'ddos', t: 'DoS / DDoS', d: 'Sänka en tjänst' },
-    { v: 'vetinte', t: 'Vet inte än', d: 'Överraska mig' },
-  ] },
-  { key: 'payout', eyebrow: 'Steg 3 av 4', q: 'Vad är målet med pengarna?', opts: [
-    { v: 'lara', t: 'Lära mig först', d: 'Pengar kan vänta' },
-    { v: 'lagom', t: 'Lagom betalt', d: 'Jämnt flöde av medel-bounties' },
-    { v: 'hogt', t: 'Sikta högt', d: 'Stora bounties' },
-  ] },
-  { key: 'target', eyebrow: 'Steg 4 av 4', q: 'Vilka mål gillar du mest?', opts: [
-    { v: 'web', t: 'Webbappar', d: '' },
-    { v: 'api', t: 'API:er', d: '' },
-    { v: 'mobil', t: 'Mobilappar', d: '' },
-    { v: 'web3', t: 'Web3 / krypto', d: '' },
-    { v: 'alla', t: 'Spelar ingen roll', d: '' },
-  ] },
-];
-const QN = {
-  level: { ny: 'nybörjare', lite: 'har testat lite', van: 'van hunter' },
-  vuln: { idor: 'åtkomstbuggar (IDOR/BOLA)', xss: 'XSS & injektioner', ssrf: 'SSRF/RCE', recon: 'recon & subdomäner', ddos: 'DoS/DDoS', vetinte: 'lite av varje' },
-  payout: { lara: 'lära dig först', lagom: 'lagom betalt', hogt: 'stora bounties' },
-  target: { web: 'webbappar', api: 'API:er', mobil: 'mobilappar', web3: 'web3/krypto', alla: 'alla sorters mål' },
-};
-let quizAns = {}, quizStep = 0;
-function openQuiz() { quizAns = {}; quizStep = 0; $('quiz').classList.add('on'); renderQuiz(); }
-function closeQuiz() { $('quiz').classList.remove('on'); }
-function renderQuizProg() {
-  const p = $('quiz-prog'); p.innerHTML = '';
-  for (let i = 0; i < QUIZ.length; i++) { const el = document.createElement('i'); if (quizStep >= QUIZ.length || i <= quizStep) el.className = 'on'; p.appendChild(el); }
-}
-function renderQuiz() {
-  renderQuizProg();
-  const body = $('quiz-body');
-  if (quizStep >= QUIZ.length) { renderResult(); return; }
-  const step = QUIZ[quizStep];
-  body.innerHTML = '<div class="quiz-eyebrow">' + step.eyebrow + '</div><div class="quiz-q">' + step.q + '</div><div class="quiz-opts"></div>' + (quizStep > 0 ? '<button class="quiz-back">← Tillbaka</button>' : '');
-  const opts = body.querySelector('.quiz-opts');
-  step.opts.forEach((o) => {
-    const b = document.createElement('button'); b.className = 'quiz-opt';
-    b.innerHTML = '<div style="flex:1"><div class="qo-t">' + escapeHtml(o.t) + '</div>' + (o.d ? '<div class="qo-d">' + escapeHtml(o.d) + '</div>' : '') + '</div><span style="opacity:.5">→</span>';
-    b.addEventListener('click', () => { quizAns[step.key] = o.v; quizStep++; renderQuiz(); });
-    opts.appendChild(b);
-  });
-  const back = body.querySelector('.quiz-back'); if (back) back.addEventListener('click', () => { quizStep = Math.max(0, quizStep - 1); renderQuiz(); });
-}
-function recommend(a) {
-  let platform, url, initial, why, payout;
-  const steps = [];
-  if (a.target === 'web3') {
-    platform = 'Immunefi'; url = 'https://immunefi.com'; initial = '∎';
-    why = 'Web3 och smarta kontrakt betalar överlägset mest — ofta motsvarande hundratusentals kronor per bugg — och Immunefi äger den nischen.';
-    payout = 'Mycket högt, men kräver att du kan smarta kontrakt (Solidity).';
-  } else if (a.level === 'ny' || a.payout === 'lara') {
-    platform = 'TryHackMe'; url = 'https://tryhackme.com'; initial = 'T';
-    why = 'Du bygger grunderna riskfritt i labbmiljö innan du går på skarpa program. Snabbaste vägen från noll till din första riktiga bugg.';
-    payout = '0 kr i början — men du lär dig fortast här.';
-    steps.push('Kör TryHackMe-banorna som tränar ' + QN.vuln[a.vuln] + '.');
-    steps.push('När du känner dig redo: ta ett VDP-program på HackerOne (rykte, inte pengar) för att öva skarpt.');
-    steps.push('Hittar du något — Falk → Skriv rapport gör rapporten åt dig.');
-  } else if (a.payout === 'hogt' || a.level === 'van') {
-    platform = 'HackerOne'; url = 'https://hackerone.com'; initial = 'h';
-    why = 'Störst utbud av välbetalda program och flest mål. Här finns de stora bountysen — men också mest konkurrens, så välj program med brett scope.';
-    payout = 'Högt möjligt — de bästa buggarna kräver skarpa skills.';
-  } else {
-    platform = 'Intigriti'; url = 'https://www.intigriti.com'; initial = '◆';
-    why = 'Europeiska program med bra betalt och mindre trängsel än de allra största — perfekt när du kan grunderna och vill börja tjäna på riktigt.';
-    payout = 'Lagom och jämnt — mindre konkurrens än de största.';
-  }
-  const tip = {
-    idor: 'IDOR/BOLA är vanligt, lätt att förstå och ofta välbetalt — perfekt förstabugg. Leta API-tunga program.',
-    xss: 'XSS trivs där användare matar in text (kommentarer, profiler). Sikta på webbappar med mycket inmatning.',
-    ssrf: 'SSRF/RCE betalar högt men är svårare och mer konkurrensutsatt — bra att växa in i.',
-    recon: 'Recon lönar sig på program med brett/wildcard-scope (*.exempel.com) — hitta glömda subdomäner.',
-    ddos: '',
-    vetinte: 'Börja med IDOR/åtkomstbuggar — lättast att förstå och bland det vanligaste som betalas ut.',
-  }[a.vuln];
-  let warning = '';
-  if (a.vuln === 'ddos') warning = 'DoS/DDoS är förbjudet i så gott som alla bug bounty-program — det ger ban, inte bounty. Sikta i stället på logik- och rate-limit-buggar (t.ex. att kringgå en spärr) som visar samma svaghet utan att sänka tjänsten.';
-  if (!steps.length) {
-    steps.push('Öppna ' + platform + ' och leta ett program som tar ' + QN.vuln[a.vuln] + ' och passar ' + QN.target[a.target] + '.');
-    steps.push('Läs scope-sidan NOGA — testa bara det som uttryckligen står i scope.');
-    steps.push('Hittar du något: Falk → Skriv rapport gör en färdig rapport åt dig.');
-  }
-  const prompt = 'Jag är ' + QN.level[a.level] + ', vill helst jaga ' + QN.vuln[a.vuln] + ', siktar på ' + QN.payout[a.payout] + ' och gillar ' + QN.target[a.target] + '. Ge mig en konkret startplan: vilket program eller plattform ska jag börja på, hur hittar jag rätt scope, och exakt vad gör jag först?';
-  return { platform, url, initial, why, payout, tip, warning, steps, prompt };
-}
-function renderResult() {
-  const r = recommend(quizAns);
-  $('quiz-body').innerHTML =
-    '<div class="quiz-eyebrow">Din matchning</div>'
-    + '<div class="qr-platform"><div class="qr-badge">' + r.initial + '</div><div><div class="qr-plabel">Börja här</div><div class="qr-pname">' + escapeHtml(r.platform) + '</div></div></div>'
-    + '<div class="qr-why">' + escapeHtml(r.why) + '</div>'
-    + '<div class="qr-meta"><div class="qr-chip"><b>Betalning:</b> ' + escapeHtml(r.payout) + '</div>'
-    + (r.tip ? '<div class="qr-chip"><b>Din grej:</b> ' + escapeHtml(r.tip) + '</div>' : '') + '</div>'
-    + (r.warning ? '<div class="qr-warn">⚠️ ' + escapeHtml(r.warning) + '</div>' : '')
-    + '<ol class="qr-steps">' + r.steps.map((s, i) => '<li><span class="n">' + (i + 1) + '</span><span>' + escapeHtml(s) + '</span></li>').join('') + '</ol>'
-    + '<div class="qr-actions"><button class="qr-btn primary" id="qr-open">Öppna ' + escapeHtml(r.platform) + '</button><button class="qr-btn ghost" id="qr-plan">Få en plan av Falk</button></div>'
-    + '<button class="qr-retake" id="qr-retake">Gör om quizet</button>';
-  $('qr-open').addEventListener('click', () => { closeQuiz(); if (active) guardedNavigate(active, r.url); });
-  $('qr-plan').addEventListener('click', () => { closeQuiz(); openKrypto(true); setTimeout(() => { try { window.view.kryptoPrefill(r.prompt); } catch {} }, 750); });
-  $('qr-retake').addEventListener('click', () => { quizAns = {}; quizStep = 0; renderQuiz(); });
-}
-if ($('quiz-launch')) $('quiz-launch').addEventListener('click', openQuiz);
-if ($('quiz-close')) $('quiz-close').addEventListener('click', closeQuiz);
-if ($('quiz')) $('quiz').addEventListener('click', (e) => { if (e.target === $('quiz')) closeQuiz(); });
-
-/* ── AdRaze Calendar — planera & spåra program att hacka ── */
-const CAL_KEY = 'prowl-calendar';
-const CAL_STATUS = [
-  { k: 'todo', label: 'Att hacka', color: '#5f7793' },
-  { k: 'doing', label: 'Pågår', color: '#e0a44c' },
-  { k: 'done', label: 'Hackade', color: '#33a06a' },
-];
-function calLoad() { try { const a = JSON.parse(localStorage.getItem(CAL_KEY)); return Array.isArray(a) ? a : []; } catch { return []; } }
-function calSave() { try { localStorage.setItem(CAL_KEY, JSON.stringify(calItems)); } catch {} }
-let calItems = calLoad();
-let calView = new Date(); calView.setDate(1);
-let calFilterDate = null, calEditId = null;
-function calMeta(k) { return CAL_STATUS.find((s) => s.k === k) || CAL_STATUS[0]; }
-function calFmt(d) { if (!d) return ''; try { return new Date(d + 'T00:00:00').toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' }); } catch { return d; } }
-function renderCal() { renderCalMonth(); renderCalAgenda(); }
-function renderCalMonth() {
-  const host = $('cal-month'); if (!host) return;
-  const y = calView.getFullYear(), m = calView.getMonth();
-  const monthName = calView.toLocaleDateString('sv-SE', { month: 'long', year: 'numeric' });
-  const startDow = (new Date(y, m, 1).getDay() + 6) % 7;
-  const daysInMonth = new Date(y, m + 1, 0).getDate();
-  const prevDays = new Date(y, m, 0).getDate();
-  const todayStr = isoToday();
-  const byDate = {}; calItems.forEach((it) => { if (it.date) (byDate[it.date] = byDate[it.date] || []).push(it); });
-  let html = '<div class="cal-mhead2"><span class="cal-title">' + monthName + '</span><span class="cal-nav"><button data-nav="-1">‹</button><button data-nav="0">i dag</button><button data-nav="1">›</button></span></div><div class="cal-grid">';
-  ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'].forEach((w) => html += '<div class="cal-wd">' + w + '</div>');
-  for (let i = 0; i < startDow; i++) html += '<div class="cal-day other">' + (prevDays - startDow + 1 + i) + '</div>';
-  for (let d = 1; d <= daysInMonth; d++) {
-    const ds = y + '-' + String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-    const items = byDate[ds] || [];
-    const dots = items.slice(0, 3).map((it) => '<span class="dot" style="background:' + calMeta(it.status).color + '"></span>').join('');
-    html += '<div class="cal-day' + (ds === todayStr ? ' today' : '') + (ds === calFilterDate ? ' sel' : '') + '" data-day="' + ds + '">' + d + '<span class="dots">' + dots + '</span></div>';
-  }
-  host.innerHTML = html + '</div>';
-  host.querySelectorAll('.cal-nav button').forEach((b) => b.addEventListener('click', () => {
-    if (b.dataset.nav === '0') { calView = new Date(); calView.setDate(1); } else calView.setMonth(calView.getMonth() + parseInt(b.dataset.nav, 10));
-    renderCalMonth();
-  }));
-  host.querySelectorAll('.cal-day[data-day]').forEach((el) => el.addEventListener('click', () => {
-    const ds = el.dataset.day;
-    if (calItems.some((it) => it.date === ds)) { calFilterDate = (calFilterDate === ds ? null : ds); renderCal(); }
-    else openCalModal(null, ds);
-  }));
-}
-function isoToday() { const n = new Date(); return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0'); }
-function calCap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
-function isoOffset(n) { const d = new Date(); d.setDate(d.getDate() + n); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
-function calDayHeader(ds) {
-  try {
-    const dt = new Date(ds + 'T00:00:00');
-    const wd = calCap(dt.toLocaleDateString('sv-SE', { weekday: 'long' }));
-    const dm = dt.toLocaleDateString('sv-SE', { day: 'numeric', month: 'long' });
-    let rel = '';
-    if (ds === isoToday()) rel = ' · i dag';
-    else if (ds === isoOffset(1)) rel = ' · i morgon';
-    else if (ds === isoOffset(-1)) rel = ' · i går';
-    return wd + ' ' + dm + rel;
-  } catch { return ds; }
-}
-/* Agenda: alla dina sparade dagar och vad du har att göra, grupperat per dag. */
-function renderCalAgenda() {
-  const host = $('cal-board'); if (!host) return;
-  host.className = 'cal-agenda';
-  let items = calItems.slice();
-  if (calFilterDate) items = items.filter((it) => it.date === calFilterDate);
-  const groups = {};
-  items.forEach((it) => { const k = it.date || ''; (groups[k] = groups[k] || []).push(it); });
-  const keys = Object.keys(groups).sort((a, b) => (a === '' ? 1 : b === '' ? -1 : a < b ? -1 : 1));
-  let html = '';
-  if (calFilterDate) html += '<div class="cal-filterbar"><span>' + calDayHeader(calFilterDate) + '</span><span class="fb-right"><button id="cal-addhere">+ lägg till</button><button id="cal-clearfilter">visa alla</button></span></div>';
-  if (!keys.length) {
-    host.innerHTML = html + '<div class="cal-empty" style="padding:26px 10px">' + (calFilterDate ? 'Inget sparat den här dagen.' : 'Inga program sparade än.<br>Tryck <b>+ Program</b> eller klicka en dag i kalendern.') + '</div>';
-    wireCalAgenda(host); return;
-  }
-  keys.forEach((k) => {
-    const label = k === '' ? 'Utan datum' : calDayHeader(k);
-    html += '<div class="cal-daygroup"><div class="cal-dayhead">' + label + '</div>' + groups[k].map(calAgendaItem).join('') + '</div>';
-  });
-  host.innerHTML = html;
-  wireCalAgenda(host);
-}
-function calAgendaItem(it) {
-  const meta = calMeta(it.status);
-  const plat = it.platform ? ' · ' + escapeHtml(it.platform) : '';
-  const notes = it.notes ? '<div class="ai-notes">' + escapeHtml(it.notes) + '</div>' : '';
-  return '<div class="cal-aitem" data-id="' + it.id + '"><span class="ci-dot" style="background:' + meta.color + '"></span>'
-    + '<div class="ai-main"><div class="ci-name">' + escapeHtml(it.name) + '</div><div class="ci-meta">' + escapeHtml(meta.label) + plat + '</div>' + notes + '</div>'
-    + '<button class="ai-status" data-id="' + it.id + '" title="Byt status" style="border-color:' + meta.color + ';color:' + meta.color + '">' + escapeHtml(meta.label) + '</button></div>';
-}
-function wireCalAgenda(host) {
-  const cf = document.getElementById('cal-clearfilter'); if (cf) cf.addEventListener('click', () => { calFilterDate = null; renderCal(); });
-  const ah = document.getElementById('cal-addhere'); if (ah) ah.addEventListener('click', () => openCalModal(null, calFilterDate));
-  host.querySelectorAll('.cal-aitem').forEach((el) => {
-    const id = el.dataset.id;
-    el.addEventListener('click', (e) => { if (e.target.closest('.ai-status')) return; openCalModal(id); });
-  });
-  host.querySelectorAll('.ai-status').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); calCycle(b.dataset.id); }));
-}
-function calCycle(id) {
-  const it = calItems.find((x) => x.id === id); if (!it) return;
-  const i = CAL_STATUS.findIndex((s) => s.k === it.status);
-  it.status = CAL_STATUS[(i + 1) % CAL_STATUS.length].k;
-  calSave(); renderCal();
-}
-function calPlatformOptions(sel) {
-  const plats = ['', ...(typeof DEFAULT_SHORTCUTS !== 'undefined' ? DEFAULT_SHORTCUTS.map((s) => s.label) : [])];
-  if (sel && plats.indexOf(sel) < 0) plats.push(sel);
-  return plats.map((p) => '<option value="' + escapeHtml(p) + '"' + (p === sel ? ' selected' : '') + '>' + (p ? escapeHtml(p) : '— välj —') + '</option>').join('');
-}
-function openCalModal(id, presetDate) {
-  calEditId = id || null;
-  const it = id ? calItems.find((x) => x.id === id) : null;
-  $('cal-mtitle').textContent = it ? 'Redigera program' : 'Nytt program';
-  $('cal-f-name').value = it ? it.name : '';
-  $('cal-f-name').style.borderColor = '';
-  $('cal-f-plat').innerHTML = calPlatformOptions(it ? it.platform : '');
-  $('cal-f-status').innerHTML = CAL_STATUS.map((s) => '<option value="' + s.k + '"' + ((it ? it.status : 'todo') === s.k ? ' selected' : '') + '>' + s.label + '</option>').join('');
-  $('cal-f-date').value = it ? (it.date || '') : (presetDate || '');
-  $('cal-f-notes').value = it ? (it.notes || '') : '';
-  $('cal-f-del').style.display = it ? '' : 'none';
-  $('cal-modal').classList.add('on');
-  setTimeout(() => { try { $('cal-f-name').focus(); } catch {} }, 0);
-}
-function closeCalModal() { $('cal-modal').classList.remove('on'); calEditId = null; }
-if ($('cal-add')) $('cal-add').addEventListener('click', () => openCalModal(null));
-if ($('cal-mclose')) $('cal-mclose').addEventListener('click', closeCalModal);
-if ($('cal-modal')) $('cal-modal').addEventListener('click', (e) => { if (e.target === $('cal-modal')) closeCalModal(); });
-if ($('cal-f-save')) $('cal-f-save').addEventListener('click', () => {
-  const name = $('cal-f-name').value.trim();
-  if (!name) { $('cal-f-name').style.borderColor = '#c25340'; return; }
-  const data = { name, platform: $('cal-f-plat').value, status: $('cal-f-status').value, date: $('cal-f-date').value || null, notes: $('cal-f-notes').value.trim() };
-  if (calEditId) { const it = calItems.find((x) => x.id === calEditId); if (it) Object.assign(it, data); }
-  else calItems.unshift({ id: 'k' + Date.now() + Math.floor(Math.random() * 1000), ...data, created: Date.now() });
-  calSave(); closeCalModal(); renderCal();
-});
-if ($('cal-f-del')) $('cal-f-del').addEventListener('click', () => { if (calEditId) { calItems = calItems.filter((x) => x.id !== calEditId); calSave(); } closeCalModal(); renderCal(); });
-
-/* ── Nätverksinspektör (Wireshark-lik) ── */
-let netRows = new Map(), netSel = null, netFilter = '', netOpen = false, netRenderPending = false;
-function netToggle(open) {
-  netOpen = (open === undefined) ? !netOpen : open;
-  window.net.toggle(netOpen);
-  $('netpanel').classList.toggle('on', netOpen);
-  $('net-btn').classList.toggle('active', netOpen);
-  if (netOpen) { renderNetRows(); setTimeout(() => { try { $('np-filter').focus(); } catch {} }, 0); }
-}
-function netStatusClass(s) { if (s === 'FAIL') return 'sfail'; const n = parseInt(s, 10); if (!n) return 's0'; if (n < 300) return 's2'; if (n < 400) return 's3'; if (n < 500) return 's4'; return 's5'; }
-function netFmtSize(b) { if (!b) return '—'; if (b < 1024) return b + ' B'; if (b < 1048576) return (b / 1024).toFixed(1) + ' kB'; return (b / 1048576).toFixed(1) + ' MB'; }
-function netUrlPath(u) { try { const x = new URL(u); return (x.pathname + x.search) || '/'; } catch { return u; } }
-function netPass(r) { if (!netFilter) return true; return (r.url + ' ' + r.method + ' ' + r.status + ' ' + r.type).toLowerCase().indexOf(netFilter) >= 0; }
-function scheduleNetRender() { if (netRenderPending) return; netRenderPending = true; setTimeout(() => { netRenderPending = false; renderNetRows(); }, 150); }
-function renderNetRows() {
-  const tb = $('np-rows'); if (!tb) return;
-  const arr = [...netRows.values()].filter(netPass);
-  $('np-count').textContent = netRows.size + ' requests' + (netFilter ? (' · ' + arr.length + ' visas') : '');
-  tb.innerHTML = arr.map((r) => {
-    const st = r.status === 0 ? '·' : (r.status === 'FAIL' ? 'FAIL' : r.status);
-    return '<tr data-id="' + escapeHtml(String(r.id)) + '"' + (r.id === netSel ? ' class="sel"' : '') + '>'
-      + '<td class="np-m">' + escapeHtml(r.method) + '</td>'
-      + '<td class="np-st ' + netStatusClass(r.status) + '">' + escapeHtml(String(st)) + '</td>'
-      + '<td class="np-host" title="' + escapeHtml(r.host) + '">' + escapeHtml(r.host) + '</td>'
-      + '<td class="np-path" title="' + escapeHtml(r.url) + '">' + escapeHtml(netUrlPath(r.url)) + '</td>'
-      + '<td class="np-type">' + escapeHtml(r.type || '') + '</td>'
-      + '<td class="np-size">' + netFmtSize(r.size) + '</td>'
-      + '<td class="np-ms">' + (r.ms ? r.ms + ' ms' : '') + '</td></tr>';
-  }).join('');
-  tb.querySelectorAll('tr').forEach((tr) => tr.addEventListener('click', () => netSelect(tr.dataset.id)));
-}
-function netKV(obj) {
-  const keys = Object.keys(obj || {});
-  if (!keys.length) return '<div class="np-kv"><span class="k">—</span><span class="v"></span></div>';
-  return '<div class="np-kv">' + keys.map((k) => '<span class="k">' + escapeHtml(k) + '</span><span class="v">' + escapeHtml(String(obj[k])) + '</span>').join('') + '</div>';
-}
-function renderNetDetail(d) {
-  const host = $('np-detail'); if (!host) return;
-  if (!d) { host.innerHTML = '<div class="np-empty">Klicka på en request för att se headers och body.</div>'; return; }
-  if (d.loading) { host.innerHTML = '<div class="np-empty">Hämtar…</div>'; return; }
-  let bodyTxt;
-  if (d.base64) bodyTxt = '(binär data · base64)\n' + (d.body ? d.body.slice(0, 600) + '…' : '');
-  else bodyTxt = (d.body || '').slice(0, 20000) || (d.bodyErr ? '[body ej tillgänglig: ' + d.bodyErr + ']' : '(tom)');
-  host.innerHTML =
-    '<div class="np-durl">' + escapeHtml(d.method) + ' ' + escapeHtml(d.url) + '</div>'
-    + '<div class="np-sec"><h4>Allmänt</h4>' + netKV({ Status: d.failed ? ('FAIL ' + (d.errorText || '')) : d.status, Typ: d.type, MIME: d.mime, 'Remote IP': d.remoteIP || '—', Storlek: netFmtSize(d.size) }) + '</div>'
-    + '<div class="np-sec"><h4>Request-headers</h4>' + netKV(d.reqHeaders) + '</div>'
-    + (d.postData ? '<div class="np-sec"><h4>Request-body</h4><div class="np-pre">' + escapeHtml(d.postData.slice(0, 10000)) + '</div></div>' : '')
-    + '<div class="np-sec"><h4>Response-headers</h4>' + netKV(d.respHeaders) + '</div>'
-    + '<div class="np-sec"><h4>Response-body</h4><div class="np-pre">' + escapeHtml(bodyTxt) + '</div></div>';
-}
-async function netSelect(id) {
-  netSel = id;
-  $('np-rows').querySelectorAll('tr').forEach((tr) => tr.classList.toggle('sel', tr.dataset.id === id));
-  renderNetDetail({ loading: true });
-  const d = await window.net.detail(id).catch(() => null);
-  if (netSel === id) renderNetDetail(d);
-}
-if ($('net-btn')) $('net-btn').addEventListener('click', () => netToggle());
-if ($('np-close')) $('np-close').addEventListener('click', () => netToggle(false));
-if ($('np-clear')) $('np-clear').addEventListener('click', () => { window.net.clear(); netRows.clear(); netSel = null; renderNetRows(); renderNetDetail(null); });
-if ($('np-filter')) $('np-filter').addEventListener('input', () => { netFilter = $('np-filter').value.toLowerCase(); renderNetRows(); });
-window.net.onRow((r) => { netRows.set(r.id, r); if (netOpen) scheduleNetRender(); });
 
 /* ── Familj: föräldrapanel, barn-blocklistor, öppen insyn ── */
 const FAM_KEY = 'adraze-family';
