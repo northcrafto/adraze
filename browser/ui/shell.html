@@ -168,16 +168,11 @@
 
     <!-- Startsida -->
     <div id="newtabpage" class="absolute inset-0 hidden overflow-hidden">
-      <div id="nt-bg" class="absolute inset-0 bg-cover bg-center transition-opacity duration-700"
-           style="background: linear-gradient(150deg,#0e2a47,#14375c 45%,#1d4a76);"></div>
+      <div id="nt-bg" class="absolute inset-0 bg-cover bg-center transition-opacity duration-700"></div>
       <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(8,20,35,.28), rgba(8,20,35,.72));"></div>
       <div class="relative z-10 h-full flex flex-col items-center justify-center px-8 text-white">
-        <div id="nt-clock" class="text-[64px] leading-none font-thin tracking-tight drop-shadow-lg"></div>
-        <div id="nt-greet" class="mt-2 text-[19px] font-medium text-white/90 drop-shadow-lg"></div>
-        <div class="mt-1.5 mb-8 flex items-center gap-2 text-white text-[15px] font-semibold">
-          <img src="adraze-mark.png" alt="" width="18" height="18" style="display:block">
-          <span>AdRaze</span>
-        </div>
+        <div id="nt-clock"></div>
+        <div id="nt-greet"></div>
         <div class="w-[min(560px,92%)] flex items-center gap-3 h-13 px-5 py-3.5 rounded-[10px] bg-white/95 shadow-2xl backdrop-blur">
           <span class="text-safe"><svg class="ic ic-sm"><use href="#i-shield-check" /></svg></span>
           <input id="nt-search" type="text" placeholder="Sök tryggt eller skriv en adress" spellcheck="false"

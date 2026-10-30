@@ -575,6 +575,13 @@ body.incog .bmchip { color: #e9e2f7; }
 #login .lg-status i { width: 8px; height: 8px; border-radius: 50%; background: #2f9e67; flex: none; }
 
 
+/* ── Startsidans klocka + hälsning ──
+   Kraftig klocka med tabellsiffror (hoppar inte i sidled), lugn hälsning under.
+   Reservbakgrund (innan dagens bild laddats): mörk natt med svag orange glöd från AdRaze-färgen. */
+#nt-bg { background-color: #0b1322; background-image: radial-gradient(1100px 520px at 50% 115%, rgb(255 75 31 / .22), transparent 70%), radial-gradient(900px 600px at 15% -10%, rgb(56 110 170 / .28), transparent 65%), linear-gradient(170deg, #0d1626, #0a111d 60%, #120f17); }
+#nt-clock { font-size: 92px; font-weight: 600; line-height: .95; letter-spacing: -.05em; font-variant-numeric: tabular-nums; color: #fff; text-shadow: 0 2px 30px rgb(0 0 0 / .35); }
+#nt-greet { margin: 12px 0 34px; font-size: 18px; font-weight: 500; letter-spacing: -.01em; color: rgb(255 255 255 / .82); text-shadow: 0 1px 14px rgb(0 0 0 / .4); }
+
 /* ── Startsidans statistik: AdRaze-listen längst ned ──
    En låg glasremsa med falken, tunn orange linje överst och hårfina avdelare. */
 .nt-stats { position: absolute; left: 50%; bottom: 44px; transform: translateX(-50%); display: flex; align-items: stretch; width: max-content; max-width: 92%;
