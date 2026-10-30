@@ -36,8 +36,6 @@ registerAdblockScheme();   // före app.ready
 
 const KRYPTO_W = 400;
 const CHATT_W = 420;        // chattens sidopanel (helskärm = hela webbytan)
-const NET_H = 340;          // nätverksinspektörens dockade höjd
-const NET_MAX = 800;        // max antal requests i bufferten per fönster
 const wins = new Map();                 // skalets webContents-id -> ctx
 
 /* ────────── Minnesbesparing (Memory Saver) ──────────
@@ -65,7 +63,6 @@ function makeCtx(win, incognito) {
     topInset: 0, leftInset: 0, defaultZoom: 1,
     kryptoView: null, kryptoOpen: false, kryptoFull: false, authToken: null,
     chattView: null, chattOpen: false, chattFull: false, chattToken: null, chattChild: false, chattBoot: null,
-    net: null, netOpen: false,          // nätverksinspektör (Wireshark-lik, via CDP)
     htmlFull: false, _wasFull: false,   // HTML5-video/element i helskärm
   };
 }
@@ -295,14 +292,6 @@ function ensureIncognitoAdblock() {
   try { const s = session.fromPartition('skoll-incognito'); applyClientHints(s); webb.installPermissions(s, true); installAdblockOn(s); trackDownloads(s); } catch {}
 }
 
-/* ── Tor (oanvänd – behållen som referens) ── */
-const TOR_DIR = path.join(__dirname, 'tor');
-const TOR_SOCKS = 9250;
-let torProc = null;
-let torState = 'off';
-function setTorState(s) { torState = s; broadcast('tor-state', s); }
-ipcMain.handle('tor:state', () => torState);
-
 /* Metadata-bedömning + checkUrl finns i scanner.js (delas med testriggen). */
 async function dailyImage() {
   try {
@@ -333,10 +322,9 @@ function applyBounds(ctx) {
   const full = ctx.kryptoOpen && ctx.kryptoFull;              // Falk i helskärm (täcker webbytan)
   const kw = (ctx.kryptoOpen && !full) ? KRYPTO_W : 0;        // sidopanelens bredd (0 i helskärm – panelen ligger ovanpå)
   const cw = (ctx.chattOpen && !ctx.chattFull) ? CHATT_W : 0; // chattens sidopanel (till vänster om Falk om båda är öppna)
-  const nh = ctx.netOpen ? NET_H : 0;                         // nätverksinspektörens höjd (dockad längst ner)
   const R = Math.round;
   if (ctx.visibleTab && ctx.views.has(ctx.visibleTab)) {
-    ctx.views.get(ctx.visibleTab).setBounds({ x: R(b.x + ctx.leftInset), y: R(b.y + ctx.topInset), width: Math.max(0, R(b.width - kw - cw - ctx.leftInset)), height: R(b.height - ctx.topInset - nh) });
+    ctx.views.get(ctx.visibleTab).setBounds({ x: R(b.x + ctx.leftInset), y: R(b.y + ctx.topInset), width: Math.max(0, R(b.width - kw - cw - ctx.leftInset)), height: R(b.height - ctx.topInset) });
   }
   if (ctx.chattView) {
     ctx.chattView.setVisible(ctx.chattOpen);
@@ -661,7 +649,6 @@ function ensureView(ctx, tabId) {
     } catch {}
   });
   ctx.views.set(tabId, view);
-  if (ctx.netOpen) attachNet(ctx, wc);   // fånga trafik direkt om inspektören är öppen
   raiseKrypto(ctx);
   return view;
 }
@@ -1627,80 +1614,6 @@ ipcMain.on('krypto:expand', (e, full) => {
   const ctx = ctxFor(e) || e.sender.__ctx; if (!ctx) return;
   ctx.kryptoFull = !!full;
   applyBounds(ctx); raiseKrypto(ctx);
-});
-
-/* ────────── Nätverksinspektör (Wireshark-lik, via Chrome DevTools-protokollet) ──────────
- * Kopplar CDP-debuggern till varje fliks webContents och lyssnar på Network-domänen,
- * precis som DevTools Network-fliken. Vi får metod, URL, status, typ, storlek, timing,
- * request-/response-headers, POST-data och (på begäran) response-body. Allt lokalt. */
-function netShortHost(u) { try { return new URL(u).host; } catch { return ''; } }
-function attachNet(ctx, wc) {
-  try {
-    if (!wc || wc.isDestroyed() || wc._netAttached) return;
-    try { wc.debugger.attach('1.3'); } catch { return; }   // redan attachad (t.ex. DevTools öppen)
-    wc._netAttached = true;
-    wc.debugger.sendCommand('Network.enable', { maxTotalBufferSize: 20000000, maxResourceBufferSize: 10000000 }).catch(() => {});
-    wc.debugger.on('message', (_e, method, params) => { try { onNetMsg(ctx, wc, method, params); } catch {} });
-    wc.debugger.on('detach', () => { wc._netAttached = false; });
-    wc.once('destroyed', () => { try { if (wc._netAttached) wc.debugger.detach(); } catch {} });
-  } catch {}
-}
-function onNetMsg(ctx, wc, method, params) {
-  const net = ctx.net; if (!net) return;
-  if (method === 'Network.requestWillBeSent') {
-    const req = params.request || {};
-    const r = {
-      id: params.requestId, _wc: wc, method: req.method || 'GET', url: req.url || '',
-      reqHeaders: req.headers || {}, postData: req.postData || '',
-      type: params.type || '', status: 0, mime: '', respHeaders: {}, remoteIP: '', size: 0,
-      t0: params.timestamp || 0, t1: 0, done: false, failed: false, errorText: '',
-    };
-    net.records.set(r.id, r); net.order.push(r.id);
-    while (net.order.length > NET_MAX) { const old = net.order.shift(); net.records.delete(old); }
-  } else if (method === 'Network.responseReceived') {
-    const r = net.records.get(params.requestId); if (!r) return;
-    const resp = params.response || {};
-    r.status = resp.status || 0; r.mime = resp.mimeType || ''; r.respHeaders = resp.headers || {};
-    r.remoteIP = resp.remoteIPAddress || ''; r.type = params.type || r.type;
-    sendNetRow(ctx, r);
-  } else if (method === 'Network.loadingFinished') {
-    const r = net.records.get(params.requestId); if (!r) return;
-    r.done = true; r.size = params.encodedDataLength || r.size; r.t1 = params.timestamp || r.t1;
-    sendNetRow(ctx, r);
-  } else if (method === 'Network.loadingFailed') {
-    const r = net.records.get(params.requestId); if (!r) return;
-    r.done = true; r.failed = true; r.errorText = params.errorText || ''; r.t1 = params.timestamp || r.t1;
-    sendNetRow(ctx, r);
-  }
-}
-function netSummary(r) {
-  return { id: r.id, method: r.method, url: r.url, host: netShortHost(r.url), status: r.failed ? 'FAIL' : (r.status || 0), type: r.type || '', mime: r.mime || '', size: r.size || 0, ms: (r.t1 && r.t0) ? Math.round((r.t1 - r.t0) * 1000) : 0, failed: !!r.failed };
-}
-function sendNetRow(ctx, r) { sendTo(ctx, 'net-row', netSummary(r)); }
-ipcMain.on('net:toggle', (e, open) => {
-  const ctx = ctxFor(e); if (!ctx) return;
-  ctx.netOpen = !!open;
-  if (!ctx.net) ctx.net = { records: new Map(), order: [] };
-  if (ctx.netOpen) {
-    ctx.views.forEach((v) => attachNet(ctx, v.webContents));
-    ctx.net.order.forEach((id) => { const r = ctx.net.records.get(id); if (r && (r.status || r.failed)) sendNetRow(ctx, r); });
-  }
-  applyBounds(ctx);
-});
-ipcMain.on('net:clear', (e) => { const ctx = ctxFor(e); if (ctx && ctx.net) { ctx.net.records.clear(); ctx.net.order = []; } });
-ipcMain.handle('net:detail', async (e, id) => {
-  const ctx = ctxFor(e); if (!ctx || !ctx.net) return null;
-  const r = ctx.net.records.get(id); if (!r) return null;
-  let body = '', base64 = false, bodyErr = '';
-  if (!r.failed && r.method !== 'OPTIONS') {
-    try { const res = await r._wc.debugger.sendCommand('Network.getResponseBody', { requestId: id }); body = res.body || ''; base64 = !!res.base64Encoded; }
-    catch (err) { bodyErr = String((err && err.message) || err || ''); }
-  }
-  return {
-    id, method: r.method, url: r.url, status: r.status, type: r.type, mime: r.mime, remoteIP: r.remoteIP || '',
-    reqHeaders: r.reqHeaders || {}, respHeaders: r.respHeaders || {}, postData: r.postData || '',
-    body, base64, bodyErr, failed: !!r.failed, errorText: r.errorText || '', size: r.size || 0,
-  };
 });
 
 /* Falk-chatt: proxar till AdRazes server med fönstrets token, så token aldrig
