@@ -232,6 +232,104 @@
   .acts .ab:first-child[data-tip]:hover::after { left: 0; transform: none; }
   .msg.user .acts .ab:last-child[data-tip]:hover::after { left: auto; right: 0; transform: none; }
   @media (prefers-reduced-motion: reduce) { .w { animation: none; opacity: 1; } .writing-owl { animation: none; } }
+
+  /* ── Formaterade svar: stycken, rubriker, listor, kod, tabeller, diagram ── */
+  .msg.krypto .bubble { white-space: normal; }
+  .bubble p { margin: 0 0 .75em; } .bubble p:last-child { margin-bottom: 0; }
+  .bubble .mh { font-weight: 650; letter-spacing: -.01em; margin: 1em 0 .4em; line-height: 1.3; } .bubble .mh:first-child { margin-top: 0; }
+  .bubble .mh1 { font-size: 19px; } .bubble .mh2 { font-size: 17px; } .bubble .mh3 { font-size: 15.5px; }
+  .bubble ul, .bubble ol { margin: 0 0 .75em; padding-left: 1.35em; } .bubble li { margin: .2em 0; } .bubble li::marker { color: var(--mut); }
+  .bubble code.ic { font: 12.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; background: #1d1d20; border: 1px solid var(--line); padding: 1px 5px; border-radius: 5px; color: #f0c8b8; }
+  .cb { margin: .85em 0; border: 1px solid var(--line); border-radius: 12px; background: #121214; overflow: hidden; }
+  .cb-h { display: flex; align-items: center; justify-content: space-between; height: 34px; padding: 0 5px 0 14px; border-bottom: 1px solid var(--line); font: 500 12px/1 Inter, system-ui, sans-serif; color: var(--mut); }
+  .cb-h .ab { width: 26px; height: 26px; } .cb-h .ab svg { width: 15px; height: 15px; }
+  .cb-h .ab[data-tip]:hover::after { left: auto; right: 0; transform: none; }
+  .cb pre { margin: 0; padding: 12px 14px; overflow-x: auto; font: 12.5px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; color: #e6e6ea; white-space: pre; tab-size: 2; }
+  .cb.doc .cb-b { padding: 14px 16px; font-size: 15px; line-height: 1.65; max-height: 420px; overflow-y: auto; }
+  .tbl { margin: .85em 0; border: 1px solid var(--line); border-radius: 12px; overflow-x: auto; background: #121214; }
+  .tbl table { width: 100%; border-collapse: collapse; font: 13px/1.45 Inter, system-ui, sans-serif; color: #e6e6ea; }
+  .tbl th { text-align: left; font-weight: 600; font-size: 12px; color: var(--mut); background: #161618; padding: 9px 12px; white-space: nowrap; }
+  .tbl td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top; }
+  .tbl tr:hover td { background: rgb(255 255 255 / .025); }
+  .tbl .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .chart { position: relative; margin: .85em 0; padding: 14px 14px 8px; border: 1px solid var(--line); border-radius: 12px; background: #121214; font-family: Inter, system-ui, sans-serif; }
+  .ch-t { font-size: 13.5px; font-weight: 600; color: var(--ink); } .ch-s { font-size: 12px; color: var(--mut); margin-top: 2px; }
+  .ch-lg { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; font-size: 12px; color: var(--mut); }
+  .ch-lg span { display: inline-flex; align-items: center; gap: 6px; } .ch-lg i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; } .ch-lg i.ln { height: 2px; width: 14px; border-radius: 2px; }
+  .chart svg { display: block; margin-top: 10px; overflow: visible; }
+  .chart svg text { font: 11px Inter, system-ui, sans-serif; fill: #8a8a91; }
+  .chart .gr { stroke: #222226; stroke-width: 1; } .chart .base { stroke: #3a3a40; stroke-width: 1; }
+  .chart .vl { fill: #ebe9e4; font-weight: 600; font-size: 11.5px; }
+  .chart .ln { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .chart .stem { stroke-width: 2; stroke-linecap: round; }
+  .chart .dot { stroke: #121214; stroke-width: 2; }
+  .chart .xh { stroke: #4a4a50; stroke-width: 1; opacity: 0; } .chart .xh.on { opacity: 1; }
+  .chart .hit { fill: transparent; }
+  .hb { display: grid; grid-template-columns: minmax(64px, 34%) 1fr auto; gap: 8px 10px; align-items: center; margin-top: 12px; font-size: 12.5px; }
+  .hb-r { display: contents; } .hb-l { color: #cfcfd4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hb-t { display: flex; flex-direction: column; gap: 2px; } .hb-t i { display: block; height: 14px; border-radius: 0 4px 4px 0; min-width: 2px; }
+  .hb-v { color: #ebe9e4; font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+  .ctip { position: absolute; left: 0; top: 0; z-index: 5; pointer-events: none; opacity: 0; transition: opacity .12s; min-width: 110px; padding: 8px 10px; border-radius: 8px;
+    background: #2a2a2f; box-shadow: 0 8px 24px rgb(0 0 0 / .45); font-size: 12px; color: var(--mut); }
+  .ctip.on { opacity: 1; } .ctip b { display: block; color: var(--ink); font-weight: 600; margin-bottom: 4px; }
+  .ctip div { display: flex; align-items: center; gap: 6px; } .ctip i { width: 8px; height: 8px; border-radius: 2px; } .ctip span { margin-left: auto; padding-left: 12px; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+  /* Animationerna när Falk skriver: tabellrader glider in, kodblock rullas fram, diagram ritas */
+  @keyframes fadein { from { opacity: 0; } }
+  @keyframes rowin { from { opacity: 0; transform: translateY(6px); } }
+  @keyframes reveal { from { clip-path: inset(0 0 100% 0); opacity: .3; } to { clip-path: inset(0 0 0 0); opacity: 1; } }
+  @keyframes grow { from { transform: scaleY(0); } } @keyframes growx { from { transform: scaleX(0); } }
+  @keyframes pop { from { transform: scale(0); } } @keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  .tbl.anim { animation: fadein .25s both; animation-delay: var(--d); }
+  .tbl.anim tr { animation: rowin .42s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--d) + var(--r) * 55ms); }
+  .cb.anim { animation: reveal var(--dur, .6s) cubic-bezier(.3,.7,.2,1) both; animation-delay: var(--d); }
+  .chart.anim { animation: fadein .3s both; animation-delay: var(--d); }
+  .chart.anim .bar, .chart.anim .stem { transform-box: fill-box; animation: grow .75s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--d) + var(--i) * 45ms); }
+  .chart.anim .dot { transform-box: fill-box; transform-origin: center; animation: pop .45s cubic-bezier(.3,1.6,.5,1) both; animation-delay: calc(var(--d) + var(--i) * 45ms + 380ms); }
+  .chart.anim .ln { stroke-dasharray: 1; animation: draw 1.1s cubic-bezier(.4,.1,.2,1) both; animation-delay: var(--d); }
+  .chart.anim .area { animation: fadein .9s both; animation-delay: calc(var(--d) + 450ms); }
+  .chart.anim .vl { animation: fadein .4s both; animation-delay: calc(var(--d) + var(--i) * 45ms + 550ms); }
+  .chart.anim .hb-t i { transform-origin: left; animation: growx .8s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--d) + var(--i) * 50ms); }
+  .chart.anim .hb-v { animation: fadein .4s both; animation-delay: calc(var(--d) + var(--i) * 50ms + 500ms); }
+  /* "Falk tänker" glittrar som hos Claude */
+  .think .tt { background: linear-gradient(90deg, #6f6f76 0%, #6f6f76 35%, #f2f2f4 50%, #6f6f76 65%, #6f6f76 100%); background-size: 250% 100%;
+    -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 1.8s linear infinite; }
+  @keyframes shimmer { from { background-position: 100% 0; } to { background-position: -150% 0; } }
+  @media (prefers-reduced-motion: reduce) { .anim, .anim * { animation: none !important; } .think .tt { animation: none; color: var(--mut); } }
+
+  /* ── Filer, mappar och projekt ── */
+  .inwrap { padding-left: 6px; }
+  #attach { width: 32px; height: 32px; flex: none; }
+  #attmenu { position: absolute; left: 14px; bottom: calc(100% + 4px); min-width: 230px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 5px; display: none; z-index: 9; box-shadow: 0 16px 40px rgb(0 0 0 / .45); }
+  #attmenu.on { display: block; animation: msgin .15s ease-out both; }
+  .am { display: flex; align-items: center; gap: 10px; width: 100%; height: 36px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); font: inherit; font-size: 13.5px; text-align: left; cursor: pointer; }
+  .am:hover { background: var(--surface-2); } .am svg { width: 17px; height: 17px; color: var(--mut); flex: none; } .am small { margin-left: auto; color: var(--faint); font-size: 11.5px; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .am-sep { height: 1px; background: var(--line); margin: 4px 6px; }
+  #chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; } #chips:empty { display: none; }
+  .fchip { position: relative; display: flex; align-items: center; gap: 9px; max-width: 220px; padding: 7px 10px 7px 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); animation: msgin .2s ease-out both; }
+  .fchip .fi { width: 30px; height: 30px; border-radius: 7px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-ink); flex: none; font: 700 9.5px/1 Inter, system-ui, sans-serif; letter-spacing: .02em; text-transform: uppercase; }
+  .fchip .fi svg { width: 16px; height: 16px; }
+  .fchip .fn { min-width: 0; font-size: 12.5px; line-height: 1.3; } .fchip .fn b { display: block; font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fchip .fn span { color: var(--mut); font-size: 11.5px; white-space: nowrap; }
+  .fchip .fx { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 50%; border: 0; background: #3a3a40; color: #fff; display: grid; place-items: center; cursor: pointer; opacity: 0; transition: opacity .15s; }
+  .fchip:hover .fx { opacity: 1; } .fchip .fx svg { width: 10px; height: 10px; }
+  .fchip.loading .fi { animation: falk-pulse 1s ease-in-out infinite; }
+  .msg.user .fchips { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin-bottom: 6px; max-width: 85%; }
+  body.drag::after { content: attr(data-drop); position: fixed; inset: 8px; z-index: 50; border: 2px dashed var(--accent); border-radius: 16px; background: rgb(14 14 16 / .86);
+    display: grid; place-items: center; font: 600 15px Inter, system-ui, sans-serif; color: var(--ink); pointer-events: none; }
+  .att-note { font-size: 12px; color: var(--mut); margin: -2px 2px 8px; } .att-note:empty { display: none; }
+  #projchip { display: none; margin-left: 8px; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-ink); font-size: 11.5px; font-weight: 600; cursor: pointer; white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis; border: 0; font-family: inherit; }
+  #projchip.on { display: inline-block; }
+  .pj-body { flex: 1; overflow-y: auto; padding: 0 16px 16px; display: flex; flex-direction: column; gap: 14px; }
+  .pj-lbl { font-size: 12px; font-weight: 600; color: var(--mut); margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .pj-name { width: 100%; height: 40px; background: var(--surface); border: 1px solid var(--field-line); border-radius: 10px; padding: 0 12px; color: var(--ink); font: inherit; font-size: 15px; font-weight: 600; outline: none; }
+  .pj-instr { width: 100%; min-height: 92px; resize: vertical; background: var(--surface); border: 1px solid var(--field-line); border-radius: 10px; padding: 10px 12px; color: var(--ink); font: inherit; font-size: 13.5px; line-height: 1.5; outline: none; }
+  .pj-name:focus, .pj-instr:focus { border-color: #55555c; }
+  .pj-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pj-btn { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 12px; border-radius: 9px; border: 0; cursor: pointer; font: inherit; font-size: 13px; font-weight: 600; color: var(--ink); background: transparent; box-shadow: inset 0 0 0 1px var(--field-line); }
+  .pj-btn:hover { background: var(--surface); } .pj-btn svg { width: 15px; height: 15px; }
+  .pj-btn.pri { background: var(--ink); color: #111; box-shadow: none; } .pj-btn.pri:hover { background: var(--accent); color: #fff; }
+  .pj-btn.danger { color: #ff8a7a; }
+  .pj-meter { height: 4px; border-radius: 4px; background: var(--surface-2); overflow: hidden; } .pj-meter i { display: block; height: 100%; background: var(--accent); border-radius: 4px; transition: width .4s; }
   @media (prefers-reduced-motion: reduce) { .msg, .hero, .step { animation: none; } body.thinking header .owl { animation: none; } }
 </style>
 <style>#modes{display:none}</style>
@@ -244,6 +342,7 @@
     <nav class="s-nav">
       <button class="s-item" id="s-new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Nytt samtal</button>
       <label class="s-item s-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="s-q" type="search" placeholder="Sök i samtal" autocomplete="off" spellcheck="false"></label>
+      <button class="s-item" id="s-proj"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/></svg>Projekt<span class="n" id="s-projn"></span></button>
       <button class="s-item" id="s-mem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 0 0-5.9-.6A3 3 0 0 0 4 9.5a3 3 0 0 0 0 5A3 3 0 0 0 8 19a3 3 0 0 0 4 1 3 3 0 0 0 4-1 3 3 0 0 0 4-4.5 3 3 0 0 0 0-5A3 3 0 0 0 17.9 4.4 3 3 0 0 0 12 5Z"/><path d="M12 5v15"/></svg>Minnen<span class="n" id="s-memn"></span></button>
     </nav>
     <div id="s-list"></div>
@@ -253,7 +352,7 @@
   <header>
     <button class="hbtn" id="sidebtn" title="Meny"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h10M4 17h16"/></svg></button>
     <span class="dot" id="hdr-dot"><img class="owl" src="krypto-owl-face.png" alt=""></span>
-    <span class="t">Falk<small id="convtitle">Din säkerhetsassistent</small></span>
+    <span class="t">Falk<small id="convtitle">Din säkerhetsassistent</small></span><button id="projchip" type="button" title="Öppna projektet"></button>
     <span class="grow"></span>
     <button class="hbtn" id="fullbtn" title="Helskärm">
       <svg id="full-ic-open" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
@@ -283,6 +382,9 @@
     <div class="p-list" id="convlist"></div>
   </div>
 
+  <!-- Projekt -->
+  <div id="projpanel" class="panel"></div>
+
   <!-- Minne -->
   <div id="mempanel" class="panel">
     <div class="p-head">
@@ -304,7 +406,20 @@
       <button class="modechip" data-mode="skicka">Skicka in</button>
       <button class="modechip" data-mode="kritik">Kritik</button>
     </div>
+    <div id="attmenu" role="menu">
+      <button class="am" id="am-files"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/></svg>Ladda upp filer</button>
+      <button class="am" id="am-dir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg>Ladda upp mapp</button>
+      <div class="am-sep"></div>
+      <button class="am" id="am-proj"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/></svg>Projekt<small id="am-projname"></small></button>
+    </div>
+    <input type="file" id="f-files" multiple hidden>
+    <input type="file" id="f-dir" webkitdirectory multiple hidden>
+    <input type="file" id="pf-files" multiple hidden>
+    <input type="file" id="pf-dir" webkitdirectory multiple hidden>
+    <div class="att-note" id="attnote"></div>
+    <div id="chips"></div>
     <div class="inwrap">
+      <button class="hbtn" id="attach" title="Lägg till filer, mapp eller projekt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
       <textarea id="inp" rows="1" placeholder="Fråga Falk" spellcheck="false"></textarea>
       <button id="send" title="Skicka">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
@@ -337,8 +452,9 @@
     function titleFrom(msgs) { const u = (msgs || []).find((m) => m.role === 'user'); return u ? u.content.slice(0, 44) : 'Nytt samtal'; }
     function saveConvos() { try { localStorage.setItem(CONV, JSON.stringify({ list: convos.slice(-50), activeId })); } catch {} if (typeof renderSide === 'function') renderSide(); }
     function activeConvo() { return convos.find((c) => c.id === activeId); }
-    function newConvo() {
+    function newConvo(projectId) {
       const c = { id: cid(), title: 'Nytt samtal', ts: Date.now(), messages: [], mode: (typeof kMode !== 'undefined' ? kMode : 'fraga') };
+      if (typeof projectId === 'string') c.projectId = projectId;
       convos.push(c); activeId = c.id; history = c.messages; saveConvos();
       updateConvTitle(); render(); closePanels(); inp.focus();
     }
@@ -349,6 +465,7 @@
       updateConvTitle(); render(); closePanels();
     }
     function deleteConvo(id) {
+      { const d = convos.find((c) => c.id === id); if (d) for (const m of d.messages) for (const f of m.files || []) idb.del(f.id).catch(() => {}); }
       convos = convos.filter((c) => c.id !== id);
       if (!convos.length) { newConvo(); return; }
       if (activeId === id) { activeId = convos[convos.length - 1].id; history = activeConvo().messages; updateConvTitle(); render(); }
@@ -359,7 +476,7 @@
       if (!c.title || c.title === 'Nytt samtal') c.title = (text || '').slice(0, 44) || 'Nytt samtal';
       c.ts = Date.now();
     }
-    function updateConvTitle() { const c = activeConvo(); $('convtitle').textContent = (c && c.messages.length) ? (c.title || 'Samtal') : 'Din säkerhetsassistent'; }
+    function updateConvTitle() { if (typeof updateProjChip === 'function') updateProjChip(); const c = activeConvo(); $('convtitle').textContent = (c && c.messages.length) ? (c.title || 'Samtal') : 'Din säkerhetsassistent'; }
 
     /* ── Minne ── */
     function memGet() { try { const m = JSON.parse(localStorage.getItem(MEM)); return Array.isArray(m) ? m : []; } catch { return []; } }
@@ -399,13 +516,175 @@
     const AV_USER = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
     const BRAIN = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 0 0-5.9-.6A3 3 0 0 0 4 9.5a3 3 0 0 0 0 5A3 3 0 0 0 8 19a3 3 0 0 0 4 1 3 3 0 0 0 4-1 3 3 0 0 0 4-4.5 3 3 0 0 0 0-5A3 3 0 0 0 17.9 4.4 3 3 0 0 0 12 5Z"/></svg>';
     function fmt(t) { return esc(t).replace(/\n/g, '<br>'); }
+
+    // Falks svar som enkel markdown. Allt escapas först – bara våra egna taggar byggs (inga länkar, ingen rå HTML).
+    const escA = (t) => esc(t).replace(/"/g, '&quot;');
+    function inl(t) {
+      return t.split(/(`[^`]+`)/).map((part) => {
+        if (/^`[^`]+`$/.test(part)) return '<code class="ic">' + esc(part.slice(1, -1)) + '</code>';
+        return esc(part).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(/(^|[^*\w])\*([^*\s][^*]*?)\*(?![*\w])/g, '$1<i>$2</i>');
+      }).join('');
+    }
+    const CHART_LANGS = ['diagram', 'chart', 'graf'];
+    const DOC_LANGS = ['text', 'txt', 'mejl', 'email', 'brev', 'dokument', 'rapport', 'markdown', 'md', 'meddelande'];
+    function block(lang, code) {
+      if (CHART_LANGS.includes(lang)) { try { const j = JSON.parse(code); if (normSpec(j)) return '<div class="chart" data-spec="' + escA(JSON.stringify(j)) + '"></div>'; } catch {} }
+      const cp = '<button type="button" class="ab cpy" data-tip="' + escA(tx('Kopiera')) + '" aria-label="' + escA(tx('Kopiera')) + '">' + I_COPY + '</button>';
+      if (DOC_LANGS.includes(lang)) {
+        const body = (lang === 'markdown' || lang === 'md' || lang === 'rapport') ? md(code) : '<p>' + esc(code).replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>') + '</p>';
+        return '<div class="cb doc" data-raw="' + escA(code) + '"><div class="cb-h"><span>' + esc(tx('Text')) + '</span>' + cp + '</div><div class="cb-b">' + body + '</div></div>';
+      }
+      return '<div class="cb" data-raw="' + escA(code) + '"><div class="cb-h"><span>' + esc(lang || tx('Kod')) + '</span>' + cp + '</div><pre><code>' + esc(code) + '</code></pre></div>';
+    }
+    function table(rows) {
+      const cells = (r) => r.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim());
+      const head = cells(rows[0]), body = rows.slice(2).map(cells);
+      const num = head.map((_, k) => body.length > 0 && body.every((r) => !r[k] || /^[-+−]?[\d\s.,]+\s*(%|kr|st|h|min|s|ms|MB|GB|kB|€|\$|SEK)?$/i.test(r[k])));
+      return '<div class="tbl"><table><thead><tr style="--r:0">' + head.map((h, k) => '<th' + (num[k] ? ' class="num"' : '') + '>' + inl(h) + '</th>').join('') + '</tr></thead><tbody>'
+        + body.map((r, i) => '<tr style="--r:' + (i + 1) + '">' + head.map((_, k) => '<td' + (num[k] ? ' class="num"' : '') + '>' + inl(r[k] || '') + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
+    }
+    function md(src) {
+      const L = String(src || '').replace(/\r/g, '').split('\n'); let out = '', para = [], i = 0;
+      const flush = () => { if (para.length) { out += '<p>' + para.map(inl).join('<br>') + '</p>'; para = []; } };
+      while (i < L.length) {
+        const line = L[i];
+        const f = line.match(/^\s*```\s*([\w+#.-]*)\s*$/);
+        if (f) { flush(); const buf = []; i++; while (i < L.length && !/^\s*```\s*$/.test(L[i])) buf.push(L[i++]); i++; out += block(f[1].toLowerCase(), buf.join('\n')); continue; }
+        if (/^\s*\|.*\|\s*$/.test(line) && i + 1 < L.length && /^\s*\|?\s*:?-{2,}/.test(L[i + 1])) { flush(); const rows = []; while (i < L.length && /^\s*\|.*\|\s*$/.test(L[i])) rows.push(L[i++]); out += table(rows); continue; }
+        const h = line.match(/^(#{1,4})\s+(.+)$/);
+        if (h) { flush(); out += '<div class="mh mh' + Math.min(3, h[1].length) + '">' + inl(h[2]) + '</div>'; i++; continue; }
+        const li = line.match(/^\s*([-*•]|\d+[.)])\s+(.+)$/);
+        if (li) { flush(); const ol = /\d/.test(li[1]); const items = []; while (i < L.length) { const m = L[i].match(/^\s*([-*•]|\d+[.)])\s+(.+)$/); if (!m || /\d/.test(m[1]) !== ol) break; items.push(m[2]); i++; } out += (ol ? '<ol>' : '<ul>') + items.map((x) => '<li>' + inl(x) + '</li>').join('') + (ol ? '</ol>' : '</ul>'); continue; }
+        if (!line.trim()) { flush(); i++; continue; }
+        para.push(line); i++;
+      }
+      flush(); return out || '<p></p>';
+    }
+    // Kopiera-knappen på kod- och textblock
+    log.addEventListener('click', (e) => {
+      const b = e.target.closest('.cpy'); if (!b) return;
+      const box = b.closest('.cb'); try { navigator.clipboard.writeText(box.dataset.raw || ''); } catch {}
+      b.innerHTML = I_OK; b.dataset.tip = tx('Kopierat'); setTimeout(() => { b.innerHTML = I_COPY; b.dataset.tip = tx('Kopiera'); }, 1500);
+    });
+
+    /* ── Diagram (Falk skriver ```diagram med JSON) ──
+       linje = utveckling över tid · stapel = jämför kategorier · stolpe = många värden/fördelning · liggande = långa etiketter/rangordning.
+       Färger: en serie = AdRaze-orange; flera = validerad färgordning för mörk yta (skiljbar även vid färgblindhet). */
+    const C_ONE = '#ff6a3d', C_MANY = ['#3987e5', '#d95926', '#199e70', '#c98500'];
+    const TYPES = { linje: 'line', line: 'line', linjediagram: 'line', stapel: 'col', stapeldiagram: 'col', column: 'col', kolumn: 'col', bar: 'col',
+      stolpe: 'stick', stolp: 'stick', stolpdiagram: 'stick', lollipop: 'stick', liggande: 'hbar', 'liggande stapel': 'hbar', horisontell: 'hbar', hbar: 'hbar' };
+    function normSpec(r) {
+      if (!r || typeof r !== 'object') return null;
+      const type = TYPES[String(r.typ || r.type || '').toLowerCase().trim()] || 'col';
+      let ser = r.serier || r.series;
+      if (!Array.isArray(ser)) ser = Array.isArray(r.data) ? [{ namn: r.titel || r.title || '', data: r.data }] : [];
+      const toNum = (v) => typeof v === 'number' ? v : parseFloat(String(v).replace(/\s/g, '').replace(',', '.').replace('−', '-'));
+      ser = ser.slice(0, 4).map((x) => ({ name: String((x && (x.namn || x.name)) || ''), data: ((x && (x.data || x.values)) || []).slice(0, 40).map(toNum) }));
+      const n = Math.max(0, ...ser.map((x) => x.data.length));
+      if (!n || !ser.some((x) => x.data.some(Number.isFinite))) return null;
+      const lab = (r.etiketter || r.labels || []).slice(0, 40).map(String);
+      return { type, title: String(r.titel || r.title || ''), unit: String(r.enhet || r.unit || ''), labels: Array.from({ length: n }, (_, i) => lab[i] || String(i + 1)), series: ser, n };
+    }
+    const NFx = {};
+    function nf(v, compact) { if (!Number.isFinite(v)) return '–'; const k = compact ? 'c' : 'n'; NFx[k] = NFx[k] || new Intl.NumberFormat(document.documentElement.lang || 'sv', compact ? { notation: 'compact', maximumFractionDigits: 1 } : { maximumFractionDigits: 2 }); return NFx[k].format(v); }
+    function niceTicks(lo, hi) {
+      const raw = (hi - lo) / 4, mag = Math.pow(10, Math.floor(Math.log10(raw))), n = raw / mag;
+      const step = (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * mag;
+      const a = Math.floor(lo / step) * step, b = Math.ceil(hi / step) * step, list = [];
+      for (let v = a; v <= b + step / 2; v += step) list.push(Math.round(v / step) * step);
+      return { lo: a, hi: b, list };
+    }
+    function barPath(x, yb, yv, w) {
+      const r = Math.min(4, w / 2, Math.abs(yb - yv)), up = yv <= yb, s = up ? 1 : -1;
+      return 'M' + x + ',' + yb + 'V' + (yv + s * r) + 'Q' + x + ',' + yv + ' ' + (x + r) + ',' + yv + 'H' + (x + w - r) + 'Q' + (x + w) + ',' + yv + ' ' + (x + w) + ',' + (yv + s * r) + 'V' + yb + 'Z';
+    }
+    function drawChart(c, raw, anim) {
+      const S = normSpec(raw); if (!S) return;
+      const cols = S.series.length === 1 ? [C_ONE] : C_MANY;
+      const unit = S.unit && S.unit.length <= 5 ? (S.unit === '%' ? ' %' : ' ' + S.unit) : '';
+      const fu = (v) => nf(v) + (Number.isFinite(v) ? unit : '');
+      let html = (S.title ? '<div class="ch-t">' + esc(S.title) + '</div>' : '') + (S.unit && !unit ? '<div class="ch-s">' + esc(S.unit) + '</div>' : (S.unit ? '<div class="ch-s">' + esc(tx('Enhet')) + ': ' + esc(S.unit) + '</div>' : ''));
+      if (S.series.length > 1) html += '<div class="ch-lg">' + S.series.map((x, k) => '<span><i class="' + (S.type === 'line' ? 'ln' : '') + '" style="background:' + cols[k] + '"></i>' + esc(x.name || tx('Serie') + ' ' + (k + 1)) + '</span>').join('') + '</div>';
+      if (S.type === 'hbar') {
+        const mx = Math.max(...S.series.flatMap((x) => x.data.filter(Number.isFinite).map(Math.abs)), 1e-9);
+        html += '<div class="hb">' + S.labels.map((l, i) => '<div class="hb-r" style="--i:' + i + '"><div class="hb-l" data-i="' + i + '" title="' + escA(l) + '">' + esc(l) + '</div><div class="hb-t" data-i="' + i + '" style="--i:' + i + '">'
+          + S.series.map((x, k) => '<i data-i="' + i + '" style="--i:' + i + ';width:' + (Number.isFinite(x.data[i]) ? Math.max(0, x.data[i]) / mx * 100 : 0).toFixed(2) + '%;background:' + cols[k] + (S.series.length > 1 ? ';height:8px' : '') + '"></i>').join('')
+          + '</div><div class="hb-v" style="--i:' + i + '">' + (S.series.length === 1 ? fu(S.series[0].data[i]) : '') + '</div></div>').join('') + '</div>';
+      } else {
+        const W = Math.max(240, (c.clientWidth || 380) - 28), H = 200, pt = 14, pb = 24;
+        const all = S.series.flatMap((x) => x.data).filter(Number.isFinite);
+        let lo = Math.min(0, ...all), hi = Math.max(0, ...all); if (hi === lo) hi = lo + 1;
+        const T = niceTicks(lo, hi), compact = Math.max(Math.abs(T.lo), Math.abs(T.hi)) >= 10000;
+        const tl = T.list.map((v) => nf(v, compact));
+        const pl = Math.max(...tl.map((t) => t.length)) * 6.4 + 12;
+        const endLab = S.type === 'line' && S.series.length <= 2;
+        const pr = endLab ? Math.min(64, Math.max(...S.series.map((x) => fu(x.data[x.data.length - 1]).length)) * 6.4 + 12) : 6;
+        const pw = W - pl - pr, ph = H - pt - pb;
+        const y = (v) => pt + (T.hi - v) / (T.hi - T.lo) * ph, y0 = y(0);
+        const band = pw / S.n;
+        const cx = (i) => S.type === 'line' ? pl + (S.n === 1 ? pw / 2 : i * pw / (S.n - 1)) : pl + band * (i + 0.5);
+        let g = '';
+        T.list.forEach((v, k) => { g += '<line class="' + (v === 0 ? 'base' : 'gr') + '" x1="' + pl + '" x2="' + (W - pr) + '" y1="' + y(v) + '" y2="' + y(v) + '"/><text x="' + (pl - 8) + '" y="' + (y(v) + 4) + '" text-anchor="end">' + esc(tl[k]) + '</text>'; });
+        const every = Math.ceil(S.n / Math.max(1, Math.floor(pw / 52)));
+        S.labels.forEach((l, i) => { if (i % every) return; const t = l.length > 10 ? l.slice(0, 9) + '…' : l; g += '<text x="' + cx(i) + '" y="' + (H - 6) + '" text-anchor="' + (S.type === 'line' && i === 0 && S.n > 1 ? 'start' : S.type === 'line' && i === S.n - 1 && S.n > 1 ? 'end' : 'middle') + '">' + esc(t) + '</text>'; });
+        const k = S.series.length;
+        if (S.type === 'col' || S.type === 'stick') {
+          const gw = band * (S.type === 'stick' ? 0.5 : 0.72), bw = S.type === 'stick' ? 0 : Math.max(2, Math.min(24, (gw - (k - 1) * 2) / k));
+          const step = S.type === 'stick' ? (k > 1 ? Math.min(12, gw / k) : 0) : bw + 2;
+          const tw = S.type === 'stick' ? step * (k - 1) : k * bw + (k - 1) * 2;
+          S.series.forEach((x, s) => x.data.forEach((v, i) => {
+            if (!Number.isFinite(v)) return;
+            const x0 = cx(i) - tw / 2 + s * step, yv = y(v), org = v >= 0 ? 'bottom' : 'top';
+            if (S.type === 'col') g += '<path class="bar" d="' + barPath(x0, y0, yv, bw) + '" fill="' + cols[s] + '" style="--i:' + i + ';transform-origin:center ' + org + '"/>';
+            else g += '<line class="stem" x1="' + x0 + '" x2="' + x0 + '" y1="' + y0 + '" y2="' + yv + '" stroke="' + cols[s] + '" style="--i:' + i + ';transform-origin:center ' + org + '"/><circle class="dot" cx="' + x0 + '" cy="' + yv + '" r="5" fill="' + cols[s] + '" style="--i:' + i + '"/>';
+            if (k === 1 && band >= 30) g += '<text class="vl" x="' + cx(i) + '" y="' + (v >= 0 ? yv - (S.type === 'stick' ? 10 : 6) : yv + 15) + '" text-anchor="middle" style="--i:' + i + '">' + esc(nf(v, compact)) + '</text>';
+          }));
+        } else {
+          const ends = [];
+          S.series.forEach((x, s) => {
+            let d = '', pen = false, first = -1, last = -1;
+            x.data.forEach((v, i) => { if (!Number.isFinite(v)) { pen = false; return; } d += (pen ? 'L' : 'M') + cx(i).toFixed(1) + ',' + y(v).toFixed(1); pen = true; if (first < 0) first = i; last = i; });
+            if (k === 1 && first >= 0 && x.data.slice(first, last + 1).every(Number.isFinite)) g += '<path class="area" d="' + d + 'L' + cx(last) + ',' + y0 + 'L' + cx(first) + ',' + y0 + 'Z" fill="' + cols[s] + '" fill-opacity=".12"/>';
+            g += '<path class="ln" pathLength="1" d="' + d + '" stroke="' + cols[s] + '"/>';
+            if (last >= 0) { g += '<circle class="dot" cx="' + cx(last) + '" cy="' + y(x.data[last]) + '" r="4.5" fill="' + cols[s] + '" style="--i:' + (S.n + 6) + '"/>'; ends.push({ y: y(x.data[last]), x: cx(last), v: x.data[last], i: S.n + 8 }); }
+          });
+          if (endLab && (ends.length < 2 || Math.abs(ends[0].y - ends[1].y) > 14)) ends.forEach((e) => { g += '<text class="vl" x="' + (e.x + 9) + '" y="' + (e.y + 4) + '" style="--i:' + e.i + '">' + esc(fu(e.v)) + '</text>'; });
+          g += '<line class="xh" x1="0" x2="0" y1="' + pt + '" y2="' + (H - pb) + '"/>';
+        }
+        S.labels.forEach((_, i) => { const w = S.type === 'line' ? (S.n === 1 ? pw : pw / (S.n - 1)) : band; g += '<rect class="hit" data-i="' + i + '" data-cx="' + cx(i) + '" x="' + (cx(i) - w / 2) + '" y="' + pt + '" width="' + w + '" height="' + ph + '"/>'; });
+        html += '<svg class="ch" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + escA(S.title || tx('Diagram')) + '">' + g + '</svg>';
+      }
+      c.innerHTML = html + '<div class="ctip"></div>';
+      c.classList.toggle('anim', !!anim);
+      const tip = c.querySelector('.ctip'), xh = c.querySelector('.xh');
+      c.onmousemove = (e) => {
+        const t = e.target.closest && e.target.closest('[data-i]');
+        if (!t || !c.contains(t)) { tip.classList.remove('on'); if (xh) xh.classList.remove('on'); return; }
+        const i = +t.dataset.i;
+        tip.innerHTML = '<b>' + esc(S.labels[i]) + '</b>' + S.series.map((x, k) => '<div><i style="background:' + cols[k] + '"></i>' + (S.series.length > 1 ? esc(x.name || tx('Serie') + ' ' + (k + 1)) : '') + '<span>' + esc(fu(x.data[i])) + '</span></div>').join('');
+        const r = c.getBoundingClientRect(); let px = e.clientX - r.left + 14, py = e.clientY - r.top + 14;
+        if (px + tip.offsetWidth > r.width - 4) px = e.clientX - r.left - tip.offsetWidth - 14;
+        tip.style.transform = 'translate(' + Math.max(4, px) + 'px,' + py + 'px)'; tip.classList.add('on');
+        if (xh && t.dataset.cx) { xh.setAttribute('x1', t.dataset.cx); xh.setAttribute('x2', t.dataset.cx); xh.classList.add('on'); }
+      };
+      c.onmouseleave = () => { tip.classList.remove('on'); if (xh) xh.classList.remove('on'); };
+    }
+    function drawCharts(root, anim) {
+      root.querySelectorAll('.chart').forEach((c) => {
+        let spec; try { spec = JSON.parse(c.dataset.spec); } catch { return; }
+        drawChart(c, spec, anim);
+        if (!c._ro && window.ResizeObserver) { let w = c.clientWidth; c._ro = new ResizeObserver(() => { if (Math.abs(c.clientWidth - w) > 8) { w = c.clientWidth; drawChart(c, spec, false); } }); c._ro.observe(c); }
+      });
+    }
     function bubble(role, html, cls, idx) {
       const el = document.createElement('div');
       el.className = 'msg ' + (role === 'user' ? 'user' : 'krypto') + (cls ? ' ' + cls : '');
       el.innerHTML = '<span class="av">' + (role === 'user' ? AV_USER : AV_KRYPTO) + '</span><div class="bubble"></div>';
       el.querySelector('.bubble').innerHTML = html;
+      const hm = idx !== undefined ? history[idx] : null;
+      if (role === 'user' && hm && hm.files && hm.files.length) { const fc = document.createElement('div'); fc.className = 'fchips'; fc.innerHTML = hm.files.map((f) => chipHtml(f, false)).join(''); el.insertBefore(fc, el.querySelector('.bubble')); if (!hm.content) el.querySelector('.bubble').remove(); }
       if (idx !== undefined) el.appendChild(actRow(role, idx));
-      log.appendChild(el); markLast(); scrollBottom(); return el;
+      log.appendChild(el); if (role !== 'user') drawCharts(el, false); markLast(); scrollBottom(); return el;
     }
     // Ikoner och knapprader under meddelandena (som claude.ai)
     const ic = (d) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>';
@@ -453,21 +732,38 @@
     // Redigera: texten tillbaka i rutan, meddelandet och allt efter tas bort
     function editFrom(idx) {
       if (busy || !history[idx]) return;
-      inp.value = history[idx].content; history.splice(idx); saveConvos(); render(); autosize(); inp.focus(); inp.dispatchEvent(new Event('input'));
+      inp.value = history[idx].content; const back = history[idx].files || []; history.splice(idx);
+      Promise.all(back.map(async (f) => { const o = await idb.get(f.id).catch(() => null); return o ? { ...f, text: o.text } : null; })).then((l) => { pending = l.filter(Boolean); renderPending(); }); saveConvos(); render(); autosize(); inp.focus(); inp.dispatchEvent(new Event('input'));
     }
-    // Svaret "skrivs fram" ord för ord, med ugglan pulserande under medan det pågår
+    // Svaret "skrivs fram" ord för ord, med ugglan pulserande under. Tabeller, kod och diagram animeras in i tur och ordning.
     function writeOut(el) {
-      const b = el.querySelector('.bubble'); const words = [];
-      const walk = (n) => { for (const c of [...n.childNodes]) { if (c.nodeType === 3) { const f = document.createDocumentFragment(); for (const part of c.textContent.split(/(\s+)/)) { if (!part) continue; if (/^\s+$/.test(part)) f.appendChild(document.createTextNode(part)); else { const sp = document.createElement('span'); sp.className = 'w'; sp.textContent = part; f.appendChild(sp); words.push(sp); } } c.replaceWith(f); } else walk(c); } };
+      const b = el.querySelector('.bubble'); const items = [];
+      const walk = (n) => { for (const c of [...n.childNodes]) {
+        if (c.nodeType === 3) { const f = document.createDocumentFragment(); for (const part of c.textContent.split(/(\s+)/)) { if (!part) continue; if (/^\s+$/.test(part)) f.appendChild(document.createTextNode(part)); else { const sp = document.createElement('span'); sp.className = 'w'; sp.textContent = part; f.appendChild(sp); items.push({ w: sp }); } } c.replaceWith(f); }
+        else if (c.nodeType === 1 && c.matches('.cb, .tbl, .chart')) items.push({ blk: c });
+        else if (c.nodeType === 1) walk(c);
+      } };
       walk(b);
-      if (matchMedia('(prefers-reduced-motion: reduce)').matches || !words.length) return Promise.resolve();
-      const step = Math.max(8, Math.min(38, 2600 / words.length));   // korta svar lugnt, långa svar snabbare (högst ~2,6 s)
-      words.forEach((w, i) => { w.style.animationDelay = Math.round(i * step) + 'ms'; });
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches || !items.length) { b.querySelectorAll('.w').forEach((w) => w.replaceWith(w.textContent)); return Promise.resolve(); }
+      const nw = items.filter((x) => x.w).length || 1;
+      const step = Math.max(8, Math.min(38, 2600 / nw));   // korta svar lugnt, långa svar snabbare
+      let t = 0;
+      for (const it of items) {
+        if (it.w) { it.w.style.animationDelay = Math.round(t) + 'ms'; t += step; continue; }
+        const c = it.blk; c.style.setProperty('--d', Math.round(t) + 'ms');
+        if (c.classList.contains('chart')) { let spec; try { spec = JSON.parse(c.dataset.spec); } catch {} if (spec) drawChart(c, spec, true); t += 1100; }
+        else if (c.classList.contains('tbl')) { c.classList.add('anim'); t += Math.min(1100, 250 + c.querySelectorAll('tr').length * 55); }
+        else { const dur = Math.min(900, 250 + (c.dataset.raw || '').split('\n').length * 22); c.style.setProperty('--dur', dur + 'ms'); c.classList.add('anim'); t += dur; }
+      }
       el.classList.add('writing');
       const owl = document.createElement('img'); owl.className = 'writing-owl'; owl.src = 'krypto-owl-face.png'; owl.alt = ''; el.insertBefore(owl, el.querySelector('.acts'));
-      const total = words.length * step + 320;
       const tick = setInterval(() => { if (follow) log.scrollTop = log.scrollHeight + 9999; }, 100);
-      return new Promise((ok) => setTimeout(() => { clearInterval(tick); owl.remove(); el.classList.remove('writing'); words.forEach((w) => w.replaceWith(w.textContent)); b.normalize(); scrollBottom(); ok(); }, total));
+      return new Promise((ok) => setTimeout(() => {
+        clearInterval(tick); owl.remove(); el.classList.remove('writing');
+        b.querySelectorAll('.w').forEach((w) => w.replaceWith(w.textContent)); b.normalize();
+        b.querySelectorAll('.anim').forEach((x) => x.classList.remove('anim'));
+        if (follow) scrollBottom(); ok();
+      }, t + 450));
     }
     var WELCOME_SV = 'Hej! Jag är Falk, din säkerhetsassistent i AdRaze. Klistra in en misstänkt länk, ett mejl eller ett SMS så säger jag om det är en bluff — eller be mig ändra en inställning åt dig. Skriv / för kommandon.';
     function welcome() {
@@ -483,7 +779,7 @@
     }
     const OWL_BIG = '<img src="krypto-owl.png" alt="">';
     const OWL_FLY = '<img class="owl-fly" src="krypto-owl.png" alt="">';
-    function render() { follow = true; log.innerHTML = ''; if (!history.length) { welcome(); return; } history.forEach((m, i) => bubble(m.role, fmt(m.content), '', i)); }
+    function render() { follow = true; log.innerHTML = ''; if (!history.length) { welcome(); return; } history.forEach((m, i) => bubble(m.role, m.role === 'user' ? fmt(m.content) : md(m.content), '', i)); }
     // En rad som visar vad Falk gör. Minnesrader öppnar minnena vid klick.
     function stepRow(icon, label, val, cls, onClick) {
       const el = document.createElement(onClick ? 'button' : 'div'); el.className = 'step' + (cls ? ' ' + cls : '');
@@ -633,6 +929,13 @@
         '• Handla åt användaren med deras sparade kort — BARA när de tydligt ber om att köpa/beställa något (t.ex. "köp en pizza"): [[gör:köp=vad (ev. hämtning/leverans)|butik|ungefärligt belopp]] — t.ex. [[gör:köp=Pizza Margherita, hämtning|Pizzerian|129 kr]]. Ange ett rimligt belopp om inget nämnts. Webbläsaren kräver användarens tillstånd + en bekräftelse innan betalning — så LOVA aldrig att köpet är genomfört, säg bara kort att du förbereder det. Skriv aldrig ut taggen.\n' +
         '• Tillåt en sida för ett barn — permanent ELLER tillfälligt: [[gör:tillat=BARNETS_NAMN|sida.se|MINUTER]] — sista delen (minuter) valfri för TILLFÄLLIG åtkomst som sen återblockeras. Ex permanent: [[gör:tillat=Emma|roblox.com]]. Ex tillfälligt en timme: [[gör:tillat=Emma|roblox.com|60]]. "en timme"=60, "en halvtimme"=30, "två timmar"=120. Bara föräldern kan tillåta.\n' +
         'Utför BARA det användaren faktiskt ber om. Skriv aldrig ut själva taggen som synlig text.\n\n' +
+        'FORMAT (chatten visar markdown snyggt): **fet**, listor, korta rubriker (##) och `kod`. Håll vanliga svar korta.\n' +
+        '• Jämförelser med flera egenskaper → en markdown-tabell (| a | b |).\n' +
+        '• När siffror blir tydligare som bild → ett kodblock ```diagram med JSON: {"typ":"linje|stapel|stolpe|liggande","titel":"…","enhet":"%","etiketter":["jan","feb"],"serier":[{"namn":"…","data":[1,2]}]}. ' +
+        'Välj typ efter vad som passar: linje = utveckling över tid, stapel = jämföra några kategorier, liggande = långa etiketter eller topplistor, stolpe = många värden eller en fördelning. Högst 4 serier och cirka 20 etiketter, bara siffror i data. ' +
+        'Hitta aldrig på siffror: använd diagram bara med riktiga eller givna data, eller säg tydligt att det är ett exempel.\n' +
+        '• Kod i ```språk-block (t.ex. ```python).\n' +
+        '• Längre text som användaren ska kopiera (mejl, brev, sms, rapporter) i ett ```text-block.\n\n' +
         'Sparade minnen om användaren just nu:\n' + memList;
       return [
         { role: 'user', content: sys },
@@ -660,10 +963,14 @@
     /* ── Skicka ── */
     async function send() {
       const text = inp.value.trim();
-      if (!text || busy) return;
-      if (text[0] === '/' && runCommand(text)) { inp.value = ''; autosize(); hideCmd(); return; }
+      if ((!text && !pending.length) || busy) return;
+      if (text[0] === '/' && !pending.length && runCommand(text)) { inp.value = ''; autosize(); hideCmd(); return; }
       inp.value = ''; autosize(); hideCmd();
-      history.push({ role: 'user', content: text, ts: Date.now() }); touchConvo(text); saveConvos();
+      const files = pending; pending = []; renderPending();
+      for (const f of files) await idb.put({ id: f.id, text: f.text }).catch(() => {});
+      const msg = { role: 'user', content: text, ts: Date.now() };
+      if (files.length) msg.files = files.map(({ text: _t, ...meta }) => meta);
+      history.push(msg); touchConvo(text || files.map((f) => f.name).join(', ')); saveConvos();
       { const h = log.querySelector('.hero'); if (h) h.remove(); }   // välkomstvyn försvinner när samtalet börjar
       follow = true; bubble('user', fmt(text), '', history.length - 1); updateConvTitle();
       ask();
@@ -672,7 +979,8 @@
     async function ask() {
       busy = true; sendBtn.disabled = true; document.body.classList.add('thinking'); setStatus(tx('Tänker') + '…');
       const typing = bubble('krypto', '<span class="think">' + OWL_FLY + '<span class="tt">' + esc((typeof window.t === 'function') ? window.t('Falk tänker') : 'Falk tänker') + '</span></span>', 'typing');
-      const messages = buildPriming().concat(history.slice(-12).map((m) => ({ role: m.role, content: m.content })));   // bara roll + text till servern
+      const priming = buildPriming(); priming[0].content += await projectText(activeConvo());
+      const messages = priming.concat(await Promise.all(history.slice(-12).map(withFiles)));   // bara roll + text (+ filerna) till servern
       let res;
       try { res = await window.krypto.chat(messages); }
       catch { res = { ok: false, message: 'Kunde inte nå Falk just nu.' }; }
@@ -697,9 +1005,14 @@
         }
         setStatus('');
         history.push({ role: 'assistant', content: clean, ts: Date.now() }); saveConvos();
-        await writeOut(bubble('krypto', fmt(clean || '(tomt svar)'), '', history.length - 1));
+        await writeOut(bubble('krypto', md(clean || '(tomt svar)'), '', history.length - 1));
       } else {
-        history.pop(); saveConvos(); setStatus('');
+        const lost = history.pop(); saveConvos(); setStatus('');
+        // Inget går förlorat: din text och dina filer läggs tillbaka i skrivfältet så du kan skicka igen
+        if (lost && lost.role === 'user') {
+          if (!inp.value.trim()) { inp.value = lost.content || ''; autosize(); }
+          if (lost.files && lost.files.length) Promise.all(lost.files.map(async (f) => { const o = await idb.get(f.id).catch(() => null); return o ? { ...f, text: o.text } : null; })).then((l) => { pending = pending.concat(l.filter(Boolean)); renderPending(); });
+        }
         bubble('krypto', fmt((res && res.message) || 'Något gick fel. Försök igen om en stund.'));
       }
       busy = false; sendBtn.disabled = false; inp.focus();
@@ -735,12 +1048,212 @@
     function cmdMatches() { const q = inp.value.trim().toLowerCase(); return COMMANDS.filter((c) => c.name.startsWith(q) || q === '/'); }
 
     /* ── Paneler ── */
-    function closePanels() { $('convpanel').classList.remove('on'); $('mempanel').classList.remove('on'); }
+    function closePanels() { $('convpanel').classList.remove('on'); $('mempanel').classList.remove('on'); $('projpanel').classList.remove('on'); projView = null; }
     function togglePanel(id, open) {
       const willOpen = open === undefined ? !$(id).classList.contains('on') : open;
       closePanels();
       if (willOpen) { $(id).classList.add('on'); if (id === 'convpanel') renderConvList(); else renderMemList(); }
     }
+
+    /* ── Filer, mappar och projekt ──
+       Filerna läses som text här i panelen (ingenting laddas upp förrän du skickar), sparas i IndexedDB
+       och följer med till Falk som <fil>-block. Mappar hoppar över beroenden, byggen och filer som brukar innehålla hemligheter. */
+    const MSG_CAP = 60000, PROJ_CAP = 100000, FILE_MAX = 3 * 1024 * 1024;
+    const SKIP_DIR = /(^|\/)(node_modules|\.git|\.hg|\.svn|dist|build|out|\.next|\.nuxt|\.cache|\.venv|venv|env|__pycache__|target|vendor|coverage|\.idea|\.vscode|\.gradle|Pods|DerivedData)\//;
+    const SKIP_FILE = /(^|\/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|\.DS_Store|Thumbs\.db)$/i;
+    const SECRET = /(^|\/)(\.env(\..*)?|.*\.(pem|key|p12|pfx|keystore|jks)|id_(rsa|dsa|ecdsa|ed25519)|\.npmrc|\.netrc|credentials(\.json)?|secrets?\.(json|ya?ml|toml))$/i;
+    const idb = (() => {
+      let pr;
+      const open = () => pr || (pr = new Promise((ok, no) => { const r = indexedDB.open('falk', 1); r.onupgradeneeded = () => r.result.createObjectStore('filer', { keyPath: 'id' }); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); }));
+      const run = async (mode, fn) => { const db = await open(); return new Promise((ok, no) => { const t = db.transaction('filer', mode); const q = fn(t.objectStore('filer')); t.oncomplete = () => ok(q && q.result); t.onerror = () => no(t.error); }); };
+      return { put: (o) => run('readwrite', (st) => st.put(o)), get: (id) => run('readonly', (st) => st.get(id)), del: (id) => run('readwrite', (st) => st.delete(id)) };
+    })();
+    const fid = () => 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    const extOf = (n) => { const m = /\.([a-z0-9]{1,5})$/i.exec(n); return m ? m[1].toLowerCase() : ''; };
+    const plural = (n, a, b) => n + ' ' + tx(n === 1 ? a : b);
+    async function readText(file) {
+      if (file.size > FILE_MAX) return { skip: 'stor' };
+      const head = new Uint8Array(await file.slice(0, 8192).arrayBuffer());
+      if (head.includes(0)) return { skip: 'binar' };
+      const t = await file.text();
+      if (/�/.test(t.slice(0, 4000)) && (t.slice(0, 4000).match(/�/g) || []).length > 8) return { skip: 'binar' };
+      return { text: t };
+    }
+    // files: [{ file, path }] → en eller flera bilagor inom taket. Mapp = en bilaga med alla filer i.
+    async function readUpload(entries, cap, asFolder) {
+      const notes = { stor: 0, binar: 0, hemlig: 0, plats: 0 };
+      entries = entries.filter((e) => !SKIP_DIR.test('/' + e.path) && !SKIP_FILE.test(e.path)).sort((a, b) => a.path.localeCompare(b.path));
+      const out = []; let used = 0;
+      for (const e of entries) {
+        if (asFolder && SECRET.test(e.path)) { notes.hemlig++; continue; }
+        const r = await readText(e.file).catch(() => ({ skip: 'binar' }));
+        if (r.skip) { notes[r.skip]++; continue; }
+        const room = cap - used; if (room < 200) { notes.plats++; continue; }
+        const text = r.text.length > room ? r.text.slice(0, room) + '\n…(avkortad)' : r.text;
+        used += text.length; out.push({ path: e.path, text, lines: text.split('\n').length });
+      }
+      let items;
+      if (asFolder && out.length) {
+        const root = (out[0].path.split('/')[0] || 'mapp');
+        items = [{ id: fid(), kind: 'mapp', name: root, files: out.length, chars: used, text: out.map((f) => '<fil namn="' + f.path + '">\n' + f.text + '\n</fil>').join('\n\n') }];
+      } else items = out.map((f) => ({ id: fid(), kind: 'fil', name: f.path.split('/').pop(), lines: f.lines, chars: f.text.length, text: f.text }));
+      const why = [];
+      if (notes.hemlig) why.push(plural(notes.hemlig, 'fil med hemligheter (t.ex. .env eller nycklar) hoppades över', 'filer med hemligheter (t.ex. .env eller nycklar) hoppades över'));
+      if (notes.binar) why.push(plural(notes.binar, 'fil är inte text (bilder och PDF kan Falk inte läsa än)', 'filer är inte text (bilder och PDF kan Falk inte läsa än)'));
+      if (notes.stor) why.push(plural(notes.stor, 'fil var större än 3 MB', 'filer var större än 3 MB'));
+      if (notes.plats) why.push(plural(notes.plats, 'fil fick inte plats', 'filer fick inte plats'));
+      return { items, note: why.join(' · ') };
+    }
+    const fromInput = (inp2) => [...inp2.files].map((f) => ({ file: f, path: f.webkitRelativePath || f.name }));
+    // Dra och släpp: mappar läses rekursivt
+    async function fromDrop(dt) {
+      const out = []; let folder = false;
+      const walk = (en, base) => new Promise((ok) => {
+        if (en.isFile) en.file((f) => { out.push({ file: f, path: base + f.name }); ok(); }, () => ok());
+        else if (en.isDirectory) { folder = true; const rd = en.createReader(); const all = []; const next = () => rd.readEntries(async (b) => { if (!b.length) { for (const c of all) { if (!SKIP_DIR.test('/' + base + en.name + '/' + c.name + '/')) await walk(c, base + en.name + '/'); } ok(); } else { all.push(...b); next(); } }, () => ok()); next(); }
+        else ok();
+      });
+      const ents = [...(dt.items || [])].map((i) => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
+      if (ents.length) { for (const en of ents) await walk(en, ''); } else for (const f of dt.files || []) out.push({ file: f, path: f.name });
+      return { entries: out, folder };
+    }
+    const FILE_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/></svg>';
+    const DIR_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg>';
+    const X_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+    function chipHtml(f, removable) {
+      const e = extOf(f.name);
+      const meta = f.kind === 'mapp' ? plural(f.files, 'fil', 'filer') : (f.lines ? plural(f.lines, 'rad', 'rader') : '');
+      return '<div class="fchip" data-id="' + f.id + '"><span class="fi">' + (f.kind === 'mapp' ? DIR_IC : (e && e.length <= 4 ? esc(e) : FILE_IC)) + '</span><span class="fn"><b title="' + escA(f.name) + '">' + esc(f.name + (f.kind === 'mapp' ? '/' : '')) + '</b><span>' + esc(meta) + '</span></span>'
+        + (removable ? '<button type="button" class="fx" title="' + escA(tx('Ta bort')) + '">' + X_IC + '</button>' : '') + '</div>';
+    }
+    var pending = [];
+    const pendingChars = () => pending.reduce((a, f) => a + f.chars, 0);
+    function renderPending() {
+      $('chips').innerHTML = pending.map((f) => chipHtml(f, true)).join('');
+      $('chips').querySelectorAll('.fx').forEach((b) => b.addEventListener('click', () => { const id = b.closest('.fchip').dataset.id; pending = pending.filter((f) => f.id !== id); renderPending(); }));
+      sendBtn.disabled = busy;
+    }
+    function note(t) { $('attnote').textContent = t || ''; if (t) { clearTimeout(note._t); note._t = setTimeout(() => { $('attnote').textContent = ''; }, 9000); } }
+    async function attach(entries, folder) {
+      if (!entries.length) return;
+      $('chips').insertAdjacentHTML('beforeend', '<div class="fchip loading"><span class="fi">' + (folder ? DIR_IC : FILE_IC) + '</span><span class="fn"><b>' + esc(tx('Läser…')) + '</b></span></div>');
+      const { items, note: n } = await readUpload(entries, Math.max(0, MSG_CAP - pendingChars()), folder);
+      pending.push(...items); renderPending(); note(n || (items.length ? '' : tx('Inga textfiler att läsa.'))); inp.focus();
+    }
+    function toggleAttMenu(open) {
+      const m = $('attmenu'); const on = open === undefined ? !m.classList.contains('on') : open;
+      m.classList.toggle('on', on);
+      const p = projOf(activeConvo()); $('am-projname').textContent = p ? p.name : '';
+    }
+    $('attach').addEventListener('click', (e) => { e.stopPropagation(); toggleAttMenu(); });
+    document.addEventListener('click', (e) => { if (!e.target.closest('#attmenu')) toggleAttMenu(false); });
+    $('am-files').addEventListener('click', () => { toggleAttMenu(false); $('f-files').click(); });
+    $('am-dir').addEventListener('click', () => { toggleAttMenu(false); $('f-dir').click(); });
+    $('am-proj').addEventListener('click', () => { toggleAttMenu(false); const p = projOf(activeConvo()); openProjects(p ? p.id : null); });
+    $('f-files').addEventListener('change', async (e) => { await attach(fromInput(e.target), false); e.target.value = ''; });
+    $('f-dir').addEventListener('change', async (e) => { await attach(fromInput(e.target), true); e.target.value = ''; });
+    let dragN = 0;
+    document.body.dataset.drop = tx('Släpp filer eller mappar här');
+    window.addEventListener('dragenter', (e) => { if ([...(e.dataTransfer.types || [])].includes('Files')) { dragN++; document.body.classList.add('drag'); } });
+    window.addEventListener('dragleave', () => { if (--dragN <= 0) { dragN = 0; document.body.classList.remove('drag'); } });
+    window.addEventListener('dragover', (e) => { e.preventDefault(); });
+    window.addEventListener('drop', async (e) => {
+      e.preventDefault(); dragN = 0; document.body.classList.remove('drag');
+      const { entries, folder } = await fromDrop(e.dataTransfer);
+      if ($('projpanel').classList.contains('on') && projView) await addProjFiles(projView, entries, folder);
+      else await attach(entries, folder);
+    });
+
+    // Det som skickas till servern: text + bifogade filer (läses från IndexedDB)
+    async function withFiles(m) {
+      if (!m.files || !m.files.length) return { role: m.role, content: m.content };
+      const parts = await Promise.all(m.files.map(async (f) => {
+        const o = await idb.get(f.id).catch(() => null);
+        const body = o ? o.text : '(filen finns inte längre)';
+        return f.kind === 'mapp' ? '<mapp namn="' + f.name + '">\n' + body + '\n</mapp>' : '<fil namn="' + f.name + '">\n' + body + '\n</fil>';
+      }));
+      return { role: m.role, content: (m.content || tx('Titta på det jag bifogade.')) + '\n\n' + tx('Bifogat') + ':\n' + parts.join('\n\n') };
+    }
+
+    /* Projekt: namn, instruktioner och filer som Falk alltid har med i projektets samtal */
+    const PROJ = 'krypto-projects';
+    var projects = []; try { const o = JSON.parse(localStorage.getItem(PROJ)); if (Array.isArray(o)) projects = o; } catch {}
+    var projView = null;
+    function saveProjects() { try { localStorage.setItem(PROJ, JSON.stringify(projects)); } catch {} $('s-projn').textContent = projects.length || ''; updateProjChip(); }
+    function projOf(c) { return c && c.projectId ? projects.find((p) => p.id === c.projectId) : null; }
+    function updateProjChip() { const p = projOf(activeConvo()); const el = $('projchip'); el.textContent = p ? p.name : ''; el.classList.toggle('on', !!p); }
+    $('projchip').addEventListener('click', () => { const p = projOf(activeConvo()); if (p) openProjects(p.id); });
+    async function projectText(c) {
+      const p = projOf(c); if (!p) return '';
+      const files = await Promise.all((p.files || []).map(async (f) => { const o = await idb.get(f.id).catch(() => null); return o ? (f.kind === 'mapp' ? '<mapp namn="' + f.name + '">\n' + o.text + '\n</mapp>' : '<fil namn="' + f.name + '">\n' + o.text + '\n</fil>') : ''; }));
+      return '\n\nAKTIVT PROJEKT: "' + p.name + '". Samtalet hör till det här projektet.' + (p.instr ? '\nAnvändarens instruktioner för projektet (följ dem):\n' + p.instr : '')
+        + (files.filter(Boolean).length ? '\nProjektets filer (kunskap du ska använda och hänvisa till med filnamn):\n' + files.filter(Boolean).join('\n\n') : '');
+    }
+    function projChars(p) { return (p.files || []).reduce((a, f) => a + (f.chars || 0), 0); }
+    async function addProjFiles(id, entries, folder) {
+      const p = projects.find((x) => x.id === id); if (!p || !entries.length) return;
+      const { items, note: n } = await readUpload(entries, Math.max(0, PROJ_CAP - projChars(p)), folder);
+      for (const f of items) { await idb.put({ id: f.id, text: f.text }); const { text, ...meta } = f; p.files.push(meta); }
+      saveProjects(); renderProject(id, n || (items.length ? '' : tx('Inga textfiler att läsa.')));
+    }
+    $('pf-files').addEventListener('change', async (e) => { if (projView) await addProjFiles(projView, fromInput(e.target), false); e.target.value = ''; });
+    $('pf-dir').addEventListener('change', async (e) => { if (projView) await addProjFiles(projView, fromInput(e.target), true); e.target.value = ''; });
+    const CLOSE_IC = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+    const BACK_IC = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
+    function openProjects(id) { closePanels(); $('projpanel').classList.add('on'); if (id) renderProject(id); else renderProjList(); }
+    function renderProjList() {
+      projView = null; const el = $('projpanel');
+      el.innerHTML = '<div class="p-head"><div style="flex:1"><div class="t">' + esc(tx('Projekt')) + '</div><div class="sub">' + esc(tx('Samla filer och instruktioner som Falk alltid använder i projektets samtal.')) + '</div></div><button class="hbtn" data-a="close" title="' + escA(tx('Stäng')) + '">' + CLOSE_IC + '</button></div>'
+        + '<button class="p-newbtn" data-a="new">' + CLIP_PLUS + esc(tx('Nytt projekt')) + '</button><div class="p-list"></div>';
+      const list = el.querySelector('.p-list');
+      if (!projects.length) list.innerHTML = '<div class="p-empty">' + esc(tx('Inga projekt än. Skapa ett, lägg till filer eller en hel mapp och skriv hur Falk ska jobba.')) + '</div>';
+      for (const p of projects.slice().sort((a, b) => b.ts - a.ts)) {
+        const n = convos.filter((c) => c.projectId === p.id && c.messages.length).length;
+        const r = document.createElement('div'); r.className = 'convrow';
+        r.innerHTML = '<div class="cmeta"><div class="ctitle">' + esc(p.name) + '</div><div class="csub">' + esc(plural((p.files || []).length, 'fil', 'filer') + ' · ' + plural(n, 'samtal', 'samtal')) + '</div></div>';
+        r.addEventListener('click', () => renderProject(p.id)); list.appendChild(r);
+      }
+      el.querySelector('[data-a=close]').addEventListener('click', closePanels);
+      el.querySelector('[data-a=new]').addEventListener('click', () => { const p = { id: 'p' + Date.now().toString(36), name: tx('Nytt projekt'), instr: '', files: [], ts: Date.now() }; projects.push(p); saveProjects(); renderProject(p.id, '', true); });
+    }
+    function renderProject(id, msg, focusName) {
+      const p = projects.find((x) => x.id === id); if (!p) return renderProjList();
+      projView = id; const el = $('projpanel'); const used = projChars(p);
+      const convs = convos.filter((c) => c.projectId === id && c.messages.length).sort((a, b) => b.ts - a.ts);
+      const cur = activeConvo();
+      el.innerHTML = '<div class="p-head"><button class="hbtn" data-a="back" title="' + escA(tx('Alla projekt')) + '">' + BACK_IC + '</button><div style="flex:1"><div class="t">' + esc(tx('Projekt')) + '</div></div><button class="hbtn" data-a="close" title="' + escA(tx('Stäng')) + '">' + CLOSE_IC + '</button></div>'
+        + '<div class="pj-body">'
+        + '<div><input class="pj-name" value="' + escA(p.name) + '" maxlength="60" spellcheck="false"></div>'
+        + '<div><div class="pj-lbl">' + esc(tx('Instruktioner')) + '</div><textarea class="pj-instr" maxlength="4000" placeholder="' + escA(tx('Hur ska Falk jobba i det här projektet? T.ex. "Svara kort, granska koden för säkerhetshål".')) + '">' + esc(p.instr || '') + '</textarea></div>'
+        + '<div><div class="pj-lbl"><span>' + esc(tx('Filer')) + '</span><span>' + Math.round(used / PROJ_CAP * 100) + ' % ' + esc(tx('använt')) + '</span></div><div class="pj-meter"><i style="width:' + Math.min(100, used / PROJ_CAP * 100) + '%"></i></div>'
+        + '<div class="att-note" style="margin:8px 2px 0">' + esc(msg || '') + '</div>'
+        + '<div class="pj-files" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">' + (p.files || []).map((f) => chipHtml(f, true)).join('') + '</div>'
+        + '<div class="pj-btns" style="margin-top:10px"><button class="pj-btn" data-a="files">' + FILE_IC + esc(tx('Lägg till filer')) + '</button><button class="pj-btn" data-a="dir">' + DIR_IC + esc(tx('Lägg till mapp')) + '</button></div></div>'
+        + '<div class="pj-btns"><button class="pj-btn pri" data-a="chat">' + esc(tx('Nytt samtal i projektet')) + '</button>'
+        + (cur && cur.messages.length && cur.projectId !== id ? '<button class="pj-btn" data-a="move">' + esc(tx('Flytta hit det här samtalet')) + '</button>' : '') + '</div>'
+        + (convs.length ? '<div><div class="pj-lbl">' + esc(tx('Samtal')) + '</div><div class="pj-convs"></div></div>' : '')
+        + '<div><button class="pj-btn danger" data-a="del">' + esc(tx('Ta bort projektet')) + '</button></div></div>';
+      const q = (a) => el.querySelector('[data-a=' + a + ']');
+      q('back').addEventListener('click', renderProjList); q('close').addEventListener('click', closePanels);
+      const nm = el.querySelector('.pj-name'); nm.addEventListener('input', () => { p.name = nm.value.trim() || tx('Nytt projekt'); saveProjects(); });
+      if (focusName) { nm.focus(); nm.select(); }
+      const ins = el.querySelector('.pj-instr'); ins.addEventListener('input', () => { p.instr = ins.value; clearTimeout(ins._t); ins._t = setTimeout(saveProjects, 300); });
+      el.querySelectorAll('.pj-files .fx').forEach((b) => b.addEventListener('click', () => { const fidv = b.closest('.fchip').dataset.id; p.files = p.files.filter((f) => f.id !== fidv); idb.del(fidv).catch(() => {}); saveProjects(); renderProject(id); }));
+      q('files').addEventListener('click', () => $('pf-files').click()); q('dir').addEventListener('click', () => $('pf-dir').click());
+      q('chat').addEventListener('click', () => { newConvo(id); });
+      if (q('move')) q('move').addEventListener('click', () => { cur.projectId = id; saveConvos(); updateProjChip(); closePanels(); });
+      q('del').addEventListener('click', () => {
+        if (q('del').dataset.sure !== '1') { q('del').dataset.sure = '1'; q('del').textContent = tx('Säker? Klicka igen'); return; }
+        for (const f of p.files || []) idb.del(f.id).catch(() => {});
+        for (const c of convos) if (c.projectId === id) delete c.projectId;
+        projects = projects.filter((x) => x.id !== id); saveConvos(); saveProjects(); renderProjList();
+      });
+      const host = el.querySelector('.pj-convs');
+      if (host) for (const c of convs) { const r = document.createElement('div'); r.className = 'convrow' + (c.id === activeId ? ' active' : ''); r.innerHTML = '<div class="cmeta"><div class="ctitle">' + esc(c.title || tx('Samtal')) + '</div><div class="csub">' + esc(ago(c.ts)) + '</div></div>'; r.addEventListener('click', () => openConvo(c.id)); host.appendChild(r); }
+    }
+    const CLIP_PLUS = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>';
+    $('s-proj').addEventListener('click', () => { openProjects(); closeSide(); });
+    $('s-projn').textContent = projects.length || '';
     function ago(ts) { const s = (Date.now() - ts) / 1000; if (s < 60) return 'nyss'; if (s < 3600) return Math.floor(s / 60) + ' min sedan'; if (s < 86400) return Math.floor(s / 3600) + ' h sedan'; return Math.floor(s / 86400) + ' d sedan'; }
     function renderConvList() {
       const host = $('convlist'); host.innerHTML = '';
