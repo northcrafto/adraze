@@ -46,13 +46,12 @@ const dec = new TextDecoder();
 function b64(buf) { const b = new Uint8Array(buf); let s = ''; for (let i = 0; i < b.length; i++) s += String.fromCharCode(b[i]); return btoa(s); }
 function fromB64(str) { const bin = atob(str); const out = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out; }
 async function sha256(str) { return new Uint8Array(await crypto.subtle.digest('SHA-256', enc.encode(str))); }
-async function deriveSecrets(code, usernameLower) {
-  const salt = await sha256('skll-v1:' + usernameLower);
-  const baseKey = await crypto.subtle.importKey('raw', enc.encode(code), 'PBKDF2', false, ['deriveBits']);
-  const bits = new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: PBKDF2_ITERS, hash: 'SHA-256' }, baseKey, 512));
-  const loginHash = b64(bits.slice(0, 32));
-  const wrapKey = await crypto.subtle.importKey('raw', bits.slice(32, 64), { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
-  return { loginHash, wrapKey };
+// Chatten låses upp av AdRaze-kontot: servern lämnar ut kontots hemlighet (bara till den inloggade),
+// ur den härleds nyckeln som låser den privata nyckeln och beviset (login_hash). Ingen kod att spara.
+async function kontoNyckel() {
+  const r = await GET('/nyckel');
+  const wrapKey = await crypto.subtle.importKey('raw', await sha256('adraze-chatt-wrap-v1:' + r.secret), { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+  return { loginHash: b64(await sha256('adraze-chatt-auto-v1:' + r.secret)), wrapKey };
 }
 async function genKeypair() {
   const kp = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey', 'deriveBits']);
@@ -102,13 +101,6 @@ async function unwrapGroupKey(envB64, wrapperPubB64) {
   // extractable så medlemmar kan paketera om gruppnyckeln när de lägger till fler
   return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, true, ['encrypt', 'decrypt']);
 }
-function genCode() {
-  const out = [];
-  while (out.length < 16) { const buf = crypto.getRandomValues(new Uint8Array(32)); for (let i = 0; i < buf.length && out.length < 16; i++) if (buf[i] < 250) out.push(buf[i] % 10); }
-  return out.join('');
-}
-function formatCode(c) { return String(c).replace(/(.{4})/g, '$1 ').trim(); }
-
 // ===== IndexedDB: privata nyckeln per chattprofil ('priv:<id>'), olika konton delar aldrig nyckel =====
 function idbOpen() {
   return new Promise((res, rej) => {
@@ -129,8 +121,6 @@ let active = null;          // { kind:'contact'|'group', id, name, key, avatar? 
 const sharedCache = {}, groupKeyCache = {}, lastTs = {}, lastSync = {}, prevUnread = {}, pubKeyCache = {};
 let pollTimer = null, bgTimer = null;
 let contactsCache = [], blockedCache = [], groupsCache = [];
-let sessionCode = null;     // koden i minnet efter skapande/upplåsning, sparas aldrig
-let hasRecovery = false;
 let unreadContacts = 0, unreadGroups = 0;
 
 // ===== API =====
@@ -221,7 +211,7 @@ const confirmBox = (text, okLabel, danger) => dialog(text, { okLabel: okLabel ||
 const promptBox = (text, value) => dialog(text, { prompt: true, value });
 
 // ===== Vyer =====
-const VIEWS = ['loading', 'error', 'suspended', 'create', 'unlock', 'app'];
+const VIEWS = ['loading', 'error', 'suspended', 'create', 'app'];
 function showView(name) {
   for (const v of VIEWS) $('view-' + v).hidden = v !== name;
   const inApp = name === 'app';
@@ -243,106 +233,60 @@ async function start() {
     $('error-text').textContent = e.message || T('Kontrollera din uppkoppling och försök igen.');
     showView('error'); return;
   }
-  if (!r.profil) { resetCreate(); showView('create'); setTimeout(() => $('create-username').focus(), 50); return; }
+  if (!r.profil) { resetCreate(r.forslag); showView('create'); setTimeout(() => { $('create-username').focus(); $('create-username').select(); }, 50); return; }
   state = { id: String(r.id), username: r.username, public_key: r.public_key, avatar: safeImg(r.avatar), bubble: r.bubble || null };
-  hasRecovery = !!r.has_recovery;
-  let stored = null; try { stored = await idbGet('priv:' + state.id); } catch {}
-  if (stored && stored.key && stored.pub === state.public_key) { myPriv = stored.key; enterApp(); return; }
-  if (stored) { try { await idbDel('priv:' + state.id); } catch {} }   // gammal nyckel (profilen raderad och skapad igen)
-  showUnlock();
+  if (r.auto) {
+    let stored = null; try { stored = await idbGet('priv:' + state.id); } catch {}
+    if (stored && stored.key && stored.pub === state.public_key) { myPriv = stored.key; enterApp(); return; }
+    if (stored) { try { await idbDel('priv:' + state.id); } catch {} }   // gammal nyckel (profilen raderad och skapad igen)
+  }
+  try { await unlockWithAccount(!r.auto); }
+  catch (e) { $('error-text').textContent = e.message || T('Kunde inte öppna chatten.'); showView('error'); }
 }
 $('btn-retry').addEventListener('click', start);
 
+// Lås upp med AdRaze-kontot. Profiler från tiden med hemlig kod får nya nycklar kopplade till kontot.
+async function unlockWithAccount(fromCode) {
+  const k = await kontoNyckel();
+  let priv;
+  if (fromCode) {
+    const { publicKeyB64, pkcs8 } = await genKeypair();
+    const encPriv = await wrapPrivate(pkcs8, k.wrapKey);
+    await POST('/users/ny-nyckel', { public_key: publicKeyB64, enc_priv: encPriv, login_hash: k.loginHash });
+    priv = await unwrapPrivate(encPriv, k.wrapKey);
+    state.public_key = publicKeyB64;
+  } else {
+    const r = await POST('/users/login', { login_hash: k.loginHash });
+    priv = await unwrapPrivate(r.enc_priv, k.wrapKey);
+    state.public_key = r.public_key || state.public_key;
+    if (r.avatar !== undefined) state.avatar = safeImg(r.avatar);
+  }
+  await storeKey(priv);
+  myPriv = priv;
+  enterApp();
+}
+
 // ===== Välj användarnamn (första gången) =====
-let pendingCode = null;
-function resetCreate() {
-  pendingCode = null;
-  $('create-username').value = ''; $('create-error').textContent = '';
-  $('created-code').textContent = ''; $('confirm-saved').checked = false; $('btn-enter').disabled = true;
-  $('form-create').hidden = false; $('form-created').hidden = true;
+function resetCreate(forslag) {
+  $('create-username').value = forslag || ''; $('create-error').textContent = '';
 }
 $('create-username').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btn-create').click(); });
-$('btn-create').addEventListener('click', () => busy($('btn-create'), 'Skapar…', async () => {
+$('btn-create').addEventListener('click', () => busy($('btn-create'), 'Startar…', async () => {
   const err = $('create-error'); err.textContent = '';
   const username = $('create-username').value.trim();
   if (!validUsername(username)) { err.textContent = T('Användarnamn: 3–20 tecken, bara bokstäver, siffror och _.'); return; }
   try {
-    const code = genCode();
-    const { loginHash, wrapKey } = await deriveSecrets(code, username.toLowerCase());
+    const k = await kontoNyckel();
     const { publicKeyB64, pkcs8 } = await genKeypair();
-    const encPriv = await wrapPrivate(pkcs8, wrapKey);
-    const r = await POST('/registrera', { username, login_hash: loginHash, public_key: publicKeyB64, enc_priv: encPriv });
-    const priv = await unwrapPrivate(encPriv, wrapKey);
+    const encPriv = await wrapPrivate(pkcs8, k.wrapKey);
+    const r = await POST('/registrera', { username, login_hash: k.loginHash, public_key: publicKeyB64, enc_priv: encPriv });
+    const priv = await unwrapPrivate(encPriv, k.wrapKey);
     state = { id: String(r.id), username: r.username, public_key: publicKeyB64, avatar: null, bubble: null };
-    hasRecovery = !!r.has_recovery;
     await storeKey(priv);
-    myPriv = priv; pendingCode = code; sessionCode = code;
-    $('created-code').textContent = formatCode(code);
-    $('form-create').hidden = true; $('form-created').hidden = false;
+    myPriv = priv;
+    enterApp();
   } catch (e) { err.textContent = e.message || T('Kunde inte skapa chattprofilen.'); }
 }));
-$('btn-copy-code').addEventListener('click', async () => {
-  const btn = $('btn-copy-code');
-  try { await navigator.clipboard.writeText(pendingCode || ''); btn.textContent = T('Kopierad ✓'); setTimeout(() => { btn.textContent = T('Kopiera kod'); }, 1600); } catch {}
-});
-$('confirm-saved').addEventListener('change', (e) => { $('btn-enter').disabled = !e.target.checked; });
-$('btn-enter').addEventListener('click', () => { pendingCode = null; $('created-code').textContent = ''; enterApp(); });
-
-// ===== Lås upp på den här datorn =====
-function showUnlock() {
-  $('unlock-name').textContent = state.username;
-  $('unlock-code').value = ''; $('unlock-error').textContent = '';
-  showForgot(false);
-  showView('unlock');
-  setTimeout(() => $('unlock-code').focus(), 50);
-}
-$('unlock-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btn-unlock').click(); });
-$('btn-unlock').addEventListener('click', () => busy($('btn-unlock'), 'Låser upp…', doUnlock));
-async function doUnlock() {
-  const err = $('unlock-error'); err.textContent = '';
-  const code = $('unlock-code').value.replace(/\s/g, '');
-  if (!code) { err.textContent = T('Skriv din kod.'); return; }
-  try {
-    const { loginHash, wrapKey } = await deriveSecrets(code, state.username.toLowerCase());
-    const r = await POST('/users/login', { username: state.username, login_hash: loginHash });
-    let priv;
-    try { priv = await unwrapPrivate(r.enc_priv, wrapKey); } catch { throw new Error(T('Fel kod. Kunde inte låsa upp dina nycklar.')); }
-    state.public_key = r.public_key || state.public_key;
-    if (r.avatar !== undefined) state.avatar = safeImg(r.avatar);
-    await storeKey(priv);
-    myPriv = priv; sessionCode = code;
-    $('unlock-code').value = '';
-    enterApp();
-  } catch (e) {
-    let m = e.message || T('Kunde inte låsa upp.');
-    if (e.data && e.data.error === 'invalid_login') m = T('Fel kod.') + (e.data.attempts_left != null ? ' ' + tf('{n} försök kvar.', { n: e.data.attempts_left }) : '');
-    err.textContent = m;
-  }
-}
-function showForgot(on) {
-  $('form-forgot').hidden = !on; $('form-unlock').hidden = on;
-  $('forgot-error').textContent = ''; $('forgot-result').hidden = true; $('forgot-code').textContent = ''; $('forgot-pw').value = '';
-  if (on) setTimeout(() => $('forgot-pw').focus(), 30);
-}
-$('btn-forgot').addEventListener('click', () => showForgot(true));
-$('btn-forgot-back').addEventListener('click', () => showForgot(false));
-let forgotCode = '';
-$('forgot-pw').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btn-forgot-go').click(); });
-$('btn-forgot-go').addEventListener('click', () => busy($('btn-forgot-go'), 'Låser upp…', async () => {
-  const err = $('forgot-error'); err.textContent = ''; $('forgot-result').hidden = true;
-  try {
-    const pw = $('forgot-pw').value;
-    if (!pw) throw new Error(T('Skriv ditt lösenord.'));
-    const d = await recAuthFor(state.username, pw);
-    const r = await POST('/users/recovery/reveal', { username: state.username, rec_auth: d.recAuth });
-    forgotCode = await recDecrypt(r.rec_blob, d.recKey);
-    $('forgot-code').textContent = formatCode(forgotCode); $('forgot-result').hidden = false;
-  } catch (e) { err.textContent = (e.data && e.data.error === 'invalid_recovery') ? T('Fel lösenord.') : (e.message || T('Kunde inte visa koden.')); }
-}));
-$('btn-forgot-login').addEventListener('click', () => {
-  const c = forgotCode; forgotCode = '';
-  showForgot(false); $('unlock-code').value = c; $('btn-unlock').click();
-});
 
 // ===== Gå in i chatten =====
 function enterApp() {
@@ -351,11 +295,9 @@ function enterApp() {
   $('my-avatar').innerHTML = avatarInner(state.username);
   rememberBubble(state.username, state.bubble);
   myBubble = state.bubble || null;
-  updateRecNudge();
   GET('/users/me').then((r) => {
-    hasRecovery = !!r.has_recovery; myBubble = r.bubble || null; state.bubble = myBubble;
+    myBubble = r.bubble || null; state.bubble = myBubble;
     state.avatar = safeImg(r.avatar); rememberAvatar(state.username, state.avatar); $('my-avatar').innerHTML = avatarInner(state.username);
-    updateRecNudge();
   }).catch(() => {});
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch {}
   closeChat();
@@ -367,7 +309,7 @@ function enterApp() {
 function resetAll() {
   closeChat();
   if (bgTimer) { clearInterval(bgTimer); bgTimer = null; }
-  state = null; myPriv = null; active = null; myBubble = null; sessionCode = null; hasRecovery = false;
+  state = null; myPriv = null; active = null; myBubble = null;
   contactsCache = []; blockedCache = []; groupsCache = [];
   for (const k in bubbleMap) delete bubbleMap[k];
   for (const c of [sharedCache, groupKeyCache, lastTs, lastSync, prevUnread, pubKeyCache, msgMeta, groupNames, groupAvatars]) for (const k in c) delete c[k];
@@ -734,69 +676,12 @@ async function saveBubble(style) {
 
 // ===== Konto: lösenord för koden + byte av användarnamn =====
 const REC_ITERS = 600000;
-async function deriveRecovery(password, saltB64) {
-  const pre = enc.encode('skll-rec-v1:'), raw = fromB64(saltB64);
-  const salt = new Uint8Array(pre.length + raw.length); salt.set(pre, 0); salt.set(raw, pre.length);
-  const baseKey = await crypto.subtle.importKey('raw', enc.encode(password.normalize('NFKC')), 'PBKDF2', false, ['deriveBits']);
-  const bits = new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: REC_ITERS, hash: 'SHA-256' }, baseKey, 512));
-  const recKey = await crypto.subtle.importKey('raw', bits.slice(32, 64), { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
-  return { recAuth: b64(bits.slice(0, 32)), recKey };
-}
-async function recEncrypt(code, key) {
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(code)));
-  const blob = new Uint8Array(12 + ct.length); blob.set(iv, 0); blob.set(ct, 12); return b64(blob);
-}
-async function recDecrypt(blobB64, key) {
-  const blob = fromB64(blobB64);
-  return dec.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: blob.slice(0, 12) }, key, blob.slice(12)));
-}
-async function recAuthFor(username, pw) {
-  const p = await POST('/users/recovery/params', { username });
-  return deriveRecovery(pw, p.salt);
-}
-const WEAK_PW = new Set(['password', 'password1', 'passw0rd', 'lösenord', 'losenord', 'losenord1', '12345678', '123456789', '1234567890', '87654321', 'qwertyui', 'qwerty123', 'qwertyuiop', 'abcd1234', 'abc12345', '11111111', '00000000', 'iloveyou', 'adraze', 'adraze123', 'hejhejhej', 'sommar123', 'sverige123']);
-function pwProblem(pw, username) {
-  if (pw.length < 8) return T('Lösenordet måste vara minst 8 tecken.');
-  if (pw.length > 128) return T('Lösenordet är för långt.');
-  const l = pw.toLowerCase();
-  if (WEAK_PW.has(l) || /^(.)\1+$/.test(pw)) return T('Det lösenordet är för lätt att gissa. Välj ett annat.');
-  if (username && l.includes(username.toLowerCase())) return T('Lösenordet får inte innehålla ditt användarnamn.');
-  return '';
-}
-// Bekräfta koden mot servern. Koden från den här sessionen används automatiskt, annars visas kodfältet.
-async function getVerifiedCode(inputEl) {
-  const typed = inputEl.value.replace(/\s/g, '');
-  const code = typed || sessionCode;
-  if (!code) { inputEl.hidden = false; inputEl.focus(); throw new Error(T('Skriv in din kod för att bekräfta.')); }
-  const s = await deriveSecrets(code, state.username.toLowerCase());
-  try {
-    const r = await POST('/users/verify-code', { login_hash: s.loginHash });
-    return { code, loginHash: s.loginHash, wrapKey: s.wrapKey, encPriv: r.enc_priv };
-  } catch (e) {
-    if (e.data && e.data.error === 'wrong_code') { inputEl.hidden = false; inputEl.focus(); throw new Error(typed ? T('Fel kod. Försök igen.') : T('Skriv in din kod för att bekräfta.')); }
-    throw e;
-  }
-}
 function accMsg(id, text, ok) { const el = $(id); el.textContent = text || ''; el.classList.toggle('ok', !!ok); }
 function accToggle(formId, on) { $(formId).classList.toggle('on', on); }
 function renderAccountSec() {
   $('acc-name-cur').textContent = state.username;
-  ['acc-name-form', 'acc-rec-form', 'acc-show-form'].forEach((f) => accToggle(f, false));
-  ['acc-name-new', 'acc-name-code', 'acc-rec-pw', 'acc-rec-pw2', 'acc-rec-code', 'acc-show-pw'].forEach((i) => { $(i).value = ''; });
-  ['acc-name-code', 'acc-rec-code'].forEach((i) => { $(i).hidden = !!sessionCode; });
-  ['acc-name-msg', 'acc-rec-msg', 'acc-show-msg'].forEach((m) => accMsg(m, ''));
-  $('acc-show-code').hidden = true; $('acc-show-code').textContent = '';
-  const st = $('acc-rec-status');
-  if (hasRecovery) st.innerHTML = '<span class="acc-ok">✓ ' + esc(T('Lösenord sparat.')) + '</span> ' + esc(T('Glömmer du koden kan du få fram den med lösenordet.'));
-  else st.textContent = T('Inget lösenord än. Tappar du bort koden går dina meddelanden inte att läsa på en ny dator.');
-  $('acc-rec-btn').textContent = hasRecovery ? T('Byt lösenord') : T('Sätt lösenord');
-  $('acc-rec-links').hidden = !hasRecovery;
+  accToggle('acc-name-form', false); $('acc-name-new').value = ''; accMsg('acc-name-msg', '');
   $('account-sec').hidden = false;
-}
-function updateRecNudge() {
-  let off = false; try { off = !!state && localStorage.getItem('adraze-chatt-rec-off:' + state.id) === '1'; } catch {}
-  $('rec-nudge').classList.toggle('on', !!state && !hasRecovery && !off);
 }
 $('acc-name-btn').addEventListener('click', () => { accToggle('acc-name-form', true); $('acc-name-new').focus(); });
 $('acc-name-cancel').addEventListener('click', () => accToggle('acc-name-form', false));
@@ -807,72 +692,18 @@ $('acc-name-save').addEventListener('click', () => busy($('acc-name-save'), 'Byt
   try {
     if (!validUsername(nu)) throw new Error(T('Användarnamn: 3–20 tecken, bara bokstäver, siffror och _.'));
     if (nu === state.username) throw new Error(T('Det är redan ditt användarnamn.'));
-    const v = await getVerifiedCode($('acc-name-code'));
-    // Packa om privata nyckeln: upp med gamla (namn+kod)-nyckeln, ner med den nya.
-    const blob = fromB64(v.encPriv);
-    let pkcs8;
-    try { pkcs8 = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: blob.slice(0, 12) }, v.wrapKey, blob.slice(12))); }
-    catch { throw new Error(T('Kunde inte låsa upp dina nycklar med koden.')); }
-    const n = await deriveSecrets(v.code, nu.toLowerCase());
-    const newEnc = await wrapPrivate(pkcs8, n.wrapKey);
-    await unwrapPrivate(newEnc, n.wrapKey);   // kontroll: nya blobben går att öppna
-    const r = await POST('/users/rename', { new_username: nu, old_login_hash: v.loginHash, new_login_hash: n.loginHash, enc_priv: newEnc });
-    state.username = r.username; sessionCode = v.code;
+    // Nyckeln hänger på kontot, inte på namnet – samma låsta nyckel följer med
+    const k = await kontoNyckel();
+    const cur = await POST('/users/login', { login_hash: k.loginHash });
+    const r = await POST('/users/rename', { new_username: nu, old_login_hash: k.loginHash, new_login_hash: k.loginHash, enc_priv: cur.enc_priv });
+    state.username = r.username;
     rememberAvatar(state.username, state.avatar); rememberBubble(state.username, myBubble);
     $('my-avatar').innerHTML = avatarInner(state.username);
     $('profile-username').textContent = state.username;
     renderAccountSec();
-    accMsg('acc-name-msg', tf('Klart! Du heter nu {u}. Din kod är densamma.', { u: r.username }), true);
+    accMsg('acc-name-msg', tf('Klart! Du heter nu {u}.', { u: r.username }), true);
   } catch (e) { accMsg('acc-name-msg', e.message || T('Kunde inte byta namn.')); }
 }));
-$('acc-rec-btn').addEventListener('click', () => { accToggle('acc-show-form', false); accToggle('acc-rec-form', true); $('acc-rec-pw').focus(); });
-$('acc-rec-cancel').addEventListener('click', () => accToggle('acc-rec-form', false));
-$('acc-rec-save').addEventListener('click', () => busy($('acc-rec-save'), 'Sparar…', async () => {
-  accMsg('acc-rec-msg', '');
-  const pw = $('acc-rec-pw').value, pw2 = $('acc-rec-pw2').value;
-  try {
-    const prob = pwProblem(pw, state.username); if (prob) throw new Error(prob);
-    if (pw !== pw2) throw new Error(T('Lösenorden är inte likadana.'));
-    const v = await getVerifiedCode($('acc-rec-code'));
-    const salt = b64(crypto.getRandomValues(new Uint8Array(16)));
-    const d = await deriveRecovery(pw, salt);
-    const blob = await recEncrypt(v.code, d.recKey);
-    if ((await recDecrypt(blob, d.recKey)) !== v.code) throw new Error(T('Krypteringskontrollen misslyckades.'));
-    await POST('/users/recovery/set', { login_hash: v.loginHash, salt, rec_auth: d.recAuth, rec_blob: blob });
-    sessionCode = v.code; hasRecovery = true; updateRecNudge(); renderAccountSec();
-    accMsg('acc-rec-msg', T('Sparat! Glömmer du koden: välj "Glömt koden?" när du låser upp chatten.'), true);
-  } catch (e) { accMsg('acc-rec-msg', e.message || T('Kunde inte spara lösenordet.')); }
-}));
-$('acc-show-btn').addEventListener('click', () => { accToggle('acc-rec-form', false); accToggle('acc-show-form', true); $('acc-show-pw').focus(); });
-$('acc-show-cancel').addEventListener('click', () => { $('acc-show-code').hidden = true; $('acc-show-code').textContent = ''; $('acc-show-pw').value = ''; accToggle('acc-show-form', false); });
-$('acc-show-pw').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('acc-show-go').click(); });
-$('acc-show-go').addEventListener('click', () => busy($('acc-show-go'), 'Låser upp…', async () => {
-  accMsg('acc-show-msg', '');
-  try {
-    const pw = $('acc-show-pw').value; if (!pw) throw new Error(T('Skriv ditt lösenord.'));
-    const d = await recAuthFor(state.username, pw);
-    const r = await POST('/users/recovery/reveal', { username: state.username, rec_auth: d.recAuth });
-    const box = $('acc-show-code'); box.textContent = formatCode(await recDecrypt(r.rec_blob, d.recKey)); box.hidden = false;
-  } catch (e) { accMsg('acc-show-msg', (e.data && e.data.error === 'invalid_recovery') ? T('Fel lösenord.') : (e.message || T('Kunde inte visa koden.'))); }
-}));
-$('acc-show-remove').addEventListener('click', async () => {
-  accMsg('acc-show-msg', '');
-  const pw = $('acc-show-pw').value;
-  if (!pw) { accMsg('acc-show-msg', T('Skriv ditt lösenord för att ta bort det.')); return; }
-  if (!(await confirmBox(T('Ta bort lösenordet? Då går koden inte längre att få fram om du tappar den.'), T('Ta bort'), true))) return;
-  await busy($('acc-show-remove'), 'Tar bort…', async () => {
-    try {
-      const d = await recAuthFor(state.username, pw);
-      await POST('/users/recovery/remove', { rec_auth: d.recAuth });
-      hasRecovery = false; updateRecNudge(); renderAccountSec();
-    } catch (e) { accMsg('acc-show-msg', (e.data && e.data.error === 'invalid_recovery') ? T('Fel lösenord.') : (e.message || T('Kunde inte ta bort lösenordet.'))); }
-  });
-});
-$('rec-nudge-go').addEventListener('click', () => {
-  if (!state) return; openProfile(state.id);
-  setTimeout(() => { if (!$('account-sec').hidden) { $('acc-rec-btn').click(); $('account-sec').scrollIntoView({ block: 'center' }); } }, 700);
-});
-$('rec-nudge-x').addEventListener('click', () => { try { localStorage.setItem('adraze-chatt-rec-off:' + state.id, '1'); } catch {} updateRecNudge(); });
 
 // ===== Chatten (vän + grupp) =====
 const chatEl = $('chat');
@@ -2046,7 +1877,7 @@ $('btn-settings').addEventListener('click', openSettings);
 $('settings-close').addEventListener('click', () => modalSettings.classList.remove('open'));
 async function openSettings() {
   $('priv-msg').textContent = ''; $('block-msg').textContent = ''; $('block-name').value = '';
-  accToggle('del-form', false); $('del-name').value = ''; $('del-code').value = ''; accMsg('del-msg', '');
+  accToggle('del-form', false); $('del-name').value = ''; accMsg('del-msg', '');
   const p = chatPrefs();
   document.querySelectorAll('[data-chat]').forEach((el) => { el.checked = !!p[el.dataset.chat]; });
   document.querySelectorAll('[data-priv], #priv-requests').forEach((el) => { el.disabled = true; });
@@ -2099,28 +1930,15 @@ $('block-go').addEventListener('click', async () => {
     await refreshContacts(); renderBlocked();
   } catch (e) { msg.textContent = e.message; }
 });
-$('forget-key').addEventListener('click', async () => {
-  if (!(await confirmBox(T('Glömma nyckeln på den här datorn? Du behöver din kod för att låsa upp chatten igen.'), T('Glöm'), true))) return;
-  try { await idbDel('priv:' + state.id); } catch {}
-  modalSettings.classList.remove('open');
-  const keep = { id: state.id, username: state.username, public_key: state.public_key, avatar: state.avatar, bubble: state.bubble };
-  const rec = hasRecovery;
-  resetAll();
-  state = keep; hasRecovery = rec;
-  showUnlock();
-});
 $('del-open').addEventListener('click', () => { accToggle('del-form', true); $('del-name').focus(); });
 $('del-cancel').addEventListener('click', () => accToggle('del-form', false));
 $('del-go').addEventListener('click', () => busy($('del-go'), 'Raderar…', async () => {
   accMsg('del-msg', '');
   try {
     if ($('del-name').value.trim().toLowerCase() !== state.username.toLowerCase()) throw new Error(T('Skriv ditt användarnamn exakt för att bekräfta.'));
-    const code = $('del-code').value.replace(/\s/g, '');
-    if (!code) throw new Error(T('Skriv din kod.'));
-    const s = await deriveSecrets(code, state.username.toLowerCase());
-    await POST('/users/delete', { login_hash: s.loginHash });
+    const k = await kontoNyckel();
+    await POST('/users/delete', { login_hash: k.loginHash });
     try { await idbDel('priv:' + state.id); } catch {}
-    try { localStorage.removeItem('adraze-chatt-rec-off:' + state.id); } catch {}
     resetAll();
     resetCreate();
     showView('create');

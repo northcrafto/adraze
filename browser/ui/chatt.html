@@ -7,6 +7,7 @@
 <title>Chatt</title>
 <link rel="stylesheet" href="chatt.css" />
 <script src="chatt-tema.js"></script>
+<script src="fokus.js"></script>
 </head>
 <body>
 <div id="app">
@@ -45,56 +46,16 @@
   <section class="view" id="view-create" hidden>
     <div class="auth-card" id="form-create">
       <h2>Välj ett användarnamn</h2>
-      <p class="lead">Dina vänner hittar dig på användarnamnet. Ditt riktiga namn och din mejl syns aldrig. Allt du skriver krypteras på din dator innan det skickas: bara du och de du chattar med kan läsa det, aldrig AdRaze.</p>
+      <p class="lead">Dina vänner lägger till dig med ditt användarnamn. Ditt riktiga namn och din mejl syns aldrig. Chatten följer med ditt AdRaze-konto, så du kommer åt den på alla datorer där du är inloggad.</p>
       <label class="field"><span class="lbl">Användarnamn</span><input type="text" id="create-username" placeholder="välj ett användarnamn" autocomplete="off" spellcheck="false" maxlength="20"></label>
-      <button class="btn" id="btn-create" type="button">Fortsätt</button>
+      <button class="btn" id="btn-create" type="button">Börja chatta</button>
       <p class="msg-error" id="create-error"></p>
       <p class="hint">3–20 tecken: bokstäver, siffror och _.</p>
-    </div>
-    <div class="auth-card" id="form-created" hidden>
-      <div class="msg-ok big">✓ Klart!</div>
-      <p class="lead">Det här är din hemliga kod. Den låser upp chatten på en ny dator och skyddar dina nycklar.</p>
-      <div class="code-box"><div class="code-val" id="created-code" translate="no"></div></div>
-      <button class="btn secondary small" id="btn-copy-code" type="button">Kopiera kod</button>
-      <div class="warn-box"><strong>Spara koden nu.</strong> Utan koden kan du inte läsa dina meddelanden på en annan dator. Lägg den i en lösenordshanterare, eller sätt ett lösenord i din profil så kan du få fram koden igen.</div>
-      <label class="check"><input type="checkbox" id="confirm-saved"> Jag har sparat min kod på ett säkert ställe.</label>
-      <button class="btn" id="btn-enter" type="button" disabled>Till chatten →</button>
-    </div>
-  </section>
-
-  <!-- Lås upp på en ny dator -->
-  <section class="view" id="view-unlock" hidden>
-    <div class="auth-card" id="form-unlock">
-      <h2>Lås upp chatten</h2>
-      <p class="lead">Du chattar som <b id="unlock-name" translate="no">—</b>. Skriv din hemliga kod för att låsa upp dina meddelanden på den här datorn.</p>
-      <label class="field"><span class="lbl">Din kod</span><input type="text" id="unlock-code" class="mono-in" placeholder="koden du sparade" autocomplete="off" inputmode="numeric"></label>
-      <button class="btn" id="btn-unlock" type="button">Lås upp</button>
-      <p class="msg-error" id="unlock-error"></p>
-      <p class="hint"><button class="link-btn" id="btn-forgot" type="button">Glömt koden?</button></p>
-    </div>
-    <div class="auth-card" id="form-forgot" hidden>
-      <h2>Glömt koden?</h2>
-      <p class="lead">Har du sparat ett lösenord i din chattprofil? Skriv det så visas din kod.</p>
-      <label class="field"><span class="lbl">Lösenord</span><input type="password" id="forgot-pw" placeholder="lösenordet du valde" autocomplete="current-password"></label>
-      <button class="btn" id="btn-forgot-go" type="button">Visa min kod</button>
-      <p class="msg-error" id="forgot-error"></p>
-      <div id="forgot-result" hidden>
-        <div class="code-box"><div class="code-val" id="forgot-code" translate="no"></div></div>
-        <p class="hint">Skriv upp koden på ett säkert ställe.</p>
-        <button class="btn" id="btn-forgot-login" type="button">Lås upp med koden</button>
-      </div>
-      <p class="hint"><button class="link-btn" id="btn-forgot-back" type="button">← Tillbaka</button></p>
-      <p class="hint">Inget lösenord sparat? Då går koden tyvärr inte att få fram. Den finns bara hos dig.</p>
     </div>
   </section>
 
   <!-- Chatten -->
   <section class="view" id="view-app" hidden>
-    <div class="rec-nudge" id="rec-nudge">
-      <div class="grow"><b>Tappa inte bort din kod.</b> Sätt ett lösenord så kan du alltid få fram koden om du glömmer den.</div>
-      <button class="btn small" id="rec-nudge-go" type="button">Sätt lösenord</button>
-      <button class="x" id="rec-nudge-x" type="button" aria-label="Dölj">×</button>
-    </div>
     <div class="layout" id="layout">
       <aside class="sidebar" id="sidebar">
         <div class="side-sec">
@@ -201,33 +162,9 @@
           </div>
           <div class="acc-form" id="acc-name-form">
             <input type="text" id="acc-name-new" maxlength="20" placeholder="nytt användarnamn" autocomplete="off" spellcheck="false">
-            <input type="text" id="acc-name-code" placeholder="din kod (för att bekräfta)" autocomplete="off" inputmode="numeric" hidden>
             <div class="acc-p">Ditt gamla namn blir ledigt för andra. Dina vänner och meddelanden följer med. Högst 3 byten per vecka.</div>
             <div class="acc-actions"><button class="btn small" id="acc-name-save" type="button">Spara namn</button><button class="link-btn" id="acc-name-cancel" type="button">Avbryt</button></div>
             <div class="acc-msg" id="acc-name-msg"></div>
-          </div>
-        </div>
-        <div class="acc-card">
-          <div class="acc-row">
-            <div><div class="acc-h">Lösenord för din kod</div><div class="acc-p" id="acc-rec-status">…</div></div>
-            <button class="btn secondary small" id="acc-rec-btn" type="button">Sätt lösenord</button>
-          </div>
-          <div class="acc-form" id="acc-rec-form">
-            <input type="password" id="acc-rec-pw" placeholder="välj lösenord (minst 8 tecken)" autocomplete="new-password">
-            <input type="password" id="acc-rec-pw2" placeholder="upprepa lösenordet" autocomplete="new-password">
-            <input type="text" id="acc-rec-code" placeholder="din kod (för att bekräfta)" autocomplete="off" inputmode="numeric" hidden>
-            <div class="acc-p">Tappar du bort koden väljer du "Glömt koden?" när du låser upp chatten och skriver lösenordet, så visas koden. Koden krypteras med lösenordet på din dator: servern ser varken lösenordet eller koden.</div>
-            <div class="acc-actions"><button class="btn small" id="acc-rec-save" type="button">Spara lösenord</button><button class="link-btn" id="acc-rec-cancel" type="button">Avbryt</button></div>
-            <div class="acc-msg" id="acc-rec-msg"></div>
-          </div>
-          <div class="acc-links" id="acc-rec-links" hidden>
-            <button class="link-btn" id="acc-show-btn" type="button">Visa min kod</button>
-          </div>
-          <div class="acc-form" id="acc-show-form">
-            <input type="password" id="acc-show-pw" placeholder="ditt lösenord" autocomplete="current-password">
-            <div class="acc-actions"><button class="btn small" id="acc-show-go" type="button">Visa min kod</button><button class="link-btn" id="acc-show-remove" type="button">Ta bort lösenordet</button><button class="link-btn" id="acc-show-cancel" type="button">Stäng</button></div>
-            <div class="acc-code" id="acc-show-code" translate="no" hidden></div>
-            <div class="acc-msg" id="acc-show-msg"></div>
           </div>
         </div>
       </div>
@@ -270,15 +207,12 @@
     <ul class="block-list" id="block-list" translate="no"></ul>
     <div class="add-row"><input type="text" id="block-name" placeholder="användarnamn" autocomplete="off" spellcheck="false" maxlength="20"><button class="btn secondary small" id="block-go" type="button">Blockera</button></div>
     <p class="msg-error" id="block-msg"></p>
-    <div class="set-title">Säkerhet</div>
-    <div class="set-row"><span class="set-txt"><span class="set-h">Glöm nyckeln på den här datorn</span><span class="set-d">Nästa gång behöver du din kod för att låsa upp chatten här.</span></span><button class="btn secondary small" id="forget-key" type="button">Glöm</button></div>
     <div class="danger-zone">
       <div class="set-h">Radera chattprofilen</div>
       <div class="set-d">Användarnamn, vänner, grupper och alla meddelanden försvinner för alltid. Ditt AdRaze-konto finns kvar.</div>
       <button class="link-btn danger" id="del-open" type="button">Radera chattprofilen…</button>
       <div class="acc-form" id="del-form">
         <input type="text" id="del-name" placeholder="skriv ditt användarnamn" autocomplete="off" spellcheck="false">
-        <input type="text" id="del-code" placeholder="din kod" autocomplete="off" inputmode="numeric">
         <div class="acc-actions"><button class="btn small danger" id="del-go" type="button">Radera för alltid</button><button class="link-btn" id="del-cancel" type="button">Avbryt</button></div>
         <div class="acc-msg" id="del-msg"></div>
       </div>
