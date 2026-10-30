@@ -52,6 +52,7 @@
     <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.6 3.1-5.5 7-5.5s7 1.9 7 5.5"/></symbol>
     <symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 14h4"/></symbol>
     <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-unlock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.6-1.7"/></symbol>
     <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
     <symbol id="i-shield-off" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.4-3.2 7.6-8 9-4.8-1.4-8-4.6-8-9V6z"/><path d="M4.5 4.5l15 15"/></symbol>
     <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
@@ -101,7 +102,7 @@
     <div id="omni-suggest"></div>
 
     <button id="allow-chip" class="pill" title="Tillfälligt tillåten sida – tid kvar" style="display:none;background:rgba(23,138,90,.13);color:#0f7a4e;font-weight:800;">
-      🔓 <span id="allow-chip-txt" class="tabular-nums"></span>
+      <svg class="ic ic-sm"><use href="#i-unlock" /></svg><span id="allow-chip-txt" class="tabular-nums"></span>
     </button>
     <button id="adblock" class="pill" title="AdRaze – blockerar reklam och spårare">
       <img src="adraze-mark.png" alt="AdRaze" class="ab-mark" width="18" height="18"><span id="adcount" class="tabular-nums">0</span>
@@ -205,7 +206,7 @@
         opacity:0;transform:translateY(16px);animation:hxin 1.1s cubic-bezier(.2,.7,.15,1) .2s forwards}
       @keyframes hxin{to{opacity:1;transform:none}}
       .hxwm{font-weight:800;letter-spacing:-.03em;font-size:clamp(44px,10vw,92px);line-height:1;color:#fff;text-shadow:0 2px 44px rgba(0,0,0,.45)}
-      .hxsub{margin:20px auto 0;font-size:clamp(14px,2.4vw,18px);color:rgba(255,255,255,.85);max-width:42ch;line-height:1.6;text-shadow:0 1px 18px rgba(0,0,0,.4)}
+      .hxsub{margin:20px auto 0;font-size:clamp(14px,2.4vw,18px);color:rgba(255,255,255,.85);max-width:42ch;line-height:1.6;text-shadow:0 1px 18px rgba(0,0,0,.4);text-wrap:balance}
       .hxhint{margin-top:42px;font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.62);
         display:inline-flex;align-items:center;gap:9px;opacity:0;animation:hxfade 1s ease 1.1s forwards}
       @keyframes hxfade{to{opacity:1}}
@@ -238,11 +239,17 @@
       #closeconf .row { display: flex; justify-content: flex-end; gap: 9px; margin-top: 15px; }
       #closeconf button { height: 36px; padding: 0 18px; border-radius: 999px; font-weight: 600; font-size: 13px;
         cursor: pointer; border: 1px solid transparent; transition: filter .15s, background .15s; }
-      #cc-cancel { background: #fff; color: var(--color-navy-900, #0e2a47); border-color: #d3dce6; }
+      #closeconf #cc-cancel { background: #fff; color: var(--color-navy-900, #0e2a47); border-color: #d3dce6; }   /* #closeconf först: annars vinner "border: transparent" ovan och Avbryt saknar kant */
       #cc-cancel:hover { background: #f4f7fa; }
       #cc-yes { background: var(--color-terra, #ff4b1f); color: #fff; }
       #cc-yes:hover { filter: brightness(1.06); }
       #closeconf button:focus-visible { outline: 2px solid var(--color-terra, #ff4b1f); outline-offset: 2px; }
+      /* mörkt läge: mörkt kort i stället för en vit ruta */
+      :root[data-theme="dark"] #closeconf { background: #161618; border-color: #2b2b2d; box-shadow: 0 18px 50px rgb(0 0 0 / .55), 0 2px 8px rgb(0 0 0 / .3); }
+      :root[data-theme="dark"] #closeconf h1, :root[data-theme="dark"] #closeconf p b { color: #f2f2f4; }
+      :root[data-theme="dark"] #closeconf p, :root[data-theme="dark"] #closeconf label span { color: #a1a1a8; }
+      :root[data-theme="dark"] #closeconf #cc-cancel { background: transparent; color: #f2f2f4; border-color: #3b3b40; }
+      :root[data-theme="dark"] #closeconf #cc-cancel:hover { background: rgb(255 255 255 / .07); }
     </style>
     <div id="closeconf" class="hidden">
       <h1>Stäng alla flikar?</h1>
@@ -879,7 +886,7 @@
                 <div style="min-width:0;">
                   <div class="kn-name" id="kn-name">—</div>
                   <div class="kn-email" id="kn-email">—</div>
-                  <span class="kn-badge" id="kn-badge" style="display:none;">✦ AdRaze Pro</span>
+                  <span class="kn-badge" id="kn-badge" translate="no" style="display:none;">AdRaze Pro</span>
                 </div>
               </div>
               <input type="file" id="kn-avatar-file" accept="image/*" style="display:none;" />
@@ -930,7 +937,6 @@
             <h2 class="set-h">Vänner &amp; chatt</h2>
             <p class="set-lead mb-4">Lägg till vänner med användarnamn och chatta, en och en eller i grupper. Ni ses bara som era användarnamn.</p>
             <div id="fr-body"></div>
-          </div>
           </div>
 
           <div class="set-panel hidden" data-cat="uppdatering">
@@ -992,9 +998,9 @@
         <p class="text-[13px] text-navy-900/50 mt-1 mb-4">Välj en av AdRazes bakgrunder eller ladda upp din egen.</p>
         <div id="bg-grid" class="grid grid-cols-4 gap-2.5"></div>
         <div class="flex gap-2.5 mt-5">
-          <button id="bg-upload-btn" class="btn btn-safe flex-1" style="height:44px;"><svg class="ic ic-sm"><use href="#i-upload" /></svg>Ladda upp egen</button>
-          <button id="bg-slump" class="btn flex-1" style="height:44px;background:var(--color-paper);color:var(--color-navy-900);">Ny bild varje flik</button>
-          <button id="bg-daily" class="btn flex-1" style="height:44px;background:var(--color-paper);color:var(--color-navy-900);">Dagens bild</button>
+          <button id="bg-upload-btn" class="btn btn-safe flex-1" style="height:44px;padding:0 12px;font-size:14px;line-height:1.2;"><svg class="ic ic-sm"><use href="#i-upload" /></svg>Ladda upp egen</button>
+          <button id="bg-slump" class="btn flex-1" style="height:44px;padding:0 12px;font-size:14px;line-height:1.2;background:var(--color-paper);color:var(--color-navy-900);">Ny bild varje flik</button>
+          <button id="bg-daily" class="btn flex-1" style="height:44px;padding:0 12px;font-size:14px;line-height:1.2;background:var(--color-paper);color:var(--color-navy-900);">Dagens bild</button>
         </div>
         <input id="bg-file" type="file" accept="image/*" style="display:none;" />
       </div>
