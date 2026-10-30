@@ -39,6 +39,7 @@ curl -fsSL -o "$IKON" "https://download.adraze.app/adraze-512.png" || true
 cat > "$BIN" <<EOF
 #!/bin/sh
 # AdRaze i Chromiums sandlåda när systemet tillåter den (annars utan)
+unset CHROME_DESKTOP   # ärvd från andra Electron-appar får castlabs-Electron att krascha vid start
 FLAGGA=""
 if [ "\$(cat /proc/sys/kernel/unprivileged_userns_clone 2>/dev/null || echo 1)" = "0" ] || [ "\$(cat /proc/sys/user/max_user_namespaces 2>/dev/null || echo 1)" = "0" ]; then FLAGGA="--no-sandbox"
 elif [ "\$(cat /proc/sys/kernel/apparmor_restrict_unprivileged_userns 2>/dev/null || echo 0)" = "1" ] && [ ! -e /etc/apparmor.d/adraze ]; then FLAGGA="--no-sandbox"; fi
