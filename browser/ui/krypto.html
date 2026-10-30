@@ -222,6 +222,9 @@
   .ab { position: relative; width: 28px; height: 28px; border: 0; border-radius: 7px; background: transparent; color: var(--mut); display: grid; place-items: center; cursor: pointer; transition: background .15s, color .15s; }
   .ab:hover { background: rgb(255 255 255 / .07); color: var(--ink); }
   .ab.on { color: var(--ink); }
+  .ab.fbb.on svg { fill: currentColor; }
+  .ab.fbb.pop svg { animation: fbpop .35s ease-out; }
+  @keyframes fbpop { 40% { transform: scale(1.3); } }
   .ab svg { width: 16px; height: 16px; }
   .ab[data-tip]:hover::after { content: attr(data-tip); position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); white-space: nowrap; z-index: 30;
     font: 500 12px/1 Inter, system-ui, sans-serif; color: #f2f2f4; background: #2e2e33; padding: 6px 8px; border-radius: 6px; box-shadow: 0 6px 18px rgb(0 0 0 / .4); pointer-events: none; }
@@ -382,7 +385,16 @@
 
     /* ── Rendering av chatten ── */
     function esc(s) { return (s || '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
-    function scrollBottom() { const go = () => { log.scrollTop = log.scrollHeight + 9999; }; go(); requestAnimationFrame(() => requestAnimationFrame(go)); setTimeout(go, 120); setTimeout(go, 560); }
+    // Följ med nedåt bara så länge du inte själv scrollat upp (då får du läsa i fred medan Falk skriver)
+    let follow = true;
+    const nearBottom = () => log.scrollHeight - log.scrollTop - log.clientHeight < 60;
+    log.addEventListener('wheel', (e) => { if (e.deltaY < 0) follow = false; }, { passive: true });
+    log.addEventListener('touchmove', () => { follow = false; }, { passive: true });
+    log.addEventListener('keydown', (e) => { if (['PageUp', 'ArrowUp', 'Home'].includes(e.key)) follow = false; });
+    log.addEventListener('mousedown', (e) => { if (e.offsetX > log.clientWidth) follow = false; });   // dra i scrollbaren
+    let lastTop = 0;
+    log.addEventListener('scroll', () => { if (log.scrollTop > lastTop && nearBottom()) follow = true; lastTop = log.scrollTop; }, { passive: true });   // scrollat ned till botten igen → följ med
+    function scrollBottom(force) { if (force) follow = true; const go = () => { if (follow) log.scrollTop = log.scrollHeight + 9999; }; go(); requestAnimationFrame(() => requestAnimationFrame(go)); setTimeout(go, 120); setTimeout(go, 560); }
     const AV_KRYPTO = '<img class="owl" src="krypto-owl-face.png" alt="">';
     const AV_USER = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
     const BRAIN = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 0 0-5.9-.6A3 3 0 0 0 4 9.5a3 3 0 0 0 0 5A3 3 0 0 0 8 19a3 3 0 0 0 4 1 3 3 0 0 0 4-1 3 3 0 0 0 4-4.5 3 3 0 0 0 0-5A3 3 0 0 0 17.9 4.4 3 3 0 0 0 12 5Z"/></svg>';
@@ -399,8 +411,6 @@
     const ic = (d) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>';
     const I_COPY = ic('<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>');
     const I_OK = ic('<path d="M5 12.5l4.5 4.5L19 7.5"/>');
-    const I_SPEAK = ic('<path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>');
-    const I_STOP = ic('<rect x="7" y="7" width="10" height="10" rx="1.5"/>');
     const I_UP = ic('<path d="M7 10v10H4V10h3Zm0 0 4-7a2.5 2.5 0 0 1 2.5 3L13 10h5.5a2 2 0 0 1 2 2.4l-1.4 6A2 2 0 0 1 17.2 20H7"/>');
     const I_DOWN = ic('<path d="M17 14V4h3v10h-3Zm0 0-4 7a2.5 2.5 0 0 1-2.5-3L11 14H5.5a2 2 0 0 1-2-2.4l1.4-6A2 2 0 0 1 6.8 4H17"/>');
     const I_RETRY = ic('<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>');
@@ -422,8 +432,11 @@
         row.appendChild(copyBtn(() => m.content));
       } else {
         row.appendChild(copyBtn(() => m.content));
-        if (window.speechSynthesis) row.appendChild(ab(I_SPEAK, 'Läs upp', (b) => speak(m.content, b)));
-        const fb = (val, b) => { m.fb = m.fb === val ? undefined : val; saveConvos(); row.querySelectorAll('.fbb').forEach((x) => x.classList.toggle('on', x.dataset.v === m.fb)); };
+        const fb = (val, b) => {
+          m.fb = m.fb === val ? undefined : val; saveConvos();
+          row.querySelectorAll('.fbb').forEach((x) => { const on = x.dataset.v === m.fb; x.classList.toggle('on', on); x.dataset.tip = on ? tx('Tack för din feedback') : tx(x.dataset.v === 'up' ? 'Bra svar' : 'Dåligt svar'); });
+          if (m.fb) { b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); }
+        };
         const up = ab(I_UP, 'Bra svar', (b) => fb('up', b), m.fb === 'up'); up.classList.add('fbb'); up.dataset.v = 'up'; row.appendChild(up);
         const dn = ab(I_DOWN, 'Dåligt svar', (b) => fb('down', b), m.fb === 'down'); dn.classList.add('fbb'); dn.dataset.v = 'down'; row.appendChild(dn);
         row.appendChild(ab(I_RETRY, 'Försök igen', () => retryFrom(lastUserBefore(idx))));
@@ -432,16 +445,6 @@
     }
     function markLast() { const all = log.querySelectorAll('.msg:not(.typing)'); all.forEach((x, i) => x.classList.toggle('last', i === all.length - 1)); }
     function lastUserBefore(idx) { for (let i = idx; i >= 0; i--) if (history[i] && history[i].role === 'user') return i; return -1; }
-    // Läs upp med datorns röst (döljs om datorn saknar talsyntes)
-    let speakingBtn = null;
-    function speak(text, b) {
-      const ss = window.speechSynthesis; const was = speakingBtn === b;
-      ss.cancel(); if (speakingBtn) { speakingBtn.innerHTML = I_SPEAK; speakingBtn.dataset.tip = tx('Läs upp'); speakingBtn = null; }
-      if (was) return;
-      const u = new SpeechSynthesisUtterance(text); u.lang = document.documentElement.lang || 'sv-SE';
-      u.onend = u.onerror = () => { if (speakingBtn === b) { b.innerHTML = I_SPEAK; b.dataset.tip = tx('Läs upp'); speakingBtn = null; } };
-      speakingBtn = b; b.innerHTML = I_STOP; b.dataset.tip = tx('Sluta läsa'); ss.speak(u);
-    }
     // Gör om från ett av dina meddelanden: allt efter det tas bort och Falk svarar igen
     function retryFrom(idx) {
       if (busy || idx < 0 || !history[idx]) return;
@@ -463,8 +466,8 @@
       el.classList.add('writing');
       const owl = document.createElement('img'); owl.className = 'writing-owl'; owl.src = 'krypto-owl-face.png'; owl.alt = ''; el.insertBefore(owl, el.querySelector('.acts'));
       const total = words.length * step + 320;
-      const follow = setInterval(scrollBottom, 250);
-      return new Promise((ok) => setTimeout(() => { clearInterval(follow); owl.remove(); el.classList.remove('writing'); words.forEach((w) => w.replaceWith(w.textContent)); b.normalize(); scrollBottom(); ok(); }, total));
+      const tick = setInterval(() => { if (follow) log.scrollTop = log.scrollHeight + 9999; }, 100);
+      return new Promise((ok) => setTimeout(() => { clearInterval(tick); owl.remove(); el.classList.remove('writing'); words.forEach((w) => w.replaceWith(w.textContent)); b.normalize(); scrollBottom(); ok(); }, total));
     }
     var WELCOME_SV = 'Hej! Jag är Falk, din säkerhetsassistent i AdRaze. Klistra in en misstänkt länk, ett mejl eller ett SMS så säger jag om det är en bluff — eller be mig ändra en inställning åt dig. Skriv / för kommandon.';
     function welcome() {
@@ -480,7 +483,7 @@
     }
     const OWL_BIG = '<img src="krypto-owl.png" alt="">';
     const OWL_FLY = '<img class="owl-fly" src="krypto-owl.png" alt="">';
-    function render() { log.innerHTML = ''; if (!history.length) { welcome(); return; } history.forEach((m, i) => bubble(m.role, fmt(m.content), '', i)); }
+    function render() { follow = true; log.innerHTML = ''; if (!history.length) { welcome(); return; } history.forEach((m, i) => bubble(m.role, fmt(m.content), '', i)); }
     // En rad som visar vad Falk gör. Minnesrader öppnar minnena vid klick.
     function stepRow(icon, label, val, cls, onClick) {
       const el = document.createElement(onClick ? 'button' : 'div'); el.className = 'step' + (cls ? ' ' + cls : '');
@@ -662,7 +665,7 @@
       inp.value = ''; autosize(); hideCmd();
       history.push({ role: 'user', content: text, ts: Date.now() }); touchConvo(text); saveConvos();
       { const h = log.querySelector('.hero'); if (h) h.remove(); }   // välkomstvyn försvinner när samtalet börjar
-      bubble('user', fmt(text), '', history.length - 1); updateConvTitle();
+      follow = true; bubble('user', fmt(text), '', history.length - 1); updateConvTitle();
       ask();
     }
     // Frågar Falk om svaret på samtalet som det ser ut nu (sista meddelandet är ditt)
