@@ -72,7 +72,7 @@ function noteraBesok(wc, url) {
   if (gammal && gammal !== ny) glomOmStangd(gammal, wc.session);
 }
 function glomOmStangd(sajt, sess) {
-  if (!sajt || !inst.get().glom) return;
+  if (!sajt || !sess || !inst.get().glom) return;
   setTimeout(async () => {
     // Är sajten fortfarande öppen i någon flik? Då väntar vi tills den stängs.
     for (const w of webContents.getAllWebContents()) {
@@ -94,7 +94,10 @@ function glomOmStangd(sajt, sess) {
 }
 function fliken(wc) {
   wc.on('did-navigate', (_e, url) => noteraBesok(wc, url));
-  wc.once('destroyed', () => { const s = wc.__glomSajt, sess = wc.session; wc.__glomSajt = null; if (s) glomOmStangd(s, sess); });
+  // Sessionen hämtas NU: på en förstörd flik kastar wc.session ("Object has been destroyed"),
+  // vilket gav JavaScript-felet när AdRaze stängdes (alla flikar förstörs samtidigt)
+  const sess = wc.session;
+  wc.once('destroyed', () => { const s = wc.__glomSajt; wc.__glomSajt = null; if (s) glomOmStangd(s, sess); });
 }
 
 /* ── Blockera element: väljare i sidan (egen isolerad värld), resultatet blir en dölj-regel för sajten ── */

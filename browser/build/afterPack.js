@@ -12,8 +12,32 @@ function evsPython() {
   return fs.existsSync(venv) ? venv : (process.env.EVS_PYTHON || 'python3');
 }
 
+// Electron-säkringar: bränns in i programfilen så att ingen kan köra AdRaze som ett vanligt
+// Node-program (ELECTRON_RUN_AS_NODE), smyga in kod via NODE_OPTIONS, koppla på en debugger
+// med --inspect eller ladda en app utanför app.asar. Kakorna krypteras på disken (nyckelringen),
+// som i Chrome/Brave. Görs före VMP-signeringen (signaturen måste täcka den ändrade filen).
+async function brannSakringar(context) {
+  const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses');
+  const namn = context.packager.appInfo.productFilename;
+  const plat = context.electronPlatformName;
+  const exe = plat === 'darwin' ? path.join(context.appOutDir, namn + '.app')
+    : plat === 'win32' ? path.join(context.appOutDir, namn + '.exe')
+    : path.join(context.appOutDir, context.packager.executableName);
+  await flipFuses(exe, {
+    version: FuseVersion.V1,
+    resetAdHocDarwinSignature: plat === 'darwin',
+    [FuseV1Options.RunAsNode]: false,
+    [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
+    [FuseV1Options.EnableNodeCliInspectArguments]: false,
+    [FuseV1Options.OnlyLoadAppFromAsar]: true,
+    [FuseV1Options.EnableCookieEncryption]: true,
+  });
+  console.log('[säkringar] inbrända i', exe);
+}
+
 exports.default = async function afterPack(context) {
   const plat = context.electronPlatformName; // 'linux' | 'darwin' | 'win32'
+  await brannSakringar(context);
   if (plat === 'linux') {
     console.log('[VMP] Linux behöver ingen VMP-signering (Widevine L3 funkar utan) — hoppar över.');
     return;

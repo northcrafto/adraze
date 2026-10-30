@@ -185,7 +185,7 @@ function pwShow(field, items) {
   box.addEventListener('mousedown', (e) => e.preventDefault(), true);
   pwRows.forEach((el, i) => {
     el.addEventListener('mouseenter', () => pwHighlight(i));
-    el.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); const fn = el._pick; pwClose(); if (fn) fn(); });
+    el.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); if (!e.isTrusted) return; const fn = el._pick; pwClose(); if (fn) fn(); });
   });
   (document.body || document.documentElement).appendChild(pwHost);
   pwPosition();
@@ -432,6 +432,10 @@ function readCard(f) {
 /* ── Kortväljaren ── */
 const IS_TOP = (() => { try { return window.top === window; } catch { return false; } })();
 const WL_MSG = '__adrazeWallet';
+// Hemlig nyckel per flik (från huvudprocessen, syns aldrig för sidans egen kod): en sida kan inte
+// förfalska "fyll i kortet"-meddelanden till sina egna ramar
+let _wlTok = null;
+function wlTok() { if (_wlTok === null) { try { _wlTok = ipcRenderer.sendSync('wallet:token') || ''; } catch { _wlTok = ''; } } return _wlTok; }
 const WL_KEYS = ['ArrowDown', 'ArrowUp', 'Enter', 'Escape'];
 let wlHost = null, wlShadow = null, wlRows = [], wlIdx = -1, wlBusy = false;
 let wlAnchor = null;      // () => DOMRect i den här ramens vy
@@ -558,7 +562,7 @@ function wlShow(menu, anchor, onPick, darkRef, isStatic) {
   box.addEventListener('mousedown', (e) => e.preventDefault(), true);
   wlRows.forEach((el, i) => {
     el.addEventListener('mouseenter', () => wlHighlight(i));
-    el.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); wlPickRow(i); });
+    el.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); if (e.isTrusted) wlPickRow(i); });
   });
   (document.body || document.documentElement).appendChild(wlHost);
   wlPosition();
@@ -598,6 +602,7 @@ async function wlFillHere(id) {
 }
 /* ── Ram-till-ram ── */
 function wlBroadcast(msg) {
+  msg = { ...msg, tok: wlTok() };
   try {
     for (const fr of document.querySelectorAll('iframe,frame')) {
       try { fr.contentWindow && fr.contentWindow.postMessage(msg, '*'); } catch {}
@@ -605,7 +610,7 @@ function wlBroadcast(msg) {
   } catch {}
 }
 function wlArm() { wlArmedAt = Date.now(); wlBroadcast({ [WL_MSG]: 1, t: 'armed' }); }
-function wlUp(msg) { try { if (!IS_TOP) parent.postMessage(msg, '*'); } catch {} }
+function wlUp(msg) { try { if (!IS_TOP) parent.postMessage({ ...msg, tok: wlTok() }, '*'); } catch {} }
 function frameElementFor(win) {
   try {
     for (const fr of document.querySelectorAll('iframe,frame')) if (fr.contentWindow === win) return fr;
@@ -614,7 +619,7 @@ function frameElementFor(win) {
 }
 function wlHandleMessage(e) {
   const d = e.data;
-  if (!d || d[WL_MSG] !== 1 || e.source === window) return;
+  if (!d || d[WL_MSG] !== 1 || e.source === window || !wlTok() || d.tok !== wlTok()) return;
   // Nedåt (från föräldern): fyll i / väljare öppnad.
   if (d.t === 'fill' || d.t === 'armed') {
     let fromParent = false;

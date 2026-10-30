@@ -38,7 +38,7 @@
     </div>
   </div>
   <script>
-    const { ipcRenderer } = require('electron');
+    const ipcRenderer = window.adrazeIpc;
     const n = Number(new URLSearchParams(location.search).get('n') || 0);
     document.getElementById('msg').innerHTML = 'Du har <b>' + n + ' flikar</b> öppna i webbläsarfönstret.';
     const done = (payload) => ipcRenderer.send('close-confirm-done', payload);

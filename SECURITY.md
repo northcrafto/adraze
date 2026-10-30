@@ -12,6 +12,18 @@ Relevant examples:
 
 We aim to reply within a week.
 
+## Browser security model
+
+These are the guarantees the AdRaze browser is built to keep. Breaking any of them is a vulnerability we want to hear about.
+
+- **Sandboxed pages.** Every renderer runs in Chromium's sandbox (`app.enableSandbox()`, user namespaces and seccomp on Linux), with context isolation and no Node.js. The sandbox is turned off only on systems that forbid it (Ubuntu 24.04+ without the AppArmor rule that the installer offers to add).
+- **The main process trusts no page.** Every IPC channel is checked against the sending frame (`main.js`, IPC guard). Web pages reach only the few channels their preload needs; passwords and cards are looked up by the frame's real origin, never by what the page sends; card autofill works only on HTTPS pages.
+- **Internal pages stay internal.** Web pages cannot navigate to, open or frame `adraze://` pages or local files.
+- **Local network protection.** A site on the internet cannot reach `localhost`, the router or other private addresses (`natskydd.js`), apart from sites on Brave's exception list.
+- **No silent app launches.** Opening another program from a link always asks; dangerous protocols (`file:`, `smb:`, `ms-msdt:` …) are refused. USB, serial, HID and other device APIs are denied.
+- **Hardened binary.** Electron fuses disable `ELECTRON_RUN_AS_NODE`, `NODE_OPTIONS` and `--inspect`, only load the app from `app.asar`, and encrypt cookies on disk.
+- **Up-to-date engine.** Releases follow the newest Electron patch release, which carries Chromium's security fixes.
+
 ## Supported versions
 
 Only the latest release receives fixes.

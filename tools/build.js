@@ -10,6 +10,9 @@ const { convertFilter } = require("@eyeo/abp2dnr");
 const LISTS = path.join(__dirname, "lists");
 const EXT = path.join(__dirname, "..", "extension");
 const KALLOR = {
+  // Braves säkerhetslistor (inte filter): undantag för natskydd (localhost/LAN) och endast HTTPS
+  "brave-localhost.txt": "https://raw.githubusercontent.com/brave/adblock-lists/master/brave-lists/localhost-permission-allow-list.txt",
+  "brave-https-undantag.txt": "https://raw.githubusercontent.com/brave/adblock-lists/master/brave-lists/https-upgrade-exceptions-list.txt",
   "easylist.txt": "https://easylist.to/easylist/easylist.txt",
   "easyprivacy.txt": "https://easylist.to/easylist/easyprivacy.txt",
   "frellwit.txt": "https://raw.githubusercontent.com/lassekongo83/Frellwits-filter-lists/master/Frellwits-Swedish-Filter.txt",
