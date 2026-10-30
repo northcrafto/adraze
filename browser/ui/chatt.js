@@ -840,7 +840,7 @@ async function renderBubble(m, kind, key) {
   if (m.mine) div.dataset.ts = m.created_at;
   let inner = '';
   if (kind === 'group' && !m.mine && m.sender_username) inner += '<span class="bub-sender">' + esc(m.sender_username) + '</span>';
-  if (reply) inner += '<span class="quote" data-ref="' + esc(reply.id) + '" title="' + esc(T('Gå till meddelandet')) + '"><span class="q-who">' + esc(reply.u === state.username ? T('Du') : reply.u) + '</span><span class="q-text">' + esc(reply.t || (reply.img ? '📷 ' + T('Bild') : '')) + '</span></span>';
+  if (reply) inner += '<span class="quote" data-ref="' + esc(reply.id) + '" title="' + esc(T('Gå till meddelandet')) + '"><span class="q-who">' + esc(reply.u === state.username ? T('Du') : reply.u) + '</span><span class="q-text">' + esc(reply.t || (reply.img ? '' + T('Bild') : '')) + '</span></span>';
   if (img) {
     const ratio = (img.w > 0 && img.h > 0) ? (img.w + ' / ' + img.h) : '4 / 3';
     inner += '<span class="img-wrap loading" style="aspect-ratio:' + ratio + '"><img alt="" draggable="false"></span>';
@@ -900,7 +900,7 @@ function setReply(id) {
   const who = meta.mine ? state.username : (meta.sender || (active && active.kind === 'contact' ? active.name : ''));
   pendingReply = { id: String(id), u: who, t: (meta.text || '').slice(0, 140), img: !!meta.img };
   $('reply-who').textContent = meta.mine ? T('Svarar dig själv') : tf('Svarar {u}', { u: who });
-  $('reply-text').textContent = pendingReply.t || (pendingReply.img ? '📷 ' + T('Bild') : '');
+  $('reply-text').textContent = pendingReply.t || (pendingReply.img ? T('Bild') : '');
   $('reply-bar').classList.add('show');
   chatInput.focus();
 }
@@ -1597,7 +1597,7 @@ async function openLinkCheck(href) {
   $('lk-url').textContent = href;
   const openBtn = $('lk-open');
   openBtn.textContent = T('Öppna'); openBtn.className = 'btn'; openBtn.disabled = true;
-  lkStatus('', '⏳', '', null); $('lk-status').lastElementChild.textContent = T('Kollar länken mot listor över farliga sajter…');
+  lkStatus('', '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>', '', null); $('lk-status').lastElementChild.textContent = T('Kollar länken mot listor över farliga sajter…');
   lkModal.classList.add('open');
   const signs = localLinkSigns(u);
   let srv = null;
@@ -1608,11 +1608,11 @@ async function openLinkCheck(href) {
   const warn = danger || (srv && srv.verdict === 'warn') || signs.length > 0;
   const items = hits.map((h) => String(h.why || '') + (h.list ? ' (' + h.list + ')' : '')).concat(signs.map((s) => s.t));
   if (danger) {
-    lkStatus('danger', '⛔', T('Farlig länk. Öppna den inte.'), items);
+    lkStatus('danger', '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/></svg>', T('Farlig länk. Öppna den inte.'), items);
     openBtn.textContent = T('Öppna ändå'); openBtn.className = 'btn danger'; lkDanger = true;
-  } else if (warn) lkStatus('warn', '⚠️', T('Var försiktig.'), items);
-  else if (srv && srv.lists_ready) lkStatus('clean', '✓', '', [T('Inga träffar i listorna över kända farliga sajter. Det betyder inte att sajten garanterat är säker, men inga varningstecken hittades.')]);
-  else lkStatus('warn', '⚠️', T('Kunde inte kolla listorna just nu. Öppna bara om du litar på avsändaren.'), items);
+  } else if (warn) lkStatus('warn', '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 21h20L12 3z"/><path d="M12 10v5M12 18h.01"/></svg>', T('Var försiktig.'), items);
+  else if (srv && srv.lists_ready) lkStatus('clean', '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>', '', [T('Inga träffar i listorna över kända farliga sajter. Det betyder inte att sajten garanterat är säker, men inga varningstecken hittades.')]);
+  else lkStatus('warn', '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 21h20L12 3z"/><path d="M12 10v5M12 18h.01"/></svg>', T('Kunde inte kolla listorna just nu. Öppna bara om du litar på avsändaren.'), items);
   openBtn.disabled = false;
 }
 function closeLinkCheck() { lkModal.classList.remove('open'); lkCurrent = null; }
@@ -1646,7 +1646,7 @@ function cleanPreview(lp, text) {
 }
 function previewCardHtml(lp) {
   let host = ''; try { host = new URL(lp.u).hostname; } catch {}
-  const ico = lp.i ? '<img class="lp-ico" alt="" src="' + esc(lp.i) + '">' : '<span class="lp-ico none">🌐</span>';
+  const ico = lp.i ? '<img class="lp-ico" alt="" src="' + esc(lp.i) + '">' : '<span class="lp-ico none"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span>';
   return '<span class="lp-card" data-href="' + esc(lp.u) + '" role="link" tabindex="0">' + ico + '<span class="lp-body"><span class="lp-host">' + esc(host) + (lp.s && lp.s.toLowerCase() !== host.toLowerCase() ? ' · ' + esc(lp.s) : '') + '</span>' +
     (lp.t ? '<span class="lp-title">' + esc(lp.t) + '</span>' : '') + (lp.d ? '<span class="lp-desc">' + esc(lp.d) + '</span>' : '') + '</span></span>';
 }
