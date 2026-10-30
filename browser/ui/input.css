@@ -575,6 +575,9 @@ body.incog .bmchip { color: #e9e2f7; }
 #login .lg-status i { width: 8px; height: 8px; border-radius: 50%; background: #2f9e67; flex: none; }
 
 
+/* Sidopanel (Falk/chatten) öppen: skalets egna sidor slutar där panelen börjar */
+#views > .absolute, #views > #permbar, #views > #hxintro { right: var(--pw, 0px) !important; transition: right .18s ease; }
+
 /* ── Startsidans klocka + hälsning ──
    Kraftig klocka med tabellsiffror (hoppar inte i sidled), lugn hälsning under.
    Reservbakgrund (innan dagens bild laddats): mörk natt med svag orange glöd från AdRaze-färgen. */
