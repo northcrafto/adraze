@@ -46,8 +46,42 @@
   .fbtn:hover { background: #eef2f6; color: #0e2a47; }
   .fbtn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8;
     stroke-linecap: round; stroke-linejoin: round; }
+  /* Mörkt läge: samma val som skalet (skriptet nedan läser skoll-theme). Förr var rutan alltid vit. */
+  :root[data-theme="dark"] .card { background: #1c1c1f; border-color: #2c2c30; box-shadow: 0 20px 48px rgba(0,0,0,.5), 0 4px 12px rgba(0,0,0,.3); }
+  :root[data-theme="dark"] .head h1, :root[data-theme="dark"] .name { color: #f2f2f4; }
+  :root[data-theme="dark"] .x, :root[data-theme="dark"] .fbtn { color: #a1a1a8; }
+  :root[data-theme="dark"] .x:hover, :root[data-theme="dark"] .fbtn:hover, :root[data-theme="dark"] .row.open:hover { background: rgba(255,255,255,.07); color: #f2f2f4; }
+  :root[data-theme="dark"] .empty, :root[data-theme="dark"] .sub { color: #a1a1a8; }
+  :root[data-theme="dark"] .ico { background: rgba(47,143,212,.16); color: #7cb8ec; }
+  :root[data-theme="dark"] .ico.done { background: rgba(18,146,90,.18); color: #4cc38a; }
+  :root[data-theme="dark"] .ico.warn { background: rgba(209,59,59,.18); color: #ff8a7a; }
+  :root[data-theme="dark"] .sub.done { color: #4cc38a; }
+  :root[data-theme="dark"] .sub.warn { color: #ff8a7a; }
+  :root[data-theme="dark"] .bar { background: #2c2c30; }
+  :root[data-theme="dark"] .spin { border-color: #2c3a4a; border-top-color: #2f8fd4; }
+  :root[data-theme="dark"] .list { scrollbar-color: #3b3b40 transparent; }
 </style>
-<script src="fokus.js"></script>
+<script>
+  // Tema: skalet sparar skoll-theme i localStorage (samma file://-origin) → följ det, även om det byts medan rutan är öppen
+  (function () {
+    function tema() { try { document.documentElement.dataset.theme = localStorage.getItem('skoll-theme') === 'dark' ? 'dark' : 'light'; } catch (e) {} }
+    tema(); window.addEventListener('storage', function (e) { if (!e.key || e.key === 'skoll-theme') tema(); });
+  })();
+</script>
+<script>
+/* Fokusringen (orange ram) visas bara när du använder tangentbordet (Tab/piltangenter).
+   Efter musklick, eller när en ruta stängs och fokus hoppar tillbaka till en knapp, syns ingen ram. */
+(function () {
+  const root = document.documentElement;
+  const st = document.createElement('style');
+  st.textContent = 'html:not([data-kbd]) :focus, html:not([data-kbd]) :focus-visible { outline: none !important; }'
+    + ' html:not([data-kbd]) button:focus, html:not([data-kbd]) a:focus, html:not([data-kbd]) [role="button"]:focus, html:not([data-kbd]) .switch input:focus + .track { box-shadow: none; }';
+  (document.head || root).appendChild(st);
+  const NAV = new Set(['Tab', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown']);
+  addEventListener('keydown', (e) => { if (NAV.has(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey) root.setAttribute('data-kbd', ''); }, true);
+  addEventListener('pointerdown', () => root.removeAttribute('data-kbd'), true);
+})();
+</script>
 </head>
 <body>
   <div class="card">
@@ -99,7 +133,7 @@
           ico = paused ? ICO_PAUSE : '<div class="spin"></div>';
           if (paused) sub = t('Pausad') + ' · ' + sub;
         } else if (scan) { sub = t('Skannar efter virus…'); ico = '<div class="spin"></div>'; }
-        else if (infected) { icoCls = 'ico warn'; ico = ICO_WARN; subCls = 'sub warn'; sub = '⚠ ' + t('Blockerad') + ' — ' + (d.threat || t('hot')); }
+        else if (infected) { icoCls = 'ico warn'; ico = ICO_WARN; subCls = 'sub warn'; sub = t('Blockerad') + ' — ' + (d.threat || t('hot')); }
         else if (removed) { icoCls = 'ico warn'; ico = ICO_WARN; subCls = 'sub warn'; sub = t('Borttagen (virus)'); }
         else if (done) { icoCls = 'ico done'; ico = ICO_DOC; subCls = 'sub done';
           sub = (d.total > 0 ? fmt(d.total) + ' · ' : '') + (d.scan === 'overridden' ? t('Klar (behållen)') : (d.scan === 'clean' ? t('Säker ✓') : t('Klar'))); }

@@ -630,7 +630,9 @@ function ensureView(ctx, tabId) {
     // satt på en riktig länk dit (target=_blank, mitten-/Ctrl-klick). Piratsajternas trick –
     // klick var som helst → a.click()/window.open mot en annonsdomän – stoppas här.
     if (url && !sameSite(url, from) && !popupTrustedHost(url)) {
-      const lc = wc.__lastClick; const viaLink = !!(lc && Date.now() - lc.t < 3000 && lc.href && sameSite(lc.href, url));
+      const lc = wc.__lastClick, nu = Date.now();
+      const viaLink = !!(lc && nu - lc.t < 3000 && (lc.href ? sameSite(lc.href, url)
+        : (wc.__linkClicks || []).some((c) => nu - c.t < 60000 && sameSite(c.href, url))));   // bekräftat i en "Du lämnar …"-ruta
       if (!viaLink) return { action: 'deny' };
     }
     if (url) sendTo(ctx, 'open-new-tab', url);                     // vanlig ny flik (Ctrl/mitten-klick, target=_blank)
@@ -1554,7 +1556,16 @@ ipcMain.on('i18n:load', (e, lang) => {
   } catch { e.returnValue = {}; }
 });
 // Skalet färgar om fönsterknapparna (Windows/Linux-overlay) när tema/inkognito byts.
-ipcMain.on('page:click', (e, info) => { e.returnValue = 1; try { e.sender.__lastClick = { t: Date.now(), href: info && info.href ? String(info.href) : null }; } catch {} });
+ipcMain.on('page:click', (e, info) => {
+  e.returnValue = 1;
+  try {
+    const t = Date.now(), href = info && info.href ? String(info.href) : null;
+    e.sender.__lastClick = { t, href };
+    // Länkar man nyss klickat på: "Du lämnar …"-rutor (Chrome Web Store, Discord m.fl.) stoppar länken
+    // och öppnar sidan först när man bekräftar med en knapp – då ska fliken ändå få öppnas.
+    if (href) e.sender.__linkClicks = [...(e.sender.__linkClicks || []).filter((c) => t - c.t < 60000).slice(-4), { t, href }];
+  } catch {}
+});
 ipcMain.on('win:minimize', (e) => { try { BrowserWindow.fromWebContents(e.sender).minimize(); } catch {} });
 ipcMain.on('win:toggle-max', (e) => { try { const w = BrowserWindow.fromWebContents(e.sender); if (w.isMaximized()) w.unmaximize(); else w.maximize(); } catch {} });
 ipcMain.on('win:close', (e) => { try { BrowserWindow.fromWebContents(e.sender).close(); } catch {} });   // samma väg som systemets kryss (stäng-bekräftelsen sköts som förut)

@@ -7,7 +7,8 @@
 <style>
   /* Falks låsta läge (inte inloggad / inte Pro). Samma tokens som inställningarna i mörkt läge. */
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  :root { --bg: #0e0e10; --surface: #161618; --surface-2: #1d1d20; --line: #26262a; --ink: #f2f2f4; --mut: #a1a1a8; --faint: #6f6f76; --accent: #ff4b1f; --accent-ink: #ff7a52; }
+  :root { --bg: #0e0e10; --surface: #161618; --surface-2: #1d1d20; --line: #26262a; --ink: #f2f2f4; --mut: #a1a1a8; --faint: #6f6f76; --accent: #ff4b1f; --accent-ink: #ff7a52;
+    color-scheme: dark; }   /* mörk rullningslist (annars en vit list med pilar i den mörka panelen) */
   html, body { height: 100%; }
   body { font-family: Inter, -apple-system, "Segoe UI", Roboto, system-ui, sans-serif; color: var(--ink); background: var(--bg);
     display: flex; flex-direction: column; min-height: 100%; padding: 22px 20px 20px; overflow-y: auto; -webkit-font-smoothing: antialiased; }
@@ -47,7 +48,20 @@
   .nopro .only-signedout { display: none; }
   @media (prefers-reduced-motion: reduce) { .btn::before { transition: none; } }
 </style>
-<script src="fokus.js"></script>
+<script>
+/* Fokusringen (orange ram) visas bara när du använder tangentbordet (Tab/piltangenter).
+   Efter musklick, eller när en ruta stängs och fokus hoppar tillbaka till en knapp, syns ingen ram. */
+(function () {
+  const root = document.documentElement;
+  const st = document.createElement('style');
+  st.textContent = 'html:not([data-kbd]) :focus, html:not([data-kbd]) :focus-visible { outline: none !important; }'
+    + ' html:not([data-kbd]) button:focus, html:not([data-kbd]) a:focus, html:not([data-kbd]) [role="button"]:focus, html:not([data-kbd]) .switch input:focus + .track { box-shadow: none; }';
+  (document.head || root).appendChild(st);
+  const NAV = new Set(['Tab', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown']);
+  addEventListener('keydown', (e) => { if (NAV.has(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey) root.setAttribute('data-kbd', ''); }, true);
+  addEventListener('pointerdown', () => root.removeAttribute('data-kbd'), true);
+})();
+</script>
 </head>
 <body class="nopro">
   <div class="top"><img src="adraze-mark-dark.png" alt="">Falk</div>

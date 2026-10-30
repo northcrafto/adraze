@@ -65,7 +65,10 @@ async function kor(rot) {
       const f = await H.anslut(findT.webSocketDebuggerUrl);
       await f.kor(`new Promise((r) => { const t = () => (document.readyState === 'complete' && document.querySelector('input') ? r(1) : setTimeout(t, 100)); t(); })`);
       R.ok('sökrutan har bara adrazeIpc, ingen require', (await f.kor(`typeof window.adrazeIpc.send + '/' + typeof require`)) === 'function/undefined');
-      R.ok('sökrutan hittar text', /^1\//.test(String(await f.kor(`const i = document.querySelector('input'); i.value = 'Example'; i.dispatchEvent(new Event('input')); new Promise((r) => setTimeout(() => r(document.body.innerText.trim()), 1000))`))));
+      // Eget ord på sidan: example.com byter text ibland (2026-10 försvann "Example" ur sidan)
+      await flik.kor(`document.body.insertAdjacentText('beforeend', ' Adrazesokord '); 1`);
+      const hittat = String(await f.kor(`const i = document.querySelector('input'); i.value = 'Adrazesokord'; i.dispatchEvent(new Event('input')); new Promise((r) => setTimeout(() => r(document.body.innerText.trim()), 1000))`));
+      R.ok('sökrutan hittar text', /^1\//.test(hittat), hittat);
       f.stang();
     } else R.ok('sökrutan öppnades', false);
 
