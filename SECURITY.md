@@ -22,7 +22,7 @@ These are the guarantees the AdRaze browser is built to keep. Breaking any of th
 - **Local network protection.** A site on the internet cannot reach `localhost`, the router or other private addresses (`natskydd.js`), apart from sites on Brave's exception list.
 - **No silent app launches.** Opening another program from a link always asks; dangerous protocols (`file:`, `smb:`, `ms-msdt:` …) are refused. USB, serial, HID and other device APIs are denied.
 - **Hardened binary.** Electron fuses disable `ELECTRON_RUN_AS_NODE`, `NODE_OPTIONS` and `--inspect`, only load the app from `app.asar`, and encrypt cookies on disk.
-- **Up-to-date engine.** Releases follow the newest Electron patch release, which carries Chromium's security fixes.
+- **Up-to-date engine.** An automated watcher checks every two hours for a newer Electron build with Widevine (castlabs), builds it, and releases it once the security and package test suites pass. Users get it through the in-app updater within about half an hour. New major versions are adopted the same way after three days. Every release, manual or automatic, is tested exactly as shipped, including that the previous release's profile and cookies still work.
 
 ## Supported versions
 
