@@ -4,7 +4,7 @@
   "description": "AdRaze – webbläsaren med AdRazes adblocker inbyggd",
   "main": "main.js",
   "scripts": {
-    "start": "electron . --no-sandbox",
+    "start": "electron .",
     "build:mac": "electron-packager . \"AdRaze\" --platform=darwin --arch=x64 --out=dist --overwrite --app-bundle-id=app.adraze.browser --ignore=\"(dist|/\\.git|meta_test\\.js|scan_test\\.js|.*\\.md)\"",
     "build:linux": "electron-builder --linux --x64",
     "build:win": "electron-builder --win --x64",
@@ -23,9 +23,10 @@
     "qrcode": "^1.5.4"
   },
   "devDependencies": {
+    "@electron/fuses": "^1.8.0",
     "@electron/packager": "^18.4.4",
     "@tailwindcss/cli": "^4.3.3",
-    "electron": "github:castlabs/electron-releases#v43.2.0+wvcus",
+    "electron": "github:castlabs/electron-releases#v43.8.3+wvcus",
     "electron-builder": "^24.13.3",
     "node-addon-api": "^8.9.2",
     "tailwindcss": "^4.3.3"

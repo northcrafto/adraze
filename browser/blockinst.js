@@ -45,6 +45,7 @@ const STANDARD = {
   skript: false,             // blockera all JavaScript
   injektioner: false,        // blockera skript som sidan skjuter in från andra sajter
   fingeravtryck: true,
+  natskydd: true,            // sajter får inte nå localhost/routern/LAN (natskydd.js)
   kakor: 'tredje',           // av | tredje | alla
   glom: false,               // glöm mig när jag stänger webbplatsen
   kontakt: '',               // mejl för rapporter om trasiga sidor
@@ -78,7 +79,12 @@ function listaPa(id) {
 // Listorna motorn ska äta (i ordning)
 function aktivaListor() { return [...LISTOR.filter((l) => listaPa(l.id)).map((l) => l.id), ...INTERNA]; }
 // Källorna listuppdateringen hämtar: alla påslagna (de medskickade och de som bara finns på nätet)
-function kallor() { const ut = {}; for (const l of LISTOR) if (listaPa(l.id)) ut[l.id] = l.url; return ut; }
+// Säkerhetslistor från Brave som alltid hålls färska (inte filter: undantag för natskydd/endast HTTPS)
+const SAKERHET = {
+  'brave-localhost.txt': 'https://raw.githubusercontent.com/brave/adblock-lists/master/brave-lists/localhost-permission-allow-list.txt',
+  'brave-https-undantag.txt': 'https://raw.githubusercontent.com/brave/adblock-lists/master/brave-lists/https-upgrade-exceptions-list.txt',
+};
+function kallor() { const ut = { ...SAKERHET }; for (const l of LISTOR) if (listaPa(l.id)) ut[l.id] = l.url; return ut; }
 
 // "Egna filter": nätverksfilter och ##+js går till motorn, ##selektor blir CSS per värd
 function egnaKosmetik(host) {
@@ -117,7 +123,7 @@ function satt(nyckel, varde) {
   switch (nyckel) {
     case 'niva': if (!['enkel', 'medium', 'aggressiv'].includes(varde)) return false; p.niva = varde; break;
     case 'kakor': if (!['av', 'tredje', 'alla'].includes(varde)) return false; p.kakor = varde; break;
-    case 'raknare': case 'skript': case 'injektioner': case 'fingeravtryck': case 'glom': case 'elementPrivat': p[nyckel] = !!varde; break;
+    case 'raknare': case 'skript': case 'injektioner': case 'fingeravtryck': case 'natskydd': case 'glom': case 'elementPrivat': p[nyckel] = !!varde; break;
     case 'kontakt': p.kontakt = String(varde || '').trim().slice(0, 200); break;
     case 'egna': p.egna = String(varde || '').slice(0, 200000); break;
     case 'social': if (varde && typeof varde === 'object') for (const k of Object.keys(STANDARD.social)) if (k in varde) p.social[k] = !!varde[k]; break;

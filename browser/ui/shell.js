@@ -1735,7 +1735,7 @@ window.view.onToast((m) => showToast(m));
 window.view.onUpdateReady((v) => { showUpdateBanner(v); refreshUpdatePanel(false); });
 // ── Webbinställningar: Vid start, bokmärkesfält, teckenstorlek, endast HTTPS, säker DNS, rensa data, behörigheter, nedladdningar ──
 const tw = (k) => (typeof window.t === 'function') ? window.t(k) : k;
-const PERM_LABEL = { camera: 'Kamera', microphone: 'Mikrofon', geolocation: 'Plats', notifications: 'Notiser', 'clipboard-read': 'Läsa urklipp', midi: 'MIDI-enheter' };
+const PERM_LABEL = { camera: 'Kamera', microphone: 'Mikrofon', geolocation: 'Plats', notifications: 'Notiser', 'clipboard-read': 'Läsa urklipp', midi: 'MIDI-enheter', external: 'Öppna ett annat program' };
 let webbPrefs = null;
 async function refreshWebbPanel() {
   try { webbPrefs = await window.view.webbGet(); } catch { webbPrefs = null; }
@@ -1826,6 +1826,7 @@ const permQ = [];
 let permCur = null;
 function permText(q) {
   const host = q.origin.replace(/^https?:\/\//, '');
+  if (q.kinds.length === 1 && q.kinds[0] === 'external') return host + ' ' + tw('vill öppna ett annat program på datorn');
   const names = q.kinds.map((k) => tw(PERM_LABEL[k] || k).toLowerCase());
   const what = names.length > 1 ? names.slice(0, -1).join(', ') + ' ' + tw('och') + ' ' + names[names.length - 1] : names[0];
   return host + ' ' + tw('vill använda') + ' ' + what;

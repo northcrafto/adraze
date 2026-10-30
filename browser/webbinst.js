@@ -12,7 +12,14 @@ const DNS_SERVERS = {
   google: 'https://dns.google/dns-query',
 };
 // Behörigheter vi frågar om. Allt annat (helskärm, urklipp-skriv m.m.) släpps igenom som förut.
-const KINDS = ['camera', 'microphone', 'geolocation', 'notifications', 'clipboard-read', 'midi'];
+const KINDS = ['camera', 'microphone', 'geolocation', 'notifications', 'clipboard-read', 'midi', 'external'];
+// Behörigheter utan fråga (som i Chrome): ofarliga, eller sådana där du själv redan valt något
+const AUTO_OK = new Set(['fullscreen', 'pointerLock', 'keyboardLock', 'clipboard-sanitized-write', 'mediaKeySystem',
+  'storage-access', 'top-level-storage-access', 'speaker-selection', 'fileSystem']);
+// Allt annat (USB, serieport, HID, Bluetooth, idle-detection, window-management, okända) nekas.
+// Protokoll som en sajt aldrig får öppna program med (lokala filer, nätverksdiskar, Windows-hål som Follina)
+const FARLIGA_PROTOKOLL = /^(file|javascript|vbscript|data|blob|smb|cifs|nfs|afp|sftp|ftp|ssh|telnet|ldaps?|jar|res|ms-msdt|search-ms|search|ms-officecmd|ms-word|ms-excel|ms-powerpoint|ms-cxh(-full)?|shell|vnc|rdp|x-unix):/i;
+const UI_URL = require('url').pathToFileURL(path.join(__dirname, 'ui')).href + '/';
 
 const prefs = Object.assign({
   dns: 'automatic',            // off | automatic | cloudflare | quad9 | google
@@ -42,11 +49,23 @@ function lokal(host) {
   return !host || host === 'localhost' || !host.includes('.') || /\.(local|lan|home|internal|test|localhost)$/i.test(host)
     || /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|\[)/.test(host) || /^\d+\.\d+\.\d+\.\d+$/.test(host);
 }
+// Braves lista över sajter som inte klarar HTTPS (hämtad i adraze-lists/, annars medskickad)
+let httpsUndantag = null, httpsUndantagAt = 0;
+function arHttpsUndantag(host) {
+  if (!httpsUndantag || Date.now() - httpsUndantagAt > 6 * 3600 * 1000) {
+    httpsUndantagAt = Date.now(); httpsUndantag = new Set();
+    for (const f of [path.join(app.getPath('userData'), 'adraze-lists', 'brave-https-undantag.txt'), path.join(__dirname, 'adraze', 'lists', 'brave-https-undantag.txt')]) {
+      try { for (const r of fs.readFileSync(f, 'utf8').split(/\r?\n/)) { const h = r.trim().toLowerCase(); if (h && !h.startsWith('#')) httpsUndantag.add(h); } break; } catch {}
+    }
+  }
+  const h = String(host || '').toLowerCase();
+  return httpsUndantag.has(h) || httpsUndantag.has(h.replace(/^www\./, ''));
+}
 // Anropas för varje huvudsida innan den hämtas. Ger en https-adress när den ska uppgraderas.
 function upgradeUrl(d) {
   if (!prefs.httpsOnly || d.resourceType !== 'mainFrame' || !/^http:/i.test(d.url)) return null;
   let u; try { u = new URL(d.url); } catch { return null; }
-  if (lokal(u.hostname) || httpOk.has(u.hostname)) return null;
+  if (lokal(u.hostname) || httpOk.has(u.hostname) || arHttpsUndantag(u.hostname)) return null;
   u.protocol = 'https:'; if (u.port === '80') u.port = '';
   try { if (d.webContents) d.webContents.__httpsUpg = { host: u.hostname, from: d.url }; } catch {}
   return u.toString();
@@ -81,15 +100,17 @@ function kindsFor(perm, details) {
     return k.length ? k : ['camera', 'microphone'];
   }
   if (perm === 'midiSysex') return ['midi'];
+  if (perm === 'openExternal') return ['external'];
   return KINDS.includes(perm) ? [perm] : null;
 }
 function installPermissions(sess, incog) {
   try {
     sess.setPermissionRequestHandler(async (wc, perm, cb, details) => {
       const url = (details && details.requestingUrl) || (wc && wc.getURL()) || '';
-      if (/^file:/i.test(url)) { cb(true); return; }                 // AdRazes egna sidor
+      if (url.startsWith(UI_URL)) { cb(true); return; }              // AdRazes egna sidor
+      if (perm === 'openExternal' && FARLIGA_PROTOKOLL.test(String((details && details.externalURL) || ''))) { cb(false); return; }
       const kinds = kindsFor(perm, details);
-      if (!kinds) { cb(true); return; }
+      if (!kinds) { cb(AUTO_OK.has(perm)); return; }
       const origin = originOf(url); if (!origin || !wc || !wc.__ctx) { cb(false); return; }
       const dec = kinds.map((k) => decision(origin, k, incog));
       if (dec.includes('block')) { cb(false); return; }
@@ -104,10 +125,10 @@ function installPermissions(sess, incog) {
       cb(!!ans.allow);
     });
     sess.setPermissionCheckHandler((wc, perm, origin, details) => {
-      if (/^file:/i.test(origin || '')) return true;
+      if (String(origin || '').startsWith('file://') && (!wc || String(wc.getURL() || '').startsWith(UI_URL))) return true;
       let kinds = kindsFor(perm, details);
       if (perm === 'media' && details && details.mediaType) kinds = [details.mediaType === 'video' ? 'camera' : 'microphone'];
-      if (!kinds) return true;
+      if (!kinds) return AUTO_OK.has(perm);
       const o = originOf(origin || (details && details.requestingUrl) || '');
       return !!o && kinds.every((k) => decision(o, k, incog) === 'allow');
     });

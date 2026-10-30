@@ -66,11 +66,11 @@
   </div>
   <script>
     // Översättning: samma ordlista som skalet (adraze-lang i localStorage delas, samma file://-origin).
-    window.locale = { load: (l) => { try { return require('electron').ipcRenderer.sendSync('i18n:load', l) || {}; } catch (e) { return {}; } } };
+    window.locale = { load: (l) => { try { return window.adrazeIpc.sendSync('i18n:load', l) || {}; } catch (e) { return {}; } } };
   </script>
   <script src="i18n.js"></script>
   <script>
-    const { ipcRenderer } = require('electron');
+    const ipcRenderer = window.adrazeIpc;
     const q = new URLSearchParams(location.search);
     if (q.get('theme') === 'dark') document.documentElement.dataset.theme = 'dark';
     const $ = (id) => document.getElementById(id);

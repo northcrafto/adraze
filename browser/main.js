@@ -10,6 +10,7 @@
  */
 const { app, BrowserWindow, WebContentsView, ipcMain, session, Menu, clipboard, dialog, shell, safeStorage, components, screen, net } = require('electron');
 app.setName('AdRaze');  // egen datamapp (~/.config/AdRaze)
+app.enableSandbox();     // alla sidprocesser i Chromiums sandlåda, som i Chrome/Brave (se sandladeFlagga)
 // Oväntade fel i huvudprocessen loggas i ~/.config/AdRaze/fel.log i stället för Electrons
 // "A JavaScript error occurred"-ruta (som annars poppar upp t.ex. vid omstart efter uppdatering).
 function loggaFel(typ, e) {
@@ -22,6 +23,39 @@ function loggaFel(typ, e) {
 process.on('uncaughtException', (e) => loggaFel('uncaughtException', e));
 process.on('unhandledRejection', (e) => loggaFel('unhandledRejection', e));
 const path = require('path');
+
+/* IPC-vakt (Electrons säkerhetschecklista #17, som Chromes "browser process trusts no renderer"):
+ * varje kanal tar bara emot från våra egna sidor i ui/. Webbsidor (flikar, ramar, popups) når bara
+ * de få kanaler som deras preload behöver; adraze://-sidor dessutom blockinst:*. Så kan en sajt –
+ * eller en kapad flikprocess – aldrig läsa lösenord, kort, inställningar eller styra skalet. */
+const UI_URL = require('url').pathToFileURL(path.join(__dirname, 'ui')).href + '/';
+const WEBB_KANALER = new Set([
+  'adraze:start', 'adraze:css', 'adraze:kakor', 'adraze:rakna', 'adraze:dolj-regler',   // adraze-preload.js
+  'page:click', 'i18n:t', 'pw:capture', 'pw:for-origin', 'pw:open-manager',            // content-preload.js
+  'wallet:capture', 'wallet:debug', 'wallet:get', 'wallet:menu', 'wallet:open-manager', 'wallet:token',
+]);
+function ramUrl(e) { try { return (e.senderFrame && e.senderFrame.url) || ''; } catch { return ''; } }
+function kanalTillaten(kanal, e) {
+  const u = ramUrl(e);
+  if (u.startsWith(UI_URL)) return true;
+  if (/^blockinst:/.test(kanal)) return /^adraze:/i.test(u);
+  return WEBB_KANALER.has(kanal);
+}
+// Interna adresser (adraze://, lokala filer, devtools) som webbsidor inte får navigera till
+const internAdress = (u) => /^(adraze|adraze-res|file|devtools|chrome|chrome-extension):/i.test(String(u || ''));
+const webbAdress = (u) => /^(https?|wss?|ftp|data|blob):/i.test(String(u || ''));
+// De små popupfönstren i ui/: sandlåda + isolering, IPC via popup-preload.js (aldrig Node i sidan)
+const POPUP_PREFS = (extra) => ({ preload: path.join(__dirname, 'popup-preload.js'), contextIsolation: true, sandbox: true, nodeIntegration: false, ...extra });
+const nekadeKanaler = new Set();
+for (const m of ['on', 'once', 'addListener', 'prependListener', 'handle', 'handleOnce']) {
+  const orig = ipcMain[m].bind(ipcMain);
+  ipcMain[m] = (kanal, fn) => orig(kanal, function (e, ...args) {
+    if (kanalTillaten(kanal, e)) return fn.call(this, e, ...args);
+    if (!nekadeKanaler.has(kanal)) { nekadeKanaler.add(kanal); console.warn('[ipc] nekad', kanal, 'från', ramUrl(e).slice(0, 80) || '(okänd ram)'); }
+    try { e.returnValue = null; } catch {}   // sendSync får inte hänga
+    return null;
+  });
+}
 const fs = require('fs');
 const crypto = require('crypto');
 const { spawn, execFile } = require('child_process');
@@ -118,7 +152,7 @@ function closeDlPopup(ctx) {
 function openDlPopup(ctx) {
   if (!ctx || !ctx.win || ctx.win.isDestroyed()) return;
   if (ctx.dlView) { try { ctx.win.contentView.addChildView(ctx.dlView); } catch {} positionDlPopup(ctx); ctx.dlView.webContents.send('dl-data', downloads); return; }  // redan öppen → höj + uppdatera
-  const view = new WebContentsView({ webPreferences: { nodeIntegration: true, contextIsolation: false, transparent: true } });   // transparent: bara kortet syns, inte vyns rektangel
+  const view = new WebContentsView({ webPreferences: POPUP_PREFS({ transparent: true }) });   // transparent: bara kortet syns, inte vyns rektangel
   try { view.setBackgroundColor('#00000000'); } catch {}
   ctx.dlView = view;
   ctx._dlH = 200;
@@ -145,7 +179,7 @@ async function openFind(ctx, text) {
   ctx.findTab = ctx.visibleTab;
   if (!ctx.findView) {
     let theme = 'light'; try { theme = await ctx.win.webContents.executeJavaScript('document.documentElement.dataset.theme || "light"'); } catch {}
-    const view = new WebContentsView({ webPreferences: { nodeIntegration: true, contextIsolation: false, transparent: true } });
+    const view = new WebContentsView({ webPreferences: POPUP_PREFS({ transparent: true }) });
     try { view.setBackgroundColor('#00000000'); } catch {}
     view.webContents.__ctx = ctx;
     ctx.findView = view;
@@ -527,7 +561,7 @@ function ensureView(ctx, tabId) {
   // nodeIntegrationInSubFrames: kortväljaren måste nå fälten i kassornas iframes
   // (Stripe/PayPal/Klarna lägger varje fält i en egen ram). Preloaden är isolerad
   // från sidans JS (contextIsolation) och exponerar inget till sidan.
-  const wp = { preload: path.join(__dirname, 'content-preload.js'), contextIsolation: true, sandbox: false, nodeIntegration: false, nodeIntegrationInSubFrames: true };
+  const wp = { preload: path.join(__dirname, 'content-preload.js'), contextIsolation: true, sandbox: true, nodeIntegration: false, nodeIntegrationInSubFrames: true };
   if (incognito) wp.partition = 'skoll-incognito';
   wp.defaultFontSize = webb.fontSize(); wp.defaultMonospaceFontSize = Math.round(webb.fontSize() * 13 / 16);
   const view = new WebContentsView({ webPreferences: wp });
@@ -542,6 +576,8 @@ function ensureView(ctx, tabId) {
   wc.setWindowOpenHandler((details) => {
     const url = details.url || '';
     const from = wc.getURL();
+    // Webbsidor får aldrig öppna AdRazes egna sidor eller lokala filer (som chrome:// i Chrome)
+    if (internAdress(url) && webbAdress(from)) return { action: 'deny' };
     // Popup-storm: Chrome/Brave tillåter EXAKT ett fönster per klick. Fler window.open inom
     // två sekunder från samma sida är en annonsflod (piratsajter) → allt utom det första dör.
     const st = wc.__popups || (wc.__popups = { t: 0, n: 0 }); const now = Date.now();
@@ -556,7 +592,7 @@ function ensureView(ctx, tabId) {
     // annonssajter (popunder) och dödas helt.
     if (details.disposition === 'new-window' || (details.features && details.features.length)) {
       if (sameSite(url, from) || popupTrustedHost(url)) {
-        return { action: 'allow', overrideBrowserWindowOptions: { width: 520, height: 680, resizable: true, autoHideMenuBar: true, webPreferences: { preload: path.join(__dirname, 'content-preload.js'), contextIsolation: true, sandbox: false, nodeIntegration: false } } };   // samma Chrome-förklädnad som flikarna, annars stoppar Google inloggningen
+        return { action: 'allow', overrideBrowserWindowOptions: { width: 520, height: 680, resizable: true, autoHideMenuBar: true, webPreferences: { preload: path.join(__dirname, 'content-preload.js'), contextIsolation: true, sandbox: true, nodeIntegration: false } } };   // samma Chrome-förklädnad som flikarna, annars stoppar Google inloggningen
       }
       // Korsdomän-fönster från en okänd sajt = popunder. Dör helt – blir inte ens en flik.
       // (Vanliga länkar med target=_blank har inga fönster-features och blir flik som vanligt.)
@@ -574,6 +610,7 @@ function ensureView(ctx, tabId) {
   });
   blocksida.fliken(wc);   // Glöm mig när jag stänger webbplatsen
   wc.on('will-navigate', (e, url) => {
+    if (internAdress(url) && webbAdress(wc.getURL())) { e.preventDefault(); return; }
     // Ad/tracker-mål → blockera helt.
     if (adblockOn && isBlockedTarget(url, wc.getURL())) { e.preventDefault(); if (adblock.isDanger(url, wc.getURL())) sendTo(ctx, 'adraze-danger', tabId, url); return; }
     // Aggressiv: sidan försöker skicka hela fliken till en annan sajt utan att du klickat
@@ -956,7 +993,10 @@ function savePwList(l) {
 }
 ipcMain.handle('pw:list', () => loadPw().filter((p) => !p.never));
 // Inloggningar för en sajt: exakt ursprung först, sedan samma domän (t.ex. login.x.se ↔ www.x.se), som Brave/Chrome
-ipcMain.handle('pw:for-origin', (_e, origin) => {
+// Sajten bestäms av huvudprocessen (ramen som frågar), aldrig av vad sidan skickar
+function ramOrigin(e) { try { const o = e.senderFrame && e.senderFrame.origin; return o && /^https?:\/\//.test(o) ? o : ''; } catch { return ''; } }
+ipcMain.handle('pw:for-origin', (e) => {
+  const origin = ramOrigin(e);
   const host = (() => { try { return new URL(String(origin)).hostname; } catch { return ''; } })();
   if (!host) return [];
   const site = siteOf('https://' + host + '/');
@@ -989,6 +1029,8 @@ ipcMain.handle('pw:set-autofill', (_e, o) => {
 ipcMain.handle('pw:delete', (_e, id) => { savePwList(loadPw().filter((p) => p.id !== id)); return { ok: true }; });
 ipcMain.on('pw:capture', (e, c) => {
   if (!c || !c.password) return;
+  const origin = ramOrigin(e); if (!origin) return;
+  c = { ...c, origin };
   const l = loadPw();
   if (l.find((p) => p.origin === c.origin && p.never)) return;        // "Aldrig" för den här sajten
   if (l.find((p) => p.origin === c.origin && p.username === c.username && p.password === c.password)) return;
@@ -1167,7 +1209,11 @@ function normCard(c, id) {
   return { id: id || c.id || ('c' + Date.now() + Math.floor(Math.random() * 1000)), holder: (c.holder || '').trim(), number: num, exp: (c.exp || '').trim(), cvc: digits(c.cvc), nick: (c.nick || '').trim(), brand: cardBrand(num) };
 }
 ipcMain.handle('wallet:list', () => loadCards().map(cardPublic));
-ipcMain.handle('wallet:get', (_e, id) => loadCards().find((c) => c.id === id) || null); // fullt kort – för redigering/autofyll
+// Fullt kort – för redigering (inställningarna) och autofyll, men bara på krypterade sidor (som Chrome)
+ipcMain.handle('wallet:get', (e, id) => {
+  if (!ramUrl(e).startsWith(UI_URL) && !/^https:\/\//.test(ramOrigin(e))) return null;
+  return loadCards().find((c) => c.id === id) || null;
+});
 ipcMain.handle('wallet:save', (_e, c) => {
   const l = loadCards();
   if (c.id) { const i = l.findIndex((x) => x.id === c.id); if (i >= 0) { l[i] = normCard(c, c.id); saveCards(l); return { ok: true, id: c.id }; } }
@@ -1183,6 +1229,8 @@ ipcMain.handle('wallet:menu', () => ({
   cards: loadCards().map(cardPublic),
   labels: { choose: trUi('Välj kort'), manage: trUi('Hantera kort'), exp: trUi('Giltigt till') },
 }));
+// Nyckeln som kortväljarens ramar signerar sina meddelanden med (samma för alla ramar i fliken)
+ipcMain.on('wallet:token', (e) => { try { e.returnValue = e.sender.__wlTok ||= crypto.randomBytes(16).toString('hex'); } catch { e.returnValue = ''; } });
 /* Felsökningslogg från kortväljaren (bara när ADRAZE_WALLET_DEBUG=1 satts). */
 ipcMain.on('wallet:debug', (_e, d) => {
   try {
@@ -1349,7 +1397,7 @@ function closePwPopup(ctx) {
 function openPwPopup(ctx, cred, theme) {
   if (!ctx || !ctx.win || ctx.win.isDestroyed() || !cred) return;
   closePwPopup(ctx);                                   // ny fråga ersätter en ev. gammal
-  const view = new WebContentsView({ webPreferences: { nodeIntegration: true, contextIsolation: false, transparent: true } });   // transparent: bara kortet syns, inte vyns rektangel
+  const view = new WebContentsView({ webPreferences: POPUP_PREFS({ transparent: true }) });   // transparent: bara kortet syns, inte vyns rektangel
   try { view.setBackgroundColor('#00000000'); } catch {}
   ctx.pwView = view; ctx._pwH = 150;
   ctx.win.contentView.addChildView(view);
@@ -1504,7 +1552,7 @@ ipcMain.on('open-close-confirm', (e, count) => {
     resizable: false, movable: true, minimizable: false, maximizable: false,
     skipTaskbar: true, hasShadow: false, show: false, opacity: 0, width: w, height: h,
     x: cx, y: cy,
-    webPreferences: { nodeIntegration: true, contextIsolation: false },
+    webPreferences: POPUP_PREFS(),
   });
   ctx.confirmWin = cw;
   cw.loadFile(path.join(__dirname, 'ui', 'confirm.html'), { query: { n: String(count || 0) } });
@@ -1938,16 +1986,45 @@ function xdg(args) {
   });
 }
 
+/* Chromiums sandlåda på Linux bygger på user namespaces. Den stängs bara av där systemet inte
+ * tillåter dem: äldre Debian (unprivileged_userns_clone=0) och Ubuntu 24.04+ (AppArmor) utan
+ * AdRazes regel i /etc/apparmor.d/adraze (installeraren lägger dit den, som Chrome/Brave gör). */
+function lasSysctl(f, std) { try { return fs.readFileSync('/proc/sys/' + f, 'utf8').trim(); } catch { return std; } }
+function sandladeFlagga() {
+  if (process.platform !== 'linux') return '';
+  if (lasSysctl('kernel/unprivileged_userns_clone', '1') === '0' || lasSysctl('user/max_user_namespaces', '1') === '0') return '--no-sandbox';
+  if (lasSysctl('kernel/apparmor_restrict_unprivileged_userns', '0') === '1' && !fs.existsSync('/etc/apparmor.d/adraze')) return '--no-sandbox';
+  return '';
+}
+// Samma beslut i skalskript (installer + startfilen ~/.local/bin/adraze)
+const WRAPPER_KOLL = [
+  'FLAGGA=""',
+  'if [ "$(cat /proc/sys/kernel/unprivileged_userns_clone 2>/dev/null || echo 1)" = "0" ] || [ "$(cat /proc/sys/user/max_user_namespaces 2>/dev/null || echo 1)" = "0" ]; then FLAGGA="--no-sandbox"',
+  'elif [ "$(cat /proc/sys/kernel/apparmor_restrict_unprivileged_userns 2>/dev/null || echo 0)" = "1" ] && [ ! -e /etc/apparmor.d/adraze ]; then FLAGGA="--no-sandbox"; fi',
+];
+// Äldre installationer har en startfil som alltid stänger av sandlådan → skriv om den en gång
+function lagaWrapper() {
+  if (process.platform !== 'linux') return;
+  const fil = path.join(app.getPath('home'), '.local', 'bin', 'adraze');
+  try {
+    const gammal = fs.readFileSync(fil, 'utf8');
+    const m = /^exec "([^"]+)" --no-sandbox "\$@"$/m.exec(gammal);
+    if (!m || gammal.includes('FLAGGA')) return;
+    fs.writeFileSync(fil, ['#!/bin/sh', '# AdRaze i Chromiums sandlåda när systemet tillåter den (annars utan)', ...WRAPPER_KOLL, `exec "${m[1]}" $FLAGGA "$@"`, ''].join('\n'), { mode: 0o755 });
+    console.log('[sandlåda] startfilen uppdaterad');
+  } catch {}
+}
+
 function desktopEntry(icon) {
-  // Föredra installerarens wrapper ~/.local/bin/adraze (skickar --no-sandbox och
+  // Föredra installerarens wrapper ~/.local/bin/adraze (väljer sandlåda och
   // överlever uppdateringar). AppImage: peka på .AppImage-filen (mount-sökvägen
   // försvinner vid avslut). OBS: inga citattecken runt sökvägen — xdg-settings
   // parser av Exec tål dem inte.
   const wrapper = path.join(app.getPath('home'), '.local', 'bin', 'adraze');
   const exec = fs.existsSync(wrapper) ? wrapper
-    : process.env.APPIMAGE ? `${process.env.APPIMAGE} --no-sandbox`
+    : process.env.APPIMAGE ? `${process.env.APPIMAGE} ${sandladeFlagga()}`.trim()
     : app.isPackaged ? process.execPath
-    : `${process.execPath} ${__dirname} --no-sandbox`;
+    : `${process.execPath} ${__dirname} ${sandladeFlagga()}`.trim();
   return [
     '[Desktop Entry]',
     'Name=AdRaze',
@@ -1991,7 +2068,7 @@ async function isDefaultBrowserLinux() {
 function registerProtocolClient() {
   for (const p of ['http', 'https']) {
     if (app.isPackaged) app.setAsDefaultProtocolClient(p);
-    else app.setAsDefaultProtocolClient(p, process.execPath, [__dirname, '--no-sandbox']);
+    else app.setAsDefaultProtocolClient(p, process.execPath, [__dirname, ...(sandladeFlagga() ? ['--no-sandbox'] : [])]);
   }
 }
 
@@ -2034,6 +2111,8 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 app.whenReady().then(async () => {
+  lagaWrapper();
+  console.log('[sandlåda]', app.commandLine.hasSwitch('no-sandbox') ? 'AV (systemet tillåter den inte)' : 'på');
   // [widevine-init] Widevine DRM (Netflix/Spotify/HBO m.fl.). castlabs-Electron laddar CDM:en vid start.
   try {
     if (components && components.whenReady) {

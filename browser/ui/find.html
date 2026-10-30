@@ -29,7 +29,7 @@
     <button id="close" title="Stäng (Esc)"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
   </div>
 <script>
-  const { ipcRenderer } = require('electron');
+  const ipcRenderer = window.adrazeIpc;
   const q = document.getElementById('q'), n = document.getElementById('n');
   const p = new URLSearchParams(location.search);
   if (p.get('theme') === 'dark') document.documentElement.dataset.theme = 'dark';

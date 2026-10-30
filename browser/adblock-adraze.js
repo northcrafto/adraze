@@ -16,6 +16,7 @@ const listuppdatering = require('./listuppdatering');   // håller filterlistorn
 const redirektResurser = require('./adblock-redirects');   // ofarliga stub-resurser för $redirect
 const dnsP = require('dns').promises;                      // CNAME-avmaskering
 const scriptlets = require('./adblock-scriptlets');        // ##+js(...) → injicerbar kod
+const { NatSkydd } = require('./natskydd');                 // lokala nätverket (localhost, routern) mot sajter
 const skydd = require('./adblock-skydd');                  // fingeravtryck, JS-injiceringar, kakor i sidan
 let electron = null; try { electron = require('electron'); } catch {}
 
@@ -158,6 +159,7 @@ class AdrazeAdblock {
       try {
         const ud = (electron && electron.app) ? electron.app.getPath('userData') : null;
         this.motorDirs = { cache: ud ? path.join(ud, 'adblock-cache.bin') : null, nya: ud ? path.join(ud, 'adraze-lists') : null, medskickad: path.join(this.dir, 'lists') };
+        this.nat = new NatSkydd([this.motorDirs.nya, this.motorDirs.medskickad]);
         this.motor = this.nyMotor();
         // Färska listor i bakgrunden; när något ändrats byggs en ny motor och byts in när den är klar
         if (this.motorDirs.nya) {
@@ -391,7 +393,7 @@ class AdrazeAdblock {
     return RES_SCHEME + '://r/' + h;
   }
 
-  install(sess) { this.sessions.add(sess); if (this.index && this.isOn()) this.enableOn(sess); else { if (this.forhand) this.baraForhand(sess); this.load(); } }
+  install(sess) { this.sessions.add(sess); if (this.index && this.isOn()) this.enableOn(sess); else { this.baraForhand(sess); this.load(); } }
 
   enableOn(sess) {
     if (!this.index) return;
@@ -399,6 +401,7 @@ class AdrazeAdblock {
     try {
       sess.webRequest.onBeforeRequest({ urls: ['<all_urls>'] }, (d, cb) => {
         const upp = this.forhand && this.forhand(d); if (upp) { cb({ redirectURL: upp }); return; }   // endast HTTPS
+        if (this.natStopp(d)) { cb({ cancel: true }); return; }
         if (!this.isOn() || !/^(https?|wss?):/i.test(d.url) || this.allowHost(d.url)) { cb({}); return; }
         const typ = TYPE_MAP[d.resourceType] || 'other';
         const kalla = typ === 'main_frame' ? (d.referrer || '') : ((d.frame && d.frame.url) || d.referrer || '');
@@ -492,11 +495,27 @@ class AdrazeAdblock {
     } catch {}
   }
   // Endast HTTPS ska fungera även när blockeraren är av: då en liten lyssnare som bara uppgraderar
+  // (och skyddet för det lokala nätverket, som inte hänger på reklamblockeringen)
   baraForhand(sess) {
-    try { sess.webRequest.onBeforeRequest({ urls: ['http://*/*'] }, (d, cb) => { const u = this.forhand && this.forhand(d); cb(u ? { redirectURL: u } : {}); }); } catch {}
+    try {
+      sess.webRequest.onBeforeRequest({ urls: ['<all_urls>'] }, (d, cb) => {
+        const u = this.forhand && this.forhand(d); if (u) { cb({ redirectURL: u }); return; }
+        cb(this.natStopp(d) ? { cancel: true } : {});
+      });
+    } catch {}
+  }
+  // Sajt på internet → din dator/router/LAN: stoppa (se natskydd.js)
+  natStopp(d) {
+    if (!this.nat || (this.inst && this.inst.get().natskydd === false)) return false;
+    let topp = ''; try { topp = d.webContents && !d.webContents.isDestroyed() ? d.webContents.getURL() : ''; } catch {}
+    if (!topp) topp = (d.frame && d.frame.url) || '';
+    if (!this.nat.stoppa(d.url, d.resourceType, topp)) return false;
+    console.log('[natskydd] stoppade', String(d.url).slice(0, 100), 'från', String(topp).slice(0, 60));
+    try { this.onBlocked(d.url, 'danger', TYPE_MAP[d.resourceType] || 'other'); } catch {}
+    return true;
   }
   disableOn(sess) {
-    try { if (this.forhand) this.baraForhand(sess); else sess.webRequest.onBeforeRequest(null); } catch {}
+    try { this.baraForhand(sess); } catch {}
     try { sess.webRequest.onHeadersReceived(null); } catch {}
     try {
       if (sess.unregisterPreloadScript) { if (sess.__adrazePreload) { sess.unregisterPreloadScript(sess.__adrazePreload); sess.__adrazePreload = null; } }
