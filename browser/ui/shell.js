@@ -64,11 +64,12 @@ function searchUrl(q) {
 function normalizeUrl(raw) {
   let s = (raw || '').trim();
   if (!s) return null;
-  if (/^(https?|file|about):/i.test(s)) return s;
+  if (/^(https?|file|about|adraze):/i.test(s)) return s;
   if (/^[^\s]+\.[^\s]{2,}(\/.*)?$/.test(s) && !s.includes(' ')) return 'https://' + s;
   return searchUrl(s);
 }
 function pretty(url) {
+  if (/^adraze:/i.test(url || '')) return url.replace(/\/$/, '');
   try { const u = new URL(url); return u.hostname.replace(/^www\./, '') + (u.pathname !== '/' ? u.pathname : '') + u.search; }
   catch { return url; }
 }
@@ -339,6 +340,7 @@ function loadInTab(tab, url) {
   window.view.load(tab.id, url);
 }
 function backgroundCheck(tab, url) {
+  if (/^adraze:/i.test(url || '')) { if (tab === active) setShield('ok'); return; }   // webbläsarens egna sidor
   if (!protectionOn) { if (tab === active) setShield('off'); return; }
   if (tab.cleared.has(url) || tab.bypassed.has(url)) { if (tab === active) setShield(tab.verdict ? tab.verdict.status : 'ok'); return; }
   tab.cleared.add(url);
@@ -540,7 +542,13 @@ async function initAdblock() {
   const st = await window.skoll.adblockState();
   $('adcount').textContent = st.count;
   $('adblock').classList.toggle('off', !st.on);
+  $('adcount').hidden = st.raknare === false;
   window.skoll.onAdblockCount((n) => { $('adcount').textContent = n; });
+  // Ändrat i adraze://adblock: räknaren på falken av/på, blockeraren av/på
+  window.skoll.onBlockinst((v) => {
+    if ('raknare' in v) $('adcount').hidden = v.raknare === false;
+    if ('pa' in v) { $('adblock').classList.toggle('off', !v.pa); $('tgl-adblock').checked = !!v.pa; }
+  });
 }
 
 /* ── Skyddsstatistik på startsidan (kumulativt, sparat lokalt) ── */
@@ -737,6 +745,7 @@ $('set-search').addEventListener('input', () => {
 $('set-search').addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('set-search').value) { e.stopPropagation(); $('set-search').value = ''; $('set-search').dispatchEvent(new Event('input')); } });
 $('tgl-protection').addEventListener('change', (e) => setProtection(e.target.checked));
 $('tgl-adblock').addEventListener('change', (e) => setAdblock(e.target.checked));
+$('adblock-more').addEventListener('click', () => { closeSettings(); createTab('adraze://adblock'); });
 /* Falk-kategori */
 $('open-krypto-btn').addEventListener('click', () => {
   closeSettings();

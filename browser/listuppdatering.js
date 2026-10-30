@@ -30,11 +30,12 @@ function rimlig(text, gammalStorlek) {
 }
 
 // Hämtar alla listor. Returnerar antalet listor som faktiskt ändrats.
-async function hamta(dir, medskickadDir) {
+// hel = en hel omgång (räknas som senaste uppdatering); false = bara enstaka nyss påslagna listor
+async function hamta(dir, medskickadDir, kallor, hel = true) {
   fs.mkdirSync(dir, { recursive: true });
   const meta = lasMeta(dir); meta.filer = meta.filer || {};
   let andrade = 0;
-  for (const [fil, url] of Object.entries(KALLOR)) {
+  for (const [fil, url] of Object.entries(kallor || KALLOR)) {
     const mal = path.join(dir, fil);
     const m = meta.filer[fil] || {};
     const har = fs.existsSync(mal);
@@ -56,18 +57,19 @@ async function hamta(dir, medskickadDir) {
       andrade++;
     } catch (e) { console.warn('[listor]', fil, String(e && e.message || e)); }
   }
-  meta.senast = Date.now();
+  if (hel) meta.senast = Date.now();
   sparaMeta(dir, meta);
   return andrade;
 }
 
-/* Startar bakgrundsuppdateringen. onNya() anropas när minst en lista ändrats (motorn byggs om). */
-function starta(dir, medskickadDir, onNya) {
+/* Startar bakgrundsuppdateringen. onNya() anropas när minst en lista ändrats (motorn byggs om),
+ * kallor() ger { fil: url } för listorna som är påslagna just nu. kor() = uppdatera nu (antal nya). */
+function starta(dir, medskickadDir, onNya, kallor) {
   let igang = false;
   const kor = async () => {
-    if (igang) return; igang = true;
-    try { const n = await hamta(dir, medskickadDir); if (n) { console.log('[listor] ' + n + ' nya listor'); onNya(); } }
-    catch (e) { console.warn('[listor]', String(e)); }
+    if (igang) return 0; igang = true;
+    try { const n = await hamta(dir, medskickadDir, kallor ? kallor() : null); if (n) { console.log('[listor] ' + n + ' nya listor'); onNya(); } return n; }
+    catch (e) { console.warn('[listor]', String(e)); return 0; }
     finally { igang = false; }
   };
   // Första koll strax efter start (inte mitt i uppstarten), men inte om vi kollade nyss
@@ -75,7 +77,16 @@ function starta(dir, medskickadDir, onNya) {
   const forsta = sedan >= INTERVALL ? 15000 : INTERVALL - sedan;
   setTimeout(kor, forsta).unref?.();
   setInterval(kor, INTERVALL).unref?.();
-  return kor;
+  // Påslagen lista som saknas helt (inte medskickad, aldrig hämtad): hämta bara den, direkt
+  const saknade = async () => {
+    const k = kallor ? kallor() : KALLOR; const ut = {};
+    for (const [fil, url] of Object.entries(k)) if (!fs.existsSync(path.join(dir, fil)) && !fs.existsSync(path.join(medskickadDir, fil))) ut[fil] = url;
+    if (!Object.keys(ut).length) return 0;
+    const n = await hamta(dir, medskickadDir, ut, false); if (n) onNya(); return n;
+  };
+  return { kor, saknade };
 }
 
-module.exports = { starta, hamta, KALLOR };
+function senast(dir) { return lasMeta(dir).senast || 0; }
+
+module.exports = { starta, hamta, senast, KALLOR };

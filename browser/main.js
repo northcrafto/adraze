@@ -29,6 +29,8 @@ const webb = require('./webbinst');
 const lasvy = require('./lasvy');   // läsläge (Readability)
 const importera = require('./importera');   // importera bokmärken/historik/lösenord från andra webbläsare
 const tillagg = require('./tillagg');        // Chrome-tillägg (Chrome Web Store)
+const blockinst = require('./blockinst');     // blockerarens inställningar (adraze://adblock)
+const blocksida = require('./blocksida');     // adraze://adblock, Blockera element, Glöm mig
 const sok = require('./sok');                 // sök på sidan (markerar i sidan, oberoende av findInPage)   // säker DNS, endast HTTPS, behörigheter, nedladdningsmapp, teckenstorlek   // AdRaze-blockeraren (samma regler som tillägget)
 registerAdblockScheme();   // före app.ready
 
@@ -204,6 +206,7 @@ const adblock = new AdrazeAdblock({
   preloadPath: path.join(__dirname, 'adraze-preload.js'),
   allowHost: (u) => adblockAllowHost(u),
   isOn: () => adblockOn,
+  inst: blockinst,
   // kat: 'ad' | 'tracker' | 'danger' – samma indelning som tilläggets ads/privacy/security
   onBlocked: (url, kat, typ) => {
     adblockCount++; broadcast('adblock:count', adblockCount);
@@ -233,6 +236,7 @@ adblock.registerIpc(ipcMain);
 
 function installAdblockOn(sess) {
   blockedSessions.add(sess);
+  blocksida.serveraPa(sess);   // adraze://adblock
   adblock.install(sess);
   if (!engine) loadEngine();
 }
@@ -278,6 +282,7 @@ function applyClientHints(sess) {
       h['sec-ch-ua'] = brand;
       h['sec-ch-ua-mobile'] = '?0';
       h['sec-ch-ua-platform'] = plat;
+      try { adblock.utgaende(details); } catch {}   // Blockera cookies (tredjepart/alla)
       cb({ requestHeaders: h });
     });
   } catch {}
@@ -473,6 +478,10 @@ function buildContextMenu(ctx, wc, params) {
     t.push({ label: T('Sök med AdRaze Search efter') + ` "${short}"`, click: () => sendTo(ctx, 'open-new-tab', 'https://search.adraze.app/search?q=' + encodeURIComponent(sel)) });
     t.push({ type: 'separator' });
   }
+  if (/^https?:/i.test(url) && blocksida.kanBlockeraElement(wc)) {
+    t.push({ label: T('Blockera element'), click: () => blocksida.blockeraElement(wc, params.x, params.y, { rad: T('Klicka på det du vill dölja · Esc avbryter'), klar: T('Dolt. Ångra under adraze://adblock') }) });
+    t.push({ type: 'separator' });
+  }
   t.push({ label: T('Spara som…'), click: () => savePage(ctx, wc) });
   t.push({ label: T('Skriv ut…'), click: () => printPage(ctx, wc) });
   t.push({ label: T('Skapa QR-kod för sidan'), click: () => showQR(ctx, url) });
@@ -564,9 +573,21 @@ function ensureView(ctx, tabId) {
     if (url) sendTo(ctx, 'open-new-tab', url);                     // vanlig ny flik (Ctrl/mitten-klick, target=_blank)
     return { action: 'deny' };
   });
+  blocksida.fliken(wc);   // Glöm mig när jag stänger webbplatsen
   wc.on('will-navigate', (e, url) => {
     // Ad/tracker-mål → blockera helt.
     if (adblockOn && isBlockedTarget(url, wc.getURL())) { e.preventDefault(); if (adblock.isDanger(url, wc.getURL())) sendTo(ctx, 'adraze-danger', tabId, url); return; }
+    // Aggressiv: sidan försöker skicka hela fliken till en annan sajt utan att du klickat
+    // (tab-under/omdirigering från reklamskript, som 7movies → casinosidor) → stoppa.
+    if (adblockOn && blockinst.get().niva === 'aggressiv' && /^https?:/i.test(url) && !sameSite(url, wc.getURL()) && !popupTrustedHost(url)) {
+      const lc = wc.__lastClick;
+      if (!(lc && Date.now() - lc.t < 5000)) {
+        e.preventDefault();
+        adblockCount++; broadcast('adblock:count', adblockCount); broadcast('adblock:hit', 'ad');
+        sendTo(ctx, 'toast', T('AdRaze stoppade en omdirigering till') + ' ' + (siteOf(url) || url));
+        return;
+      }
+    }
     // Samma origin (formulär-POST, 2FA-kod, fler-stegs-inloggning) → låt navigeringen ske NATIVT så POST-datan
     // bevaras. preventDefault + omladdning via loadURL blir en GET → koden/formuläret tappas (GitHub-2FA-buggen).
     let sameOrigin = false;
@@ -648,16 +669,25 @@ function ensureView(ctx, tabId) {
 /* ────────── IPC – globala tjänster (fönsteroberoende) ────────── */
 ipcMain.handle('skoll:check-url', (_e, url) => checkUrl(url));
 ipcMain.handle('skoll:daily-image', () => dailyImage());
-ipcMain.handle('skoll:adblock-toggle', async (_e, on) => {
+async function setAdblockOn(on) {
   adblockOn = !!on;
   await loadEngine();
   for (const s of blockedSessions) {
     try { adblockOn ? enableEngineOn(s) : disableEngineOn(s); } catch {}
   }
+  broadcast('blockinst:andrat', { raknare: blockinst.get().raknare, pa: adblockOn });
+  blocksida.skickaTillSidor('blockinst:andrat');
   return adblockOn;
-});
+}
+ipcMain.handle('skoll:adblock-toggle', (_e, on) => setAdblockOn(on));
 ipcMain.handle('adraze:open-anyway', (_e, url) => { adblock.openAnyway(String(url || '')); return true; });
-ipcMain.handle('skoll:adblock-state', () => ({ on: adblockOn, count: adblockCount }));
+ipcMain.handle('skoll:adblock-state', () => ({ on: adblockOn, count: adblockCount, raknare: blockinst.get().raknare }));
+let senasteTema = 'light';   // skalets tema (för adraze://-sidorna)
+blocksida.setup({
+  adblock, broadcast, satPa: setAdblockOn, webb, apiBas: process.env.ADRAZE_API || 'https://api.adraze.app',
+  tema: () => senasteTema, sprak: () => uiLang, localeDict: (l) => localeDict(l),
+  toast: (wc, text) => { const ctx = wc.__ctx; if (ctx) sendTo(ctx, 'toast', text); },
+});
 /* AdRaze-kontot: samma konton som adraze.app (api.adraze.app). Webbläsaren skickar app:true och
  * får sessionen som en nyckel (Bearer) i stället för kakor. Svaren översätts till skalets gamla form
  * ({ ok, needCode, token, email, name, message, error }). */
@@ -863,6 +893,8 @@ ipcMain.on('chatt:toggle', (e, open, o) => {
   if (ctx.chattView) { try { ctx.chattView.webContents.send('chatt-visible', ctx.chattOpen); ctx.chattView.webContents.send('chatt-theme', theme); } catch {} }
 });
 ipcMain.on('chatt:theme', (e, theme) => {
+  senasteTema = theme === 'dark' ? 'dark' : 'light';
+  blocksida.skickaTillSidor('blockinst:tema', senasteTema);
   const ctx = ctxFor(e); if (!ctx) return;
   if (ctx.chattBoot) ctx.chattBoot.theme = theme === 'dark' ? 'dark' : 'light';
   if (ctx.chattView) { try { ctx.chattView.webContents.send('chatt-theme', theme === 'dark' ? 'dark' : 'light'); } catch {} }

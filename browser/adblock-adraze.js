@@ -11,16 +11,21 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { AdblockMotor } = require('./adblock-motor');
-const listuppdatering = require('./listuppdatering');   // håller filterlistorna färska   // vår egen C++-nätverksmotor
+const { AdblockMotor } = require('./adblock-motor');   // vår egen C++-nätverksmotor
+const listuppdatering = require('./listuppdatering');   // håller filterlistorna färska
 const redirektResurser = require('./adblock-redirects');   // ofarliga stub-resurser för $redirect
 const dnsP = require('dns').promises;                      // CNAME-avmaskering
 const scriptlets = require('./adblock-scriptlets');        // ##+js(...) → injicerbar kod
+const skydd = require('./adblock-skydd');                  // fingeravtryck, JS-injiceringar, kakor i sidan
 let electron = null; try { electron = require('electron'); } catch {}
 
 const RES_SCHEME = 'adraze-res';
 function registerScheme() {
-  try { electron.protocol.registerSchemesAsPrivileged([{ scheme: RES_SCHEME, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, bypassCSP: true } }]); } catch {}
+  // adraze:// = webbläsarens egna sidor (adraze://adblock), serveras av blocksida.js
+  try { electron.protocol.registerSchemesAsPrivileged([
+    { scheme: RES_SCHEME, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, bypassCSP: true } },
+    { scheme: 'adraze', privileges: { standard: true, secure: true, supportFetchAPI: true } },
+  ]); } catch {}
 }
 
 const KATEGORI = { ads: 'ad', privacy: 'tracker', security: 'danger' };
@@ -100,6 +105,7 @@ class AdrazeAdblock {
     this.onBlocked = opts.onBlocked || (() => {});
     this.onCount = opts.onCount || (() => {});
     this.isOn = opts.isOn || (() => true);
+    this.inst = opts.inst || null;   // blockinst.js: nivå, kakor, skript, listor … (adraze://adblock)
     this.sessions = new Set();
     this.index = null;
     this.ready = null;
@@ -151,16 +157,15 @@ class AdrazeAdblock {
       // ovan sköter fortfarande farliga sidor (security), omdirigeringar och CSP-rubriker.
       try {
         const ud = (electron && electron.app) ? electron.app.getPath('userData') : null;
-        const cacheFil = ud ? path.join(ud, 'adblock-cache.bin') : null;
-        const nyaDir = ud ? path.join(ud, 'adraze-lists') : null;
-        const medskickad = path.join(this.dir, 'lists');
-        this.motor = new AdblockMotor(medskickad, cacheFil, nyaDir);
-        if (!this.motor.bygg()) this.motor = null;
+        this.motorDirs = { cache: ud ? path.join(ud, 'adblock-cache.bin') : null, nya: ud ? path.join(ud, 'adraze-lists') : null, medskickad: path.join(this.dir, 'lists') };
+        this.motor = this.nyMotor();
         // Färska listor i bakgrunden; när något ändrats byggs en ny motor och byts in när den är klar
-        if (nyaDir) listuppdatering.starta(nyaDir, medskickad, () => {
-          const ny = new AdblockMotor(medskickad, cacheFil, nyaDir);
-          if (ny.bygg()) { this.motor = ny; this.scriptletCache.clear(); }
-        });
+        if (this.motorDirs.nya) {
+          this.listor = listuppdatering.starta(this.motorDirs.nya, this.motorDirs.medskickad, () => this.byggOm(), this.inst ? () => this.inst.kallor() : null);
+          this.listor.saknade().catch(() => {});
+        }
+        // Listor/egna filter/nivå ändrade i adraze://adblock → ny motor (och hämta nypåslagna listor)
+        if (this.inst) this.inst.onMotor(() => { this.byggOm(); if (this.listor) this.listor.saknade().catch(() => {}); });
       } catch (e) { this.motor = null; console.warn('[adraze] motor:', String(e)); }
       this.popupHosts = new Set(this.json('data/popup-hosts.json', []));
       this.kos = this.json('data/cosmetic.json', { generic: [], specific: {}, exceptions: {}, genericHideExceptions: [] });
@@ -175,6 +180,43 @@ class AdrazeAdblock {
       return true;
     })();
     return this.ready;
+  }
+
+  nyMotor() {
+    const d = this.motorDirs; const i = this.inst;
+    const m = new AdblockMotor(d.medskickad, d.cache, d.nya, i ? i.aktivaListor() : null, i ? i.egnaMotorText() : '');
+    return m.bygg() ? m : null;
+  }
+  // Bygg en ny motor (efter listuppdatering eller ändrade inställningar) och byt in den
+  byggOm() {
+    clearTimeout(this.byggTimer);
+    this.byggTimer = setTimeout(() => {
+      try { const ny = this.nyMotor(); if (ny) { this.motor = ny; this.scriptletCache.clear(); } } catch (e) { console.warn('[adraze] motor:', String(e)); }
+      if (this.onMotorKlar) this.onMotorKlar();
+    }, 300);
+  }
+  // För adraze://adblock: hur många filter och när listorna senast hämtades
+  motorInfo() {
+    return { antal: this.motor ? this.motor.antal : 0, senast: this.motorDirs && this.motorDirs.nya ? listuppdatering.senast(this.motorDirs.nya) : 0 };
+  }
+  async uppdateraListorNu() { if (!this.listor) return 0; return this.listor.kor(); }
+
+  /* Kakor: ska kakor till/från den här förfrågan strykas? (toppsidans värd avgör tredjepart) */
+  kakStopp(url, toppUrl) {
+    const i = this.inst; if (!i || !this.isOn()) return false;
+    const lage = i.get().kakor; if (lage === 'av') return false;
+    if (this.allowHost(url) || (toppUrl && this.allowHost(toppUrl))) return false;   // inloggning/betalning
+    if (lage === 'alla') return true;
+    const h = hostAv(url), t = hostAv(toppUrl);
+    return !!h && !!t && bas(h) !== bas(t);
+  }
+  // Anropas från huvudprocessens onBeforeSendHeaders (Electron tillåter bara EN lyssnare per session)
+  utgaende(d) {
+    if (!/^(https?|wss?):/i.test(d.url || '')) return;
+    let topp = ''; try { topp = d.webContents && !d.webContents.isDestroyed() ? d.webContents.getURL() : ''; } catch {}
+    if (!topp) topp = (d.frame && d.frame.url) || d.referrer || '';
+    if (!this.kakStopp(d.url, topp)) return;
+    for (const k of Object.keys(d.requestHeaders)) if (k.toLowerCase() === 'cookie') delete d.requestHeaders[k];
   }
 
   /* Bästa regeln för en förfrågan: { typ: 'block'|'redirect'|'allow', kat, action } eller null */
@@ -228,7 +270,10 @@ class AdrazeAdblock {
     for (const n of nivaer) for (const s of k.exceptions[n] || []) undantag.add(s);
     const specifika = [];
     for (const n of nivaer) for (const s of k.specific[n] || []) if (!undantag.has(s)) specifika.push(s);
-    const utanGeneric = nivaer.some((n) => k.genericHide.has(n));
+    const inst = this.inst;
+    if (inst) specifika.push(...inst.elementFor(host), ...inst.egnaKosmetik(host));
+    // Enkel: bara sajtspecifika regler, inga allmänna dölj-regler (minst risk att något går sönder)
+    const utanGeneric = nivaer.some((n) => k.genericHide.has(n)) || (inst && inst.get().niva === 'enkel');
     let css = specifika.length ? cssAv(specifika) : '';
     if (!utanGeneric) css += undantag.size ? cssAv(k.generic.filter((s) => !undantag.has(s))) : this.genericCss;
     return css && css + `[${this.lockbete}]:not(#a#b#c#d#e){display:revert!important}\n`;
@@ -361,10 +406,21 @@ class AdrazeAdblock {
         // Inloggnings-/2FA-sidor (GitHub, Google-konto, Microsoft …): blockera ingenting på dem
         if (typ !== 'main_frame' && kalla && this.allowHost(kalla)) { cb({}); return; }
         if (d.webContents && !d.webContents.isDestroyed() && this.allowHost(d.webContents.getURL() || '')) { cb({}); return; }
+        const inst = this.inst ? this.inst.get() : null;
+        if (inst && typ !== 'main_frame') {
+          let topp = ''; try { topp = d.webContents && !d.webContents.isDestroyed() ? hostAv(d.webContents.getURL()) : ''; } catch {}
+          // Blockera skript: all JavaScript på sidorna (inline stoppas med CSP i onHeadersReceived)
+          if (inst.skript && typ === 'script') { this.onBlocked(d.url, 'ad', typ); cb({ cancel: true }); return; }
+          // Sociala medier: inbäddningar/inloggning från Facebook, X, LinkedIn på andra sajter
+          if (this.inst.socialStopp(d.url, topp || hostAv(kalla))) { this.onBlocked(d.url, 'tracker', typ); cb({ cancel: true }); return; }
+        }
+        // Enkel: reklam från sajten själv (förstapart) släpps igenom – bara tredjepart och farliga sidor stoppas
+        const enkel = !!inst && inst.niva === 'enkel';
         // JS-indexet (farliga sidor, redirect-regler, rubriker) — körs om motorn släpper igenom
         const jsMatch = () => {
-          const r = this.match(this.fraga(d.url, typ, kalla));
-          if (!r) { cb({}); return; }
+          const f = this.fraga(d.url, typ, kalla);
+          const r = this.match(f);
+          if (!r || (enkel && !f.tredje && r.kat !== 'danger')) { cb({}); return; }
           this.onBlocked(d.url, r.kat, typ);
           const red = r.typ === 'redirect' && r.action.redirect;
           // Stoppad huvudsida: did-fail-load (ERR_BLOCKED_BY_CLIENT) får skalet att visa varningen
@@ -382,7 +438,7 @@ class AdrazeAdblock {
           const vard = hostAv(d.url);
           const kallVard = hostAv(kalla) || vard;
           const tredje = !!vard && !!kallVard && bas(vard) !== bas(kallVard);
-          const b = this.motor.blockera(d.url, kallVard, d.resourceType, tredje);
+          const b = (enkel && !tredje) ? { block: false } : this.motor.blockera(d.url, kallVard, d.resourceType, tredje);
           if (b.block) { blockera(b, 'ad'); return; }
           // CNAME-avmaskering: spårare som gömmer sig bakom en förstaparts-subdomän
           if (this.cnameMojlig(vard)) {
@@ -397,9 +453,23 @@ class AdrazeAdblock {
       // modifyHeaders-reglerna: lägg till CSP på vissa sajter (stänger av popunder-ramar, workers m.m.)
       sess.webRequest.onHeadersReceived({ urls: ['<all_urls>'] }, (d, cb) => {
         const typ = TYPE_MAP[d.resourceType] || 'other';
-        if (!this.isOn() || (typ !== 'main_frame' && typ !== 'sub_frame')) { cb({}); return; }
-        const f = this.fraga(d.url, typ, typ === 'main_frame' ? (d.referrer || '') : ((d.frame && d.frame.url) || d.referrer || ''));
+        if (!this.isOn()) { cb({}); return; }
         let rubriker = null;
+        const inst = this.inst ? this.inst.get() : null;
+        // Kakor: stryk Set-Cookie från tredjepart (eller allt), som Braves "Blockera cookies"
+        if (inst && inst.kakor !== 'av') {
+          let topp = typ === 'main_frame' ? d.url : '';
+          if (!topp) { try { topp = d.webContents && !d.webContents.isDestroyed() ? d.webContents.getURL() : ''; } catch {} }
+          if (!topp) topp = (d.frame && d.frame.url) || d.referrer || '';
+          if (this.kakStopp(d.url, topp)) {
+            const k = Object.keys(d.responseHeaders || {}).filter((h) => h.toLowerCase() === 'set-cookie');
+            if (k.length) { rubriker = { ...d.responseHeaders }; for (const h of k) delete rubriker[h]; }
+          }
+        }
+        if (typ !== 'main_frame' && typ !== 'sub_frame') { cb(rubriker ? { responseHeaders: rubriker } : {}); return; }
+        // Blockera skript: även inbäddad JavaScript i sidan (CSP), utom på inloggningssidor
+        if (inst && inst.skript && !this.allowHost(d.url)) { rubriker ||= { ...d.responseHeaders }; rubriker['Content-Security-Policy'] = [...(rubriker['Content-Security-Policy'] || []), "script-src 'none'"]; }
+        const f = this.fraga(d.url, typ, typ === 'main_frame' ? (d.referrer || '') : ((d.frame && d.frame.url) || d.referrer || ''));
         for (const r of this.index.rubriker) {
           if (!passar(r, f)) continue;
           rubriker ||= { ...d.responseHeaders };
@@ -442,7 +512,17 @@ class AdrazeAdblock {
       let topp = ''; try { topp = hostAv(e.sender.getURL()); } catch {}
       if (this.allowHost('https://' + (topp || host) + '/')) { e.returnValue = ut; return; }
       // scriptlets gäller den aktuella ramens värd → bygg per host (lätt, cachas)
-      e.returnValue = { pa: true, skript: { ...this.skript, scriptlets: this.scriptletKod(String(host || topp || '')) } };
+      const ram = String(host || topp || '');
+      const ut2 = { pa: true, skript: { ...this.skript, scriptlets: this.scriptletKod(ram) } };
+      const inst = this.inst ? this.inst.get() : null;
+      if (inst) {
+        // Samma frö för hela sajten under sessionen: fingeravtrycket ser stabilt ut på sajten men skiljer sig mellan sajter
+        ut2.skydd = [];
+        if (inst.fingeravtryck) ut2.skydd.push(skydd.fingeravtryck(parseInt(crypto.createHash('sha1').update(this.lockbete + bas(topp || ram)).digest('hex').slice(0, 8), 16)));
+        if (inst.injektioner || inst.niva === 'aggressiv') ut2.skydd.push(skydd.injektioner());
+        if (inst.kakor === 'alla' || (inst.kakor === 'tredje' && topp && ram && bas(topp) !== bas(ram))) ut2.skydd.push(skydd.ingaKakor());
+      }
+      e.returnValue = ut2;
     });
     ipcMain.on('adraze:css', (e, host) => { e.returnValue = { css: this.cssFor(String(host || '')), lockbete: this.lockbete }; });
     // Kakhanteraren är på så fort blockeraren är på (inte bara på sajter med egen kak-CSS),
