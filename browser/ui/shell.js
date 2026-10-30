@@ -232,7 +232,7 @@ function favHtml(tab) {
   let origin = ''; try { origin = new URL(tab.url).origin; } catch {}
   const real = origin ? origin + '/favicon.ico' : '';
   const src = tab.favicon || real;
-  if (!src) return '<span class="fav"><svg class="ic" style="width:15px;height:15px"><use href="#i-globe" /></svg></span>';
+  if (!src) return '<span class="fav"><svg class="ic" style="width:15px;height:15px"><use href="#i-fav" /></svg></span>';
   const fb = (real && real !== src) ? escapeHtml(real) : '';
   const cls = favLight[tab.favicon] === true ? ' on-dark' : '';
   return '<span class="fav' + cls + '"><img src="' + escapeHtml(src) + '" data-fb="' + fb + '" data-glob="tab" alt=""></span>';
@@ -240,10 +240,10 @@ function favHtml(tab) {
 // Favicon som inte laddar → glob. Inline-onerror blockeras av CSP (script-src 'self'),
 // så felet fångas här i capture-fasen (error-händelser bubblar inte).
 const GLOB = {
-  tab: '<svg class="ic" style="width:15px;height:15px"><use href="#i-globe" /></svg>',
-  sm: '<svg class="ic ic-sm"><use href="#i-globe"/></svg>',
-  hist: '<span class="hist-fav" style="display:grid;place-items:center;color:#8ba3bf"><svg class="ic" style="width:13px;height:13px"><use href="#i-globe" /></svg></span>',
-  bm: '<span class="bmglobe"><svg class="ic"><use href="#i-globe" /></svg></span>',
+  tab: '<svg class="ic" style="width:15px;height:15px"><use href="#i-fav" /></svg>',
+  sm: '<svg class="ic ic-sm"><use href="#i-fav"/></svg>',
+  hist: '<span class="hist-fav" style="display:grid;place-items:center;color:#8ba3bf"><svg class="ic" style="width:13px;height:13px"><use href="#i-fav" /></svg></span>',
+  bm: '<span class="bmglobe"><svg class="ic"><use href="#i-fav" /></svg></span>',
 };
 document.addEventListener('error', (e) => {
   const img = e.target;
@@ -1602,7 +1602,7 @@ function wordStarts(lc, w) {
 function sugIcon(it) {
   if (it.kind === 'past') return '<svg class="ic ic-sm"><use href="#i-history"/></svg>';
   if (it.search) return '<svg class="ic ic-sm"><use href="#i-search"/></svg>';
-  return it.favicon ? `<img src="${escapeHtml(it.favicon)}" data-glob="sm" alt="">` : '<svg class="ic ic-sm"><use href="#i-globe"/></svg>';
+  return it.favicon ? `<img src="${escapeHtml(it.favicon)}" data-glob="sm" alt="">` : '<svg class="ic ic-sm"><use href="#i-fav"/></svg>';
 }
 function renderSug() {
   suggestEl.innerHTML = '';
@@ -2189,7 +2189,7 @@ function renderHistory() {
     const row = document.createElement('div'); row.className = 'hist-row';
     const fav = e.favicon
       ? `<img class="hist-fav" src="${e.favicon}" data-glob="hist" alt="">`
-      : `<span class="hist-fav" style="display:grid;place-items:center;color:#8ba3bf"><svg class="ic" style="width:13px;height:13px"><use href="#i-globe" /></svg></span>`;
+      : `<span class="hist-fav" style="display:grid;place-items:center;color:#8ba3bf"><svg class="ic" style="width:13px;height:13px"><use href="#i-fav" /></svg></span>`;
     row.innerHTML = `${fav}<div class="hist-txt"><div class="hist-title">${escapeHtml(e.title)}</div><div class="hist-url">${escapeHtml(e.url.replace(/^https?:\/\/(www\.)?/, ''))}</div></div>` + (locked ? '' : `<button class="row-btn" title="Ta bort från historiken"><svg class="ic ic-sm"><use href="#i-trash" /></svg></button>`);
     row.addEventListener('click', () => { closeHistory(); if (active) guardedNavigate(active, e.url); });
     if (!locked) row.querySelector('.row-btn').addEventListener('click', (ev) => { ev.stopPropagation(); removeHistory(e.url); renderHistory(); });
@@ -2252,7 +2252,7 @@ function renderHistPanel() {
     const row = document.createElement('div'); row.className = 'hist-row';
     const fav = e.favicon
       ? `<img class="hist-fav" src="${escapeHtml(e.favicon)}" data-glob="hist" alt="">`
-      : `<span class="hist-fav" style="display:grid;place-items:center;color:#8ba3bf"><svg class="ic" style="width:13px;height:13px"><use href="#i-globe" /></svg></span>`;
+      : `<span class="hist-fav" style="display:grid;place-items:center;color:#8ba3bf"><svg class="ic" style="width:13px;height:13px"><use href="#i-fav" /></svg></span>`;
     row.innerHTML = fav
       + `<div class="hist-txt"><div class="hist-title">${escapeHtml(e.title || e.url)}</div><div class="hist-url">${escapeHtml(e.url.replace(/^https?:\/\/(www\.)?/, ''))}</div></div>`
       + `<span style="flex:none;font-size:11.5px;color:#8ba3bf;margin-right:4px;white-space:nowrap">${escapeHtml(histFmtDate(e.t))}</span>`
@@ -2371,7 +2371,7 @@ function renderBookmarkBar() {
   bar.innerHTML = list.map((e) => {
     const fav = e.favicon
       ? '<img src="' + escapeHtml(e.favicon) + '" data-glob="bm" alt="">'
-      : '<span class="bmglobe"><svg class="ic"><use href="#i-globe" /></svg></span>';
+      : '<span class="bmglobe"><svg class="ic"><use href="#i-fav" /></svg></span>';
     return '<div class="bmchip" data-url="' + escapeHtml(e.url) + '" title="' + escapeHtml(e.title || e.url) + '">'
       + fav + '<span>' + escapeHtml(bmShort(e)) + '</span></div>';
   }).join('');
@@ -2392,7 +2392,7 @@ function renderBookmarkBar() {
   sendBounds();   // fältet ändrar höjd → flytta native-webbvyn så den inte täcker fältet
 }
 function rowFav(favicon) {
-  return favicon ? `<img class="hist-fav" src="${favicon}" data-glob="hist" alt="">` : `<span class="hist-fav" style="display:grid;place-items:center;color:#8ba3bf"><svg class="ic" style="width:13px;height:13px"><use href="#i-globe" /></svg></span>`;
+  return favicon ? `<img class="hist-fav" src="${favicon}" data-glob="hist" alt="">` : `<span class="hist-fav" style="display:grid;place-items:center;color:#8ba3bf"><svg class="ic" style="width:13px;height:13px"><use href="#i-fav" /></svg></span>`;
 }
 function openBookmarks() {
   window.view.hide();
