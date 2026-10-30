@@ -3,6 +3,28 @@
  * inloggningar och fångar nya när du loggar in. Allt defensivt – får aldrig
  * krascha sidan. */
 const { ipcRenderer } = require('electron');
+/* adraze://-sidorna (adraze://adblock): blockerarens inställningar. Huvudprocessen kontrollerar
+ * dessutom själv att anropen kommer från en adraze://-sida. */
+if (location.protocol === 'adraze:') {
+  try {
+    const { contextBridge } = require('electron');
+    const boot = ipcRenderer.sendSync('blockinst:boot') || { tema: 'light', sprak: 'sv' };
+    try { localStorage.setItem('adraze-lang', boot.sprak || 'sv'); } catch {}
+    contextBridge.exposeInMainWorld('locale', { load: (l) => ipcRenderer.sendSync('blockinst:locale', l) || {} });
+    contextBridge.exposeInMainWorld('adraze', {
+      boot: () => boot,
+      hamta: () => ipcRenderer.invoke('blockinst:get'),
+      satt: (nyckel, varde) => ipcRenderer.invoke('blockinst:set', nyckel, varde),
+      pa: (on) => ipcRenderer.invoke('blockinst:pa', on),
+      https: (on) => ipcRenderer.invoke('blockinst:https', on),
+      uppdatera: () => ipcRenderer.invoke('blockinst:uppdatera'),
+      taBortElement: (host, sel) => ipcRenderer.invoke('blockinst:ta-bort-element', host, sel),
+      rapport: (data) => ipcRenderer.invoke('blockinst:rapport', data),
+      onAndrat: (cb) => ipcRenderer.on('blockinst:andrat', () => cb()),
+      onTema: (cb) => ipcRenderer.on('blockinst:tema', (_e, t) => cb(t)),
+    });
+  } catch (e) {}
+}
 /* Popunder-vakt: huvudprocessen får veta vad senaste klicket satt på (länk eller inte) INNAN
  * sidans egna hanterare hinner öppna något. En ny flik till en annan sajt tillåts sedan bara
  * om klicket satt på en riktig länk dit. Synkront så ordningen är garanterad. */

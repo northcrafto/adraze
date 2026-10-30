@@ -15,6 +15,9 @@ const KALLOR = {
   "frellwit.txt": "https://raw.githubusercontent.com/lassekongo83/Frellwits-filter-lists/master/Frellwits-Swedish-Filter.txt",
   "badware.txt": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt",
   "ubo-filters.txt": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
+  // Bara för webbläsarens C++-motor (ingår inte i tilläggets regelpaket)
+  "ubo-quick-fixes.txt": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/quick-fixes.txt",
+  "ubo-unbreak.txt": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/unbreak.txt",
   "peterlowe.txt": "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=adblockplus&showintro=0&mimetype=plaintext",
   "adguard-popups.txt": "https://filters.adtidy.org/extension/ublock/filters/19.txt",
   // Bara kosmetiken används (döljer kakrutor), se kakor.json längre ner

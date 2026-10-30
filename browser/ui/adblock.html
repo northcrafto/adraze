@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AdRaze – Blockering</title>
+  <link rel="icon" href="adraze-mark.png">
+  <link rel="stylesheet" href="adblock.css">
+  <script src="i18n.js"></script>
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <img class="mark" src="adraze-mark.png" alt="" width="40" height="40" id="mark">
+      <div class="hero-txt">
+        <h1>AdRaze-blockering</h1>
+        <p class="mut" id="status">Laddar…</p>
+      </div>
+      <label class="switch big" title="AdRaze på/av"><input id="pa" type="checkbox"><span class="track"></span></label>
+    </header>
+
+    <section>
+      <h2>Blockera spårare och annonser som följer dig på nätet</h2>
+      <p class="lead">Det här gäller alla webbplatser.</p>
+
+      <div class="grupp">
+        <div class="rad kolumn">
+          <div class="txt"><div class="titel">Blockering av spårare och annonser</div><div class="beskr" id="niva-beskr"></div></div>
+          <div class="seg" id="niva" role="radiogroup" aria-label="Nivå">
+            <button data-v="enkel" role="radio">Enkel</button>
+            <button data-v="medium" role="radio">Medium</button>
+            <button data-v="aggressiv" role="radio">Aggressiv</button>
+          </div>
+        </div>
+        <label class="rad">
+          <div class="txt"><div class="titel">Visa antalet blockerade på falken</div><div class="beskr">Siffran bredvid AdRaze-ikonen i verktygsraden.</div></div>
+          <span class="switch"><input type="checkbox" data-k="raknare"><span class="track"></span></span>
+        </label>
+        <label class="rad">
+          <div class="txt"><div class="titel">Uppgradera anslutningar till HTTPS</div><div class="beskr">Öppnar alltid den säkra versionen av sidan och varnar om den saknas.</div></div>
+          <span class="switch"><input type="checkbox" id="https"><span class="track"></span></span>
+        </label>
+        <label class="rad">
+          <div class="txt"><div class="titel">Blockera JavaScript-injiceringar</div><div class="beskr">Stoppar skript som sidan skjuter in i efterhand från andra sajter. Det är så piratsajter laddar sina reklamskript och omdirigeringar. Sidans egna skript körs som vanligt.</div></div>
+          <span class="switch"><input type="checkbox" data-k="injektioner"><span class="track"></span></span>
+        </label>
+        <label class="rad">
+          <div class="txt"><div class="titel">Blockera skript</div><div class="beskr">Stänger av all JavaScript. Många sidor slutar fungera.</div></div>
+          <span class="switch"><input type="checkbox" data-k="skript"><span class="track"></span></span>
+        </label>
+        <label class="rad">
+          <div class="txt"><div class="titel">Blockera fingeravtryck</div><div class="beskr">Sajter kan känna igen din dator utan kakor. AdRaze ger varje sajt lite olika svar så att du inte går att följa mellan sajter.</div></div>
+          <span class="switch"><input type="checkbox" data-k="fingeravtryck"><span class="track"></span></span>
+        </label>
+        <div class="rad">
+          <div class="txt"><div class="titel">Blockera cookies</div><div class="beskr">Kakor från andra sajter används mest för att följa dig.</div></div>
+          <select data-k="kakor">
+            <option value="tredje">Från andra sajter</option>
+            <option value="alla">Alla</option>
+            <option value="av">Tillåt alla</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grupp">
+        <label class="rad">
+          <div class="txt"><div class="titel">Glöm mig när jag stänger den här webbplatsen</div><div class="beskr">Rensa cookies och andra webbplatsdata när du stänger en webbplats.</div></div>
+          <span class="switch"><input type="checkbox" data-k="glom"><span class="track"></span></span>
+        </label>
+        <div class="rad kolumn">
+          <div class="txt"><div class="titel">Spara kontaktinformation för framtida rapporter om trasiga webbsidor</div><div class="beskr">Om du uppger en mejladress sparas den här och fylls i nästa gång du rapporterar en sida.</div></div>
+          <div class="falt-rad">
+            <input type="email" id="kontakt" placeholder="din@mejl.se" autocomplete="email" spellcheck="false">
+            <button class="knapp" id="rapport-oppna">Rapportera en trasig sida…</button>
+          </div>
+          <div id="rapport" class="rapport" hidden>
+            <input type="url" id="rapport-url" placeholder="Adress till sidan, t.ex. https://exempel.se" spellcheck="false">
+            <textarea id="rapport-text" rows="3" placeholder="Vad fungerar inte? (valfritt)"></textarea>
+            <div class="falt-rad hoger"><span class="mut liten" id="rapport-status"></span><button class="knapp" id="rapport-avbryt">Avbryt</button><button class="knapp fylld" id="rapport-skicka">Skicka</button></div>
+          </div>
+        </div>
+        <label class="rad">
+          <div class="txt"><div class="titel">Tillåt elementblockering i privata fönster</div><div class="beskr">Högerklicka och välj "Blockera element" även i inkognito. Element som blockeras där blockeras också i vanliga fönster.</div></div>
+          <span class="switch"><input type="checkbox" data-k="elementPrivat"><span class="track"></span></span>
+        </label>
+      </div>
+    </section>
+
+    <section>
+      <h2>Innehållsfiltrering</h2>
+      <p class="lead">Filterlistorna avgör vad som blockeras. AdRaze hämtar nya versioner av sig själv var 6:e timme.</p>
+      <div class="falt-rad"><span class="mut liten" id="listor-status"></span><button class="knapp" id="uppdatera">Uppdatera nu</button></div>
+      <h3>Grund</h3><div class="grupp" id="listor-bas"></div>
+      <h3>Extra</h3><div class="grupp" id="listor-extra"></div>
+      <h3>Regionala</h3><div class="grupp" id="listor-region"></div>
+
+      <h3>Egna filter</h3>
+      <p class="lead">Ett filter per rad, samma format som uBlock och Brave. Till exempel <code>||reklam.exempel.se^</code> eller <code>exempel.se##.banner</code>.</p>
+      <textarea id="egna" class="kod" rows="7" spellcheck="false" placeholder="! Mina filter&#10;||annonser.exempel.se^&#10;exempel.se##.popup"></textarea>
+      <div class="falt-rad hoger"><span class="mut liten" id="egna-status"></span><button class="knapp fylld" id="egna-spara">Spara filter</button></div>
+
+      <h3>Blockerade element</h3>
+      <p class="lead">Saker du dolt med "Blockera element" i högerklicksmenyn.</p>
+      <div class="grupp" id="element"></div>
+    </section>
+
+    <section>
+      <h2>Blockering av sociala medier</h2>
+      <p class="lead">Inbäddningar och inloggningsknappar från sociala medier kan följa dig mellan sajter.</p>
+      <div class="grupp">
+        <label class="rad">
+          <div class="txt"><div class="titel">Tillåt Facebook-inloggningar och inbäddade poster</div></div>
+          <span class="switch"><input type="checkbox" data-social="facebook"><span class="track"></span></span>
+        </label>
+        <label class="rad">
+          <div class="txt"><div class="titel">Tillåt inbäddade tweets från X (tidigare Twitter)</div></div>
+          <span class="switch"><input type="checkbox" data-social="x"><span class="track"></span></span>
+        </label>
+        <label class="rad">
+          <div class="txt"><div class="titel">Tillåt inbäddningar från LinkedIn</div></div>
+          <span class="switch"><input type="checkbox" data-social="linkedin"><span class="track"></span></span>
+        </label>
+      </div>
+    </section>
+  </main>
+  <script src="adblock.js"></script>
+</body>
+</html>

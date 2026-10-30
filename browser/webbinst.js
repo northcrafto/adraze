@@ -167,4 +167,6 @@ function setup({ onDnsChanged } = {}) {
 module.exports = {
   prefs, setup, applyDns, upgradeUrl, httpsFailed, allowHttp: (h) => httpOk.add(h),
   installPermissions, setAsker: (fn) => { asker = fn; }, downloadDir, fontSize: () => prefs.fontSize,
+  // adraze://adblock har samma reglage som Integritet & säkerhet
+  httpsOnly: () => !!prefs.httpsOnly, setHttpsOnly: (v) => { prefs.httpsOnly = !!v; if (!v) httpOk.clear(); save(); },
 };
