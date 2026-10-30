@@ -365,26 +365,54 @@ function applyBounds(ctx) {
     return;
   }
   const full = ctx.kryptoOpen && ctx.kryptoFull;              // Falk i helskärm (täcker webbytan)
-  const kw = (ctx.kryptoOpen && !full) ? KRYPTO_W : 0;        // sidopanelens bredd (0 i helskärm – panelen ligger ovanpå)
-  const cw = (ctx.chattOpen && !ctx.chattFull) ? CHATT_W : 0; // chattens sidopanel (till vänster om Falk om båda är öppna)
+  // Sidopanelerna glider in/ut (panelSlide driver pK/pC 0→1). Webbsidan byter bredd EN gång: när panelen
+  // har glidit klart in, eller direkt när den börjar glida ut – då slipper sidan räknas om varje bildruta.
+  const tK = (ctx.kryptoOpen && !full) ? 1 : 0, tC = (ctx.chattOpen && !ctx.chattFull) ? 1 : 0;
+  if (ctx.pK === undefined) { ctx.pK = tK; ctx.pC = tC; }
+  if (full || !ctx.kryptoOpen && ctx.kryptoFull) ctx.pK = tK;
+  if (ctx.chattFull) ctx.pC = tC;
+  if (ctx.pK !== tK || ctx.pC !== tC) panelSlide(ctx);
+  const ease = (t) => 1 - Math.pow(1 - t, 3);
+  const eK = ease(ctx.pK), eC = ease(ctx.pC);
+  const kw = (tK && ctx.pK === 1) ? KRYPTO_W : 0;             // sidopanelens bredd för webbsidan (0 i helskärm – panelen ligger ovanpå)
+  const cw = (tC && ctx.pC === 1) ? CHATT_W : 0;              // chattens sidopanel (till vänster om Falk om båda är öppna)
   const R = Math.round;
+  { const inset = (ctx.kryptoOpen && full) || (ctx.chattOpen && ctx.chattFull) ? R(b.width) : kw + cw;   // skalets egna sidor får samma högerkant som webbsidan
+    if (ctx.panelInset !== inset) { ctx.panelInset = inset; sendTo(ctx, 'panel-inset', inset); } }
   if (ctx.visibleTab && ctx.views.has(ctx.visibleTab)) {
     ctx.views.get(ctx.visibleTab).setBounds({ x: R(b.x + ctx.leftInset), y: R(b.y + ctx.topInset), width: Math.max(0, R(b.width - kw - cw - ctx.leftInset)), height: R(b.height - ctx.topInset) });
   }
   if (ctx.chattView) {
-    ctx.chattView.setVisible(ctx.chattOpen);
-    if (ctx.chattOpen) {
+    const vis = ctx.chattFull ? ctx.chattOpen : ctx.pC > 0;
+    ctx.chattView.setVisible(vis);
+    if (vis) {
       if (ctx.chattFull) ctx.chattView.setBounds({ x: R(b.x + ctx.leftInset), y: R(b.y), width: Math.max(0, R(b.width - kw - ctx.leftInset)), height: R(b.height) });
-      else ctx.chattView.setBounds({ x: R(b.x + b.width - kw - CHATT_W), y: R(b.y), width: CHATT_W, height: R(b.height) });
+      else ctx.chattView.setBounds({ x: R(b.x + b.width - (tK && tC ? KRYPTO_W * eK : 0) - CHATT_W * eC), y: R(b.y), width: CHATT_W, height: R(b.height) });   // vid byte glider chatten rakt in under Falk som glider ut
     }
   }
   if (ctx.kryptoView) {
-    ctx.kryptoView.setVisible(ctx.kryptoOpen);
-    if (ctx.kryptoOpen) {
+    const vis = full ? true : ctx.pK > 0;
+    ctx.kryptoView.setVisible(vis);
+    if (vis) {
       if (full) ctx.kryptoView.setBounds({ x: R(b.x + ctx.leftInset), y: R(b.y), width: R(b.width - ctx.leftInset), height: R(b.height) });
-      else ctx.kryptoView.setBounds({ x: R(b.x + b.width - KRYPTO_W), y: R(b.y), width: KRYPTO_W, height: R(b.height) });
+      else ctx.kryptoView.setBounds({ x: R(b.x + b.width - KRYPTO_W * eK), y: R(b.y), width: KRYPTO_W, height: R(b.height) });
     }
   }
+}
+// Glid-animation för sidopanelerna: ~220 ms, ca 60 bilder/s. Respekterar "minska rörelse" i systemet.
+const SLIDE_MS = 220;
+function panelSlide(ctx) {
+  if (ctx._slide) return;
+  let last = Date.now();
+  ctx._slide = setInterval(() => {
+    if (!ctx.win || ctx.win.isDestroyed()) { clearInterval(ctx._slide); ctx._slide = null; return; }
+    const now = Date.now(), d = (require('electron').systemPreferences.getAnimationSettings?.().prefersReducedMotion ? 1 : (now - last) / SLIDE_MS); last = now;
+    const tK = (ctx.kryptoOpen && !(ctx.kryptoOpen && ctx.kryptoFull)) ? 1 : 0, tC = (ctx.chattOpen && !ctx.chattFull) ? 1 : 0;
+    const step = (p, t) => t > p ? Math.min(t, p + d) : Math.max(t, p - d);
+    ctx.pK = step(ctx.pK, tK); ctx.pC = step(ctx.pC, tC);
+    if (ctx.pK === tK && ctx.pC === tC) { clearInterval(ctx._slide); ctx._slide = null; }
+    applyBounds(ctx);
+  }, 16);
 }
 function raiseKrypto(ctx) { if (ctx && ctx.chattView) ctx.win.contentView.addChildView(ctx.chattView); if (ctx && ctx.kryptoView) ctx.win.contentView.addChildView(ctx.kryptoView); }
 function showOnly(ctx, tabId) {

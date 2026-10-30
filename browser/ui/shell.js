@@ -579,12 +579,15 @@ $('adblock').addEventListener('click', () => setAdblock($('adblock').classList.c
 let kryptoOpen = false;
 function kryptoMode() { return account ? (account.pro ? 'pro' : 'nopro') : 'signedout'; }
 let pendingKryptoAfterLogin = false;
-function openKrypto(open) {
+// Falk och chatten visas en i taget. Öppnar du den ena göms den andra och kommer tillbaka när du stänger.
+var parkedKrypto = false, parkedChatt = false;
+function openKrypto(open, parking) {
   if (open && !account) { pendingKryptoAfterLogin = true; openLogin(); return; }
-  if (open && chattOpen) { chattOpen = false; chattSync(); }   // en sidopanel i taget
+  if (open) { parkedKrypto = false; if (chattOpen) { parkedChatt = true; chattOpen = false; chattSync(); } }
   kryptoOpen = open;
   window.view.kryptoToggle(open, kryptoMode(), account ? account.token : null);
   $('krypto-btn').classList.toggle('off', !open);
+  if (!open && !parking && parkedChatt) { parkedChatt = false; if (account && !account.isChild) { chattOpen = true; chattSync(); } }
 }
 $('krypto-btn').addEventListener('click', () => openKrypto(!kryptoOpen));
 async function refreshPro() {
@@ -964,7 +967,7 @@ function loginAs(token, email, pro, name) {
   setTimeout(() => { try { refreshPro(); } catch {} }, 400);   // Pro-status från servern (Google-inloggningen vet den inte)
 }
 function doLogout(reopenKrypto) {
-  chattOpen = false; chattUnread = 0;
+  chattOpen = false; chattUnread = 0; parkedKrypto = false; parkedChatt = false;
   const t = account && account.token;
   const sk = account ? accountKey(account) : null;
   account = null; socMe = null; localStorage.removeItem('skoll-account'); updateAccountBtn();
@@ -1286,10 +1289,12 @@ function chattSync() { try { if (!account || account.isChild) chattOpen = false;
 function openChatt(open) {
   if (open && !account) { pendingChattAfterLogin = true; openLogin(); return; }
   if (open && account.isChild) { showToast(t('Chatten finns inte för barnkonton. Prata med dina föräldrar i stället.')); return; }
-  if (open && kryptoOpen) openKrypto(false);   // en sidopanel i taget
+  if (open) { parkedChatt = false; if (kryptoOpen) { parkedKrypto = true; openKrypto(false, true); } }
   chattOpen = !!open;
   chattSync();
+  if (!open) restoreKrypto();
 }
+function restoreKrypto() { if (parkedKrypto) { parkedKrypto = false; if (account) openKrypto(true); } }
 function renderChattBtn() {
   const b = $('chatt-btn'); if (!b) return;
   b.classList.toggle('active', chattOpen);
@@ -1297,7 +1302,9 @@ function renderChattBtn() {
   if (bd) { bd.textContent = chattUnread > 99 ? '99+' : String(chattUnread); bd.style.display = (chattUnread > 0 && !chattOpen && account && !account.isChild) ? 'block' : 'none'; }
 }
 $('chatt-btn') && $('chatt-btn').addEventListener('click', () => openChatt(!chattOpen));
-window.view.onChattClosed(() => { chattOpen = false; renderChattBtn(); });
+window.view.onChattClosed(() => { chattOpen = false; renderChattBtn(); restoreKrypto(); });
+// Falk/chatten tar en egen kolumn till höger: startsidan, inställningarna och rutorna krymper i stället för att hamna under panelen
+window.view.onPanelInset && window.view.onPanelInset((px) => { document.documentElement.style.setProperty('--pw', (px | 0) + 'px'); });
 window.view.onChattUnread((n) => { chattUnread = n || 0; renderChattBtn(); });
 // Inställningar → Vänner & chatt: kort förklaring + öppna-knapp (själva chatten är panelen)
 function renderFriends() {
