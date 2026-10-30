@@ -10,6 +10,17 @@
  */
 const { app, BrowserWindow, WebContentsView, ipcMain, session, Menu, clipboard, dialog, shell, safeStorage, components, screen, net } = require('electron');
 app.setName('AdRaze');  // egen datamapp (~/.config/AdRaze)
+// Oväntade fel i huvudprocessen loggas i ~/.config/AdRaze/fel.log i stället för Electrons
+// "A JavaScript error occurred"-ruta (som annars poppar upp t.ex. vid omstart efter uppdatering).
+function loggaFel(typ, e) {
+  try {
+    const rad = new Date().toISOString() + ' ' + typ + ' ' + app.getVersion() + ': ' + ((e && e.stack) || String(e)) + '\n';
+    console.error(rad);
+    require('fs').appendFileSync(require('path').join(app.getPath('userData'), 'fel.log'), rad);
+  } catch {}
+}
+process.on('uncaughtException', (e) => loggaFel('uncaughtException', e));
+process.on('unhandledRejection', (e) => loggaFel('unhandledRejection', e));
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -2176,5 +2187,5 @@ ipcMain.handle('update:status', async (_e, force) => {
     auto: !!autoUpdater && process.platform !== 'darwin' && !process.env.ADRAZE_NO_UPDATES,
   };
 });
-app.on('will-quit', () => { if (torProc) { try { torProc.kill(); } catch {} } });
+
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
