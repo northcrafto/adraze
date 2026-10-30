@@ -346,6 +346,38 @@ body.incog .bmchip { color: #e9e2f7; }
 :root[data-theme="dark"] #search-engine { color: rgb(240 240 244 / .4); }
 :root[data-theme="dark"] .pill:not(.pill-accent) { background: #1d1d20; color: #f2f2f4; border-color: #3b3b40; }
 :root[data-theme="dark"] .pill:not(.pill-accent):hover { background: #27272b; }
+/* Mörkt läge, småfix (2026-10-30): mörka rullningslister/kryssrutor, synlig bokmärkesstjärna och flikikoner,
+   ingen vit yta bakom sidan när webbvyn göms (stäng-rutan, sidbyten) */
+:root[data-theme="dark"] { color-scheme: dark; }
+/* …men de ljusa korten/rutorna som saknar mörkt läge behåller ljusa rullningslister, kryssrutor och listor */
+:root[data-theme="dark"] :is(#bookmarks, #bgpick, #qr, #danger, #history, #dlthreat, #kidblock, #kbuy-modal, #kn-delmodal, #fam-modal, #fam-confirm, #fam-histmodal, #fam-sessmodal, #fam-codemodal) { color-scheme: light; }
+:root[data-theme="dark"] #bm-star:not(.on) { color: #d4d4d8; }
+:root[data-theme="dark"] #bm-star:hover { background: rgb(255 255 255 / .09); }
+:root[data-theme="dark"] .tab:not(.incognito) .fav { color: #a8a8ac; }
+:root[data-theme="dark"] .tab.active:not(.incognito) .fav { color: #d4d4d8; }
+:root[data-theme="dark"] #views { background-color: #0e0e10; }
+:root[data-theme="dark"] #allow-chip { color: #4cc38a !important; }
+body.incog #views, :root[data-theme="dark"] body.incog #views { background-color: #0a0512; }
+/* Inkognito går före mörkt läge: samma lila chrome i båda lägena (de grå reglerna ovan vann annars) */
+:root[data-theme="dark"] body.incog { background: #0a0512; }
+:root[data-theme="dark"] body.incog .chrome-top { background: #0b0618; }
+:root[data-theme="dark"] body.incog .chrome-bar, :root[data-theme="dark"] body.incog #bmbar { background: #100a1e; border-bottom-color: rgba(124,58,237,.22); }
+:root[data-theme="dark"] body.incog .icon-btn, :root[data-theme="dark"] body.incog .newtab-btn { color: #cbbde6; }
+:root[data-theme="dark"] body.incog .icon-btn:hover, :root[data-theme="dark"] body.incog .newtab-btn:hover { background: rgba(168,85,247,.14); color: #fff; }
+:root[data-theme="dark"] body.incog .tab { color: #a08cc4; }
+:root[data-theme="dark"] body.incog .tab:hover { background: rgba(168,85,247,.12); color: #ece3fb; }
+:root[data-theme="dark"] .tab.incognito.active { background: #241442; color: #fff; }
+:root[data-theme="dark"] body.incog #omnibox { background: #1a1030 !important; --tw-ring-color: #3b2a5c; }
+:root[data-theme="dark"] body.incog .pill:not(.pill-accent) { background: #1a1030; border-color: rgba(124,58,237,.3); color: #e2d3fb; }
+:root[data-theme="dark"] body.incog .pill:not(.pill-accent):hover { background: #241442; }
+:root[data-theme="dark"] body.incog .bmchip { color: #e9e2f7; }
+/* Wallet-notiserna (spara/fyll i kort): samma mörka remsa som behörighetsfrågan, inte en vit list */
+:root[data-theme="dark"] :is(#wsavebar, #wfillbar) { background: #161618 !important; color: #f2f2f4; border-bottom-color: #26262a !important; box-shadow: 0 6px 20px rgb(0 0 0 / .4) !important; }
+:root[data-theme="dark"] :is(#wsavebar, #wfillbar) .text-navy-900\/50 { color: rgb(242 242 244 / .55); }
+:root[data-theme="dark"] :is(#wsavebar, #wfillbar) > span, :root[data-theme="dark"] :is(#wsavebar-no, #wfillbar-no) { background: rgb(255 255 255 / .08) !important; color: #d4d4d8 !important; }
+/* Startsidans statistikremsa hamnade under uppdaterings-/standardwebbläsar-notisen längst ned */
+body:has(#defbrowser-banner, #update-banner) .nt-stats { visibility: hidden; }
+#danger-sub { text-wrap: balance; }
 
 #chatt-btn.active { color: var(--color-terra); background: rgba(255,75,31,.14); }
 
@@ -411,6 +443,7 @@ body.incog .bmchip { color: #e9e2f7; }
 #settings .set-hero-side { display: flex; gap: 8px; align-items: center; flex: none; }
 #settings .set-chip { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--s-accent-soft); color: var(--s-accent-ink); }
 #settings .set-chip.dim { background: var(--s-surface-2); color: var(--s-mut); }
+#settings .set-chip:empty { display: none; }   /* Pro-rutan: tom grå pastill när statusen inte gick att hämta */
 
 /* Paneler: rubrik + ingress + grupper av rader */
 #settings .set-panel { background: none; border: 0; border-radius: 0; padding: 0; }
@@ -443,6 +476,14 @@ body.incog .bmchip { color: #e9e2f7; }
   background: var(--s-field); color: var(--s-ink); border-color: var(--s-field-line); }
 #settings input:not(#set-search):focus-visible, #settings textarea:focus-visible, #settings select:focus-visible { outline: none; border-color: var(--s-ink); box-shadow: 0 0 0 3px var(--s-accent-soft); }
 #settings input::placeholder, #settings textarea::placeholder { color: var(--s-faint); }
+/* fält och texter med egen vit bakgrund/navy-färg i panelernas <style> (Tillägg, Historik, Import) */
+#settings #ext-url, #settings #hist-search { background: var(--s-field); color: var(--s-ink); border-color: var(--s-field-line); }
+#settings #hist-clear { background: var(--s-surface); }
+#settings .ext-note, #settings .imp-none { color: var(--s-mut); }
+#settings input[type="checkbox"] { accent-color: var(--s-accent); }
+#settings :is(.btn, .set-btn, .pill, .btn-ghost, .btn-safe):disabled { opacity: .45; cursor: default; pointer-events: none; }
+#settings .set-main { scrollbar-gutter: stable; }   /* innehållet hoppar inte i sidled mellan korta och långa kategorier */
+#settings #kn-signedout .set-lead { margin-inline: auto; }
 #settings .badge-built { background: var(--s-surface-2); color: var(--s-mut); border-radius: 999px; font-weight: 600; }
 
 /* Knappar: Cettos vätskefyllning. Huvudknappar fylls mörkt (ljust i mörkt läge), sekundära med accenten */

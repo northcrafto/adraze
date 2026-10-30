@@ -370,7 +370,12 @@ window.view.onDidNavigate((id, url, b, f) => {
 });
 window.view.onTitle((id, title) => { const t = byId(id); if (t) { t.title = title; renderTabs(); if (t.url && !t.incognito) pushHistory(t.url, title, t.favicon); } });
 window.view.onFavicon((id, fav) => { const t = byId(id); if (t) { t.favicon = fav; renderTabs(); } });
-window.view.onLoading((id, loading) => { const t = byId(id); if (t && t === active) $('reload').textContent = loading ? '✕' : '⟳'; });
+// Ladda om ⇄ stoppa: byt SVG-ikonen (förr ersattes ikonen med tecknen ✕/⟳ i textform, som såg annorlunda ut än övriga knappar)
+window.view.onLoading((id, loading) => {
+  const t = byId(id); if (!t || t !== active) return;
+  const b = $('reload'); b.dataset.loading = loading ? '1' : '';
+  b.innerHTML = `<svg class="ic"><use href="#${loading ? 'i-close' : 'i-reload'}" /></svg>`;
+});
 window.view.onOpenNewTab((url) => createTab(url));
 window.view.onNewIncognito(() => createTab(null, true));
 
@@ -523,7 +528,7 @@ function doReload() {
   const anyOverlay = OVERLAY_IDS.some((id) => { const el = $(id); return el && !el.classList.contains('hidden'); });
   const onWebPage = active && active.url && !anyOverlay;
   if (onWebPage) {
-    if ($('reload').textContent === '\u2715') window.view.stop(active.id); else window.view.reload(active.id);
+    if ($('reload').dataset.loading === '1') window.view.stop(active.id); else window.view.reload(active.id);
     return;
   }
   // Startsida eller inställningar → ladda om HELA skalet så allt (barn, konto, startsida) läses in på nytt.
@@ -1516,6 +1521,14 @@ function renderShortcuts() {
     host.appendChild(add);
   }
 }
+// Startsidans statistikremsa ligger fast längst ned. I ett lågt fönster eller med många genvägar
+// hamnade den ovanpå genvägarna → göm den när den skulle krocka (räknas om vid storleksändring).
+function fitNtStats() {
+  const st = newtabpage.querySelector('.nt-stats'), sc = $('shortcuts');
+  if (!st || !sc || newtabpage.classList.contains('hidden')) return;
+  st.style.visibility = sc.getBoundingClientRect().bottom + 12 > st.getBoundingClientRect().top ? 'hidden' : '';
+}
+try { const ro = new ResizeObserver(() => fitNtStats()); ro.observe(newtabpage); ro.observe($('shortcuts')); } catch {}
 $('incog-search').addEventListener('keydown', (e) => { if (e.key === 'Enter' && active) guardedNavigate(active, $('incog-search').value); });
 
 /* ── Adressfält-autocomplete (från historiken) ── */
@@ -1981,7 +1994,7 @@ function showUpdateBanner(version) {
   const bar = document.createElement('div'); bar.id = 'update-banner';
   bar.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:300;display:flex;align-items:center;gap:12px;background:var(--color-navy-900);color:#fff;padding:11px 14px 11px 18px;border-radius:14px;box-shadow:0 14px 40px rgba(8,20,35,.45);font-size:13.5px;max-width:92vw;';
   const tt = (k) => (typeof window.t === 'function') ? window.t(k) : k;
-  bar.innerHTML = '<span>\u2728 ' + escapeHtml(tt('En ny version av')) + ' <b>AdRaze</b>' + (version ? ' (' + version + ')' : '') + ' ' + escapeHtml(tt('är klar.')) + '</span>'
+  bar.innerHTML = '<span>' + escapeHtml(tt('En ny version av')) + ' <b>AdRaze</b>' + (version ? ' (' + version + ')' : '') + ' ' + escapeHtml(tt('är klar.')) + '</span>'
     + '<button id="upd-now" style="background:#fff;color:var(--color-navy-900);border:0;border-radius:9px;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;">' + escapeHtml(tt('Starta om & uppdatera')) + '</button>'
     + '<button id="upd-later" style="background:none;border:0;color:rgba(255,255,255,.7);font-size:13px;cursor:pointer;">' + escapeHtml(tt('Senare')) + '</button>';
   document.body.appendChild(bar);
@@ -1993,6 +2006,8 @@ function showUpdateBanner(version) {
 async function maybeShowDefaultBanner() {
   try {
     if (windowIncognito) return;
+    const intro = $('hxintro');   // första start: vänta tills introt är borta, annars hamnar notisen ovanpå det
+    if (intro && intro.style.display === 'flex') { setTimeout(maybeShowDefaultBanner, 2500); return; }
     const st = await window.defaultBrowser.state();
     if (st && st.default) return;                                   // redan standard → visa inte
     const snooze = parseInt(localStorage.getItem('skoll-defbrowser-snooze') || '0', 10);
@@ -2330,7 +2345,7 @@ function renderDownloads() {
     const paused = d.state === 'paused', prog = d.state === 'progressing' || paused;
     if (prog) status = (paused ? (window.t ? window.t('Pausad') : 'Pausad') + ' · ' : '') + `${fmtBytes(d.received)} / ${fmtBytes(d.total)}`;
     else if (scanning) { status = 'Skannar efter virus…'; col = 'var(--color-terra)'; }
-    else if (infected) { status = '⚠ Blockerad — ' + (d.threat || 'hot'); col = 'var(--color-danger)'; }
+    else if (infected) { status = 'Blockerad — ' + (d.threat || 'hot'); col = 'var(--color-danger)'; }
     else if (removed) { status = 'Borttagen (virus)'; col = 'var(--color-danger)'; }
     else if (done) { status = d.scan === 'overridden' ? 'Klar (behållen trots varning)' : (d.scan === 'clean' ? 'Säker ✓' : 'Klar'); col = 'var(--color-safe)'; }
     else { status = d.state === 'cancelled' ? 'Avbruten' : 'Misslyckades'; }
@@ -2362,7 +2377,7 @@ window.dl.onThreat((t) => {
   threatId = t.id;
   $('dlthreat-msg').innerHTML = '<b>' + escapeHtml(t.filename) + '</b> kan innehålla <b>' + escapeHtml(t.threat) + '</b>. Vi flyttade den åt sidan så den inte kan skada din dator. Är du säker på att filen är trygg kan du behålla den ändå.';
   $('dlthreat').style.display = 'block';
-  showToast('⚠ Farlig nedladdning stoppad');
+  showToast('Farlig nedladdning stoppad');
 });
 function hideThreat() { $('dlthreat').style.display = 'none'; threatId = null; }
 $('dlthreat-remove').addEventListener('click', () => { if (threatId) window.dl.removeThreat(threatId); hideThreat(); showToast('Filen togs bort.'); });

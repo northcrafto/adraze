@@ -10,6 +10,8 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root { --bg: #0e0e10; --surface: #161618; --surface-2: #1d1d20; --line: #26262a; --field-line: #34343a; --ink: #f2f2f4; --mut: #a1a1a8; --faint: #6f6f76; --accent: #ff4b1f; --accent-ink: #ff7a52; }
   html, body { height: 100%; }
+  /* mörk rullningslist utan color-scheme: dark – det skulle ge Stripes kortfält (iframe) en vit bakgrund */
+  html { scrollbar-color: #3b3b40 var(--bg); }
   body { font-family: Inter, -apple-system, "Segoe UI", Roboto, system-ui, sans-serif; color: var(--ink); background: var(--bg); min-height: 100%; padding: 18px 20px 24px; overflow-y: auto; -webkit-font-smoothing: antialiased; }
   .top { display: flex; align-items: center; gap: 10px; margin-bottom: 26px; }
   .back { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; color: var(--mut); text-decoration: none; transition: background .15s, color .15s; }
