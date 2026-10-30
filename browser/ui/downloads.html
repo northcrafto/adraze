@@ -136,7 +136,7 @@
         else if (infected) { icoCls = 'ico warn'; ico = ICO_WARN; subCls = 'sub warn'; sub = t('Blockerad') + ' — ' + (d.threat || t('hot')); }
         else if (removed) { icoCls = 'ico warn'; ico = ICO_WARN; subCls = 'sub warn'; sub = t('Borttagen (virus)'); }
         else if (done) { icoCls = 'ico done'; ico = ICO_DOC; subCls = 'sub done';
-          sub = (d.total > 0 ? fmt(d.total) + ' · ' : '') + (d.scan === 'overridden' ? t('Klar (behållen)') : (d.scan === 'clean' ? t('Säker ✓') : t('Klar'))); }
+          sub = (d.total > 0 ? fmt(d.total) + ' · ' : '') + (d.scan === 'overridden' ? t('Klar (behållen)') : (d.scan === 'clean' ? t('Säker') : t('Klar'))); }
         else if (failed) { sub = d.state === 'cancelled' ? t('Avbruten') : t('Misslyckades'); }
 
         row.innerHTML =
