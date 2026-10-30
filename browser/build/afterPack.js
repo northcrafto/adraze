@@ -35,9 +35,29 @@ async function brannSakringar(context) {
   console.log('[säkringar] inbrända i', exe);
 }
 
+/* Linux: programfilen blir ett litet startskript runt den riktiga binären (som google-chrome).
+ * castlabs-Electron kraschar direkt vid start om miljövariabeln CHROME_DESKTOP finns
+ * (FATAL zygote_host_impl_linux.cc:221 "Check failed: . : Invalid argument", även med
+ * --no-sandbox; vanlig Electron gör det inte). Den ärvs från alla Electron-appar: den gamla
+ * AdRaze när uppdateringen startar om, Discord/VS Code när man klickar på en länk … */
+function startskript(context) {
+  const namn = context.packager.executableName;
+  const bin = path.join(context.appOutDir, namn);
+  fs.renameSync(bin, bin + '.bin');
+  fs.writeFileSync(bin, [
+    '#!/bin/sh',
+    '# AdRaze: castlabs-Electron kraschar om CHROME_DESKTOP ärvs från en annan Electron-app (se build/afterPack.js)',
+    'unset CHROME_DESKTOP',
+    `exec "$(dirname "$(readlink -f "$0")")/${namn}.bin" "$@"`,
+    '',
+  ].join('\n'), { mode: 0o755 });
+  console.log('[startskript]', bin, '→', namn + '.bin');
+}
+
 exports.default = async function afterPack(context) {
   const plat = context.electronPlatformName; // 'linux' | 'darwin' | 'win32'
   await brannSakringar(context);
+  if (plat === 'linux') startskript(context);
   if (plat === 'linux') {
     console.log('[VMP] Linux behöver ingen VMP-signering (Widevine L3 funkar utan) — hoppar över.');
     return;

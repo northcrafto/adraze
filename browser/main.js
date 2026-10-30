@@ -2002,17 +2002,54 @@ const WRAPPER_KOLL = [
   'if [ "$(cat /proc/sys/kernel/unprivileged_userns_clone 2>/dev/null || echo 1)" = "0" ] || [ "$(cat /proc/sys/user/max_user_namespaces 2>/dev/null || echo 1)" = "0" ]; then FLAGGA="--no-sandbox"',
   'elif [ "$(cat /proc/sys/kernel/apparmor_restrict_unprivileged_userns 2>/dev/null || echo 0)" = "1" ] && [ ! -e /etc/apparmor.d/adraze ]; then FLAGGA="--no-sandbox"; fi',
 ];
-// Äldre installationer har en startfil som alltid stänger av sandlådan → skriv om den en gång
+// Installerarens startfil ~/.local/bin/adraze hålls i nyaste form (äldre stängde alltid av
+// sandlådan, och ingen rensade CHROME_DESKTOP – se build/afterPack.js)
+function wrapperText(appimage) {
+  return ['#!/bin/sh', '# AdRaze i Chromiums sandlåda när systemet tillåter den (annars utan)',
+    'unset CHROME_DESKTOP   # ärvd från andra Electron-appar får castlabs-Electron att krascha vid start',
+    ...WRAPPER_KOLL, `exec "${appimage}" $FLAGGA "$@"`, ''].join('\n');
+}
 function lagaWrapper() {
   if (process.platform !== 'linux') return;
   const fil = path.join(app.getPath('home'), '.local', 'bin', 'adraze');
   try {
     const gammal = fs.readFileSync(fil, 'utf8');
-    const m = /^exec "([^"]+)" --no-sandbox "\$@"$/m.exec(gammal);
-    if (!m || gammal.includes('FLAGGA')) return;
-    fs.writeFileSync(fil, ['#!/bin/sh', '# AdRaze i Chromiums sandlåda när systemet tillåter den (annars utan)', ...WRAPPER_KOLL, `exec "${m[1]}" $FLAGGA "$@"`, ''].join('\n'), { mode: 0o755 });
-    console.log('[sandlåda] startfilen uppdaterad');
+    const m = /^exec "([^"]+)" (?:--no-sandbox|\$FLAGGA) "\$@"$/m.exec(gammal);
+    if (!m) return;                                  // inte vår fil – rör inte
+    const ny = wrapperText(m[1]);
+    if (ny === gammal) return;
+    fs.writeFileSync(fil, ny, { mode: 0o755 });
+    console.log('[startfil] uppdaterad');
   } catch {}
+}
+
+/* Omstart efter uppdatering. electron-updater startar annars den nya versionen MEDAN den här
+ * fortfarande lever och med den här processens miljö: den nya förlorar enkelinstans-låset och
+ * stänger sig (ingen AdRaze kommer tillbaka), och CHROME_DESKTOP + den gamla AppImage-monteringens
+ * sökvägar följer med. I stället: ett litet skript väntar tills den här processen är helt borta
+ * och startar sedan AdRaze med ren miljö, via startfilen om den finns. */
+function renMiljo() {
+  const env = { ...process.env };
+  for (const k of ['CHROME_DESKTOP', 'APPDIR', 'APPIMAGE', 'ARGV0', 'OWD', 'APPIMAGE_SILENT_INSTALL', 'APPIMAGE_EXIT_AFTER_INSTALL',
+    'GSETTINGS_SCHEMA_DIR', 'ELECTRON_RUN_AS_NODE', 'NODE_OPTIONS']) delete env[k];
+  const montering = process.env.APPDIR;                 // AppRun lade sin monteringsmapp först i sökvägarna
+  if (montering) for (const k of ['PATH', 'LD_LIBRARY_PATH', 'XDG_DATA_DIRS']) {
+    if (env[k] != null) env[k] = env[k].split(':').filter((p) => p && !p.startsWith(montering)).join(':');
+  }
+  if (!env.LD_LIBRARY_PATH) delete env.LD_LIBRARY_PATH;
+  return env;
+}
+function startaOmEfterAvslut() {
+  const wrapper = path.join(app.getPath('home'), '.local', 'bin', 'adraze');
+  const appimage = process.env.APPIMAGE;
+  const mal = fs.existsSync(wrapper) ? [wrapper] : appimage ? [appimage, ...(sandladeFlagga() ? ['--no-sandbox'] : [])] : null;
+  if (!mal) return false;
+  // Vänta (högst 30 s) tills den här processen är borta, starta sedan
+  const skript = 'i=0; while kill -0 "$1" 2>/dev/null && [ "$i" -lt 300 ]; do sleep 0.1; i=$((i+1)); done; shift; exec "$@"';
+  try {
+    spawn('/bin/sh', ['-c', skript, 'adraze-omstart', String(process.pid), ...mal], { detached: true, stdio: 'ignore', env: renMiljo(), cwd: app.getPath('home') }).unref();
+    return true;
+  } catch (e) { console.warn('[omstart]', String(e)); return false; }
 }
 
 function desktopEntry(icon) {
@@ -2022,7 +2059,7 @@ function desktopEntry(icon) {
   // parser av Exec tål dem inte.
   const wrapper = path.join(app.getPath('home'), '.local', 'bin', 'adraze');
   const exec = fs.existsSync(wrapper) ? wrapper
-    : process.env.APPIMAGE ? `${process.env.APPIMAGE} ${sandladeFlagga()}`.trim()
+    : process.env.APPIMAGE ? `env -u CHROME_DESKTOP ${process.env.APPIMAGE} ${sandladeFlagga()}`.trim()
     : app.isPackaged ? process.execPath
     : `${process.execPath} ${__dirname} ${sandladeFlagga()}`.trim();
   return [
@@ -2099,6 +2136,26 @@ ipcMain.handle('defaultbrowser:set', async () => {
 // macOS skickar länkar hit i stället för via argv.
 app.on('open-url', (e, url) => { e.preventDefault(); openExternalLink(url); });
 
+// Startad av electron-updater i en äldre AdRaze (0.1.38 och tidigare startar den nya versionen
+// innan de själva stängt): vänta tyst tills den gamla processen som håller låset är borta, annars
+// förlorar vi låset och stänger oss – och ingen AdRaze kommer tillbaka efter uppdateringen.
+function vantaPaGammalInstans() {
+  try {
+    const lank = fs.readlinkSync(path.join(app.getPath('userData'), 'SingletonLock'));   // "värd-pid"
+    const pid = parseInt(String(lank).split('-').pop(), 10);
+    if (!pid || pid === process.pid) return;
+    const vila = new Int32Array(new SharedArrayBuffer(4));
+    const slut = Date.now() + 20000;
+    while (Date.now() < slut) {
+      try { process.kill(pid, 0); } catch { return; }      // borta
+      Atomics.wait(vila, 0, 0, 100);
+    }
+  } catch {}
+}
+if (process.platform === 'linux' && process.env.APPIMAGE_SILENT_INSTALL === 'true') {
+  vantaPaGammalInstans();
+  delete process.env.APPIMAGE_SILENT_INSTALL;
+}
 if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
@@ -2241,6 +2298,13 @@ ipcMain.on('update:install', async () => {
     }
   } catch {}
   updInstalling = false;
+  // Linux/AppImage: electron-updater byter bara filen; vi startar om själva (startaOmEfterAvslut)
+  const egenOmstart = process.platform === 'linux' && !!process.env.APPIMAGE;
+  if (egenOmstart) {
+    autoUpdater.autoRunAppAfterInstall = false;
+    // Sänds först när filen verkligen är bytt (precis innan electron-updater stänger appen)
+    try { require('electron').autoUpdater.once('before-quit-for-update', () => startaOmEfterAvslut()); } catch {}
+  }
   try { autoUpdater.quitAndInstall(false, true); } catch {}
 });
 // Inställningarnas "Programuppdatering": din version, den senaste på GitHub och om den redan är hämtad.
