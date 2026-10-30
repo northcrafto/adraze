@@ -11,7 +11,8 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { AdblockMotor } = require('./adblock-motor');   // vår egen C++-nätverksmotor
+const { AdblockMotor } = require('./adblock-motor');
+const listuppdatering = require('./listuppdatering');   // håller filterlistorna färska   // vår egen C++-nätverksmotor
 const redirektResurser = require('./adblock-redirects');   // ofarliga stub-resurser för $redirect
 const dnsP = require('dns').promises;                      // CNAME-avmaskering
 const scriptlets = require('./adblock-scriptlets');        // ##+js(...) → injicerbar kod
@@ -149,9 +150,17 @@ class AdrazeAdblock {
       // Vår C++-motor tar nätverksblockeringen (full filtersyntax, 7× fler regler). JS-indexet
       // ovan sköter fortfarande farliga sidor (security), omdirigeringar och CSP-rubriker.
       try {
-        const cacheFil = (electron && electron.app) ? path.join(electron.app.getPath('userData'), 'adblock-cache.bin') : null;
-        this.motor = new AdblockMotor(path.join(this.dir, 'lists'), cacheFil);
+        const ud = (electron && electron.app) ? electron.app.getPath('userData') : null;
+        const cacheFil = ud ? path.join(ud, 'adblock-cache.bin') : null;
+        const nyaDir = ud ? path.join(ud, 'adraze-lists') : null;
+        const medskickad = path.join(this.dir, 'lists');
+        this.motor = new AdblockMotor(medskickad, cacheFil, nyaDir);
         if (!this.motor.bygg()) this.motor = null;
+        // Färska listor i bakgrunden; när något ändrats byggs en ny motor och byts in när den är klar
+        if (nyaDir) listuppdatering.starta(nyaDir, medskickad, () => {
+          const ny = new AdblockMotor(medskickad, cacheFil, nyaDir);
+          if (ny.bygg()) { this.motor = ny; this.scriptletCache.clear(); }
+        });
       } catch (e) { this.motor = null; console.warn('[adraze] motor:', String(e)); }
       this.popupHosts = new Set(this.json('data/popup-hosts.json', []));
       this.kos = this.json('data/cosmetic.json', { generic: [], specific: {}, exceptions: {}, genericHideExceptions: [] });

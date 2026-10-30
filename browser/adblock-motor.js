@@ -26,17 +26,24 @@ function ladda() {
 }
 
 class AdblockMotor {
-  constructor(listDir, cacheFil) {
+  // listDir = mappen med listorna som följer med appen. extraDir = nyhämtade listor (userData), vinner
+  // per fil när de finns – annars den medskickade.
+  constructor(listDir, cacheFil, extraDir) {
     this.listDir = listDir;
+    this.extraDir = extraDir || null;
     this.cacheFil = cacheFil || null;   // diskcache (userData), hoppar över omtolkning vid oförändrade listor
     this.motor = null;
     this.antal = 0;
+  }
+  listFil(fil) {
+    if (this.extraDir) { const p = path.join(this.extraDir, fil); try { if (fs.statSync(p).size > 0) return p; } catch {} }
+    return path.join(this.listDir, fil);
   }
   // Nyckel som ändras så fort någon lista ändras (namn + storlek + ändringstid + motorversion)
   cacheKey() {
     const h = crypto.createHash('sha1'); h.update('v1');
     for (const fil of LISTOR) {
-      try { const s = fs.statSync(path.join(this.listDir, fil)); h.update(fil + ':' + s.size + ':' + Math.round(s.mtimeMs)); }
+      try { const p = this.listFil(fil), s = fs.statSync(p); h.update(p + ':' + s.size + ':' + Math.round(s.mtimeMs)); }
       catch { h.update(fil + ':0'); }
     }
     return h.digest('hex');
@@ -73,7 +80,7 @@ class AdblockMotor {
         return true;
       }
       for (const fil of LISTOR) {
-        let text; try { text = fs.readFileSync(path.join(this.listDir, fil), 'utf8'); } catch { continue; }
+        let text; try { text = fs.readFileSync(this.listFil(fil), 'utf8'); } catch { continue; }
         try { m.laggLista(text); } catch (e) { console.warn('[adblock] lista', fil, String(e)); }
       }
       this.antal = m.antal();
@@ -98,4 +105,4 @@ class AdblockMotor {
   }
 }
 
-module.exports = { AdblockMotor };
+module.exports = { AdblockMotor, LISTOR };
