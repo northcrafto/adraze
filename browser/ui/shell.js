@@ -174,6 +174,7 @@ function switchTab(tab) {
   renderTabs(); updateNavButtons(); updateStar();
   try { updateReaderBtn(); } catch {}
   try { permSwitched(); } catch {}
+  try { applyTabPanel(tab); } catch {}
   saveOpenTabs();
 }
 function closeTab(tab) {
@@ -593,6 +594,7 @@ function openKrypto(open, parking) {
   window.view.kryptoToggle(open, kryptoMode(), account ? account.token : null);
   $('krypto-btn').classList.toggle('off', !open);
   if (!open && !parking && parkedChatt) { parkedChatt = false; if (account && !account.isChild) { chattOpen = true; chattSync(); } }
+  rememberPanel();
 }
 $('krypto-btn').addEventListener('click', () => openKrypto(!kryptoOpen));
 async function refreshPro() {
@@ -973,6 +975,7 @@ function loginAs(token, email, pro, name) {
 }
 function doLogout(reopenKrypto) {
   chattOpen = false; chattUnread = 0; parkedKrypto = false; parkedChatt = false;
+  for (const x of tabs) { x.panel = null; x.parked = null; }
   const t = account && account.token;
   const sk = account ? accountKey(account) : null;
   account = null; socMe = null; localStorage.removeItem('skoll-account'); updateAccountBtn();
@@ -1298,8 +1301,23 @@ function openChatt(open) {
   chattOpen = !!open;
   chattSync();
   if (!open) restoreKrypto();
+  rememberPanel();
 }
 function restoreKrypto() { if (parkedKrypto) { parkedKrypto = false; if (account) openKrypto(true); } }
+// Falk och chatten hör till fliken där de öppnades: en ny flik eller en annan flik har ingen panel,
+// och går du tillbaka kommer panelen fram igen (även en "parkerad" Falk bakom chatten).
+function panelNow() { return kryptoOpen ? 'krypto' : (chattOpen ? 'chatt' : null); }
+function rememberPanel() { if (!active) return; active.panel = panelNow(); active.parked = parkedKrypto ? 'krypto' : (parkedChatt ? 'chatt' : null); }
+function applyTabPanel(tab) {
+  const want = account ? (tab.panel || null) : null;
+  parkedKrypto = !!account && tab.parked === 'krypto'; parkedChatt = !!account && tab.parked === 'chatt';
+  if (want === 'chatt' && account.isChild) return;
+  if (want === panelNow()) return;
+  if (kryptoOpen && want !== 'krypto') { kryptoOpen = false; window.view.kryptoToggle(false, kryptoMode(), account ? account.token : null); $('krypto-btn').classList.add('off'); }
+  if (chattOpen && want !== 'chatt') { chattOpen = false; chattSync(); }
+  if (want === 'krypto') { kryptoOpen = true; window.view.kryptoToggle(true, kryptoMode(), account.token); $('krypto-btn').classList.remove('off'); }
+  else if (want === 'chatt') { chattOpen = true; chattSync(); }
+}
 function renderChattBtn() {
   const b = $('chatt-btn'); if (!b) return;
   b.classList.toggle('active', chattOpen);
@@ -1307,7 +1325,7 @@ function renderChattBtn() {
   if (bd) { bd.textContent = chattUnread > 99 ? '99+' : String(chattUnread); bd.style.display = (chattUnread > 0 && !chattOpen && account && !account.isChild) ? 'block' : 'none'; }
 }
 $('chatt-btn') && $('chatt-btn').addEventListener('click', () => openChatt(!chattOpen));
-window.view.onChattClosed(() => { chattOpen = false; renderChattBtn(); restoreKrypto(); });
+window.view.onChattClosed(() => { chattOpen = false; renderChattBtn(); restoreKrypto(); rememberPanel(); });
 // Falk/chatten tar en egen kolumn till höger: startsidan, inställningarna och rutorna krymper i stället för att hamna under panelen
 window.view.onPanelInset && window.view.onPanelInset((px) => { document.documentElement.style.setProperty('--pw', (px | 0) + 'px'); });
 window.view.onChattUnread((n) => { chattUnread = n || 0; renderChattBtn(); });
