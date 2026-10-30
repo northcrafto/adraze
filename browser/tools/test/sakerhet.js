@@ -28,7 +28,7 @@ async function kor(rot) {
     const fejk = (url, origin) => `({ senderFrame: { url: '${url}', origin: '${origin}' }, sender: {}, returnValue: undefined })`;
     const h = (k) => `el.ipcMain._invokeHandlers.get('${k}')`;
     R.ok('wallet:list nekas från webbsida', (await M(`return ${h('wallet:list')} ? await ${h('wallet:list')}(${fejk('https://evil.example/', 'https://evil.example')}) : 'saknas'`)) === null);
-    R.ok('wallet:list tillåts från ui/', Array.isArray(await M(`const u = el.webContents.getAllWebContents().map((w) => w.getURL()).find((x) => /\/ui\/shell\.html/.test(x)); return await ${h('wallet:list')}({ senderFrame: { url: u, origin: 'file://' }, sender: {} })`)));
+    R.ok('wallet:list tillåts från ui/', Array.isArray(await M(`const u = el.webContents.getAllWebContents().map((w) => w.getURL()).find((x) => x.includes('/ui/shell.html')); return await ${h('wallet:list')}({ senderFrame: { url: u, origin: 'file://' }, sender: {} })`)));
     R.ok('pw:for-origin använder ramens origin, inte argumentet', JSON.stringify(await M(`return await ${h('pw:for-origin')}(${fejk('https://a.example/', 'https://a.example')}, 'https://bank.example')`)) === '[]');
     R.ok('wallet:get nekas på http-sida', (await M(`return await ${h('wallet:get')}(${fejk('http://shop.example/', 'http://shop.example')}, 'x')`)) === null);
     R.ok('blockinst:set nekas från vanlig sajt', (await M(`return ${h('blockinst:set')} ? await ${h('blockinst:set')}(${fejk('https://evil.example/', 'https://evil.example')}, 'natskydd', false) : 'saknas'`)) === null);
