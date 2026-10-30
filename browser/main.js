@@ -2044,10 +2044,15 @@ function startaOmEfterAvslut() {
   const appimage = process.env.APPIMAGE;
   const mal = fs.existsSync(wrapper) ? [wrapper] : appimage ? [appimage, ...(sandladeFlagga() ? ['--no-sandbox'] : [])] : null;
   if (!mal) return false;
+  // Chromium lämnar fd:er öppna utan CLOEXEC (v8-snapshot från AppImage-monteringen, devtools-uttag,
+  // pipes). Ärvs de håller den nya versionen den gamla monteringen upptagen, och då blir den gamla
+  // AppImage-processen och den raderade filen kvar tills AdRaze stängs. Stäng allt utom 0–2 först.
   // Vänta (högst 30 s) tills den här processen är borta, starta sedan
-  const skript = 'i=0; while kill -0 "$1" 2>/dev/null && [ "$i" -lt 300 ]; do sleep 0.1; i=$((i+1)); done; shift; exec "$@"';
+  const stang = 'for f in /proc/$$/fd/*; do n=${f##*/}; [ "$n" -gt 2 ] && eval "exec $n>&-"; done 2>/dev/null; ';
+  const skript = stang + 'i=0; while kill -0 "$1" 2>/dev/null && [ "$i" -lt 300 ]; do sleep 0.1; i=$((i+1)); done; shift; exec "$@"';
+  const skal = fs.existsSync('/bin/bash') ? '/bin/bash' : '/bin/sh';   // dash klarar bara fd 0–9 i exec n>&-
   try {
-    spawn('/bin/sh', ['-c', skript, 'adraze-omstart', String(process.pid), ...mal], { detached: true, stdio: 'ignore', env: renMiljo(), cwd: app.getPath('home') }).unref();
+    spawn(skal, ['-c', skript, 'adraze-omstart', String(process.pid), ...mal], { detached: true, stdio: 'ignore', env: renMiljo(), cwd: app.getPath('home') }).unref();
     return true;
   } catch (e) { console.warn('[omstart]', String(e)); return false; }
 }
