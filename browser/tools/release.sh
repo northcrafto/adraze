@@ -2,14 +2,14 @@
 # Släpper en ny AdRaze-version till alla (in-app-uppdatering via northcrafto/adraze-dl).
 # Användning: tools/release.sh ["vad som är nytt"]   — höjer patch-versionen själv.
 # Exakt det byggda paketet testas (säkerhet + paket, osynligt i Xvfb) innan det släpps.
-# Nödläge utan tester: ADRAZE_UTAN_TEST=1 tools/release.sh "…"
+# Nödläge utan tester: ADRAZE_UTAN_TEST=1 tools/release.sh "…"   Bygg + testa utan att släppa: ADRAZE_TORR=1
 set -e
 cd "$(dirname "$0")/.."
 NOTES="${1:-Uppdatering}"
 # Electron-vakten kan ha släppt en version sedan sist – ta in den först
 git pull -q --rebase --autostash origin main
 # node_modules måste ha precis den Electron som package.json säger (annars släpps fel Chromium)
-VILL=$(node -p "(require('./package.json').dependencies.electron||'').replace(/.*#v/,'')")
+VILL=$(node -p "const p=require('./package.json'); ((p.dependencies||{}).electron||(p.devDependencies||{}).electron||'').replace(/.*#v/,'')")
 HAR=$(cat node_modules/electron/dist/version 2>/dev/null || echo "")
 if [ "$VILL" != "$HAR" ]; then
   echo "Electron i node_modules ($HAR) ≠ package.json ($VILL) — installerar"
@@ -33,6 +33,7 @@ if [ -z "$ADRAZE_UTAN_TEST" ]; then
   fi
   rm -rf "$FORRA"
 fi
+if [ -n "$ADRAZE_TORR" ]; then git checkout -q package.json package-lock.json; echo "Torrkörning: $V byggd och testad, släpps inte"; exit 0; fi
 gh release create "v$V" -R northcrafto/adraze-dl --title "AdRaze $V" --notes "$NOTES" \
   dist-installer/AdRaze.AppImage dist-installer/latest-linux.yml
 git add package.json package-lock.json 2>/dev/null || git add package.json
