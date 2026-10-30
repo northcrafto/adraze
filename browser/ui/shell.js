@@ -1327,7 +1327,19 @@ function renderChattBtn() {
 $('chatt-btn') && $('chatt-btn').addEventListener('click', () => openChatt(!chattOpen));
 window.view.onChattClosed(() => { chattOpen = false; renderChattBtn(); restoreKrypto(); rememberPanel(); });
 // Falk/chatten tar en egen kolumn till höger: startsidan, inställningarna och rutorna krymper i stället för att hamna under panelen
-window.view.onPanelInset && window.view.onPanelInset((px) => { document.documentElement.style.setProperty('--pw', (px | 0) + 'px'); });
+window.view.onPanelInset && window.view.onPanelInset((px) => { document.documentElement.style.setProperty('--pw', (px | 0) + 'px'); fitOmni(); });
+// Med Falk/chatten öppen krymper adressfältet så att det (och förslagsrutan under) slutar före panelen
+function fitOmni() {
+  const o = $('omnibox'); if (!o) return;
+  o.style.maxWidth = '';
+  const pw = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--pw'), 10) || 0;
+  if (pw > 0) {
+    const r = o.getBoundingClientRect(), lim = innerWidth - pw - 12;
+    if (r.right > lim) o.style.maxWidth = Math.max(240, Math.floor(r.width - (r.right - lim))) + 'px';
+  }
+  try { if (suggestEl.classList.contains('on')) { const r = o.getBoundingClientRect(); suggestEl.style.left = r.left + 'px'; suggestEl.style.width = r.width + 'px'; } } catch {}
+}
+addEventListener('resize', () => fitOmni());
 window.view.onChattUnread((n) => { chattUnread = n || 0; renderChattBtn(); });
 // Inställningar → Vänner & chatt: kort förklaring + öppna-knapp (själva chatten är panelen)
 function renderFriends() {

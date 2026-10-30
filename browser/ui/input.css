@@ -729,3 +729,6 @@ body:has(#defbrowser-banner, #update-banner) .nt-stats { visibility: hidden; }
 #reader-btn { color: var(--color-muted); }
 #reader-btn:hover { background: rgb(14 42 71 / .06); }
 #reader-btn.on { color: var(--color-terra); }
+
+/* Notiserna längst ned centreras i sidytan när Falk/chatten tar högerkolumnen */
+#update-banner, #defbrowser-banner { left: calc((100% - var(--pw, 0px)) / 2) !important; max-width: calc(100vw - var(--pw, 0px) - 24px) !important; }
