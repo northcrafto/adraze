@@ -1405,17 +1405,17 @@ function greet() {
   if (name) name = name[0].toUpperCase() + name.slice(1);   // snyggare i hälsningen
   const h = new Date().getHours();
   let b;
-  if (h >= 5 && h < 10) b = { e: '☀️', t: ['God morgon', 'Morgonpigg', 'Ny dag väntar'] };
-  else if (h >= 10 && h < 12) b = { e: '🌤️', t: ['God förmiddag', 'Härlig förmiddag'] };
-  else if (h >= 12 && h < 14) b = { e: '🍽️', t: ['Lunchdags snart?', 'Mitt på dagen', 'God middag'] };
-  else if (h >= 14 && h < 18) b = { e: '🌇', t: ['God eftermiddag', 'Trevlig eftermiddag'] };
-  else if (h >= 18 && h < 22) b = { e: '🌆', t: ['God kväll', 'Skön kväll'] };
-  else if (h >= 22 || h < 3) b = { e: '🌙', t: ['Lite sent', 'Uppe sent', 'Nattsurfning'] };
-  else b = { e: '😴', t: ['Mitt i natten', 'Dags att sova snart?', 'Sena timmar'] }; // 03–05
+  if (h >= 5 && h < 10) b = ['God morgon', 'Morgonpigg', 'Ny dag väntar'];
+  else if (h >= 10 && h < 12) b = ['God förmiddag', 'Härlig förmiddag'];
+  else if (h >= 12 && h < 14) b = ['Lunchdags snart?', 'Mitt på dagen', 'God middag'];
+  else if (h >= 14 && h < 18) b = ['God eftermiddag', 'Trevlig eftermiddag'];
+  else if (h >= 18 && h < 22) b = ['God kväll', 'Skön kväll'];
+  else if (h >= 22 || h < 3) b = ['Lite sent', 'Uppe sent', 'Nattsurfning'];
+  else b = ['Mitt i natten', 'Dags att sova snart?', 'Sena timmar']; // 03–05
   const key = name + '|' + h;                          // stabil inom samma timme + namn
   if (_greetCache.key !== key) {
-    const g = b.t[Math.floor(Math.random() * b.t.length)];
-    _greetCache = { key, text: (name ? g + ', ' + name : g) + ' ' + b.e };
+    const g = b[Math.floor(Math.random() * b.length)];
+    _greetCache = { key, text: name ? g + ', ' + name : g };
   }
   el.textContent = _greetCache.text;
 }
@@ -1997,14 +1997,14 @@ function showDefaultBrowserBanner() {
   if (document.getElementById('defbrowser-banner')) return;
   const bar = document.createElement('div'); bar.id = 'defbrowser-banner';
   bar.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:300;display:flex;align-items:center;gap:12px;background:var(--color-navy-900);color:#fff;padding:11px 14px 11px 18px;border-radius:14px;box-shadow:0 14px 40px rgba(8,20,35,.45);font-size:13.5px;max-width:92vw;';
-  bar.innerHTML = '<span>🛡️ <b>AdRaze</b> är inte din huvudwebbläsare än.</span>'
+  bar.innerHTML = '<span><b>AdRaze</b> är inte din huvudwebbläsare än.</span>'
     + '<button id="db-set" style="background:#fff;color:var(--color-navy-900);border:0;border-radius:9px;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;">Gör AdRaze till min main</button>'
     + '<button id="db-later" style="background:none;border:0;color:rgba(255,255,255,.7);font-size:13px;cursor:pointer;">Senare</button>';
   document.body.appendChild(bar);
   bar.querySelector('#db-set').addEventListener('click', async () => {
     const b = bar.querySelector('#db-set'); b.textContent = 'Sätter…'; b.disabled = true;
     let r; try { r = await window.defaultBrowser.set(); } catch { r = null; }
-    if (r && r.ok) { showToast('AdRaze är nu din huvudwebbläsare 🎉'); bar.remove(); }
+    if (r && r.ok) { showToast('AdRaze är nu din huvudwebbläsare'); bar.remove(); }
     else if (r && r.manual) { showToast('Välj AdRaze i systeminställningarna som öppnades.'); bar.remove(); }
     else { b.textContent = 'Gör AdRaze till min main'; b.disabled = false; showToast('Kunde inte sätta AdRaze som standard.'); }
   });
