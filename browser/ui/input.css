@@ -746,3 +746,7 @@ body:has(#defbrowser-banner, #update-banner) .nt-stats { visibility: hidden; }
 body.incog .sug .sline { color: #efe9fb; }
 body.incog .sug .sdim { color: #a08cc4; }
 body.incog .sug .slink { color: #b9a2f5; }
+
+/* Sajt utan egen ikon: Chromiums fyllda grå jordglob (som Brave/Chrome) */
+svg:has(use[href="#i-fav"]) { color: #5f6368; opacity: 1; }
+:root[data-theme="dark"] svg:has(use[href="#i-fav"]), body.incog svg:has(use[href="#i-fav"]) { color: #9aa0a6; }
