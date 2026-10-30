@@ -1083,7 +1083,7 @@ async function pickImage(file) {
     img.preview = URL.createObjectURL(new Blob([img.bytes], { type: img.mime }));
     pendingImage = img;
     $('attach-thumb').src = img.preview;
-    $('attach-meta').textContent = img.w + '×' + img.h + ' · ' + Math.round(img.size / 1024) + ' kB · ' + T('krypteras innan den skickas');
+    $('attach-meta').textContent = img.w + '×' + img.h + ' · ' + Math.round(img.size / 1024) + ' kB';
     $('attach-preview').classList.add('show');
     chatInput.focus();
   } catch (e) { alertBox(e.message || T('Kunde inte läsa bilden.')); }
@@ -1767,7 +1767,7 @@ async function openMembers() {
     const owner = String(r.owner_id);
     const meRow = mmMembers.find((m) => m.id === state.id);
     mmAmAdmin = owner === state.id || !!(meRow && meRow.is_admin);
-    $('mm-sub').textContent = tf('{n} medlemmar · krypterad grupp', { n: mmMembers.length });
+    $('mm-sub').textContent = tf('{n} medlemmar', { n: mmMembers.length });
     $('mm-rename').hidden = !mmAmAdmin; $('mm-avatar-rm').hidden = !mmAmAdmin || !active.avatar;
     mmAv.disabled = !mmAmAdmin; mmAv.title = mmAmAdmin ? T('Byt gruppbild') : '';
     list.innerHTML = '';

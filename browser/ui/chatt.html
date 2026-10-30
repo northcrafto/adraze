@@ -14,7 +14,6 @@
   <header class="topbar">
     <img class="logo logo-light" src="adraze-mark.png" alt="" width="22" height="22"><img class="logo logo-dark" src="adraze-mark-dark.png" alt="" width="22" height="22">
     <span class="tb-title">Chatt</span>
-    <span class="tb-e2e" title="Änd-till-änd-krypterat">krypterat</span>
     <span class="grow"></span>
     <button class="tb-me" id="btn-profile" type="button" title="Din profil" hidden><span class="avatar" id="my-avatar" translate="no">?</span></button>
     <button class="tb-btn" id="btn-settings" type="button" title="Chattinställningar" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
@@ -88,7 +87,7 @@
       </aside>
 
       <main class="chat" id="chat">
-        <div class="chat-empty" id="chat-empty"><p>Välj en vän eller grupp för att börja skriva. Allt krypteras innan det lämnar din dator.</p></div>
+        <div class="chat-empty" id="chat-empty"><p>Välj en vän eller grupp för att börja skriva.</p></div>
         <div id="chat-active" class="chat-active" hidden>
           <div class="chat-head">
             <button class="back" id="chat-back" type="button" aria-label="Tillbaka" title="Tillbaka"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
@@ -243,7 +242,7 @@
 <div class="modal-overlay" id="modal-create-group">
   <div class="modal">
     <h3>Ny grupp</h3>
-    <p class="sub">Ge gruppen ett namn och välj vilka vänner som ska vara med. Allt krypteras: servern ser aldrig namnet eller meddelandena.</p>
+    <p class="sub">Ge gruppen ett namn och välj vilka vänner som ska vara med.</p>
     <label class="field"><span class="lbl">Gruppnamn</span><input type="text" id="group-name" placeholder="t.ex. fikagänget" autocomplete="off" maxlength="60"></label>
     <span class="lbl">Välj medlemmar</span>
     <div class="pick-list" id="group-pick" translate="no"></div>
