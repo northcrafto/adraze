@@ -168,6 +168,7 @@ async function uppdatera({ torr, tvinga }) {
       const fel = await testa(rot, path.join(rot, 'dist-installer', 'AdRaze.AppImage'), forraRelease(path.join(STATE, 'forra')), chrome);
       if (fel.length) throw new Error(fel.length + ' test föll: ' + fel.map((f) => f.namn).join(', '));
       logg('torrkörning: allt grönt, släpper inte');
+      delete status.misslyckad;
       return 0;
     }
     kor('bash', ['tools/release.sh', not], { cwd: rot });          // bygger, testar exakt paketet, släpper
