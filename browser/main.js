@@ -2300,7 +2300,7 @@ function startAutoUpdate() {
   if (process.windowsStore) return;               // Microsoft Store sköter uppdateringarna själv
   if (process.platform === 'darwin') { checkMacUpdate(); return; }  // mac: notis (osignerad)
   if (!autoUpdater) return;
-  const log = (m) => { try { fs.appendFileSync(path.join(app.getPath('userData'), 'update.log'), m + '\n'); } catch {} };
+  const log = (m) => { try { fs.appendFileSync(path.join(app.getPath('userData'), 'update.log'), new Date().toISOString().slice(0, 19) + ' ' + m + '\n'); } catch {} };
   try {
     autoUpdater.autoDownload = true;
     autoUpdater.autoInstallOnAppQuit = false;     // aldrig tyst byte vid stängning – bara via "Starta om & uppdatera"-notisen
@@ -2314,14 +2314,15 @@ function startAutoUpdate() {
       updDownloaded = v;
       broadcast('update-ready', v);
     });
-    autoUpdater.on('error', (e) => log('error ' + (e && e.message)));
+    autoUpdater.on('error', (e) => { log('error ' + (e && e.message)); if (updInstallTried && /filepath|not downloaded|no update/i.test(String(e && e.message))) installRetry(); });
     runUpdateCheck = () => { try { return autoUpdater.checkForUpdates().catch(() => null); } catch { return Promise.resolve(null); } };
     setTimeout(runUpdateCheck, 5000);
-    setInterval(runUpdateCheck, 30 * 60 * 1000);
+    setTimeout(runUpdateCheck, 3 * 60 * 1000);   // en version släppt precis före start syns inte direkt i GitHubs flöde
+    setInterval(runUpdateCheck, 10 * 60 * 1000);
     // …och när fönstret får fokus igen (högst var 10:e minut) – så att notisen alltid
     // pekar på den senaste släppta versionen, inte den som råkade vara ny vid start.
     let lastFocusCheck = 0;
-    app.on('browser-window-focus', () => { const n = Date.now(); if (n - lastFocusCheck > 10 * 60 * 1000) { lastFocusCheck = n; runUpdateCheck(); } });
+    app.on('browser-window-focus', () => { const n = Date.now(); if (n - lastFocusCheck > 3 * 60 * 1000) { lastFocusCheck = n; runUpdateCheck(); } });
   } catch {}
 }
 // Användaren tryckte "Starta om & uppdatera" i banner → installera den hämtade uppdateringen nu.
@@ -2329,6 +2330,7 @@ function startAutoUpdate() {
 // i stället, så att man aldrig startar om till en redan gammal version.
 let updDownloaded = '';
 let updInstalling = false;
+let updInstallTried = false, updRetried = false;
 let runUpdateCheck = () => Promise.resolve(null);
 ipcMain.on('update:install', async () => {
   if (!autoUpdater || updInstalling) return;
@@ -2349,8 +2351,24 @@ ipcMain.on('update:install', async () => {
     // Sänds först när filen verkligen är bytt (precis innan electron-updater stänger appen)
     try { require('electron').autoUpdater.once('before-quit-for-update', () => startaOmEfterAvslut()); } catch {}
   }
-  try { autoUpdater.quitAndInstall(false, true); } catch {}
+  updInstallTried = true;
+  try { autoUpdater.quitAndInstall(false, true); } catch { installRetry(); }
+  // Inget hände (filen saknades och inget fel kom)? Hämta igen och installera.
+  let stanger = false; app.once('before-quit', () => { stanger = true; });
+  setTimeout(() => { if (!updRetried && !stanger) installRetry(); }, 6000);
 });
+// Den hämtade filen fanns inte längre (en ny koll började hämta om den) → hämta klart och installera,
+// i stället för att bara starta om till samma gamla version.
+async function installRetry() {
+  if (updRetried || !autoUpdater) return;
+  updRetried = true;
+  broadcast('toast', T('Hämtar uppdateringen…'));
+  try {
+    const r = await autoUpdater.checkForUpdates();
+    if (r && r.downloadPromise) await r.downloadPromise;
+    autoUpdater.quitAndInstall(false, true);
+  } catch { broadcast('toast', T('Uppdateringen kunde inte installeras. Försök igen om en stund.')); updRetried = false; updInstallTried = false; }
+}
 // Inställningarnas "Programuppdatering": din version, den senaste på GitHub och om den redan är hämtad.
 let updLatest = { v: '', notes: '', date: '', at: 0 };
 async function latestRelease(force) {
