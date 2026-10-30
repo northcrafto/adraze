@@ -42,6 +42,14 @@
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
     <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
     <symbol id="i-fav" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></symbol>
+    <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.8 1.8-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-.9.8-1.7 1.7-1.7H16a5 5 0 0 0 5-5c0-4-4-7.2-9-7.2z"/><circle cx="7.5" cy="11.5" r="1"/><circle cx="10" cy="7.5" r="1"/><circle cx="14.5" cy="7.5" r="1"/></symbol>
+    <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 3v8"/><path d="M6.4 6.6a8 8 0 1 0 11.2 0"/></symbol>
+    <symbol id="i-translate" viewBox="0 0 24 24"><path d="M4 5h9M8.5 3v2M6 5c.6 3 2.6 5.6 5.5 7M11 5c-.8 3.6-3.4 6.6-7 8"/><path d="m12 21 4.5-10L21 21M13.5 18h6"/></symbol>
+    <symbol id="i-puzzle" viewBox="0 0 24 24"><path d="M10 4.5a2 2 0 1 1 4 0V6h3a1 1 0 0 1 1 1v3h1.5a2 2 0 1 1 0 4H18v4a1 1 0 0 1-1 1h-3.5v-1.5a2 2 0 1 0-4 0V19H6a1 1 0 0 1-1-1v-4h1.5a2 2 0 1 0 0-4H5V7a1 1 0 0 1 1-1h4z"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6h.01"/></symbol>
+    <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3.5 13.9 9l5.6 2-5.6 2-1.9 5.5-1.9-5.5-5.6-2 5.6-2z"/><path d="M19 3v3M17.5 4.5h3"/></symbol>
+    <symbol id="i-access" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="7.6" r="1.1"/><path d="M7.5 10.2 12 11l4.5-.8M12 11v3.2l-2 3.6M12 14.2l2 3.6"/></symbol>
+    <symbol id="i-update" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4.5h-4.5"/><path d="M12 8v4.5l3 1.8"/></symbol>
     <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><ellipse cx="12" cy="12" rx="3.8" ry="9"/></symbol>
     <symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></symbol>
     <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 6h16v10h-9l-4 3v-3H4z"/><path d="M8 10h8M8 13h5"/></symbol>
@@ -490,7 +498,6 @@
       <button id="settings-close" class="set-close icon-btn w-9 h-9 z-20" title="Stäng"><svg class="ic ic-sm"><use href="#i-close" /></svg></button>
       <aside class="set-rail">
         <div class="set-brand"><img src="adraze-mark.png" alt="" width="22" height="22"><span>Inställningar</span></div>
-        <label class="set-search"><svg class="ic ic-sm"><use href="#i-search" /></svg><input id="set-search" type="search" placeholder="Sök i inställningar" autocomplete="off" spellcheck="false"></label>
           <nav id="settings-nav" class="flex flex-col">
             <div class="set-glbl">Du</div>
             <button class="set-tab" style="--i:1" data-cat="konto"><svg class="ic"><use href="#i-user" /></svg>Konto</button>
@@ -498,24 +505,25 @@
             <button class="set-tab" style="--i:3" data-cat="familj"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Familj</button>
             <button class="set-tab" style="--i:4" data-cat="wallet"><svg class="ic"><use href="#i-card" /></svg>AdRaze Wallet</button>
             <div class="set-glbl">Webbläsaren</div>
-            <button class="set-tab" style="--i:5" data-cat="utseende"><svg class="ic"><use href="#i-image" /></svg>Utseende</button>
-            <button class="set-tab" style="--i:6" data-cat="start"><svg class="ic"><use href="#i-reload" /></svg>Vid start</button>
-            <button class="set-tab" style="--i:6" data-cat="sok"><svg class="ic"><use href="#i-globe" /></svg>Sökmotor</button>
-            <button class="set-tab" style="--i:7" data-cat="sprak"><svg class="ic"><use href="#i-globe" /></svg>Språk</button>
+            <button class="set-tab" style="--i:5" data-cat="utseende"><svg class="ic"><use href="#i-palette" /></svg>Utseende</button>
+            <button class="set-tab" style="--i:6" data-cat="start"><svg class="ic"><use href="#i-power" /></svg>Vid start</button>
+            <button class="set-tab" style="--i:6" data-cat="sok"><svg class="ic"><use href="#i-search" /></svg>Sökmotor</button>
+            <button class="set-tab" style="--i:7" data-cat="sprak"><svg class="ic"><use href="#i-translate" /></svg>Språk</button>
             <button class="set-tab" style="--i:8" data-cat="nedladdningar"><svg class="ic"><use href="#i-download" /></svg>Nedladdningar</button>
-            <button class="set-tab" style="--i:8" data-cat="historik"><svg class="ic"><use href="#i-reload" /></svg>Historik</button>
-            <button class="set-tab" style="--i:9" data-cat="tillganglighet"><svg class="ic"><use href="#i-eye" /></svg>Tillgänglighet</button>
+            <button class="set-tab" style="--i:8" data-cat="historik"><svg class="ic"><use href="#i-history" /></svg>Historik</button>
+            <button class="set-tab" style="--i:9" data-cat="tillganglighet"><svg class="ic"><use href="#i-access" /></svg>Tillgänglighet</button>
             <div class="set-glbl">Skydd</div>
             <button class="set-tab" style="--i:10" data-cat="integritet"><svg class="ic"><use href="#i-shield" /></svg>Integritet &amp; säkerhet</button>
-            <button class="set-tab" style="--i:11" data-cat="tillagg"><svg class="ic"><use href="#i-settings" /></svg>Tillägg</button>
+            <button class="set-tab" style="--i:11" data-cat="tillagg"><svg class="ic"><use href="#i-puzzle" /></svg>Tillägg</button>
             <button class="set-tab" style="--i:12" data-cat="losenord"><svg class="ic"><use href="#i-key" /></svg>Autofyll &amp; lösenord</button>
-            <button class="set-tab" style="--i:13" data-cat="krypto"><svg class="ic"><use href="#i-chat" /></svg>Falk</button>
-            <button class="set-tab" style="--i:15" data-cat="uppdatering"><svg class="ic"><use href="#i-reload" /></svg>Programuppdatering<span class="upd-dot" id="upd-dot" hidden></span></button>
-            <button class="set-tab" style="--i:16" data-cat="om"><svg class="ic"><use href="#i-shield-check" /></svg>Om</button>
+            <button class="set-tab" style="--i:13" data-cat="krypto"><svg class="ic"><use href="#i-sparkle" /></svg>Falk</button>
+            <button class="set-tab" style="--i:15" data-cat="uppdatering"><svg class="ic"><use href="#i-update" /></svg>Programuppdatering<span class="upd-dot" id="upd-dot" hidden></span></button>
+            <button class="set-tab" style="--i:16" data-cat="om"><svg class="ic"><use href="#i-info" /></svg>Om</button>
             <p id="set-search-none" class="set-search-none" hidden>Inget hittades.</p>
           </nav>
       </aside>
       <main class="set-main">
+        <div class="set-top"><label class="set-search"><svg class="ic ic-sm"><use href="#i-search" /></svg><input id="set-search" type="search" placeholder="Sök i inställningar" autocomplete="off" spellcheck="false"></label></div>
         <div class="set-wrap">
           <header id="set-hero" class="set-hero">
             <div class="set-hero-avatar" id="set-hero-avatar">?</div>

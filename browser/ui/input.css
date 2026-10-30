@@ -750,3 +750,22 @@ body.incog .sug .slink { color: #b9a2f5; }
 /* Sajt utan egen ikon: Chromiums fyllda grå jordglob (som Brave/Chrome) */
 svg:has(use[href="#i-fav"]) { color: #5f6368; opacity: 1; }
 :root[data-theme="dark"] svg:has(use[href="#i-fav"]), body.incog svg:has(use[href="#i-fav"]) { color: #9aa0a6; }
+
+/* ── Inställningar, Brave-luftigare (2026-10-31) ── */
+#settings { grid-template-columns: 276px minmax(0, 1fr); }
+#settings .set-rail { padding: 22px 14px 28px; }
+#settings .set-brand { padding: 4px 10px 22px; font-size: 18px; gap: 12px; }
+#settings .set-brand img { width: 24px; height: 24px; }
+#settings .set-glbl { padding: 22px 12px 8px; font-size: 12px; letter-spacing: .01em; }
+#settings .set-tab { height: 42px; padding: 0 12px; gap: 14px; font-size: 14.5px; font-weight: 500; color: var(--s-ink); border-radius: 8px; }
+#settings .set-tab svg { width: 20px; height: 20px; stroke-width: 1.6; color: var(--s-mut); }
+#settings .set-tab.on { font-weight: 600; }
+#settings .set-main { padding-top: 0; }
+#settings .set-top { position: sticky; top: 0; z-index: 5; background: var(--s-bg); padding: 18px 0; margin-bottom: 22px; }
+#settings .set-top .set-search { max-width: 700px; margin: 0 auto; height: 44px; padding: 0 16px; gap: 12px; border-radius: 10px; }
+#settings .set-top .set-search svg { width: 17px; height: 17px; }
+#settings .set-top .set-search input { font-size: 14px; }
+/* Wallet: ingen grön ruta och ingen streckad knapp */
+#settings .wl-secure { background: none; border: 0; padding: 0; color: var(--s-mut); font-size: 12.5px; gap: 8px; }
+#settings .wl-addbtn { border: 1px solid var(--s-field-line); background: var(--s-surface); color: var(--s-ink); border-radius: 9px; }
+#settings .wl-addbtn:hover { border-color: var(--s-ink); color: var(--s-ink); background: var(--s-surface); }
