@@ -1,7 +1,7 @@
 // Jordklotet (samma stil som nappis.se): ljus glob med exakta landkonturer, D3 orthographic på canvas.
 // Länder där sajten finns på landets eget språk är tonade orange; hovra för att se språket, klicka för att byta.
 // Snurrar långsamt, går att dra, pausas när det inte syns och står still vid "minska rörelser".
-import { geoOrthographic, geoPath, geoGraticule10, geoDistance, geoContains } from 'https://cdn.jsdelivr.net/npm/d3-geo@3.1.1/+esm';
+import { geoOrthographic, geoPath, geoGraticule10, geoDistance, geoContains, geoInterpolate } from 'https://cdn.jsdelivr.net/npm/d3-geo@3.1.1/+esm';
 import { feature, mesh } from 'https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/+esm';
 
 const canvas = document.getElementById('klot');
@@ -26,7 +26,7 @@ async function start() {
   const grat = geoGraticule10();
   const HEM = [18.07, 59.33];
   const stilla = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let rot = [-15, -48, 0], storlek = 0, dpr = 1, drag = null, rordes = false, hover = null, synlig = true, lander = [], granser = null, prickar = [];
+  let rot = [-15, -48, 0], storlek = 0, dpr = 1, drag = null, rordes = false, hover = null, synlig = true, lander = [], granser = null, prickar = [], bagar = [], nastaBage = 0;
 
   const tips = document.createElement('div'); tips.className = 'klot-tips'; tips.hidden = true; stage.appendChild(tips);
 
@@ -53,10 +53,55 @@ async function start() {
     ctx.beginPath();
     for (const p of prickar) { if (!syns(p)) continue; const [x, y] = proj(p); ctx.moveTo(x + pr, y); ctx.arc(x, y, pr, 0, 7); }
     ctx.fillStyle = 'rgba(255,75,31,.85)'; ctx.fill();
+    ritaBagar(performance.now() / 1000);
     if (syns(HEM)) {
       const [x, y] = proj(HEM), r = Math.max(storlek / 210, 2.6);
       ctx.beginPath(); ctx.arc(x, y, r * 2.6, 0, 7); ctx.fillStyle = 'rgba(255,75,31,.18)'; ctx.fill();
       ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fillStyle = '#ff4b1f'; ctx.fill();
+    }
+  }
+
+  // Bågar från Stockholm: lyfter i en båge över ytan, ritas ut till en prick, pulsar där och dras sedan tillbaka hem.
+  const UT = 1.15, KVAR = 0.35, IN = 1.0;
+  const lattUt = (t) => 1 - Math.pow(1 - t, 3), lattIn = (t) => t * t * (3 - 2 * t);
+  function nyBage(nu) {
+    const kandidater = prickar.filter((p) => syns(p) && geoDistance(HEM, p) > 0.35 && geoDistance(HEM, p) < 1.35);
+    if (!kandidater.length) return;
+    const mal = kandidater[Math.floor(Math.random() * kandidater.length)], d = geoDistance(HEM, mal);
+    bagar.push({ mal, f: geoInterpolate(HEM, mal), start: nu, hojd: Math.min(0.32, 0.06 + d * 0.11) });
+  }
+  function bagPunkt(b, t) {
+    const p = b.f(t), [x, y] = proj(p), c = storlek / 2, lyft = 1 + b.hojd * Math.sin(Math.PI * t);
+    const X = c + (x - c) * lyft, Y = c + (y - c) * lyft;
+    const ute = Math.hypot(X - c, Y - c) > proj.scale();      // lyft utanför klotets kant syns även på baksidan
+    return [X, Y, syns(p) || ute];
+  }
+  function ritaBagar(nu) {
+    if (stilla || !prickar.length) return;
+    if (nu > nastaBage && bagar.length < 7) { nyBage(nu); nastaBage = nu + 0.42 + Math.random() * 0.35; }
+    bagar = bagar.filter((b) => nu - b.start < UT + KVAR + IN);
+    const lw = Math.max(storlek / 380, 1.4);
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    for (const b of bagar) {
+      const t = nu - b.start;
+      const huvud = t < UT ? lattUt(t / UT) : t < UT + KVAR ? 1 : 1 - lattIn((t - UT - KVAR) / IN);
+      if (huvud <= 0.002) continue;
+      const N = Math.max(4, Math.round(40 * huvud)), pts = [];
+      for (let i = 0; i <= N; i++) pts.push(bagPunkt(b, (i / N) * huvud));
+      // linjen tonar från svag vid Sverige till stark vid huvudet
+      for (let i = 1; i < pts.length; i++) {
+        if (!pts[i][2] || !pts[i - 1][2]) continue;
+        ctx.beginPath(); ctx.moveTo(pts[i - 1][0], pts[i - 1][1]); ctx.lineTo(pts[i][0], pts[i][1]);
+        ctx.strokeStyle = `rgba(255,75,31,${0.25 + 0.75 * (i / pts.length)})`; ctx.lineWidth = lw; ctx.stroke();
+      }
+      const [hx, hy, hs] = pts[pts.length - 1];
+      if (hs) {
+        ctx.beginPath(); ctx.arc(hx, hy, lw * 1.6, 0, 7); ctx.fillStyle = '#ff4b1f'; ctx.fill();
+        if (t >= UT && t < UT + KVAR + 0.4) {                    // liten puls när linjen når fram
+          const k = Math.min(1, (t - UT) / (KVAR + 0.4));
+          ctx.beginPath(); ctx.arc(hx, hy, lw * (2 + k * 7), 0, 7); ctx.strokeStyle = `rgba(255,75,31,${0.6 * (1 - k)})`; ctx.lineWidth = 1.2; ctx.stroke();
+        }
+      }
     }
   }
 
@@ -114,7 +159,8 @@ async function start() {
   if (stilla) return;
   (function loop() {
     requestAnimationFrame(loop);
-    if (drag || hover || !synlig || document.hidden) return;
-    rot[0] += 0.12; rita();
+    if (!synlig || document.hidden) return;
+    if (!drag && !hover) rot[0] += 0.12;
+    rita();
   })();
 }
