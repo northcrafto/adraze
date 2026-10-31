@@ -19,24 +19,19 @@ const hero = document.querySelector('.hero');
 if (hero) new IntersectionObserver(([e]) => header.classList.toggle('solid', !e.isIntersecting), { rootMargin: '-80px 0px 0px 0px' }).observe(hero);
 else header.classList.add('solid'); // undersidorna har ingen hjälte att scrolla förbi
 
-// Före/efter-demon: slå på AdRaze och räkna upp det som stoppades
-const demo = document.querySelector('.demo');
-if (demo) {
-  const knapp = document.getElementById('demo-knapp');
-  const antal = document.getElementById('demo-antal');
-  // Annonsrutor och popupen, plus de 12 spårarna som pillret visar
-  const totalt = demo.querySelectorAll('.annons, .popup').length + 12;
-  let raknare = null;
-  knapp.addEventListener('click', () => {
-    const pa = demo.dataset.pa !== 'true';
-    demo.dataset.pa = String(pa);
-    knapp.setAttribute('aria-pressed', String(pa));
-    knapp.querySelector('span').textContent = pa ? knapp.dataset.avText : knapp.dataset.paText;
-    clearInterval(raknare);
-    if (!pa) { antal.textContent = '0'; return; }
-    let n = 0;
-    raknare = setInterval(() => { n += 1; antal.textContent = n; if (n >= totalt) clearInterval(raknare); }, 22);
+// Före/efter: två riktiga inspelningar som spelas i takt när de syns
+const jmf = [...document.querySelectorAll('.jmf-video')];
+if (jmf.length) {
+  const lugn = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const [forsta, ...ovriga] = jmf;
+  // Håll de andra videorna i takt med den första
+  forsta.addEventListener('timeupdate', () => {
+    for (const v of ovriga) if (Math.abs(v.currentTime - forsta.currentTime) > 0.15) v.currentTime = forsta.currentTime;
   });
+  if (lugn) jmf.forEach((v) => { v.controls = true; });
+  else new IntersectionObserver(([e]) => {
+    jmf.forEach((v) => (e.isIntersecting ? v.play().catch(() => {}) : v.pause()));
+  }, { threshold: 0.35 }).observe(forsta.closest('.jmf'));
 }
 
 // Språkväljaren: stäng när man klickar utanför eller trycker Escape, kom ihåg valet
