@@ -217,6 +217,30 @@
     return (vagU || knapplik(el, lyss)) && vag.some((n) => n !== lyss && typeof n.onclick === "function" && liten(n) && !tom(n));
   };
 
+  // Länkar till andra sajter som man nyss klickat på (de 5 senaste, i 60 s). "Du lämnar …"-rutor (Chrome
+  // Web Store, Discord m.fl.) stoppar länken och öppnar sidan först när man bekräftar i rutan: då får
+  // fönstret öppnas även om bekräftelsen inte ser ut som en knapp. Osynliga reklamlock räknas aldrig.
+  let lankar = [];
+  const minnsLank = (e) => {
+    if (!e.isTrusted) return;
+    const vag = e.composedPath?.() || [];
+    const a = vag.find((n) => n instanceof HTMLAnchorElement && n.href);
+    if (!a || !korsSajt(a.href) || arLock(a) || vag.some((n) => n instanceof Element && n !== a && n.contains(a) && arLock(n))) return;
+    let h;
+    try { h = new URL(a.href, location.href).hostname; } catch { return; }
+    const t = performance.now();
+    lankar = [...lankar.filter((l) => t - l.t < 60000).slice(-4), { t, sajt: sajt(h) }];
+  };
+  Reflect.apply(origAdd, window, ["click", minnsLank, true]);
+  Reflect.apply(origAdd, window, ["auxclick", minnsLank, true]);
+  const nyssLank = (u) => {
+    try {
+      const s = sajt(new URL(u, location.href).hostname);
+      const t = performance.now();
+      return lankar.some((l) => t - l.t < 60000 && l.sajt === s);
+    } catch { return false; }
+  };
+
   const original = window.open;
   byt(window, "open", { open() {
     "use strict";
@@ -235,6 +259,8 @@
           const knapp = el.closest(INTERAKTIV);
           ok = knapp ? !arLock(knapp) : egetKlick(el, u, String(arguments[2] || ""));
         }
+        // Bekräftelse i en "Du lämnar …"-ruta för en länk man nyss klickade på
+        if (!ok) ok = nyssLank(u);
       }
       if (!ok) { signal(); return attrapp(); }
     }
