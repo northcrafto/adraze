@@ -1,6 +1,6 @@
 {
   "name": "adraze-browser",
-  "version": "0.1.55",
+  "version": "0.1.56",
   "description": "AdRaze – webbläsaren med AdRazes adblocker inbyggd",
   "main": "main.js",
   "scripts": {
