@@ -215,7 +215,10 @@ class AdrazeAdblock {
   // Anropas från huvudprocessens onBeforeSendHeaders (Electron tillåter bara EN lyssnare per session)
   utgaende(d) {
     if (!/^(https?|wss?):/i.test(d.url || '')) return;
-    let topp = ''; try { topp = d.webContents && !d.webContents.isDestroyed() ? d.webContents.getURL() : ''; } catch {}
+    // Huvudsidan: målet ÄR toppsidan (som i Chrome). webContents.getURL() är fortfarande sidan man
+    // lämnar under navigeringen/omdirigeringarna → OAuth-flöden (Google → OpenAI → ChatGPT) tappade kakorna.
+    let topp = d.resourceType === 'mainFrame' ? d.url : '';
+    if (!topp) { try { topp = d.webContents && !d.webContents.isDestroyed() ? d.webContents.getURL() : ''; } catch {} }
     if (!topp) topp = (d.frame && d.frame.url) || d.referrer || '';
     if (!this.kakStopp(d.url, topp)) return;
     for (const k of Object.keys(d.requestHeaders)) if (k.toLowerCase() === 'cookie') delete d.requestHeaders[k];
