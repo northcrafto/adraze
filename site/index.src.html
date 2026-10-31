@@ -49,85 +49,21 @@
         <p>{{t:demo.lead}}</p>
       </div>
 
-      <div class="demo" data-pa="false">
-        <div class="demo-rad">
-          <button id="demo-knapp" data-pa-text="{{t:demo.on}}" data-av-text="{{t:demo.off}}" class="btn liq" aria-pressed="false">{{shield-check}}<span>{{t:demo.on}}</span></button>
-          <p class="demo-raknare" aria-live="polite"><b id="demo-antal">0</b> {{t:demo.counter}}</p>
-        </div>
-
-        <div class="webblasare" aria-label="{{t:demo.browser_label}}">
-          <div class="flikrad">
-            <span class="prickar"><i></i><i></i><i></i></span>
-            <span class="adressfalt">{{lock-simple}}{{t:demo.domain}}</span>
-          </div>
-          <div class="sida">
-            <header class="tidning">
-              <b class="tidning-logo">{{t:demo.site_name}}</b>
-              <nav class="tidning-nav" aria-hidden="true"><span>{{t:demo.nav1}}</span><span class="vald">{{t:demo.nav2}}</span><span>{{t:demo.nav3}}</span><span>{{t:demo.nav4}}</span></nav>
-            </header>
-            <div class="annons annons-topp" data-annons>
-              <span>{{t:demo.ad_label}}</span>
-              <div class="ad-iphone"><i class="ad-telefon"></i><b>{{t:demo.ad1}}</b><em class="ad-knapp">{{t:demo.ad_cta}}</em></div>
-            </div>
-            <div class="sida-grid">
-              <article class="artikel">
-                <p class="artikel-kicker">{{t:demo.kicker}}</p>
-                <h3>{{t:demo.headline}}</h3>
-                <p class="artikel-ingress">{{t:demo.ingress}}</p>
-                <p class="artikel-byline">{{t:demo.byline}}</p>
-                <div class="artikel-bild" aria-hidden="true"><i class="sol"></i><i class="moln m1"></i><i class="moln m2"></i><i class="kulle"></i></div>
-                <p>{{t:demo.p1}}</p>
-                <div class="annons annons-mitt" data-annons>
-                  <span>{{t:demo.ad_label}}</span>
-                  <div class="ad-video"><i class="ad-play"></i><b>{{t:demo.ad2}}</b><em class="ad-knapp guld">{{t:demo.ad_cta}}</em><small>{{t:demo.ad_skip}}</small></div>
-                </div>
-                <p>{{t:demo.p2}}</p>
-                <div class="prognos">
-                  <b>{{t:demo.forecast_title}}</b>
-                  <table>
-                    <thead><tr><th></th><th>{{t:demo.day1}}</th><th>{{t:demo.day2}}</th><th>{{t:demo.day3}}</th></tr></thead>
-                    <tbody>
-                      <tr><th>{{t:demo.city1}}</th><td><i class="v halv"></i>17°</td><td><i class="v sol"></i>21°</td><td><i class="v sol"></i>20°</td></tr>
-                      <tr><th>{{t:demo.city2}}</th><td><i class="v moln"></i>15°</td><td><i class="v sol"></i>19°</td><td><i class="v halv"></i>18°</td></tr>
-                      <tr><th>{{t:demo.city3}}</th><td><i class="v halv"></i>18°</td><td><i class="v sol"></i>22°</td><td><i class="v sol"></i>21°</td></tr>
-                      <tr><th>{{t:demo.city4}}</th><td><i class="v regn"></i>9°</td><td><i class="v moln"></i>11°</td><td><i class="v halv"></i>12°</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-                <p>{{t:demo.p3}}</p>
-              </article>
-              <aside class="spalt">
-                <div class="annons annons-sida" data-annons>
-                  <span>{{t:demo.ad_label}}</span>
-                  <div class="ad-banta"><b class="ad-stor">−10 kg</b><b>{{t:demo.ad3}}</b><em class="ad-knapp">{{t:demo.ad_cta}}</em></div>
-                </div>
-                <div class="spalt-kort">
-                  <b>{{t:demo.popular_title}}</b>
-                  <ol class="mest-last">
-                    <li>{{t:demo.popular1}}</li>
-                    <li>{{t:demo.popular2}}</li>
-                    <li>{{t:demo.popular3}}</li>
-                    <li>{{t:demo.popular4}}</li>
-                  </ol>
-                </div>
-                <div class="annons annons-sida liten" data-annons>
-                  <span>{{t:demo.ad_label}}</span>
-                  <div class="ad-lan"><b>{{t:demo.ad4}}</b><em class="ad-knapp">{{t:demo.ad_cta}}</em></div>
-                </div>
-              </aside>
-            </div>
-            <div class="annons annons-botten" data-annons>
-              <div class="ad-krypto"><span>{{t:demo.ad_label}}</span><b>{{t:demo.ad5}}</b><em class="ad-knapp">{{t:demo.ad_cta}}</em></div>
-            </div>
-            <div class="popup" data-annons>
-              <b>{{t:demo.popup_title}}</b>
-              <p>{{t:demo.popup_text}}</p>
-              <span class="popup-knapp">{{t:demo.popup_btn}}</span>
-            </div>
-            <div class="sparare" data-annons><i></i><i></i><i></i><span>{{t:demo.trackers}}</span></div>
-          </div>
-        </div>
+      <div class="jmf">
+        <figure class="jmf-ruta">
+          <figcaption class="jmf-etikett"><b>Chrome</b> {{t:demo.chrome_label}}</figcaption>
+          <video class="jmf-video" muted loop playsinline preload="metadata" poster="/video/jamfor-chrome.jpg" width="1280" height="800" aria-label="{{t:demo.chrome_alt}}">
+            <source src="/video/jamfor-chrome.webm" type="video/webm"><source src="/video/jamfor-chrome.mp4" type="video/mp4">
+          </video>
+        </figure>
+        <figure class="jmf-ruta jmf-adraze">
+          <figcaption class="jmf-etikett"><b>AdRaze</b> {{t:demo.adraze_label}}</figcaption>
+          <video class="jmf-video" muted loop playsinline preload="metadata" poster="/video/jamfor-adraze.jpg" width="1280" height="800" aria-label="{{t:demo.adraze_alt}}">
+            <source src="/video/jamfor-adraze.webm" type="video/webm"><source src="/video/jamfor-adraze.mp4" type="video/mp4">
+          </video>
+        </figure>
       </div>
+      <p class="jmf-not">{{t:demo.caption}}</p>
     </div>
   </section>
 
