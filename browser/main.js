@@ -358,6 +358,42 @@ async function dailyImage() {
   return { url: null, credit: '' };
 }
 
+/* ────────── Felsida (sidan kunde inte laddas) ────────── */
+// Ritas in i Chromiums tomma chrome-error-dokument. Adressfältet behåller den riktiga adressen,
+// och "Försök igen" laddar om den. Ingen sida, inga nätanrop – bara text och en knapp.
+function felText(code, host) {
+  const internet = [-21, -106, -109];
+  if (internet.includes(code)) return [T('Du är inte ansluten till internet'), T('Kontrollera wifi eller nätverkskabeln och försök igen.')];
+  if ([-105, -137].includes(code)) return [T('Sidan kan inte nås'), T('Det gick inte att hitta servern för') + ' ' + host + '. ' + T('Kontrollera att adressen är rätt stavad.')];
+  if ([-7, -118].includes(code)) return [T('Sidan kan inte nås'), host + ' ' + T('tog för lång tid att svara.')];
+  if (code === -102) return [T('Sidan kan inte nås'), host + ' ' + T('vägrade att ansluta.')];
+  if (code <= -200 && code > -300) return [T('Anslutningen är inte säker'), T('Certifikatet för') + ' ' + host + ' ' + T('är ogiltigt. AdRaze stoppade sidan för att skydda dig.')];
+  return [T('Sidan kan inte nås'), T('Det gick inte att ladda') + ' ' + host + '.'];
+}
+function visaFelsida(wc, code, desc, url) {
+  let host = url; try { host = new URL(url).hostname; } catch {}
+  const [rubrik, text] = felText(code, host);
+  const d = { rubrik, text, kod: String(desc || 'ERR_FAILED'), knapp: T('Försök igen'), url };
+  const kod = `(() => { const d = ${JSON.stringify(d)};
+    document.title = d.rubrik;
+    const s = document.createElement('style');
+    s.textContent = \`html{color-scheme:light dark;background:Canvas}body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;color:CanvasText}
+      .b{max-width:520px;padding:32px 24px}.i{width:56px;height:56px;color:#ff5a2a;margin-bottom:22px}
+      h1{font-size:24px;font-weight:600;margin:0 0 10px}p{margin:0 0 6px;opacity:.78;word-break:break-word}
+      code{display:block;margin-top:14px;font:12px ui-monospace,monospace;opacity:.55}
+      button{margin-top:26px;padding:10px 22px;border:0;border-radius:999px;background:#ff5a2a;color:#fff;font:600 14px system-ui,sans-serif;cursor:pointer}
+      button:hover{background:#e8481b}button:focus-visible{outline:2px solid #ff5a2a;outline-offset:3px}\`;
+    document.head.replaceChildren(s);
+    document.body.innerHTML = '<div class="b"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z"/><path d="M3.6 9h16.8M3.6 15h16.8"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/><path d="M5 5l14 14" stroke-width="2"/></svg><h1></h1><p></p><code></code><button type="button"></button></div>';
+    document.querySelector('h1').textContent = d.rubrik;
+    document.querySelector('p').textContent = d.text;
+    document.querySelector('code').textContent = d.kod;
+    const k = document.querySelector('button'); k.textContent = d.knapp;
+    k.onclick = () => { location.href = d.url; }; })()`;
+  // Chromium hinner byta till felsidans dokument strax efter did-fail-load
+  setTimeout(() => { try { if (!wc.isDestroyed()) wc.executeJavaScript(kod, true).catch(() => {}); } catch {} }, 60);
+}
+
 /* ────────── Vy-hantering (per fönster) ────────── */
 function canGo(wc, dir) {
   try { return dir < 0 ? wc.navigationHistory.canGoBack() : wc.navigationHistory.canGoForward(); }
@@ -686,6 +722,8 @@ function ensureView(ctx, tabId) {
     // Endast HTTPS: sajten svarade inte säkert → skalet frågar om man vill fortsätta osäkert
     const httpUrl = isMain ? webb.httpsFailed(wc, code, url) : null;
     if (httpUrl) sendTo(ctx, 'https-failed', tabId, httpUrl);
+    // Electron visar ingen egen felsida → tom vit sida och man står fast. Rita en "Sidan kan inte nås" i stället.
+    else if (isMain && code !== -3 && code !== -20 && /^https?:/i.test(url || '')) visaFelsida(wc, code, _desc, url);
   });
   wc.on('did-navigate', (_e, url) => sendTo(ctx, 'did-navigate', tabId, url, canGo(wc, -1), canGo(wc, 1)));
   if (ctx.mutedTabs && ctx.mutedTabs.has(tabId)) { try { wc.setAudioMuted(true); } catch {} }
