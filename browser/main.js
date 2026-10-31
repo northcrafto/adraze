@@ -2191,7 +2191,7 @@ async function setDefaultBrowserLinux() {
     const iconDir = path.join(home, '.local', 'share', 'icons');
     fs.mkdirSync(iconDir, { recursive: true });
     const dst = path.join(iconDir, 'adraze.png');
-    fs.copyFileSync(icon, dst); icon = dst;
+    fs.writeFileSync(dst, fs.readFileSync(icon)); icon = dst;   // copyFileSync klarar inte asar-sökvägar
   } catch {}
   fs.mkdirSync(appsDir, { recursive: true });
   fs.writeFileSync(path.join(appsDir, DESKTOP_ID), desktopEntry(icon));
