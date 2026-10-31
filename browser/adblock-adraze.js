@@ -413,9 +413,9 @@ class AdrazeAdblock {
         if (inst && typ !== 'main_frame') {
           let topp = ''; try { topp = d.webContents && !d.webContents.isDestroyed() ? hostAv(d.webContents.getURL()) : ''; } catch {}
           // Blockera skript: all JavaScript på sidorna (inline stoppas med CSP i onHeadersReceived)
-          if (inst.skript && typ === 'script') { this.onBlocked(d.url, 'ad', typ); cb({ cancel: true }); return; }
+          if (inst.skript && typ === 'script') { this.onBlocked(d.url, 'ad', typ, d.webContentsId); cb({ cancel: true }); return; }
           // Sociala medier: inbäddningar/inloggning från Facebook, X, LinkedIn på andra sajter
-          if (this.inst.socialStopp(d.url, topp || hostAv(kalla))) { this.onBlocked(d.url, 'tracker', typ); cb({ cancel: true }); return; }
+          if (this.inst.socialStopp(d.url, topp || hostAv(kalla))) { this.onBlocked(d.url, 'tracker', typ, d.webContentsId); cb({ cancel: true }); return; }
         }
         // Enkel: reklam från sajten själv (förstapart) släpps igenom – bara tredjepart och farliga sidor stoppas
         const enkel = !!inst && inst.niva === 'enkel';
@@ -424,7 +424,7 @@ class AdrazeAdblock {
           const f = this.fraga(d.url, typ, kalla);
           const r = this.match(f);
           if (!r || (enkel && !f.tredje && r.kat !== 'danger')) { cb({}); return; }
-          this.onBlocked(d.url, r.kat, typ);
+          this.onBlocked(d.url, r.kat, typ, d.webContentsId);
           const red = r.typ === 'redirect' && r.action.redirect;
           // Stoppad huvudsida: did-fail-load (ERR_BLOCKED_BY_CLIENT) får skalet att visa varningen
           if (red && red.url && !red.extensionPath) { const s = this.stubUrlFor(red.url); cb(s ? { redirectURL: s } : (/^https?:/.test(red.url) ? { redirectURL: red.url } : { cancel: true })); return; }
@@ -432,7 +432,7 @@ class AdrazeAdblock {
         };
         // Blockad från motorn (ren blockering eller $redirect-stub)
         const blockera = (b, kat) => {
-          this.onBlocked(d.url, kat, typ);
+          this.onBlocked(d.url, kat, typ, d.webContentsId);
           const stub = b.redirect ? this.redirektUrl(b.redirect) : null;
           cb(stub ? { redirectURL: stub } : { cancel: true });
         };
@@ -511,7 +511,7 @@ class AdrazeAdblock {
     if (!topp) topp = (d.frame && d.frame.url) || '';
     if (!this.nat.stoppa(d.url, d.resourceType, topp)) return false;
     console.log('[natskydd] stoppade', String(d.url).slice(0, 100), 'från', String(topp).slice(0, 60));
-    try { this.onBlocked(d.url, 'danger', TYPE_MAP[d.resourceType] || 'other'); } catch {}
+    try { this.onBlocked(d.url, 'danger', TYPE_MAP[d.resourceType] || 'other', d.webContentsId); } catch {}
     return true;
   }
   disableOn(sess) {

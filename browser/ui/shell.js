@@ -160,6 +160,11 @@ function showActiveTab() {
     else { incogpage.classList.add('hidden'); newtabpage.classList.remove('hidden'); greet(); try { tabBg(active); } catch {} }
   }
 }
+// Siffran gäller fliken du tittar på (som Brave). Startsidan och inställningarna: ingen siffra.
+function visaFlikRaknare() {
+  const el = $('adcount'); if (!el) return;
+  el.textContent = active && active.url ? String(active.blocked || 0) : '';
+}
 function switchTab(tab) {
   active = tab;
   document.body.classList.toggle('incog', !!tab.incognito);
@@ -175,6 +180,7 @@ function switchTab(tab) {
   try { updateReaderBtn(); } catch {}
   try { permSwitched(); } catch {}
   try { applyTabPanel(tab); } catch {}
+  try { visaFlikRaknare(); } catch {}
   saveOpenTabs();
 }
 function closeTab(tab) {
@@ -362,6 +368,7 @@ window.view.onDidNavigate((id, url, b, f) => {
   const t = byId(id); if (!t) return;
   t.url = url; t.canBack = b; t.canForward = f;
   saveOpenTabs();
+  if (t === active) visaFlikRaknare();
   if (t.warning && t.warning.url !== url) { t.warning = null; if (t === active) hideInfobar(); }
   if (t === active) { addressInput.value = pretty(url); updateNavButtons(); updateStar(); }
   // Korsdomän-navigeringar sker numera nativt (så POST bevaras) – därför görs de snabba kollarna här i stället.
@@ -546,10 +553,10 @@ function updateNavButtons() {
 /* ── Adblock ── */
 async function initAdblock() {
   const st = await window.skoll.adblockState();
-  $('adcount').textContent = st.count;
+  visaFlikRaknare();
   $('adblock').classList.toggle('off', !st.on);
   $('adcount').hidden = st.raknare === false;
-  window.skoll.onAdblockCount((n) => { $('adcount').textContent = n; });
+  window.skoll.onAdblockTab && window.skoll.onAdblockTab((id, n) => { const t = byId(id); if (t) { t.blocked = n; if (t === active) visaFlikRaknare(); } });
   // Ändrat i adraze://adblock: räknaren på falken av/på, blockeraren av/på
   window.skoll.onBlockinst((v) => {
     if ('raknare' in v) $('adcount').hidden = v.raknare === false;
