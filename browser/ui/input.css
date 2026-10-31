@@ -770,10 +770,15 @@ svg:has(use[href="#i-fav"]) { color: #5f6368; opacity: 1; }
 #settings .wl-addbtn { border: 1px solid var(--s-field-line); background: var(--s-surface); color: var(--s-ink); border-radius: 9px; }
 #settings .wl-addbtn:hover { border-color: var(--s-ink); color: var(--s-ink); background: var(--s-surface); }
 
-/* Verktygsraden: mer luft (2026-10-31) – knapparna till höger får eget utrymme */
-#toolbar .pill { height: 38px; padding: 0 14px; gap: 8px; }
-#toolbar .icon-btn { width: 38px; height: 38px; }
-#toolbar #back, #toolbar #forward, #toolbar #reload { margin-right: 2px; }
-#toolbar #adblock { margin-left: 2px; }
-#toolbar #krypto-btn { margin-right: 6px; }
-#toolbar #search-engine { margin-left: 4px; }
+/* Verktygsraden i Brave-stil: fältet centrerat med maxbredd, rena ikoner, AdRaze-räknaren inne i fältet */
+#toolbar .omni-center { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0 24px; }
+#toolbar #omnibox { flex: 1 1 auto; max-width: 1080px; margin: 0; }
+#toolbar .icon-btn { width: 34px; height: 34px; border-radius: 8px; }
+#toolbar #search-engine { display: none; }
+#toolbar .omni-ab { display: flex; align-items: center; gap: 5px; height: 26px; padding: 0 7px; border-radius: 7px; font-size: 12.5px; font-weight: 700; color: var(--color-navy-800); flex: none; cursor: pointer; }
+#toolbar .omni-ab:hover { background: rgb(14 42 71 / .07); }
+#toolbar .omni-ab.off .ab-mark { filter: grayscale(1); opacity: .6; }
+#toolbar .omni-ab .ab-mark { width: 17px; height: 17px; }
+:root[data-theme="dark"] #toolbar .omni-ab { color: #e9e9ec; }
+:root[data-theme="dark"] #toolbar .omni-ab:hover { background: rgb(255 255 255 / .08); }
+#toolbar .falk-btn:not(.off) { background: rgb(255 75 31 / .14); color: var(--color-terra); }
