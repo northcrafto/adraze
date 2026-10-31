@@ -769,3 +769,11 @@ svg:has(use[href="#i-fav"]) { color: #5f6368; opacity: 1; }
 #settings .wl-secure { background: none; border: 0; padding: 0; color: var(--s-mut); font-size: 12.5px; gap: 8px; }
 #settings .wl-addbtn { border: 1px solid var(--s-field-line); background: var(--s-surface); color: var(--s-ink); border-radius: 9px; }
 #settings .wl-addbtn:hover { border-color: var(--s-ink); color: var(--s-ink); background: var(--s-surface); }
+
+/* Verktygsraden: mer luft (2026-10-31) – knapparna till höger får eget utrymme */
+#toolbar .pill { height: 38px; padding: 0 14px; gap: 8px; }
+#toolbar .icon-btn { width: 38px; height: 38px; }
+#toolbar #back, #toolbar #forward, #toolbar #reload { margin-right: 2px; }
+#toolbar #adblock { margin-left: 2px; }
+#toolbar #krypto-btn { margin-right: 6px; }
+#toolbar #search-engine { margin-left: 4px; }
