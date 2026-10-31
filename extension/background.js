@@ -63,6 +63,14 @@ function suffix(host) {
   return ut;
 }
 
+// Sajtens :style-regler ([selektor, deklarationer], t.ex. "lås upp scrollningen" när en ruta är dold):
+// en regel var, så att en som Chromium inte förstår inte tar med sig de andra
+function stilCss(k, nivaer, undantag) {
+  let css = "";
+  for (const n of nivaer) for (const [sel, decl] of k.styles?.[n] || []) if (!undantag.has(`${sel}:style(${decl})`)) css += `${sel}{${decl}}\n`;
+  return css;
+}
+
 async function cssFor(host) {
   const k = await laddaKosmetik();
   const nivaer = suffix(host);
@@ -71,7 +79,7 @@ async function cssFor(host) {
   const specifika = [];
   for (const n of nivaer) for (const s of k.specific[n] || []) if (!undantag.has(s)) specifika.push(s);
   const utanGeneric = nivaer.some((n) => k.genericHide.has(n));
-  let css = specifika.length ? cssAv(specifika) : "";
+  let css = (specifika.length ? cssAv(specifika) : "") + stilCss(k, nivaer, undantag);
   if (!utanGeneric) css += undantag.size ? cssAv(k.generic.filter((s) => !undantag.has(s))) : genericCss;
   return css && css + lockbeteCss;
 }
@@ -95,7 +103,7 @@ async function kakCssFor(host) {
   for (const n of nivaer) for (const s of kakKos.exceptions[n] || []) undantag.add(s);
   const specifika = [];
   for (const n of nivaer) for (const s of kakKos.specific[n] || []) if (!undantag.has(s)) specifika.push(s);
-  return cssAv(specifika) + (undantag.size ? cssAv(kakKos.generic.filter((s) => !undantag.has(s))) : kakGenericCss) + KAK_UPPLAS;
+  return cssAv(specifika) + stilCss(kakKos, nivaer, undantag) + (undantag.size ? cssAv(kakKos.generic.filter((s) => !undantag.has(s))) : kakGenericCss) + KAK_UPPLAS;
 }
 
 // Rutor utan gratis nej (t.ex. "betala eller godkänn") döljs i toppramen när content/kakor.js ber om det
@@ -131,6 +139,13 @@ async function synkaPaus() {
   await registreraSkript(lista);
 }
 
+// Scriptlets från filterlistorna (tools/build.js): en fil per scriptlet och vilka värdar den gäller
+let scriptlets = null;
+async function laddaScriptlets() {
+  scriptlets ||= await (await fetch(chrome.runtime.getURL("data/scriptlets.json"))).json();
+  return scriptlets;
+}
+
 async function registreraSkript(lista) {
   const exclude = lista.flatMap((h) => [`*://${h}/*`, `*://*.${h}/*`]);
   const gamla = await chrome.scripting.getRegisteredContentScripts();
@@ -144,6 +159,14 @@ async function registreraSkript(lista) {
     // YouTube: spola förbi och dölj förvideo- och mellanreklam
     { ...bas, id: "youtube", js: ["content/youtube.js"], world: "MAIN", matches: ["*://*.youtube.com/*", "*://*.youtube-nocookie.com/*"] },
   ]);
+  // Scriptlets (sidans egen värld, före sidans skript) bara på värdarna de gäller. Eget anrop, så att
+  // ett fel här aldrig tar med sig kosmetiken eller vakten.
+  try {
+    const sl = await laddaScriptlets();
+    await chrome.scripting.registerContentScripts(sl.map((s) => ({ ...bas, id: s.id, js: [s.js], world: "MAIN", matches: s.vardar.map((h) => `*://*.${h}/*`) })));
+  } catch (e) {
+    console.warn("AdRaze: kunde inte registrera scriptlets", e);
+  }
 }
 
 // ---------- Räknare ----------

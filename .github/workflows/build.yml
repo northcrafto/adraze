@@ -37,16 +37,19 @@ jobs:
           node -e '
             const fs = require("fs");
             const m = JSON.parse(fs.readFileSync("extension/manifest.json"));
-            let total = 0;
+            let total = 0, regexTotal = 0;
             for (const r of m.declarative_net_request.rule_resources) {
               const rules = JSON.parse(fs.readFileSync("extension/" + r.path));
               const regex = rules.filter((x) => x.condition.regexFilter).length;
               console.log(`${r.id}: ${rules.length} rules, ${regex} regex`);
-              if (regex > 1000) throw new Error(`${r.id}: too many regex rules`);
               total += rules.length;
+              regexTotal += regex;
             }
-            console.log("total:", total);
+            console.log("total:", total, "regex:", regexTotal);
+            // Chrome räknar regexgränsen (1000) över alla påslagna statiska regelsamlingar tillsammans
+            if (regexTotal > 1000) throw new Error("too many regex rules in total");
             if (total > 30000) throw new Error("over the guaranteed static rule limit");
+            if (m.declarative_net_request.rule_resources.length > 50) throw new Error("too many rulesets");
           '
       - name: Package
         run: cd extension && zip -qr ../adraze-${{ github.sha }}.zip .

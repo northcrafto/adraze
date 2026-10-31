@@ -40,6 +40,8 @@ AdRaze stoppar reklam, spårare, popups och omdirigeringar till farliga sidor. G
 Det här gör AdRaze:
 • Blockerar reklam, spårare och popups med välkända öppna filterlistor – inklusive en lista gjord för svenska sajter.
 • Döljer tomma annonsrutor så att sidan ser ren ut.
+• Lagar sajter som försöker kringgå blockeringen: små inbyggda skript stänger av adblock-varningar och reklamskript, och sidor som väntar på ett reklamskript får en ofarlig ersättare så att de inte går sönder.
+• Tar bort kända spårningsparametrar ur adresser.
 • Tystar och hoppar över reklam på YouTube.
 • Avvisar onödiga kakor automatiskt i vanliga kakrutor. Rutor utan gratis nej döljs utan att något godkänns.
 • Stoppar popunders och osynliga klickfällor. Inloggnings- och betalfönster öppnas alltid som vanligt.
@@ -63,9 +65,9 @@ AdRaze blocks ads, trackers and other unwanted web content: ad and tracker reque
 
 | Behörighet | Motivering (klistra in) |
 |---|---|
-| declarativeNetRequest | Blocks ad, tracker and malicious requests with static rule sets compiled from public filter lists (EasyList, EasyPrivacy and others). |
+| declarativeNetRequest | Blocks ad, tracker and malicious requests with static rule sets compiled from public filter lists, replaces blocked ad scripts with harmless built-in stand-ins so pages keep working, and removes known tracking parameters from addresses. |
 | declarativeNetRequestFeedback | Counts how many requests were blocked on the current tab, shown in the toolbar menu. Only the matched rule set is read, never page content. |
-| scripting | Injects CSS that hides empty ad slots and cookie banners, and registers the content scripts that stop popunders and skip YouTube ads. |
+| scripting | Injects CSS that hides empty ad slots and cookie banners, and registers the content scripts that stop popunders, skip YouTube ads and run the small page fixes from the filter lists (packaged in the extension) on the sites they are written for, to switch off anti-adblock scripts. |
 | storage | Saves the user's settings (sites where protection is paused) and local counters. |
 | webNavigation | Detects new tabs opened by a page so popunders and ad-initiated redirects to malicious sites can be closed or stopped. |
 | alarms | Refreshes the blocked counters periodically, and syncs daily totals to the user's AdRaze account only if the user has linked one. |
