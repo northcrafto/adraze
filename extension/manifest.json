@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AdRaze",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Sveriges bästa adblocker. Stoppar reklam, spårare, popups och omdirigeringar till farliga sidor.",
   "minimum_chrome_version": "121",
   "permissions": [
