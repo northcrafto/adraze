@@ -313,6 +313,12 @@
   .fchip .fx { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 50%; border: 0; background: #3a3a40; color: #fff; display: grid; place-items: center; cursor: pointer; opacity: 0; transition: opacity .15s; }
   .fchip:hover .fx { opacity: 1; } .fchip .fx svg { width: 10px; height: 10px; }
   .fchip.loading .fi { animation: falk-pulse 1s ease-in-out infinite; }
+  .srcs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .srcs a { font-family: Inter, -apple-system, "Segoe UI", Roboto, system-ui, sans-serif; display: inline-flex; align-items: center; gap: 6px; max-width: 220px; padding: 4px 10px 4px 6px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--mut); font-size: 12px; text-decoration: none; transition: border-color .15s, color .15s; }
+  .srcs a:hover { border-color: var(--field-line); color: var(--ink); }
+  .srcs a svg { width: 13px; height: 13px; flex: 0 0 auto; opacity: .8; }
+  .srcs a span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bubble a.ml { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 2px; }
   .msg.user .fchips { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin-bottom: 6px; max-width: 85%; }
   body.drag::after { content: attr(data-drop); position: fixed; inset: 8px; z-index: 50; border: 2px dashed var(--accent); border-radius: 16px; background: rgb(14 14 16 / .86);
     display: grid; place-items: center; font: 600 15px Inter, system-ui, sans-serif; color: var(--ink); pointer-events: none; }
@@ -536,7 +542,7 @@
     function inl(t) {
       return t.split(/(`[^`]+`)/).map((part) => {
         if (/^`[^`]+`$/.test(part)) return '<code class="ic">' + esc(part.slice(1, -1)) + '</code>';
-        return esc(part).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(/(^|[^*\w])\*([^*\s][^*]*?)\*(?![*\w])/g, '$1<i>$2</i>');
+        return esc(part).replace(/\[([^\]]+)\]\((https?:\/\/[^\s)"<>]+)\)/g, '<a class="ml" href="$2" target="_blank" rel="noopener">$1</a>').replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(/(^|[^*\w])\*([^*\s][^*]*?)\*(?![*\w])/g, '$1<i>$2</i>');
       }).join('');
     }
     const CHART_LANGS = ['diagram', 'chart', 'graf'];
@@ -690,6 +696,20 @@
         if (!c._ro && window.ResizeObserver) { let w = c.clientWidth; c._ro = new ResizeObserver(() => { if (Math.abs(c.clientWidth - w) > 8) { w = c.clientWidth; drawChart(c, spec, false); } }); c._ro.observe(c); }
       });
     }
+    // Källorna Falk läste på webben, som klickbara chips under svaret (öppnas i en ny flik)
+    function srcRow(list) {
+      const d = document.createElement('div'); d.className = 'srcs';
+      for (const k of list.slice(0, 6)) {
+        let u; try { u = new URL(k.url); } catch { continue; }
+        if (!/^https?:$/.test(u.protocol)) continue;
+        const host = u.hostname.replace(/^www\./, '');
+        const a = document.createElement('a'); a.href = u.href; a.target = '_blank'; a.rel = 'noopener'; a.title = (k.title || host) + '\n' + u.href;
+        const sp = document.createElement('span'); sp.textContent = host;
+        a.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg>';
+        a.appendChild(sp); d.appendChild(a);
+      }
+      return d;
+    }
     function bubble(role, html, cls, idx) {
       const el = document.createElement('div');
       el.className = 'msg ' + (role === 'user' ? 'user' : 'krypto') + (cls ? ' ' + cls : '');
@@ -697,6 +717,7 @@
       el.querySelector('.bubble').innerHTML = html;
       const hm = idx !== undefined ? history[idx] : null;
       if (role === 'user' && hm && hm.files && hm.files.length) { const fc = document.createElement('div'); fc.className = 'fchips'; fc.innerHTML = hm.files.map((f) => chipHtml(f, false)).join(''); el.insertBefore(fc, el.querySelector('.bubble')); if (!hm.content) el.querySelector('.bubble').remove(); }
+      if (role !== 'user' && hm && Array.isArray(hm.sources) && hm.sources.length) el.querySelector('.bubble').appendChild(srcRow(hm.sources));
       if (idx !== undefined) el.appendChild(actRow(role, idx));
       log.appendChild(el); if (role !== 'user') drawCharts(el, false); markLast(); scrollBottom(); return el;
     }
@@ -1018,7 +1039,7 @@
           }
         }
         setStatus('');
-        history.push({ role: 'assistant', content: clean, ts: Date.now() }); saveConvos();
+        history.push({ role: 'assistant', content: clean, ts: Date.now(), ...(Array.isArray(res.sources) && res.sources.length ? { sources: res.sources.slice(0, 6) } : {}) }); saveConvos();
         await writeOut(bubble('krypto', md(clean || '(tomt svar)'), '', history.length - 1));
       } else {
         const lost = history.pop(); saveConvos(); setStatus('');
