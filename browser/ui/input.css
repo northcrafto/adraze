@@ -573,61 +573,58 @@ body:has(#defbrowser-banner, #update-banner) .nt-stats { visibility: hidden; }
 .sug.ssearch .surl b { font-weight: 700; }
 .sug.ssearch .sfav svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 
-/* ── Inloggning: svart kort i samma stil som inställningarna (2026-09-05) ──
-   Alla id:n och svenska strängar är oförändrade så shell.js och i18n
-   fortsätter fungera; bara utseendet är nytt. */
-#login { --lg-bg: #f7f6f3; --lg-ink: #141416; --lg-mut: #6b6b72; --lg-line: #dcdad4; --lg-field: #fff; --lg-err: #c0392b;
-  background: var(--lg-bg); color: var(--lg-ink); overflow-y: auto; display: grid; place-items: center; padding: 48px 24px; }
-:root[data-theme="dark"] #login { --lg-bg: #0e0e10; --lg-ink: #f2f2f4; --lg-mut: #8d8f97; --lg-line: #2a2a2e; --lg-field: #161618; --lg-err: #ff8a84; }
+/* ── Inloggning: ett steg i taget, centrerat (2026-11-01) ──
+   En rubrik, en rad text, ett fält och en knapp per steg. Följer ljust/mörkt läge. */
+#login { --lg-bg: #f7f6f3; --lg-ink: #141416; --lg-mut: #6b6b72; --lg-line: #d9d7d0; --lg-field: #fff; --lg-err: #c0392b; --lg-knapp: #141416; --lg-knapp-text: #fff;
+  background: var(--lg-bg); color: var(--lg-ink); overflow-y: auto; display: grid; place-items: center; padding: 96px 24px 64px; }
+:root[data-theme="dark"] #login { --lg-bg: #1a1a1a; --lg-ink: #f2f1ee; --lg-mut: #9a9893; --lg-line: #3a3a38; --lg-field: #222221; --lg-err: #ff8a84; --lg-knapp: #ecebe8; --lg-knapp-text: #1a1a1a; }
 #login.hidden { display: none; }
-#login .lg-card { width: 100%; max-width: 360px; animation: lg-in .25s ease-out both; }
+#login .lg-card { width: 100%; max-width: 400px; text-align: center; }
+#login .lg-view { animation: lg-in .28s ease-out both; }
 @keyframes lg-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-#login .lg-close { position: absolute; top: 16px; right: 16px; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 6px; color: var(--lg-mut); cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { #login .lg-view { animation: none; } }
+#login .lg-close { position: absolute; top: 16px; right: 16px; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 8px; color: var(--lg-mut); cursor: pointer; }
 #login .lg-close:hover { color: var(--lg-ink); background: color-mix(in srgb, var(--lg-ink) 7%, transparent); }
-#login .lg-brand { display: flex; align-items: center; gap: 8px; margin-bottom: 36px; }
+#login .lg-brand { position: absolute; top: 40px; left: 0; right: 0; display: flex; align-items: center; justify-content: center; gap: 8px; pointer-events: none; }
 #login .lg-brand img { display: block; }
-#login .lg-brand-name { font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
-#login .lg-h { font-size: 26px; font-weight: 700; letter-spacing: -.025em; line-height: 1.15; }
-#login .lg-lead { font-size: 14px; color: var(--lg-mut); margin: 8px 0 28px; line-height: 1.5; }
+#login .lg-brand-name { font-size: 17px; font-weight: 700; letter-spacing: -.015em; }
+#login .lg-h { font-family: Georgia, "Times New Roman", serif; font-size: 34px; font-weight: 400; letter-spacing: -.02em; line-height: 1.15; text-wrap: balance; }
+#login .lg-lead { font-size: 14px; color: var(--lg-mut); margin: 10px 0 28px; line-height: 1.5; text-wrap: balance; }
 #login .lg-strong { color: var(--lg-ink); font-weight: 600; }
-#login .lg-lbl { display: block; font-size: 13px; font-weight: 600; margin: 0 0 6px; }
-#login .lg-lblrow { display: flex; align-items: baseline; justify-content: space-between; }
-#login .lg-field { display: flex; align-items: center; height: 44px; padding: 0 12px; border-radius: 6px; background: var(--lg-field); border: 1px solid var(--lg-line); margin-bottom: 18px; transition: border-color .12s, box-shadow .12s; }
-#login .lg-field:focus-within { border-color: var(--lg-ink); box-shadow: 0 0 0 1px var(--lg-ink); }
-#login .lg-in { flex: 1; min-width: 0; background: transparent; outline: none; border: 0; font-size: 15px; color: var(--lg-ink); }
-#login .lg-in.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .2em; }
-#login .lg-in::placeholder { color: color-mix(in srgb, var(--lg-mut) 70%, transparent); }
-#login .lg-eye { color: var(--lg-mut); cursor: pointer; display: grid; place-items: center; }
+/* fälten: stora, mjuka, texten i mitten */
+#login .lg-in { display: block; width: 100%; height: 50px; padding: 0 16px; border-radius: 12px; background: var(--lg-field); border: 1px solid var(--lg-line); outline: none; font-size: 15px; text-align: center; color: var(--lg-ink); transition: border-color .12s, box-shadow .12s; }
+#login .lg-in:focus { border-color: color-mix(in srgb, var(--lg-ink) 55%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--lg-ink) 8%, transparent); }
+#login .lg-in::placeholder { color: color-mix(in srgb, var(--lg-mut) 75%, transparent); }
+#login .lg-field { position: relative; }
+#login .lg-field .lg-in { padding: 0 44px; }
+#login .lg-eye { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--lg-mut); cursor: pointer; display: grid; place-items: center; }
 #login .lg-eye:hover { color: var(--lg-ink); }
 #login .lg-link { font-size: inherit; font-weight: 600; color: var(--lg-ink); cursor: pointer; text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--lg-ink) 30%, transparent); text-underline-offset: 3px; }
-#login .lg-link:hover { text-decoration-color: var(--color-terra); color: var(--color-terra); }
-#login .lg-lblrow .lg-link, #login .lg-row .lg-link { font-size: 13px; }
+#login .lg-link:hover { color: var(--color-terra); text-decoration-color: currentColor; }
 #login .lg-link.dim { color: var(--lg-mut); text-decoration: none; font-weight: 500; }
 #login .lg-link.dim:hover { color: var(--lg-ink); }
-#login .lg-err { margin: -6px 0 4px; font-size: 13px; font-weight: 500; color: var(--lg-err); }
-/* knappen: vätskefyllning underifrån vid hover */
-#login .lg-btn { position: relative; isolation: isolate; overflow: hidden; display: flex; align-items: center; justify-content: center; width: 100%; height: 46px; margin-top: 8px; border-radius: 6px; font-size: 15px; font-weight: 600; color: var(--lg-bg); background: var(--lg-ink); cursor: pointer; transition: color .3s; }
-#login .lg-btn::before { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--color-terra); transform: translateY(101%); transition: transform .35s cubic-bezier(.2,.8,.2,1); }
-#login .lg-btn:hover { color: #fff; }
-#login .lg-btn:hover::before { transform: none; }
-#login .lg-btn:disabled { opacity: .55; pointer-events: none; }
+#login .lg-err { margin-top: 10px; font-size: 13px; font-weight: 500; color: var(--lg-err); }
+#login .lg-btn { display: flex; align-items: center; justify-content: center; width: 100%; height: 46px; margin-top: 12px; border-radius: 12px; font-size: 15px; font-weight: 600; color: var(--lg-knapp-text); background: var(--lg-knapp); cursor: pointer; transition: opacity .15s; }
+#login .lg-btn:hover { opacity: .88; }
+#login .lg-btn:disabled { opacity: .5; pointer-events: none; }
 #login .lg-btn.ghost { background: transparent; color: var(--lg-ink); border: 1px solid var(--lg-line); }
-#login .lg-btn.ghost:hover { color: #fff; border-color: var(--color-terra); }
-#login .lg-or { display: flex; align-items: center; gap: 12px; margin: 16px 0 12px; font-size: 12.5px; color: var(--lg-mut); }
+#login .lg-btn.ghost:hover { opacity: 1; border-color: var(--lg-ink); }
+#login .lg-or { display: flex; align-items: center; gap: 14px; margin: 18px 0; font-size: 12.5px; color: var(--lg-mut); }
 #login .lg-or::before, #login .lg-or::after { content: ''; flex: 1; height: 1px; background: var(--lg-line); }
-#login .lg-google { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 46px; border-radius: 6px; border: 1px solid var(--lg-line); font-size: 15px; font-weight: 600; color: var(--lg-ink); background: transparent; cursor: pointer; transition: border-color .2s, background .2s; }
-#login .lg-google:hover { border-color: var(--lg-ink); }
+#login .lg-google { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 46px; border-radius: 12px; border: 1px solid var(--lg-line); font-size: 15px; font-weight: 600; color: var(--lg-ink); background: var(--lg-field); cursor: pointer; transition: border-color .15s; }
+#login .lg-google:hover { border-color: color-mix(in srgb, var(--lg-ink) 55%, transparent); }
 #login .lg-google:disabled { opacity: .55; pointer-events: none; }
-#login .lg-alt { display: block; width: 100%; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--lg-line); text-align: left; font-size: 13.5px; color: var(--lg-mut); cursor: pointer; }
+#login .lg-alt { display: block; margin: 32px auto 0; font-size: 13.5px; color: var(--lg-mut); cursor: pointer; }
 #login .lg-alt span { color: var(--lg-ink); font-weight: 600; margin-left: 4px; }
 #login .lg-alt:hover span { color: var(--color-terra); }
-#login .lg-code { display: block; width: 100%; height: 60px; margin-bottom: 18px; text-align: center; background: var(--lg-field); border: 1px solid var(--lg-line); border-radius: 6px; outline: none; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 28px; font-weight: 600; letter-spacing: .4em; text-indent: .4em; color: var(--lg-ink); }
+#login .lg-code { display: block; width: 100%; height: 60px; text-align: center; background: var(--lg-field); border: 1px solid var(--lg-line); border-radius: 12px; outline: none; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 26px; font-weight: 600; letter-spacing: .4em; text-indent: .4em; color: var(--lg-ink); }
 #login .lg-code::placeholder { color: color-mix(in srgb, var(--lg-mut) 40%, transparent); }
-#login .lg-code:focus { border-color: var(--lg-ink); box-shadow: 0 0 0 1px var(--lg-ink); }
+#login .lg-code:focus { border-color: color-mix(in srgb, var(--lg-ink) 55%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--lg-ink) 8%, transparent); }
 #login .lg-code.kid { font-size: 22px; letter-spacing: .16em; text-indent: .16em; text-transform: uppercase; }
-#login .lg-row { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; }
+#login .lg-row { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; font-size: 13.5px; }
+#login .lg-row.center { justify-content: center; }
 #login .lg-chip { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 4px; font-size: 11.5px; font-weight: 700; color: #fff; background: var(--color-terra); vertical-align: 1px; }
-#login .lg-status { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; font-size: 14px; }
+#login .lg-status { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 18px; font-size: 14px; }
 #login .lg-status i { width: 8px; height: 8px; border-radius: 50%; background: #2f9e67; flex: none; }
 
 

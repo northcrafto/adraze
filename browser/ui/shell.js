@@ -939,7 +939,7 @@ function updateAccountBtn() {
   try { if (typeof historyOpen !== 'undefined' && historyOpen) renderHistory(); } catch {}
 }
 function setLoginView(name) {
-  const map = { login: 'login-form', signup: 'login-signup', code: 'login-code', reset: 'login-reset', resetconfirm: 'login-reset-confirm', account: 'login-account-view', child: 'login-child' };
+  const map = { login: 'login-form', pw: 'login-pw-view', signup: 'login-signup', signuppw: 'login-signup-pw', code: 'login-code', reset: 'login-reset', resetconfirm: 'login-reset-confirm', resetpw: 'login-reset-pw', account: 'login-account-view', child: 'login-child' };
   for (const k in map) { const el = $(map[k]); if (el) el.style.display = (k === name) ? 'block' : 'none'; }
 }
 function openLogin() {
@@ -949,7 +949,7 @@ function openLogin() {
     $('login-email-shown').textContent = (account.name ? account.name + ' · ' : '') + (account.email || '');
     $('login-pro-badge').style.display = account.pro ? 'inline-flex' : 'none';
   } else {
-    $('login-email').value = ''; $('login-pw').value = ''; $('login-error').style.display = 'none';
+    $('login-email').value = ''; $('login-pw').value = ''; $('login-error').style.display = 'none'; $('start-error').style.display = 'none';
     setLoginView('login');
     setTimeout(() => $('login-email').focus(), 30);
   }
@@ -998,6 +998,17 @@ function doLogout(reopenKrypto) {
 }
 function busyBtn(id, busy, busyText, text) {
   const b = $(id); if (!b) return; b.disabled = busy; b.style.opacity = busy ? '0.7' : '1'; b.textContent = busy ? busyText : text;
+}
+// Steg 1 → 2: mejlen först, sedan lösenordet (ett steg i taget)
+function goPw() {
+  const email = $('login-email').value.trim().toLowerCase();
+  const err = $('start-error');
+  if (!EMAIL_RE.test(email)) { err.textContent = 'Fyll i en giltig mejladress.'; err.style.display = 'block'; return; }
+  err.style.display = 'none';
+  $('pw-email-shown').textContent = email;
+  $('login-pw').value = ''; $('login-error').style.display = 'none';
+  setLoginView('pw');
+  setTimeout(() => $('login-pw').focus(), 30);
 }
 async function doLogin() {
   const email = $('login-email').value.trim().toLowerCase();
@@ -1077,7 +1088,7 @@ async function doResetRequest() {
   try { await window.auth.resetRequest(email); } catch {}
   busyBtn('reset-send', false, 'Skickar…', 'Skicka kod');
   pendingResetEmail = email;
-  $('reset-code').value = ''; $('reset-pw').value = ''; $('reset-confirm-error').style.display = 'none';
+  $('reset-code').value = ''; $('reset-pw').value = ''; $('reset-confirm-error').style.display = 'none'; $('reset-code-error').style.display = 'none';
   setLoginView('resetconfirm');
   setTimeout(() => $('reset-code').focus(), 30);
 }
@@ -1406,27 +1417,47 @@ $('kn-avatar-file') && $('kn-avatar-file').addEventListener('change', knHandleAv
 $('login-close').addEventListener('click', () => { pendingKryptoAfterLogin = false; closeLogin(); });
 $('qr-copy').addEventListener('click', () => { try { navigator.clipboard.writeText($('qr-url').textContent); } catch {} $('qr-copy').textContent = tn('Kopierad!'); });
 $('qr-close').addEventListener('click', () => { if (active) active.overlay = null; $('qr').classList.add('hidden'); showActiveTab(); });
-$('login-email').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('login-pw').focus(); });
+$('login-email').addEventListener('keydown', (e) => { if (e.key === 'Enter') goPw(); });
+$('login-next').addEventListener('click', goPw);
+$('pw-change').addEventListener('click', () => { setLoginView('login'); setTimeout(() => $('login-email').focus(), 20); });
 $('login-pw').addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
 $('login-submit').addEventListener('click', doLogin);
-$('login-google').addEventListener('click', () => doGoogle('login-error', 'login-google'));
-$('signup-google').addEventListener('click', () => doGoogle('signup-error', 'signup-google'));
-$('to-signup').addEventListener('click', () => { $('signup-name').value = ''; $('signup-email').value = ''; $('signup-pw').value = ''; $('signup-error').style.display = 'none'; setLoginView('signup'); setTimeout(() => $('signup-name').focus(), 20); });
-$('to-login').addEventListener('click', () => { setLoginView('login'); setTimeout(() => $('login-email').focus(), 20); });
-$('signup-name').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('signup-email').focus(); });
-$('signup-email').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('signup-pw').focus(); });
+$('login-google').addEventListener('click', () => doGoogle('start-error', 'login-google'));
+$('to-signup').addEventListener('click', () => {
+  const email = $('login-email').value.trim().toLowerCase();
+  $('signup-email').value = email; $('signup-email-shown').textContent = email;
+  $('signup-name').value = ''; $('signup-pw').value = ''; $('name-error').style.display = 'none'; $('signup-error').style.display = 'none';
+  setLoginView('signup'); setTimeout(() => $('signup-name').focus(), 20);
+});
+$('to-login').addEventListener('click', () => { setLoginView('pw'); setTimeout(() => $('login-pw').focus(), 20); });
+function goSignupPw() {
+  if (!$('signup-name').value.trim()) { $('name-error').textContent = 'Fyll i ditt namn.'; $('name-error').style.display = 'block'; return; }
+  $('name-error').style.display = 'none';
+  setLoginView('signuppw'); setTimeout(() => $('signup-pw').focus(), 20);
+}
+$('signup-name').addEventListener('keydown', (e) => { if (e.key === 'Enter') goSignupPw(); });
+$('signup-next').addEventListener('click', goSignupPw);
+$('signup-pw-back').addEventListener('click', () => { setLoginView('signup'); setTimeout(() => $('signup-name').focus(), 20); });
 $('signup-pw').addEventListener('keydown', (e) => { if (e.key === 'Enter') doSignup(); });
 $('signup-submit').addEventListener('click', doSignup);
 $('login-code-input').addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6); });
 $('login-code-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') doVerifyCode(); });
 $('code-submit').addEventListener('click', doVerifyCode);
 $('code-resend').addEventListener('click', doResendCode);
-$('code-back').addEventListener('click', () => { setLoginView(pendingSubmit && pendingSubmit.type === 'signup' ? 'signup' : 'login'); });
+$('code-back').addEventListener('click', () => { setLoginView(pendingSubmit && pendingSubmit.type === 'signup' ? 'signuppw' : 'pw'); });
 $('to-reset').addEventListener('click', () => { $('reset-email').value = $('login-email').value || ''; $('reset-error').style.display = 'none'; setLoginView('reset'); setTimeout(() => $('reset-email').focus(), 20); });
 $('reset-email').addEventListener('keydown', (e) => { if (e.key === 'Enter') doResetRequest(); });
 $('reset-send').addEventListener('click', doResetRequest);
-$('reset-back').addEventListener('click', () => { setLoginView('login'); setTimeout(() => $('login-email').focus(), 20); });
+$('reset-back').addEventListener('click', () => { setLoginView('pw'); setTimeout(() => $('login-pw').focus(), 20); });
 $('reset-code').addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6); });
+function goResetPw() {
+  if ($('reset-code').value.replace(/\D/g, '').length !== 6) { $('reset-code-error').textContent = 'Koden är 6 siffror.'; $('reset-code-error').style.display = 'block'; return; }
+  $('reset-code-error').style.display = 'none'; $('reset-confirm-error').style.display = 'none';
+  setLoginView('resetpw'); setTimeout(() => $('reset-pw').focus(), 20);
+}
+$('reset-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') goResetPw(); });
+$('reset-code-next').addEventListener('click', goResetPw);
+$('reset-pw-back').addEventListener('click', () => { setLoginView('resetconfirm'); setTimeout(() => $('reset-code').focus(), 20); });
 $('reset-pw').addEventListener('keydown', (e) => { if (e.key === 'Enter') doResetConfirm(); });
 $('reset-confirm-submit').addEventListener('click', doResetConfirm);
 $('reset-confirm-back').addEventListener('click', () => setLoginView('reset'));
