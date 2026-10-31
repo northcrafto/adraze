@@ -349,6 +349,7 @@ function loadInTab(tab, url) {
 function backgroundCheck(tab, url) {
   if (/^adraze:/i.test(url || '')) { if (tab === active) setShield('ok'); return; }   // webbläsarens egna sidor
   if (!protectionOn) { if (tab === active) setShield('off'); return; }
+  if (tab.incognito) { if (tab === active) setShield(instantDanger(url) ? 'danger' : 'ok'); return; }   // inkognito: inget lämnar datorn
   if (tab.cleared.has(url) || tab.bypassed.has(url)) { if (tab === active) setShield(tab.verdict ? tab.verdict.status : 'ok'); return; }
   tab.cleared.add(url);
   if (tab === active) setShield('checking');
