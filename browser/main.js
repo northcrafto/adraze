@@ -362,31 +362,43 @@ async function dailyImage() {
 // Ritas in i Chromiums tomma chrome-error-dokument. Adressfältet behåller den riktiga adressen,
 // och "Försök igen" laddar om den. Ingen sida, inga nätanrop – bara text och en knapp.
 function felText(code, host) {
-  const internet = [-21, -106, -109];
-  if (internet.includes(code)) return [T('Du är inte ansluten till internet'), T('Kontrollera wifi eller nätverkskabeln och försök igen.')];
-  if ([-105, -137].includes(code)) return [T('Sidan kan inte nås'), T('Det gick inte att hitta servern för') + ' ' + host + '. ' + T('Kontrollera att adressen är rätt stavad.')];
-  if ([-7, -118].includes(code)) return [T('Sidan kan inte nås'), host + ' ' + T('tog för lång tid att svara.')];
-  if (code === -102) return [T('Sidan kan inte nås'), host + ' ' + T('vägrade att ansluta.')];
-  if (code <= -200 && code > -300) return [T('Anslutningen är inte säker'), T('Certifikatet för') + ' ' + host + ' ' + T('är ogiltigt. AdRaze stoppade sidan för att skydda dig.')];
-  return [T('Sidan kan inte nås'), T('Det gick inte att ladda') + ' ' + host + '.'];
+  const stavning = T('Kolla att adressen är rätt stavad'), dns = T('Kolla dina DNS-inställningar'), fel = T('Eller så är sidan bara fel eller nere just nu');
+  if ([-21, -106, -109].includes(code)) return [T('Du är inte ansluten till internet'), T('AdRaze kommer inte ut på nätet just nu.'), [T('Kolla wifi eller nätverkskabeln'), T('Starta om routern'), dns]];
+  if ([-105, -137].includes(code)) return [T('Sidan kan inte nås'), T('Det gick inte att hitta servern för') + ' ' + host + '.', [stavning, dns, fel]];
+  if ([-7, -118].includes(code)) return [T('Sidan kan inte nås'), host + ' ' + T('tog för lång tid att svara.'), [T('Försök igen om en stund'), dns, fel]];
+  if (code === -102) return [T('Sidan kan inte nås'), host + ' ' + T('vägrade att ansluta.'), [stavning, fel]];
+  if (code <= -200 && code > -300) return [T('Anslutningen är inte säker'), T('Certifikatet för') + ' ' + host + ' ' + T('är ogiltigt. AdRaze stoppade sidan för att skydda dig.'), [T('Kolla att datorns datum och tid stämmer'), fel]];
+  return [T('Sidan kan inte nås'), T('Det gick inte att ladda') + ' ' + host + '.', [stavning, dns, fel]];
 }
 function visaFelsida(wc, code, desc, url) {
   let host = url; try { host = new URL(url).hostname; } catch {}
-  const [rubrik, text] = felText(code, host);
-  const d = { rubrik, text, kod: String(desc || 'ERR_FAILED'), knapp: T('Försök igen'), url };
+  const [rubrik, text, tips] = felText(code, host);
+  const d = { rubrik, text, tips, kod: String(desc || 'ERR_FAILED'), knapp: T('Försök igen'), url };
   const kod = `(() => { const d = ${JSON.stringify(d)};
     document.title = d.rubrik;
     const s = document.createElement('style');
-    s.textContent = \`html{color-scheme:light dark;background:Canvas}body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;color:CanvasText}
-      .b{max-width:520px;padding:32px 24px}.i{width:56px;height:56px;color:#ff5a2a;margin-bottom:22px}
-      h1{font-size:24px;font-weight:600;margin:0 0 10px}p{margin:0 0 6px;opacity:.78;word-break:break-word}
-      code{display:block;margin-top:14px;font:12px ui-monospace,monospace;opacity:.55}
-      button{margin-top:26px;padding:10px 22px;border:0;border-radius:999px;background:#ff5a2a;color:#fff;font:600 14px system-ui,sans-serif;cursor:pointer}
-      button:hover{background:#e8481b}button:focus-visible{outline:2px solid #ff5a2a;outline-offset:3px}\`;
+    s.textContent = \`html{background:#141414}body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;color:#ececec;background:radial-gradient(ellipse at 50% 30%,#1f1f1f 0,#141414 60%)}
+      .b{max-width:480px;padding:32px 24px;text-align:center}
+      .papper{width:112px;height:140px;margin:0 auto 30px;filter:drop-shadow(0 18px 30px rgba(0,0,0,.55))}
+      h1{font-size:24px;font-weight:600;margin:0 0 8px;letter-spacing:-.01em}
+      .t{margin:0;color:#9b9b9b;word-break:break-word}
+      ul{list-style:none;margin:22px auto 0;padding:14px 18px;text-align:left;background:#1c1c1c;border:1px solid #2b2b2b;border-radius:12px;color:#bdbdbd;display:inline-block}
+      li{position:relative;padding-left:18px;margin:5px 0}li::before{content:"";position:absolute;left:2px;top:.68em;width:5px;height:5px;border-radius:50%;background:#5a5a5a}
+      code{display:block;margin-top:18px;font:12px ui-monospace,monospace;color:#5f5f5f}
+      button{margin-top:24px;padding:10px 24px;border:1px solid #3a3a3a;border-radius:999px;background:#262626;color:#f2f2f2;font:600 14px system-ui,sans-serif;cursor:pointer;transition:background .15s,border-color .15s}
+      button:hover{background:#303030;border-color:#4a4a4a}button:focus-visible{outline:2px solid #8a8a8a;outline-offset:3px}\`;
     document.head.replaceChildren(s);
-    document.body.innerHTML = '<div class="b"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z"/><path d="M3.6 9h16.8M3.6 15h16.8"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/><path d="M5 5l14 14" stroke-width="2"/></svg><h1></h1><p></p><code></code><button type="button"></button></div>';
+    document.body.innerHTML = '<div class="b"><svg class="papper" viewBox="0 0 112 140" fill="none">'
+      + '<path d="M8 4h70l30 30v98a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z" fill="#2a2a2a" stroke="#3a3a3a" stroke-width="1.5"/>'
+      + '<path d="M78 4v24a6 6 0 0 0 6 6h24z" fill="#3d3d3d" stroke="#4a4a4a" stroke-width="1.5" stroke-linejoin="round"/>'
+      + '<path d="M78 34h30" stroke="#000" stroke-opacity=".25" stroke-width="3"/>'
+      + '<g stroke="#454545" stroke-width="5" stroke-linecap="round"><path d="M22 56h50"/><path d="M22 72h66"/><path d="M22 88h40"/></g>'
+      + '<g stroke="#6a6a6a" stroke-width="3.5" stroke-linecap="round"><path d="M44 106l12 12M56 106l-12 12"/></g></svg>'
+      + '<h1></h1><p class="t"></p><ul></ul><code></code><div><button type="button"></button></div></div>';
     document.querySelector('h1').textContent = d.rubrik;
-    document.querySelector('p').textContent = d.text;
+    document.querySelector('.t').textContent = d.text;
+    const ul = document.querySelector('ul');
+    for (const t of d.tips) { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); }
     document.querySelector('code').textContent = d.kod;
     const k = document.querySelector('button'); k.textContent = d.knapp;
     k.onclick = () => { location.href = d.url; }; })()`;
