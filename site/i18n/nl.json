@@ -436,5 +436,7 @@
   "case.reply": "Schrijf een antwoord",
   "case.send": "Versturen",
   "case.closed": "Deze zaak is gesloten. Als je weer schrijft, gaat hij opnieuw open.",
-  "case.back": "Terug naar support"
+  "case.back": "Terug naar support",
+  "hero.eaten": "advertenties opgegeten",
+  "hero.gorilla_alt": "De AdRaze-gorilla eet advertenties op"
 }

@@ -73,3 +73,8 @@ if (sprak) {
     if (text) text.textContent = a.dataset.inloggad;
   }
 })();
+
+// Staplarna i adblock-test-diagrammet växer fram när de syns
+document.querySelectorAll('.sf-test').forEach((el) => new IntersectionObserver(([e], o) => {
+  if (e.isIntersecting) { el.classList.add('syns'); o.disconnect(); }
+}, { threshold: 0.4 }).observe(el));

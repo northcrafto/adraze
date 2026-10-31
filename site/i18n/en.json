@@ -436,5 +436,7 @@
   "case.reply": "Write a reply",
   "case.send": "Send",
   "case.closed": "This case is closed. If you write again, it opens again.",
-  "case.back": "Back to support"
+  "case.back": "Back to support",
+  "hero.eaten": "ads eaten",
+  "hero.gorilla_alt": "The AdRaze gorilla eating ads"
 }

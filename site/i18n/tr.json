@@ -436,5 +436,7 @@
   "case.reply": "Bir yanıt yazın",
   "case.send": "Gönder",
   "case.closed": "Bu talep kapandı. Tekrar yazarsanız yeniden açılır.",
-  "case.back": "Desteğe dön"
+  "case.back": "Desteğe dön",
+  "hero.eaten": "reklam yendi",
+  "hero.gorilla_alt": "AdRaze gorili reklamları yiyor"
 }

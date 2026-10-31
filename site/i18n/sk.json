@@ -436,5 +436,7 @@
   "case.reply": "Napíšte odpoveď",
   "case.send": "Odoslať",
   "case.closed": "Požiadavka je uzavretá. Keď napíšete znova, otvorí sa.",
-  "case.back": "Späť na podporu"
+  "case.back": "Späť na podporu",
+  "hero.eaten": "zjedených reklám",
+  "hero.gorilla_alt": "Gorila AdRaze je reklamy"
 }

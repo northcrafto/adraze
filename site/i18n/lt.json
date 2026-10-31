@@ -436,5 +436,7 @@
   "case.reply": "Parašykite atsakymą",
   "case.send": "Siųsti",
   "case.closed": "Kreipimasis užbaigtas. Jei parašysite vėl, jis bus atidarytas iš naujo.",
-  "case.back": "Atgal į pagalbą"
+  "case.back": "Atgal į pagalbą",
+  "hero.eaten": "suvalgytų reklamų",
+  "hero.gorilla_alt": "AdRaze gorila valgo reklamas"
 }

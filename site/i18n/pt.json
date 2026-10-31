@@ -436,5 +436,7 @@
   "case.reply": "Escreva uma resposta",
   "case.send": "Enviar",
   "case.closed": "Este chamado está encerrado. Se você escrever de novo, ele será reaberto.",
-  "case.back": "Voltar ao suporte"
+  "case.back": "Voltar ao suporte",
+  "hero.eaten": "anúncios devorados",
+  "hero.gorilla_alt": "O gorila do AdRaze a devorar anúncios"
 }

@@ -436,5 +436,7 @@
   "case.reply": "Skriv ett svar",
   "case.send": "Skicka",
   "case.closed": "Ärendet är avslutat. Skriver du igen öppnas det på nytt.",
-  "case.back": "Till supporten"
+  "case.back": "Till supporten",
+  "hero.eaten": "annonser uppätna",
+  "hero.gorilla_alt": "AdRaze-gorillan äter upp reklamlappar"
 }

@@ -436,5 +436,7 @@
   "case.reply": "Écrire une réponse",
   "case.send": "Envoyer",
   "case.closed": "Cette demande est clôturée. Si vous écrivez à nouveau, elle sera rouverte.",
-  "case.back": "Retour à l’assistance"
+  "case.back": "Retour à l’assistance",
+  "hero.eaten": "pubs dévorées",
+  "hero.gorilla_alt": "Le gorille AdRaze dévore les pubs"
 }

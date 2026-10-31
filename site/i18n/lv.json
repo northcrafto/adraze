@@ -436,5 +436,7 @@
   "case.reply": "Raksti atbildi",
   "case.send": "Sūtīt",
   "case.closed": "Pieteikums ir slēgts. Ja rakstīsi vēlreiz, tas atvērsies no jauna.",
-  "case.back": "Atpakaļ uz atbalstu"
+  "case.back": "Atpakaļ uz atbalstu",
+  "hero.eaten": "apēstas reklāmas",
+  "hero.gorilla_alt": "AdRaze gorilla ēd reklāmas"
 }
