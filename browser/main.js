@@ -1782,13 +1782,13 @@ ipcMain.handle('krypto:chat', async (e, messages) => {
       // AdRazes egen server (pro.js /falk/chat), bara för Pro
       const r = await fetch(ADRAZE_API + '/falk/chat', {
         method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json', authorization: 'Bearer ' + token },
-        body: JSON.stringify(payload), signal: AbortSignal.timeout(70000),
+        body: JSON.stringify(payload), signal: AbortSignal.timeout(90000),
       });
       const json = await r.json().catch(() => ({}));
       if (r.status === 401) return { ok: false, needLogin: true, message: 'Logga in igen för att använda Falk.' };
       if (!r.ok || !json.ok) { klog({ stage: 'http', attempt, status: r.status, error: json.error }); return { ok: false, error: json.error, message: json.message || json.error || 'Något gick fel. Försök igen om en stund.' }; }
       klog({ stage: 'ok', attempt });
-      return { ok: true, reply: json.reply };
+      return { ok: true, reply: json.reply, sources: Array.isArray(json.sources) ? json.sources.slice(0, 6) : [] };
     } catch (err) {
       klog({ stage: 'throw', attempt, err: String(err && (err.name || err.message || err)) });
       if (attempt === 2) return { ok: false, message: 'Kunde inte nå Falk just nu. Kontrollera din uppkoppling och försök igen.' };
