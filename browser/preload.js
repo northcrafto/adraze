@@ -16,6 +16,7 @@ contextBridge.exposeInMainWorld('skoll', {
   adblockToggle: (on) => ipcRenderer.invoke('skoll:adblock-toggle', on),
   adblockState: () => ipcRenderer.invoke('skoll:adblock-state'),
   onAdblockCount: (cb) => ipcRenderer.on('adblock:count', (_e, n) => cb(n)),
+  onAdblockTab: (cb) => ipcRenderer.on('adblock:tab', (_e, id, n) => cb(id, n)),
   onBlockinst: (cb) => ipcRenderer.on('blockinst:andrat', (_e, v) => cb(v || {})),
   onAdblockHit: (cb) => ipcRenderer.on('adblock:hit', (_e, type) => cb(type)),
 });

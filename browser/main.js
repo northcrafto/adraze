@@ -227,6 +227,15 @@ const TRACKER_HOSTS = new Set([
 ]);
 let adblockOn = true;
 let adblockCount = 0;
+// Räknaren i adressfältet gäller fliken du tittar på (som Brave): antal stoppade på sidan, nollas vid ny sida
+function flikBlockerad(wcOrId) {
+  try {
+    const wc = typeof wcOrId === 'number' ? require('electron').webContents.fromId(wcOrId) : wcOrId;
+    if (!wc || wc.isDestroyed() || wc.__tabId == null || !wc.__ctx) return;
+    wc.__blocked = (wc.__blocked || 0) + 1;
+    sendTo(wc.__ctx, 'adblock:tab', wc.__tabId, wc.__blocked);
+  } catch {}
+}
 function hostCategory(url) {
   try {
     const h = new URL(url).hostname;
@@ -250,8 +259,9 @@ const adblock = new AdrazeAdblock({
   isOn: () => adblockOn,
   inst: blockinst,
   // kat: 'ad' | 'tracker' | 'danger' – samma indelning som tilläggets ads/privacy/security
-  onBlocked: (url, kat, typ) => {
+  onBlocked: (url, kat, typ, wcId) => {
     adblockCount++; broadcast('adblock:count', adblockCount);
+    flikBlockerad(wcId);
     if (process.env.ADRAZE_DEBUG) console.log('[adraze] stoppad', kat, typ, url.slice(0, 140));
     if (kat === 'danger' && typ === 'main_frame') return;   // räknas av skalets varning (en gång per sida)
     broadcast('adblock:hit', kat === 'ad' && hostCategory(url) === 'tracker' ? 'tracker' : kat);
@@ -649,7 +659,7 @@ function ensureView(ctx, tabId) {
       const lc = wc.__lastClick;
       if (!(lc && Date.now() - lc.t < 5000)) {
         e.preventDefault();
-        adblockCount++; broadcast('adblock:count', adblockCount); broadcast('adblock:hit', 'ad');
+        adblockCount++; broadcast('adblock:count', adblockCount); broadcast('adblock:hit', 'ad'); flikBlockerad(wc);
         sendTo(ctx, 'toast', T('AdRaze stoppade en omdirigering till') + ' ' + (siteOf(url) || url));
         return;
       }
@@ -692,6 +702,7 @@ function ensureView(ctx, tabId) {
     lasvy.kanLasa(wc).then((ok) => { wc.__readerable = ok; sendTo(ctx, 'reader-available', tabId, ok, false); });
   });
   wc.on('did-start-navigation', (_e, _u, inPage, isMain) => { if (isMain && !inPage) { wc.__reader = false; sendTo(ctx, 'reader-available', tabId, false, false); } });
+  wc.on('did-start-navigation', (_e, _u, inPage, isMain) => { if (isMain && !inPage && wc.__blocked) { wc.__blocked = 0; sendTo(ctx, 'adblock:tab', tabId, 0); } });
   wc.on('dom-ready', () => { try { if (ctx.defaultZoom !== 1) wc.setZoomFactor(ctx.defaultZoom); } catch {} });
   // Video/element går i helskärm (sidans egen fullscreen-knapp) → täck HELA skärmen
   wc.on('enter-html-full-screen', () => { ctx._wasFull = ctx.win.isFullScreen(); ctx.htmlFull = true; setFull(ctx, true); applyBounds(ctx); });
