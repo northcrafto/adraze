@@ -436,6 +436,10 @@ window.view.onOpenTabRaw((rawUrl) => {
 window.view.onShowQR((url, dataUrl) => {
   $('qr-img').src = dataUrl;
   $('qr-url').textContent = url;
+  let host = url; try { host = new URL(url).hostname.replace(/^www\./, ''); } catch {}
+  $('qr-host').textContent = host;
+  $('qr-fav').src = (active && active.favicon) || 'adraze-mark-dark.png';
+  $('qr-copy').textContent = tn('Kopiera länk');
   hideInfobar();
   window.view.hide();
   hideOverlayElements();
@@ -1406,6 +1410,7 @@ $('kn-delete') && $('kn-delete').addEventListener('click', showConfirmDelete);
 $('kn-avatar') && $('kn-avatar').addEventListener('click', () => { const f = $('kn-avatar-file'); if (f) f.click(); });
 $('kn-avatar-file') && $('kn-avatar-file').addEventListener('change', knHandleAvatar);
 $('login-close').addEventListener('click', () => { pendingKryptoAfterLogin = false; closeLogin(); });
+$('qr-copy').addEventListener('click', () => { try { navigator.clipboard.writeText($('qr-url').textContent); } catch {} $('qr-copy').textContent = tn('Kopierad!'); });
 $('qr-close').addEventListener('click', () => { if (active) active.overlay = null; $('qr').classList.add('hidden'); showActiveTab(); });
 $('login-email').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('login-pw').focus(); });
 $('login-pw').addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });

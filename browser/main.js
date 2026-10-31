@@ -546,7 +546,7 @@ async function sparaBildSom(ctx, wc, src) {
   try { wc.downloadURL(src); } catch { nastaLaddningSokvag = ''; }
 }
 async function showQR(ctx, url) {
-  try { const dataUrl = await QRCode.toDataURL(url, { width: 260, margin: 1, color: { dark: '#0e2a47', light: '#ffffff' } }); sendTo(ctx, 'show-qr', url, dataUrl); } catch {}
+  try { const dataUrl = await QRCode.toDataURL(url, { width: 416, margin: 0, errorCorrectionLevel: 'H', color: { dark: '#141414', light: '#ffffff' } }); sendTo(ctx, 'show-qr', url, dataUrl); } catch {}
 }
 /* Skriv ut: finns en skrivare → systemets utskriftsdialog. Annars faller vi
  * tillbaka på PDF (som Chromes "Spara som PDF") så knappen ALLTID gör något. */

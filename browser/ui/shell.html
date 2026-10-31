@@ -481,13 +481,41 @@
     </div>
 
     <!-- QR-kod för sidan -->
-    <div id="qr" class="hidden absolute inset-0 z-[70] grid place-items-center p-6" style="background:linear-gradient(160deg,#0e2a47,#14375c);">
-      <div class="bg-white rounded-[10px] px-8 py-7 text-center shadow-[0_30px_80px_rgba(0,0,0,.45)] relative">
-        <button id="qr-close" class="absolute top-3.5 right-3.5 icon-btn w-8 h-8" style="color:var(--color-navy-900);"><svg class="ic ic-sm"><use href="#i-close" /></svg></button>
-        <h1 class="text-[18px] font-extrabold text-navy-900 mb-1">QR-kod för sidan</h1>
-        <p class="text-[12.5px] text-navy-900/50 mb-4">Skanna med telefonen för att öppna sidan.</p>
-        <img id="qr-img" alt="QR-kod" class="mx-auto rounded-lg" width="220" height="220" />
-        <div id="qr-url" class="mt-3 text-[11.5px] text-navy-900/45 font-mono break-all" style="max-width:240px;margin-left:auto;margin-right:auto;"></div>
+    <div id="qr" class="hidden absolute inset-0 z-[70]">
+      <style>
+        #qr{display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 30%,#202020 0,#121212 65%);color:#ececec;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+        #qr.hidden{display:none}
+        #qr .qr-kort{position:relative;width:340px;max-width:100%;padding:26px 26px 22px;background:#1b1b1b;border:1px solid #2c2c2c;border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,.55);text-align:center;animation:qr-in .22s cubic-bezier(.2,.8,.2,1)}
+        @keyframes qr-in{from{opacity:0;transform:translateY(8px) scale(.98)}}
+        @media (prefers-reduced-motion:reduce){#qr .qr-kort{animation:none}}
+        #qr .qr-x{position:absolute;top:14px;right:14px;width:32px;height:32px;display:grid;place-items:center;border-radius:999px;color:#9a9a9a;background:transparent;border:0;cursor:pointer}
+        #qr .qr-x:hover{background:#2a2a2a;color:#fff}
+        #qr .qr-site{display:inline-flex;align-items:center;gap:8px;max-width:100%;padding:5px 12px 5px 6px;border-radius:999px;background:#242424;border:1px solid #303030;font-size:12.5px;color:#cfcfcf}
+        #qr .qr-site img{width:18px;height:18px;border-radius:5px;flex:none;background:#2e2e2e}
+        #qr .qr-site span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        #qr h1{margin:16px 0 4px;font-size:19px;font-weight:650;letter-spacing:-.01em;color:#f3f3f3}
+        #qr .qr-sub{margin:0 0 20px;font-size:13px;color:#8d8d8d}
+        #qr .qr-ram{position:relative;width:236px;height:236px;margin:0 auto;padding:14px;border-radius:16px;background:#fff;box-shadow:0 0 0 1px rgba(255,255,255,.06),0 10px 30px rgba(0,0,0,.4)}
+        #qr .qr-ram::before{content:"";position:absolute;inset:-6px;border-radius:21px;border:1.5px solid rgba(255,75,31,.55);pointer-events:none}
+        #qr #qr-img{display:block;width:208px;height:208px;image-rendering:pixelated}
+        #qr .qr-logo{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:12px;background:#fff;padding:5px;box-shadow:0 0 0 3px #fff}
+        #qr .qr-logo img{width:100%;height:100%;display:block}
+        #qr #qr-url{margin:18px auto 0;max-width:280px;font:11.5px ui-monospace,monospace;color:#6f6f6f;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        #qr .qr-knapp{margin-top:16px;display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:999px;background:#ff4b1f;color:#fff;border:0;font:600 13.5px system-ui,sans-serif;cursor:pointer;transition:background .15s}
+        #qr .qr-knapp:hover{background:#e8401a}
+        #qr .qr-knapp:focus-visible,#qr .qr-x:focus-visible{outline:2px solid #ff4b1f;outline-offset:3px}
+      </style>
+      <div class="qr-kort" role="dialog" aria-labelledby="qr-titel">
+        <button id="qr-close" class="qr-x" title="Stäng"><svg class="ic ic-sm"><use href="#i-close" /></svg></button>
+        <div class="qr-site"><img id="qr-fav" alt="" src="adraze-mark-dark.png" /><span id="qr-host"></span></div>
+        <h1 id="qr-titel">Öppna på telefonen</h1>
+        <p class="qr-sub">Rikta kameran mot koden.</p>
+        <div class="qr-ram">
+          <img id="qr-img" alt="QR-kod" width="208" height="208" />
+          <div class="qr-logo"><img src="adraze-mark.png" alt="" /></div>
+        </div>
+        <div id="qr-url"></div>
+        <button id="qr-copy" class="qr-knapp" type="button">Kopiera länk</button>
       </div>
     </div>
 
