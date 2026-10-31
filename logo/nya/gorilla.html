@@ -1,0 +1,70 @@
+<!doctype html><meta charset="utf-8"><title>AdRaze – ritade loggor</title>
+<style>
+@font-face{font-family:News;src:url(fonts/Newsreader.ttf);font-weight:200 800}
+@font-face{font-family:NewsI;src:url(fonts/Newsreader-Italic.ttf);font-weight:200 800}
+@font-face{font-family:InterK;src:url(fonts/InterDisplay-Black.otf);font-weight:900}
+:root{--paper:#ede5d6;--ink:#1b1916;--night:#151412;--o:#ff4b1f}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:News,serif;padding:40px 44px}
+h1{font-weight:400;font-size:40px;margin:0 0 28px}h1 em{font-family:NewsI}
+.g{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.k{display:flex;flex-direction:column}
+.ruta{aspect-ratio:1;border-radius:28px;display:grid;place-items:center;position:relative}
+.ljus{background:#f4efe6;outline:3px solid var(--ink);outline-offset:-3px}
+.mork{background:var(--night);margin-top:14px;aspect-ratio:2.2}
+.ruta svg{width:78%;overflow:visible}.mork svg{width:34%}
+.sma{display:flex;gap:14px;align-items:center;margin-top:14px}
+.sma svg{overflow:visible}
+h2{font-weight:400;font-size:26px;margin:14px 0 2px}h2 em{font-family:NewsI}
+p{margin:0;font-size:17px;line-height:1.35;color:#4a443c}
+.ink{fill:none;stroke:var(--ink);stroke-linecap:round;stroke-linejoin:round}
+.ordm{font-family:News;font-size:56px;letter-spacing:-1px}.ordm em{font-family:NewsI}
+</style>
+<h1>AdRaze, <em>gorillan.</em></h1>
+<div class="g" id="g"></div>
+<script>
+const H=(n,s)=>{const x=Math.sin(n*127.1+(s||1)*311.7)*43758.5453;return(x-Math.floor(x))*2-1};
+function smooth(p,c){const n=p.length,f=v=>v.toFixed(1);if(!c){let d=`M${f(p[0][0])} ${f(p[0][1])}`;for(let i=1;i<n-1;i++){const a=p[i],b=p[i+1];d+=` Q${f(a[0])} ${f(a[1])} ${f((a[0]+b[0])/2)} ${f((a[1]+b[1])/2)}`}return d+` L${f(p[n-1][0])} ${f(p[n-1][1])}`}
+let d=`M${f((p[0][0]+p[n-1][0])/2)} ${f((p[0][1]+p[n-1][1])/2)}`;for(let i=0;i<n;i++){const a=p[i],b=p[(i+1)%n];d+=` Q${f(a[0])} ${f(a[1])} ${f((a[0]+b[0])/2)} ${f((a[1]+b[1])/2)}`}return d+'Z'}
+const jit=(p,s,st,a)=>p.map((q,i)=>[q[0]+H(st*7+i*13,s)*a,q[1]+H(st*7+i*13+5,s+3)*a]);
+const blob=(cx,cy,r,s,n,irr)=>Array.from({length:n},(_,i)=>{const a=i/n*Math.PI*2,rr=r*(1+H(i*3+1,s)*irr);return[cx+Math.cos(a)*rr,cy+Math.sin(a)*rr]});
+const line=(a,b,k)=>Array.from({length:k+1},(_,i)=>[a[0]+(b[0]-a[0])*i/k,a[1]+(b[1]-a[1])*i/k]);
+function rect(x,y,w,h,r){const o=[],C=[[x,y],[x+w,y],[x+w,y+h],[x,y+h]];for(let c=0;c<4;c++){const a=C[c],b=C[(c+1)%4],L=Math.hypot(b[0]-a[0],b[1]-a[1]),ux=(b[0]-a[0])/L,uy=(b[1]-a[1])/L;o.push([a[0]+ux*r*.3,a[1]+uy*r*.3]);for(let i=0;i<3;i++){const t=i/2;o.push([a[0]+ux*r+(b[0]-a[0]-2*ux*r)*t,a[1]+uy*r+(b[1]-a[1]-2*uy*r)*t])}o.push([b[0]-ux*r*.3,b[1]-uy*r*.3])}return o}
+// varje logga = lista av lager {p:punkter, c:sluten, fill, stroke, w, amp}
+const O='#ff4b1f',I='#1b1916',P='#f4efe6',Y='#ffd23e';
+function A(x,y,s){ // handritat A som tre streck
+ return[{p:[[x-26*s,y+34*s],[x-12*s,y-4*s],[x,y-36*s]],w:9},{p:[[x,y-36*s],[x+12*s,y-4*s],[x+26*s,y+34*s]],w:9},{p:[[x-15*s,y+10*s],[x+15*s,y+8*s]],w:8}]}
+const rot=(p,cx,cy,dg)=>{const a=dg*Math.PI/180,c=Math.cos(a),n=Math.sin(a);return p.map(([x,y])=>[cx+(x-cx)*c-(y-cy)*n,cy+(x-cx)*n+(y-cy)*c])};
+const dot=(x,y,r,s)=>({p:blob(x,y,r,s,8,.08),c:1,fill:I,amp:.6});
+const F='#3a332d',ANS='#c9b8a0';
+const huvud=(fur,ans,dx,dy)=>{const m=p=>p.map(([x,y])=>[x+(dx||0),y+(dy||0)]);return[
+ {p:m(blob(40,106,13,2,8,.06)),c:1,fill:fur,w:7,amp:1},{p:m(blob(160,106,13,3,8,.06)),c:1,fill:fur,w:7,amp:1},
+ {p:m([[100,30],[128,38],[150,60],[160,92],[157,126],[146,152],[124,168],[100,173],[76,168],[54,152],[43,126],[40,92],[50,60],[72,38]]),c:1,fill:fur,w:8,amp:1.6},
+ {p:m([[100,72],[120,66],[138,76],[142,94],[136,110],[148,128],[143,150],[124,162],[100,165],[76,162],[57,150],[52,128],[64,110],[58,94],[62,76],[80,66]]),c:1,fill:ans,w:6,amp:1.4},
+ {p:m([[62,92],[80,82],[100,90],[120,82],[138,92]]),w:10,amp:1},
+ dot(82+(dx||0),102+(dy||0),6,1),dot(118+(dx||0),102+(dy||0),6,2),
+ {p:m([[85,128],[90,114],[100,111],[110,114],[115,128]]),w:6,amp:.8},dot(93+(dx||0),127+(dy||0),3.5,4),dot(107+(dx||0),127+(dy||0),3.5,5),
+ {p:m([[78,147],[100,152],[122,147]]),w:6,amp:.8}]};
+const IDEER=[
+ {namn:'Gorillan',sub:'på klicken',txt:'Ett handritat gorillahuvud ovanpå den orangea klicken. Stark, lugn och lätt att känna igen.',
+  lager:()=>[{p:blob(100,104,92,4,16,.06),c:1,fill:O,amp:2.2},...huvud(F,ANS)]},
+ {namn:'Gorillan',sub:'äter reklam',txt:'Samma gorilla, men med en gul AD-lapp i käften. Rolig – funkar som maskot i filmer och på sajten.',
+  lager:()=>[{p:blob(100,104,92,9,16,.06),c:1,fill:O,amp:2.2},...huvud(F,ANS).slice(0,-1),
+   {p:rot(rect(70,138,62,26,5),101,151,-8),c:1,fill:Y,w:5,amp:.9,txt:['AD',101,159,-8,0,20]}]},
+ {namn:'Orange gorilla',sub:'i AdRaze-färg',txt:'Gorillan själv i orange – ingen bakgrund behövs. Bäst som appikon i mörkt läge.',
+  lager:()=>huvud(O,'#ffd9c9')},
+];
+const ritaSVG=(L,st,storlek,mork)=>{let s=`<svg viewBox="0 0 200 200" width="${storlek||''}">`;
+ L.forEach((l,j)=>{const pts=jit(l.p,j*17+3,st,l.amp||1.5);const st2=l.w?`stroke:${l.stroke||(mork?P:I)};stroke-width:${l.w}`:'stroke:none';
+  s+=`<path class="ink" d="${smooth(pts,l.c)}" style="fill:${l.fill||'none'};${st2}"/>`;
+  if(l.txt){const[t,x,y,rot,ff,fs,col]=l.txt;s+=`<text x="${x}" y="${y}" transform="rotate(${rot} ${x} ${y})" text-anchor="middle" style="font:${ff?'400':'900'} ${fs||26}px ${ff||'InterK'};fill:${col||I}">${t}</text>`}});
+ return s+'</svg>'};
+const g=document.getElementById('g');
+IDEER.forEach((d,i)=>{const k=document.createElement('div');k.className='k';
+ k.innerHTML=`<div class="ruta ljus" data-i="${i}" data-t="stor"></div><div class="ruta mork" data-i="${i}" data-t="mork"></div>
+ <div class="sma"><span data-i="${i}" data-t="64"></span><span data-i="${i}" data-t="32"></span><span data-i="${i}" data-t="16"></span>
+ ${d.ord?`<span class="ordm" style="margin-left:auto">Ad<em>Raze</em></span>`:''}</div>
+ <h2>${String.fromCharCode(65+i)}. ${d.namn} – <em>${d.sub.replace(/<\/?em>/g,'')}</em></h2><p>${d.txt}</p>`;g.appendChild(k)});
+let st=0;function tick(){st++;document.querySelectorAll('[data-i]').forEach(el=>{const d=IDEER[+el.dataset.i],t=el.dataset.t;
+ el.innerHTML=ritaSVG(d.lager(),st,/^\d+$/.test(t)?t:0,t==='mork')});}
+tick();if(!new URLSearchParams(location.search).has('still'))setInterval(tick,110);
+</script>
