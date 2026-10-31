@@ -345,22 +345,18 @@
       </div>
     </div>
 
-    <!-- Varningsskärm -->
-    <div id="danger" class="hidden absolute inset-0 z-50 grid place-items-center p-6"
-         style="background: linear-gradient(160deg,#5f1d1d,#3a1212);">
-      <div class="w-full max-w-[540px] bg-white rounded-[10px] px-10 py-9 text-center shadow-[0_30px_80px_rgba(0,0,0,.45)]">
-        <div class="mx-auto w-16 h-16 grid place-items-center rounded-[12px]" style="background:#fbeaea; color:var(--color-danger);">
-          <svg class="ic" style="width:34px;height:34px;stroke-width:1.6;"><use href="#i-shield-x" /></svg>
+    <!-- Varningsskärm: en symbol, en anledning, två val (2026-11-01) -->
+    <div id="danger" class="hidden absolute inset-0 z-50">
+      <div class="dg-card">
+        <svg class="dg-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 2.4 17.6A2 2 0 0 0 4.1 20.6h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4.5M12 17v.1"/></svg>
+        <h1 id="danger-title" class="dg-h">Den här sidan ser farlig ut</h1>
+        <p class="dg-lbl">Varför vi varnar</p>
+        <p id="danger-reason" class="dg-skal"></p>
+        <p id="danger-target" class="dg-adr"></p>
+        <div class="dg-val">
+          <button id="danger-back" class="dg-btn">Gå tillbaka</button>
+          <button id="danger-proceed" class="dg-vidare">Fortsätt ändå</button>
         </div>
-        <h1 id="danger-title" class="mt-4 text-[24px] font-extrabold" style="color:var(--color-danger);">Den här sidan ser farlig ut</h1>
-        <p id="danger-sub" class="mt-1.5 text-[15px] text-navy-900/60">AdRazes AI har skannat sidan och tycker att du <b>inte</b> borde gå in här.</p>
-        <div id="danger-reasons" class="mt-5 text-left mx-auto max-w-[440px]"></div>
-        <div class="mt-4 text-[12px] text-navy-900/40 break-all">Adress: <span id="danger-target" class="font-mono" style="color:var(--color-danger);"></span></div>
-        <div class="mt-6 flex gap-3 justify-center">
-          <button id="danger-back" class="btn btn-safe"><svg class="ic ic-sm"><use href="#i-back" /></svg>Ta mig härifrån</button>
-          <button id="danger-proceed" class="btn btn-risk">Fortsätt ändå</button>
-        </div>
-        <p class="mt-4 text-[11.5px] text-navy-900/35">Fortsätter du går du in på den riktiga sidan på egen risk.</p>
       </div>
     </div>
 
@@ -771,8 +767,9 @@
           </div>
 
           <style>
-            .fam-open { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--color-safe); background: rgba(23,138,90,.07); border: 1px solid rgba(23,138,90,.18); border-radius: 10px; padding: 9px 12px; }
-            .fam-open svg { flex: none; }
+            .fam-open { display: flex; align-items: center; gap: 8px; font-size: 12.5px; line-height: 1.45; color: inherit; margin-top: -2px; }
+            .fam-open span { opacity: .62; }
+            .fam-open svg { flex: none; color: #ff4b1f; }
             .fam-create { border: 1px dashed var(--color-line); border-radius: 16px; padding: 28px; text-align: center; }
             .fam-create p { color: rgb(28 43 58 / .6); font-size: 13.5px; margin-bottom: 14px; }
             .fam-in { height: 40px; border: 1px solid var(--color-line); border-radius: 10px; padding: 0 12px; font-size: 13.5px; color: var(--color-navy-900); outline: none; background: #fff; }

@@ -491,15 +491,9 @@ function showDanger(tab, url, verdict) {
   if (verdict.status !== 'warn' && url && !countedDangers.has(url)) { countedDangers.add(url); bumpStat('dangers', 1); }  // räkna en gång per farlig sida
   if (tab === active) window.view.hide();
   $('danger-title').textContent = verdict.title || 'Den här sidan ser farlig ut';
-  const sub = $('danger-sub');
-  if (sub) { if (!sub.dataset.orig) sub.dataset.orig = sub.innerHTML; if (verdict.sub) sub.textContent = verdict.sub; else sub.innerHTML = sub.dataset.orig; }
   $('danger-target').textContent = url;
-  const box = $('danger-reasons'); box.innerHTML = '';
-  (verdict.reasons || []).forEach((r) => {
-    const row = document.createElement('div'); row.className = 'danger-reason';
-    row.innerHTML = `<svg class="ic ic-sm" style="color:var(--color-warn);flex:none;margin-top:1px"><use href="#i-shield-alert" /></svg><span>${escapeHtml(r)}</span>`;
-    box.appendChild(row);
-  });
+  // Bara en anledning: den första (den viktigaste) – eller underrubriken om inga skäl finns
+  $('danger-reason').textContent = (verdict.reasons && verdict.reasons[0]) || verdict.sub || tw('Sidan liknar sidor som lurar folk eller sprider skadlig kod.');
   pending = { tab, url };
   if (tab === active) { $('danger').classList.remove('hidden'); setShield('danger'); }
 }
