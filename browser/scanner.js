@@ -52,9 +52,11 @@ function verdictFromReport(report) {
   };
 }
 
+const svarCache = new Map();   // värd → { t, svar }: samma sajt frågas inte om och om igen
 async function checkUrl(target) {
+  let host = '';
   try {
-    const host = new URL(target).hostname.toLowerCase();
+    host = new URL(target).hostname.toLowerCase();
     const DEMO = ['farlig.exempel.se', 'bank-verifiering.se', 'testsafebrowsing.appspot.com'];
     if (DEMO.some((d) => host === d || host.endsWith('.' + d)) || /phish|malware|bluff|scam/i.test(host)) {
       return { verdict: { status: 'danger', title: 'Den här sidan ser farlig ut', reasons: [
@@ -63,11 +65,17 @@ async function checkUrl(target) {
     }
   } catch {}
   try {
-    const res = await fetch(SKOLL + '/api/check-url?url=' + encodeURIComponent(target),
+    const c = svarCache.get(host); if (c && Date.now() - c.t < 30 * 60_000) return c.svar;
+    // Bara sajtens adress (https://värd/) lämnar datorn – aldrig sökväg, sökord eller inloggningskoder.
+    // Bedömningen (domänens ålder, certifikat, förväxlingsnamn) bygger ändå bara på domänen.
+    const res = await fetch(SKOLL + '/api/check-url?url=' + encodeURIComponent('https://' + host + '/'),
       { headers: { accept: 'application/json' }, signal: AbortSignal.timeout(9000) });
     const report = await res.json();
     if (!res.ok) throw new Error('fel');
-    return { verdict: verdictFromReport(report), report };
+    const svar = { verdict: verdictFromReport(report), report };
+    svarCache.set(host, { t: Date.now(), svar });
+    if (svarCache.size > 500) svarCache.delete(svarCache.keys().next().value);
+    return svar;
   } catch (e) {
     return { verdict: { status: 'unknown', title: 'Kunde inte granska sidan', reasons: [
       'Säkerkoll gick inte att nå just nu. Var extra försiktig med känsliga uppgifter.'] } };
