@@ -1,8 +1,11 @@
 # Changelog
 
-## Unreleased
+## 0.2.1 (2026-10-31)
 
+- New icon: the AdRaze eagle.
 - Account page moved to accounts.adraze.app: the extension now connects to your account there too (adraze.app/konto redirects).
+- YouTube's and Google's own cookie banners are rejected too.
+- Fresh filter lists.
 
 ## 0.2.0 (2026-10-22)
 
