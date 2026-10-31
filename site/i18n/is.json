@@ -436,5 +436,7 @@
   "case.reply": "Skrifa svar",
   "case.send": "Senda",
   "case.closed": "Málinu er lokað. Ef þú skrifar aftur opnast það á ný.",
-  "case.back": "Til baka í aðstoð"
+  "case.back": "Til baka í aðstoð",
+  "hero.eaten": "auglýsingar étnar",
+  "hero.gorilla_alt": "AdRaze-górillan étur auglýsingar"
 }

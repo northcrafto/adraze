@@ -34,8 +34,10 @@
         <li>{{check}}{{t:hero.proof3}}</li>
       </ul>
     </div>
-    <figure class="hero-illu">
-      <img src="/illu/secure-server.svg" alt="{{t:hero.img_alt}}" width="760" height="560">
+    <figure class="hero-illu hero-3d">
+      <canvas aria-label="{{t:hero.gorilla_alt}}" role="img"></canvas>
+      <img class="hero-3d-reserv" src="/bilder/gorilla/g1.png" alt="{{t:hero.gorilla_alt}}" width="768" height="768">
+      <figcaption class="hero-3d-rakna"><b data-raknare>0</b> {{t:hero.eaten}}</figcaption>
     </figure>
   </section>
 
@@ -131,11 +133,18 @@
 
   <!-- SIFFROR (mörkt band) -->
   <section class="siffror">
-    <div class="wrap siffror-grid">
-      <div><b>100<small>/100</small></b><p>{{t:stats.s1}}</p></div>
-      <div><b>35 → 0</b><p>{{t:stats.s2}}</p></div>
-      <div><b>120 000+</b><p>{{t:stats.s3}}</p></div>
-      <div><b>0</b><p>{{t:stats.s4}}</p></div>
+    <div class="wrap sf">
+      <div class="sf-test">
+        <div class="sf-topp"><span>adblock-tester.com</span><b>100<small>/100</small></b></div>
+        <div class="sf-rad"><span>AdRaze</span><i style="--v:1"></i><b>100</b></div>
+        <div class="sf-rad sf-svag"><span>Chrome</span><i style="--v:.41"></i><b>41</b></div>
+        <p>{{t:stats.s1}}</p>
+      </div>
+      <div class="sf-lista">
+        <div><b>35 → 0</b><p>{{t:stats.s2}}</p></div>
+        <div><b>120 000+</b><p>{{t:stats.s3}}</p></div>
+        <div><b>0</b><p>{{t:stats.s4}}</p></div>
+      </div>
     </div>
   </section>
 
@@ -350,5 +359,6 @@
 
 <script src="/main.js"></script>
 <script type="module" src="/klot.js"></script>
+<script type="module" src="/hero3d.js"></script>
 </body>
 </html>

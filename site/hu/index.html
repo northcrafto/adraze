@@ -93,8 +93,10 @@
         <li><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"/></svg>Működik Chrome-ban, Brave-ben és Edge-ben</li>
       </ul>
     </div>
-    <figure class="hero-illu">
-      <img src="/illu/secure-server.svg" alt="Egy ember egy szervert védő nagy pajzs mellett" width="760" height="560">
+    <figure class="hero-illu hero-3d">
+      <canvas aria-label="Az AdRaze gorilla megeszi a hirdetéseket" role="img"></canvas>
+      <img class="hero-3d-reserv" src="/bilder/gorilla/g1.png" alt="Az AdRaze gorilla megeszi a hirdetéseket" width="768" height="768">
+      <figcaption class="hero-3d-rakna"><b data-raknare>0</b> megevett hirdetés</figcaption>
     </figure>
   </section>
 
@@ -190,11 +192,18 @@
 
   <!-- SIFFROR (mörkt band) -->
   <section class="siffror">
-    <div class="wrap siffror-grid">
-      <div><b>100<small>/100</small></b><p>az adblock-tester.com-on, ahol a bővítmény nélküli Chrome 41 pontot kap.</p></div>
-      <div><b>35 → 0</b><p>hirdetési domain a Blocket.se-n, Svédország legnagyobb apróhirdetési oldalán, ha be van kapcsolva az AdRaze.</p></div>
-      <div><b>120 000+</b><p>szűrőszabály, plusz egy külön svéd lista a svéd oldalakhoz.</p></div>
-      <div><b>0</b><p>bájt adat rólad. Minden a saját böngésződben történik.</p></div>
+    <div class="wrap sf">
+      <div class="sf-test">
+        <div class="sf-topp"><span>adblock-tester.com</span><b>100<small>/100</small></b></div>
+        <div class="sf-rad"><span>AdRaze</span><i style="--v:1"></i><b>100</b></div>
+        <div class="sf-rad sf-svag"><span>Chrome</span><i style="--v:.41"></i><b>41</b></div>
+        <p>az adblock-tester.com-on, ahol a bővítmény nélküli Chrome 41 pontot kap.</p>
+      </div>
+      <div class="sf-lista">
+        <div><b>35 → 0</b><p>hirdetési domain a Blocket.se-n, Svédország legnagyobb apróhirdetési oldalán, ha be van kapcsolva az AdRaze.</p></div>
+        <div><b>120 000+</b><p>szűrőszabály, plusz egy külön svéd lista a svéd oldalakhoz.</p></div>
+        <div><b>0</b><p>bájt adat rólad. Minden a saját böngésződben történik.</p></div>
+      </div>
     </div>
   </section>
 
@@ -406,5 +415,6 @@
 
 <script src="/main.js"></script>
 <script type="module" src="/klot.js"></script>
+<script type="module" src="/hero3d.js"></script>
 </body>
 </html>

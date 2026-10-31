@@ -436,5 +436,7 @@
   "case.reply": "Napišite odgovor",
   "case.send": "Pošalji",
   "case.closed": "Upit je zatvoren. Ako ponovno pišete, ponovno će se otvoriti.",
-  "case.back": "Natrag na podršku"
+  "case.back": "Natrag na podršku",
+  "hero.eaten": "pojedenih oglasa",
+  "hero.gorilla_alt": "AdRaze gorila jede oglase"
 }

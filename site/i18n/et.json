@@ -436,5 +436,7 @@
   "case.reply": "Kirjuta vastus",
   "case.send": "Saada",
   "case.closed": "Pöördumine on suletud. Kui kirjutad uuesti, avatakse see taas.",
-  "case.back": "Tagasi toe juurde"
+  "case.back": "Tagasi toe juurde",
+  "hero.eaten": "reklaami söödud",
+  "hero.gorilla_alt": "AdRaze gorilla sööb reklaame"
 }

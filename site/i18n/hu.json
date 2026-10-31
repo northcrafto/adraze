@@ -436,5 +436,7 @@
   "case.reply": "Válasz írása",
   "case.send": "Küldés",
   "case.closed": "Az ügy le van zárva. Ha újra írsz, újra megnyílik.",
-  "case.back": "Vissza a támogatáshoz"
+  "case.back": "Vissza a támogatáshoz",
+  "hero.eaten": "megevett hirdetés",
+  "hero.gorilla_alt": "Az AdRaze gorilla megeszi a hirdetéseket"
 }

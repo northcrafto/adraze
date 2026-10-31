@@ -436,5 +436,7 @@
   "case.reply": "Napisz odpowiedź",
   "case.send": "Wyślij",
   "case.closed": "Zgłoszenie jest zamknięte. Jeśli napiszesz ponownie, zostanie otwarte.",
-  "case.back": "Wróć do pomocy"
+  "case.back": "Wróć do pomocy",
+  "hero.eaten": "zjedzonych reklam",
+  "hero.gorilla_alt": "Goryl AdRaze zjada reklamy"
 }
