@@ -26,7 +26,7 @@ async function start() {
   const grat = geoGraticule10();
   const HEM = [18.07, 59.33];
   const stilla = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let rot = [-15, -48, 0], storlek = 0, dpr = 1, drag = null, rordes = false, hover = null, synlig = true, lander = [], granser = null;
+  let rot = [-15, -48, 0], storlek = 0, dpr = 1, drag = null, rordes = false, hover = null, synlig = true, lander = [], granser = null, prickar = [];
 
   const tips = document.createElement('div'); tips.className = 'klot-tips'; tips.hidden = true; stage.appendChild(tips);
 
@@ -44,14 +44,18 @@ async function start() {
     ctx.beginPath(); path(grat); ctx.strokeStyle = 'rgba(17,17,19,.07)'; ctx.lineWidth = 0.6; ctx.stroke();
     if (lander.length) {
       ctx.beginPath(); lander.forEach((f) => path(f)); ctx.fillStyle = 'rgba(17,17,19,.05)'; ctx.fill();
-      ctx.beginPath(); lander.forEach((f) => { if (f.sprak) path(f); }); ctx.fillStyle = 'rgba(255,75,31,.13)'; ctx.fill();
-      if (hover) { ctx.beginPath(); path(hover); ctx.fillStyle = 'rgba(255,75,31,.32)'; ctx.fill(); }
+      if (hover) { ctx.beginPath(); path(hover); ctx.fillStyle = 'rgba(255,75,31,.18)'; ctx.fill(); }
       ctx.beginPath(); path(granser); ctx.strokeStyle = 'rgba(17,17,19,.55)'; ctx.lineWidth = 0.9; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
     }
     ctx.beginPath(); path({ type: 'Sphere' }); ctx.strokeStyle = 'rgba(17,17,19,.14)'; ctx.lineWidth = 1; ctx.stroke();
+    // små orange prickar utspridda över hela världen (samma ställen varje gång)
+    const pr = Math.max(storlek / 520, 1.15);
+    ctx.beginPath();
+    for (const p of prickar) { if (!syns(p)) continue; const [x, y] = proj(p); ctx.moveTo(x + pr, y); ctx.arc(x, y, pr, 0, 7); }
+    ctx.fillStyle = 'rgba(255,75,31,.85)'; ctx.fill();
     if (syns(HEM)) {
-      const [x, y] = proj(HEM), r = Math.max(storlek / 110, 4);
-      ctx.beginPath(); ctx.arc(x, y, r * 2.4, 0, 7); ctx.fillStyle = 'rgba(255,75,31,.22)'; ctx.fill();
+      const [x, y] = proj(HEM), r = Math.max(storlek / 210, 2.6);
+      ctx.beginPath(); ctx.arc(x, y, r * 2.6, 0, 7); ctx.fillStyle = 'rgba(255,75,31,.18)'; ctx.fill();
       ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fillStyle = '#ff4b1f'; ctx.fill();
     }
   }
@@ -98,6 +102,13 @@ async function start() {
     lander = feature(varld, varld.objects.countries).features;
     lander.forEach((f) => { const n = +f.id; f.iso = ISO[n]; f.sprak = LAND_SPRAK[n]; });
     granser = mesh(varld, varld.objects.countries);
+    // ~230 prickar slumpade inuti land (seedat, så de ligger still mellan besök)
+    let fro = 7; const slump = () => ((fro = (fro * 16807) % 2147483647) / 2147483647);
+    const bebott = lander.filter((f) => f.id !== '010' && f.id !== '304');
+    for (let forsok = 0; prickar.length < 230 && forsok < 40000; forsok++) {
+      const p = [slump() * 360 - 180, Math.asin(slump() * 1.7 - 0.85) * 180 / Math.PI];
+      if (bebott.some((f) => geoContains(f, p))) prickar.push(p);
+    }
   } catch {}
   canvas.classList.add('klar'); rita();
   if (stilla) return;
