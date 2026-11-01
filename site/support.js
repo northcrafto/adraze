@@ -15,6 +15,13 @@
     if (!r.ok || !j.ok) throw Object.assign(new Error(LANG === 'sv' && j.error ? j.error : sida.dataset.fel), { status: r.status });  // serverns texter är på svenska
     return j;
   }
+  // Förifyllt från webbläsaren (t.ex. "Rapportera svar" i Falk): ?kategori=…&amne=…&text=…
+  try {
+    const q = new URLSearchParams(location.search);
+    const kat = q.get('kategori'); if (kat) { const r = form.querySelector(`input[name="kategori"][value="${CSS.escape(kat)}"]`); if (r) r.checked = true; }
+    if (q.get('amne')) form.amne.value = q.get('amne').slice(0, 140);
+    if (q.get('text')) form.text.value = q.get('text').slice(0, 5000);
+  } catch {}
   const visaFel = (text) => { $('sup-fel').textContent = text || ''; $('sup-fel').hidden = !text; };
 
   // Inloggad: mejlet tas från kontot och dina ärenden visas under formuläret

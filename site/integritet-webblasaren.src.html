@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{t:bp.meta_title}}</title>
+<meta name="description" content="{{t:bp.meta_description}}">
+<link rel="icon" href="/favicon.png">
+{{alternates}}
+<link rel="stylesheet" href="/style.css">
+<style>
+  .policy { max-width: 760px; padding: 72px 0 120px; }
+  .policy h1 { font-size: clamp(44px, 6vw, 72px); letter-spacing: -0.05em; }
+  .policy .datum { color: var(--dov); margin: 16px 0 48px; }
+  .policy h2 { font-size: 28px; margin: 48px 0 14px; }
+  .policy p, .policy li { color: #33333a; font-size: 17px; }
+  .policy ul { list-style: disc; padding-left: 22px; display: grid; gap: 8px; margin-top: 12px; }
+  .policy code { background: #e6e6e1; padding: 1px 6px; border-radius: 5px; font-size: 15px; }
+  .tillbaka { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 40px; }
+  .tillbaka svg { transform: scaleX(-1); width: 18px; height: 18px; }
+</style>
+</head>
+<body>
+{{topp}}
+<main class="wrap policy">
+  <a class="tillbaka nav-link" href="{{hem}}">{{arrow-right}}{{t:privacy.back}}</a>
+  <h1>{{t:bp.title}}</h1>
+  <p class="datum">{{t:bp.updated}}</p>
+  <p>{{t:bp.intro}}</p>
+
+  <h2>{{t:bp.h_short}}</h2>
+  <p>{{t:bp.p_short}}</p>
+
+  <h2>{{t:bp.h_auto}}</h2>
+  <p>{{t:bp.p_auto}}</p>
+  <ul>
+    <li>{{t:bp.auto_rt}}</li>
+    <li>{{t:bp.auto_dl}}</li>
+    <li>{{t:bp.auto_sug}}</li>
+    <li>{{t:bp.auto_nt}}</li>
+    <li>{{t:bp.auto_lists}}</li>
+    <li>{{t:bp.auto_upd}}</li>
+    <li>{{t:bp.auto_drm}}</li>
+    <li>{{t:bp.auto_dns}}</li>
+    <li>{{t:bp.auto_spell}}</li>
+  </ul>
+
+  <h2>{{t:bp.h_local}}</h2>
+  <p>{{t:bp.p_local}}</p>
+  <ul>
+    <li>{{t:bp.local_hist}}</li>
+    <li>{{t:bp.local_pw}}</li>
+    <li>{{t:bp.local_falk}}</li>
+    <li>{{t:bp.local_chat}}</li>
+  </ul>
+
+  <h2>{{t:bp.h_account}}</h2>
+  <p>{{t:bp.p_account}}</p>
+  <ul>
+    <li>{{t:bp.acc_email}}</li>
+    <li>{{t:bp.acc_pw}}</li>
+    <li>{{t:bp.acc_google}}</li>
+    <li>{{t:bp.acc_sync}}</li>
+    <li>{{t:bp.acc_support}}</li>
+  </ul>
+  <p>{{t:bp.p_account_mail}}</p>
+
+  <h2>{{t:bp.h_falk}}</h2>
+  <p>{{t:bp.p_falk}}</p>
+  <ul>
+    <li>{{t:bp.falk_what}}</li>
+    <li>{{t:bp.falk_page}}</li>
+    <li>{{t:bp.falk_where}}</li>
+    <li>{{t:bp.falk_store}}</li>
+    <li>{{t:bp.falk_incog}}</li>
+  </ul>
+  <p>{{t:bp.p_falk_ctrl}}</p>
+
+  <h2>{{t:bp.h_chat}}</h2>
+  <p>{{t:bp.p_chat}}</p>
+  <ul>
+    <li>{{t:bp.chat_profile}}</li>
+    <li>{{t:bp.chat_msg}}</li>
+    <li>{{t:bp.chat_key}}</li>
+    <li>{{t:bp.chat_links}}</li>
+    <li>{{t:bp.chat_report}}</li>
+  </ul>
+  <p>{{t:bp.p_chat_rules}}</p>
+
+  <h2>{{t:bp.h_family}}</h2>
+  <p>{{t:bp.p_family}}</p>
+  <ul>
+    <li>{{t:bp.fam_hist}}</li>
+    <li>{{t:bp.fam_login}}</li>
+    <li>{{t:bp.fam_code}}</li>
+  </ul>
+
+  <h2>{{t:bp.h_pay}}</h2>
+  <p>{{t:bp.p_pay}}</p>
+
+  <h2>{{t:bp.h_ext}}</h2>
+  <p>{{t:bp.p_ext}}</p>
+
+  <h2>{{t:bp.h_third}}</h2>
+  <p>{{t:bp.p_third}}</p>
+  <ul>
+    <li>{{t:bp.third_stripe}}</li>
+    <li>{{t:bp.third_ai}}</li>
+    <li>{{t:bp.third_brevo}}</li>
+    <li>{{t:bp.third_google}}</li>
+    <li>{{t:bp.third_icons}}</li>
+    <li>{{t:bp.third_github}}</li>
+    <li>{{t:bp.third_cf}}</li>
+  </ul>
+
+  <h2>{{t:bp.h_where}}</h2>
+  <p>{{t:bp.p_where}}</p>
+
+  <h2>{{t:bp.h_who}}</h2>
+  <p>{{t:bp.p_who}}</p>
+
+  <h2>{{t:bp.h_rights}}</h2>
+  <p>{{t:bp.p_rights}}</p>
+  <p>{{t:bp.p_rights2}}</p>
+
+  <h2>{{t:bp.h_kids}}</h2>
+  <p>{{t:bp.p_kids}}</p>
+
+  <h2>{{t:bp.h_changes}}</h2>
+  <p>{{t:bp.p_changes}}</p>
+</main>
+<footer class="fot">
+  <div class="wrap fot-grid">
+    <div><a href="{{hem}}" class="logo"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a><p>{{t:footer.tagline}}</p></div>
+  </div>
+</footer>
+<script src="/main.js"></script>
+</body>
+</html>

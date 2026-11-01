@@ -22,7 +22,7 @@ SPRAK = [
     ('uk', 'Українська'), ('tr', 'Türkçe'),
 ]
 # Källa → (sajt, sökväg på sajten)
-SIDOR = {'index.src.html': (SAJT, ''), 'integritet.src.html': (SAJT, 'integritet'), 'statistik.src.html': (SAJT, 'statistik'),
+SIDOR = {'index.src.html': (SAJT, ''), 'integritet.src.html': (SAJT, 'integritet'), 'chattregler.src.html': (SAJT, 'chattregler'), 'integritet-webblasaren.src.html': (SAJT, 'integritet-webblasaren'), 'statistik.src.html': (SAJT, 'statistik'),
          'stod.src.html': (SAJT, 'stod'), 'kolla.src.html': (SAJT, 'kolla'),
          'konto.src.html': (KONTO, ''), 'download.src.html': (LADDA, ''),
          'support.src.html': (HJALP, ''), 'arende.src.html': (HJALP, 'arende'), 'team.src.html': (HJALP, 'team')}
@@ -88,6 +88,7 @@ for kod, namn in finns:
         ut = ut.replace('{{lang}}', kod).replace('{{hem}}', hem + url(kod, '')).replace('{{pre}}', hem + ('' if kod == 'sv' else f'/{kod}'))
         ut = ut.replace('{{konto}}', KONTO + url(kod, '')).replace('{{ladda}}', LADDA + url(kod, '')).replace('{{hjalp}}', HJALP + url(kod, ''))
         ut = re.sub(r'\{\{t:([a-z0-9_.]+)\}\}', lambda m: t[m.group(1)], ut)
+        ut = ut.replace('{{pre}}', hem + ('' if kod == 'sv' else f'/{kod}'))   # länkar inne i översättningar
         ut = re.sub(r'\{\{([a-z-]+)\}\}', lambda m: ikon(m.group(1)), ut)
         assert '{{' not in ut, re.findall(r'\{\{.*?\}\}', ut)[:3]
         mal = MAPP[sajt] / (kod if kod != 'sv' else '') / ((sida or 'index') + '.html')
