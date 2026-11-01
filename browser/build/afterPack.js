@@ -56,13 +56,26 @@ function startskript(context) {
 
 exports.default = async function afterPack(context) {
   const plat = context.electronPlatformName; // 'linux' | 'darwin' | 'win32'
-  await brannSakringar(context);
+  // macOS: castlabs VMP-signerar bara en oförändrad Electron Framework (säkringarna ligger i den),
+  // och säkringar efter VMP gör signaturen ogiltig – testat 2026-11-01 ("Binary signature denied" /
+  // "InvalidSignature"). Netflix/Widevine valdes före säkringarna på Mac. Linux/Windows: säkringar som förut.
+  if (plat !== 'darwin') await brannSakringar(context);
+  else console.log('[säkringar] hoppas över på macOS (krockar med castlabs VMP-signering)');
   if (plat === 'linux') startskript(context);
   if (plat === 'linux') {
     console.log('[VMP] Linux behöver ingen VMP-signering (Widevine L3 funkar utan) — hoppar över.');
     return;
   }
   const appOutDir = context.appOutDir;
+  // macOS universal: x64- och arm64-delarna (…-x64-temp/…-arm64-temp) slås ihop efteråt och VMP-signaturen
+  // (Electron Framework.sig) skiljer sig per del → sammanslagningen vägrar. Signera bara den färdiga universella appen.
+  if (plat === 'darwin' && /-(x64|arm64)-temp$/.test(appOutDir)) {
+    // castlabs-paketen har redan en utvecklar-.sig per arkitektur – ta bort den, annars är delarna olika
+    const fw = path.join(appOutDir, context.packager.appInfo.productFilename + '.app', 'Contents', 'Frameworks', 'Electron Framework.framework', 'Versions', 'A', 'Resources');
+    for (const f of fs.existsSync(fw) ? fs.readdirSync(fw) : []) if (f.endsWith('.sig')) fs.rmSync(path.join(fw, f));
+    console.log('[VMP] universell del – signeras efter sammanslagningen');
+    return;
+  }
   const py = evsPython();
   const evsCfg = path.join(os.homedir(), '.config', 'evs', 'config.json');
   if (!fs.existsSync(evsCfg) && !process.env.EVS_FORCE) {

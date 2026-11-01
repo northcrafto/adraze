@@ -5,12 +5,11 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build:mac": "electron-packager . \"AdRaze\" --platform=darwin --arch=x64 --out=dist --overwrite --app-bundle-id=app.adraze.browser --ignore=\"(dist|/\\.git|meta_test\\.js|scan_test\\.js|.*\\.md)\"",
+    "build:mac": "npm run sync && electron-builder --mac",
     "build:linux": "electron-builder --linux --x64",
     "build:win": "electron-builder --win --x64",
     "sync": "bash tools/sync-adraze.sh",
     "prestart": "npm run sync",
-    "prebuild:mac": "npm run sync",
     "prebuild:linux": "npm run sync && bash tools/build-native.sh",
     "prebuild:win": "npm run sync"
   },
@@ -88,7 +87,69 @@
     "electronDist": "node_modules/electron/dist",
     "asarUnpack": [
       "native/adblock/build/Release/*.node"
-    ]
+    ],
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "category": "public.app-category.productivity",
+      "artifactName": "AdRaze-mac.${ext}",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "x64ArchFiles": "Contents/Resources/app.asar.unpacked/native/adblock/build/Release/*.node",
+      "minimumSystemVersion": "12.0",
+      "notarize": {
+        "teamId": "TSW6WVMNJ8"
+      },
+      "extendInfo": {
+        "NSCameraUsageDescription": "En webbplats vill använda kameran.",
+        "NSMicrophoneUsageDescription": "En webbplats vill använda mikrofonen.",
+        "NSLocationUsageDescription": "En webbplats vill veta var du är.",
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLName": "Webbadress",
+            "CFBundleURLSchemes": [
+              "http",
+              "https"
+            ]
+          }
+        ]
+      }
+    },
+    "dmg": {
+      "title": "AdRaze",
+      "artifactName": "AdRaze.dmg",
+      "contents": [
+        {
+          "x": 150,
+          "y": 190
+        },
+        {
+          "x": 390,
+          "y": 190,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ],
+      "window": {
+        "width": 540,
+        "height": 380
+      }
+    }
   },
   "repository": {
     "type": "git",
