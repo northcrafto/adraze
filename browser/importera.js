@@ -123,6 +123,236 @@ function ffHistorik(dir) {
   } catch { return []; } finally { stangDb(db); }
 }
 
+/* ── Inställningar och utseende ──
+ * Allt översätts till AdRazes egna val. Bara sådant du faktiskt har ändrat i den andra webbläsaren
+ * tas med (utom temat, som alltid följer med — "som datorn" blir ljust eller mörkt efter datorn nu). */
+const ZOOMSTEG = [90, 100, 110, 125];
+function narmasteZoom(procent) {
+  if (!(procent > 0)) return null;
+  return ZOOMSTEG.reduce((a, b) => (Math.abs(b - procent) < Math.abs(a - procent) ? b : a));
+}
+function motorFranText(t) {
+  t = String(t || '').toLowerCase();
+  if (/search\.adraze|adraze/.test(t)) return 'adraze';
+  if (/duckduckgo|\bddg\b/.test(t)) return 'duckduckgo';
+  if (/search\.brave|brave/.test(t)) return 'brave';
+  if (/startpage/.test(t)) return 'startpage';
+  if (/google/.test(t)) return 'google';
+  return null;
+}
+function dnsFranMall(mall) {
+  mall = String(mall || '').toLowerCase();
+  if (/cloudflare|1\.1\.1\.1|mozilla\.cloudflare/.test(mall)) return 'cloudflare';
+  if (/quad9|9\.9\.9\.9/.test(mall)) return 'quad9';
+  if (/dns\.google|8\.8\.8\.8/.test(mall)) return 'google';
+  return 'automatic';
+}
+function systemetMorkt() { try { return require('electron').nativeTheme.shouldUseDarkColors; } catch { return false; } }
+function lasJson(f) { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return null; } }
+function hamta(o, nyckel) {
+  let d = o;
+  for (const k of nyckel.split('.')) { if (!d || typeof d !== 'object' || !(k in d)) return undefined; d = d[k]; }
+  return d;
+}
+function rentOrigin(monster) {
+  // Chromium: "https://exempel.se:443,*" → https://exempel.se (jokertecken hoppas över)
+  const s = String(monster || '').split(',')[0].trim();
+  if (!s || s.includes('*') || s.includes('[')) return null;
+  try { const u = new URL(s); return /^https?:$/.test(u.protocol) ? u.origin : null; } catch { return null; }
+}
+function tomInst() { return { tema: null, bmbar: null, zoom: null, fontSize: null, motor: null, motorNamn: '', start: null, nedladdning: null, httpsOnly: null, dns: null, perms: {}, permDefaults: {}, tillagg: [] }; }
+
+const CR_PERM = { notifications: 'notifications', geolocation: 'geolocation', media_stream_camera: 'camera', media_stream_mic: 'microphone', clipboard: 'clipboard-read', midi_sysex: 'midi' };
+const CR_STD_MOTOR = { chrome: 'google', chromium: 'google', brave: 'brave' };   // vad webbläsaren använder om du aldrig bytt
+
+function chromeTillaggNamn(dir, id, v) {
+  let namn = (v.manifest && v.manifest.name) || '';
+  if (!namn || /^__MSG_/.test(namn)) {
+    // Läs namnet ur tilläggets egen manifest (och språkfilen om namnet är översatt)
+    try {
+      const bas = path.join(dir, 'Extensions', id);
+      const ver = fs.readdirSync(bas).filter((x) => fs.existsSync(path.join(bas, x, 'manifest.json'))).sort().pop();
+      const m = lasJson(path.join(bas, ver, 'manifest.json')) || {};
+      namn = m.name || namn;
+      const msg = /^__MSG_(.+)__$/.exec(namn || '');
+      if (msg) {
+        for (const sp of [m.default_locale, 'en', 'en_US'].filter(Boolean)) {
+          const l = lasJson(path.join(bas, ver, '_locales', sp, 'messages.json'));
+          const hit = l && Object.keys(l).find((k) => k.toLowerCase() === msg[1].toLowerCase());
+          if (hit && l[hit].message) { namn = l[hit].message; break; }
+        }
+      }
+    } catch {}
+  }
+  return /^__MSG_/.test(namn || '') ? id : (namn || id);
+}
+
+function chromeInst(webblasare, dir) {
+  const ut = tomInst();
+  const p = lasJson(path.join(dir, 'Preferences')) || {};
+  const sp = lasJson(path.join(dir, 'Secure Preferences')) || {};
+  const b = CHROMIUM.find((x) => x.id === webblasare);
+  const ls = (b && lasJson(path.join(b.dir, 'Local State'))) || {};
+
+  // Tema: Brave har ett eget val i Local State (0 = som datorn, 1 = mörkt, 2 = ljust),
+  // Chrome/Edge/Chromium i profilen (0 = som datorn, 1 = ljust, 2 = mörkt)
+  let tema = null;
+  if (webblasare === 'brave') {
+    const v = hamta(ls, 'brave.dark_mode');
+    tema = v === 1 ? 'dark' : v === 2 ? 'light' : null;
+  }
+  if (!tema) {
+    const v = hamta(p, 'browser.theme.color_scheme2') ?? hamta(p, 'browser.theme.color_scheme');
+    tema = v === 2 ? 'dark' : v === 1 ? 'light' : null;
+  }
+  ut.tema = tema || (systemetMorkt() ? 'dark' : 'light');
+
+  const bm = hamta(p, 'bookmark_bar.show_on_all_tabs');
+  if (typeof bm === 'boolean') ut.bmbar = bm;
+  const zl = hamta(p, 'partition.default_zoom_level');
+  const niva = zl && typeof zl === 'object' ? Object.values(zl).find((x) => typeof x === 'number') : (typeof zl === 'number' ? zl : undefined);
+  if (typeof niva === 'number') ut.zoom = narmasteZoom(Math.round(Math.pow(1.2, niva) * 100));
+  const fs_ = hamta(p, 'webkit.webprefs.default_font_size');
+  if (typeof fs_ === 'number' && fs_ !== 16) ut.fontSize = fs_;
+
+  // Sökmotor
+  const sd = hamta(p, 'default_search_provider_data.mirrored_template_url_data') || hamta(p, 'default_search_provider_data.template_url_data');
+  if (sd && (sd.url || sd.short_name)) {
+    ut.motorNamn = sd.short_name || '';
+    ut.motor = motorFranText((sd.url || '') + ' ' + (sd.short_name || ''));
+  } else if (CR_STD_MOTOR[webblasare]) ut.motor = CR_STD_MOTOR[webblasare];
+
+  // Vid start: 1 = fortsätt där du var, 4 = vissa sidor, 5 = ny flik
+  const rs = hamta(p, 'session.restore_on_startup');
+  if (rs === 1) ut.start = { mode: 'tidigare' };
+  else if (rs === 5) ut.start = { mode: 'ny' };
+  else if (rs === 4) {
+    const u = (hamta(p, 'session.startup_urls') || []).find((x) => /^https?:/i.test(x));
+    if (u) ut.start = { mode: 'sida', url: u };
+  }
+
+  const dd = hamta(p, 'download.default_directory') || hamta(p, 'savefile.default_directory');
+  const fraga = hamta(p, 'download.prompt_for_download');
+  if ((dd && fs.existsSync(dd)) || typeof fraga === 'boolean') ut.nedladdning = { dir: dd && fs.existsSync(dd) ? dd : '', fraga: typeof fraga === 'boolean' ? fraga : null };
+
+  const ho = hamta(p, 'https_only_mode_enabled');
+  if (typeof ho === 'boolean') ut.httpsOnly = ho;
+  const dl = hamta(ls, 'dns_over_https.mode');
+  if (dl === 'off') ut.dns = 'off';
+  else if (dl === 'secure') ut.dns = dnsFranMall(hamta(ls, 'dns_over_https.templates'));
+
+  // Webbplatsbehörigheter (1 = tillåt, 2 = blockera)
+  const undantag = hamta(p, 'profile.content_settings.exceptions') || {};
+  for (const [typ, kind] of Object.entries(CR_PERM)) {
+    for (const [monster, v] of Object.entries(undantag[typ] || {})) {
+      const o = rentOrigin(monster); const s = v && v.setting;
+      if (!o || (s !== 1 && s !== 2)) continue;
+      (ut.perms[o] = ut.perms[o] || {})[kind] = s === 1 ? 'allow' : 'block';
+    }
+    if (hamta(p, 'profile.default_content_setting_values.' + typ) === 2) ut.permDefaults[kind] = 'block';
+  }
+
+  // Tillägg från Chrome Web Store som är påslagna (location 1 = installerat av dig från butiken)
+  const sett = new Set();
+  for (const src of [hamta(sp, 'extensions.settings'), hamta(p, 'extensions.settings')]) {
+    for (const [id, v] of Object.entries(src || {})) {
+      if (sett.has(id) || !/^[a-p]{32}$/.test(id) || !v || typeof v !== 'object' || v.location !== 1) continue;
+      const av = (Array.isArray(v.disable_reasons) && v.disable_reasons.length) || (typeof v.disable_reasons === 'number' && v.disable_reasons) || v.state === 0;
+      if (av) continue;
+      sett.add(id); ut.tillagg.push({ id, namn: chromeTillaggNamn(dir, id, v) });
+    }
+  }
+  return ut;
+}
+
+/* Firefox: prefs.js (user_pref-rader), search.json.mozlz4, permissions.sqlite, content-prefs.sqlite */
+function ffPrefs(dir) {
+  const ut = {};
+  let text = ''; try { text = fs.readFileSync(path.join(dir, 'prefs.js'), 'utf8'); } catch { return ut; }
+  const re = /^user_pref\("([^"]+)",\s*(.+)\);\s*$/gm; let m;
+  while ((m = re.exec(text))) { try { ut[m[1]] = JSON.parse(m[2]); } catch {} }
+  return ut;
+}
+// Mozillas lz4-format: "mozLz40\0" + 4 byte storlek + ett lz4-block
+function mozLz4(buf) {
+  if (!buf || buf.length < 12 || buf.toString('latin1', 0, 8) !== 'mozLz40\0') return null;
+  const ut = Buffer.alloc(buf.readUInt32LE(8)); let i = 12, o = 0;
+  while (i < buf.length) {
+    const tok = buf[i++]; let lit = tok >> 4;
+    if (lit === 15) { let x; do { x = buf[i++]; lit += x; } while (x === 255); }
+    buf.copy(ut, o, i, i + lit); i += lit; o += lit;
+    if (i >= buf.length) break;
+    const off = buf[i] | (buf[i + 1] << 8); i += 2;
+    let len = tok & 15;
+    if (len === 15) { let x; do { x = buf[i++]; len += x; } while (x === 255); }
+    len += 4; let f = o - off;
+    if (off <= 0 || f < 0) return null;
+    while (len--) ut[o++] = ut[f++];
+  }
+  return ut.slice(0, o);
+}
+const FF_PERM = { 'desktop-notification': 'notifications', geo: 'geolocation', camera: 'camera', microphone: 'microphone' };
+function ffInst(dir) {
+  const ut = tomInst();
+  const p = ffPrefs(dir);
+  const tid = String(p['extensions.activeThemeID'] || '');
+  const co = p['layout.css.prefers-color-scheme.content-override'];
+  const tt = p['browser.theme.toolbar-theme'];
+  ut.tema = /dark/.test(tid) ? 'dark' : /light/.test(tid) ? 'light'
+    : co === 0 ? 'dark' : co === 1 ? 'light' : tt === 0 ? 'dark' : tt === 1 ? 'light'
+    : (systemetMorkt() ? 'dark' : 'light');
+
+  const vis = p['browser.toolbars.bookmarks.visibility'];
+  if (vis === 'always') ut.bmbar = true; else if (vis === 'never') ut.bmbar = false;
+  const fsz = p['font.size.variable.x-western'];
+  if (typeof fsz === 'number' && fsz !== 16) ut.fontSize = fsz;
+  const db = oppnaDb(path.join(dir, 'content-prefs.sqlite'));
+  if (db) {
+    try {
+      const r = db.prepare("SELECT p.value AS v FROM prefs p JOIN settings s ON p.settingID=s.id WHERE s.name='browser.content.full-zoom' AND p.groupID IS NULL").get();
+      if (r && Number(r.v) > 0) ut.zoom = narmasteZoom(Math.round(Number(r.v) * 100));
+    } catch {} finally { stangDb(db); }
+  }
+
+  try {
+    const j = JSON.parse(mozLz4(fs.readFileSync(path.join(dir, 'search.json.mozlz4'))).toString('utf8'));
+    const id = hamta(j, 'metaData.defaultEngineId') || '';
+    const e = (j.engines || []).find((x) => x.id === id || x._name === id || (x._metaData && x._metaData.order === 1 && !id));
+    const namn = (e && (e._name || e.id)) || id;
+    if (namn) { ut.motorNamn = namn; ut.motor = motorFranText(namn + ' ' + id); }
+  } catch {}
+
+  // Vid start: 3 = fortsätt där du var, 0 = tom sida, 1 = startsidan
+  const sp = p['browser.startup.page'];
+  if (sp === 3) ut.start = { mode: 'tidigare' };
+  else if (sp === 0) ut.start = { mode: 'ny' };
+  else {
+    const hem = String(p['browser.startup.homepage'] || '').split('|').find((x) => /^https?:/i.test(x));
+    if (hem) ut.start = { mode: 'sida', url: hem };
+  }
+
+  const dd = p['browser.download.folderList'] === 2 ? p['browser.download.dir'] : '';
+  const fraga = p['browser.download.useDownloadDir'] === false ? true : null;
+  if ((dd && fs.existsSync(dd)) || fraga) ut.nedladdning = { dir: dd && fs.existsSync(dd) ? dd : '', fraga };
+
+  if (typeof p['dom.security.https_only_mode'] === 'boolean') ut.httpsOnly = p['dom.security.https_only_mode'];
+  const trr = p['network.trr.mode'];
+  if (trr === 5) ut.dns = 'off'; else if (trr === 2 || trr === 3) ut.dns = dnsFranMall(p['network.trr.uri'] || p['network.trr.custom_uri'] || 'mozilla.cloudflare-dns.com');
+
+  const pdb = oppnaDb(path.join(dir, 'permissions.sqlite'));
+  if (pdb) {
+    try {
+      for (const r of pdb.prepare('SELECT origin, type, permission FROM moz_perms').all()) {
+        const kind = FF_PERM[r.type]; if (!kind || (r.permission !== 1 && r.permission !== 2)) continue;
+        const o = rentOrigin(r.origin); if (!o) continue;
+        (ut.perms[o] = ut.perms[o] || {})[kind] = r.permission === 1 ? 'allow' : 'block';
+      }
+    } catch {} finally { stangDb(pdb); }
+  }
+  for (const [typ, kind] of Object.entries(FF_PERM)) if (p['permissions.default.' + typ] === 2) ut.permDefaults[kind] = 'block';
+  return ut;
+}
+
 /* ── Lösenord från CSV (export ur den andra webbläsaren) ── */
 function parseCsv(text) {
   const rader = []; let f = [], c = '', q = false;
@@ -165,19 +395,34 @@ function setup(hooks) {
   ipcMain.handle('import:kallor', () => kallor());
 
   // Läs bokmärken + historik från en vald källa (ges tillbaka till skalet som lägger in i localStorage)
-  ipcMain.handle('import:las', (_e, { typ, id, profil, bokmarken, historik }) => {
-    let bm = [], hist = [];
+  ipcMain.handle('import:las', (_e, { typ, id, profil, bokmarken, historik, installningar }) => {
+    let bm = [], hist = [], inst = null;
     try {
       if (typ === 'firefox') {
+        if (!kallor().some((k) => k.typ === 'firefox' && k.profiler.some((p) => p.id === profil))) throw new Error('profil saknas');
         if (bokmarken) bm = ffBokmarken(profil);
         if (historik) hist = ffHistorik(profil);
+        if (installningar) inst = ffInst(profil);
       } else {
         const dir = chromiumMapp(id, profil); if (!dir) throw new Error('profil saknas');
         if (bokmarken) bm = chromeBokmarken(dir);
         if (historik) hist = chromeHistorik(dir);
+        if (installningar) inst = chromeInst(id, dir);
       }
     } catch (e) { return { ok: false, fel: String(e.message || e) }; }
-    return { ok: true, bokmarken: bm, historik: hist };
+    return { ok: true, bokmarken: bm, historik: hist, installningar: inst };
+  });
+
+  // Installera tilläggen från Chrome Web Store (samma väg som när du lägger till ett själv)
+  ipcMain.handle('import:tillagg', async (_e, ids) => {
+    const ut = { ok: true, klara: [], fel: [] };
+    for (const id of (Array.isArray(ids) ? ids : []).slice(0, 60)) {
+      try {
+        const r = hooks && hooks.installeraTillagg ? await hooks.installeraTillagg(id) : { ok: false };
+        if (r && (r.ok || r.redan)) ut.klara.push(id); else ut.fel.push({ id, fel: (r && r.fel) || '' });
+      } catch (err) { ut.fel.push({ id, fel: String(err.message || err) }); }
+    }
+    return ut;
   });
 
   // Lösenord: välj en CSV-fil, tolka och spara via webbläsarens egna valv
@@ -197,4 +442,4 @@ function setup(hooks) {
   });
 }
 
-module.exports = { setup, kallor };
+module.exports = { setup, kallor, chromeInst, ffInst, mozLz4 };

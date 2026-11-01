@@ -120,6 +120,7 @@ contextBridge.exposeInMainWorld('view', {
   importKallor: () => ipcRenderer.invoke('import:kallor'),
   importLas: (val) => ipcRenderer.invoke('import:las', val),
   importLosenCsv: () => ipcRenderer.invoke('import:losen-csv'),
+  importTillagg: (ids) => ipcRenderer.invoke('import:tillagg', ids),
   synkGet: (token, sorts) => ipcRenderer.invoke('synk:get', token, sorts),
   synkPush: (token, sorts, poster, borttagna) => ipcRenderer.invoke('synk:push', token, sorts, poster, borttagna),
   extList: () => ipcRenderer.invoke('ext:list'),

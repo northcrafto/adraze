@@ -159,6 +159,7 @@ function setup({ onDnsChanged } = {}) {
     else if (k === 'falkSida') prefs.falkSida = !!v;
     else if (k === 'falkSamtycke') prefs.falkSamtycke = !!v;
     else if (k === 'downloadDir') prefs.downloadDir = '';
+    else if (k === 'downloadDirPath' && typeof v === 'string' && path.isAbsolute(v)) { try { if (fs.statSync(v).isDirectory()) prefs.downloadDir = v; else return false; } catch { return false; } }
     else if (k === 'permDefault' && v && KINDS.includes(v.kind)) prefs.permDefaults[v.kind] = v.value === 'block' ? 'block' : 'ask';
     else if (k === 'perm' && v && v.origin) {
       const s = prefs.perms[v.origin] = prefs.perms[v.origin] || {};

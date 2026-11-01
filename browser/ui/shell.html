@@ -760,22 +760,32 @@
             .imp-msg { font-size: 12.5px; color: var(--color-safe); }
             .imp-msg.err { color: #b23636; }
             .imp-none { font-size: 12.5px; color: rgb(28 43 58 / .5); }
+            .imp-lista { margin: 12px 0 0; padding: 10px 12px; list-style: none; border-radius: 10px; background: var(--color-paper); display: grid; gap: 5px; }
+            .imp-lista li { font-size: 12.5px; color: var(--color-navy-900); display: flex; gap: 8px; line-height: 1.45; }
+            .imp-lista li::before { content: '✓'; color: var(--color-safe); font-weight: 800; flex: none; }
+            .imp-lista li.miss::before { content: '–'; color: rgb(28 43 58 / .45); }
+            .imp-lista li.miss { color: rgb(28 43 58 / .6); }
+            :root[data-theme="dark"] .imp-lista li.miss, :root[data-theme="dark"] .imp-lista li.miss::before { color: #a1a1a8; }
           </style>
           <div class="set-panel hidden" data-cat="losenord">
             <h2 class="set-h">Autofyll &amp; lösenord</h2>
             <div class="imp-card">
               <h3>Importera från en annan webbläsare</h3>
-              <p class="imp-lead">Ta med dina bokmärken, historik och lösenord från Chrome, Brave, Edge eller Firefox. Inget skickas någonstans — allt stannar på den här datorn.</p>
+              <p class="imp-lead">Byt utan att börja om. Ta med bokmärken, historik, inställningar, utseende och tillägg från Chrome, Brave, Edge eller Firefox. Inget skickas någonstans — allt stannar på den här datorn.</p>
               <div id="imp-src" class="imp-src"></div>
               <div class="imp-opts">
                 <label><input type="checkbox" id="imp-bm" checked> Bokmärken</label>
                 <label><input type="checkbox" id="imp-hist" checked> Historik</label>
+                <label><input type="checkbox" id="imp-inst" checked> Inställningar</label>
+                <label><input type="checkbox" id="imp-utse" checked> Utseende</label>
+                <label id="imp-ext-wrap"><input type="checkbox" id="imp-ext" checked> Tillägg</label>
               </div>
               <div class="imp-foot">
                 <button id="imp-go" class="btn btn-safe" style="height:40px;padding:0 16px;" disabled>Importera</button>
                 <button id="imp-csv" class="btn btn-ghost" style="height:40px;padding:0 16px;">Lösenord från CSV-fil…</button>
                 <span id="imp-msg" class="imp-msg" hidden></span>
               </div>
+              <ul id="imp-lista" class="imp-lista" hidden></ul>
             </div>
             <p class="set-lead mb-3">Sparade inloggningar. AdRaze fyller i dem åt dig.</p>
             <div class="flex gap-2 mb-3">

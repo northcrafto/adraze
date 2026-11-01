@@ -1740,6 +1740,7 @@ ipcMain.on('open-app-menu', (e) => {
     { label: T('Ny inkognitoflik'), click: () => sendTo(ctx, 'new-incognito') },
     { type: 'separator' },
     { label: T('Lösenord och autofyll'), click: () => sendTo(ctx, 'open-passwords') },
+    { label: T('Importera från en annan webbläsare'), click: () => sendTo(ctx, 'open-passwords') },
     { label: T('Historik'), click: () => sendTo(ctx, 'open-history') },
     { label: T('Bokmärken och listor'), click: () => sendTo(ctx, 'open-bookmarks') },
     { label: T('Nedladdade filer'), click: () => sendTo(ctx, 'open-downloads') },
@@ -2479,6 +2480,7 @@ app.whenReady().then(async () => {
   applyClientHints(session.defaultSession);
   webb.setup(); webb.applyDns();
   importera.setup({
+    installeraTillagg: (id) => tillagg.installera(id),
     // Spara importerade lösenord i det aktiva valvet (samma avdubbling som pw:save)
     sparaLosen: (lista) => {
       const l = loadPw(); let antal = 0;
