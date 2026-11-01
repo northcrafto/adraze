@@ -46,20 +46,20 @@ function updateTitlebar() {
 
 /* ── URL-hjälp ── */
 const ENGINES = {
-  adraze: { label: 'AdRaze Search', url: 'https://search.adraze.app/search?q=' },
   google: { label: 'Google', url: 'https://www.google.com/search?q=' },
+  adraze: { label: 'AdRaze Search', url: 'https://search.adraze.app/search?q=' },
   duckduckgo: { label: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=' },
   brave: { label: 'Brave Search', url: 'https://search.brave.com/search?q=' },
   startpage: { label: 'Startpage', url: 'https://www.startpage.com/sp/search?query=' },
 };
 /* Inkognito söker alltid via AdRaze Search (vår egen motor, loggar inget). */
 const INCOG_ENGINE = { label: 'AdRaze Search', url: 'https://search.adraze.app/search?q=' };
-let searchEngine = 'adraze';
+let searchEngine = 'google';   // standard = Google; AdRaze Search går att välja (och används alltid i inkognito)
 try { const e = localStorage.getItem('skoll-engine'); if (e && ENGINES[e]) searchEngine = e; } catch {}
 function searchUrl(q) {
   // Vanligt: vald sökmotor. Inkognito: alltid AdRaze Search (ingen logg).
   if (active && active.incognito) return INCOG_ENGINE.url + encodeURIComponent(q);
-  return (ENGINES[searchEngine] || ENGINES.adraze).url + encodeURIComponent(q);
+  return (ENGINES[searchEngine] || ENGINES.google).url + encodeURIComponent(q);
 }
 function normalizeUrl(raw) {
   let s = (raw || '').trim();
