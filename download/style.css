@@ -151,8 +151,9 @@ body:has(.menu.open) .top { background: var(--bg); backdrop-filter: none; -webki
 .hero-3d{position:relative;aspect-ratio:1/0.95;margin:0}
 .hero-3d canvas{position:absolute;inset:-8% -14%;width:128%;height:116%;display:block;-webkit-mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)}
 @media (max-width:900px){.hero-3d canvas{inset:-6% 0;width:100%;height:112%}}
-.hero-3d-reserv{display:none;width:70%;margin:auto}
-.hero-3d.utan-3d canvas{display:none}.hero-3d.utan-3d .hero-3d-reserv{display:block}
+.hero-3d-reserv{display:block;width:70%;margin:auto;padding-top:6%}
+.hero-3d canvas{opacity:0;transition:opacity .35s}.hero-3d.klar canvas{opacity:1}.hero-3d.klar .hero-3d-reserv{visibility:hidden}
+.hero-3d.utan-3d canvas{display:none}.hero-3d.utan-3d .hero-3d-reserv{visibility:visible}
 .hero-3d-rakna{position:absolute;left:50%;bottom:2%;transform:translateX(-50%);background:var(--ink,#1b1916);color:#fff;
   font-size:15px;padding:8px 16px;border-radius:999px;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.18)}
 .hero-3d-rakna b{color:var(--accent,#ff4b1f);font-variant-numeric:tabular-nums}
