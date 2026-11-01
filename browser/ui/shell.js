@@ -387,6 +387,11 @@ window.view.onLoading((id, loading) => {
   b.innerHTML = `<svg class="ic"><use href="#${loading ? 'i-close' : 'i-reload'}" /></svg>`;
 });
 window.view.onOpenNewTab((url) => createTab(url));
+// Inställningar → Om: policy och chattregler på sajten (på användarens språk om det finns)
+{ const sajt = (sida) => { const l = (document.documentElement.lang || 'sv').slice(0, 2); return 'https://adraze.app' + (l === 'sv' ? '' : '/' + l) + '/' + sida; };
+  const pp = document.getElementById('privacy-policy-btn'), cr = document.getElementById('chat-rules-btn');
+  if (pp) pp.addEventListener('click', () => { createTab(sajt('integritet-webblasaren')); try { closeSettings(); } catch {} });
+  if (cr) cr.addEventListener('click', () => { createTab(sajt('chattregler')); try { closeSettings(); } catch {} }); }
 window.view.onNewIncognito(() => createTab(null, true));
 
 /* ── Bekräfta stängning med flera flikar (flytande Brave-lik notis) ──
@@ -1727,7 +1732,7 @@ function updateSug(q) {
   const seq = ++sugSeq;
   sugTimer = setTimeout(async () => {
     let list = [];
-    try { list = await window.view.suggest(query, incog ? 'adraze' : searchEngine); } catch { list = []; }   // inkognito: förslag från AdRaze Search
+    if (!incog) { try { list = await window.view.suggest(query, searchEngine); } catch { list = []; } }   // inkognito: inga förslag hämtas – det du skriver lämnar inte datorn förrän du söker
     if (seq !== sugSeq || document.activeElement !== inp || inp.value.slice(0, query.length).trim() !== query) return;   // gammalt svar → släng
     const seen = sug.pastQ || new Set([query.toLowerCase()]);
     const extra = list.filter((t) => t && !seen.has(t.toLowerCase())).slice(0, Math.max(0, 9 - lokala.length)).map((t) => ({ search: true, q: t }));

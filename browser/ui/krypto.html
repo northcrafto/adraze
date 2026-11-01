@@ -1125,8 +1125,8 @@
       const el = document.createElement('div'); el.className = 'samtycke'; el.setAttribute('role', 'dialog'); el.setAttribute('translate', 'no');
       el.innerHTML = '<b></b><p class="p1"></p><p class="p2"></p><p class="p3"></p><div class="rad"><button class="ja" type="button"></button><button class="nej" type="button"></button></div>';
       el.querySelector('b').textContent = tx('Innan Falk svarar');
-      el.querySelector('.p1').textContent = tx('Falk är en AI. Det du skriver i chatten skickas till AdRazes server och vidare till AI-tjänsten DeepSeek (via OpenRouter) för att ta fram ett svar.');
-      el.querySelector('.p2').textContent = tx('Är Granska sidan på skickas också texten på sidan du har öppen, så att Falk kan läsa och använda den.');
+      el.querySelector('.p1').textContent = tx('Falk är en AI. Det du skriver, filer du bifogar och det Falk har sparat om dig (minnen och projekt) skickas till AdRazes server och vidare till AI-tjänsten DeepSeek (via OpenRouter) för att ta fram ett svar. Vi sparar inte samtalen på servern.');
+      el.querySelector('.p2').textContent = tx('Är Granska sidan på skickas också adressen och texten på sidan du har öppen, och det som står ifyllt i fält (aldrig lösenord eller kortuppgifter). Inkognitoflikar läses aldrig.');
       el.querySelector('.p3').textContent = tx('Vi säljer inget och använder det aldrig för reklam. Du kan ändra dig när som helst i Inställningar → Falk.');
       el.querySelector('.ja').textContent = tx('Godkänn och fortsätt');
       el.querySelector('.nej').textContent = tx('Inte nu');
