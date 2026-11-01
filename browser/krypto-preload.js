@@ -7,8 +7,11 @@ contextBridge.exposeInMainWorld('locale', {
   load: (lang) => { try { return ipcRenderer.sendSync('i18n:load', lang) || {}; } catch { return {}; } },
 });
 contextBridge.exposeInMainWorld('krypto', {
-  chat: (messages) => ipcRenderer.invoke('krypto:chat', messages),
+  chat: (messages, opts) => ipcRenderer.invoke('krypto:chat', messages, opts),
   doAction: (a) => ipcRenderer.send('krypto:action', a),
+  tab: () => ipcRenderer.invoke('krypto:tab'),
+  page: () => ipcRenderer.invoke('krypto:page'),
+  act: (a) => ipcRenderer.invoke('krypto:act', a),
   expand: (full) => ipcRenderer.send('krypto:expand', !!full),
   onPrefill: (cb) => ipcRenderer.on('krypto-prefill', (_e, t) => cb(t)),
   me: () => ipcRenderer.invoke('krypto:me'),
