@@ -1640,7 +1640,7 @@ ipcMain.handle('omni:suggest', async (_e, arg) => {
   try {
     const q = String((arg && arg.q) || '').trim().slice(0, 200);
     if (!q) return [];
-    const mk = SUGGEST_URLS[(arg && arg.engine) || 'adraze'] || SUGGEST_URLS.adraze;
+    const mk = SUGGEST_URLS[(arg && arg.engine) || 'google'] || SUGGEST_URLS.google;
     const ac = new AbortController(); const t = setTimeout(() => ac.abort(), 1500);
     const res = await net.fetch(mk(q), { signal: ac.signal, headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' } });
     clearTimeout(t);
