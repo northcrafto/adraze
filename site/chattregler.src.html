@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{t:chat.meta_title}}</title>
+<meta name="description" content="{{t:chat.meta_description}}">
+<link rel="icon" href="/favicon.png">
+{{alternates}}
+<link rel="stylesheet" href="/style.css">
+<style>
+  .policy { max-width: 760px; padding: 72px 0 120px; }
+  .policy h1 { font-size: clamp(44px, 6vw, 72px); letter-spacing: -0.05em; }
+  .policy .datum { color: var(--dov); margin: 16px 0 48px; }
+  .policy h2 { font-size: 28px; margin: 48px 0 14px; }
+  .policy p, .policy li { color: #33333a; font-size: 17px; }
+  .policy ul { list-style: disc; padding-left: 22px; display: grid; gap: 8px; margin-top: 12px; }
+  .policy code { background: #e6e6e1; padding: 1px 6px; border-radius: 5px; font-size: 15px; }
+  .tillbaka { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 40px; }
+  .tillbaka svg { transform: scaleX(-1); width: 18px; height: 18px; }
+</style>
+</head>
+<body>
+{{topp}}
+<main class="wrap policy">
+  <a class="tillbaka nav-link" href="{{hem}}">{{arrow-right}}{{t:privacy.back}}</a>
+  <h1>{{t:chat.title}}</h1>
+  <p class="datum">{{t:chat.updated}}</p>
+  <p>{{t:chat.intro}}</p>
+
+  <h2>{{t:chat.h_not}}</h2>
+  <ul>
+    <li>{{t:chat.not1}}</li>
+    <li>{{t:chat.not2}}</li>
+    <li>{{t:chat.not3}}</li>
+    <li>{{t:chat.not4}}</li>
+    <li>{{t:chat.not5}}</li>
+    <li>{{t:chat.not6}}</li>
+    <li>{{t:chat.not7}}</li>
+    <li>{{t:chat.not8}}</li>
+    <li>{{t:chat.not9}}</li>
+  </ul>
+
+  <h2>{{t:chat.h_report}}</h2>
+  <p>{{t:chat.p_report}}</p>
+
+  <h2>{{t:chat.h_we}}</h2>
+  <p>{{t:chat.p_we}}</p>
+
+  <h2>{{t:chat.h_contact}}</h2>
+  <p>{{t:chat.p_contact}}</p>
+</main>
+<footer class="fot">
+  <div class="wrap fot-grid">
+    <div><a href="{{hem}}" class="logo"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a><p>{{t:footer.tagline}}</p></div>
+  </div>
+</footer>
+<script src="/main.js"></script>
+</body>
+</html>
