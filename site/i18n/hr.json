@@ -341,7 +341,7 @@
   "dl.copy": "Kopiraj",
   "dl.copied": "Kopirano",
   "dl.windows_note": "Uskoro u Microsoft Storeu.",
-  "dl.mac_note": "Radimo na tome.",
+  "dl.mac_note": "Otvorite datoteku i povucite AdRaze u Aplikacije. Za macOS 12 ili noviji, Apple čip i Intel.",
   "dl.soon": "Uskoro",
   "dl.ext_note": "Za Chrome, Brave, Edge i druge preglednike temeljene na Chromiumu.",
   "dl.all_releases": "Sve verzije na GitHubu",
@@ -401,5 +401,6 @@
   "demo.adraze_label": "ista stranica",
   "demo.chrome_alt": "Snimka stranice s vijestima u Chromeu, pune oglasa",
   "demo.adraze_alt": "Snimka iste stranice u AdRazeu, bez oglasa",
-  "demo.caption": "Prava snimka zaslona, ne animacija. expressen.se 1. studenoga 2026., oba s novim profilom i istim pomicanjem."
+  "demo.caption": "Prava snimka zaslona, ne animacija. expressen.se 1. studenoga 2026., oba s novim profilom i istim pomicanjem.",
+  "dl.mac_btn": "Preuzmi za Mac"
 }

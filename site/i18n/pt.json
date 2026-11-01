@@ -341,7 +341,7 @@
   "dl.copy": "Copiar",
   "dl.copied": "Copiado",
   "dl.windows_note": "Em breve na Microsoft Store.",
-  "dl.mac_note": "Estamos trabalhando nisso.",
+  "dl.mac_note": "Abra o arquivo e arraste o AdRaze para Aplicativos. Para macOS 12 ou mais recente, chip Apple e Intel.",
   "dl.soon": "Em breve",
   "dl.ext_note": "Para Chrome, Brave, Edge e outros navegadores Chromium.",
   "dl.all_releases": "Todas as versões no GitHub",
@@ -401,5 +401,6 @@
   "demo.adraze_label": "mesma página",
   "demo.chrome_alt": "Gravação de um site de notícias no Chrome, cheio de anúncios",
   "demo.adraze_alt": "Gravação do mesmo site de notícias no AdRaze, sem anúncios",
-  "demo.caption": "Gravação de ecrã real, não uma animação. expressen.se a 1 de novembro de 2026, ambos com perfil novo e o mesmo deslocamento."
+  "demo.caption": "Gravação de ecrã real, não uma animação. expressen.se a 1 de novembro de 2026, ambos com perfil novo e o mesmo deslocamento.",
+  "dl.mac_btn": "Baixar para Mac"
 }

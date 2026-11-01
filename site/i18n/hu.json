@@ -341,7 +341,7 @@
   "dl.copy": "Másolás",
   "dl.copied": "Másolva",
   "dl.windows_note": "Hamarosan a Microsoft Store-ban.",
-  "dl.mac_note": "Dolgozunk rajta.",
+  "dl.mac_note": "Nyissa meg a fájlt, és húzza az AdRaze-t az Alkalmazások mappába. macOS 12 vagy újabb, Apple chip és Intel.",
   "dl.soon": "Hamarosan",
   "dl.ext_note": "Chrome-hoz, Brave-hez, Edge-hez és más Chromium-alapú böngészőkhöz.",
   "dl.all_releases": "Minden verzió a GitHubon",
@@ -401,5 +401,6 @@
   "demo.adraze_label": "ugyanaz az oldal",
   "demo.chrome_alt": "Felvétel egy hírportálról Chrome-ban, tele reklámmal",
   "demo.adraze_alt": "Felvétel ugyanarról a hírportálról AdRaze-ben, reklámok nélkül",
-  "demo.caption": "Valódi képernyőfelvétel, nem animáció. expressen.se, 2026. november 1., mindkettő új profillal és azonos görgetéssel."
+  "demo.caption": "Valódi képernyőfelvétel, nem animáció. expressen.se, 2026. november 1., mindkettő új profillal és azonos görgetéssel.",
+  "dl.mac_btn": "Letöltés Macre"
 }

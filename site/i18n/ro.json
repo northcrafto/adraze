@@ -341,7 +341,7 @@
   "dl.copy": "Copiază",
   "dl.copied": "Copiat",
   "dl.windows_note": "Vine în Microsoft Store.",
-  "dl.mac_note": "Lucrăm la asta.",
+  "dl.mac_note": "Deschide fișierul și trage AdRaze în Aplicații. Pentru macOS 12 sau mai nou, cip Apple și Intel.",
   "dl.soon": "În curând",
   "dl.ext_note": "Pentru Chrome, Brave, Edge și alte browsere bazate pe Chromium.",
   "dl.all_releases": "Toate versiunile pe GitHub",
@@ -401,5 +401,6 @@
   "demo.adraze_label": "aceeași pagină",
   "demo.chrome_alt": "Înregistrare a unui site de știri în Chrome, plin de reclame",
   "demo.adraze_alt": "Înregistrare a aceluiași site în AdRaze, fără reclame",
-  "demo.caption": "Înregistrare reală a ecranului, nu o animație. expressen.se, 1 noiembrie 2026, ambele cu profil nou și aceeași derulare."
+  "demo.caption": "Înregistrare reală a ecranului, nu o animație. expressen.se, 1 noiembrie 2026, ambele cu profil nou și aceeași derulare.",
+  "dl.mac_btn": "Descarcă pentru Mac"
 }

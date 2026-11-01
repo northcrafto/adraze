@@ -341,7 +341,7 @@
   "dl.copy": "Kopiera",
   "dl.copied": "Kopierat",
   "dl.windows_note": "Kommer till Microsoft Store.",
-  "dl.mac_note": "Vi jobbar på det.",
+  "dl.mac_note": "Öppna filen och dra AdRaze till Program. För macOS 12 eller nyare, både Apple-chip och Intel.",
   "dl.soon": "Kommer snart",
   "dl.ext_note": "För Chrome, Brave, Edge och andra webbläsare byggda på Chromium.",
   "dl.all_releases": "Alla versioner på GitHub",
@@ -401,5 +401,6 @@
   "demo.adraze_label": "samma sida",
   "demo.chrome_alt": "Inspelning av en nyhetssajt i Chrome, full av annonser",
   "demo.adraze_alt": "Inspelning av samma nyhetssajt i AdRaze, utan annonser",
-  "demo.caption": "Riktig skärminspelning, ingen animation. expressen.se den 1 november 2026, båda med ny profil och samma scrollning."
+  "demo.caption": "Riktig skärminspelning, ingen animation. expressen.se den 1 november 2026, båda med ny profil och samma scrollning.",
+  "dl.mac_btn": "Ladda ner för Mac"
 }

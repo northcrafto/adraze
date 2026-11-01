@@ -341,7 +341,7 @@
   "dl.copy": "Kopyala",
   "dl.copied": "Kopyalandı",
   "dl.windows_note": "Yakında Microsoft Store’da.",
-  "dl.mac_note": "Üzerinde çalışıyoruz.",
+  "dl.mac_note": "Dosyayı açın ve AdRaze'i Uygulamalar'a sürükleyin. macOS 12 veya üzeri, Apple çip ve Intel.",
   "dl.soon": "Çok yakında",
   "dl.ext_note": "Chrome, Brave, Edge ve diğer Chromium tabanlı tarayıcılar için.",
   "dl.all_releases": "GitHub’daki tüm sürümler",
@@ -401,5 +401,6 @@
   "demo.adraze_label": "aynı sayfa",
   "demo.chrome_alt": "Chrome'da reklamlarla dolu bir haber sitesinin kaydı",
   "demo.adraze_alt": "Aynı haber sitesinin AdRaze'de reklamsız kaydı",
-  "demo.caption": "Gerçek ekran kaydı, animasyon değil. expressen.se, 1 Kasım 2026, ikisi de yeni profil ve aynı kaydırma ile."
+  "demo.caption": "Gerçek ekran kaydı, animasyon değil. expressen.se, 1 Kasım 2026, ikisi de yeni profil ve aynı kaydırma ile.",
+  "dl.mac_btn": "Mac için indir"
 }

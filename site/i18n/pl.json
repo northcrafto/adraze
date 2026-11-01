@@ -341,7 +341,7 @@
   "dl.copy": "Kopiuj",
   "dl.copied": "Skopiowano",
   "dl.windows_note": "Wkrótce w Microsoft Store.",
-  "dl.mac_note": "Pracujemy nad tym.",
+  "dl.mac_note": "Otwórz plik i przeciągnij AdRaze do Aplikacji. Dla macOS 12 lub nowszego, z czipem Apple i Intel.",
   "dl.soon": "Już wkrótce",
   "dl.ext_note": "Do Chrome, Brave, Edge i innych przeglądarek opartych na Chromium.",
   "dl.all_releases": "Wszystkie wersje na GitHubie",
@@ -401,5 +401,6 @@
   "demo.adraze_label": "ta sama strona",
   "demo.chrome_alt": "Nagranie strony z wiadomościami w Chrome, pełnej reklam",
   "demo.adraze_alt": "Nagranie tej samej strony w AdRaze, bez reklam",
-  "demo.caption": "Prawdziwe nagranie ekranu, nie animacja. expressen.se, 1 listopada 2026, oba z nowym profilem i tym samym przewijaniem."
+  "demo.caption": "Prawdziwe nagranie ekranu, nie animacja. expressen.se, 1 listopada 2026, oba z nowym profilem i tym samym przewijaniem.",
+  "dl.mac_btn": "Pobierz na Maca"
 }

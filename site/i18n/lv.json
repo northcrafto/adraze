@@ -341,7 +341,7 @@
   "dl.copy": "Kopēt",
   "dl.copied": "Nokopēts",
   "dl.windows_note": "Drīzumā Microsoft Store.",
-  "dl.mac_note": "Mēs pie tā strādājam.",
+  "dl.mac_note": "Atveriet failu un ievelciet AdRaze mapē Lietotnes. macOS 12 vai jaunākai, Apple mikroshēmai un Intel.",
   "dl.soon": "Drīzumā",
   "dl.ext_note": "Pārlūkiem Chrome, Brave, Edge un citiem Chromium pārlūkiem.",
   "dl.all_releases": "Visas versijas GitHub",
@@ -401,5 +401,6 @@
   "demo.adraze_label": "tā pati lapa",
   "demo.chrome_alt": "Ziņu vietnes ieraksts pārlūkā Chrome, pilns ar reklāmām",
   "demo.adraze_alt": "Tās pašas vietnes ieraksts AdRaze, bez reklāmām",
-  "demo.caption": "Īsts ekrāna ieraksts, nevis animācija. expressen.se 2026. gada 1. novembrī, abi ar jaunu profilu un vienādu ritināšanu."
+  "demo.caption": "Īsts ekrāna ieraksts, nevis animācija. expressen.se 2026. gada 1. novembrī, abi ar jaunu profilu un vienādu ritināšanu.",
+  "dl.mac_btn": "Lejupielādēt Mac datoram"
 }

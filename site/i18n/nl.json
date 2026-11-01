@@ -341,7 +341,7 @@
   "dl.copy": "Kopiëren",
   "dl.copied": "Gekopieerd",
   "dl.windows_note": "Komt naar de Microsoft Store.",
-  "dl.mac_note": "We werken eraan.",
+  "dl.mac_note": "Open het bestand en sleep AdRaze naar Apps. Voor macOS 12 of nieuwer, Apple-chip en Intel.",
   "dl.soon": "Binnenkort",
   "dl.ext_note": "Voor Chrome, Brave, Edge en andere Chromium-browsers.",
   "dl.all_releases": "Alle versies op GitHub",
@@ -401,5 +401,6 @@
   "demo.adraze_label": "dezelfde pagina",
   "demo.chrome_alt": "Opname van een nieuwssite in Chrome, vol advertenties",
   "demo.adraze_alt": "Opname van dezelfde nieuwssite in AdRaze, zonder advertenties",
-  "demo.caption": "Echte schermopname, geen animatie. expressen.se op 1 november 2026, allebei met een nieuw profiel en hetzelfde scrollen."
+  "demo.caption": "Echte schermopname, geen animatie. expressen.se op 1 november 2026, allebei met een nieuw profiel en hetzelfde scrollen.",
+  "dl.mac_btn": "Download voor Mac"
 }

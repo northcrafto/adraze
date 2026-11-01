@@ -341,7 +341,7 @@
   "dl.copy": "Копиране",
   "dl.copied": "Копирано",
   "dl.windows_note": "Скоро в Microsoft Store.",
-  "dl.mac_note": "Работим по въпроса.",
+  "dl.mac_note": "Отворете файла и плъзнете AdRaze в Програми. За macOS 12 или по-нова, Apple чип и Intel.",
   "dl.soon": "Очаквайте скоро",
   "dl.ext_note": "За Chrome, Brave, Edge и други браузъри на база Chromium.",
   "dl.all_releases": "Всички версии в GitHub",
@@ -401,5 +401,6 @@
   "demo.adraze_label": "същата страница",
   "demo.chrome_alt": "Запис на новинарски сайт в Chrome, пълен с реклами",
   "demo.adraze_alt": "Запис на същия сайт в AdRaze, без реклами",
-  "demo.caption": "Истински запис на екрана, не анимация. expressen.se, 1 ноември 2026 г., и двата с нов профил и еднакво превъртане."
+  "demo.caption": "Истински запис на екрана, не анимация. expressen.se, 1 ноември 2026 г., и двата с нов профил и еднакво превъртане.",
+  "dl.mac_btn": "Изтегли за Mac"
 }
