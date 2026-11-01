@@ -19,7 +19,7 @@ if [ "$VILL" != "$HAR" ]; then
 fi
 node tools/electron-vakt.js --koll 2>/dev/null | tail -1 | grep -q "uppdatera till" && echo "OBS: $(node tools/electron-vakt.js --koll | tail -1) finns hos castlabs"
 V=$(npm version patch --no-git-tag-version | tr -d v)
-rm -f dist-installer/latest-linux.yml dist-installer/AdRaze.AppImage
+rm -f dist-installer/latest-linux.yml dist-installer/AdRaze.AppImage dist-installer/AdRaze.dmg dist-installer/AdRaze-mac.zip dist-installer/AdRaze-mac.zip.blockmap dist-installer/latest-mac.yml
 npm run build:linux -- --publish never
 grep -q "^version: $V$" dist-installer/latest-linux.yml || { echo "latest-linux.yml har fel version"; exit 1; }
 if [ -z "$ADRAZE_UTAN_TEST" ]; then
@@ -33,9 +33,20 @@ if [ -z "$ADRAZE_UTAN_TEST" ]; then
   fi
   rm -rf "$FORRA"
 fi
+# Mac (universell dmg + zip för uppdateringar), byggd och notariserad på MacBooken. Går det inte –
+# Mac:en avstängd eller bygget föll – följer förra versionens Mac-filer med, så att nedladdningslänken
+# alltid fungerar (Mac-användarna får då ingen uppdatering just den här gången).
+MAC_FILER="dist-installer/AdRaze.dmg dist-installer/AdRaze-mac.zip dist-installer/AdRaze-mac.zip.blockmap dist-installer/latest-mac.yml"
+if [ -n "$ADRAZE_UTAN_MAC" ] || ! tools/release-mac.sh; then
+  echo "OBS: ingen ny Mac-version i $V – tar med förra Mac-filerna"
+  rm -f $MAC_FILER
+  gh release download -R northcrafto/adraze-dl -D dist-installer -p AdRaze.dmg -p AdRaze-mac.zip -p AdRaze-mac.zip.blockmap -p latest-mac.yml 2>/dev/null || true
+  command -v notify-send >/dev/null && notify-send "AdRaze $V" "Mac-bygget gjordes inte – förra Mac-versionen följer med" 2>/dev/null || true
+fi
+MAC_FILER=$(for f in $MAC_FILER; do [ -f "$f" ] && echo "$f"; done)
 if [ -n "$ADRAZE_TORR" ]; then git checkout -q package.json package-lock.json; echo "Torrkörning: $V byggd och testad, släpps inte"; exit 0; fi
 gh release create "v$V" -R northcrafto/adraze-dl --title "AdRaze $V" --notes "$NOTES" \
-  dist-installer/AdRaze.AppImage dist-installer/latest-linux.yml
+  dist-installer/AdRaze.AppImage dist-installer/latest-linux.yml $MAC_FILER
 git add package.json package-lock.json 2>/dev/null || git add package.json
 git -c user.name=Cetto -c user.email=cetoari9@gmail.com commit -qm "AdRaze $V: $NOTES"
 git push -q origin HEAD:main

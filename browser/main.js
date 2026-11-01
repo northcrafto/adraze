@@ -2524,7 +2524,9 @@ function startAutoUpdate() {
   // releaser i northcrafto/adraze-dl
   if (process.env.ADRAZE_NO_UPDATES) return;
   if (process.windowsStore) return;               // Microsoft Store sköter uppdateringarna själv
-  if (process.platform === 'darwin') { checkMacUpdate(); return; }  // mac: notis (osignerad)
+  // mac: signerad + notariserad sedan 0.1.76 → samma automatiska uppdatering (zip + latest-mac.yml).
+  // Utan electron-updater (osignerat dev-bygge) blir det bara en notis.
+  if (process.platform === 'darwin' && !autoUpdater) { checkMacUpdate(); return; }
   if (!autoUpdater) return;
   const log = (m) => { try { fs.appendFileSync(path.join(app.getPath('userData'), 'update.log'), new Date().toISOString().slice(0, 19) + ' ' + m + '\n'); } catch {} };
   try {
@@ -2615,7 +2617,7 @@ ipcMain.handle('update:status', async (_e, force) => {
     current, latest: l.v || current, notes: l.notes, date: l.date,
     available: !!(l.v && semverGt(l.v, current)),
     ready: !!(updDownloaded && semverGt(updDownloaded, current)), readyVersion: updDownloaded,
-    auto: !!autoUpdater && process.platform !== 'darwin' && !process.env.ADRAZE_NO_UPDATES,
+    auto: !!autoUpdater && !process.env.ADRAZE_NO_UPDATES,
   };
 });
 

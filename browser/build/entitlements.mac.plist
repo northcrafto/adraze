@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- V8/Chromium behöver JIT och skrivbart+körbart minne -->
+  <key>com.apple.security.cs.allow-jit</key><true/>
+  <key>com.apple.security.cs.allow-unsigned-executable-memory</key><true/>
+  <!-- Widevine-modulen (CDM) laddas ner av castlabs-Electron och är signerad av Google, inte av oss -->
+  <key>com.apple.security.cs.disable-library-validation</key><true/>
+  <!-- Sajter som ber om kamera/mikrofon (Meet, Discord …) – frågan visas ändå först -->
+  <key>com.apple.security.device.camera</key><true/>
+  <key>com.apple.security.device.audio-input</key><true/>
+</dict>
+</plist>
