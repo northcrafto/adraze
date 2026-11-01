@@ -767,3 +767,18 @@ try {
     try { if (lastFs && lastFs.isConnected && !document.fullscreenElement) lastFs.requestFullscreen().catch(() => {}); } catch {}
   };
 } catch {}
+
+/* Bild-i-bild: säg till när sidan (den här ramen) har en video och när en video går in i
+ * eller ut ur bild-i-bild, så att skalet kan visa knappen i adressfältet. */
+if (/^https?:$/.test(location.protocol)) {
+  let sist = '';
+  const meddela = () => {
+    try {
+      const has = Array.from(document.querySelectorAll('video')).some((v) => v.readyState > 0 && v.offsetWidth >= 160);
+      const on = !!document.pictureInPictureElement;
+      if (has + '|' + on === sist) return; sist = has + '|' + on;
+      ipcRenderer.send('pip:state', { has, on });
+    } catch {}
+  };
+  for (const ev of ['loadedmetadata', 'play', 'emptied', 'enterpictureinpicture', 'leavepictureinpicture']) document.addEventListener(ev, () => setTimeout(meddela, 60), true);
+}
