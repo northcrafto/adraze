@@ -107,6 +107,7 @@
       <input id="address" type="text" spellcheck="false" placeholder="Sök tryggt eller skriv en adress"
              class="flex-1 bg-transparent outline-none text-[14.5px] text-navy-900 placeholder:text-navy-900/40" />
       <button id="reader-btn" class="grid place-items-center w-7 h-7 rounded-lg flex-none" title="Läsläge" hidden><svg class="ic" viewBox="0 0 24 24" style="width:18px;height:18px" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg></button>
+      <span id="falk-granskar" class="flex-none" hidden><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg><span>Falk granskar sidan</span></span>
       <button id="pip-btn" class="grid place-items-center w-7 h-7 rounded-lg flex-none" title="Bild-i-bild" hidden><svg class="ic" viewBox="0 0 24 24" style="width:18px;height:18px" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><rect x="12" y="11.5" width="7" height="5" rx="1.2" fill="currentColor" stroke="none"/></svg></button>
       <button id="adblock" class="omni-ab" title="AdRaze – blockerar reklam och spårare"><img src="adraze-mark.png" alt="AdRaze" class="ab-mark" width="18" height="18"><span id="adcount" class="tabular-nums">0</span></button>
       <span id="search-engine" class="text-[11px] font-semibold text-navy-900/35 select-none">Google</span>
@@ -682,6 +683,11 @@
               <span class="set-ico" style="color:var(--color-terra);"><svg class="ic ic-sm"><use href="#i-chat" /></svg></span>
               <div class="set-txt"><div class="set-title">Visa Falk-knappen</div><div class="set-desc">Snabbknappen i verktygsraden.</div></div>
               <label class="switch"><input id="tgl-krypto" type="checkbox" checked /><span class="track"></span></label>
+            </div>
+            <div class="set-row">
+              <span class="set-ico" style="color:var(--color-terra);"><svg class="ic ic-sm"><use href="#i-eye" /></svg></span>
+              <div class="set-txt"><div class="set-title">Granska sidan</div><div class="set-desc">Falk får läsa sidan du har öppen och klicka och skriva på den när du ber om det. Av: Falk ser bara det du skriver i chatten.</div></div>
+              <label class="switch"><input id="tgl-falksida" type="checkbox" checked /><span class="track"></span></label>
             </div>
             <button id="open-krypto-btn" class="btn mt-5 text-white" style="height:42px;background:var(--color-terra);">Öppna Falk</button>
           </div>

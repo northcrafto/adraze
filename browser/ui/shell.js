@@ -178,7 +178,7 @@ function switchTab(tab) {
   else showActiveTab();
   renderTabs(); updateNavButtons(); updateStar();
   try { updateReaderBtn(); } catch {}
-  try { updatePipBtn(); } catch {}
+  try { updatePipBtn(); updateFalkGranskar(); } catch {}
   try { permSwitched(); } catch {}
   try { applyTabPanel(tab); } catch {}
   try { visaFlikRaknare(); } catch {}
@@ -1889,6 +1889,7 @@ async function refreshWebbPanel() {
   $('sel-font').value = String(webbPrefs.fontSize);
   if (!$('sel-font').value) $('sel-font').value = '16';
   $('tgl-https').checked = !!webbPrefs.httpsOnly;
+  if ($('tgl-falksida')) $('tgl-falksida').checked = webbPrefs.falkSida !== false;
   $('sel-dns').value = webbPrefs.dns;
   $('dl-dir').textContent = webbPrefs.downloadDir; $('dl-dir-reset').hidden = !webbPrefs.downloadDirCustom;
   $('tgl-askdl').checked = !!webbPrefs.askDownload;
@@ -1937,6 +1938,7 @@ $('start-url-cur').addEventListener('click', () => {
 $('tgl-bmbar').addEventListener('change', (e) => { bmbarOn = e.target.checked; try { localStorage.setItem('adraze-bmbar', bmbarOn ? '1' : '0'); } catch {} renderBookmarkBar(); });
 $('sel-font').addEventListener('change', (e) => { window.view.webbSet('fontSize', e.target.value); showToast(tw('Ny teckenstorlek gäller flikar du öppnar från och med nu.')); });
 $('tgl-https').addEventListener('change', (e) => window.view.webbSet('httpsOnly', e.target.checked));
+$('tgl-falksida').addEventListener('change', (e) => window.view.webbSet('falkSida', e.target.checked));
 $('sel-dns').addEventListener('change', (e) => window.view.webbSet('dns', e.target.value));
 $('tgl-askdl').addEventListener('change', (e) => window.view.webbSet('askDownload', e.target.checked));
 $('dl-dir-btn').addEventListener('click', async () => { const d = await window.view.webbPickDir(); if (d) refreshWebbPanel(); });
@@ -2016,6 +2018,8 @@ window.view.onReader((id, ok, on) => { const t = byId(id); if (!t) return; t.rea
 function updatePipBtn() { const b = $('pip-btn'); if (!b) return; b.hidden = !(active && active.url && (active.pipHas || active.pipOn)); b.classList.toggle('on', !!(active && active.pipOn)); b.title = (active && active.pipOn) ? tw('Ta tillbaka videon') : tw('Bild-i-bild') + ' (Ctrl+Shift+P)'; }
 window.view.onPip((id, has, on) => { const t = byId(id); if (!t) return; t.pipHas = has; t.pipOn = on; if (t === active) updatePipBtn(); });
 $('pip-btn').addEventListener('click', () => { if (active) window.view.pip(active.id); });
+function updateFalkGranskar() { const b = $('falk-granskar'); if (b) b.hidden = !(active && active.falkGranskar); }
+window.view.onFalkGranskar((id, on) => { const t = byId(id); if (!t) return; t.falkGranskar = on; if (t === active) updateFalkGranskar(); });
 $('reader-btn').addEventListener('click', () => { if (active) window.view.reader(active.id, document.documentElement.dataset.theme || 'light'); });
 
 // ── Fäst flik och ljud av ──
