@@ -341,7 +341,7 @@
   "dl.copy": "Kopiér",
   "dl.copied": "Kopieret",
   "dl.windows_note": "Kommer til Microsoft Store.",
-  "dl.mac_note": "Vi arbejder på det.",
+  "dl.mac_note": "Åbn filen, og træk AdRaze til Programmer. Til macOS 12 eller nyere, både Apple-chip og Intel.",
   "dl.soon": "Kommer snart",
   "dl.ext_note": "Til Chrome, Brave, Edge og andre Chromium-baserede browsere.",
   "dl.all_releases": "Alle versioner på GitHub",
@@ -401,5 +401,6 @@
   "demo.adraze_label": "samme side",
   "demo.chrome_alt": "Optagelse af et nyhedssite i Chrome, fyldt med reklamer",
   "demo.adraze_alt": "Optagelse af det samme nyhedssite i AdRaze, uden reklamer",
-  "demo.caption": "Ægte skærmoptagelse, ikke en animation. expressen.se den 1. november 2026, begge med ny profil og samme scrolling."
+  "demo.caption": "Ægte skærmoptagelse, ikke en animation. expressen.se den 1. november 2026, begge med ny profil og samme scrolling.",
+  "dl.mac_btn": "Hent til Mac"
 }

@@ -341,7 +341,7 @@
   "dl.copy": "Kopeeri",
   "dl.copied": "Kopeeritud",
   "dl.windows_note": "Tulemas Microsoft Store’i.",
-  "dl.mac_note": "Töötame selle kallal.",
+  "dl.mac_note": "Ava fail ja lohista AdRaze kausta Rakendused. macOS 12 või uuem, nii Apple'i kiip kui ka Intel.",
   "dl.soon": "Varsti",
   "dl.ext_note": "Chrome’ile, Brave’ile, Edge’ile ja teistele Chromiumil põhinevatele brauseritele.",
   "dl.all_releases": "Kõik versioonid GitHubis",
@@ -401,5 +401,6 @@
   "demo.adraze_label": "sama leht",
   "demo.chrome_alt": "Salvestus uudisteportaalist Chrome'is, täis reklaame",
   "demo.adraze_alt": "Salvestus samast portaalist AdRaze'is, ilma reklaamideta",
-  "demo.caption": "Päris ekraanisalvestus, mitte animatsioon. expressen.se 1. novembril 2026, mõlemad uue profiili ja sama kerimisega."
+  "demo.caption": "Päris ekraanisalvestus, mitte animatsioon. expressen.se 1. novembril 2026, mõlemad uue profiili ja sama kerimisega.",
+  "dl.mac_btn": "Laadi alla Macile"
 }

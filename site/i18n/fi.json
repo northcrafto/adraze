@@ -341,7 +341,7 @@
   "dl.copy": "Kopioi",
   "dl.copied": "Kopioitu",
   "dl.windows_note": "Tulossa Microsoft Storeen.",
-  "dl.mac_note": "Työstämme sitä.",
+  "dl.mac_note": "Avaa tiedosto ja vedä AdRaze Ohjelmat-kansioon. macOS 12 tai uudempi, sekä Apple-siru että Intel.",
   "dl.soon": "Tulossa pian",
   "dl.ext_note": "Chromeen, Braveen, Edgeen ja muihin Chromium-pohjaisiin selaimiin.",
   "dl.all_releases": "Kaikki versiot GitHubissa",
@@ -401,5 +401,6 @@
   "demo.adraze_label": "sama sivu",
   "demo.chrome_alt": "Tallenne uutissivustosta Chromessa, täynnä mainoksia",
   "demo.adraze_alt": "Tallenne samasta uutissivustosta AdRazessa, ilman mainoksia",
-  "demo.caption": "Aito näyttötallenne, ei animaatio. expressen.se 1. marraskuuta 2026, molemmat uudella profiililla ja samalla vierityksellä."
+  "demo.caption": "Aito näyttötallenne, ei animaatio. expressen.se 1. marraskuuta 2026, molemmat uudella profiililla ja samalla vierityksellä.",
+  "dl.mac_btn": "Lataa Macille"
 }

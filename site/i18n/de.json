@@ -341,7 +341,7 @@
   "dl.copy": "Kopieren",
   "dl.copied": "Kopiert",
   "dl.windows_note": "Kommt in den Microsoft Store.",
-  "dl.mac_note": "Wir arbeiten daran.",
+  "dl.mac_note": "Datei öffnen und AdRaze in „Programme“ ziehen. Für macOS 12 oder neuer, Apple-Chip und Intel.",
   "dl.soon": "Bald verfügbar",
   "dl.ext_note": "Für Chrome, Brave, Edge und andere Chromium-Browser.",
   "dl.all_releases": "Alle Versionen auf GitHub",
@@ -401,5 +401,6 @@
   "demo.adraze_label": "gleiche Seite",
   "demo.chrome_alt": "Aufnahme einer Nachrichtenseite in Chrome, voller Werbung",
   "demo.adraze_alt": "Aufnahme derselben Nachrichtenseite in AdRaze, ohne Werbung",
-  "demo.caption": "Echte Bildschirmaufnahme, keine Animation. expressen.se am 1. November 2026, beide mit frischem Profil und gleichem Scrollen."
+  "demo.caption": "Echte Bildschirmaufnahme, keine Animation. expressen.se am 1. November 2026, beide mit frischem Profil und gleichem Scrollen.",
+  "dl.mac_btn": "Für Mac laden"
 }

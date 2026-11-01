@@ -341,7 +341,7 @@
   "dl.copy": "Afrita",
   "dl.copied": "Afritað",
   "dl.windows_note": "Kemur í Microsoft Store.",
-  "dl.mac_note": "Við erum að vinna í því.",
+  "dl.mac_note": "Opnaðu skrána og dragðu AdRaze í Forrit. Fyrir macOS 12 eða nýrra, bæði Apple-örgjörva og Intel.",
   "dl.soon": "Kemur bráðum",
   "dl.ext_note": "Fyrir Chrome, Brave, Edge og aðra Chromium-vafra.",
   "dl.all_releases": "Allar útgáfur á GitHub",
@@ -401,5 +401,6 @@
   "demo.adraze_label": "sama síða",
   "demo.chrome_alt": "Upptaka af fréttavef í Chrome, fullum af auglýsingum",
   "demo.adraze_alt": "Upptaka af sama fréttavef í AdRaze, án auglýsinga",
-  "demo.caption": "Raunveruleg skjáupptaka, ekki hreyfimynd. expressen.se 1. nóvember 2026, báðir með nýjan prófíl og sömu skrunun."
+  "demo.caption": "Raunveruleg skjáupptaka, ekki hreyfimynd. expressen.se 1. nóvember 2026, báðir með nýjan prófíl og sömu skrunun.",
+  "dl.mac_btn": "Sækja fyrir Mac"
 }

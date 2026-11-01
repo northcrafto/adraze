@@ -341,7 +341,7 @@
   "dl.copy": "Copy",
   "dl.copied": "Copied",
   "dl.windows_note": "Coming to the Microsoft Store.",
-  "dl.mac_note": "We're working on it.",
+  "dl.mac_note": "Open the file and drag AdRaze to Applications. For macOS 12 or later, Apple silicon and Intel.",
   "dl.soon": "Coming soon",
   "dl.ext_note": "For Chrome, Brave, Edge and other Chromium-based browsers.",
   "dl.all_releases": "All versions on GitHub",
@@ -401,5 +401,6 @@
   "demo.adraze_label": "same page",
   "demo.chrome_alt": "Recording of a news site in Chrome, full of ads",
   "demo.adraze_alt": "Recording of the same news site in AdRaze, without ads",
-  "demo.caption": "Real screen recording, not an animation. expressen.se on 1 November 2026, both with a fresh profile and the same scrolling."
+  "demo.caption": "Real screen recording, not an animation. expressen.se on 1 November 2026, both with a fresh profile and the same scrolling.",
+  "dl.mac_btn": "Download for Mac"
 }

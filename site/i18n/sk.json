@@ -341,7 +341,7 @@
   "dl.copy": "Kopírovať",
   "dl.copied": "Skopírované",
   "dl.windows_note": "Čoskoro v Microsoft Store.",
-  "dl.mac_note": "Pracujeme na tom.",
+  "dl.mac_note": "Otvorte súbor a presuňte AdRaze do Aplikácií. Pre macOS 12 alebo novší, čip Apple aj Intel.",
   "dl.soon": "Už čoskoro",
   "dl.ext_note": "Pre Chrome, Brave, Edge a ďalšie prehliadače založené na Chromiu.",
   "dl.all_releases": "Všetky verzie na GitHube",
@@ -401,5 +401,6 @@
   "demo.adraze_label": "tá istá stránka",
   "demo.chrome_alt": "Záznam spravodajskej stránky v Chrome, plnej reklám",
   "demo.adraze_alt": "Záznam tej istej stránky v AdRaze, bez reklám",
-  "demo.caption": "Skutočný záznam obrazovky, nie animácia. expressen.se 1. novembra 2026, oba s novým profilom a rovnakým posúvaním."
+  "demo.caption": "Skutočný záznam obrazovky, nie animácia. expressen.se 1. novembra 2026, oba s novým profilom a rovnakým posúvaním.",
+  "dl.mac_btn": "Stiahnuť pre Mac"
 }

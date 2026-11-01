@@ -341,7 +341,7 @@
   "dl.copy": "Kopijuoti",
   "dl.copied": "Nukopijuota",
   "dl.windows_note": "Netrukus Microsoft Store.",
-  "dl.mac_note": "Dirbame su tuo.",
+  "dl.mac_note": "Atidarykite failą ir nutempkite AdRaze į Programas. macOS 12 ar naujesnei, Apple lustui ir Intel.",
   "dl.soon": "Netrukus",
   "dl.ext_note": "Chrome, Brave, Edge ir kitoms Chromium naršyklėms.",
   "dl.all_releases": "Visos versijos GitHub",
@@ -401,5 +401,6 @@
   "demo.adraze_label": "tas pats puslapis",
   "demo.chrome_alt": "Naujienų portalo įrašas Chrome naršyklėje, pilnas reklamų",
   "demo.adraze_alt": "To paties portalo įrašas AdRaze, be reklamų",
-  "demo.caption": "Tikras ekrano įrašas, ne animacija. expressen.se, 2026 m. lapkričio 1 d., abu su nauju profiliu ir vienodu slinkimu."
+  "demo.caption": "Tikras ekrano įrašas, ne animacija. expressen.se, 2026 m. lapkričio 1 d., abu su nauju profiliu ir vienodu slinkimu.",
+  "dl.mac_btn": "Atsisiųsti „Mac“"
 }
