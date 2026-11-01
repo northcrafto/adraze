@@ -167,7 +167,8 @@ svg { display: block; }
   .engine-opt.on { border-color: var(--color-terra); background: rgba(255,75,31,.06); }
   .engine-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #c9d4e0; flex: none; display: grid; place-items: center; }
   .engine-opt.on .engine-radio { border-color: var(--color-terra); }
-  .engine-opt.on .engine-radio::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--color-terra); }
+  /* Punkten = rutans egen bakgrund innanför 3 px padding (8 px, alltid mitt i) – ett ::after-barn hamnade en halv pixel snett */
+  .engine-opt.on .engine-radio { box-sizing: border-box; padding: 3px; background: var(--color-terra) content-box; }
 
   /* ── AdRaze Wallet ── */
   .wl-secure { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--color-safe); background: rgba(23,138,90,.07); border: 1px solid rgba(23,138,90,.18); border-radius: 10px; padding: 9px 12px; }
