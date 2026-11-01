@@ -1917,7 +1917,12 @@ const FALK_BILD = `(() => {
 })()`;
 const FALK_KOP = /(slutför|genomför|bekräfta|lägg|skicka)\s*(köp|beställning|order)|^\s*(köp|betala|beställ)(\s+(nu|och betala))?\s*$|betala\s+\d|place\s+order|buy\s+now|pay\s+(now|\d)|complete\s+(purchase|order)|confirm\s+(order|purchase|payment)|submit\s+order/i;
 function falkFlik(ctx) { const v = activeView(ctx) || (ctx.senasteFlik != null && ctx.views.get(ctx.senasteFlik)); const wc = v && v.webContents; return wc && !wc.isDestroyed() ? wc : null; }
-const falkKor = (wc, kod) => wc.executeJavaScriptInIsolatedWorld(FALK_VARLD, [{ code: kod }], true);
+// executeJavaScript väntar tills sidan laddat klart, och vissa sidor (strömmar, annonser som laddar i evighet)
+// blir aldrig klara – då hängde Falk på "granskar". Ge upp efter några sekunder i stället.
+const falkTid = (p, ms) => Promise.race([p, new Promise((_, nej) => setTimeout(() => nej(new Error('tidsgräns')), ms))]);
+const falkKor = (wc, kod) => (wc.isLoadingMainFrame() && wc.mainFrame)
+  ? falkTid(wc.mainFrame.executeJavaScript(kod, true), 6000)
+  : falkTid(wc.executeJavaScriptInIsolatedWorld(FALK_VARLD, [{ code: kod }], true), 6000);
 function falkVantaLaddat(wc, ms) {
   return new Promise((ok) => {
     const klar = () => { clearTimeout(t); try { wc.off('did-stop-loading', klar); } catch {} setTimeout(ok, 500); };
