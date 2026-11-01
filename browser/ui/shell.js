@@ -1890,6 +1890,7 @@ async function refreshWebbPanel() {
   if (!$('sel-font').value) $('sel-font').value = '16';
   $('tgl-https').checked = !!webbPrefs.httpsOnly;
   if ($('tgl-falksida')) $('tgl-falksida').checked = webbPrefs.falkSida !== false;
+  if ($('tgl-falksamtycke')) $('tgl-falksamtycke').checked = !!webbPrefs.falkSamtycke;
   $('sel-dns').value = webbPrefs.dns;
   $('dl-dir').textContent = webbPrefs.downloadDir; $('dl-dir-reset').hidden = !webbPrefs.downloadDirCustom;
   $('tgl-askdl').checked = !!webbPrefs.askDownload;
@@ -1939,6 +1940,7 @@ $('tgl-bmbar').addEventListener('change', (e) => { bmbarOn = e.target.checked; t
 $('sel-font').addEventListener('change', (e) => { window.view.webbSet('fontSize', e.target.value); showToast(tw('Ny teckenstorlek gäller flikar du öppnar från och med nu.')); });
 $('tgl-https').addEventListener('change', (e) => window.view.webbSet('httpsOnly', e.target.checked));
 $('tgl-falksida').addEventListener('change', (e) => window.view.webbSet('falkSida', e.target.checked));
+$('tgl-falksamtycke').addEventListener('change', (e) => window.view.webbSet('falkSamtycke', e.target.checked));
 $('sel-dns').addEventListener('change', (e) => window.view.webbSet('dns', e.target.value));
 $('tgl-askdl').addEventListener('change', (e) => window.view.webbSet('askDownload', e.target.checked));
 $('dl-dir-btn').addEventListener('click', async () => { const d = await window.view.webbPickDir(); if (d) refreshWebbPanel(); });

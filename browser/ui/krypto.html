@@ -54,6 +54,14 @@
   .dots span:nth-child(2) { animation-delay: .18s; } .dots span:nth-child(3) { animation-delay: .36s; }
   @keyframes b { 0%,60%,100% { opacity: .3; } 30% { opacity: 1; } }
 
+  /* Samtyckesrutan (Store-policy 10.5.2) */
+  .samtycke { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 14px 15px; font-size: 13.5px; line-height: 1.55; color: var(--ink); animation: msgin .2s ease-out both; }
+  .samtycke b { display: block; font-size: 14.5px; margin-bottom: 6px; }
+  .samtycke p { color: var(--mut); margin: 0 0 8px; }
+  .samtycke .rad { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .samtycke button { height: 34px; padding: 0 14px; border-radius: 9px; font-size: 13.5px; font-weight: 600; cursor: pointer; border: 1px solid var(--field-line); background: transparent; color: var(--ink); }
+  .samtycke button.ja { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .samtycke button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   /* Välkomstvyn när samtalet är tomt */
   .hero { display: flex; flex-direction: column; align-items: flex-start; padding: 18px 2px 4px; gap: 6px; animation: msgin .25s ease-out both; }
   .hero .big { width: 40px; height: 40px; margin-bottom: 10px; }
@@ -751,6 +759,7 @@
     const I_UP = ic('<path d="M7 10v10H4V10h3Zm0 0 4-7a2.5 2.5 0 0 1 2.5 3L13 10h5.5a2 2 0 0 1 2 2.4l-1.4 6A2 2 0 0 1 17.2 20H7"/>');
     const I_DOWN = ic('<path d="M17 14V4h3v10h-3Zm0 0-4 7a2.5 2.5 0 0 1-2.5-3L11 14H5.5a2 2 0 0 1-2-2.4l1.4-6A2 2 0 0 1 6.8 4H17"/>');
     const I_RETRY = ic('<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>');
+    const I_FLAG = ic('<path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/>');
     const I_EDIT = ic('<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z"/><path d="M13.5 6.5l4 4"/>');
     function ab(icon, tip, fn, on) {
       const b = document.createElement('button'); b.type = 'button'; b.className = 'ab' + (on ? ' on' : ''); b.dataset.tip = tx(tip); b.setAttribute('aria-label', tx(tip)); b.innerHTML = icon;
@@ -777,6 +786,11 @@
         const up = ab(I_UP, 'Bra svar', (b) => fb('up', b), m.fb === 'up'); up.classList.add('fbb'); up.dataset.v = 'up'; row.appendChild(up);
         const dn = ab(I_DOWN, 'Dåligt svar', (b) => fb('down', b), m.fb === 'down'); dn.classList.add('fbb'); dn.dataset.v = 'down'; row.appendChild(dn);
         row.appendChild(ab(I_RETRY, 'Försök igen', () => retryFrom(lastUserBefore(idx))));
+        row.appendChild(ab(I_FLAG, 'Rapportera svar', () => {
+          const u = history[lastUserBefore(idx)];
+          const text = tx('Beskriv vad som var fel med svaret:') + '\n\n\n---\n' + tx('Din fråga') + ':\n' + String((u && u.content) || '').slice(0, 1200) + '\n\n' + tx('Falks svar') + ':\n' + String(m.content || '').slice(0, 2400);
+          window.krypto.doAction({ name: 'rapportera_svar', amne: tx('Rapport: Falk-svar'), text });
+        }));
       }
       return row;
     }
@@ -785,7 +799,7 @@
     // Gör om från ett av dina meddelanden: allt efter det tas bort och Falk svarar igen
     function retryFrom(idx) {
       if (busy || idx < 0 || !history[idx]) return;
-      history.splice(idx + 1); saveConvos(); render(); ask();
+      history.splice(idx + 1); saveConvos(); render(); askMedSamtycke();
     }
     // Redigera: texten tillbaka i rutan, meddelandet och allt efter tas bort
     function editFrom(idx) {
@@ -1050,7 +1064,7 @@
       history.push(msg); touchConvo(text || files.map((f) => f.name).join(', ')); saveConvos();
       { const h = log.querySelector('.hero'); if (h) h.remove(); }   // välkomstvyn försvinner när samtalet börjar
       follow = true; bubble('user', fmt(text), '', history.length - 1); updateConvTitle();
-      ask();
+      askMedSamtycke();
     }
     /* ── Falk ser och styr fliken ── */
     // Av/på styrs av Inställningar → Falk → "Granska sidan" (sparas i huvudprocessen)
@@ -1103,6 +1117,23 @@
 
     // Frågar Falk om svaret på samtalet som det ser ut nu (sista meddelandet är ditt).
     // Lägger Falk klick-/skriv-taggar körs de på fliken och Falk får en ny bild av sidan, tills uppgiften är klar.
+    /* ── Samtycke: inget skickas till AI-tjänsten förrän användaren sagt ja (kan återkallas i Inställningar → Falk) ── */
+    async function askMedSamtycke() {
+      let ok = false; try { ok = await window.krypto.samtycke(); } catch {}
+      if (ok) { ask(); return; }
+      log.querySelectorAll('.samtycke').forEach((x) => x.remove());
+      const el = document.createElement('div'); el.className = 'samtycke'; el.setAttribute('role', 'dialog'); el.setAttribute('translate', 'no');
+      el.innerHTML = '<b></b><p class="p1"></p><p class="p2"></p><p class="p3"></p><div class="rad"><button class="ja" type="button"></button><button class="nej" type="button"></button></div>';
+      el.querySelector('b').textContent = tx('Innan Falk svarar');
+      el.querySelector('.p1').textContent = tx('Falk är en AI. Det du skriver i chatten skickas till AdRazes server och vidare till AI-tjänsten DeepSeek (via OpenRouter) för att ta fram ett svar.');
+      el.querySelector('.p2').textContent = tx('Är Granska sidan på skickas också texten på sidan du har öppen, så att Falk kan läsa och använda den.');
+      el.querySelector('.p3').textContent = tx('Vi säljer inget och använder det aldrig för reklam. Du kan ändra dig när som helst i Inställningar → Falk.');
+      el.querySelector('.ja').textContent = tx('Godkänn och fortsätt');
+      el.querySelector('.nej').textContent = tx('Inte nu');
+      el.querySelector('.ja').addEventListener('click', async () => { try { await window.krypto.samtycke(true); } catch {} el.remove(); ask(); });
+      el.querySelector('.nej').addEventListener('click', () => { el.querySelector('.rad').remove(); el.querySelector('.p3').textContent = tx('Inget har skickats. Skriv igen när du vill fortsätta.'); });
+      log.appendChild(el); scrollBottom();
+    }
     async function ask() {
       busy = true; sendBtn.disabled = true; document.body.classList.add('thinking'); setStatus(tx('Tänker') + '…');
       let typing = bubble('krypto', '<span class="think">' + OWL_FLY + '<span class="tt">' + esc((typeof window.t === 'function') ? window.t('Falk tänker') : 'Falk tänker') + '</span></span>', 'typing');
