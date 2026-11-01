@@ -1490,9 +1490,9 @@ function greet() {
   else if (h >= 18 && h < 22) b = ['God kväll', 'Skön kväll'];
   else if (h >= 22 || h < 3) b = ['Lite sent', 'Uppe sent', 'Nattsurfning'];
   else b = ['Mitt i natten', 'Dags att sova snart?', 'Sena timmar']; // 03–05
-  const key = name + '|' + h;                          // stabil inom samma timme + namn
+  const key = name + '|' + h + '|' + ((window.i18n && window.i18n.lang) || 'sv');                          // stabil inom samma timme + namn
   if (_greetCache.key !== key) {
-    const g = b[Math.floor(Math.random() * b.length)];
+    const g0 = b[Math.floor(Math.random() * b.length)], g = (typeof window.t === 'function') ? window.t(g0) : g0;
     _greetCache = { key, text: name ? g + ', ' + name : g };
   }
   el.textContent = _greetCache.text;
