@@ -1863,7 +1863,10 @@ ipcMain.handle('pro:cancel', (e, t) => proCall(e, 'POST', 'cancel', t));
 ipcMain.handle('pro:resume', (e, t) => proCall(e, 'POST', 'resume', t));
 ipcMain.handle('billing:intent', (e, plan) => billingCall(e, 'intent', { plan: String(plan || 'pro_month') }));
 ipcMain.handle('billing:confirm', (e, d) => billingCall(e, 'confirm', { subscription: d && d.subscription, payment_intent: d && d.payment_intent }));
+// Samtycke (Store-policy 10.5.2): inget skickas till AI-tjänsten förrän användaren sagt ja i Falk-panelen
+ipcMain.handle('krypto:samtycke', (_e, v) => { if (typeof v === 'boolean') webb.setFalkSamtycke(v); return !!webb.prefs.falkSamtycke; });
 ipcMain.handle('krypto:chat', async (e, messages, opts) => {
+  if (!webb.prefs.falkSamtycke) return { ok: false, samtycke: true, message: 'Godkänn först att Falk får skicka till AI-tjänsten.' };
   const ctx = e.sender.__ctx;
   const token = ctx && ctx.authToken;
   if (!token) { klog({ stage: 'no-token' }); return { ok: false, needLogin: true, message: 'Logga in med din mejl (kontoknappen) för att låsa upp Falk.' }; }
@@ -1934,7 +1937,7 @@ function falkVantaLaddat(wc, ms) {
 ipcMain.handle('krypto:tab', (e) => {
   const ctx = e.sender.__ctx; const wc = ctx && falkFlik(ctx);
   const url = wc ? wc.getURL() : '';
-  return /^https?:/i.test(url) ? { url, titel: wc.getTitle(), av: webb.prefs.falkSida === false } : null;
+  return /^https?:/i.test(url) ? { url, titel: wc.getTitle(), av: webb.prefs.falkSida === false || !webb.prefs.falkSamtycke } : null;
 });
 // "Falk granskar sidan" i adressfältet medan Falk läser eller styr fliken
 function falkGranskar(ctx, wc) {
@@ -1945,14 +1948,14 @@ function falkGranskar(ctx, wc) {
 }
 ipcMain.handle('krypto:page', async (e) => {
   const ctx = e.sender.__ctx; const wc = ctx && falkFlik(ctx);
-  if (webb.prefs.falkSida === false) return null;
+  if (webb.prefs.falkSida === false || !webb.prefs.falkSamtycke) return null;
   if (!wc || !/^https?:/i.test(wc.getURL())) return null;
   falkGranskar(ctx, wc);
   try { return await falkKor(wc, FALK_BILD); } catch { return null; }
 });
 ipcMain.handle('krypto:act', async (e, a) => {
   const ctx = e.sender.__ctx; if (!ctx || !a) return { ok: false, fel: 'Ingen flik.' };
-  if (webb.prefs.falkSida === false) return { ok: false, fel: 'Sidgranskning är avstängd i Inställningar.' };
+  if (webb.prefs.falkSida === false || !webb.prefs.falkSamtycke) return { ok: false, fel: 'Sidgranskning är avstängd i Inställningar.' };
   let wc = falkFlik(ctx);
   falkGranskar(ctx, wc);
   const namn = String(a.name || '').toLowerCase().replace(/[åä]/g, 'a').replace(/ö/g, 'o');
@@ -2021,6 +2024,10 @@ ipcMain.on('krypto:action', (e, a) => {
     if (name === 'losenord' || name === 'autofyll' || name === 'autofill') { sendTo(ctx, 'open-passwords'); return; }
     if (name === 'wallet' || name === 'planbok' || name === 'kort' || name === 'adraze wallet') { sendTo(ctx, 'open-settings', 'wallet'); return; }
     if (name === 'falk_installningar') { sendTo(ctx, 'open-settings', 'krypto'); return; }
+    if (name === 'rapportera_svar') {   // Store-policy 11.16: rapportera olämpliga AI-svar till oss (via supportsidan, förifyllt)
+      const q = new URLSearchParams({ kategori: 'webblasare', amne: String(a.amne || 'Rapport: Falk-svar').slice(0, 140), text: String(a.text || '').slice(0, 4000) });
+      sendTo(ctx, 'open-new-tab', 'https://support.adraze.app/?' + q); return;
+    }
     // sokmotor / adblock / realtidsskydd / minska_rorelse sköts i skalet
     sendTo(ctx, 'krypto-set', a);
   } catch {}

@@ -29,6 +29,7 @@ const prefs = Object.assign({
   askDownload: false,
   permDefaults: {},            // kind -> 'ask' | 'block'
   perms: {},                   // origin -> { kind: 'allow' | 'block' }
+  falkSamtycke: false,         // Store-policy 10.5.2: uttryckligt ja innan något skickas till AI-tjänsten
   falkSida: true,              // Falk får granska (läsa och styra) sidan du har öppen
 }, (() => { try { return JSON.parse(fs.readFileSync(FILE, 'utf8')); } catch { return {}; } })());
 let saveTimer = null;
@@ -148,7 +149,7 @@ function setup({ onDnsChanged } = {}) {
   ipcMain.handle('webb:get', () => ({
     dns: prefs.dns, httpsOnly: prefs.httpsOnly, fontSize: prefs.fontSize,
     downloadDir: downloadDir(), downloadDirCustom: !!prefs.downloadDir, askDownload: prefs.askDownload,
-    permDefaults: prefs.permDefaults, perms: prefs.perms, falkSida: prefs.falkSida !== false,
+    permDefaults: prefs.permDefaults, perms: prefs.perms, falkSida: prefs.falkSida !== false, falkSamtycke: !!prefs.falkSamtycke,
   }));
   ipcMain.handle('webb:set', (_e, k, v) => {
     if (k === 'dns' && (v === 'off' || v === 'automatic' || DNS_SERVERS[v])) { prefs.dns = v; applyDns(); if (onDnsChanged) onDnsChanged(); }
@@ -156,6 +157,7 @@ function setup({ onDnsChanged } = {}) {
     else if (k === 'fontSize') { const n = parseInt(v, 10); if (n >= 9 && n <= 30) prefs.fontSize = n; }
     else if (k === 'askDownload') prefs.askDownload = !!v;
     else if (k === 'falkSida') prefs.falkSida = !!v;
+    else if (k === 'falkSamtycke') prefs.falkSamtycke = !!v;
     else if (k === 'downloadDir') prefs.downloadDir = '';
     else if (k === 'permDefault' && v && KINDS.includes(v.kind)) prefs.permDefaults[v.kind] = v.value === 'block' ? 'block' : 'ask';
     else if (k === 'perm' && v && v.origin) {
@@ -191,5 +193,6 @@ module.exports = {
   prefs, setup, applyDns, upgradeUrl, httpsFailed, allowHttp: (h) => httpOk.add(h),
   installPermissions, setAsker: (fn) => { asker = fn; }, downloadDir, fontSize: () => prefs.fontSize,
   // adraze://adblock har samma reglage som Integritet & säkerhet
+  setFalkSamtycke: (v) => { prefs.falkSamtycke = !!v; save(); },
   httpsOnly: () => !!prefs.httpsOnly, setHttpsOnly: (v) => { prefs.httpsOnly = !!v; if (!v) httpOk.clear(); save(); },
 };
