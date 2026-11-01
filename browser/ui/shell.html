@@ -71,6 +71,7 @@
     <symbol id="i-incognito" viewBox="0 0 24 24"><path d="M6 10.5l1.4-4.2a2 2 0 0 1 1.9-1.3h5.4a2 2 0 0 1 1.9 1.3L18 10.5"/><path d="M3 11h18"/><circle cx="7.5" cy="15" r="2.5"/><circle cx="16.5" cy="15" r="2.5"/><path d="M10 15c.6-.7 3.4-.7 4 0"/></symbol>
     <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></symbol>
     <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></symbol>
+    <symbol id="i-flytt" viewBox="0 0 24 24"><path d="M4 8h12M12 4l4 4-4 4"/><path d="M20 16H8M12 12l-4 4 4 4"/></symbol>
     <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v10M8 10l4 4 4-4"/><path d="M5 19h14"/></symbol>
     <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16.5 6.5l2 2M13.5 9.5l2 2"/></symbol>
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9.5 7V5h5v2M6.5 7l.9 12h9.2l.9-12"/></symbol>
@@ -204,6 +205,37 @@
     </div>
 
     <!-- Intro (första gången) — frostad startsidebakgrund + mjuk text -->
+    <style>
+      /* Notiskort längst ner (uppdatering, flytta från en annan webbläsare, huvudwebbläsare) */
+      .notis{position:fixed;left:50%;bottom:22px;z-index:300;width:min(620px,calc(100vw - 32px));display:flex;align-items:center;gap:14px;
+        padding:14px 14px 14px 14px;border-radius:18px;color:#f4f4f5;
+        background:linear-gradient(180deg,rgb(30 30 34 / .94),rgb(18 18 21 / .96));
+        border:1px solid rgb(255 255 255 / .09);
+        box-shadow:0 1px 0 rgb(255 255 255 / .06) inset,0 22px 50px -12px rgb(0 0 0 / .6),0 4px 14px rgb(0 0 0 / .25);
+        backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);
+        transform:translateX(-50%);animation:notisIn .45s cubic-bezier(.2,.9,.25,1.15) both}
+      .notis.ut{animation:notisUt .25s ease-in both}
+      @keyframes notisIn{from{opacity:0;transform:translate(-50%,18px) scale(.97)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+      @keyframes notisUt{to{opacity:0;transform:translate(-50%,12px) scale(.98)}}
+      body.reduce-motion .notis,body.reduce-motion .notis.ut{animation:none}
+      .notis-ikon{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#fff;
+        background:linear-gradient(140deg,#ff7a45,#ff4b1f 55%,#e2370f);box-shadow:0 6px 16px -4px rgb(255 75 31 / .55),0 1px 0 rgb(255 255 255 / .25) inset}
+      .notis-ikon svg{width:20px;height:20px;stroke-width:2}
+      .notis-text{flex:1;min-width:0;line-height:1.35}
+      .notis-titel{font-size:14px;font-weight:750;letter-spacing:-.01em;color:#fff}
+      .notis-under{font-size:12.5px;color:rgb(244 244 245 / .62);margin-top:2px}
+      .notis-knapp{flex:none;height:36px;padding:0 16px;border:0;border-radius:11px;font-size:13px;font-weight:750;color:#fff;cursor:pointer;white-space:nowrap;
+        background:linear-gradient(180deg,#ff6a3a,#ff4b1f);box-shadow:0 1px 0 rgb(255 255 255 / .22) inset,0 6px 14px -6px rgb(255 75 31 / .7);transition:filter .15s,transform .15s}
+      .notis-knapp:hover{filter:brightness(1.08)}
+      .notis-knapp:active{transform:translateY(1px)}
+      .notis-knapp:disabled{opacity:.7;cursor:default}
+      .notis-sek{flex:none;height:36px;padding:0 10px;border:0;border-radius:10px;background:none;color:rgb(244 244 245 / .7);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+      .notis-sek:hover{background:rgb(255 255 255 / .07);color:#fff}
+      .notis-x{flex:none;width:28px;height:28px;margin-left:-4px;border:0;border-radius:8px;background:none;color:rgb(244 244 245 / .45);display:grid;place-items:center;cursor:pointer}
+      .notis-x:hover{background:rgb(255 255 255 / .08);color:#fff}
+      .notis-x svg{width:14px;height:14px;stroke-width:2.2}
+      @media (max-width:560px){.notis{flex-wrap:wrap}.notis-text{flex-basis:calc(100% - 100px)}.notis-knapp{margin-left:54px}}
+    </style>
     <style>
       #hxintro{position:absolute;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;
         background:rgba(8,16,28,.42);backdrop-filter:blur(30px) saturate(1.15);-webkit-backdrop-filter:blur(30px) saturate(1.15);

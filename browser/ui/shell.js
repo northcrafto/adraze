@@ -2121,22 +2121,41 @@ $('upd-install')?.addEventListener('click', () => { const b = $('upd-install'); 
 setInterval(() => { if (updWhen && $('upd-when')) { const m = Math.round((Date.now() - updWhen) / 60000); const tt = (k) => (typeof window.t === 'function') ? window.t(k) : k; $('upd-when').textContent = m < 1 ? tt('Just nu') : (m + ' ' + tt('min sedan')); } }, 30000);
 setTimeout(() => refreshUpdatePanel(false), 7000);
 setInterval(() => refreshUpdatePanel(false), 30 * 60 * 1000);
+/* Gemensamt notiskort längst ner. Returnerar elementet; .stang() tar bort det med en liten animation. */
+function visaNotis({ id, ikon, titel, under, knapp, sek, onKnapp, onSek, onStang }) {
+  const gammal = document.getElementById(id); if (gammal) gammal.remove();
+  const el = document.createElement('div'); el.id = id; el.className = 'notis'; el.setAttribute('role', 'status');
+  el.innerHTML = '<span class="notis-ikon"><svg class="ic"><use href="#' + ikon + '" /></svg></span>'
+    + '<div class="notis-text"><div class="notis-titel"></div>' + (under ? '<div class="notis-under"></div>' : '') + '</div>'
+    + '<button class="notis-knapp"></button>' + (sek ? '<button class="notis-sek"></button>' : '')
+    + '<button class="notis-x" aria-label="Stäng"><svg class="ic"><use href="#i-close" /></svg></button>';
+  el.querySelector('.notis-titel').textContent = titel;
+  if (under) el.querySelector('.notis-under').textContent = under;
+  el.querySelector('.notis-knapp').textContent = knapp;
+  if (sek) el.querySelector('.notis-sek').textContent = sek;
+  el.stang = () => { if (!el.isConnected) return; el.classList.add('ut'); setTimeout(() => el.remove(), 260); };
+  el.querySelector('.notis-knapp').addEventListener('click', () => onKnapp && onKnapp(el));
+  if (sek) el.querySelector('.notis-sek').addEventListener('click', () => { if (onSek) onSek(el); el.stang(); });
+  el.querySelector('.notis-x').addEventListener('click', () => { if (onStang) onStang(el); else if (onSek) onSek(el); el.stang(); });
+  document.body.appendChild(el);
+  return el;
+}
 function showUpdateBanner(version) {
   // Fanns redan en banner (äldre version hämtad)? Bygg om den med den nya versionen,
   // och behåll "Startar om…" om användaren redan tryckt.
   const prev = document.getElementById('update-banner');
   const busy = !!(prev && prev.dataset.busy);
-  if (prev) prev.remove();
-  const bar = document.createElement('div'); bar.id = 'update-banner';
-  bar.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:300;display:flex;align-items:center;gap:12px;background:var(--color-navy-900);color:#fff;padding:11px 14px 11px 18px;border-radius:14px;box-shadow:0 14px 40px rgba(8,20,35,.45);font-size:13.5px;max-width:92vw;';
   const tt = (k) => (typeof window.t === 'function') ? window.t(k) : k;
-  bar.innerHTML = '<span>' + escapeHtml(tt('En ny version av')) + ' <b>AdRaze</b>' + (version ? ' (' + version + ')' : '') + ' ' + escapeHtml(tt('är klar.')) + '</span>'
-    + '<button id="upd-now" style="background:#fff;color:var(--color-navy-900);border:0;border-radius:9px;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;">' + escapeHtml(tt('Starta om & uppdatera')) + '</button>'
-    + '<button id="upd-later" style="background:none;border:0;color:rgba(255,255,255,.7);font-size:13px;cursor:pointer;">' + escapeHtml(tt('Senare')) + '</button>';
-  document.body.appendChild(bar);
-  bar.querySelector('#upd-now').addEventListener('click', () => { bar.dataset.busy = '1'; bar.querySelector('#upd-now').textContent = tt('Startar om…'); try { window.view.installUpdate(); } catch {} });
-  bar.querySelector('#upd-later').addEventListener('click', () => { updSenare = version || ''; bar.remove(); });
-  if (busy) { bar.dataset.busy = '1'; bar.querySelector('#upd-now').textContent = tt('Startar om…'); }
+  const starta = (el) => { el.dataset.busy = '1'; const b = el.querySelector('.notis-knapp'); b.textContent = tt('Startar om…'); b.disabled = true; };
+  const bar = visaNotis({
+    id: 'update-banner', ikon: 'i-update',
+    titel: 'AdRaze' + (version ? ' ' + version : '') + ' ' + tt('är klar'),
+    under: tt('Starta om, så kommer dina flikar tillbaka.'),
+    knapp: tt('Uppdatera'), sek: tt('Senare'),
+    onKnapp: (el) => { starta(el); try { window.view.installUpdate(); } catch {} },
+    onSek: () => { updSenare = version || ''; },
+  });
+  if (busy) starta(bar);
 }
 // Nudge: om AdRaze inte är standardwebbläsare, visa en banner (som uppdateringsnotisen).
 async function maybeShowDefaultBanner() {
@@ -2154,22 +2173,19 @@ async function maybeShowDefaultBanner() {
 }
 function showDefaultBrowserBanner() {
   if (document.getElementById('defbrowser-banner')) return;
-  const bar = document.createElement('div'); bar.id = 'defbrowser-banner';
-  bar.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:300;display:flex;align-items:center;gap:12px;background:var(--color-navy-900);color:#fff;padding:11px 14px 11px 18px;border-radius:14px;box-shadow:0 14px 40px rgba(8,20,35,.45);font-size:13.5px;max-width:92vw;';
-  bar.innerHTML = '<span><b>AdRaze</b> är inte din huvudwebbläsare än.</span>'
-    + '<button id="db-set" style="background:#fff;color:var(--color-navy-900);border:0;border-radius:9px;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;">Gör AdRaze till min main</button>'
-    + '<button id="db-later" style="background:none;border:0;color:rgba(255,255,255,.7);font-size:13px;cursor:pointer;">Senare</button>';
-  document.body.appendChild(bar);
-  bar.querySelector('#db-set').addEventListener('click', async () => {
-    const b = bar.querySelector('#db-set'); b.textContent = 'Sätter…'; b.disabled = true;
-    let r; try { r = await window.defaultBrowser.set(); } catch { r = null; }
-    if (r && r.ok) { showToast('AdRaze är nu din huvudwebbläsare'); bar.remove(); }
-    else if (r && r.manual) { showToast('Välj AdRaze i systeminställningarna som öppnades.'); bar.remove(); }
-    else { b.textContent = 'Gör AdRaze till min main'; b.disabled = false; showToast('Kunde inte sätta AdRaze som standard.'); }
-  });
-  bar.querySelector('#db-later').addEventListener('click', () => {
-    try { localStorage.setItem('skoll-defbrowser-snooze', String(Date.now() + 7 * 24 * 3600 * 1000)); } catch {}
-    bar.remove();
+  visaNotis({
+    id: 'defbrowser-banner', ikon: 'i-shield-check',
+    titel: tw('Gör AdRaze till din huvudwebbläsare?'),
+    under: tw('Då öppnas länkar från andra program utan reklam.'),
+    knapp: tw('Ja, gör det'), sek: tw('Senare'),
+    onKnapp: async (el) => {
+      const b = el.querySelector('.notis-knapp'); b.textContent = tw('Sätter…'); b.disabled = true;
+      let r; try { r = await window.defaultBrowser.set(); } catch { r = null; }
+      if (r && r.ok) { showToast(tw('AdRaze är nu din huvudwebbläsare')); el.stang(); }
+      else if (r && r.manual) { showToast(tw('Välj AdRaze i systeminställningarna som öppnades.')); el.stang(); }
+      else { b.textContent = tw('Ja, gör det'); b.disabled = false; showToast(tw('Kunde inte sätta AdRaze som standard.')); }
+    },
+    onSek: () => { try { localStorage.setItem('skoll-defbrowser-snooze', String(Date.now() + 7 * 24 * 3600 * 1000)); } catch {} },
   });
 }
 window.view.onOpenSettings((cat) => { openSettings(); if (cat === 'rensa') { showSettingsCat('integritet'); openClearBox(); } else if (cat) showSettingsCat(cat); });
@@ -2976,20 +2992,19 @@ async function maybeShowFlyttBanner() {
     localStorage.setItem('adraze-flytt-erbjuden', '1');
     const forsta = lista[0];
     const namn = lista.length === 1 ? forsta.namn : '';
-    const bar = document.createElement('div'); bar.id = 'flytt-banner';
-    bar.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:300;display:flex;align-items:center;gap:12px;background:var(--color-navy-900);color:#fff;padding:11px 14px 11px 18px;border-radius:14px;box-shadow:0 14px 40px rgba(8,20,35,.45);font-size:13.5px;max-width:92vw;';
-    bar.innerHTML = '<span>' + escapeHtml(namn ? tw('Kommer du från') + ' ' + namn + '? ' : tw('Kommer du från en annan webbläsare?') + ' ') + escapeHtml(tw('Ta med bokmärken, inställningar och utseende.')) + '</span>'
-      + '<button id="fl-go" style="background:#fff;color:var(--color-navy-900);border:0;border-radius:9px;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;">' + escapeHtml(tw('Ta med allt')) + '</button>'
-      + '<button id="fl-later" style="background:none;border:0;color:rgba(255,255,255,.7);font-size:13px;cursor:pointer;white-space:nowrap;">' + escapeHtml(tw('Nej tack')) + '</button>';
-    document.body.appendChild(bar);
-    bar.querySelector('#fl-go').addEventListener('click', async () => {
-      bar.remove(); openPasswords();
-      // Välj webbläsaren direkt så att det bara är att trycka på Importera
-      for (let i = 0; i < 20 && !document.querySelector('#imp-src .imp-b'); i++) await new Promise((r) => setTimeout(r, 100));
-      const b = document.querySelector('#imp-src .imp-b'); if (b) b.click();
-      const kort = document.querySelector('.imp-card'); if (kort) try { kort.scrollIntoView({ block: 'start' }); } catch {}
+    visaNotis({
+      id: 'flytt-banner', ikon: 'i-flytt',
+      titel: namn ? tw('Kommer du från') + ' ' + namn + '?' : tw('Kommer du från en annan webbläsare?'),
+      under: tw('Ta med bokmärken, inställningar och utseende.'),
+      knapp: tw('Ta med allt'), sek: tw('Nej tack'),
+      onKnapp: async (el) => {
+        el.stang(); openPasswords();
+        // Välj webbläsaren direkt så att det bara är att trycka på Importera
+        for (let i = 0; i < 20 && !document.querySelector('#imp-src .imp-b'); i++) await new Promise((r) => setTimeout(r, 100));
+        const b = document.querySelector('#imp-src .imp-b'); if (b) b.click();
+        const kort = document.querySelector('.imp-card'); if (kort) try { kort.scrollIntoView({ block: 'start' }); } catch {}
+      },
     });
-    bar.querySelector('#fl-later').addEventListener('click', () => bar.remove());
   } catch {}
 }
 setTimeout(maybeShowFlyttBanner, 1200);
