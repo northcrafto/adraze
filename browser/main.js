@@ -1198,11 +1198,20 @@ async function migrateGoogleCookieFix() {
 
 function reloadVisible(ctx) { try { if (ctx && ctx.visibleTab && ctx.views.has(ctx.visibleTab)) ctx.views.get(ctx.visibleTab).webContents.reload(); } catch {} }
 function migratePwLegacy(key) {   // första inloggningen: flytta ev. gamla (icke-konto) lösenord in i kontot
-  try { if (!fs.existsSync(pwFileFor(key)) && fs.existsSync(PW_FILE)) { fs.mkdirSync(PW_DIR, { recursive: true }); fs.copyFileSync(PW_FILE, pwFileFor(key)); } } catch {}
+  // Skrivs krypterat direkt och klartextfilen raderas – den får aldrig ligga kvar på disken.
+  try {
+    if (!fs.existsSync(PW_FILE)) return;
+    if (!fs.existsSync(pwFileFor(key))) {
+      const l = JSON.parse(fs.readFileSync(PW_FILE, 'utf8'));
+      fs.mkdirSync(PW_DIR, { recursive: true });
+      fs.writeFileSync(pwFileFor(key), walletEncrypt(JSON.stringify(Array.isArray(l) ? l : [])), { mode: 0o600 });
+    }
+    fs.unlinkSync(PW_FILE);
+  } catch {}
 }
 // Sätt inloggat konto UTAN att röra webbsessionen (vid uppstart — sessionen ligger redan kvar på disk)
 // Uppstart: sätt kontonyckel utan att röra webbsessionen (cookies ligger redan på disk för rätt konto).
-ipcMain.handle('session:setkey', (_e, d) => { currentAcctKey = (d && d.key) || null; if (currentAcctKey) migratePwLegacy(currentAcctKey); return { ok: true }; });
+ipcMain.handle('session:setkey', (_e, d) => { currentAcctKey = (d && d.key) || null; migratePwLegacy(currentAcctKey || 'lokal'); return { ok: true }; });
 // Inloggning / kontobyte: spara ev. UTGÅENDE kontots cookies, rensa webbsessionen, återställ det NYA kontots cookies.
 // → varje konto (förälder/barn) får sina EGNA webb-cookies, isolerade från varandra.
 ipcMain.handle('session:login', async (_e, d) => {
@@ -1390,7 +1399,7 @@ async function cloudDownloadCheck(rec) {
   try {
     const r = await fetch(SKOLL + '/api/sakerkoll/download-check', {
       method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' },
-      body: JSON.stringify({ sha256: hash, filename: rec.filename, size: rec.total, url: rec.url }),
+      body: JSON.stringify({ sha256: hash }),   // bara hashen – aldrig adress, filnamn eller storlek
       signal: AbortSignal.timeout(15000),
     });
     const j = await r.json().catch(() => ({}));
@@ -1628,7 +1637,7 @@ ipcMain.on('app:quit', () => app.quit());
  * Hämtas här i huvudprocessen (ingen CORS) från den sökmotor användaren valt.
  * Startpage saknar förslags-API → DuckDuckGo, som inte loggar. Svaret är alltid
  * en lista strängar; fel eller timeout ger en tom lista, aldrig ett undantag
- * till skalet. Inkognito frågar aldrig hit (skalet avgör). */
+ * till skalet. Inkognito frågar aldrig hit (skalet hoppar över förslag där). */
 const SUGGEST_URLS = {
   adraze: (q) => 'https://search.adraze.app/api/suggest?q=' + encodeURIComponent(q),
   google: (q) => 'https://suggestqueries.google.com/complete/search?client=firefox&hl=sv&q=' + encodeURIComponent(q),
@@ -1919,6 +1928,7 @@ const FALK_BILD = `(() => {
   return { url: location.href, titel: document.title, text, items, nere: Math.round(scrollY), hojd: document.documentElement.scrollHeight, fonster: innerHeight };
 })()`;
 const FALK_KOP = /(slutför|genomför|bekräfta|lägg|skicka)\s*(köp|beställning|order)|^\s*(köp|betala|beställ)(\s+(nu|och betala))?\s*$|betala\s+\d|place\s+order|buy\s+now|pay\s+(now|\d)|complete\s+(purchase|order)|confirm\s+(order|purchase|payment)|submit\s+order/i;
+const falkInkognito = (wc) => { try { return wc.session === session.fromPartition('skoll-incognito'); } catch { return false; } };
 function falkFlik(ctx) { const v = activeView(ctx) || (ctx.senasteFlik != null && ctx.views.get(ctx.senasteFlik)); const wc = v && v.webContents; return wc && !wc.isDestroyed() ? wc : null; }
 // executeJavaScript väntar tills sidan laddat klart, och vissa sidor (strömmar, annonser som laddar i evighet)
 // blir aldrig klara – då hängde Falk på "granskar". Ge upp efter några sekunder i stället.
@@ -1937,7 +1947,7 @@ function falkVantaLaddat(wc, ms) {
 ipcMain.handle('krypto:tab', (e) => {
   const ctx = e.sender.__ctx; const wc = ctx && falkFlik(ctx);
   const url = wc ? wc.getURL() : '';
-  return /^https?:/i.test(url) ? { url, titel: wc.getTitle(), av: webb.prefs.falkSida === false || !webb.prefs.falkSamtycke } : null;
+  return /^https?:/i.test(url) ? { url, titel: wc.getTitle(), av: webb.prefs.falkSida === false || !webb.prefs.falkSamtycke || falkInkognito(wc) } : null;
 });
 // "Falk granskar sidan" i adressfältet medan Falk läser eller styr fliken
 function falkGranskar(ctx, wc) {
@@ -1950,6 +1960,7 @@ ipcMain.handle('krypto:page', async (e) => {
   const ctx = e.sender.__ctx; const wc = ctx && falkFlik(ctx);
   if (webb.prefs.falkSida === false || !webb.prefs.falkSamtycke) return null;
   if (!wc || !/^https?:/i.test(wc.getURL())) return null;
+  if (falkInkognito(wc)) return null;   // inkognito: Falk läser aldrig sidan
   falkGranskar(ctx, wc);
   try { return await falkKor(wc, FALK_BILD); } catch { return null; }
 });
@@ -1957,6 +1968,7 @@ ipcMain.handle('krypto:act', async (e, a) => {
   const ctx = e.sender.__ctx; if (!ctx || !a) return { ok: false, fel: 'Ingen flik.' };
   if (webb.prefs.falkSida === false || !webb.prefs.falkSamtycke) return { ok: false, fel: 'Sidgranskning är avstängd i Inställningar.' };
   let wc = falkFlik(ctx);
+  if (wc && falkInkognito(wc)) return { ok: false, fel: 'Falk läser och styr inte inkognitoflikar.' };
   falkGranskar(ctx, wc);
   const namn = String(a.name || '').toLowerCase().replace(/[åä]/g, 'a').replace(/ö/g, 'o');
   const v = String(a.value || '').trim();

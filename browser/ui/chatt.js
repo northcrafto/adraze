@@ -1476,7 +1476,7 @@ function openReport(ctx) {
   }
   $('rp-note').textContent = ctx.messageId
     ? tf('Meddelandet ovan skickas till AdRazes granskare så vi kan bedöma det. Inget annat från chatten delas. {u} får inte veta att du rapporterat.', { u: ctx.username })
-    : tf('Vi kan inte läsa era meddelanden (de är krypterade). Rapportera gärna ett specifikt meddelande via menyn på det. {u} får inte veta att du rapporterat.', { u: ctx.username });
+    : tf('Meddelandena är krypterade och vi läser dem inte. Rapportera gärna ett specifikt meddelande via menyn på det, så skickas just det till oss. {u} får inte veta att du rapporterat.', { u: ctx.username });
   $('rp-details').value = '';
   $('rp-block').checked = false;
   $('rp-block-label').textContent = tf('Blockera också {u}', { u: ctx.username });
