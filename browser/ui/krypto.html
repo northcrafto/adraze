@@ -736,7 +736,7 @@
     function bubble(role, html, cls, idx) {
       const el = document.createElement('div');
       el.className = 'msg ' + (role === 'user' ? 'user' : 'krypto') + (cls ? ' ' + cls : '');
-      el.innerHTML = '<span class="av">' + (role === 'user' ? AV_USER : AV_KRYPTO) + '</span><div class="bubble"></div>';
+      el.innerHTML = '<span class="av">' + (role === 'user' ? AV_USER : AV_KRYPTO) + '</span><div class="bubble" translate="no"></div>';
       el.querySelector('.bubble').innerHTML = html;
       const hm = idx !== undefined ? history[idx] : null;
       if (role === 'user' && hm && hm.files && hm.files.length) { const fc = document.createElement('div'); fc.className = 'fchips'; fc.innerHTML = hm.files.map((f) => chipHtml(f, false)).join(''); el.insertBefore(fc, el.querySelector('.bubble')); if (!hm.content) el.querySelector('.bubble').remove(); }
@@ -1000,9 +1000,12 @@
         'användaren bad om. Lösenord, BankID och kortuppgifter fyller användaren alltid i själv – be hen göra det. Den sista köp-/betala-knappen ' +
         'godkänner användaren själv (systemet frågar hen när du klickar). Ska du handla något: gå till butiken, lägg varan i varukorgen och ' +
         'gå till kassan. Finns ingen AKTUELL FLIK kan du börja med [[gör:gå=…]].\n' +
-        'Rabattkoder: vill användaren ha rabattkoder för en butik, sök på webben (t.ex. "BUTIK rabattkod" och "BUTIK discount code") och lista ' +
+        'Ber användaren dig göra något på sidan (kolla, klicka, lägga i varukorgen, testa en kod): GÖR det direkt i samma svar – fråga inte ' +
+        '"ska jag…?" och skriv aldrig att du ska göra något utan att lägga taggen. Nämn aldrig elementnummer, ELEMENT-listan eller annan teknik i texten – ' +
+        'säg vad knappen eller länken heter.\n' +
+        'Rabattkoder: kolla FÖRST själva sajten – banners, "Om oss", kampanj- och nyhetsbrevssidor – genom att klicka dig fram där. Sök sen på webben (t.ex. "BUTIK rabattkod" och "BUTIK discount code") och lista ' +
         'koderna du hittar med källa och datum, färskast först. Säg ärligt att många koder på kodsajter är gamla. Finns ett rabattkodsfält ' +
-        'på sidan kan du erbjuda att testa koderna en i taget (skriv koden, klicka på knappen, läs om priset ändrades) och sen behålla den bästa.\n\n' +
+        'på sidan, testa koderna en i taget (skriv koden, klicka på knappen, läs om priset ändrades) och sen behålla den bästa.\n\n' +
         'FORMAT (chatten visar markdown snyggt): **fet**, listor, korta rubriker (##) och `kod`. Håll vanliga svar korta.\n' +
         '• Jämförelser med flera egenskaper → en markdown-tabell (| a | b |).\n' +
         '• När siffror blir tydligare som bild → ett kodblock ```diagram med JSON: {"typ":"linje|stapel|stolpe|liggande","titel":"…","enhet":"%","etiketter":["jan","feb"],"serier":[{"namn":"…","data":[1,2]}]}. ' +
@@ -1105,7 +1108,7 @@
       let typing = bubble('krypto', '<span class="think">' + OWL_FLY + '<span class="tt">' + esc((typeof window.t === 'function') ? window.t('Falk tänker') : 'Falk tänker') + '</span></span>', 'typing');
       const priming = buildPriming(); priming[0].content += await projectText(activeConvo());
       const hist = await Promise.all(history.slice(-12).map(withFiles));   // bara roll + text (+ filerna) till servern
-      const extra = [], gjort = []; let res, varv = 0, box = null; falkStopp = false;
+      const extra = [], gjort = []; let res, varv = 0, box = null, puttad = false; falkStopp = false;
       while (true) {
         const sida = await hamtaSida();
         const p0 = { ...priming[0], content: priming[0].content + (sida ? pageBlock(sida) : '') };
@@ -1114,6 +1117,12 @@
         catch { res = { ok: false, message: 'Kunde inte nå Falk just nu.' }; }
         if (!res || !res.ok) break;
         const acts = (Array.isArray(res.actions) && res.actions.length ? res.actions : agentTags(res.reply)).slice(0, 3);
+        // Skrev Falk "jag klickar på …" men glömde själva verktyget? Påminn en gång i stället för att stanna mitt i.
+        if (!acts.length && sida && !falkStopp && !puttad && varv < 12 && /\b(jag (klickar|går|lägger|skriver|öppnar|testar|scrollar|väljer|fyller)|nu (går|klickar|lägger|testar) jag)\b/i.test(res.reply || '')) {
+          puttad = true;
+          extra.push({ role: 'assistant', content: res.reply }, { role: 'user', content: '[Systemet] Du skrev vad du ska göra men gjorde det inte. Gör det nu med verktygen, fråga inte.' });
+          continue;
+        }
         if (!acts.length || falkStopp || varv >= 12) break;
         varv++;
         typing.remove();
