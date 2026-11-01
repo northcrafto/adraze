@@ -1206,7 +1206,7 @@ async function renderKonto() {
   const rows = [['Typ', account.isChild ? 'Barnkonto' : 'Vuxenkonto'], ['Status', account.pro ? 'AdRaze Pro' : 'Gratis']];
   if (account.email && !account.isChild) rows.push(['Mejl', account.email]);
   $('kn-rows').innerHTML = rows.map((r) => '<div class="kn-row"><span class="k">' + r[0] + '</span><span class="v">' + escapeHtml(r[1]) + '</span></div>').join('');
-  const dz = $('kn-danger'); if (dz) dz.style.display = account.isChild ? 'none' : 'block';
+  const dz = $('kn-danger'); if (dz) dz.style.display = account.isChild ? 'none' : '';
   const sr = $('synk-row');
   if (sr) {
     sr.style.display = account.isChild ? 'none' : 'flex';
@@ -2569,7 +2569,7 @@ let impLaddad = false;
 function impSettMsg(text, err) {
   const m = $('imp-msg'); if (!m) return;
   if (!text) { m.hidden = true; return; }
-  m.hidden = false; m.textContent = text; m.classList.toggle('err', !!err);
+  m.hidden = false; m.textContent = text; m.classList.toggle('err', !!err && err !== 'ok'); m.classList.toggle('ok', err === 'ok');
 }
 async function initImport() {
   const wrap = $('imp-src'); if (!wrap || impLaddad) return;
@@ -2675,11 +2675,11 @@ function impVisaLista(ok, missar) {
   ul.innerHTML = '';
   for (const t of ok) { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); }
   for (const t of missar) { const li = document.createElement('li'); li.className = 'miss'; li.textContent = t; ul.appendChild(li); }
-  ul.hidden = !ul.children.length;
+  if ($('imp-res')) $('imp-res').hidden = !ul.children.length;
 }
 function impUppdateraVal() {
   const ff = impVal && impVal.typ === 'firefox';
-  const w = $('imp-ext-wrap'); if (w) { w.style.opacity = ff ? '.45' : ''; w.title = ff ? tw('Firefox-tillägg fungerar inte i AdRaze') : ''; }
+  const w = $('imp-ext-wrap'); if (w) w.title = ff ? tw('Firefox-tillägg fungerar inte i AdRaze') : '';
   if ($('imp-ext')) $('imp-ext').disabled = !!ff;
 }
 if ($('imp-go')) $('imp-go').addEventListener('click', async () => {
@@ -2715,7 +2715,7 @@ if ($('imp-go')) $('imp-go').addEventListener('click', async () => {
     }
   }
   btn.disabled = false;
-  impSettMsg(tw('Klart! Det här togs med från') + ' ' + impVal.namn + ':');
+  impSettMsg(tw('Klart! Det här togs med från') + ' ' + impVal.namn + ':', 'ok');
   impVisaLista(ok, missar);
 });
 if ($('imp-csv')) $('imp-csv').addEventListener('click', async () => {
@@ -3002,7 +3002,7 @@ async function maybeShowFlyttBanner() {
         // Välj webbläsaren direkt så att det bara är att trycka på Importera
         for (let i = 0; i < 20 && !document.querySelector('#imp-src .imp-b'); i++) await new Promise((r) => setTimeout(r, 100));
         const b = document.querySelector('#imp-src .imp-b'); if (b) b.click();
-        const kort = document.querySelector('.imp-card'); if (kort) try { kort.scrollIntoView({ block: 'start' }); } catch {}
+        const kort = document.querySelector('.imp-del'); if (kort) try { kort.scrollIntoView({ block: 'start' }); } catch {}
       },
     });
   } catch {}
