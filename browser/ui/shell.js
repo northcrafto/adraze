@@ -2687,14 +2687,31 @@ if ($('imp-go')) $('imp-go').addEventListener('click', async () => {
   const bokmarken = $('imp-bm').checked, historik = $('imp-hist').checked;
   const inst = $('imp-inst').checked, utse = $('imp-utse').checked;
   const ext = $('imp-ext').checked && !$('imp-ext').disabled;
-  if (!bokmarken && !historik && !inst && !utse && !ext) { impSettMsg(tw('Välj minst en sak att ta med.'), true); return; }
+  const flikar = $('imp-flikar').checked, kakor = $('imp-kakor').checked;
+  if (!bokmarken && !historik && !inst && !utse && !ext && !flikar && !kakor) { impSettMsg(tw('Välj minst en sak att ta med.'), true); return; }
   const btn = $('imp-go'); btn.disabled = true; impSettMsg(tw('Importerar…')); impVisaLista([], []);
-  let r; try { r = await window.view.importLas({ ...impVal, bokmarken, historik, installningar: inst || utse || ext }); } catch (e) { r = { ok: false, fel: String(e) }; }
+  let r; try { r = await window.view.importLas({ ...impVal, bokmarken, historik, installningar: inst || utse || ext, flikar, kakor }); } catch (e) { r = { ok: false, fel: String(e) }; }
   if (!r || !r.ok) { btn.disabled = false; impSettMsg(r && r.fel ? r.fel : tw('Kunde inte läsa webbläsaren.'), true); return; }
   const ok = [], missar = [];
   const rad = (t) => ok.push(t), miss = (t) => missar.push(t);
   if (bokmarken) { const n = mergeBokmarken(r.bokmarken || []); if (n) rad(n + ' ' + tw('bokmärken')); else miss(tw('Inga nya bokmärken')); }
   if (historik) { const n = mergeHistorik(r.historik || []); if (n) rad(n + ' ' + tw('sidor i historiken')); else miss(tw('Ingen ny historik')); }
+  // Inloggningarna är redan satta av huvudprocessen (kakorna lämnar den aldrig) — före flikarna, så att de öppnas inloggade
+  if (kakor && r.kakor) {
+    if (r.kakor.antal) rad(tw('Inloggad på') + ' ' + r.kakor.sajter + ' ' + tw(r.kakor.sajter === 1 ? 'sajt' : 'sajter'));
+    else if (!r.kakor.last) miss(tw('Inga inloggningar att ta med'));
+    if (r.kakor.last) miss(r.kakor.last + ' ' + tw('inloggningar gick inte att låsa upp'));
+  }
+  if (flikar) {
+    const redan = new Set(tabs.map((t) => t.url).filter(Boolean));
+    const nya = (r.flikar || []).filter((t) => !redan.has(t.url));
+    if (nya.length) {
+      const tillbaka = active;
+      for (const t of nya) { const nt = createTab(t.url); if (t.pinned) try { setPinned(nt, true); } catch {} }
+      try { if (tillbaka) switchTab(tillbaka); } catch {}
+      rad(nya.length + ' ' + tw(nya.length === 1 ? 'flik öppnad' : 'flikar öppnade'));
+    } else miss(tw('Inga öppna flikar att ta med'));
+  }
   const x = r.installningar;
   try {
     if (x && utse) await tillampaUtseende(x, rad);
@@ -2995,7 +3012,7 @@ async function maybeShowFlyttBanner() {
     visaNotis({
       id: 'flytt-banner', ikon: 'i-flytt',
       titel: namn ? tw('Kommer du från') + ' ' + namn + '?' : tw('Kommer du från en annan webbläsare?'),
-      under: tw('Ta med bokmärken, inställningar och utseende.'),
+      under: tw('Ta med flikar, inloggningar, bokmärken och inställningar.'),
       knapp: tw('Ta med allt'), sek: tw('Nej tack'),
       onKnapp: async (el) => {
         el.stang(); openPasswords();

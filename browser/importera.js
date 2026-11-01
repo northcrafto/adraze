@@ -6,7 +6,21 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { app, ipcMain, dialog, BrowserWindow } = require('electron');
+const { app, ipcMain, dialog, BrowserWindow, session } = require('electron');
+const crypto = require('crypto');
+const { spawn } = require('child_process');
+// Kör ett program utan att frysa appen (macOS kan visa en lösenordsruta medan vi väntar)
+function kor(prog, args, { input, timeout = 30000 } = {}) {
+  return new Promise((res) => {
+    let ut = '', klar = false;
+    let p; try { p = spawn(prog, args, { windowsHide: true }); } catch { return res(null); }
+    const t = setTimeout(() => { try { p.kill(); } catch {} }, timeout);
+    p.stdout.on('data', (d) => { ut += d; });
+    p.on('error', () => { if (!klar) { klar = true; clearTimeout(t); res(null); } });
+    p.on('close', (kod) => { if (!klar) { klar = true; clearTimeout(t); res(kod === 0 ? ut : null); } });
+    if (input != null) p.stdin.end(input); else p.stdin.end();
+  });
+}
 let DatabaseSync = null;
 try { ({ DatabaseSync } = require('node:sqlite')); } catch {}
 
@@ -353,6 +367,190 @@ function ffInst(dir) {
   return ut;
 }
 
+/* ── Öppna flikar ──
+ * Chromium sparar flikarna i Sessions/Session_<tid> (SNSS: en rad kommandon). Vi läser bara de vi behöver:
+ * adress per flik och historiksteg, vald historikpost, fönster, ordning, fäst och stängda flikar/fönster. */
+function snss(buf) {
+  if (!buf || buf.length < 8 || buf.toString('latin1', 0, 4) !== 'SNSS') return [];
+  let p = 8; const flikar = new Map(), stangdaF = new Set();
+  const flik = (id) => { if (!flikar.has(id)) flikar.set(id, { navs: new Map(), sel: -1, win: -1, idx: 0, pin: false, stangd: false }); return flikar.get(id); };
+  while (p + 3 <= buf.length) {
+    const size = buf.readUInt16LE(p); if (size < 1 || p + 2 + size > buf.length) break;
+    const id = buf[p + 2], d = buf.subarray(p + 3, p + 2 + size); p += 2 + size;
+    try {
+      if (id === 6 && d.length >= 16) {            // UpdateTabNavigation (Pickle: storlek, flik, index, adress …)
+        const tid = d.readInt32LE(4), idx = d.readInt32LE(8), len = d.readInt32LE(12);
+        if (len > 0 && 16 + len <= d.length) flik(tid).navs.set(idx, d.toString('utf8', 16, 16 + len));
+      } else if (id === 0 && d.length >= 8) flik(d.readInt32LE(4)).win = d.readInt32LE(0);   // SetTabWindow
+      else if (id === 2 && d.length >= 8) flik(d.readInt32LE(0)).idx = d.readInt32LE(4);    // SetTabIndexInWindow
+      else if (id === 7 && d.length >= 8) flik(d.readInt32LE(0)).sel = d.readInt32LE(4);    // SetSelectedNavigationIndex
+      else if (id === 12 && d.length >= 5) flik(d.readInt32LE(0)).pin = d[4] !== 0;         // SetPinnedState
+      else if (id === 16 && d.length >= 4) flik(d.readInt32LE(0)).stangd = true;            // TabClosed
+      else if (id === 17 && d.length >= 4) stangdaF.add(d.readInt32LE(0));                  // WindowClosed
+    } catch {}
+  }
+  return [...flikar.values()].filter((t) => !t.stangd && t.win !== -1 && !stangdaF.has(t.win) && t.navs.size)
+    .sort((a, b) => a.win - b.win || a.idx - b.idx)
+    .map((t) => ({ url: t.navs.get(t.sel) || t.navs.get(Math.max(...t.navs.keys())), pinned: t.pin }))
+    .filter((t) => t.url && /^https?:/i.test(t.url));
+}
+function chromeFlikar(dir) {
+  try {
+    const sd = path.join(dir, 'Sessions');
+    const f = fs.readdirSync(sd).filter((x) => /^Session_\d+$/.test(x)).sort().pop();
+    if (f) return snss(fs.readFileSync(path.join(sd, f)));
+    for (const gammal of ['Current Session', 'Last Session']) { const g = path.join(dir, gammal); if (fs.existsSync(g)) return snss(fs.readFileSync(g)); }
+  } catch {}
+  return [];
+}
+function ffFlikar(dir) {
+  // Medan Firefox är öppen skrivs recovery.jsonlz4, när den stängts sessionstore.jsonlz4 — ta den nyaste
+  const kand = [path.join(dir, 'sessionstore-backups', 'recovery.jsonlz4'), path.join(dir, 'sessionstore.jsonlz4')]
+    .filter((f) => fs.existsSync(f)).sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
+  for (const f of kand) {
+    try {
+      const j = JSON.parse(mozLz4(fs.readFileSync(f)).toString('utf8'));
+      const ut = [];
+      for (const w of j.windows || []) for (const t of w.tabs || []) {
+        const e = (t.entries || [])[(t.index || (t.entries || []).length) - 1];
+        if (e && /^https?:/i.test(e.url || '')) ut.push({ url: e.url, pinned: !!t.pinned });
+      }
+      return ut;
+    } catch {}
+  }
+  return [];
+}
+
+/* ── Inloggningar (kakor) ──
+ * Chromium krypterar kakorna med en nyckel som ligger i datorns nyckelring:
+ *  Linux: Secret Service ("Brave Safe Storage" m.fl.), v11 = AES-128-CBC; v10 = den fasta nyckeln "peanuts".
+ *  macOS: Nyckelringen (macOS frågar dig om lov), v10 = AES-128-CBC med 1003 PBKDF2-varv.
+ *  Windows: nyckeln i Local State, låst med DPAPI, v10 = AES-256-GCM. Chromes egna v20-kakor
+ *  (app-bunden kryptering) går inte att läsa för något annat program — de hoppas över.
+ * Kakorna läses och sätts direkt här i huvudprocessen och lämnar aldrig datorn. */
+const LIBSECRET_APP = { chrome: 'chrome', chromium: 'chromium', brave: 'brave', edge: 'microsoft-edge', vivaldi: 'vivaldi' };
+const MAC_NYCKEL = { chrome: ['Chrome Safe Storage', 'Chrome'], chromium: ['Chromium Safe Storage', 'Chromium'], brave: ['Brave Safe Storage', 'Brave'], edge: ['Microsoft Edge Safe Storage', 'Microsoft Edge'], vivaldi: ['Vivaldi Safe Storage', 'Vivaldi'] };
+const PY_SECRET = `import sys
+app=sys.argv[1]
+try:
+    import gi; gi.require_version('Secret','1'); from gi.repository import Secret
+    s=Secret.password_lookup_sync(Secret.Schema.new('chrome_libsecret_os_crypt_password_v2',Secret.SchemaFlags.DONT_MATCH_NAME,{'application':Secret.SchemaAttributeType.STRING}),{'application':app},None)
+    if s: print(s,end=''); sys.exit(0)
+except Exception: pass
+try:
+    import dbus
+    b=dbus.SessionBus(); i=dbus.Interface(b.get_object('org.freedesktop.secrets','/org/freedesktop/secrets'),'org.freedesktop.Secret.Service')
+    _,ses=i.OpenSession('plain',dbus.String('',variant_level=1))
+    u,l=i.SearchItems({'application':app})
+    if l: i.Unlock(l)
+    for it in list(u)+list(l):
+        sec=dbus.Interface(b.get_object('org.freedesktop.secrets',it),'org.freedesktop.Secret.Item').GetSecret(ses)
+        print(bytes(sec[2]).decode(),end=''); sys.exit(0)
+except Exception: pass
+sys.exit(1)`;
+async function kakNycklar(webblasare) {
+  const n = {};
+  if (plat === 'linux') {
+    n.v10 = crypto.pbkdf2Sync('peanuts', 'saltysalt', 1, 16, 'sha1');
+    let pw = null;
+    pw = await kor('python3', ['-c', PY_SECRET, LIBSECRET_APP[webblasare] || webblasare]);
+    if (!pw) { const r = await kor('secret-tool', ['lookup', 'application', LIBSECRET_APP[webblasare] || webblasare]); if (r) pw = r.replace(/\n$/, ''); }
+    if (pw) n.v11 = crypto.pbkdf2Sync(pw, 'saltysalt', 1, 16, 'sha1');
+    n.cbc = true;
+  } else if (plat === 'darwin') {
+    const [tjanst, konto] = MAC_NYCKEL[webblasare] || [];
+    const r = tjanst ? await kor('security', ['find-generic-password', '-w', '-s', tjanst, '-a', konto], { timeout: 120000 }) : null;
+    if (r && r.trim()) n.v10 = crypto.pbkdf2Sync(r.trim(), 'saltysalt', 1003, 16, 'sha1');
+    n.cbc = true;
+  } else if (plat === 'win32') {
+    const b = CHROMIUM.find((x) => x.id === webblasare);
+    try {
+      const ek = Buffer.from(lasJson(path.join(b.dir, 'Local State')).os_crypt.encrypted_key, 'base64');
+      if (ek.toString('latin1', 0, 5) === 'DPAPI') {
+        const ps = 'Add-Type -AssemblyName System.Security; $b=[Convert]::FromBase64String([Console]::In.ReadToEnd()); [Convert]::ToBase64String([Security.Cryptography.ProtectedData]::Unprotect($b,$null,"CurrentUser"))';
+        const r = await kor('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', ps], { input: ek.subarray(5).toString('base64') });
+        if (r && r.trim()) n.v10 = Buffer.from(r.trim(), 'base64');
+      }
+    } catch {}
+    n.gcm = true;
+  }
+  return n;
+}
+function dekryptera(enc, n, host, meta) {
+  const pre = enc.toString('latin1', 0, 3);
+  const key = pre === 'v11' ? n.v11 : pre === 'v10' ? n.v10 : null;
+  if (!key) return null;
+  let v;
+  if (n.gcm) {
+    const d = crypto.createDecipheriv('aes-256-gcm', key, enc.subarray(3, 15));
+    d.setAuthTag(enc.subarray(enc.length - 16));
+    v = Buffer.concat([d.update(enc.subarray(15, enc.length - 16)), d.final()]);
+  } else {
+    const d = crypto.createDecipheriv('aes-128-cbc', key, Buffer.alloc(16, 0x20));
+    v = Buffer.concat([d.update(enc.subarray(3)), d.final()]);
+  }
+  // Från databasversion 24 börjar värdet med SHA-256 av domänen (skydd mot att kakor flyttas mellan sajter)
+  if (meta >= 24) { if (v.length < 32 || !v.subarray(0, 32).equals(crypto.createHash('sha256').update(host).digest())) return null; v = v.subarray(32); }
+  return v.toString('utf8');
+}
+const SAMESITE_CR = { '-1': 'unspecified', 0: 'no_restriction', 1: 'lax', 2: 'strict' };
+const SAMESITE_FF = { 0: 'no_restriction', 1: 'lax', 2: 'strict' };
+async function chromeKakor(webblasare, dir) {
+  const fil = [path.join(dir, 'Network', 'Cookies'), path.join(dir, 'Cookies')].find((f) => fs.existsSync(f));
+  const db = fil && oppnaDb(fil); if (!db) return { kakor: [], last: 0 };
+  const ut = [], nu = Date.now() / 1000; let last = 0;
+  try {
+    let meta = 0; try { meta = Number(db.prepare("SELECT value FROM meta WHERE key='version'").get().value) || 0; } catch {}
+    const n = await kakNycklar(webblasare);
+    const stmt = db.prepare('SELECT * FROM cookies'); try { stmt.setReadBigInts(true); } catch {}
+    for (const c of stmt.all()) {
+      if (c.top_frame_site_key && String(c.top_frame_site_key)) continue;     // partitionerade kakor hör till en annan sajt
+      let varde = c.value || '';
+      const enc = c.encrypted_value ? Buffer.from(c.encrypted_value) : null;
+      if (!varde && enc && enc.length) { try { varde = dekryptera(enc, n, c.host_key, meta); } catch { varde = null; } }
+      if (varde == null) { last++; continue; }
+      const persist = Number(c.has_expires ?? c.is_persistent ?? 1) !== 0;
+      const exp = persist ? Number(BigInt(c.expires_utc) / 1000000n) - 11644473600 : 0;
+      if (persist && exp && exp < nu) continue;
+      ut.push({ host: c.host_key, name: c.name, value: varde, path: c.path || '/', secure: !!Number(c.is_secure), httpOnly: !!Number(c.is_httponly),
+        sameSite: SAMESITE_CR[String(Number(c.samesite))] || 'unspecified', exp: persist && exp > 0 ? exp : 0 });
+    }
+  } catch {} finally { stangDb(db); }
+  return { kakor: ut, last };
+}
+function ffKakor(dir) {
+  const db = oppnaDb(path.join(dir, 'cookies.sqlite')); if (!db) return { kakor: [], last: 0 };
+  const ut = [], nu = Date.now() / 1000;
+  try {
+    const stmt = db.prepare("SELECT host, name, value, path, expiry, isSecure, isHttpOnly, sameSite, originAttributes FROM moz_cookies"); try { stmt.setReadBigInts(true); } catch {}
+    for (const c of stmt.all()) {
+      if (c.originAttributes) continue;                    // behållare/partitioner hoppas över
+      let exp = Number(c.expiry) || 0; if (exp > 1e11) exp = Math.floor(exp / 1000);   // nyare Firefox: millisekunder
+      if (exp && exp < nu) continue;
+      ut.push({ host: c.host, name: c.name, value: c.value || '', path: c.path || '/', secure: !!Number(c.isSecure), httpOnly: !!Number(c.isHttpOnly),
+        sameSite: SAMESITE_FF[Number(c.sameSite)] || 'unspecified', exp });
+    }
+  } catch {} finally { stangDb(db); }
+  return { kakor: ut, last: 0 };
+}
+async function sattKakor(lista) {
+  const s = session.defaultSession; let n = 0;
+  for (let i = 0; i < lista.length; i += 200) {
+    const del = lista.slice(i, i + 200).map(async (c) => {
+      const host = c.host.replace(/^\./, ''); if (!host) return;
+      const k = { url: (c.secure ? 'https://' : 'http://') + host + (c.path || '/'), name: c.name, value: c.value, path: c.path || '/',
+        secure: c.secure, httpOnly: c.httpOnly, sameSite: c.sameSite };
+      if (c.host.startsWith('.') && !c.name.startsWith('__Host-')) k.domain = c.host;
+      if (c.exp) k.expirationDate = c.exp;
+      if (k.sameSite === 'no_restriction' && !k.secure) k.sameSite = 'lax';
+      try { await s.cookies.set(k); n++; } catch {}
+    });
+    await Promise.all(del);
+  }
+  try { await s.cookies.flushStore(); } catch {}
+  return n;
+}
+
 /* ── Lösenord från CSV (export ur den andra webbläsaren) ── */
 function parseCsv(text) {
   const rader = []; let f = [], c = '', q = false;
@@ -395,22 +593,29 @@ function setup(hooks) {
   ipcMain.handle('import:kallor', () => kallor());
 
   // Läs bokmärken + historik från en vald källa (ges tillbaka till skalet som lägger in i localStorage)
-  ipcMain.handle('import:las', (_e, { typ, id, profil, bokmarken, historik, installningar }) => {
-    let bm = [], hist = [], inst = null;
+  ipcMain.handle('import:las', async (_e, { typ, id, profil, bokmarken, historik, installningar, flikar, kakor }) => {
+    let bm = [], hist = [], inst = null, tabs = [], kak = null;
     try {
       if (typ === 'firefox') {
         if (!kallor().some((k) => k.typ === 'firefox' && k.profiler.some((p) => p.id === profil))) throw new Error('profil saknas');
         if (bokmarken) bm = ffBokmarken(profil);
         if (historik) hist = ffHistorik(profil);
         if (installningar) inst = ffInst(profil);
+        if (flikar) tabs = ffFlikar(profil);
+        if (kakor) kak = ffKakor(profil);
       } else {
         const dir = chromiumMapp(id, profil); if (!dir) throw new Error('profil saknas');
         if (bokmarken) bm = chromeBokmarken(dir);
         if (historik) hist = chromeHistorik(dir);
         if (installningar) inst = chromeInst(id, dir);
+        if (flikar) tabs = chromeFlikar(dir);
+        if (kakor) kak = await chromeKakor(id, dir);
       }
     } catch (e) { return { ok: false, fel: String(e.message || e) }; }
-    return { ok: true, bokmarken: bm, historik: hist, installningar: inst };
+    let kakorSatta = 0;
+    if (kak && kak.kakor.length) { try { kakorSatta = await sattKakor(kak.kakor); } catch {} }
+    return { ok: true, bokmarken: bm, historik: hist, installningar: inst, flikar: tabs.slice(0, 60),
+      kakor: kak ? { antal: kakorSatta, last: kak.last, sajter: new Set(kak.kakor.map((c) => c.host.replace(/^\./, '').replace(/^www\./, ''))).size } : null };
   });
 
   // Installera tilläggen från Chrome Web Store (samma väg som när du lägger till ett själv)
@@ -442,4 +647,4 @@ function setup(hooks) {
   });
 }
 
-module.exports = { setup, kallor, chromeInst, ffInst, mozLz4 };
+module.exports = { setup, kallor, chromeInst, ffInst, mozLz4, snss, chromeFlikar, ffFlikar, chromeKakor, ffKakor };
