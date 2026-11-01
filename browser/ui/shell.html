@@ -779,46 +779,73 @@
           </div>
 
           <style>
-            .imp-card { border: 1px solid var(--color-line); border-radius: 16px; padding: 16px 18px; margin-bottom: 18px; }
-            .imp-card h3 { font-size: 14.5px; font-weight: 800; color: var(--color-navy-900); margin-bottom: 3px; }
-            .imp-card .imp-lead { font-size: 12.5px; color: var(--color-navy-600); line-height: 1.5; margin-bottom: 13px; }
-            .imp-src { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 13px; }
-            .imp-b { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 650; padding: 8px 13px; border-radius: 10px; border: 1px solid var(--color-line); background: var(--color-paper); color: var(--color-navy-900); cursor: pointer; }
-            .imp-b:hover { border-color: var(--color-terra); }
-            .imp-b.on { border-color: var(--color-terra); background: rgba(255,75,31,.07); color: var(--color-terra); }
-            .imp-opts { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 13px; }
-            .imp-opts label { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--color-navy-900); cursor: pointer; }
-            .imp-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-            .imp-msg { font-size: 12.5px; color: var(--color-safe); }
-            .imp-msg.err { color: #b23636; }
-            .imp-none { font-size: 12.5px; color: rgb(28 43 58 / .5); }
-            .imp-lista { margin: 12px 0 0; padding: 10px 12px; list-style: none; border-radius: 10px; background: var(--color-paper); display: grid; gap: 5px; }
-            .imp-lista li { font-size: 12.5px; color: var(--color-navy-900); display: flex; gap: 8px; line-height: 1.45; }
-            .imp-lista li::before { content: '✓'; color: var(--color-safe); font-weight: 800; flex: none; }
-            .imp-lista li.miss::before { content: '–'; color: rgb(28 43 58 / .45); }
-            .imp-lista li.miss { color: rgb(28 43 58 / .6); }
-            :root[data-theme="dark"] .imp-lista li.miss, :root[data-theme="dark"] .imp-lista li.miss::before { color: #a1a1a8; }
+            .imp-rad { display: flex; align-items: center; gap: 14px; }
+            .imp-etikett { flex: none; width: 70px; font-size: 13px; font-weight: 600; color: var(--s-mut); }
+            .imp-src, .imp-opts { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+            .imp-b, .imp-chip { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px; border-radius: 8px; font-size: 13px; font-weight: 600;
+              background: var(--s-surface-2); color: var(--s-ink); border: 0; box-shadow: inset 0 0 0 1px var(--s-line); cursor: pointer; transition: background .15s, box-shadow .15s, color .15s; user-select: none; }
+            .imp-b:hover, .imp-chip:hover { box-shadow: inset 0 0 0 1px var(--s-faint); }
+            .imp-b.on { background: var(--s-accent-soft); color: var(--s-accent-ink); box-shadow: inset 0 0 0 1.5px var(--s-accent); }
+            .imp-b::before { content: ''; width: 8px; height: 8px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--s-faint); }
+            .imp-b.on::before { box-shadow: inset 0 0 0 4px var(--s-accent); }
+            .imp-chip input { position: absolute; opacity: 0; pointer-events: none; }
+            .imp-chip span::before { content: ''; display: inline-block; vertical-align: -2px; width: 14px; height: 14px; margin-right: 7px; border-radius: 4px; box-shadow: inset 0 0 0 1.5px var(--s-faint); transition: background .15s, box-shadow .15s; }
+            .imp-chip:has(input:checked) span::before { background: var(--s-accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/12px no-repeat; box-shadow: none; }
+            .imp-chip:has(input:focus-visible) { outline: 2px solid var(--s-accent); outline-offset: 2px; }
+            .imp-chip:has(input:disabled) { opacity: .4; cursor: default; }
+            .imp-fot { justify-content: flex-end; }
+            .imp-msg { flex: 1; min-width: 0; font-size: 12.5px; color: var(--s-mut); }
+            .imp-msg.ok { color: var(--s-ink); font-weight: 600; }
+            .imp-msg.err { color: #d0402f; }
+            :root[data-theme="dark"] .imp-msg.err { color: #ff8a7a; }
+            .imp-none { font-size: 12.5px; color: var(--s-mut); }
+            .imp-resultat { padding-top: 12px !important; padding-bottom: 14px !important; }
+            .imp-lista { width: 100%; margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 18px; }
+            .imp-lista li { font-size: 12.5px; color: var(--s-ink); display: flex; gap: 8px; line-height: 1.45; min-width: 0; overflow-wrap: anywhere; }
+            .imp-lista li::before { content: ''; flex: none; width: 14px; height: 14px; margin-top: 2px; border-radius: 50%; background: var(--color-safe) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 8.5l2.2 2.2L11.5 6' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/11px no-repeat; }
+            .imp-lista li.miss { color: var(--s-mut); }
+            .imp-lista li.miss::before { background: var(--s-surface-2); box-shadow: inset 0 0 0 1.5px var(--s-faint); }
+            .imp-csv-rad { margin-top: 12px !important; }
+            #settings .imp-fot:has(+ [hidden]) { border-radius: 0 0 12px 12px; }
+            #settings .kn-ut-rad:has(+ [style*="none"]) { border-radius: 12px; }
+            .kn-del-link { height: 32px; padding: 0 12px; border: 0; border-radius: 8px; background: none; color: #d0402f; font-size: 13px; font-weight: 600; cursor: pointer; }
+            .kn-del-link:hover { background: rgb(208 64 47 / .09); }
+            :root[data-theme="dark"] .kn-del-link { color: #ff8a7a; }
+            :root[data-theme="dark"] .kn-del-link:hover { background: rgb(255 138 122 / .1); }
           </style>
           <div class="set-panel hidden" data-cat="losenord">
             <h2 class="set-h">Autofyll &amp; lösenord</h2>
-            <div class="imp-card">
-              <h3>Importera från en annan webbläsare</h3>
-              <p class="imp-lead">Byt utan att börja om. Ta med bokmärken, historik, inställningar, utseende och tillägg från Chrome, Brave, Edge eller Firefox. Inget skickas någonstans — allt stannar på den här datorn.</p>
-              <div id="imp-src" class="imp-src"></div>
-              <div class="imp-opts">
-                <label><input type="checkbox" id="imp-bm" checked> Bokmärken</label>
-                <label><input type="checkbox" id="imp-hist" checked> Historik</label>
-                <label><input type="checkbox" id="imp-inst" checked> Inställningar</label>
-                <label><input type="checkbox" id="imp-utse" checked> Utseende</label>
-                <label id="imp-ext-wrap"><input type="checkbox" id="imp-ext" checked> Tillägg</label>
+            <div class="imp-del">
+              <div class="set-row imp-rad">
+                <div class="set-txt flex-1 min-w-0"><div class="set-title">Importera från en annan webbläsare</div><div class="set-desc">Inget skickas någonstans — allt stannar på den här datorn.</div></div>
               </div>
-              <div class="imp-foot">
-                <button id="imp-go" class="btn btn-safe" style="height:40px;padding:0 16px;" disabled>Importera</button>
-                <button id="imp-csv" class="btn btn-ghost" style="height:40px;padding:0 16px;">Lösenord från CSV-fil…</button>
+              <div class="set-row imp-rad">
+                <div class="imp-etikett">Från</div>
+                <div id="imp-src" class="imp-src"></div>
+              </div>
+              <div class="set-row imp-rad">
+                <div class="imp-etikett">Ta med</div>
+                <div class="imp-opts">
+                  <label class="imp-chip"><input type="checkbox" id="imp-bm" checked><span>Bokmärken</span></label>
+                  <label class="imp-chip"><input type="checkbox" id="imp-hist" checked><span>Historik</span></label>
+                  <label class="imp-chip"><input type="checkbox" id="imp-inst" checked><span>Inställningar</span></label>
+                  <label class="imp-chip"><input type="checkbox" id="imp-utse" checked><span>Utseende</span></label>
+                  <label class="imp-chip" id="imp-ext-wrap"><input type="checkbox" id="imp-ext" checked><span>Tillägg</span></label>
+                </div>
+              </div>
+              <div class="set-row imp-rad imp-fot">
                 <span id="imp-msg" class="imp-msg" hidden></span>
+                <button id="imp-go" class="btn btn-safe flex-none" disabled>Importera</button>
               </div>
-              <ul id="imp-lista" class="imp-lista" hidden></ul>
+              <div class="set-row imp-rad imp-resultat" id="imp-res" hidden>
+                <ul id="imp-lista" class="imp-lista"></ul>
+              </div>
             </div>
+            <div class="set-row flex items-center imp-csv-rad">
+              <div class="set-txt flex-1 min-w-0"><div class="set-title">Lösenord från en CSV-fil</div><div class="set-desc">Exportera lösenorden som CSV i den andra webbläsaren och välj filen här.</div></div>
+              <button id="imp-csv" class="pill flex-none" style="height:34px;">Välj fil…</button>
+            </div>
+            <div style="height:22px"></div>
             <p class="set-lead mb-3">Sparade inloggningar. AdRaze fyller i dem åt dig.</p>
             <div class="flex gap-2 mb-3">
               <input id="pw-add-origin" placeholder="https://sajt.se" class="pw-in flex-1" />
@@ -1010,14 +1037,15 @@
                 </div>
                 <p class="pro-err" id="pro-err" hidden></p>
               </div>
-              <div class="kn-actions">
-                <button id="kn-logout" class="btn btn-ghost" style="height:42px;padding:0 20px;">Logga ut</button>
+              <div class="set-row flex items-center kn-ut-rad">
+                <div class="set-txt flex-1 min-w-0"><div class="set-title">Logga ut</div><div class="set-desc">Du kan logga in igen när du vill.</div></div>
+                <button id="kn-logout" class="pill flex-none" style="height:34px;">Logga ut</button>
               </div>
-              <div class="kn-danger" id="kn-danger">
-                <div class="kn-danger-h">Ta bort konto</div>
-                <p class="kn-danger-p">Detta raderar ditt konto permanent — Pro, sparade barn och inställningar försvinner. Det går inte att ångra.</p>
-                <button id="kn-delete" class="kn-del-btn">Ta bort mitt konto</button>
+              <div class="set-row flex items-center" id="kn-danger">
+                <div class="set-txt flex-1 min-w-0"><div class="set-title">Ta bort konto</div><div class="set-desc">Kontot, Pro och sparade barn raderas för alltid.</div></div>
+                <button id="kn-delete" class="kn-del-link flex-none">Ta bort…</button>
               </div>
+              <div style="height:8px"></div>
             </div>
             <div id="kn-signedout" style="display:none;text-align:center;padding:28px 10px;">
               <p class="set-lead mb-4">Du är inte inloggad.</p>
