@@ -1,7 +1,9 @@
 // Heron i 3D: den handritade gorillan som ett tjockt klistermärke som slukar reklamlappar.
 // Lapparna svävar runt gorillan, en i taget flyger in i käften och sprängs i papperssmulor.
 // Scenen följer musen, pausas när den inte syns och står still vid "minska rörelser".
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
+// Gorillabilden (img) syns tills 3D-scenen har ritat sin första hela bild med texturerna laddade,
+// så heron blir aldrig en tom/vit platta om WebGL eller bilderna strular.
+import * as THREE from '/vendor/three.module.js';
 
 const wrap = document.querySelector('.hero-3d');
 const canvas = wrap && wrap.querySelector('canvas');
@@ -23,12 +25,15 @@ function start() {
   const glod = new THREE.PointLight(0xff4b1f, 18, 12); glod.position.set(-2.5, -1, 3); scene.add(glod);
 
   // ---------- gorillan: framsida + 16 mörkare lager bakom = tjocklek ----------
-  const laddare = new THREE.TextureLoader();
+  let klar = false;
+  const hanterare = new THREE.LoadingManager(() => { klar = true; gorilla.visible = true; if (stilla) rita(0); },
+    undefined, () => { wrap.classList.add('utan-3d'); });
+  const laddare = new THREE.TextureLoader(hanterare);
   const rutor = [1, 2, 3, 4].map((k) => {
-    const t = laddare.load(`/bilder/gorilla/g${k}.png`, () => { if (stilla) rita(0); });
+    const t = laddare.load(`/bilder/gorilla/g${k}.png`);
     t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
   });
-  const gorilla = new THREE.Group(); scene.add(gorilla);
+  const gorilla = new THREE.Group(); gorilla.visible = false; scene.add(gorilla);
   const STL = 4.1, plan = new THREE.PlaneGeometry(STL, STL);
   const lager = [];
   for (let i = 16; i >= 0; i--) {
@@ -158,7 +163,10 @@ function start() {
       s.m.rotation.x += s.r.x * dt; s.m.rotation.y += s.r.y * dt; s.m.material.opacity = Math.min(1, s.liv * 2);
     }
     renderer.render(scene, camera);
+    if (klar && !wrap.classList.contains('klar')) requestAnimationFrame(() => wrap.classList.add('klar'));
   }
+  canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); wrap.classList.remove('klar'); });
+  canvas.addEventListener('webglcontextrestored', () => { forraRuta = -1; });
 
   if (stilla) { rita(0); return; }
   let synlig = true, forra = performance.now(), tid = 0;
