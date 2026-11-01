@@ -1,0 +1,93 @@
+name: Mac-bygge
+
+# Bygger, Widevine-signerar, kodsignerar och notariserar AdRaze för Mac på GitHubs Mac-datorer,
+# så att släppen inte hänger på att MacBooken är igång. Startas av browser/tools/release-mac.sh.
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Commit att bygga"
+        required: true
+      version:
+        description: "Version (t.ex. 0.1.80)"
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mac-bygge
+  cancel-in-progress: false
+
+jobs:
+  mac:
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Blockeringsdata från Linux-bygget
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download mac-indata -R "$GITHUB_REPOSITORY" -p "adraze-data-${{ inputs.version }}.tar.gz" -D /tmp
+          rm -rf browser/adraze && tar -xzf "/tmp/adraze-data-${{ inputs.version }}.tar.gz" -C browser
+          test -f browser/adraze/VERSION
+      - name: Beroenden
+        working-directory: browser
+        run: |
+          npm version "${{ inputs.version }}" --no-git-tag-version --allow-same-version
+          npm ci --no-audit --no-fund
+          npm install -g node-gyp
+          node node_modules/electron/install.js
+      - name: Certifikat i en tillfällig nyckelring
+        env:
+          P12: ${{ secrets.MAC_CERT_P12 }}
+          P12_PASS: ${{ secrets.MAC_CERT_PASS }}
+        run: |
+          KC=$RUNNER_TEMP/bygg.keychain-db; KP=$(uuidgen)
+          echo "$P12" | base64 --decode > $RUNNER_TEMP/cert.p12
+          security create-keychain -p "$KP" "$KC"
+          security set-keychain-settings -lut 7200 "$KC"
+          security unlock-keychain -p "$KP" "$KC"
+          security import $RUNNER_TEMP/cert.p12 -P "$P12_PASS" -A -t cert -f pkcs12 -k "$KC"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KP" "$KC" >/dev/null
+          security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
+          rm -f $RUNNER_TEMP/cert.p12
+          security find-identity -v -p codesigning "$KC" | grep -q "Developer ID Application"
+      - name: Apple- och castlabs-nycklar
+        env:
+          ASC_P8: ${{ secrets.ASC_KEY_P8 }}
+          EVS_ACCOUNT: ${{ secrets.EVS_ACCOUNT }}
+          EVS_PASSWORD: ${{ secrets.EVS_PASSWORD }}
+        run: |
+          echo "$ASC_P8" > $RUNNER_TEMP/AuthKey.p8
+          python3 -m venv ~/.castlabs-evs-venv
+          ~/.castlabs-evs-venv/bin/pip install -q castlabs-evs
+          ~/.castlabs-evs-venv/bin/python -m castlabs_evs.account reauth -A "$EVS_ACCOUNT" -P "$EVS_PASSWORD" >/dev/null
+          test -f ~/.config/evs/config.json
+      - name: Bygg, signera och notarisera
+        working-directory: browser
+        env:
+          ADRAZE_UTAN_SYNC: "1"
+          APPLE_API_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.ASC_ISSUER }}
+        run: APPLE_API_KEY=$RUNNER_TEMP/AuthKey.p8 bash tools/mac/bygg.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: adraze-mac-${{ inputs.version }}
+          path: |
+            browser/dist-installer/AdRaze.dmg
+            browser/dist-installer/AdRaze-mac.zip
+            browser/dist-installer/AdRaze-mac.zip.blockmap
+            browser/dist-installer/latest-mac.yml
+          retention-days: 7
+      - name: Städa
+        if: always()
+        run: |
+          security delete-keychain $RUNNER_TEMP/bygg.keychain-db 2>/dev/null || true
+          rm -f $RUNNER_TEMP/AuthKey.p8 ~/.config/evs/config.json

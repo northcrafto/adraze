@@ -8,8 +8,9 @@ cd "$(dirname "$0")/../.."
 ID="Developer ID Application: MIR BRUSC BATAK (TSW6WVMNJ8)"
 export CSC_NAME="MIR BRUSC BATAK (TSW6WVMNJ8)"
 # App Store Connect-nyckeln (samma som asc-mcp) används för notariseringen
-export APPLE_API_KEY=$HOME/.appstoreconnect/private_keys/AuthKey_6D8DAB3LFW.p8 APPLE_API_KEY_ID=6D8DAB3LFW
-export APPLE_API_ISSUER=$(python3 -c "import json,os;d=json.load(open(os.path.expanduser('~/.config/asc-mcp/companies.json')));d=d if isinstance(d,list) else d['companies'];print(d[0]['issuer_id'])")
+# (På GitHub kommer nyckeln och utfärdar-id:t från hemligheterna i stället, se .github/workflows/mac.yml)
+export APPLE_API_KEY=${APPLE_API_KEY:-$HOME/.appstoreconnect/private_keys/AuthKey_6D8DAB3LFW.p8} APPLE_API_KEY_ID=${APPLE_API_KEY_ID:-6D8DAB3LFW}
+[ -n "$APPLE_API_ISSUER" ] || export APPLE_API_ISSUER=$(python3 -c "import json,os;d=json.load(open(os.path.expanduser('~/.config/asc-mcp/companies.json')));d=d if isinstance(d,list) else d['companies'];print(d[0]['issuer_id'])")
 
 # castlabs Electron för båda arkitekturerna (node_modules har bara Mac:ens egen)
 EV=$(node -p "require('./node_modules/electron/package.json').version")      # t.ex. 44.9.3+wvcus
@@ -33,7 +34,8 @@ if [ "$(cat native/adblock/build/.mac-hash 2>/dev/null)" != "$H$EV" ]; then
 fi
 
 rm -rf dist-installer
-npm run sync
+# På GitHub följer blockeringsdatan med färdigsynkad från Linux-bygget (rålistorna ligger inte i git)
+[ -n "$ADRAZE_UTAN_SYNC" ] || npm run sync
 node_modules/.bin/electron-builder --mac --publish never -c.electronDist="$ZIPS" -c.mac.notarize=false
 
 # dmg:n signeras också, skickas till Apple och får kvittot fasthäftat
