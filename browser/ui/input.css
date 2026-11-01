@@ -744,6 +744,12 @@ body:has(#defbrowser-banner, #update-banner) .nt-stats { visibility: hidden; }
 #pip-btn { color: var(--color-muted); }
 #pip-btn:hover { background: rgb(14 42 71 / .06); }
 #pip-btn.on { color: var(--color-terra); }
+#falk-granskar { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px; border-radius: 999px; background: rgb(255 75 31 / .1); color: var(--color-terra); font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+#falk-granskar[hidden] { display: none; }
+#falk-granskar svg { width: 14px; height: 14px; }
+#falk-granskar svg { animation: falk-titt 1.6s ease-in-out infinite; }
+@keyframes falk-titt { 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { #falk-granskar svg { animation: none; } }
 
 /* Notiserna längst ned centreras i sidytan när Falk/chatten tar högerkolumnen */
 #update-banner, #defbrowser-banner { left: calc((100% - var(--pw, 0px)) / 2) !important; max-width: calc(100vw - var(--pw, 0px) - 24px) !important; }

@@ -1050,18 +1050,19 @@
       ask();
     }
     /* ── Falk ser och styr fliken ── */
+    // Av/på styrs av Inställningar → Falk → "Granska sidan" (sparas i huvudprocessen)
     let pageOn = true, pageTab = null, falkStopp = false;
-    try { pageOn = localStorage.getItem('falk-page') !== '0'; } catch {}
     const PAGE_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>';
     const CURSOR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m4 4 7 17 2.5-7.5L21 11Z"/></svg>';
     function renderPageChip() {
       const c = $('pagechip');
+      pageOn = !(pageTab && pageTab.av);
       if (!pageTab) { c.hidden = true; return; }
       c.hidden = false; c.classList.toggle('on', pageOn);
-      c.innerHTML = PAGE_IC + '<span>' + esc(pageOn ? tx('Ser sidan') + ': ' + (pageTab.titel || pageTab.url) : tx('Ser inte sidan – klicka för att visa den för Falk')) + '</span>';
-      c.title = pageOn ? tx('Falk ser och kan använda sidan du har öppen. Klicka för att stänga av.') : '';
+      c.innerHTML = PAGE_IC + '<span>' + esc(pageOn ? tx('Sidan granskas') + ': ' + (pageTab.titel || pageTab.url) : tx('Sidgranskning är avstängd')) + '</span>';
+      c.title = pageOn ? tx('Falk läser och kan använda sidan du har öppen. Stäng av i Inställningar → Falk.') : tx('Slå på i Inställningar → Falk.');
     }
-    $('pagechip').addEventListener('click', () => { pageOn = !pageOn; try { localStorage.setItem('falk-page', pageOn ? '1' : '0'); } catch {} renderPageChip(); });
+    $('pagechip').addEventListener('click', () => { try { window.krypto.doAction({ name: 'falk_installningar' }); } catch {} });
     async function pollTab() { try { const t = window.krypto.tab ? await window.krypto.tab() : null; if (JSON.stringify(t) !== JSON.stringify(pageTab)) { pageTab = t; renderPageChip(); } } catch {} }
     pollTab(); setInterval(pollTab, 1500);
     const SLAG = { a: 'länk', button: 'knapp', textarea: 'textfält', select: 'lista', summary: 'knapp' };

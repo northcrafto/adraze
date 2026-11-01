@@ -1929,16 +1929,27 @@ function falkVantaLaddat(wc, ms) {
 ipcMain.handle('krypto:tab', (e) => {
   const ctx = e.sender.__ctx; const wc = ctx && falkFlik(ctx);
   const url = wc ? wc.getURL() : '';
-  return /^https?:/i.test(url) ? { url, titel: wc.getTitle() } : null;
+  return /^https?:/i.test(url) ? { url, titel: wc.getTitle(), av: webb.prefs.falkSida === false } : null;
 });
+// "Falk granskar sidan" i adressfältet medan Falk läser eller styr fliken
+function falkGranskar(ctx, wc) {
+  if (!ctx || !wc || wc.__tabId == null) return;
+  sendTo(ctx, 'falk-granskar', wc.__tabId, true);
+  clearTimeout(wc.__falkTimer);
+  wc.__falkTimer = setTimeout(() => sendTo(ctx, 'falk-granskar', wc.__tabId, false), 4000);
+}
 ipcMain.handle('krypto:page', async (e) => {
   const ctx = e.sender.__ctx; const wc = ctx && falkFlik(ctx);
+  if (webb.prefs.falkSida === false) return null;
   if (!wc || !/^https?:/i.test(wc.getURL())) return null;
+  falkGranskar(ctx, wc);
   try { return await falkKor(wc, FALK_BILD); } catch { return null; }
 });
 ipcMain.handle('krypto:act', async (e, a) => {
   const ctx = e.sender.__ctx; if (!ctx || !a) return { ok: false, fel: 'Ingen flik.' };
+  if (webb.prefs.falkSida === false) return { ok: false, fel: 'Sidgranskning är avstängd i Inställningar.' };
   let wc = falkFlik(ctx);
+  falkGranskar(ctx, wc);
   const namn = String(a.name || '').toLowerCase().replace(/[åä]/g, 'a').replace(/ö/g, 'o');
   const v = String(a.value || '').trim();
   try {
@@ -2004,6 +2015,7 @@ ipcMain.on('krypto:action', (e, a) => {
     if (name === 'nedladdningar' || name === 'downloads') { sendTo(ctx, 'open-downloads'); return; }
     if (name === 'losenord' || name === 'autofyll' || name === 'autofill') { sendTo(ctx, 'open-passwords'); return; }
     if (name === 'wallet' || name === 'planbok' || name === 'kort' || name === 'adraze wallet') { sendTo(ctx, 'open-settings', 'wallet'); return; }
+    if (name === 'falk_installningar') { sendTo(ctx, 'open-settings', 'krypto'); return; }
     // sokmotor / adblock / realtidsskydd / minska_rorelse sköts i skalet
     sendTo(ctx, 'krypto-set', a);
   } catch {}

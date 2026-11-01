@@ -157,6 +157,7 @@ contextBridge.exposeInMainWorld('view', {
   onReader: (cb) => ipcRenderer.on('reader-available', (_e, id, ok, on) => cb(id, ok, on)),
   pip: (id) => ipcRenderer.send('view:pip', id),
   onPip: (cb) => ipcRenderer.on('pip-state', (_e, id, has, on) => cb(id, has, on)),
+  onFalkGranskar: (cb) => ipcRenderer.on('falk-granskar', (_e, id, on) => cb(id, on)),
   tabMenu: (info) => ipcRenderer.send('tab:menu', info),
   onTabAudio: (cb) => ipcRenderer.on('tab-audio', (_e, id, audible) => cb(id, audible)),
   onTabAction: (cb) => ipcRenderer.on('tab-action', (_e, action, id) => cb(action, id)),

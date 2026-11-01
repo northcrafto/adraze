@@ -29,6 +29,7 @@ const prefs = Object.assign({
   askDownload: false,
   permDefaults: {},            // kind -> 'ask' | 'block'
   perms: {},                   // origin -> { kind: 'allow' | 'block' }
+  falkSida: true,              // Falk får granska (läsa och styra) sidan du har öppen
 }, (() => { try { return JSON.parse(fs.readFileSync(FILE, 'utf8')); } catch { return {}; } })());
 let saveTimer = null;
 function save() { clearTimeout(saveTimer); saveTimer = setTimeout(() => { try { fs.writeFileSync(FILE, JSON.stringify(prefs)); } catch {} }, 200); }
@@ -147,13 +148,14 @@ function setup({ onDnsChanged } = {}) {
   ipcMain.handle('webb:get', () => ({
     dns: prefs.dns, httpsOnly: prefs.httpsOnly, fontSize: prefs.fontSize,
     downloadDir: downloadDir(), downloadDirCustom: !!prefs.downloadDir, askDownload: prefs.askDownload,
-    permDefaults: prefs.permDefaults, perms: prefs.perms,
+    permDefaults: prefs.permDefaults, perms: prefs.perms, falkSida: prefs.falkSida !== false,
   }));
   ipcMain.handle('webb:set', (_e, k, v) => {
     if (k === 'dns' && (v === 'off' || v === 'automatic' || DNS_SERVERS[v])) { prefs.dns = v; applyDns(); if (onDnsChanged) onDnsChanged(); }
     else if (k === 'httpsOnly') { prefs.httpsOnly = !!v; if (!v) httpOk.clear(); }
     else if (k === 'fontSize') { const n = parseInt(v, 10); if (n >= 9 && n <= 30) prefs.fontSize = n; }
     else if (k === 'askDownload') prefs.askDownload = !!v;
+    else if (k === 'falkSida') prefs.falkSida = !!v;
     else if (k === 'downloadDir') prefs.downloadDir = '';
     else if (k === 'permDefault' && v && KINDS.includes(v.kind)) prefs.permDefaults[v.kind] = v.value === 'block' ? 'block' : 'ask';
     else if (k === 'perm' && v && v.origin) {
