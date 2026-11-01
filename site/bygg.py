@@ -39,7 +39,7 @@ TILLGANGAR = {
 }
 # Sätt till butikslänken när Google har godkänt tillägget: knapparna går då direkt dit och zip-instruktionerna försvinner
 # (Byt då även /chrome och /extension i ../download/vercel.json till butikslänken.)
-BUTIK = None  # 'https://chromewebstore.google.com/detail/cgdjdjgdoklomdphknggkhfghlglcppd'
+BUTIK = 'https://chromewebstore.google.com/detail/cgdjdjgdoklomdphknggkhfghlglcppd'
 
 def ikon(namn):
     svg = re.sub(r'<title>.*?</title>', '', (rot / 'ikoner' / f'{namn}.svg').read_text())

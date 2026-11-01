@@ -57,7 +57,9 @@ Measured on 19 October 2026 in Chromium 1248, with and without the extension:
 
 ## Install
 
-AdRaze is on its way to the Chrome Web Store. Until then:
+**[Add AdRaze from the Chrome Web Store](https://chromewebstore.google.com/detail/adraze/cgdjdjgdoklomdphknggkhfghlglcppd)** — it updates itself.
+
+Or install it by hand:
 
 1. Download `adraze-x.y.z.zip` from the [latest release](https://github.com/northcrafto/adraze/releases/latest) and unzip it.
 2. Open `chrome://extensions` and turn on **Developer mode**.
