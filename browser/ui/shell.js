@@ -178,6 +178,7 @@ function switchTab(tab) {
   else showActiveTab();
   renderTabs(); updateNavButtons(); updateStar();
   try { updateReaderBtn(); } catch {}
+  try { updatePipBtn(); } catch {}
   try { permSwitched(); } catch {}
   try { applyTabPanel(tab); } catch {}
   try { visaFlikRaknare(); } catch {}
@@ -2015,6 +2016,9 @@ window.view.onHttpsFailed((id, url) => {
 // ── Läsläge: bokikonen i adressfältet syns när sidan har en artikel ──
 function updateReaderBtn() { const b = $('reader-btn'); if (!b) return; b.hidden = !(active && active.url && (active.readerable || active.readerOn)); b.classList.toggle('on', !!(active && active.readerOn)); b.title = (active && active.readerOn) ? tw('Avsluta läsläget') : tw('Läsläge'); }
 window.view.onReader((id, ok, on) => { const t = byId(id); if (!t) return; t.readerable = ok; t.readerOn = !!on; if (t === active) updateReaderBtn(); });
+function updatePipBtn() { const b = $('pip-btn'); if (!b) return; b.hidden = !(active && active.url && (active.pipHas || active.pipOn)); b.classList.toggle('on', !!(active && active.pipOn)); b.title = (active && active.pipOn) ? tw('Ta tillbaka videon') : tw('Bild-i-bild') + ' (Ctrl+Shift+P)'; }
+window.view.onPip((id, has, on) => { const t = byId(id); if (!t) return; t.pipHas = has; t.pipOn = on; if (t === active) updatePipBtn(); });
+$('pip-btn').addEventListener('click', () => { if (active) window.view.pip(active.id); });
 $('reader-btn').addEventListener('click', () => { if (active) window.view.reader(active.id, document.documentElement.dataset.theme || 'light'); });
 
 // ── Fäst flik och ljud av ──

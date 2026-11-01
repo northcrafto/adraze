@@ -31,7 +31,7 @@ const path = require('path');
 const UI_URL = require('url').pathToFileURL(path.join(__dirname, 'ui')).href + '/';
 const WEBB_KANALER = new Set([
   'adraze:start', 'adraze:css', 'adraze:kakor', 'adraze:rakna', 'adraze:dolj-regler',   // adraze-preload.js
-  'page:click', 'i18n:t', 'pw:capture', 'pw:for-origin', 'pw:open-manager',            // content-preload.js
+  'page:click', 'i18n:t', 'pw:capture', 'pw:for-origin', 'pw:open-manager', 'pip:state',            // content-preload.js
   'wallet:capture', 'wallet:debug', 'wallet:get', 'wallet:menu', 'wallet:open-manager', 'wallet:token',
 ]);
 function ramUrl(e) { try { return (e.senderFrame && e.senderFrame.url) || ''; } catch { return ''; } }
@@ -585,6 +585,10 @@ function buildContextMenu(ctx, wc, params) {
     t.push({ label: T('Kopiera bildadress'), click: () => clipboard.writeText(params.srcURL) });
     t.push({ type: 'separator' });
   }
+  if (params.mediaType === 'video') {
+    t.push({ label: T('Bild-i-bild'), accelerator: 'CmdOrCtrl+Shift+P', click: () => bildIBild(ctx, wc) });
+    t.push({ type: 'separator' });
+  }
   if (params.isEditable) {
     t.push({ label: T('Klipp ut'), role: 'cut', enabled: params.editFlags.canCut });
     t.push({ label: T('Kopiera'), role: 'copy', enabled: params.editFlags.canCopy });
@@ -751,6 +755,7 @@ function ensureView(ctx, tabId) {
     if (wc.__reader) return;
     lasvy.kanLasa(wc).then((ok) => { wc.__readerable = ok; sendTo(ctx, 'reader-available', tabId, ok, false); });
   });
+  wc.on('did-start-navigation', (_e, _u, inPage, isMain) => { if (isMain && !inPage && wc.__pip) { wc.__pip = null; skickaPip(wc); } });
   wc.on('did-start-navigation', (_e, _u, inPage, isMain) => { if (isMain && !inPage) { wc.__reader = false; sendTo(ctx, 'reader-available', tabId, false, false); } });
   wc.on('did-start-navigation', (_e, _u, inPage, isMain) => { if (isMain && !inPage && wc.__blocked) { wc.__blocked = 0; sendTo(ctx, 'adblock:tab', tabId, 0); } });
   wc.on('dom-ready', () => { try { if (ctx.defaultZoom !== 1) wc.setZoomFactor(ctx.defaultZoom); } catch {} });
@@ -1562,6 +1567,42 @@ ipcMain.on('tab:menu', (e, info) => {
   ];
   Menu.buildFromTemplate(m).popup({ window: ctx.win });
 });
+/* Bild-i-bild: flikens video (helst den som spelar, annars den största) ut i ett eget litet
+ * fönster som ligger överst – eller tillbaka om den redan är ute. Tittar i alla ramar så att
+ * inbäddade videor (iframes) också fungerar. */
+const PIP_JS = `(async () => {
+  if (document.pictureInPictureElement) { await document.exitPictureInPicture(); return 'ut'; }
+  const vs = Array.from(document.querySelectorAll('video')).filter((v) => v.readyState > 0);
+  if (!vs.length) return '';
+  const yta = (v) => v.offsetWidth * v.offsetHeight;
+  vs.sort((a, b) => (a.paused - b.paused) || (yta(b) - yta(a)));
+  const v = vs[0];
+  v.removeAttribute('disablepictureinpicture'); v.disablePictureInPicture = false;
+  await v.requestPictureInPicture(); return 'in';
+})().catch(() => 'fel')`;
+async function bildIBild(ctx, wc) {
+  if (!wc || wc.isDestroyed()) return;
+  let ramar = [];
+  try { ramar = wc.mainFrame.framesInSubtree; } catch {}
+  for (const f of ramar) { try { if (await f.executeJavaScript('!!document.pictureInPictureElement')) { await f.executeJavaScript(PIP_JS, true); return; } } catch {} }
+  for (const f of ramar) { try { if (await f.executeJavaScript(PIP_JS, true) === 'in') return; } catch {} }
+  sendTo(ctx, 'toast', T('Hittade ingen video att visa i bild-i-bild.'));
+}
+// Sidan (content-preload, varje ram) säger om den har en video och om den är i bild-i-bild
+function skickaPip(wc) {
+  let has = false, on = false;
+  for (const st of (wc.__pip || new Map()).values()) { has = has || st.has; on = on || st.on; }
+  sendTo(wc.__ctx, 'pip-state', wc.__tabId, has, on);
+}
+ipcMain.on('pip:state', (e, st) => {
+  try {
+    const wc = e.sender; if (!wc.__ctx || wc.__tabId == null || !e.senderFrame) return;
+    if (!wc.__pip) wc.__pip = new Map();
+    wc.__pip.set(e.senderFrame.processId + '-' + e.senderFrame.routingId, { has: !!(st && st.has), on: !!(st && st.on) });
+    skickaPip(wc);
+  } catch {}
+});
+ipcMain.on('view:pip', (e, id) => { const ctx = ctxFor(e); if (!ctx) return; const v = ctx.views.get(id); if (v) bildIBild(ctx, v.webContents); });
 // Läsläge av/på för en flik
 ipcMain.on('view:reader', async (e, id, theme) => {
   const ctx = ctxFor(e); if (!ctx) return;
@@ -1907,6 +1948,7 @@ function handleShortcut(wc, input) {
   if (mod && !shift && k === 'l') { try { ctx.win.webContents.focus(); } catch {} sendTo(ctx, 'focus-address'); return true; }
   if (mod && shift && k === 'r') { const v = activeView(ctx); if (v) v.webContents.reloadIgnoringCache(); return true; }
   if (mod && !shift && k === 'r') { const v = activeView(ctx); if (v) v.webContents.reload(); return true; }
+  if (mod && shift && k === 'p') { const v = activeView(ctx); if (v) bildIBild(ctx, v.webContents); return true; }
   if (mod && !shift && k === 'p') { const v = activeView(ctx); if (v) printPage(ctx, v.webContents); return true; }
   if (mod && (k === '+' || k === '=')) { sendTo(ctx, 'menu-zoom', 1); return true; }
   if (mod && (k === '-' || k === '_')) { sendTo(ctx, 'menu-zoom', -1); return true; }
