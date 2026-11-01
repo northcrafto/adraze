@@ -856,9 +856,6 @@ function applyKryptoSetting(a) {
     const n = (typeof window.famBlockFor === 'function') ? window.famBlockFor(child, hosts) : 0;
     if (n) msg = 'Blockerade ' + n + ' sida' + (n > 1 ? 'r' : '') + (child ? ' för ' + child : '');
   }
-  else if (name === 'kop' || name === 'buy' || name === 'bestall' || name === 'betala') {
-    if (typeof startKryptoPurchase === 'function') startKryptoPurchase(val);
-  }
   else if (name === 'tillat' || name === 'avblockera' || name === 'unblock') {
     const parts = ('' + val).split('|'); const child = (parts[0] || '').trim();
     const hosts = (parts[1] || '').split(',').map((s) => s.trim()).filter(Boolean);

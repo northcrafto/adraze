@@ -476,7 +476,7 @@ function raiseKrypto(ctx) { if (ctx && ctx.chattView) ctx.win.contentView.addChi
 function showOnly(ctx, tabId) {
   const now = Date.now();
   if (ctx.visibleTab && ctx.visibleTab !== tabId) ctx.lastActive.set(ctx.visibleTab, now); // starta ledig-klockan för fliken vi lämnar
-  ctx.visibleTab = tabId;
+  ctx.visibleTab = tabId; ctx.senasteFlik = tabId;   // Falk: fliken man senast tittade på, även när skalet tillfälligt gömt den
   ctx.lastActive.set(tabId, now);
   ctx.views.forEach((v, id) => v.setVisible(id === tabId));
   if (ctx.findView && ctx.findTab !== tabId) closeFind(ctx, true);
@@ -1863,11 +1863,11 @@ ipcMain.handle('pro:cancel', (e, t) => proCall(e, 'POST', 'cancel', t));
 ipcMain.handle('pro:resume', (e, t) => proCall(e, 'POST', 'resume', t));
 ipcMain.handle('billing:intent', (e, plan) => billingCall(e, 'intent', { plan: String(plan || 'pro_month') }));
 ipcMain.handle('billing:confirm', (e, d) => billingCall(e, 'confirm', { subscription: d && d.subscription, payment_intent: d && d.payment_intent }));
-ipcMain.handle('krypto:chat', async (e, messages) => {
+ipcMain.handle('krypto:chat', async (e, messages, opts) => {
   const ctx = e.sender.__ctx;
   const token = ctx && ctx.authToken;
   if (!token) { klog({ stage: 'no-token' }); return { ok: false, needLogin: true, message: 'Logga in med din mejl (kontoknappen) för att låsa upp Falk.' }; }
-  const payload = { messages: (Array.isArray(messages) ? messages : []).slice(-16) };
+  const payload = { messages: (Array.isArray(messages) ? messages : []).slice(-16), ...(opts && opts.flik ? { flik: true } : {}) };
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
       // AdRazes egen server (pro.js /falk/chat), bara för Pro
@@ -1879,13 +1879,119 @@ ipcMain.handle('krypto:chat', async (e, messages) => {
       if (r.status === 401) return { ok: false, needLogin: true, message: 'Logga in igen för att använda Falk.' };
       if (!r.ok || !json.ok) { klog({ stage: 'http', attempt, status: r.status, error: json.error }); return { ok: false, error: json.error, message: json.message || json.error || 'Något gick fel. Försök igen om en stund.' }; }
       klog({ stage: 'ok', attempt });
-      return { ok: true, reply: json.reply, sources: Array.isArray(json.sources) ? json.sources.slice(0, 6) : [] };
+      return { ok: true, reply: json.reply, sources: Array.isArray(json.sources) ? json.sources.slice(0, 6) : [], actions: Array.isArray(json.actions) ? json.actions.slice(0, 3) : [] };
     } catch (err) {
       klog({ stage: 'throw', attempt, err: String(err && (err.name || err.message || err)) });
       if (attempt === 2) return { ok: false, message: 'Kunde inte nå Falk just nu. Kontrollera din uppkoppling och försök igen.' };
       await new Promise((r) => setTimeout(r, 800)); // kort backoff, försök igen en gång
     }
   }
+});
+
+/* Falk ser och styr fliken: panelen ber om en bild av sidan (text + numrerade knappar, länkar och fält)
+ * och skickar handlingar (klicka, skriv, tangent, gå till, scrolla, tillbaka). Allt körs i en egen isolerad
+ * värld så sidans skript varken ser eller kan påverka det. Lösenord och kortuppgifter läses eller skrivs aldrig,
+ * och sista köp-/betala-klicket kräver att användaren godkänner i panelen. */
+const FALK_VARLD = 1001;
+const FALK_BILD = `(() => {
+  const syns = (el) => { const r = el.getBoundingClientRect(); if (r.width < 2 || r.height < 2) return false; const s = getComputedStyle(el); return s.visibility !== 'hidden' && s.display !== 'none' && +s.opacity > 0.05; };
+  document.querySelectorAll('[data-falk]').forEach((e) => e.removeAttribute('data-falk'));
+  const sel = 'a[href],button,input:not([type=hidden]),textarea,select,[role=button],[role=link],[role=tab],[role=menuitem],[role=checkbox],[role=option],[contenteditable=true],summary';
+  const items = []; let n = 0;
+  for (const el of document.querySelectorAll(sel)) {
+    if (n >= 160) break; if (!syns(el)) continue;
+    const id = ++n; el.setAttribute('data-falk', id);
+    const tag = el.tagName.toLowerCase(), typ = (el.getAttribute('type') || '').toLowerCase();
+    const falt = /^(input|textarea|select)$/.test(tag);
+    let namn = (el.getAttribute('aria-label') || (falt ? '' : el.innerText) || el.title || el.getAttribute('alt') || '').replace(/\\s+/g, ' ').trim();
+    if (!namn && el.querySelector('img[alt]')) namn = el.querySelector('img[alt]').alt;
+    if (falt) { const l = el.id && document.querySelector('label[for="' + CSS.escape(el.id) + '"]'); namn = [namn, l && l.innerText, el.placeholder, el.name].filter(Boolean).join(' · ').replace(/\\s+/g, ' '); }
+    const hemligt = typ === 'password' || /cc-|card|kort|cvc|cvv|kontonummer/i.test((el.autocomplete || '') + ' ' + (el.name || '') + ' ' + (el.id || ''));
+    const r = el.getBoundingClientRect();
+    let varde = falt && !hemligt ? String(el.value || '').slice(0, 60) : '';
+    if (tag === 'select') { varde = (el.selectedOptions[0] && el.selectedOptions[0].text) || ''; namn = (namn ? namn + ' · ' : '') + 'val: ' + Array.from(el.options).slice(0, 12).map((o) => o.text.trim()).join(', '); }
+    items.push({ id, tag, typ, namn: namn.slice(0, 160), varde, hemligt, synlig: r.top < innerHeight && r.bottom > 0 });
+  }
+  const text = (document.body ? document.body.innerText : '').replace(/\\n{3,}/g, '\\n\\n').slice(0, 14000);
+  return { url: location.href, titel: document.title, text, items, nere: Math.round(scrollY), hojd: document.documentElement.scrollHeight, fonster: innerHeight };
+})()`;
+const FALK_KOP = /(slutför|genomför|bekräfta|lägg|skicka)\s*(köp|beställning|order)|^\s*(köp|betala|beställ)(\s+(nu|och betala))?\s*$|betala\s+\d|place\s+order|buy\s+now|pay\s+(now|\d)|complete\s+(purchase|order)|confirm\s+(order|purchase|payment)|submit\s+order/i;
+function falkFlik(ctx) { const v = activeView(ctx) || (ctx.senasteFlik != null && ctx.views.get(ctx.senasteFlik)); const wc = v && v.webContents; return wc && !wc.isDestroyed() ? wc : null; }
+const falkKor = (wc, kod) => wc.executeJavaScriptInIsolatedWorld(FALK_VARLD, [{ code: kod }], true);
+function falkVantaLaddat(wc, ms) {
+  return new Promise((ok) => {
+    const klar = () => { clearTimeout(t); try { wc.off('did-stop-loading', klar); } catch {} setTimeout(ok, 500); };
+    const t = setTimeout(klar, ms);
+    if (wc.isLoading()) wc.once('did-stop-loading', klar); else setTimeout(() => { if (wc.isLoading()) wc.once('did-stop-loading', klar); else klar(); }, 700);
+  });
+}
+// Snabbt: bara titel och adress (för "Den här sidan"-chippet i panelen)
+ipcMain.handle('krypto:tab', (e) => {
+  const ctx = e.sender.__ctx; const wc = ctx && falkFlik(ctx);
+  const url = wc ? wc.getURL() : '';
+  return /^https?:/i.test(url) ? { url, titel: wc.getTitle() } : null;
+});
+ipcMain.handle('krypto:page', async (e) => {
+  const ctx = e.sender.__ctx; const wc = ctx && falkFlik(ctx);
+  if (!wc || !/^https?:/i.test(wc.getURL())) return null;
+  try { return await falkKor(wc, FALK_BILD); } catch { return null; }
+});
+ipcMain.handle('krypto:act', async (e, a) => {
+  const ctx = e.sender.__ctx; if (!ctx || !a) return { ok: false, fel: 'Ingen flik.' };
+  let wc = falkFlik(ctx);
+  const namn = String(a.name || '').toLowerCase().replace(/[åä]/g, 'a').replace(/ö/g, 'o');
+  const v = String(a.value || '').trim();
+  try {
+    if (namn === 'ga' || namn === 'oppna') {
+      let url = v; if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+      if (!/^https?:\/\/[^\s/]+\.[^\s]+/i.test(url)) return { ok: false, fel: 'Ogiltig adress.' };
+      if (wc && /^https?:/i.test(wc.getURL())) wc.loadURL(url).catch(() => {});
+      else { sendTo(ctx, 'open-new-tab', url); await new Promise((r) => setTimeout(r, 900)); wc = falkFlik(ctx); }
+      if (wc) await falkVantaLaddat(wc, 12000);
+      return { ok: true, vad: url };
+    }
+    if (!wc || !/^https?:/i.test(wc.getURL())) return { ok: false, fel: 'Det finns ingen webbsida öppen i fliken.' };
+    if (namn === 'tillbaka') { try { wc.navigationHistory.goBack(); } catch { wc.goBack(); } await falkVantaLaddat(wc, 8000); return { ok: true }; }
+    if (namn === 'scrolla') { await falkKor(wc, `window.scrollBy(0, ${/upp|up/i.test(v) ? -1 : 1} * innerHeight * 0.85)`); await new Promise((r) => setTimeout(r, 500)); return { ok: true }; }
+    if (namn === 'tangent') {
+      const key = ({ enter: 'Enter', tab: 'Tab', escape: 'Escape', esc: 'Escape', ner: 'Down', upp: 'Up' })[v.toLowerCase()] || 'Enter';
+      wc.sendInputEvent({ type: 'keyDown', keyCode: key }); if (key === 'Enter') wc.sendInputEvent({ type: 'char', keyCode: '\r' }); wc.sendInputEvent({ type: 'keyUp', keyCode: key });
+      await falkVantaLaddat(wc, 8000); return { ok: true };
+    }
+    const [idDel, ...rest] = v.split('|'); const id = parseInt(idDel, 10);
+    if (!id) return { ok: false, fel: 'Saknar nummer på elementet.' };
+    const info = await falkKor(wc, `(() => { const el = document.querySelector('[data-falk="${id}"]'); if (!el) return null;
+      el.scrollIntoView({ block: 'center', inline: 'center' });
+      const r = el.getBoundingClientRect(), typ = (el.getAttribute('type') || '').toLowerCase();
+      const namn = (el.getAttribute('aria-label') || el.innerText || el.value || el.title || '').replace(/\\s+/g, ' ').trim().slice(0, 90);
+      const hemligt = typ === 'password' || /cc-|card|kort|cvc|cvv|kontonummer/i.test((el.autocomplete || '') + ' ' + (el.name || '') + ' ' + (el.id || ''));
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2, namn, tag: el.tagName.toLowerCase(), hemligt }; })()`);
+    if (!info) return { ok: false, fel: 'Hittade inte element ' + id + ' längre. Sidan kan ha ändrats.' };
+    if (namn === 'klicka') {
+      if (FALK_KOP.test(info.namn) && !a.godkant) return { ok: false, godkann: true, vad: info.namn };
+      const z = wc.getZoomFactor() || 1, x = Math.round(info.x * z), y = Math.round(info.y * z);
+      wc.sendInputEvent({ type: 'mouseMove', x, y });
+      wc.sendInputEvent({ type: 'mouseDown', x, y, button: 'left', clickCount: 1 });
+      wc.sendInputEvent({ type: 'mouseUp', x, y, button: 'left', clickCount: 1 });
+      await falkVantaLaddat(wc, 10000);
+      return { ok: true, vad: info.namn };
+    }
+    if (namn === 'skriv') {
+      if (info.hemligt) return { ok: false, fel: 'Lösenord och kortuppgifter fyller användaren i själv.' };
+      const text = rest.join('|');
+      if (info.tag === 'select') {
+        const r = await falkKor(wc, `(() => { const el = document.querySelector('[data-falk="${id}"]'); const t = ${JSON.stringify(text.toLowerCase())};
+          const o = Array.from(el.options).find((o) => o.text.toLowerCase().includes(t) || o.value.toLowerCase() === t); if (!o) return false;
+          el.value = o.value; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`);
+        return r ? { ok: true, vad: info.namn } : { ok: false, fel: 'Hittade inget sådant val i listan.' };
+      }
+      await falkKor(wc, `(() => { const el = document.querySelector('[data-falk="${id}"]'); el.focus(); if (el.select) el.select(); else document.execCommand('selectAll'); })()`);
+      wc.insertText(text);
+      await new Promise((r) => setTimeout(r, 300));
+      return { ok: true, vad: info.namn };
+    }
+    return { ok: false, fel: 'Okänd handling.' };
+  } catch (err) { return { ok: false, fel: 'Det gick inte: ' + String(err && err.message || err).slice(0, 120) }; }
 });
 
 // Falk som agent: panelen skickar hit kommandon (t.ex. byt sökmotor, av/på skydd).
