@@ -2144,6 +2144,7 @@ async function maybeShowDefaultBanner() {
     if (windowIncognito) return;
     const intro = $('hxintro');   // första start: vänta tills introt är borta, annars hamnar notisen ovanpå det
     if (intro && intro.style.display === 'flex') { setTimeout(maybeShowDefaultBanner, 2500); return; }
+    if (document.getElementById('flytt-banner')) { setTimeout(maybeShowDefaultBanner, 4000); return; }   // flytt-erbjudandet först
     const st = await window.defaultBrowser.state();
     if (st && st.default) return;                                   // redan standard → visa inte
     const snooze = parseInt(localStorage.getItem('skoll-defbrowser-snooze') || '0', 10);
@@ -2576,6 +2577,7 @@ async function initImport() {
         b.classList.add('on');
         $('imp-go').disabled = false;
         impSettMsg('');
+        impVisaLista([], []); impUppdateraVal();
       });
       wrap.appendChild(b);
     }
@@ -2600,20 +2602,105 @@ function mergeHistorik(nya) {
   if (n) { h.sort((a, b) => (b.t || 0) - (a.t || 0)); saveHistory(h.slice(0, 500)); }
   return n;
 }
+// Utseende: tema, bokmärkesfält, sidzoom, teckenstorlek
+async function tillampaUtseende(x, rad) {
+  if (x.tema) { setTheme(x.tema); rad(tw(x.tema === 'dark' ? 'Mörkt tema' : 'Ljust tema')); }
+  if (typeof x.bmbar === 'boolean') {
+    bmbarOn = x.bmbar; try { localStorage.setItem('adraze-bmbar', bmbarOn ? '1' : '0'); } catch {}
+    try { renderBookmarkBar(); } catch {} if ($('tgl-bmbar')) $('tgl-bmbar').checked = bmbarOn;
+    rad(tw(bmbarOn ? 'Bokmärkesfältet visas' : 'Bokmärkesfältet är dolt'));
+  }
+  if (x.zoom && [90, 100, 110, 125].includes(x.zoom)) {
+    defaultZoom = x.zoom; try { localStorage.setItem('skoll-zoom', String(x.zoom)); } catch {}
+    try { window.view.defaultZoom(x.zoom / 100); applyZoomSeg(); } catch {}
+    rad(tw('Sidzoom') + ' ' + x.zoom + ' %');
+  }
+  if (x.fontSize) {
+    const f = [9, 12, 16, 20, 24].reduce((a, b) => (Math.abs(b - x.fontSize) < Math.abs(a - x.fontSize) ? b : a));
+    await window.view.webbSet('fontSize', f);
+    const opt = $('sel-font') && [...$('sel-font').options].find((o) => o.value === String(f));
+    rad(tw('Teckenstorlek') + (opt ? ': ' + opt.textContent : ''));
+  }
+}
+// Inställningar: sökmotor, vid start, nedladdningar, säkerhet, webbplatsbehörigheter
+async function tillampaInstallningar(x, rad, miss) {
+  if (x.motor && setEngine(x.motor)) rad(tw('Sökmotor') + ': ' + ENGINES[x.motor].label);
+  else if (x.motorNamn) miss(tw('Sökmotorn') + ' ' + x.motorNamn + ' ' + tw('finns inte i AdRaze — välj en under Sökmotor.'));
+  if (x.start && (x.start.mode !== 'sida' || x.start.url)) {
+    startMode = x.start.mode; try { localStorage.setItem('adraze-start', startMode); } catch {}
+    if (x.start.url) { startUrl = x.start.url; try { localStorage.setItem('adraze-start-url', startUrl); } catch {} }
+    rad(tw('Vid start') + ': ' + (startMode === 'tidigare' ? tw('fortsätt där du var') : startMode === 'ny' ? tw('ny flik') : startUrl));
+  }
+  if (x.nedladdning) {
+    if (x.nedladdning.dir && await window.view.webbSet('downloadDirPath', x.nedladdning.dir)) rad(tw('Nedladdningsmapp') + ': ' + x.nedladdning.dir);
+    if (typeof x.nedladdning.fraga === 'boolean') { await window.view.webbSet('askDownload', x.nedladdning.fraga); if (x.nedladdning.fraga) rad(tw('Fråga var filer ska sparas')); }
+  }
+  if (typeof x.httpsOnly === 'boolean') { await window.view.webbSet('httpsOnly', x.httpsOnly); if (x.httpsOnly) rad(tw('Endast HTTPS')); }
+  if (x.dns) { await window.view.webbSet('dns', x.dns); rad(tw('Säker DNS')); }
+  // Behörigheter: bara där du inte redan har gjort ett val i AdRaze
+  let nu = null; try { nu = await window.view.webbGet(); } catch {}
+  const finns = (nu && nu.perms) || {}, std = (nu && nu.permDefaults) || {};
+  let np = 0;
+  for (const [o, kinds] of Object.entries(x.perms || {})) {
+    for (const [kind, v] of Object.entries(kinds)) {
+      if (finns[o] && finns[o][kind]) continue;
+      if (await window.view.webbSet('perm', { origin: o, kind, value: v })) np++;
+    }
+  }
+  if (np) rad(np + ' ' + tw(np === 1 ? 'webbplatsbehörighet' : 'webbplatsbehörigheter'));
+  for (const [kind, v] of Object.entries(x.permDefaults || {})) {
+    if (std[kind] || v !== 'block') continue;
+    await window.view.webbSet('permDefault', { kind, value: 'block' });
+    rad(tw('Blockeras på alla sajter') + ': ' + tw(PERM_LABEL[kind] || kind));
+  }
+}
+function impVisaLista(ok, missar) {
+  const ul = $('imp-lista'); if (!ul) return;
+  ul.innerHTML = '';
+  for (const t of ok) { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); }
+  for (const t of missar) { const li = document.createElement('li'); li.className = 'miss'; li.textContent = t; ul.appendChild(li); }
+  ul.hidden = !ul.children.length;
+}
+function impUppdateraVal() {
+  const ff = impVal && impVal.typ === 'firefox';
+  const w = $('imp-ext-wrap'); if (w) { w.style.opacity = ff ? '.45' : ''; w.title = ff ? tw('Firefox-tillägg fungerar inte i AdRaze') : ''; }
+  if ($('imp-ext')) $('imp-ext').disabled = !!ff;
+}
 if ($('imp-go')) $('imp-go').addEventListener('click', async () => {
   if (!impVal) return;
   const bokmarken = $('imp-bm').checked, historik = $('imp-hist').checked;
-  if (!bokmarken && !historik) { impSettMsg('Välj bokmärken eller historik.', true); return; }
-  const btn = $('imp-go'); btn.disabled = true; impSettMsg('Importerar…');
-  let r; try { r = await window.view.importLas({ ...impVal, bokmarken, historik }); } catch (e) { r = { ok: false, fel: String(e) }; }
+  const inst = $('imp-inst').checked, utse = $('imp-utse').checked;
+  const ext = $('imp-ext').checked && !$('imp-ext').disabled;
+  if (!bokmarken && !historik && !inst && !utse && !ext) { impSettMsg(tw('Välj minst en sak att ta med.'), true); return; }
+  const btn = $('imp-go'); btn.disabled = true; impSettMsg(tw('Importerar…')); impVisaLista([], []);
+  let r; try { r = await window.view.importLas({ ...impVal, bokmarken, historik, installningar: inst || utse || ext }); } catch (e) { r = { ok: false, fel: String(e) }; }
+  if (!r || !r.ok) { btn.disabled = false; impSettMsg(r && r.fel ? r.fel : tw('Kunde inte läsa webbläsaren.'), true); return; }
+  const ok = [], missar = [];
+  const rad = (t) => ok.push(t), miss = (t) => missar.push(t);
+  if (bokmarken) { const n = mergeBokmarken(r.bokmarken || []); if (n) rad(n + ' ' + tw('bokmärken')); else miss(tw('Inga nya bokmärken')); }
+  if (historik) { const n = mergeHistorik(r.historik || []); if (n) rad(n + ' ' + tw('sidor i historiken')); else miss(tw('Ingen ny historik')); }
+  const x = r.installningar;
+  try {
+    if (x && utse) await tillampaUtseende(x, rad);
+    if (x && inst) await tillampaInstallningar(x, rad, miss);
+  } catch (e) { miss(String(e && e.message || e)); }
+  try { refreshWebbPanel(); } catch {}
+  if (x && ext) {
+    const lista = x.tillagg || [];
+    if (!lista.length) miss(tw('Inga tillägg att ta med'));
+    else {
+      impSettMsg(tw('Installerar tillägg…') + ' (' + lista.length + ')');
+      let t = null; try { t = await window.view.importTillagg(lista.map((e) => e.id)); } catch {}
+      const klara = new Set((t && t.klara) || []);
+      const namn = (id) => (lista.find((e) => e.id === id) || {}).namn || id;
+      if (klara.size) rad(tw('Tillägg') + ': ' + [...klara].map(namn).join(', '));
+      for (const f of (t && t.fel) || []) miss(namn(f.id) + ' — ' + tw('gick inte att installera'));
+      try { renderExt(); } catch {}
+    }
+  }
   btn.disabled = false;
-  if (!r || !r.ok) { impSettMsg(r && r.fel ? r.fel : 'Kunde inte läsa webbläsaren.', true); return; }
-  const nb = bokmarken ? mergeBokmarken(r.bokmarken || []) : 0;
-  const nh = historik ? mergeHistorik(r.historik || []) : 0;
-  const delar = [];
-  if (bokmarken) delar.push(nb + ' bokmärken');
-  if (historik) delar.push(nh + ' sidor i historiken');
-  impSettMsg('Klart — ' + delar.join(' och ') + ' från ' + impVal.namn + '.');
+  impSettMsg(tw('Klart! Det här togs med från') + ' ' + impVal.namn + ':');
+  impVisaLista(ok, missar);
 });
 if ($('imp-csv')) $('imp-csv').addEventListener('click', async () => {
   const btn = $('imp-csv'); btn.disabled = true; impSettMsg('Läser filen…');
@@ -2875,6 +2962,37 @@ function runHackerIntro(force) {
 
 window.__hackerIntro = () => runHackerIntro(true);
 runHackerIntro(false);
+
+/* ── Byter du från en annan webbläsare? Erbjud flytten en gång, efter introt ── */
+async function maybeShowFlyttBanner() {
+  try {
+    if (windowIncognito) return;
+    if (localStorage.getItem('adraze-flytt-erbjuden')) return;
+    const intro = $('hxintro');
+    if (intro && intro.style.display === 'flex') { setTimeout(maybeShowFlyttBanner, 1000); return; }
+    if (document.getElementById('defbrowser-banner')) { setTimeout(maybeShowFlyttBanner, 3000); return; }   // inte två notiser på varandra
+    let lista = []; try { lista = await window.view.importKallor(); } catch {}
+    if (!Array.isArray(lista) || !lista.length) return;
+    localStorage.setItem('adraze-flytt-erbjuden', '1');
+    const forsta = lista[0];
+    const namn = lista.length === 1 ? forsta.namn : '';
+    const bar = document.createElement('div'); bar.id = 'flytt-banner';
+    bar.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:300;display:flex;align-items:center;gap:12px;background:var(--color-navy-900);color:#fff;padding:11px 14px 11px 18px;border-radius:14px;box-shadow:0 14px 40px rgba(8,20,35,.45);font-size:13.5px;max-width:92vw;';
+    bar.innerHTML = '<span>' + escapeHtml(namn ? tw('Kommer du från') + ' ' + namn + '? ' : tw('Kommer du från en annan webbläsare?') + ' ') + escapeHtml(tw('Ta med bokmärken, inställningar och utseende.')) + '</span>'
+      + '<button id="fl-go" style="background:#fff;color:var(--color-navy-900);border:0;border-radius:9px;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;">' + escapeHtml(tw('Ta med allt')) + '</button>'
+      + '<button id="fl-later" style="background:none;border:0;color:rgba(255,255,255,.7);font-size:13px;cursor:pointer;white-space:nowrap;">' + escapeHtml(tw('Nej tack')) + '</button>';
+    document.body.appendChild(bar);
+    bar.querySelector('#fl-go').addEventListener('click', async () => {
+      bar.remove(); openPasswords();
+      // Välj webbläsaren direkt så att det bara är att trycka på Importera
+      for (let i = 0; i < 20 && !document.querySelector('#imp-src .imp-b'); i++) await new Promise((r) => setTimeout(r, 100));
+      const b = document.querySelector('#imp-src .imp-b'); if (b) b.click();
+      const kort = document.querySelector('.imp-card'); if (kort) try { kort.scrollIntoView({ block: 'start' }); } catch {}
+    });
+    bar.querySelector('#fl-later').addEventListener('click', () => bar.remove());
+  } catch {}
+}
+setTimeout(maybeShowFlyttBanner, 1200);
 
 /* ── Familj: föräldrapanel, barn-blocklistor, öppen insyn ── */
 const FAM_KEY = 'adraze-family';

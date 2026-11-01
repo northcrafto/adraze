@@ -88,26 +88,29 @@ function listaUt() {
   });
 }
 
+async function installera(text) {
+  initPaths();
+  const id = pluckId(text);
+  if (!id) return { ok: false, fel: 'Klistra in ett tilläggs-id eller en länk till Chrome Web Store.' };
+  const o = lasLista();
+  if (o[id] && laddadInfo(o[id].vid)) return { ok: false, redan: true, fel: 'Tillägget är redan installerat.' };
+  try {
+    const dir = await hamtaOchPacka(id);
+    const e = await laddaIn(dir);
+    o[id] = { namn: e.name || id, aktiv: true, installerad: Date.now(), vid: e.id };
+    sparaLista(o);
+    return { ok: true, tillagg: { id, namn: e.name || id, version: e.version || '' } };
+  } catch (err) {
+    try { fs.rmSync(krMapp(id), { recursive: true, force: true }); } catch {}
+    return { ok: false, fel: String(err.message || err) };
+  }
+}
+
 function setup() {
   initPaths();
   ipcMain.handle('ext:list', () => listaUt());
 
-  ipcMain.handle('ext:add', async (_e, text) => {
-    const id = pluckId(text);
-    if (!id) return { ok: false, fel: 'Klistra in ett tilläggs-id eller en länk till Chrome Web Store.' };
-    const o = lasLista();
-    if (o[id] && laddadInfo(o[id].vid)) return { ok: false, fel: 'Tillägget är redan installerat.' };
-    try {
-      const dir = await hamtaOchPacka(id);
-      const e = await laddaIn(dir);
-      o[id] = { namn: e.name || id, aktiv: true, installerad: Date.now(), vid: e.id };
-      sparaLista(o);
-      return { ok: true, tillagg: { id, namn: e.name || id, version: e.version || '' } };
-    } catch (err) {
-      try { fs.rmSync(krMapp(id), { recursive: true, force: true }); } catch {}
-      return { ok: false, fel: String(err.message || err) };
-    }
-  });
+  ipcMain.handle('ext:add', async (_e, text) => installera(text));
 
   ipcMain.handle('ext:toggle', async (_e, id, pa) => {
     const o = lasLista(); if (!o[id]) return { ok: false };
@@ -127,4 +130,4 @@ function setup() {
   ipcMain.on('ext:store', (_e, id) => { try { shell.openExternal(id ? 'https://chrome.google.com/webstore/detail/' + id : 'https://chromewebstore.google.com'); } catch {} });
 }
 
-module.exports = { setup, laddaSparade };
+module.exports = { setup, laddaSparade, installera };
