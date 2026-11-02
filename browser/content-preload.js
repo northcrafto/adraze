@@ -29,11 +29,23 @@ if (location.protocol === 'adraze:') {
  * sidans egna hanterare hinner öppna något. En ny flik till en annan sajt tillåts sedan bara
  * om klicket satt på en riktig länk dit. Synkront så ordningen är garanterad. */
 (function () {
-  const report = (href) => { try { ipcRenderer.sendSync('page:click', { href: href || null }); } catch {} };
+  const report = (href, knapp) => { try { ipcRenderer.sendSync('page:click', { href: href || null, knapp: !!knapp }); } catch {} };
   const linkOf = (t) => { try { const a = t && t.closest ? t.closest('a[href]') : null; return a ? a.href : null; } catch { return null; } };
-  window.addEventListener('pointerdown', (e) => report(linkOf(e.target)), true);
-  window.addEventListener('mousedown', (e) => report(linkOf(e.target)), true);
-  window.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') report(linkOf(document.activeElement)); }, true);
+  // Satt klicket på en riktig, synlig knapp/länk? (Betalknappar som öppnar ett kassafönster.)
+  // Piratsajternas popunder-trick klickar på en osynlig yta över hela sidan – den räknas inte.
+  const knappOf = (t) => {
+    try {
+      const el = t && t.closest ? t.closest('button,a[href],[role="button"],input[type="submit"],input[type="button"],input[type="image"],label,summary') : null;
+      if (!el) return false;
+      const r = el.getBoundingClientRect(), vw = innerWidth || 1, vh = innerHeight || 1;
+      if (r.width * r.height > vw * vh * 0.5) return false;      // "knapp" som täcker halva sidan = overlay
+      const cs = getComputedStyle(el);
+      return !(cs.opacity === '0' || cs.visibility === 'hidden');
+    } catch { return false; }
+  };
+  window.addEventListener('pointerdown', (e) => report(linkOf(e.target), knappOf(e.target)), true);
+  window.addEventListener('mousedown', (e) => report(linkOf(e.target), knappOf(e.target)), true);
+  window.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') report(linkOf(document.activeElement), knappOf(document.activeElement)); }, true);
 })();
 
 /* Få AdRaze att se ut EXAKT som riktiga Google Chrome för sajternas JavaScript

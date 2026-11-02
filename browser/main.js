@@ -673,6 +673,16 @@ function ensureView(ctx, tabId) {
     const st = wc.__popups || (wc.__popups = { t: 0, n: 0 }); const now = Date.now();
     st.n = (now - st.t < 2000) ? st.n + 1 : 1; st.t = now;
     if (st.n > 1) return { action: 'deny' };
+    // Kassafönster (CapCut m.fl.): sidan öppnar ett tomt fönster direkt vid klicket på en riktig knapp
+    // och skickar dit betalsidan först när servern svarat. Brave tillåter det; vi gör samma sak, men bara
+    // för ett synligt knappklick nyss – och fönstret vaktas: går det till en annons/skräpadress stängs det.
+    const lcK = wc.__lastClick, knappNyss = !!(lcK && lcK.knapp && now - lcK.t < 1500);
+    const tomt = !url || url === 'about:blank';
+    const fonster = details.disposition === 'new-window' || (details.features && details.features.length);
+    if (knappNyss && fonster && (tomt || (/^https?:/i.test(url) && !isBlockedTarget(url, from)))) {
+      wc.__kassaFonster = now;
+      return { action: 'allow', overrideBrowserWindowOptions: { width: 520, height: 720, resizable: true, autoHideMenuBar: true, webPreferences: { preload: path.join(__dirname, 'content-preload.js'), contextIsolation: true, sandbox: true, nodeIntegration: false } } };
+    }
     if (adblockOn && (!/^https?:/i.test(url) || isBlockedTarget(url, from))) {
       return { action: 'deny' };                                  // annons/pop-under/skräp-schema → död
     }
@@ -699,6 +709,18 @@ function ensureView(ctx, tabId) {
     }
     if (url) sendTo(ctx, 'open-new-tab', url);                     // vanlig ny flik (Ctrl/mitten-klick, target=_blank)
     return { action: 'deny' };
+  });
+  // Vakt för kassafönster som släppts igenom ovan: går fönstret till en annons-/skräpadress stängs det direkt.
+  wc.on('did-create-window', (child) => {
+    try {
+      const cwc = child.webContents;
+      // Stäng EFTER händelsen – att förstöra fönstret mitt i en navigeringshändelse kraschar Electron.
+      const vakta = (e, url) => { if (adblockOn && /^https?:/i.test(url || '') && isBlockedTarget(url, from0())) { try { e && e.preventDefault && e.preventDefault(); } catch {} setTimeout(() => { try { if (!child.isDestroyed()) child.close(); } catch {} }, 0); } };
+      const from0 = () => { try { return wc.getURL(); } catch { return ''; } };
+      cwc.on('will-navigate', vakta);
+      cwc.on('will-redirect', vakta);
+      cwc.on('did-start-navigation', (e, url, inPage, isMain) => { if (isMain && !inPage) vakta(null, url); });
+    } catch {}
   });
   blocksida.fliken(wc);   // Glöm mig när jag stänger webbplatsen
   wc.on('will-navigate', (e, url) => {
@@ -1671,7 +1693,7 @@ ipcMain.on('page:click', (e, info) => {
   e.returnValue = 1;
   try {
     const t = Date.now(), href = info && info.href ? String(info.href) : null;
-    e.sender.__lastClick = { t, href };
+    e.sender.__lastClick = { t, href, knapp: !!(info && info.knapp) };
     // Länkar man nyss klickat på: "Du lämnar …"-rutor (Chrome Web Store, Discord m.fl.) stoppar länken
     // och öppnar sidan först när man bekräftar med en knapp – då ska fliken ändå få öppnas.
     if (href) e.sender.__linkClicks = [...(e.sender.__linkClicks || []).filter((c) => t - c.t < 60000).slice(-4), { t, href }];
