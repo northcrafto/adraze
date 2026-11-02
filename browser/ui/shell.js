@@ -2125,10 +2125,8 @@ setInterval(() => refreshUpdatePanel(false), 30 * 60 * 1000);
 function visaNotis({ id, ikon, titel, under, knapp, sek, onKnapp, onSek, onStang }) {
   const gammal = document.getElementById(id); if (gammal) gammal.remove();
   const el = document.createElement('div'); el.id = id; el.className = 'notis'; el.setAttribute('role', 'status');
-  el.innerHTML = '<span class="notis-ikon"><svg class="ic"><use href="#' + ikon + '" /></svg></span>'
-    + '<div class="notis-text"><div class="notis-titel"></div>' + (under ? '<div class="notis-under"></div>' : '') + '</div>'
-    + '<button class="notis-knapp"></button>' + (sek ? '<button class="notis-sek"></button>' : '')
-    + '<button class="notis-x" aria-label="Stäng"><svg class="ic"><use href="#i-close" /></svg></button>';
+  el.innerHTML = '<div class="notis-titel"></div>' + (under ? '<p class="notis-under"></p>' : '')
+    + '<div class="notis-rad">' + (sek ? '<button class="notis-sek"></button>' : '') + '<button class="notis-knapp"></button></div>';
   el.querySelector('.notis-titel').textContent = titel;
   if (under) el.querySelector('.notis-under').textContent = under;
   el.querySelector('.notis-knapp').textContent = knapp;
@@ -2136,7 +2134,6 @@ function visaNotis({ id, ikon, titel, under, knapp, sek, onKnapp, onSek, onStang
   el.stang = () => { if (!el.isConnected) return; el.classList.add('ut'); setTimeout(() => el.remove(), 260); };
   el.querySelector('.notis-knapp').addEventListener('click', () => onKnapp && onKnapp(el));
   if (sek) el.querySelector('.notis-sek').addEventListener('click', () => { if (onSek) onSek(el); el.stang(); });
-  el.querySelector('.notis-x').addEventListener('click', () => { if (onStang) onStang(el); else if (onSek) onSek(el); el.stang(); });
   document.body.appendChild(el);
   return el;
 }
@@ -2149,9 +2146,9 @@ function showUpdateBanner(version) {
   const starta = (el) => { el.dataset.busy = '1'; const b = el.querySelector('.notis-knapp'); b.textContent = tt('Startar om…'); b.disabled = true; };
   const bar = visaNotis({
     id: 'update-banner', ikon: 'i-update',
-    titel: 'AdRaze' + (version ? ' ' + version : '') + ' ' + tt('är klar'),
-    under: tt('Starta om, så kommer dina flikar tillbaka.'),
-    knapp: tt('Uppdatera'), sek: tt('Senare'),
+    titel: tt('Uppdatera AdRaze?'),
+    under: tt('Version') + (version ? ' ' + version : '') + ' ' + tt('är klar. Starta om, så kommer dina flikar tillbaka.'),
+    knapp: tt('Starta om'), sek: tt('Senare'),
     onKnapp: (el) => { starta(el); try { window.view.installUpdate(); } catch {} },
     onSek: () => { updSenare = version || ''; },
   });
