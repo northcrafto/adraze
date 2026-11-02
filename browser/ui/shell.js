@@ -2129,7 +2129,9 @@ function visaNotis({ id, ikon, titel, under, knapp, sek, onKnapp, onSek, onStang
     + '<div class="notis-rad">' + (sek ? '<button class="notis-sek"></button>' : '') + '<button class="notis-knapp"></button></div>';
   el.querySelector('.notis-titel').textContent = titel;
   if (under) el.querySelector('.notis-under').textContent = under;
-  el.querySelector('.notis-knapp').textContent = knapp;
+  const kn = el.querySelector('.notis-knapp');
+  if (ikon) { const NS = 'http://www.w3.org/2000/svg', sv = document.createElementNS(NS, 'svg'), u = document.createElementNS(NS, 'use'); sv.setAttribute('aria-hidden', 'true'); u.setAttribute('href', '#' + ikon); sv.appendChild(u); kn.appendChild(sv); }
+  const kt = document.createElement('span'); kt.className = 'notis-kt'; kt.textContent = knapp; kn.appendChild(kt);
   if (sek) el.querySelector('.notis-sek').textContent = sek;
   el.stang = () => { if (!el.isConnected) return; el.classList.add('ut'); setTimeout(() => el.remove(), 260); };
   el.querySelector('.notis-knapp').addEventListener('click', () => onKnapp && onKnapp(el));
@@ -2143,7 +2145,7 @@ function showUpdateBanner(version) {
   const prev = document.getElementById('update-banner');
   const busy = !!(prev && prev.dataset.busy);
   const tt = (k) => (typeof window.t === 'function') ? window.t(k) : k;
-  const starta = (el) => { el.dataset.busy = '1'; const b = el.querySelector('.notis-knapp'); b.textContent = tt('Startar om…'); b.disabled = true; };
+  const starta = (el) => { el.dataset.busy = '1'; const b = el.querySelector('.notis-knapp'); (b.querySelector('.notis-kt') || b).textContent = tt('Startar om…'); b.disabled = true; };
   const bar = visaNotis({
     id: 'update-banner', ikon: 'i-update',
     titel: tt('Uppdatera AdRaze?'),
