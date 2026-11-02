@@ -7,3 +7,7 @@
 
 ! browser.lol: lockbetet /ads.js måste laddas, annars spärras sessionsstarten
 @@||browser.lol/ads.js^$script,image,domain=browser.lol
+
+! CapCut: köpknappen snurrar för evigt om ByteDance-säkerhetskollen (argus) blockeras – EasyPrivacy
+! tar hela /monitor_browser/collect/*. Släpp bara säkerhetsdelen, vanlig telemetri blockeras fortfarande.
+@@||capcutapi.com/monitor_browser/collect/batch/security/$domain=capcut.com
