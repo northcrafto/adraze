@@ -207,27 +207,41 @@
     <!-- Intro (första gången) — frostad startsidebakgrund + mjuk text -->
     <style>
       /* Notiser uppe till höger, i samma stil som "Stäng alla flikar?" (uppdatering, flytta hit, huvudwebbläsare) */
-      .notis { position: fixed; top: 100px; right: 12px; width: 340px; max-width: 88vw; z-index: 240;
-        background: #fff; border-radius: 14px; padding: 16px 18px; border: 1px solid var(--color-line, #e6ebf1);
-        box-shadow: 0 18px 50px rgba(14,42,71,.30), 0 2px 8px rgba(14,42,71,.12);
+      /* Notiser uppe till höger, i samma stil som adraze.app: svart huvudknapp med ikon + tunn kantknapp,
+         orange vätska fyller knappen vid hover (signaturkitet). */
+      .notis { position: fixed; top: 100px; right: 12px; width: 344px; max-width: 88vw; z-index: 240;
+        background: #fff; color: #111113; border-radius: 18px; padding: 18px 18px 16px; border: 1px solid #e4e4df;
+        box-shadow: 0 22px 60px rgba(17,17,19,.18), 0 2px 8px rgba(17,17,19,.06);
         animation: ccpop .16s cubic-bezier(.2,.7,.2,1); }
       .notis.ut { opacity: 0; transform: translateY(-6px); transition: opacity .15s, transform .15s; }
       body.reduce-motion .notis { animation: none; }
-      .notis-titel { font-size: 15px; font-weight: 700; color: var(--color-navy-900, #0e2a47); margin: 0 0 5px; letter-spacing: -.01em; }
-      .notis-under { font-size: 13px; color: #5a6b7b; margin: 0; line-height: 1.5; }
-      .notis-rad { display: flex; justify-content: flex-end; gap: 9px; margin-top: 15px; }
-      .notis button { height: 36px; padding: 0 18px; border-radius: 999px; font-weight: 600; font-size: 13px; cursor: pointer; border: 1px solid transparent; transition: filter .15s, background .15s; white-space: nowrap; }
-      .notis .notis-sek { background: #fff; color: var(--color-navy-900, #0e2a47); border-color: #d3dce6; }
-      .notis .notis-sek:hover { background: #f4f7fa; }
-      .notis .notis-knapp { background: var(--color-terra, #ff4b1f); color: #fff; }
-      .notis .notis-knapp:hover { filter: brightness(1.06); }
-      .notis .notis-knapp:disabled { opacity: .7; cursor: default; filter: none; }
-      .notis button:focus-visible { outline: 2px solid var(--color-terra, #ff4b1f); outline-offset: 2px; }
-      :root[data-theme="dark"] .notis { background: #161618; border-color: #2b2b2d; box-shadow: 0 18px 50px rgb(0 0 0 / .55), 0 2px 8px rgb(0 0 0 / .3); }
-      :root[data-theme="dark"] .notis-titel { color: #f2f2f4; }
+      .notis-titel { font-size: 16px; font-weight: 700; color: #111113; margin: 0 0 4px; letter-spacing: -.015em; }
+      .notis-under { font-size: 13.5px; color: #5c5c63; margin: 0; line-height: 1.5; }
+      .notis-rad { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+      .notis button { position: relative; overflow: hidden; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        height: 40px; padding: 0 18px; border-radius: 999px; font-weight: 600; font-size: 13.5px; font-family: inherit; cursor: pointer; border: 0; white-space: nowrap;
+        transition: color .6s ease, box-shadow .3s ease, transform .2s ease, background-color 0s; }
+      .notis button svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .notis button::before { content: ""; position: absolute; z-index: -1; left: -15%; width: 130%; bottom: 0; height: 165%;
+        transform: translateY(100%); background: linear-gradient(180deg, #ff6a43 0%, #ff4b1f 100%); border-radius: 46% 46% 0 0;
+        transition: transform .95s cubic-bezier(.2,.75,.25,1); pointer-events: none; }
+      .notis button:hover::before, .notis button:focus-visible::before { transform: translateY(0); }
+      .notis button:active { transform: translateY(1px); }
+      .notis .notis-knapp { background: #111113; color: #fff; }
+      .notis .notis-knapp:hover, .notis .notis-knapp:focus-visible { color: #111113; background-color: #ff4b1f; transition: color .6s ease, transform .2s ease, background-color 0s .6s; }
+      .notis .notis-sek { background: transparent; color: #111113; box-shadow: inset 0 0 0 1px rgba(17,17,19,.18); }
+      .notis .notis-sek:hover, .notis .notis-sek:focus-visible { color: #111113; box-shadow: inset 0 0 0 1px transparent; }
+      .notis .notis-knapp:disabled { cursor: default; color: #fff; background: #111113; }
+      .notis .notis-knapp:disabled::before { transform: translateY(100%); }
+      .notis button:focus-visible { outline: 2px solid #ff4b1f; outline-offset: 2px; }
+      body.reduce-motion .notis button::before { transition: none; }
+      :root[data-theme="dark"] .notis { background: #1c1c20; color: #f2f2f4; border-color: #2c2c31; box-shadow: 0 22px 60px rgb(0 0 0 / .55), 0 2px 8px rgb(0 0 0 / .3); }
+      :root[data-theme="dark"] .notis-titel { color: #f5f5f7; }
       :root[data-theme="dark"] .notis-under { color: #a1a1a8; }
-      :root[data-theme="dark"] .notis .notis-sek { background: transparent; color: #f2f2f4; border-color: #3b3b40; }
-      :root[data-theme="dark"] .notis .notis-sek:hover { background: rgb(255 255 255 / .07); }
+      :root[data-theme="dark"] .notis .notis-knapp { background: #fff; color: #111113; }
+      :root[data-theme="dark"] .notis .notis-knapp:disabled { background: #fff; color: #111113; }
+      :root[data-theme="dark"] .notis .notis-sek { color: #f5f5f7; box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); }
+      :root[data-theme="dark"] .notis .notis-sek:hover, :root[data-theme="dark"] .notis .notis-sek:focus-visible { color: #111113; }
     </style>
     <style>
       #hxintro{position:absolute;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;
