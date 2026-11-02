@@ -376,8 +376,6 @@ body.incog #views, :root[data-theme="dark"] body.incog #views { background-color
 :root[data-theme="dark"] :is(#wsavebar, #wfillbar) { background: #161618 !important; color: #f2f2f4; border-bottom-color: #26262a !important; box-shadow: 0 6px 20px rgb(0 0 0 / .4) !important; }
 :root[data-theme="dark"] :is(#wsavebar, #wfillbar) .text-navy-900\/50 { color: rgb(242 242 244 / .55); }
 :root[data-theme="dark"] :is(#wsavebar, #wfillbar) > span, :root[data-theme="dark"] :is(#wsavebar-no, #wfillbar-no) { background: rgb(255 255 255 / .08) !important; color: #d4d4d8 !important; }
-/* Startsidans statistikremsa hamnade under uppdaterings-/standardwebbläsar-notisen längst ned */
-body:has(#defbrowser-banner, #update-banner) .nt-stats { visibility: hidden; }
 /* Varningsskärm: lugn helsida, följer ljust/mörkt läge */
 #danger { --dg-bg: #f7f6f3; --dg-ink: #141416; --dg-mut: #6b6b72; --dg-line: #dcdad4; --dg-rod: #d4371f;
   background: var(--dg-bg); color: var(--dg-ink); display: grid; place-items: center; padding: 48px 24px; overflow-y: auto; }
@@ -752,8 +750,8 @@ body:has(#defbrowser-banner, #update-banner) .nt-stats { visibility: hidden; }
 @keyframes falk-titt { 50% { opacity: .45; } }
 @media (prefers-reduced-motion: reduce) { #falk-granskar svg { animation: none; } }
 
-/* Notiserna längst ned centreras i sidytan när Falk/chatten tar högerkolumnen */
-#update-banner, #defbrowser-banner { left: calc((100% - var(--pw, 0px)) / 2) !important; max-width: calc(100vw - var(--pw, 0px) - 24px) !important; }
+/* Notiserna uppe till höger flyttar in när Falk/chatten tar högerkolumnen */
+.notis { right: calc(12px + var(--pw, 0px)) !important; }
 
 /* Brave-stil: en rad – text, grå " - ", blå adress; det du inte skrivit/dina ord feta */
 .sug .sline { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--color-navy-900); }

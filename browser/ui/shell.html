@@ -206,35 +206,28 @@
 
     <!-- Intro (första gången) — frostad startsidebakgrund + mjuk text -->
     <style>
-      /* Notiskort längst ner (uppdatering, flytta från en annan webbläsare, huvudwebbläsare) */
-      .notis{position:fixed;left:50%;bottom:22px;z-index:300;width:min(620px,calc(100vw - 32px));display:flex;align-items:center;gap:14px;
-        padding:14px 14px 14px 14px;border-radius:18px;color:#f4f4f5;
-        background:linear-gradient(180deg,rgb(30 30 34 / .94),rgb(18 18 21 / .96));
-        border:1px solid rgb(255 255 255 / .09);
-        box-shadow:0 1px 0 rgb(255 255 255 / .06) inset,0 22px 50px -12px rgb(0 0 0 / .6),0 4px 14px rgb(0 0 0 / .25);
-        backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);
-        transform:translateX(-50%);animation:notisIn .45s cubic-bezier(.2,.9,.25,1.15) both}
-      .notis.ut{animation:notisUt .25s ease-in both}
-      @keyframes notisIn{from{opacity:0;transform:translate(-50%,18px) scale(.97)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
-      @keyframes notisUt{to{opacity:0;transform:translate(-50%,12px) scale(.98)}}
-      body.reduce-motion .notis,body.reduce-motion .notis.ut{animation:none}
-      .notis-ikon{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#fff;
-        background:linear-gradient(140deg,#ff7a45,#ff4b1f 55%,#e2370f);box-shadow:0 6px 16px -4px rgb(255 75 31 / .55),0 1px 0 rgb(255 255 255 / .25) inset}
-      .notis-ikon svg{width:20px;height:20px;stroke-width:2}
-      .notis-text{flex:1;min-width:0;line-height:1.35}
-      .notis-titel{font-size:14px;font-weight:750;letter-spacing:-.01em;color:#fff}
-      .notis-under{font-size:12.5px;color:rgb(244 244 245 / .62);margin-top:2px}
-      .notis-knapp{flex:none;height:36px;padding:0 16px;border:0;border-radius:11px;font-size:13px;font-weight:750;color:#fff;cursor:pointer;white-space:nowrap;
-        background:linear-gradient(180deg,#ff6a3a,#ff4b1f);box-shadow:0 1px 0 rgb(255 255 255 / .22) inset,0 6px 14px -6px rgb(255 75 31 / .7);transition:filter .15s,transform .15s}
-      .notis-knapp:hover{filter:brightness(1.08)}
-      .notis-knapp:active{transform:translateY(1px)}
-      .notis-knapp:disabled{opacity:.7;cursor:default}
-      .notis-sek{flex:none;height:36px;padding:0 10px;border:0;border-radius:10px;background:none;color:rgb(244 244 245 / .7);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
-      .notis-sek:hover{background:rgb(255 255 255 / .07);color:#fff}
-      .notis-x{flex:none;width:28px;height:28px;margin-left:-4px;border:0;border-radius:8px;background:none;color:rgb(244 244 245 / .45);display:grid;place-items:center;cursor:pointer}
-      .notis-x:hover{background:rgb(255 255 255 / .08);color:#fff}
-      .notis-x svg{width:14px;height:14px;stroke-width:2.2}
-      @media (max-width:560px){.notis{flex-wrap:wrap}.notis-text{flex-basis:calc(100% - 100px)}.notis-knapp{margin-left:54px}}
+      /* Notiser uppe till höger, i samma stil som "Stäng alla flikar?" (uppdatering, flytta hit, huvudwebbläsare) */
+      .notis { position: fixed; top: 100px; right: 12px; width: 340px; max-width: 88vw; z-index: 240;
+        background: #fff; border-radius: 14px; padding: 16px 18px; border: 1px solid var(--color-line, #e6ebf1);
+        box-shadow: 0 18px 50px rgba(14,42,71,.30), 0 2px 8px rgba(14,42,71,.12);
+        animation: ccpop .16s cubic-bezier(.2,.7,.2,1); }
+      .notis.ut { opacity: 0; transform: translateY(-6px); transition: opacity .15s, transform .15s; }
+      body.reduce-motion .notis { animation: none; }
+      .notis-titel { font-size: 15px; font-weight: 700; color: var(--color-navy-900, #0e2a47); margin: 0 0 5px; letter-spacing: -.01em; }
+      .notis-under { font-size: 13px; color: #5a6b7b; margin: 0; line-height: 1.5; }
+      .notis-rad { display: flex; justify-content: flex-end; gap: 9px; margin-top: 15px; }
+      .notis button { height: 36px; padding: 0 18px; border-radius: 999px; font-weight: 600; font-size: 13px; cursor: pointer; border: 1px solid transparent; transition: filter .15s, background .15s; white-space: nowrap; }
+      .notis .notis-sek { background: #fff; color: var(--color-navy-900, #0e2a47); border-color: #d3dce6; }
+      .notis .notis-sek:hover { background: #f4f7fa; }
+      .notis .notis-knapp { background: var(--color-terra, #ff4b1f); color: #fff; }
+      .notis .notis-knapp:hover { filter: brightness(1.06); }
+      .notis .notis-knapp:disabled { opacity: .7; cursor: default; filter: none; }
+      .notis button:focus-visible { outline: 2px solid var(--color-terra, #ff4b1f); outline-offset: 2px; }
+      :root[data-theme="dark"] .notis { background: #161618; border-color: #2b2b2d; box-shadow: 0 18px 50px rgb(0 0 0 / .55), 0 2px 8px rgb(0 0 0 / .3); }
+      :root[data-theme="dark"] .notis-titel { color: #f2f2f4; }
+      :root[data-theme="dark"] .notis-under { color: #a1a1a8; }
+      :root[data-theme="dark"] .notis .notis-sek { background: transparent; color: #f2f2f4; border-color: #3b3b40; }
+      :root[data-theme="dark"] .notis .notis-sek:hover { background: rgb(255 255 255 / .07); }
     </style>
     <style>
       #hxintro{position:absolute;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;
