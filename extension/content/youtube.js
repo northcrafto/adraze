@@ -43,7 +43,30 @@
     if (Math.abs(v.duration - langd) > 1.5) v.currentTime = v.duration;
   }
 
+  // YouTubes ruta "Annonsblockerare är inte tillåtna": stäng den med rutans egen avvisa-knapp
+  // (aldrig "Tillåt annonser" eller Premium) och starta videon igen om rutan pausade den.
+  const AVVISA = /^(nej tack|no thanks|inte nu|not now|stäng|close|avvisa|dismiss|hoppa över|skip)$/i;
+  const ALDRIG = /tillåt|allow|premium|prova|try|logga in|sign in/i;
+  let spelade = false;
+  function avvisaRuta() {
+    const v = document.querySelector("#movie_player video");
+    const ruta = document.querySelector("ytd-enforcement-message-view-model");
+    if (!ruta) { spelade = !!(v && !v.paused); return; }
+    const dialog = ruta.closest("tp-yt-paper-dialog") || ruta;
+    const text = b => (b.getAttribute("aria-label") || b.textContent || "").replace(/\s+/g, " ").trim();
+    const knappar = [...dialog.querySelectorAll("#dismiss-button button, button, tp-yt-paper-button, a[role=button]")];
+    const knapp = knappar.find(b => b.closest("#dismiss-button") && !ALDRIG.test(text(b))) ||
+                  knappar.find(b => AVVISA.test(text(b)) && !ALDRIG.test(text(b)));
+    if (knapp) knapp.click();
+    else {
+      dialog.remove();
+      document.querySelectorAll("tp-yt-iron-overlay-backdrop").forEach(b => b.remove());
+      if (document.body) document.body.style.removeProperty("overflow");
+    }
+    if (v && v.paused && spelade) v.play().catch(() => {});
+  }
+
   // Kolla när videon spelar och dessutom med jämna mellanrum som reserv
   document.addEventListener("timeupdate", hoppa, { capture: true, passive: true });
-  setInterval(hoppa, 250);
+  setInterval(() => { hoppa(); avvisaRuta(); }, 250);
 })();
