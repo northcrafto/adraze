@@ -13,7 +13,7 @@ on:
         required: true
 
 permissions:
-  contents: read
+  contents: write  # utkast-släppet mac-indata syns bara med skrivrätt
 
 concurrency:
   group: mac-bygge
@@ -34,7 +34,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release download mac-indata -R "$GITHUB_REPOSITORY" -p "adraze-data-${{ inputs.version }}.tar.gz" -D /tmp
+          # mac-indata är ett utkast (saknar tagg), så paketet hämtas via API:et i stället för gh release download
+          F="adraze-data-${{ inputs.version }}.tar.gz"
+          ID=$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" -q ".[] | select(.name==\"Indata till Mac-bygget\") | .assets[] | select(.name==\"$F\") | .id" | head -1)
+          test -n "$ID"
+          gh api -H "Accept: application/octet-stream" "repos/$GITHUB_REPOSITORY/releases/assets/$ID" > "/tmp/$F"
           rm -rf browser/adraze && tar -xzf "/tmp/adraze-data-${{ inputs.version }}.tar.gz" -C browser
           test -f browser/adraze/VERSION
       - name: Beroenden
