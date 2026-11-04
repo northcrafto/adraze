@@ -542,5 +542,11 @@
   "proxy.err_address": "Γράψτε μια διεύθυνση, π.χ. youtube.com.",
   "proxy.err_support": "Το πρόγραμμα περιήγησής σας δεν υποστηρίζει το proxy. Δοκιμάστε νέα έκδοση του Chrome, Firefox, Edge ή Safari (όχι ιδιωτικό παράθυρο στον Firefox).",
   "proxy.err_start": "Το proxy δεν μπόρεσε να ξεκινήσει. Ανανεώστε τη σελίδα και δοκιμάστε ξανά.",
-  "nav.proxy": "Proxy"
+  "nav.proxy": "Proxy",
+  "proxy.tab_new": "Νέα καρτέλα",
+  "proxy.tab_close": "Κλείσιμο καρτέλας",
+  "proxy.menu": "Μενού",
+  "proxy.menu_leave": "Έξοδος από το proxy",
+  "proxy.list_empty": "Τίποτα δεν έχει σταματήσει ακόμη σε αυτή τη σελίδα.",
+  "proxy.newtab_safe": "Το AdRaze σας προστατεύει: διαφημίσεις και ιχνηλάτες σταματούν"
 }

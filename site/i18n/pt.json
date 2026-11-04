@@ -542,5 +542,11 @@
   "proxy.err_address": "Escreva um endereço, ex. youtube.com.",
   "proxy.err_support": "O seu navegador não consegue executar o proxy. Experimente uma versão recente do Chrome, Firefox, Edge ou Safari (não uma janela privada no Firefox).",
   "proxy.err_start": "Não foi possível iniciar o proxy. Recarregue a página e tente novamente.",
-  "nav.proxy": "Proxy"
+  "nav.proxy": "Proxy",
+  "proxy.tab_new": "Nova aba",
+  "proxy.tab_close": "Fechar aba",
+  "proxy.menu": "Menu",
+  "proxy.menu_leave": "Sair do proxy",
+  "proxy.list_empty": "Nada bloqueado nesta página ainda.",
+  "proxy.newtab_safe": "O AdRaze protege você: anúncios e rastreadores bloqueados"
 }

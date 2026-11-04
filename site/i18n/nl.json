@@ -542,5 +542,11 @@
   "proxy.err_address": "Typ een adres, bijv. youtube.com.",
   "proxy.err_support": "Je browser kan de proxy niet uitvoeren. Probeer een recente versie van Chrome, Firefox, Edge of Safari (geen privévenster in Firefox).",
   "proxy.err_start": "De proxy kon niet starten. Laad de pagina opnieuw en probeer het nog eens.",
-  "nav.proxy": "Proxy"
+  "nav.proxy": "Proxy",
+  "proxy.tab_new": "Nieuw tabblad",
+  "proxy.tab_close": "Tabblad sluiten",
+  "proxy.menu": "Menu",
+  "proxy.menu_leave": "Proxy verlaten",
+  "proxy.list_empty": "Nog niets gestopt op deze pagina.",
+  "proxy.newtab_safe": "AdRaze beschermt je: advertenties en trackers worden gestopt"
 }

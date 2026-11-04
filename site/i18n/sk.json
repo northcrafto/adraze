@@ -542,5 +542,11 @@
   "proxy.err_address": "Napíšte adresu, napr. youtube.com.",
   "proxy.err_support": "Váš prehliadač proxy nezvládne. Skúste novú verziu Chrome, Firefox, Edge alebo Safari (nie súkromné okno vo Firefoxe).",
   "proxy.err_start": "Proxy sa nepodarilo spustiť. Načítajte stránku znova a skúste to znova.",
-  "nav.proxy": "Proxy"
+  "nav.proxy": "Proxy",
+  "proxy.tab_new": "Nová karta",
+  "proxy.tab_close": "Zavrieť kartu",
+  "proxy.menu": "Ponuka",
+  "proxy.menu_leave": "Opustiť proxy",
+  "proxy.list_empty": "Na tejto stránke zatiaľ nič nezastavené.",
+  "proxy.newtab_safe": "AdRaze vás chráni: reklamy a sledovače sa zastavujú"
 }

@@ -83,28 +83,85 @@
     </div>
   </section>
 
-  <!-- Surfläget: adressfält + sidan -->
-  <div class="px-surf" id="px-surf" hidden>
+  <!-- Surfläget: ser ut som AdRaze-webbläsaren (flikrad + verktygsrad) -->
+  <div class="px-surf" id="px-surf" hidden data-t-newtab="{{t:proxy.tab_new}}" data-t-tabclose="{{t:proxy.tab_close}}">
+    <svg width="0" height="0" class="px-dold" aria-hidden="true">
+      <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+      <symbol id="i-fwd" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+      <symbol id="i-reload" viewBox="0 0 24 24"><path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 5v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2M20 19v-4h-4"/></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><ellipse cx="12" cy="12" rx="3.8" ry="9"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.4-3.2 7.6-8 9-4.8-1.4-8-4.6-8-9V6z"/></symbol>
+      <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.4-3.2 7.6-8 9-4.8-1.4-8-4.6-8-9V6z"/><path d="M9 11.5l2 2 4-4.5"/></symbol>
+      <symbol id="i-shield-alert" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.4-3.2 7.6-8 9-4.8-1.4-8-4.6-8-9V6z"/><path d="M12 8.5v3.5M12 14.6v.2"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+      <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+      <symbol id="i-exit" viewBox="0 0 24 24"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 16l-4-4 4-4M6 12h10"/></symbol>
+      <symbol id="i-puzzle" viewBox="0 0 24 24"><path d="M10 4.5a2 2 0 1 1 4 0V6h3a1 1 0 0 1 1 1v3h1.5a2 2 0 1 1 0 4H18v4a1 1 0 0 1-1 1h-3.5v-1.5a2 2 0 1 0-4 0V19H6a1 1 0 0 1-1-1v-4h1.5a2 2 0 1 0 0-4H5V7a1 1 0 0 1 1-1h4z"/></symbol>
+      <symbol id="i-newtab" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M12 9.5v5M9.5 12h5"/></symbol>
+    </svg>
+
+    <!-- Flikrad -->
+    <div class="px-flikrad">
+      <div class="px-flikar" id="px-flikar" role="tablist"></div>
+      <button type="button" class="px-nyflik" id="px-nyflik" title="{{t:proxy.tab_new}}" aria-label="{{t:proxy.tab_new}}"><svg class="ic ic-sm"><use href="#i-plus"/></svg></button>
+      <div class="px-flik-fyll"></div>
+    </div>
+
+    <!-- Verktygsrad -->
     <div class="px-bar">
-      <a href="{{pre}}/" class="px-bar-logo" id="px-hem" aria-label="{{t:proxy.bar_home}}" title="{{t:proxy.bar_home}}"><img src="/logo-mark.svg" alt="" width="28" height="28"></a>
-      <button type="button" class="px-bar-knapp" id="px-bak" aria-label="{{t:proxy.bar_back}}" title="{{t:proxy.bar_back}}">{{arrow-left}}</button>
-      <button type="button" class="px-bar-knapp" id="px-fram" aria-label="{{t:proxy.bar_forward}}" title="{{t:proxy.bar_forward}}">{{arrow-right}}</button>
-      <button type="button" class="px-bar-knapp" id="px-om" aria-label="{{t:proxy.bar_reload}}" title="{{t:proxy.bar_reload}}">{{arrow-clockwise}}</button>
-      <form class="px-bar-form" id="px-bar-form" novalidate>
-        <span class="px-lås" aria-hidden="true">{{lock}}</span>
-        <label class="px-dold" for="px-bar-url">{{t:proxy.label}}</label>
-        <input id="px-bar-url" type="text" inputmode="url" autocomplete="off" spellcheck="false" autocapitalize="off" maxlength="4000">
-      </form>
-      <button type="button" class="px-raknare" id="px-raknare" aria-live="polite" title="{{t:proxy.bar_counter_title}}"><span class="px-raknare-prick"></span><b id="px-antal">0</b><span class="px-raknare-text">{{t:proxy.bar_blocked}}</span></button>
-      <button type="button" class="px-bar-knapp" id="px-stang" aria-label="{{t:proxy.bar_close}}" title="{{t:proxy.bar_close}}">{{x}}</button>
+      <button type="button" class="px-ikon-knapp" id="px-bak" title="{{t:proxy.bar_back}}" aria-label="{{t:proxy.bar_back}}"><svg class="ic"><use href="#i-back"/></svg></button>
+      <button type="button" class="px-ikon-knapp" id="px-fram" title="{{t:proxy.bar_forward}}" aria-label="{{t:proxy.bar_forward}}"><svg class="ic"><use href="#i-fwd"/></svg></button>
+      <button type="button" class="px-ikon-knapp" id="px-om" title="{{t:proxy.bar_reload}}" aria-label="{{t:proxy.bar_reload}}"><svg class="ic"><use href="#i-reload"/></svg></button>
+      <div class="px-omni-mitt">
+        <form class="px-omni" id="px-bar-form" novalidate>
+          <span class="px-skold" id="px-skold" aria-hidden="true"><svg class="ic ic-sm"><use href="#i-shield"/></svg></span>
+          <label class="px-dold" for="px-bar-url">{{t:proxy.label}}</label>
+          <input id="px-bar-url" type="text" inputmode="url" autocomplete="off" spellcheck="false" autocapitalize="off" maxlength="4000" placeholder="{{t:proxy.placeholder}}">
+          <button type="button" class="px-ab" id="px-raknare" title="{{t:proxy.bar_counter_title}}" aria-label="{{t:proxy.bar_counter_title}}"><img src="/logo-mark.svg" alt="" width="17" height="17"><b id="px-antal">0</b></button>
+        </form>
+      </div>
+      <button type="button" class="px-ikon-knapp" id="px-menyknapp" title="{{t:proxy.menu}}" aria-label="{{t:proxy.menu}}" aria-expanded="false" aria-controls="px-menyn"><svg class="ic"><use href="#i-menu"/></svg></button>
     </div>
     <div class="px-laddar" id="px-laddar"><span></span></div>
+
+    <!-- Menyn -->
+    <div class="px-menyn" id="px-menyn" role="menu" hidden>
+      <button type="button" role="menuitem" id="px-meny-nyflik"><svg class="ic"><use href="#i-newtab"/></svg>{{t:proxy.tab_new}}</button>
+      <a role="menuitem" href="{{installera}}" target="_blank" rel="noopener"><svg class="ic"><use href="#i-puzzle"/></svg>{{t:nav.add_chrome}}</a>
+      <hr>
+      <button type="button" role="menuitem" id="px-stang"><svg class="ic"><use href="#i-exit"/></svg>{{t:proxy.menu_leave}}</button>
+    </div>
+
+    <!-- Vad AdRaze stoppat (som tilläggets ruta) -->
     <div class="px-lista" id="px-lista" hidden>
-      <div class="px-lista-topp"><b>{{t:proxy.list_title}}</b><button type="button" class="px-bar-knapp" id="px-lista-stang" aria-label="{{t:proxy.bar_close}}">{{x}}</button></div>
+      <div class="px-lista-topp"><img src="/logo-mark.svg" alt="" width="26" height="26"><b>{{t:proxy.list_title}}</b><button type="button" class="px-ikon-knapp" id="px-lista-stang" aria-label="{{t:proxy.bar_close}}"><svg class="ic ic-sm"><use href="#i-close"/></svg></button></div>
       <p class="px-lista-summa"><span><i class="k-reklam"></i>{{t:proxy.cat_ads}} <b data-kat="reklam">0</b></span><span><i class="k-sparare"></i>{{t:proxy.cat_trackers}} <b data-kat="sparare">0</b></span><span><i class="k-farlig"></i>{{t:proxy.cat_danger}} <b data-kat="farlig">0</b></span></p>
       <ul id="px-lista-vardar"></ul>
+      <p class="px-lista-tom" id="px-lista-tom">{{t:proxy.list_empty}}</p>
     </div>
-    <div class="px-ram" id="px-ram"></div>
+
+    <!-- Sidorna -->
+    <div class="px-ram" id="px-ram">
+      <div class="px-nyfliksida" id="px-nyfliksida" hidden>
+        <img src="/logo-mark.svg" alt="" width="72" height="72">
+        <p class="px-ny-titel">AdRaze <span>Proxy</span></p>
+        <form class="px-ny-sok" id="px-ny-form" novalidate>
+          <svg class="ic"><use href="#i-search"/></svg>
+          <label class="px-dold" for="px-ny-url">{{t:proxy.label}}</label>
+          <input id="px-ny-url" type="text" inputmode="url" autocomplete="off" spellcheck="false" autocapitalize="off" maxlength="4000" placeholder="{{t:proxy.placeholder}}">
+        </form>
+        <div class="px-genvagar">
+          <button type="button" data-ga="https://www.youtube.com"><span>Y</span>YouTube</button>
+          <button type="button" data-ga="https://www.svt.se"><span>S</span>SVT</button>
+          <button type="button" data-ga="https://sv.wikipedia.org"><span>W</span>Wikipedia</button>
+          <button type="button" data-ga="https://www.aftonbladet.se"><span>A</span>Aftonbladet</button>
+          <button type="button" data-ga="https://duckduckgo.com"><span>D</span>DuckDuckGo</button>
+        </div>
+        <p class="px-ny-skydd"><i></i>{{t:proxy.newtab_safe}}</p>
+      </div>
+    </div>
   </div>
 </main>
 

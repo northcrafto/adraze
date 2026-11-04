@@ -542,5 +542,11 @@
   "proxy.err_address": "Upiši adresu, npr. youtube.com.",
   "proxy.err_support": "Tvoj preglednik ne podržava proxy. Probaj noviju verziju Chromea, Firefoxa, Edgea ili Safarija (ne privatni prozor u Firefoxu).",
   "proxy.err_start": "Proxy se nije uspio pokrenuti. Ponovno učitaj stranicu i pokušaj opet.",
-  "nav.proxy": "Proxy"
+  "nav.proxy": "Proxy",
+  "proxy.tab_new": "Nova kartica",
+  "proxy.tab_close": "Zatvori karticu",
+  "proxy.menu": "Izbornik",
+  "proxy.menu_leave": "Napusti proxy",
+  "proxy.list_empty": "Na ovoj stranici još ništa nije zaustavljeno.",
+  "proxy.newtab_safe": "AdRaze te štiti: reklame i pratitelji se zaustavljaju"
 }

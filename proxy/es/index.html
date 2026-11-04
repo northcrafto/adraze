@@ -144,28 +144,85 @@
     </div>
   </section>
 
-  <!-- Surfläget: adressfält + sidan -->
-  <div class="px-surf" id="px-surf" hidden>
+  <!-- Surfläget: ser ut som AdRaze-webbläsaren (flikrad + verktygsrad) -->
+  <div class="px-surf" id="px-surf" hidden data-t-newtab="Nueva pestaña" data-t-tabclose="Cerrar pestaña">
+    <svg width="0" height="0" class="px-dold" aria-hidden="true">
+      <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+      <symbol id="i-fwd" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+      <symbol id="i-reload" viewBox="0 0 24 24"><path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 5v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2M20 19v-4h-4"/></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><ellipse cx="12" cy="12" rx="3.8" ry="9"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.4-3.2 7.6-8 9-4.8-1.4-8-4.6-8-9V6z"/></symbol>
+      <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.4-3.2 7.6-8 9-4.8-1.4-8-4.6-8-9V6z"/><path d="M9 11.5l2 2 4-4.5"/></symbol>
+      <symbol id="i-shield-alert" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.4-3.2 7.6-8 9-4.8-1.4-8-4.6-8-9V6z"/><path d="M12 8.5v3.5M12 14.6v.2"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+      <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+      <symbol id="i-exit" viewBox="0 0 24 24"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 16l-4-4 4-4M6 12h10"/></symbol>
+      <symbol id="i-puzzle" viewBox="0 0 24 24"><path d="M10 4.5a2 2 0 1 1 4 0V6h3a1 1 0 0 1 1 1v3h1.5a2 2 0 1 1 0 4H18v4a1 1 0 0 1-1 1h-3.5v-1.5a2 2 0 1 0-4 0V19H6a1 1 0 0 1-1-1v-4h1.5a2 2 0 1 0 0-4H5V7a1 1 0 0 1 1-1h4z"/></symbol>
+      <symbol id="i-newtab" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M12 9.5v5M9.5 12h5"/></symbol>
+    </svg>
+
+    <!-- Flikrad -->
+    <div class="px-flikrad">
+      <div class="px-flikar" id="px-flikar" role="tablist"></div>
+      <button type="button" class="px-nyflik" id="px-nyflik" title="Nueva pestaña" aria-label="Nueva pestaña"><svg class="ic ic-sm"><use href="#i-plus"/></svg></button>
+      <div class="px-flik-fyll"></div>
+    </div>
+
+    <!-- Verktygsrad -->
     <div class="px-bar">
-      <a href="https://adraze.app/es/" class="px-bar-logo" id="px-hem" aria-label="Ir al inicio" title="Ir al inicio"><img src="/logo-mark.svg" alt="" width="28" height="28"></a>
-      <button type="button" class="px-bar-knapp" id="px-bak" aria-label="Atrás" title="Atrás"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M228,128a12,12,0,0,1-12,12H69l51.52,51.51a12,12,0,0,1-17,17l-72-72a12,12,0,0,1,0-17l72-72a12,12,0,0,1,17,17L69,116H216A12,12,0,0,1,228,128Z"/></svg></button>
-      <button type="button" class="px-bar-knapp" id="px-fram" aria-label="Adelante" title="Adelante"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg></button>
-      <button type="button" class="px-bar-knapp" id="px-om" aria-label="Recargar" title="Recargar"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M244,56v48a12,12,0,0,1-12,12H184a12,12,0,1,1,0-24H201.1l-19-17.38c-.13-.12-.26-.24-.38-.37A76,76,0,1,0,127,204h1a75.53,75.53,0,0,0,52.15-20.72,12,12,0,0,1,16.49,17.45A99.45,99.45,0,0,1,128,228h-1.37A100,100,0,1,1,198.51,57.06L220,76.72V56a12,12,0,0,1,24,0Z"/></svg></button>
-      <form class="px-bar-form" id="px-bar-form" novalidate>
-        <span class="px-lås" aria-hidden="true"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,76H180V56A52,52,0,0,0,76,56V76H48A20,20,0,0,0,28,96V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V96A20,20,0,0,0,208,76ZM100,56a28,28,0,0,1,56,0V76H100ZM204,204H52V100H204Zm-60-52a16,16,0,1,1-16-16A16,16,0,0,1,144,152Z"/></svg></span>
-        <label class="px-dold" for="px-bar-url">Dirección o búsqueda</label>
-        <input id="px-bar-url" type="text" inputmode="url" autocomplete="off" spellcheck="false" autocapitalize="off" maxlength="4000">
-      </form>
-      <button type="button" class="px-raknare" id="px-raknare" aria-live="polite" title="Lo que AdRaze ha bloqueado desde que empezaste a navegar"><span class="px-raknare-prick"></span><b id="px-antal">0</b><span class="px-raknare-text">bloqueados</span></button>
-      <button type="button" class="px-bar-knapp" id="px-stang" aria-label="Cerrar" title="Cerrar"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z"/></svg></button>
+      <button type="button" class="px-ikon-knapp" id="px-bak" title="Atrás" aria-label="Atrás"><svg class="ic"><use href="#i-back"/></svg></button>
+      <button type="button" class="px-ikon-knapp" id="px-fram" title="Adelante" aria-label="Adelante"><svg class="ic"><use href="#i-fwd"/></svg></button>
+      <button type="button" class="px-ikon-knapp" id="px-om" title="Recargar" aria-label="Recargar"><svg class="ic"><use href="#i-reload"/></svg></button>
+      <div class="px-omni-mitt">
+        <form class="px-omni" id="px-bar-form" novalidate>
+          <span class="px-skold" id="px-skold" aria-hidden="true"><svg class="ic ic-sm"><use href="#i-shield"/></svg></span>
+          <label class="px-dold" for="px-bar-url">Dirección o búsqueda</label>
+          <input id="px-bar-url" type="text" inputmode="url" autocomplete="off" spellcheck="false" autocapitalize="off" maxlength="4000" placeholder="Escribe una dirección, p. ej. youtube.com">
+          <button type="button" class="px-ab" id="px-raknare" title="Lo que AdRaze ha bloqueado desde que empezaste a navegar" aria-label="Lo que AdRaze ha bloqueado desde que empezaste a navegar"><img src="/logo-mark.svg" alt="" width="17" height="17"><b id="px-antal">0</b></button>
+        </form>
+      </div>
+      <button type="button" class="px-ikon-knapp" id="px-menyknapp" title="Menú" aria-label="Menú" aria-expanded="false" aria-controls="px-menyn"><svg class="ic"><use href="#i-menu"/></svg></button>
     </div>
     <div class="px-laddar" id="px-laddar"><span></span></div>
+
+    <!-- Menyn -->
+    <div class="px-menyn" id="px-menyn" role="menu" hidden>
+      <button type="button" role="menuitem" id="px-meny-nyflik"><svg class="ic"><use href="#i-newtab"/></svg>Nueva pestaña</button>
+      <a role="menuitem" href="https://chromewebstore.google.com/detail/cgdjdjgdoklomdphknggkhfghlglcppd" target="_blank" rel="noopener"><svg class="ic"><use href="#i-puzzle"/></svg>Añadir a Chrome</a>
+      <hr>
+      <button type="button" role="menuitem" id="px-stang"><svg class="ic"><use href="#i-exit"/></svg>Salir del proxy</button>
+    </div>
+
+    <!-- Vad AdRaze stoppat (som tilläggets ruta) -->
     <div class="px-lista" id="px-lista" hidden>
-      <div class="px-lista-topp"><b>Bloqueado por AdRaze</b><button type="button" class="px-bar-knapp" id="px-lista-stang" aria-label="Cerrar"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z"/></svg></button></div>
+      <div class="px-lista-topp"><img src="/logo-mark.svg" alt="" width="26" height="26"><b>Bloqueado por AdRaze</b><button type="button" class="px-ikon-knapp" id="px-lista-stang" aria-label="Cerrar"><svg class="ic ic-sm"><use href="#i-close"/></svg></button></div>
       <p class="px-lista-summa"><span><i class="k-reklam"></i>Anuncios <b data-kat="reklam">0</b></span><span><i class="k-sparare"></i>Rastreadores <b data-kat="sparare">0</b></span><span><i class="k-farlig"></i>Peligroso <b data-kat="farlig">0</b></span></p>
       <ul id="px-lista-vardar"></ul>
+      <p class="px-lista-tom" id="px-lista-tom">Aún no se ha bloqueado nada en esta página.</p>
     </div>
-    <div class="px-ram" id="px-ram"></div>
+
+    <!-- Sidorna -->
+    <div class="px-ram" id="px-ram">
+      <div class="px-nyfliksida" id="px-nyfliksida" hidden>
+        <img src="/logo-mark.svg" alt="" width="72" height="72">
+        <p class="px-ny-titel">AdRaze <span>Proxy</span></p>
+        <form class="px-ny-sok" id="px-ny-form" novalidate>
+          <svg class="ic"><use href="#i-search"/></svg>
+          <label class="px-dold" for="px-ny-url">Dirección o búsqueda</label>
+          <input id="px-ny-url" type="text" inputmode="url" autocomplete="off" spellcheck="false" autocapitalize="off" maxlength="4000" placeholder="Escribe una dirección, p. ej. youtube.com">
+        </form>
+        <div class="px-genvagar">
+          <button type="button" data-ga="https://www.youtube.com"><span>Y</span>YouTube</button>
+          <button type="button" data-ga="https://www.svt.se"><span>S</span>SVT</button>
+          <button type="button" data-ga="https://sv.wikipedia.org"><span>W</span>Wikipedia</button>
+          <button type="button" data-ga="https://www.aftonbladet.se"><span>A</span>Aftonbladet</button>
+          <button type="button" data-ga="https://duckduckgo.com"><span>D</span>DuckDuckGo</button>
+        </div>
+        <p class="px-ny-skydd"><i></i>AdRaze te protege: anuncios y rastreadores bloqueados</p>
+      </div>
+    </div>
   </div>
 </main>
 

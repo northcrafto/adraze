@@ -542,5 +542,11 @@
   "proxy.err_address": "Въведи адрес, напр. youtube.com.",
   "proxy.err_support": "Браузърът ти не поддържа проксито. Опитай нова версия на Chrome, Firefox, Edge или Safari (не в частен прозорец на Firefox).",
   "proxy.err_start": "Проксито не успя да стартира. Презареди страницата и опитай отново.",
-  "nav.proxy": "Прокси"
+  "nav.proxy": "Прокси",
+  "proxy.tab_new": "Нов раздел",
+  "proxy.tab_close": "Затвори раздела",
+  "proxy.menu": "Меню",
+  "proxy.menu_leave": "Излез от проксито",
+  "proxy.list_empty": "Все още нищо не е спряно на тази страница.",
+  "proxy.newtab_safe": "AdRaze те пази: рекламите и тракерите се спират"
 }

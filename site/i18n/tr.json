@@ -542,5 +542,11 @@
   "proxy.err_address": "Bir adres yazın, ör. youtube.com.",
   "proxy.err_support": "Tarayıcınız proxy'yi çalıştıramıyor. Chrome, Firefox, Edge veya Safari'nin güncel bir sürümünü deneyin (Firefox'ta gizli pencere değil).",
   "proxy.err_start": "Proxy başlatılamadı. Sayfayı yenileyip tekrar deneyin.",
-  "nav.proxy": "Proxy"
+  "nav.proxy": "Proxy",
+  "proxy.tab_new": "Yeni sekme",
+  "proxy.tab_close": "Sekmeyi kapat",
+  "proxy.menu": "Menü",
+  "proxy.menu_leave": "Proxy'den çık",
+  "proxy.list_empty": "Bu sayfada henüz bir şey durdurulmadı.",
+  "proxy.newtab_safe": "AdRaze sizi koruyor: reklamlar ve izleyiciler durduruluyor"
 }
