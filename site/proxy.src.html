@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{t:proxy.meta_title}}</title>
+<meta name="description" content="{{t:proxy.meta_description}}">
+<meta name="theme-color" content="#111113">
+<link rel="icon" href="/favicon.png">
+{{alternates}}
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/proxy.css">
+</head>
+<body class="px-sida">
+{{topp}}
+
+<main id="proxy" data-lang="{{lang}}" data-t-blocked="{{t:proxy.bar_blocked}}" data-t-loading="{{t:proxy.bar_loading}}"
+  data-e-adress="{{t:proxy.err_address}}" data-e-stod="{{t:proxy.err_support}}" data-e-start="{{t:proxy.err_start}}">
+
+  <!-- Startsidan -->
+  <section class="px-hjalte">
+    <div class="wrap px-hjalte-inner">
+      <div class="px-hjalte-text">
+        <p class="px-fore">{{t:proxy.pre}}</p>
+        <h1>{{t:proxy.title}}</h1>
+        <p class="px-lead">{{t:proxy.lead}}</p>
+        <form id="px-form" class="px-form" novalidate>
+          <label class="px-dold" for="px-url">{{t:proxy.label}}</label>
+          <span class="px-lås" aria-hidden="true">{{lock}}</span>
+          <input id="px-url" name="url" type="text" inputmode="url" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="{{t:proxy.placeholder}}" maxlength="4000" required>
+          <button class="btn btn-stor liq" type="submit">{{t:proxy.button}}{{arrow-right}}</button>
+        </form>
+        <p class="px-fel" id="px-fel" role="alert" hidden></p>
+        <p class="px-snabb">{{t:proxy.quick}}
+          <button type="button" data-ga="https://www.youtube.com">YouTube</button>
+          <button type="button" data-ga="https://www.svt.se">SVT</button>
+          <button type="button" data-ga="https://sv.wikipedia.org">Wikipedia</button>
+          <button type="button" data-ga="https://www.aftonbladet.se">Aftonbladet</button>
+          <button type="button" data-ga="https://duckduckgo.com">DuckDuckGo</button>
+        </p>
+      </div>
+      <img class="px-gubbe" src="/illu/casual-browsing.svg" alt="" width="520" height="420">
+    </div>
+  </section>
+
+  <!-- Vad du får -->
+  <section class="px-fordelar">
+    <div class="wrap">
+      <h2>{{t:proxy.why_title}}</h2>
+      <ul class="px-kort">
+        <li class="bar-hover"><span class="px-ikon">{{prohibit}}</span><h3>{{t:proxy.f1_title}}</h3><p>{{t:proxy.f1_text}}</p></li>
+        <li class="bar-hover"><span class="px-ikon">{{eye-slash}}</span><h3>{{t:proxy.f2_title}}</h3><p>{{t:proxy.f2_text}}</p></li>
+        <li class="bar-hover"><span class="px-ikon">{{lock}}</span><h3>{{t:proxy.f3_title}}</h3><p>{{t:proxy.f3_text}}</p></li>
+        <li class="bar-hover"><span class="px-ikon">{{lightning}}</span><h3>{{t:proxy.f4_title}}</h3><p>{{t:proxy.f4_text}}</p></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Så funkar det -->
+  <section class="px-hur">
+    <div class="wrap px-hur-inner">
+      <img src="/illu/secure-server.svg" alt="" width="460" height="360" loading="lazy">
+      <div>
+        <h2>{{t:proxy.how_title}}</h2>
+        <ol class="px-hur-lista">
+          <li><span>01</span><p>{{t:proxy.how1}}</p></li>
+          <li><span>02</span><p>{{t:proxy.how2}}</p></li>
+          <li><span>03</span><p>{{t:proxy.how3}}</p></li>
+        </ol>
+        <p class="px-not">{{t:proxy.note}}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Installera -->
+  <section class="px-cta">
+    <div class="wrap px-cta-inner">
+      <div>
+        <h2>{{t:proxy.cta_title}}</h2>
+        <p>{{t:proxy.cta_text}}</p>
+      </div>
+      <a href="{{installera}}" class="btn btn-stor liq liq-mork">{{chrome}}{{t:nav.add_chrome}}</a>
+    </div>
+  </section>
+
+  <!-- Surfläget: adressfält + sidan -->
+  <div class="px-surf" id="px-surf" hidden>
+    <div class="px-bar">
+      <a href="{{pre}}/" class="px-bar-logo" id="px-hem" aria-label="{{t:proxy.bar_home}}" title="{{t:proxy.bar_home}}"><img src="/logo-mark.svg" alt="" width="28" height="28"></a>
+      <button type="button" class="px-bar-knapp" id="px-bak" aria-label="{{t:proxy.bar_back}}" title="{{t:proxy.bar_back}}">{{arrow-left}}</button>
+      <button type="button" class="px-bar-knapp" id="px-fram" aria-label="{{t:proxy.bar_forward}}" title="{{t:proxy.bar_forward}}">{{arrow-right}}</button>
+      <button type="button" class="px-bar-knapp" id="px-om" aria-label="{{t:proxy.bar_reload}}" title="{{t:proxy.bar_reload}}">{{arrow-clockwise}}</button>
+      <form class="px-bar-form" id="px-bar-form" novalidate>
+        <span class="px-lås" aria-hidden="true">{{lock}}</span>
+        <label class="px-dold" for="px-bar-url">{{t:proxy.label}}</label>
+        <input id="px-bar-url" type="text" inputmode="url" autocomplete="off" spellcheck="false" autocapitalize="off" maxlength="4000">
+      </form>
+      <button type="button" class="px-raknare" id="px-raknare" aria-live="polite" title="{{t:proxy.bar_counter_title}}"><span class="px-raknare-prick"></span><b id="px-antal">0</b><span class="px-raknare-text">{{t:proxy.bar_blocked}}</span></button>
+      <button type="button" class="px-bar-knapp" id="px-stang" aria-label="{{t:proxy.bar_close}}" title="{{t:proxy.bar_close}}">{{x}}</button>
+    </div>
+    <div class="px-laddar" id="px-laddar"><span></span></div>
+    <div class="px-lista" id="px-lista" hidden>
+      <div class="px-lista-topp"><b>{{t:proxy.list_title}}</b><button type="button" class="px-bar-knapp" id="px-lista-stang" aria-label="{{t:proxy.bar_close}}">{{x}}</button></div>
+      <p class="px-lista-summa"><span><i class="k-reklam"></i>{{t:proxy.cat_ads}} <b data-kat="reklam">0</b></span><span><i class="k-sparare"></i>{{t:proxy.cat_trackers}} <b data-kat="sparare">0</b></span><span><i class="k-farlig"></i>{{t:proxy.cat_danger}} <b data-kat="farlig">0</b></span></p>
+      <ul id="px-lista-vardar"></ul>
+    </div>
+    <div class="px-ram" id="px-ram"></div>
+  </div>
+</main>
+
+<footer class="fot">
+  <div class="wrap fot-grid">
+    <div><a href="{{hem}}" class="logo"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a><p>{{t:footer.tagline}}</p></div>
+    <ul>
+      <li><a class="nav-link" href="{{hem}}">{{t:privacy.back}}</a></li>
+      <li><a class="nav-link" href="{{hem}}kolla">{{t:nav.check}}</a></li>
+      <li><a class="nav-link" href="{{ladda}}">{{t:nav.download}}</a></li>
+      <li><a class="nav-link" href="{{hjalp}}">{{t:nav.help}}</a></li>
+      <li><a class="nav-link" href="{{hem}}integritet">{{t:footer.privacy}}</a></li>
+    </ul>
+  </div>
+</footer>
+<script src="/motor/baremux/index.js"></script>
+<script src="/motor/scram/scramjet.all.js"></script>
+<script src="/proxy.js" defer></script>
+<script src="/main.js"></script>
+</body>
+</html>
