@@ -159,6 +159,7 @@
   // Länk som /?u=https://… öppnar sidan direkt
   const start = new URLSearchParams(location.search).get('u');
   if (start) { const u = tolka(start); if (u) surfa(u, false); }
-  // Förvärm motorn när man börjar skriva
-  falt.addEventListener('focus', () => starta().catch(() => {}), { once: true });
+  // Förvärm motorn direkt (service worker, regler, krypterad anslutning), så att första sidan inte väntar på den
+  const forvarm = () => starta().catch(() => {});
+  if (!start) ('requestIdleCallback' in window ? requestIdleCallback(forvarm, { timeout: 1500 }) : setTimeout(forvarm, 300));
 })();

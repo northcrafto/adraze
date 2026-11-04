@@ -102,9 +102,76 @@ async function hantera(e) {
       return Response.error();
     }
   }
+  if (e.request.method === 'GET' && CACHEBARA.has(e.request.destination)) {
+    const traff = await franCache(e.request.url);
+    if (traff) return traff;
+    const svar = await scramjet.fetch(e);
+    sparaICache(e, e.request.url, svar);
+    return svar;
+  }
   return scramjet.fetch(e);
 }
 self.addEventListener('fetch', (e) => e.respondWith(hantera(e)));
+
+// ---------- cache ----------
+// Proxade svar hamnar aldrig i webbläsarens egen cache (allt hämtas via Wisp), så utan den här laddas varje
+// skript, bild och typsnitt om vid varje sidbyte. Bara det sajten själv säger får cachas (max-age/immutable),
+// aldrig svar med kakor, aldrig video/ljud. Lagras färdigomskrivet, så Scramjet slipper skriva om skripten igen.
+const SIDCACHE = 'adraze-sidcache-v1';
+const CACHEBARA = new Set(['script', 'style', 'font', 'image']);
+const MAX_SEKUNDER = 7 * 86400;
+const MAX_STORLEK = 8 * 1024 * 1024;
+const MAX_POSTER = 3000;
+function livstid(h) {
+  const cc = (h.get('cache-control') || '').toLowerCase();
+  if (/no-store|no-cache|private/.test(cc) || h.has('set-cookie') || (h.get('vary') || '').trim() === '*') return 0;
+  const m = /(?:^|[,\s])max-age=(\d+)/.exec(cc);
+  let s = m ? Number(m[1]) : 0;
+  if (!m && h.get('expires')) s = (Date.parse(h.get('expires')) - Date.now()) / 1000 || 0;
+  if (/immutable/.test(cc)) s = Math.max(s, 86400);
+  return Math.min(Math.max(0, s), MAX_SEKUNDER);
+}
+async function franCache(nyckel) {
+  try {
+    const c = await caches.open(SIDCACHE);
+    const r = await c.match(nyckel);
+    if (!r) return null;
+    if (Date.now() > Number(r.headers.get('x-adraze-utgar') || 0)) { c.delete(nyckel); return null; }
+    return r;
+  } catch { return null; }
+}
+let sparade = 0;
+function sparaICache(e, nyckel, svar) {
+  if (!svar || svar.status !== 200 || svar.type === 'error') return;
+  const s = livstid(svar.headers);
+  const langd = Number(svar.headers.get('content-length') || 0);
+  if (s < 60 || langd > MAX_STORLEK) return;
+  const kopia = svar.clone();
+  e.waitUntil((async () => {
+    try {
+      const kropp = await kopia.arrayBuffer();
+      if (kropp.byteLength > MAX_STORLEK) return;
+      const h = new Headers(kopia.headers);
+      h.set('x-adraze-utgar', String(Date.now() + s * 1000));
+      const c = await caches.open(SIDCACHE);
+      await c.put(nyckel, new Response(kropp, { status: 200, statusText: kopia.statusText, headers: h }));
+      if (++sparade % 200 === 0) rensaCache(c);
+    } catch {}
+  })());
+}
+// Håll cachen liten: utgångna poster bort, och de äldsta om det blivit för många
+async function rensaCache(c) {
+  const nycklar = await c.keys();
+  const nu = Date.now();
+  const kvar = [];
+  for (const k of nycklar) {
+    const r = await c.match(k);
+    const t = Number(r?.headers.get('x-adraze-utgar') || 0);
+    if (!r || nu > t) await c.delete(k); else kvar.push(k);
+  }
+  for (const k of kvar.slice(0, Math.max(0, kvar.length - MAX_POSTER))) await c.delete(k);
+}
+self.addEventListener('activate', (e) => e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k.startsWith('adraze-sidcache-') && k !== SIDCACHE).map((k) => caches.delete(k))))));
 
 // HTML-sidor (även inbäddade ramar) får AdRazes kosmetik (döljer annonsytor och kakrutor) och tilläggets
 // sidskript: avvisar kakrutor, stoppar popunders och spolar förbi YouTube-reklam
