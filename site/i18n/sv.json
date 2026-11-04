@@ -548,5 +548,6 @@
   "proxy.menu": "Meny",
   "proxy.menu_leave": "Lämna proxyn",
   "proxy.list_empty": "Inget stoppat än på den här sidan.",
-  "proxy.newtab_safe": "AdRaze skyddar dig: reklam och spårare stoppas"
+  "proxy.newtab_safe": "AdRaze skyddar dig: reklam och spårare stoppas",
+  "proxy.ui": "{}"
 }
