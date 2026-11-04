@@ -3,7 +3,7 @@
 - {{ikon}} -> inline-SVG från ikoner/
 - {{t:nyckel}} -> text från i18n/<språk>.json (saknas nyckeln: svenska)
 - Svenska ligger i roten (/), övriga språk i /<kod>/ med hreflang-länkar mellan alla.
-- Tre sajter ur samma källor: adraze.app (site/), accounts.adraze.app (../accounts/) och
+- Flera sajter ur samma källor (även proxy.adraze.app → ../proxy/, serveras från doxing): adraze.app (site/), accounts.adraze.app (../accounts/) och
   download.adraze.app (../download/). Subdomänerna får kopior av filerna de behöver i TILLGANGAR.
 Kör: python3 bygg.py"""
 import html, json, pathlib, re, shutil
@@ -13,6 +13,7 @@ SAJT = 'https://adraze.app'
 KONTO = 'https://accounts.adraze.app'
 LADDA = 'https://download.adraze.app'
 HJALP = 'https://support.adraze.app'
+PROXY = 'https://proxy.adraze.app'
 # Kod, namn på språket självt (ordning = ordning i språkväljaren)
 SPRAK = [
     ('sv', 'Svenska'), ('en', 'English'), ('nb', 'Norsk'), ('da', 'Dansk'), ('fi', 'Suomi'), ('is', 'Íslenska'),
@@ -25,8 +26,9 @@ SPRAK = [
 SIDOR = {'index.src.html': (SAJT, ''), 'integritet.src.html': (SAJT, 'integritet'), 'chattregler.src.html': (SAJT, 'chattregler'), 'integritet-webblasaren.src.html': (SAJT, 'integritet-webblasaren'), 'statistik.src.html': (SAJT, 'statistik'),
          'stod.src.html': (SAJT, 'stod'), 'kolla.src.html': (SAJT, 'kolla'),
          'konto.src.html': (KONTO, ''), 'download.src.html': (LADDA, ''),
-         'support.src.html': (HJALP, ''), 'arende.src.html': (HJALP, 'arende'), 'team.src.html': (HJALP, 'team')}
-MAPP = {SAJT: rot, KONTO: rot.parent / 'accounts', LADDA: rot.parent / 'download', HJALP: rot.parent / 'support'}
+         'support.src.html': (HJALP, ''), 'arende.src.html': (HJALP, 'arende'), 'team.src.html': (HJALP, 'team'),
+         'proxy.src.html': (PROXY, '')}
+MAPP = {SAJT: rot, KONTO: rot.parent / 'accounts', LADDA: rot.parent / 'download', HJALP: rot.parent / 'support', PROXY: rot.parent / 'proxy'}
 UTAN_SITEMAP = {(KONTO, ''), (HJALP, 'arende'), (HJALP, 'team')}  # inloggning, ärenden och teampanelen ska inte indexeras
 BARA_SV = {'team.src.html'}  # teamets panel finns bara på svenska
 # Filer som subdomänerna serverar själva (kopieras från site/ vid varje bygge)
@@ -34,6 +36,9 @@ TILLGANGAR = {
     KONTO: ['style.css', 'konto.css', 'konto.js', 'main.js', 'fonts', 'mail/vinkar.gif', 'logo-mark.svg', 'favicon.png',
             'app-google.html', 'app-google.css', 'app-google.js'],
     HJALP: ['style.css', 'support.css', 'support.js', 'arende.js', 'team.js', 'main.js', 'fonts', 'mail/vinkar.gif', 'logo-mark.svg', 'favicon.png'],
+    # proxy.adraze.app serveras av doxing (~/adraze-api/proxy), inte Vercel: service workern måste ligga på samma värd som Wisp
+    PROXY: ['style.css', 'proxy.css', 'proxy.js', ('proxy-sw.js', 'sw.js'), 'main.js', 'fonts', 'logo-mark.svg', 'favicon.png',
+            'illu/casual-browsing.svg', 'illu/secure-server.svg', '4bbbc2d76725e865a25008fd19941943.txt'],
     LADDA: ['style.css', 'download.css', 'download.js', 'main.js', 'fonts', 'logo-mark.svg', 'favicon.png', 'install.sh', 'adraze-512.png', 'os',
             '4bbbc2d76725e865a25008fd19941943.txt'],  # IndexNow-nyckeln (måste ligga på samma värd)
 }
@@ -59,7 +64,8 @@ for mapp in MAPP.values():
         if k != 'sv' and (mapp / k).is_dir(): shutil.rmtree(mapp / k)
 for sajt, filer in TILLGANGAR.items():
     for f in filer:
-        fran, till = rot / f, MAPP[sajt] / f
+        f, mal = f if isinstance(f, tuple) else (f, f)
+        fran, till = rot / f, MAPP[sajt] / mal
         till.parent.mkdir(parents=True, exist_ok=True)
         if fran.is_dir(): shutil.rmtree(till, ignore_errors=True); shutil.copytree(fran, till)
         else: shutil.copy2(fran, till)
@@ -86,7 +92,7 @@ for kod, namn in finns:
         ut = re.sub(rf'<!--{bort}-->.*?<!--/{bort}-->', '', ut, flags=re.S).replace('<!--zip-->', '').replace('<!--/zip-->', '').replace('<!--butik-->', '').replace('<!--/butik-->', '')
         ut = ut.replace('{{installera}}', BUTIK or hem + url(kod, '') + '#installera').replace('{{butik}}', BUTIK or '')
         ut = ut.replace('{{lang}}', kod).replace('{{hem}}', hem + url(kod, '')).replace('{{pre}}', hem + ('' if kod == 'sv' else f'/{kod}'))
-        ut = ut.replace('{{konto}}', KONTO + url(kod, '')).replace('{{ladda}}', LADDA + url(kod, '')).replace('{{hjalp}}', HJALP + url(kod, ''))
+        ut = ut.replace('{{konto}}', KONTO + url(kod, '')).replace('{{ladda}}', LADDA + url(kod, '')).replace('{{hjalp}}', HJALP + url(kod, '')).replace('{{proxy}}', PROXY + url(kod, ''))
         ut = re.sub(r'\{\{t:([a-z0-9_.]+)\}\}', lambda m: t[m.group(1)], ut)
         ut = ut.replace('{{pre}}', hem + ('' if kod == 'sv' else f'/{kod}'))   # länkar inne i översättningar
         ut = re.sub(r'\{\{([a-z-]+)\}\}', lambda m: ikon(m.group(1)), ut)

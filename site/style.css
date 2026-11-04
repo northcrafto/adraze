@@ -356,3 +356,14 @@ section { padding: 120px 0; }
   .menu-btn { margin-left: 0; }
   .sprak-lista { position: fixed; top: 64px; right: 16px; }
 }
+
+/* Menyn rymmer sju länkar: inga radbrytningar, och hamburgaren tar över innan de inte får plats */
+.links a { white-space: nowrap; }
+@media (min-width: 1301px) { .nav { gap: 20px; } .links { gap: 20px; } .nav-cta { margin-left: 0; } }
+@media (max-width: 1300px) {
+  .links, .nav-cta, .nav-login { display: none; }
+  .menu-btn { display: grid; margin-left: 0; }
+  .menu { display: flex; }
+  .nav { gap: 8px; }
+  .links + .sprak { margin-left: auto; }
+}

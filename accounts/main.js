@@ -50,13 +50,13 @@ if (sprak) {
   if (location.pathname !== '/' || /bot|crawl|spider|lighthouse/i.test(navigator.userAgent)) return;
   let valt = null;
   try { valt = localStorage.getItem('adraze-sprak'); } catch {}
-  if (valt) { if (valt !== 'sv') location.replace(`/${valt}/${location.hash}`); return; }
+  if (valt) { if (valt !== 'sv') location.replace(`/${valt}/${location.search}${location.hash}`); return; }
   const finns = [...document.querySelectorAll('[data-sprak]')].map((a) => a.dataset.sprak);
   for (const l of navigator.languages || [navigator.language]) {
     let kod = l.toLowerCase().split('-')[0];
     if (kod === 'no' || kod === 'nn') kod = 'nb';
     if (kod === 'sv') return;
-    if (finns.includes(kod)) { location.replace(`/${kod}/${location.hash}`); return; }
+    if (finns.includes(kod)) { location.replace(`/${kod}/${location.search}${location.hash}`); return; }
   }
 })();
 
