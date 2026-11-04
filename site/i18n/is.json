@@ -542,5 +542,11 @@
   "proxy.err_address": "Skrifaðu vefslóð, t.d. youtube.com.",
   "proxy.err_support": "Vafrinn þinn ræður ekki við proxyið. Prófaðu nýja útgáfu af Chrome, Firefox, Edge eða Safari (ekki huliðsglugga í Firefox).",
   "proxy.err_start": "Proxyið gat ekki ræst. Endurhlaðaðu síðunni og reyndu aftur.",
-  "nav.proxy": "Proxy"
+  "nav.proxy": "Proxy",
+  "proxy.tab_new": "Nýr flipi",
+  "proxy.tab_close": "Loka flipa",
+  "proxy.menu": "Valmynd",
+  "proxy.menu_leave": "Fara úr proxyinu",
+  "proxy.list_empty": "Ekkert stöðvað á þessari síðu enn.",
+  "proxy.newtab_safe": "AdRaze verndar þig: auglýsingar og rekjarar eru stöðvaðir"
 }

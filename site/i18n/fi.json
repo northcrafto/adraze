@@ -542,5 +542,11 @@
   "proxy.err_address": "Kirjoita osoite, esim. youtube.com.",
   "proxy.err_support": "Selaimesi ei tue proxya. Kokeile Chromen, Firefoxin, Edgen tai Safarin uutta versiota (ei Firefoxin yksityistä ikkunaa).",
   "proxy.err_start": "Proxy ei käynnistynyt. Lataa sivu uudelleen ja yritä uudestaan.",
-  "nav.proxy": "Proxy"
+  "nav.proxy": "Proxy",
+  "proxy.tab_new": "Uusi välilehti",
+  "proxy.tab_close": "Sulje välilehti",
+  "proxy.menu": "Valikko",
+  "proxy.menu_leave": "Poistu proxysta",
+  "proxy.list_empty": "Tällä sivulla ei ole vielä pysäytetty mitään.",
+  "proxy.newtab_safe": "AdRaze suojaa sinua: mainokset ja seuranta pysäytetään"
 }

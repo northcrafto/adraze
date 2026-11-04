@@ -542,5 +542,11 @@
   "proxy.err_address": "Skriv en adresse, f.eks. youtube.com.",
   "proxy.err_support": "Nettleseren din klarer ikke proxyen. Prøv en ny versjon av Chrome, Firefox, Edge eller Safari (ikke privat vindu i Firefox).",
   "proxy.err_start": "Proxyen kunne ikke starte. Last inn siden på nytt og prøv igjen.",
-  "nav.proxy": "Proxy"
+  "nav.proxy": "Proxy",
+  "proxy.tab_new": "Ny fane",
+  "proxy.tab_close": "Lukk fane",
+  "proxy.menu": "Meny",
+  "proxy.menu_leave": "Forlat proxyen",
+  "proxy.list_empty": "Ingenting stoppet på denne siden ennå.",
+  "proxy.newtab_safe": "AdRaze beskytter deg: reklame og sporere stoppes"
 }

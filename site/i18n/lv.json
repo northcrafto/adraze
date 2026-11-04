@@ -542,5 +542,11 @@
   "proxy.err_address": "Ieraksti adresi, piem., youtube.com.",
   "proxy.err_support": "Tavs pārlūks neatbalsta starpniekserveri. Izmēģini jaunu Chrome, Firefox, Edge vai Safari versiju (ne Firefox privāto logu).",
   "proxy.err_start": "Starpniekserveri neizdevās palaist. Pārlādē lapu un mēģini vēlreiz.",
-  "nav.proxy": "Proxy"
+  "nav.proxy": "Proxy",
+  "proxy.tab_new": "Jauna cilne",
+  "proxy.tab_close": "Aizvērt cilni",
+  "proxy.menu": "Izvēlne",
+  "proxy.menu_leave": "Iziet no starpniekservera",
+  "proxy.list_empty": "Šajā lapā vēl nekas nav apturēts.",
+  "proxy.newtab_safe": "AdRaze tevi sargā: reklāmas un izsekotāji tiek apturēti"
 }

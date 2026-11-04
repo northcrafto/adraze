@@ -542,5 +542,11 @@
   "proxy.err_address": "Írj be egy címet, pl. youtube.com.",
   "proxy.err_support": "A böngésződ nem tudja futtatni a proxyt. Próbáld a Chrome, Firefox, Edge vagy Safari friss verzióját (Firefoxban ne privát ablakban).",
   "proxy.err_start": "A proxy nem indult el. Töltsd újra az oldalt, és próbáld újra.",
-  "nav.proxy": "Proxy"
+  "nav.proxy": "Proxy",
+  "proxy.tab_new": "Új lap",
+  "proxy.tab_close": "Lap bezárása",
+  "proxy.menu": "Menü",
+  "proxy.menu_leave": "Kilépés a proxyból",
+  "proxy.list_empty": "Ezen az oldalon még semmit sem állítottunk meg.",
+  "proxy.newtab_safe": "Az AdRaze véd: a reklámokat és nyomkövetőket megállítjuk"
 }

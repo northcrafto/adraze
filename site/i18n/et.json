@@ -542,5 +542,11 @@
   "proxy.err_address": "Kirjuta aadress, nt youtube.com.",
   "proxy.err_support": "Sinu brauser ei toeta proksit. Proovi Chrome'i, Firefoxi, Edge'i või Safari uut versiooni (mitte Firefoxi privaatakent).",
   "proxy.err_start": "Proksi ei käivitunud. Laadi leht uuesti ja proovi veel kord.",
-  "nav.proxy": "Proxy"
+  "nav.proxy": "Proxy",
+  "proxy.tab_new": "Uus vaheleht",
+  "proxy.tab_close": "Sulge vaheleht",
+  "proxy.menu": "Menüü",
+  "proxy.menu_leave": "Lahku proksist",
+  "proxy.list_empty": "Sellel lehel pole veel midagi peatatud.",
+  "proxy.newtab_safe": "AdRaze kaitseb sind: reklaamid ja jälgijad peatatakse"
 }

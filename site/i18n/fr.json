@@ -542,5 +542,11 @@
   "proxy.err_address": "Saisissez une adresse, ex. youtube.com.",
   "proxy.err_support": "Votre navigateur ne prend pas en charge le proxy. Essayez une version récente de Chrome, Firefox, Edge ou Safari (pas une fenêtre privée dans Firefox).",
   "proxy.err_start": "Le proxy n'a pas pu démarrer. Rechargez la page et réessayez.",
-  "nav.proxy": "Proxy"
+  "nav.proxy": "Proxy",
+  "proxy.tab_new": "Nouvel onglet",
+  "proxy.tab_close": "Fermer l'onglet",
+  "proxy.menu": "Menu",
+  "proxy.menu_leave": "Quitter le proxy",
+  "proxy.list_empty": "Rien de bloqué sur cette page pour l'instant.",
+  "proxy.newtab_safe": "AdRaze vous protège : pubs et traqueurs sont bloqués"
 }

@@ -542,5 +542,11 @@
   "proxy.err_address": "Введіть адресу, напр. youtube.com.",
   "proxy.err_support": "Ваш браузер не підтримує проксі. Спробуйте нову версію Chrome, Firefox, Edge або Safari (не приватне вікно Firefox).",
   "proxy.err_start": "Не вдалося запустити проксі. Перезавантажте сторінку й спробуйте ще раз.",
-  "nav.proxy": "Проксі"
+  "nav.proxy": "Проксі",
+  "proxy.tab_new": "Нова вкладка",
+  "proxy.tab_close": "Закрити вкладку",
+  "proxy.menu": "Меню",
+  "proxy.menu_leave": "Вийти з проксі",
+  "proxy.list_empty": "На цій сторінці ще нічого не зупинено.",
+  "proxy.newtab_safe": "AdRaze захищає вас: реклама й трекери зупиняються"
 }

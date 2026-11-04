@@ -542,5 +542,11 @@
   "proxy.err_address": "Wpisz adres, np. youtube.com.",
   "proxy.err_support": "Twoja przeglądarka nie obsługuje proxy. Spróbuj nowej wersji Chrome, Firefox, Edge lub Safari (nie w oknie prywatnym Firefoksa).",
   "proxy.err_start": "Nie udało się uruchomić proxy. Odśwież stronę i spróbuj ponownie.",
-  "nav.proxy": "Proxy"
+  "nav.proxy": "Proxy",
+  "proxy.tab_new": "Nowa karta",
+  "proxy.tab_close": "Zamknij kartę",
+  "proxy.menu": "Menu",
+  "proxy.menu_leave": "Opuść proxy",
+  "proxy.list_empty": "Na tej stronie nic jeszcze nie zatrzymano.",
+  "proxy.newtab_safe": "AdRaze cię chroni: reklamy i trackery są zatrzymywane"
 }

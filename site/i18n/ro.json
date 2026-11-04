@@ -542,5 +542,11 @@
   "proxy.err_address": "Scrie o adresă, ex. youtube.com.",
   "proxy.err_support": "Browserul tău nu poate rula proxy-ul. Încearcă o versiune recentă de Chrome, Firefox, Edge sau Safari (nu fereastră privată în Firefox).",
   "proxy.err_start": "Proxy-ul nu a putut porni. Reîncarcă pagina și încearcă din nou.",
-  "nav.proxy": "Proxy"
+  "nav.proxy": "Proxy",
+  "proxy.tab_new": "Filă nouă",
+  "proxy.tab_close": "Închide fila",
+  "proxy.menu": "Meniu",
+  "proxy.menu_leave": "Ieși din proxy",
+  "proxy.list_empty": "Nimic oprit încă pe această pagină.",
+  "proxy.newtab_safe": "AdRaze te protejează: reclamele și trackerele sunt oprite"
 }

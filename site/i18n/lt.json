@@ -542,5 +542,11 @@
   "proxy.err_address": "Įrašykite adresą, pvz., youtube.com.",
   "proxy.err_support": "Jūsų naršyklė nepalaiko tarpinio serverio. Išbandykite naują Chrome, Firefox, Edge ar Safari versiją (ne privatų Firefox langą).",
   "proxy.err_start": "Tarpinio serverio paleisti nepavyko. Įkelkite puslapį iš naujo ir bandykite dar kartą.",
-  "nav.proxy": "Proxy"
+  "nav.proxy": "Proxy",
+  "proxy.tab_new": "Naujas skirtukas",
+  "proxy.tab_close": "Uždaryti skirtuką",
+  "proxy.menu": "Meniu",
+  "proxy.menu_leave": "Išeiti iš tarpinio serverio",
+  "proxy.list_empty": "Šiame puslapyje dar nieko nesustabdyta.",
+  "proxy.newtab_safe": "AdRaze jus saugo: reklamos ir sekikliai sustabdomi"
 }

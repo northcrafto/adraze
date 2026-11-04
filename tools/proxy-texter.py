@@ -477,12 +477,45 @@ T = {
  'Tarayıcınız proxy\'yi çalıştıramıyor. Chrome, Firefox, Edge veya Safari\'nin güncel bir sürümünü deneyin (Firefox\'ta gizli pencere değil).',
  'Proxy başlatılamadı. Sayfayı yenileyip tekrar deneyin.'],
 }
+
+# Webbläsarlika surfläget (flikar, meny)
+K2 = ['tab_new', 'tab_close', 'menu', 'menu_leave', 'list_empty', 'newtab_safe']
+T2 = {
+'sv': ['Ny flik', 'Stäng flik', 'Meny', 'Lämna proxyn', 'Inget stoppat än på den här sidan.', 'AdRaze skyddar dig: reklam och spårare stoppas'],
+'en': ['New tab', 'Close tab', 'Menu', 'Leave the proxy', 'Nothing blocked on this page yet.', 'AdRaze protects you: ads and trackers are blocked'],
+'nb': ['Ny fane', 'Lukk fane', 'Meny', 'Forlat proxyen', 'Ingenting stoppet på denne siden ennå.', 'AdRaze beskytter deg: reklame og sporere stoppes'],
+'da': ['Ny fane', 'Luk fane', 'Menu', 'Forlad proxyen', 'Intet stoppet på denne side endnu.', 'AdRaze beskytter dig: reklamer og trackere stoppes'],
+'fi': ['Uusi välilehti', 'Sulje välilehti', 'Valikko', 'Poistu proxysta', 'Tällä sivulla ei ole vielä pysäytetty mitään.', 'AdRaze suojaa sinua: mainokset ja seuranta pysäytetään'],
+'is': ['Nýr flipi', 'Loka flipa', 'Valmynd', 'Fara úr proxyinu', 'Ekkert stöðvað á þessari síðu enn.', 'AdRaze verndar þig: auglýsingar og rekjarar eru stöðvaðir'],
+'de': ['Neuer Tab', 'Tab schließen', 'Menü', 'Proxy verlassen', 'Auf dieser Seite noch nichts gestoppt.', 'AdRaze schützt dich: Werbung und Tracker werden gestoppt'],
+'nl': ['Nieuw tabblad', 'Tabblad sluiten', 'Menu', 'Proxy verlaten', 'Nog niets gestopt op deze pagina.', 'AdRaze beschermt je: advertenties en trackers worden gestopt'],
+'fr': ['Nouvel onglet', 'Fermer l\'onglet', 'Menu', 'Quitter le proxy', 'Rien de bloqué sur cette page pour l\'instant.', 'AdRaze vous protège : pubs et traqueurs sont bloqués'],
+'es': ['Nueva pestaña', 'Cerrar pestaña', 'Menú', 'Salir del proxy', 'Aún no se ha bloqueado nada en esta página.', 'AdRaze te protege: anuncios y rastreadores bloqueados'],
+'pt': ['Nova aba', 'Fechar aba', 'Menu', 'Sair do proxy', 'Nada bloqueado nesta página ainda.', 'O AdRaze protege você: anúncios e rastreadores bloqueados'],
+'it': ['Nuova scheda', 'Chiudi scheda', 'Menu', 'Esci dal proxy', 'Ancora niente fermato su questa pagina.', 'AdRaze ti protegge: pubblicità e tracker fermati'],
+'pl': ['Nowa karta', 'Zamknij kartę', 'Menu', 'Opuść proxy', 'Na tej stronie nic jeszcze nie zatrzymano.', 'AdRaze cię chroni: reklamy i trackery są zatrzymywane'],
+'cs': ['Nová karta', 'Zavřít kartu', 'Nabídka', 'Opustit proxy', 'Na této stránce zatím nic nezastaveno.', 'AdRaze vás chrání: reklamy a sledovače se zastavují'],
+'sk': ['Nová karta', 'Zavrieť kartu', 'Ponuka', 'Opustiť proxy', 'Na tejto stránke zatiaľ nič nezastavené.', 'AdRaze vás chráni: reklamy a sledovače sa zastavujú'],
+'hu': ['Új lap', 'Lap bezárása', 'Menü', 'Kilépés a proxyból', 'Ezen az oldalon még semmit sem állítottunk meg.', 'Az AdRaze véd: a reklámokat és nyomkövetőket megállítjuk'],
+'ro': ['Filă nouă', 'Închide fila', 'Meniu', 'Ieși din proxy', 'Nimic oprit încă pe această pagină.', 'AdRaze te protejează: reclamele și trackerele sunt oprite'],
+'bg': ['Нов раздел', 'Затвори раздела', 'Меню', 'Излез от проксито', 'Все още нищо не е спряно на тази страница.', 'AdRaze те пази: рекламите и тракерите се спират'],
+'el': ['Νέα καρτέλα', 'Κλείσιμο καρτέλας', 'Μενού', 'Έξοδος από το proxy', 'Τίποτα δεν έχει σταματήσει ακόμη σε αυτή τη σελίδα.', 'Το AdRaze σας προστατεύει: διαφημίσεις και ιχνηλάτες σταματούν'],
+'hr': ['Nova kartica', 'Zatvori karticu', 'Izbornik', 'Napusti proxy', 'Na ovoj stranici još ništa nije zaustavljeno.', 'AdRaze te štiti: reklame i pratitelji se zaustavljaju'],
+'sl': ['Nov zavihek', 'Zapri zavihek', 'Meni', 'Zapusti proxy', 'Na tej strani še nič ni ustavljeno.', 'AdRaze vas ščiti: oglasi in sledilci se ustavijo'],
+'et': ['Uus vaheleht', 'Sulge vaheleht', 'Menüü', 'Lahku proksist', 'Sellel lehel pole veel midagi peatatud.', 'AdRaze kaitseb sind: reklaamid ja jälgijad peatatakse'],
+'lv': ['Jauna cilne', 'Aizvērt cilni', 'Izvēlne', 'Iziet no starpniekservera', 'Šajā lapā vēl nekas nav apturēts.', 'AdRaze tevi sargā: reklāmas un izsekotāji tiek apturēti'],
+'lt': ['Naujas skirtukas', 'Uždaryti skirtuką', 'Meniu', 'Išeiti iš tarpinio serverio', 'Šiame puslapyje dar nieko nesustabdyta.', 'AdRaze jus saugo: reklamos ir sekikliai sustabdomi'],
+'uk': ['Нова вкладка', 'Закрити вкладку', 'Меню', 'Вийти з проксі', 'На цій сторінці ще нічого не зупинено.', 'AdRaze захищає вас: реклама й трекери зупиняються'],
+'tr': ['Yeni sekme', 'Sekmeyi kapat', 'Menü', 'Proxy\'den çık', 'Bu sayfada henüz bir şey durdurulmadı.', 'AdRaze sizi koruyor: reklamlar ve izleyiciler durduruluyor'],
+}
 NAV = {'uk': 'Проксі', 'bg': 'Прокси'}
 for kod, rader in T.items():
     assert len(rader) == len(K), (kod, len(rader))
     f = I18N / f'{kod}.json'
     d = json.loads(f.read_text())
     d.update({f'proxy.{k}': v for k, v in zip(K, rader)})
+    assert len(T2[kod]) == len(K2), kod
+    d.update({f'proxy.{k}': v for k, v in zip(K2, T2[kod])})
     d['nav.proxy'] = NAV.get(kod, 'Proxy')
     f.write_text(json.dumps(d, ensure_ascii=False, indent=2) + '\n')
 print('skrev', len(T), 'språk')
