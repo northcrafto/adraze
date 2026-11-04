@@ -75,6 +75,7 @@
 </div>
 
 
+<script type="application/json" id="px-texter">{}</script>
 <main id="proxy" data-lang="sv" data-t-blocked="stoppade" data-t-loading="Laddar"
   data-e-adress="Skriv en adress, t.ex. youtube.com." data-e-stod="Din webbläsare klarar inte proxyn. Prova en ny version av Chrome, Firefox, Edge eller Safari (inte i privat läge i Firefox)." data-e-start="Proxyn kunde inte starta. Ladda om sidan och försök igen.">
 
@@ -160,6 +161,11 @@
       <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
       <symbol id="i-exit" viewBox="0 0 24 24"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 16l-4-4 4-4M6 12h10"/></symbol>
       <symbol id="i-puzzle" viewBox="0 0 24 24"><path d="M10 4.5a2 2 0 1 1 4 0V6h3a1 1 0 0 1 1 1v3h1.5a2 2 0 1 1 0 4H18v4a1 1 0 0 1-1 1h-3.5v-1.5a2 2 0 1 0-4 0V19H6a1 1 0 0 1-1-1v-4h1.5a2 2 0 1 0 0-4H5V7a1 1 0 0 1 1-1h4z"/></symbol>
+      <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+      <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.8 1.8-1.7 0-.5-.2-.9-.5-1.2-.3-.4-.5-.8-.5-1.2 0-.9.8-1.7 1.7-1.7H16a5 5 0 0 0 5-5c0-4-4-7.2-9-7.2z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="14.5" cy="7" r="1"/><circle cx="17" cy="11" r="1"/></symbol>
+      <symbol id="i-translate" viewBox="0 0 24 24"><path d="M4 5h9M8.5 3v2M6 5c.6 3 2.7 5.8 5.5 7M11 5c-.7 3.3-3.3 6.2-6.5 7.6"/><path d="M12.5 21l4-9 4 9M14 17.5h5"/></symbol>
+      <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.8v.2"/></symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></symbol>
       <symbol id="i-newtab" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M12 9.5v5M9.5 12h5"/></symbol>
     </svg>
 
@@ -179,10 +185,11 @@
         <form class="px-omni" id="px-bar-form" novalidate>
           <span class="px-skold" id="px-skold" aria-hidden="true"><svg class="ic ic-sm"><use href="#i-shield"/></svg></span>
           <label class="px-dold" for="px-bar-url">Adress eller sökning</label>
-          <input id="px-bar-url" type="text" inputmode="url" autocomplete="off" spellcheck="false" autocapitalize="off" maxlength="4000" placeholder="Skriv en adress, t.ex. youtube.com">
+          <input id="px-bar-url" type="text" inputmode="url" autocomplete="off" spellcheck="false" autocapitalize="off" maxlength="4000" placeholder="Skriv en adress, t.ex. youtube.com" data-t-placeholder="Sök tryggt eller skriv en adress">
           <button type="button" class="px-ab" id="px-raknare" title="Det här har AdRaze stoppat sedan du började surfa" aria-label="Det här har AdRaze stoppat sedan du började surfa"><img src="/logo-mark.svg" alt="" width="17" height="17"><b id="px-antal">0</b></button>
         </form>
       </div>
+      <button type="button" class="px-ikon-knapp" id="px-installningar-knapp" data-t-title="Inställningar"><svg class="ic"><use href="#i-settings"/></svg></button>
       <button type="button" class="px-ikon-knapp" id="px-menyknapp" title="Meny" aria-label="Meny" aria-expanded="false" aria-controls="px-menyn"><svg class="ic"><use href="#i-menu"/></svg></button>
     </div>
     <div class="px-laddar" id="px-laddar"><span></span></div>
@@ -190,6 +197,7 @@
     <!-- Menyn -->
     <div class="px-menyn" id="px-menyn" role="menu" hidden>
       <button type="button" role="menuitem" id="px-meny-nyflik"><svg class="ic"><use href="#i-newtab"/></svg>Ny flik</button>
+      <button type="button" role="menuitem" id="px-meny-installningar"><svg class="ic"><use href="#i-settings"/></svg><span data-t="Inställningar"></span></button>
       <a role="menuitem" href="https://chromewebstore.google.com/detail/cgdjdjgdoklomdphknggkhfghlglcppd" target="_blank" rel="noopener"><svg class="ic"><use href="#i-puzzle"/></svg>Lägg till i Chrome</a>
       <hr>
       <button type="button" role="menuitem" id="px-stang"><svg class="ic"><use href="#i-exit"/></svg>Lämna proxyn</button>
@@ -205,22 +213,101 @@
 
     <!-- Sidorna -->
     <div class="px-ram" id="px-ram">
+      <!-- Ny flik: samma startsida som AdRaze-webbläsaren -->
       <div class="px-nyfliksida" id="px-nyfliksida" hidden>
-        <img src="/logo-mark.svg" alt="" width="72" height="72">
-        <p class="px-ny-titel">AdRaze <span>Proxy</span></p>
-        <form class="px-ny-sok" id="px-ny-form" novalidate>
-          <svg class="ic"><use href="#i-search"/></svg>
-          <label class="px-dold" for="px-ny-url">Adress eller sökning</label>
-          <input id="px-ny-url" type="text" inputmode="url" autocomplete="off" spellcheck="false" autocapitalize="off" maxlength="4000" placeholder="Skriv en adress, t.ex. youtube.com">
-        </form>
-        <div class="px-genvagar">
-          <button type="button" data-ga="https://www.youtube.com"><span>Y</span>YouTube</button>
-          <button type="button" data-ga="https://www.svt.se"><span>S</span>SVT</button>
-          <button type="button" data-ga="https://sv.wikipedia.org"><span>W</span>Wikipedia</button>
-          <button type="button" data-ga="https://www.aftonbladet.se"><span>A</span>Aftonbladet</button>
-          <button type="button" data-ga="https://duckduckgo.com"><span>D</span>DuckDuckGo</button>
+        <div class="nt-bg" id="nt-bg"></div>
+        <div class="nt-ton"></div>
+        <div class="nt-inre">
+          <div id="nt-klocka"><div id="nt-clock"></div><div id="nt-greet"></div></div>
+          <form class="nt-sok" id="px-ny-form" novalidate>
+            <span class="nt-sok-skold"><svg class="ic ic-sm"><use href="#i-shield-check"/></svg></span>
+            <label class="px-dold" for="px-ny-url">Adress eller sökning</label>
+            <input id="px-ny-url" type="text" inputmode="url" autocomplete="off" spellcheck="false" autocapitalize="off" maxlength="4000" data-t-placeholder="Sök tryggt eller skriv en adress">
+          </form>
+          <div id="shortcuts" class="nt-genvagar"></div>
         </div>
-        <p class="px-ny-skydd"><i></i>AdRaze skyddar dig: reklam och spårare stoppas</p>
+        <div class="nt-stats" id="nt-stats">
+          <div class="nt-st nt-st-main">
+            <img src="/logo-mark.svg" alt="" class="nt-st-mark" width="30" height="30">
+            <div><div class="nt-st-n nt-st-acc"><span id="stat-blocked">0</span></div><div class="nt-st-l" data-t="annonser och spårare stoppade"></div></div>
+          </div>
+          <div class="nt-st"><div class="nt-st-n"><span id="stat-band">0</span><small id="stat-band-u">MB</small></div><div class="nt-st-l" data-t="mindre data"></div></div>
+          <div class="nt-st"><div class="nt-st-n"><span id="stat-time">0</span><small id="stat-time-u"></small></div><div class="nt-st-l" data-t="sparad tid"></div></div>
+        </div>
+        <div id="nt-credit"></div>
+      </div>
+
+      <!-- Inställningar: som webbläsarens, men bara det som gäller proxyn och ingen inloggning -->
+      <div class="px-inst" id="px-inst" hidden>
+        <button type="button" class="px-ikon-knapp px-inst-stang" id="px-inst-stang" data-t-title="Stäng"><svg class="ic ic-sm"><use href="#i-close"/></svg></button>
+        <aside class="inst-rail">
+          <div class="inst-brand"><img src="/logo-mark.svg" alt="" width="22" height="22"><span data-t="Inställningar"></span></div>
+          <nav class="inst-nav" id="inst-nav">
+            <div class="inst-glbl">AdRaze Proxy</div>
+            <button type="button" class="inst-tab on" data-cat="utseende"><svg class="ic"><use href="#i-palette"/></svg><span data-t="Utseende"></span></button>
+            <button type="button" class="inst-tab" data-cat="sok"><svg class="ic"><use href="#i-search"/></svg><span data-t="Sökmotor"></span></button>
+            <button type="button" class="inst-tab" data-cat="sprak"><svg class="ic"><use href="#i-translate"/></svg><span data-t="Språk"></span></button>
+            <div class="inst-glbl" data-t="Skydd"></div>
+            <button type="button" class="inst-tab" data-cat="integritet"><svg class="ic"><use href="#i-shield"/></svg><span data-t="Integritet & säkerhet"></span></button>
+            <button type="button" class="inst-tab" data-cat="om"><svg class="ic"><use href="#i-info"/></svg><span data-t="Om"></span></button>
+          </nav>
+        </aside>
+        <div class="inst-main">
+          <div class="inst-wrap">
+            <div class="inst-panel" data-cat="utseende">
+              <h2 class="inst-h" data-t="Utseende"></h2>
+              <div class="inst-rad"><div class="inst-txt"><div class="inst-titel" data-t="Tema"></div><div class="inst-besk" data-t="Ljust eller mörkt utseende på proxyn."></div></div>
+                <div class="seg"><button type="button" class="seg-btn" data-tema="light" data-t="Ljust"></button><button type="button" class="seg-btn" data-tema="dark" data-t="Mörkt"></button></div></div>
+              <div class="inst-rad"><div class="inst-txt"><div class="inst-titel" data-t="Bakgrund"></div><div class="inst-besk" data-t="Ny bild för varje ny flik, en egen bild eller dagens bild."></div></div>
+                <button type="button" class="inst-knapp" id="inst-bg" data-t="Ändra"></button></div>
+              <div class="inst-rad"><div class="inst-txt"><div class="inst-titel" data-t="Toppsajter"></div><div class="inst-besk" data-t="Dina egna genvägar, eller de sidor du besöker oftast."></div></div>
+                <div class="seg"><button type="button" class="seg-btn" data-topp="mina" data-t="Mina"></button><button type="button" class="seg-btn" data-topp="mest" data-t="Mest besökta"></button></div></div>
+              <div class="inst-rad"><div class="inst-txt"><div class="inst-titel" data-t="Visa klockan"></div><div class="inst-besk" data-t="Klocka och hälsning på ny flik-sidan."></div></div>
+                <label class="switch"><input type="checkbox" id="inst-klocka"><span class="track"></span></label></div>
+              <div class="inst-rad"><div class="inst-txt"><div class="inst-titel" data-t="Visa statistiken"></div><div class="inst-besk" data-t="Det AdRaze stoppat, längst ned på ny flik-sidan."></div></div>
+                <label class="switch"><input type="checkbox" id="inst-statistik"><span class="track"></span></label></div>
+            </div>
+            <div class="inst-panel" data-cat="sok" hidden>
+              <h2 class="inst-h" data-t="Sökmotor"></h2>
+              <p class="inst-lead" data-t="Används när du söker i adressfältet."></p>
+              <div class="inst-motorer" id="inst-motorer"></div>
+            </div>
+            <div class="inst-panel" data-cat="sprak" hidden>
+              <h2 class="inst-h" data-t="Språk"></h2>
+              <p class="inst-lead" data-t="Språket i proxyns menyer."></p>
+              <div class="inst-motorer" id="inst-sprak"></div>
+            </div>
+            <div class="inst-panel" data-cat="integritet" hidden>
+              <h2 class="inst-h" data-t="Integritet & säkerhet"></h2>
+              <p class="inst-lead" data-t="Ingen inloggning. Allt sparas bara i din webbläsare, aldrig på våra servrar."></p>
+              <div class="inst-rad"><div class="inst-txt"><div class="inst-titel" data-t="Rensa proxyns data"></div><div class="inst-besk" data-t="Historik, genvägar, sidcache och statistik i den här webbläsaren."></div></div>
+                <button type="button" class="inst-knapp inst-risk" id="inst-rensa" data-t="Rensa"></button></div>
+            </div>
+            <div class="inst-panel" data-cat="om" hidden>
+              <h2 class="inst-h" data-t="Om"></h2>
+              <div class="inst-rad"><img src="/logo-mark.svg" alt="" width="40" height="40"><div class="inst-txt"><div class="inst-titel">AdRaze Proxy</div><div class="inst-besk" data-t="Öppen källkod. Proxyn bygger på Scramjet och Wisp, med AdRazes blockerare inbyggd."></div></div></div>
+              <div class="inst-rad"><div class="inst-txt"><div class="inst-titel" data-t="Källkod på GitHub"></div><div class="inst-besk">github.com/northcrafto/adraze-api · AGPL-3.0</div></div>
+                <a class="inst-knapp" href="https://github.com/northcrafto/adraze-api" target="_blank" rel="noopener">GitHub</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bakgrundsväljaren -->
+      <div class="px-bgval" id="px-bgval" hidden>
+        <div class="bgval-kort">
+          <button type="button" class="px-ikon-knapp bgval-stang" id="bgval-stang" data-t-title="Stäng"><svg class="ic ic-sm"><use href="#i-close"/></svg></button>
+          <h1 data-t="Bakgrund"></h1>
+          <p data-t="Välj en av AdRazes bakgrunder eller ladda upp din egen."></p>
+          <div class="bgval-grid" id="bgval-grid"></div>
+          <div class="bgval-knappar">
+            <button type="button" class="inst-knapp inst-fylld" id="bgval-ladda"><svg class="ic ic-sm"><use href="#i-upload"/></svg><span data-t="Ladda upp egen"></span></button>
+            <button type="button" class="inst-knapp" id="bgval-slump" data-t="Ny bild varje flik"></button>
+            <button type="button" class="inst-knapp" id="bgval-dag" data-t="Dagens bild"></button>
+          </div>
+          <p class="bgval-fel" id="bgval-fel" hidden></p>
+          <input type="file" id="bgval-fil" accept="image/*" hidden>
+        </div>
       </div>
     </div>
   </div>
