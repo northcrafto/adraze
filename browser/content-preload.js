@@ -208,10 +208,24 @@ function isLoginField(el) {
   const t = (el.type || 'text').toLowerCase();
   if (t === 'password') return true;
   if (!['text', 'email', 'tel', ''].includes(t)) return false;
-  const ac = (el.autocomplete || '').toLowerCase();
-  if (/username|email/.test(ac)) return true;
+  // Bara riktiga inloggnings-/registreringsformulär: användarnamnsfältet i ett formulär som HAR ett lösenordsfält,
+  // eller ett fält som sidan själv märkt som användarnamn (tvåstegsinloggning, t.ex. Google). Vanliga textfält
+  // (födelsedatum, namn, sök, adress …) får aldrig väljaren.
+  if (/\b(username|webauthn)\b/i.test(el.getAttribute('autocomplete') || '')) return true;
   const f = findFields(el);
-  return !!(f && f.user === el) || /user|e-?mail|e-?post|login|anv(ä|a)ndar/i.test((el.name || '') + ' ' + (el.id || ''));
+  return !!(f && f.pw && f.user === el && hasPwInScope(el));
+}
+function hasPwInScope(el) {
+  const vis = (x) => { try { const r = x.getBoundingClientRect(); return r.width > 0 && r.height > 0; } catch { return true; } };
+  const form = el.form || el.closest('form');
+  return Array.from((form || document).querySelectorAll('input[type=password]')).some(vis);
+}
+function looksLikeUsername(el) {
+  if (!el) return false;
+  const ac = el.getAttribute('autocomplete') || '';
+  if (/\b(username|email|webauthn)\b/i.test(ac)) return true;
+  if ((el.type || '').toLowerCase() === 'email') return true;
+  return /user|e-?mail|e-?post|login|anv(ä|a)ndar/i.test((el.name || '') + ' ' + (el.id || ''));
 }
 async function pwOpenFor(field) {
   if (pwHost && pwField === field) return;
@@ -270,7 +284,9 @@ function hookCapture() {
       const a = document.activeElement && document.activeElement.tagName === 'INPUT' ? document.activeElement : null;
       const f = findFields(a);
       if (f && f.pw && f.pw.value) last = { origin: location.origin, username: (f.user && f.user.value) || (last && last.origin === location.origin && last.username) || '', password: f.pw.value };
-      else if (f && f.user && f.user.value && !f.pw) last = { origin: location.origin, username: f.user.value, password: (last && last.password) || '' };   // tvåstegsinloggning
+      // Tvåstegsinloggning (namn först, lösenord på nästa steg): bara ett riktigt användarnamnsfält, och bara INNAN
+      // något lösenord skrivits – annars blev t.ex. födelsedatumet i en registrering "användarnamnet" och rutan dök upp igen.
+      else if (f && f.user && f.user.value && !f.pw && f.user === a && looksLikeUsername(a) && !(last && last.password)) last = { origin: location.origin, username: f.user.value, password: '' };
     }
     function fire() {
       if (!last || !last.password) return;
@@ -278,6 +294,7 @@ function hookCapture() {
       if (sig === sentSig) return;
       sentSig = sig;
       ipcRenderer.send('pw:capture', last);
+      last = null;   // en fråga per inloggning; senare steg (födelsedatum, profil …) ska inte fråga igen
     }
     const LOGINBTN = /logga ?in|logga|sign ?in|log ?in|login|fortsätt|forts|continue|nästa|next|verifiera|verify|submit|skicka/i;
     // Håll inloggningen i minnet medan användaren skriver – så värdet finns kvar även om sidans JS tömmer fältet.
