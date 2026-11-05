@@ -30,7 +30,17 @@ async function kor(rot) {
     R.ok('wallet:list nekas från webbsida', (await M(`return ${h('wallet:list')} ? await ${h('wallet:list')}(${fejk('https://evil.example/', 'https://evil.example')}) : 'saknas'`)) === null);
     R.ok('wallet:list tillåts från ui/', Array.isArray(await M(`const u = el.webContents.getAllWebContents().map((w) => w.getURL()).find((x) => x.includes('/ui/shell.html')); return await ${h('wallet:list')}({ senderFrame: { url: u, origin: 'file://' }, sender: {} })`)));
     R.ok('pw:for-origin använder ramens origin, inte argumentet', JSON.stringify(await M(`return await ${h('pw:for-origin')}(${fejk('https://a.example/', 'https://a.example')}, 'https://bank.example')`)) === '[]');
-    R.ok('wallet:get nekas på http-sida', (await M(`return await ${h('wallet:get')}(${fejk('http://shop.example/', 'http://shop.example')}, 'x')`)) === null);
+    R.ok('wallet:get nekas på http-sida', (await M(`return await ${h('wallet:get')}(${fejk('http://evil.example/', 'http://evil.example')}, 'x')`)) === null);
+    // Säkerhetsgranskningen 2026-11-05: hela kortet bara till vårt eget gränssnitt; webbsidor får kort via wallet:valj
+    // (bara huvudramen, efter ditt val), och lösenord bara för exakt ursprung (+ www-tvillingen) – aldrig "samma domän".
+    R.ok('wallet:get nekas på https-sida (bara ui/)', (await M(`return await ${h('wallet:get')}(${fejk('https://evil.example/', 'https://evil.example')}, 'x')`)) === null);
+    R.ok('wallet:valj nekas från underram', (await M(`return await ${h('wallet:valj')}({ senderFrame: { url: 'https://evil.example/', origin: 'https://evil.example', parent: {} }, sender: {} }, 'x')`)) === null);
+    const ui = `{ senderFrame: { url: el.webContents.getAllWebContents().map((w) => w.getURL()).find((x) => x.includes('/ui/shell.html')), origin: 'file://' }, sender: {} }`;
+    await M(`return await ${h('pw:save')}(${ui}, { id: 'psl-test-1', origin: 'https://alice.vercel.app', username: 'alice@test', password: 'x1' })`);
+    await M(`return await ${h('pw:save')}(${ui}, { id: 'psl-test-2', origin: 'https://example.org', username: 'bob@test', password: 'x2' })`);
+    R.ok('pw:for-origin: grannar på delad värd (vercel.app) delar inte lösenord', JSON.stringify(await M(`return await ${h('pw:for-origin')}(${fejk('https://mallory.vercel.app/', 'https://mallory.vercel.app')})`)) === '[]');
+    R.ok('pw:for-origin: www-tvillingen får lösenordet', ((await M(`return await ${h('pw:for-origin')}(${fejk('https://www.example.org/', 'https://www.example.org')})`)) || []).length === 1);
+    await M(`await ${h('pw:delete')}(${ui}, 'psl-test-1'); return await ${h('pw:delete')}(${ui}, 'psl-test-2')`);
     R.ok('blockinst:set nekas från vanlig sajt', (await M(`return ${h('blockinst:set')} ? await ${h('blockinst:set')}(${fejk('https://evil.example/', 'https://evil.example')}, 'natskydd', false) : 'saknas'`)) === null);
 
     // 2. En riktig sajt i en flik

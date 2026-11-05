@@ -255,10 +255,13 @@ function pwRun() {
   document.addEventListener('mousedown', (e) => {
     const t = e.target;
     if (pwHost && t !== pwField && t !== pwHost) pwClose();
-    else if (!pwHost && isLoginField(t) && document.activeElement === t) setTimeout(() => pwOpenFor(t), 0);   // klick i redan fokuserat fält
+    else if (e.isTrusted && !pwHost && isLoginField(t) && document.activeElement === t) setTimeout(() => pwOpenFor(t), 0);   // klick i redan fokuserat fält
   }, true);
   document.addEventListener('input', (e) => { if (pwHost && e.target === pwField && e.isTrusted) pwClose(); }, true);
   document.addEventListener('keydown', (e) => {
+    // Bara riktiga tangenttryck: sidans eget skript kan skicka påhittade ↓/Enter (isTrusted=false) och fick
+    // förr välja en sparad inloggning åt dig – och sen läsa lösenordet ur fältet.
+    if (!e.isTrusted) return;
     if (!pwHost) {
       if (e.key === 'ArrowDown' && isLoginField(e.target)) pwOpenFor(e.target);
       return;
@@ -330,12 +333,14 @@ function hookCapture() {
  * IFRAME-KASSOR: Stripe, PayPal, Klarna m.fl. lägger varje kortfält i en EGEN
  * iframe på sin egen domän. Preloaden körs i alla ramar, men väljaren måste
  * ritas i den ÖVERSTA ramen (annars klipps den av den enradiga iframen).
- * Därför pratar ramarna postMessage med varandra:
- *   'open' skickas uppåt (varje förälder översätter koordinaterna till sin
- *          egen vy) tills den översta ramen ritar väljaren ovanpå iframen,
- *   'fill' skickas nedåt till ALLA ramar med bara kortets id – varje ram
- *          hämtar själv kortet ur det krypterade valvet och fyller i sina
- *          egna fält. Inga kortuppgifter passerar någonsin mellan ramarna. */
+ *   'open'/'close' skickas uppåt med postMessage (varje förälder översätter
+ *          koordinaterna till sin egen vy) tills den översta ramen ritar
+ *          väljaren ovanpå iframen. De kan bara flytta/stänga väljaren.
+ *   Tangenterna från en underram och själva ifyllningen går via HUVUDPROCESSEN,
+ *          aldrig med postMessage (som sidornas egna skript också ser): när du
+ *          väljer ett kort fyller huvudprocessen i ramar med sidans eget
+ *          ursprung och ramen där DU klickade/skrev i kortfältet – aldrig en
+ *          främmande inbäddad ram (annons, widget) på samma kassasida. */
 const CARD_SEL = 'input, select, [contenteditable="true"]';
 function fieldHay(el) {
   try {
@@ -474,7 +479,7 @@ let wlField = null;       // fältet i DENNA ram (lokalt fall)
 let wlFields = null;
 let wlChildWin = null;    // barnram som bad om väljaren – dit går svaret nedåt
 let wlUpOpen = false;     // vi (underram) har bett om en väljare längre upp
-let wlArmedAt = 0;        // när en väljare senast öppnades i den här sidan
+let wlSenastAkta = 0;     // senaste ÄKTA mus-/tangenttryck i den här ramen (sidans skript kan inte fejka dem)
 const WL_CSS = `
 :host{all:initial}
 .box{position:fixed;z-index:2147483647;min-width:270px;max-width:460px;box-sizing:border-box;
@@ -596,7 +601,6 @@ function wlShow(menu, anchor, onPick, darkRef, isStatic) {
   (document.body || document.documentElement).appendChild(wlHost);
   wlPosition();
   wlLog('visar', { kort: menu.cards.length });
-  wlArm();                       // säg till alla ramar att en väljare är öppen
 }
 async function wlMenu() {
   try { const m = await ipcRenderer.invoke('wallet:menu'); return (m && m.cards && m.cards.length) ? m : null; } catch { return null; }
@@ -607,6 +611,7 @@ async function wlOpenLocal(field, fields) {
   const menu = await wlMenu();
   if (!menu) { wlLog('inga-kort'); return; }
   if (document.activeElement !== field) { wlLog('fokus-flyttade'); return; }
+  try { ipcRenderer.send('wallet:want'); } catch {}   // huvudramens eget fält: glöm tidigare iframe-klick
   wlShow(menu, () => field.getBoundingClientRect(), (id) => wlFillEverywhere(id), field, false);
   wlField = field; wlFields = fields;
 }
@@ -616,29 +621,23 @@ async function wlOpenForChild(rect, childWin) {
   wlShow(menu, () => rect, (id) => wlFillEverywhere(id), document.body, true);
   wlChildWin = childWin;
 }
-/* Skicka bara kortets ID nedåt till alla ramar – varje ram hämtar kortet själv. */
-function wlFillEverywhere(id) {
+/* Du valde ett kort (äkta klick/tangent, väljaren ritas alltid i huvudramen). Huvudprocessen ger
+ * tillbaka kortet hit och fyller själv i kassans ramar som får det (se 'wallet:valj' i main.js). */
+async function wlFillEverywhere(id) {
   if (!id) return;
-  wlFillHere(id);
-  wlBroadcast({ [WL_MSG]: 1, t: 'fill', id });
-}
-async function wlFillHere(id) {
   try {
-    const card = await ipcRenderer.invoke('wallet:get', id);
+    const card = await ipcRenderer.invoke('wallet:valj', id);
     const f = findCardFieldsLoose();
     if (card && f) fillCard(f, card);
   } catch {}
 }
-/* ── Ram-till-ram ── */
-function wlBroadcast(msg) {
-  msg = { ...msg, tok: wlTok() };
-  try {
-    for (const fr of document.querySelectorAll('iframe,frame')) {
-      try { fr.contentWindow && fr.contentWindow.postMessage(msg, '*'); } catch {}
-    }
-  } catch {}
-}
-function wlArm() { wlArmedAt = Date.now(); wlBroadcast({ [WL_MSG]: 1, t: 'armed' }); }
+// Underram: huvudprocessen fyller i våra kortfält (bara om ramen fick kortet). Kommer aldrig från sidor.
+ipcRenderer.on('wallet-fyll', (_e, card) => {
+  try { if (IS_TOP) return; const f = findCardFieldsLoose(); if (card && f) fillCard(f, card); } catch {}
+});
+// Huvudramen: ↑/↓/Enter/Esc som du tryckte i ett kortfält i en underram (vidarebefordrat av huvudprocessen)
+ipcRenderer.on('wallet-nav', (_e, key) => { try { if (IS_TOP && wlHost && wlChildWin) wlNav(key); } catch {} });
+/* ── Ram-till-ram (bara väljarens läge: öppna/stäng) ── */
 function wlUp(msg) { try { if (!IS_TOP) parent.postMessage({ ...msg, tok: wlTok() }, '*'); } catch {} }
 function frameElementFor(win) {
   try {
@@ -649,18 +648,9 @@ function frameElementFor(win) {
 function wlHandleMessage(e) {
   const d = e.data;
   if (!d || d[WL_MSG] !== 1 || e.source === window || !wlTok() || d.tok !== wlTok()) return;
-  // Nedåt (från föräldern): fyll i / väljare öppnad.
-  if (d.t === 'fill' || d.t === 'armed') {
-    let fromParent = false;
-    try { fromParent = e.source === window.parent; } catch {}
-    if (!fromParent) return;
-    if (d.t === 'armed') { wlArmedAt = Date.now(); wlBroadcast(d); return; }
-    if (Date.now() - wlArmedAt > 30000) return;          // ingen tyst ifyllning utan öppnad väljare
-    wlFillHere(d.id);
-    wlBroadcast(d);
-    return;
-  }
-  // Uppåt (från en barnram): bara direkta, synliga iframes får be om väljaren.
+  // Bara uppåt (från en barnram) och bara öppna/stäng väljaren. Ifyllning och tangenter går ALDRIG
+  // den här vägen längre: postMessage syns för sidornas egna skript, så nyckeln är inte hemlig.
+  // Bara direkta, synliga iframes får be om väljaren.
   const fr = frameElementFor(e.source); if (!fr) return;
   if (d.t === 'open') {
     const fb = fr.getBoundingClientRect();
@@ -675,10 +665,6 @@ function wlHandleMessage(e) {
     else { wlChildWin = e.source; wlUp({ [WL_MSG]: 1, t: 'open', rect }); }
     return;
   }
-  if (d.t === 'nav') {
-    if (IS_TOP) wlNav(d.key); else wlUp(d);
-    return;
-  }
   if (d.t === 'close') {
     if (IS_TOP) { if (wlChildWin === e.source) wlClose(); } else wlUp(d);
   }
@@ -690,7 +676,7 @@ function wlLog(what, extra) {
   if (!WL_DEBUG) return;
   try { ipcRenderer.send('wallet:debug', { what, top: IS_TOP, url: location.href.slice(0, 120), ...(extra || {}) }); } catch {}
 }
-function wlMaybeOpen(target) {
+function wlMaybeOpen(target, e) {
   try {
     if (!target || !target.tagName || target === wlHost) return;
     const f = findCardFieldsLoose();
@@ -704,7 +690,10 @@ function wlMaybeOpen(target) {
       return;
     }
     if (IS_TOP) { wlOpenLocal(target, f); return; }
-    // Underram: be den översta ramen rita väljaren ovanpå oss.
+    // Underram: du klickade/skrev HÄR på riktigt (inte sidans skript) → huvudprocessen får fylla i den här
+    // ramens ursprung när du väljer ett kort. Ren programmatisk fokus räknas inte.
+    if (e && e.isTrusted && Date.now() - wlSenastAkta < 1500) { try { ipcRenderer.send('wallet:want'); } catch {} }
+    // Be den översta ramen rita väljaren ovanpå oss.
     const r = target.getBoundingClientRect();
     wlUpOpen = true; wlField = target;
     wlUp({ [WL_MSG]: 1, t: 'open', rect: { left: r.left, top: r.top, width: r.width, height: r.height } });
@@ -715,9 +704,10 @@ function walletRun() {
     window.addEventListener('message', wlHandleMessage);
     // Öppna när man klickar/tabbar in i ett kortfält – delegerat på document så
     // att kassor som ritas ut i efterhand (SPA) också funkar.
-    document.addEventListener('focusin', (e) => wlMaybeOpen(e.target), true);
-    document.addEventListener('click', (e) => wlMaybeOpen(e.target), true);
+    document.addEventListener('focusin', (e) => wlMaybeOpen(e.target, e), true);
+    document.addEventListener('click', (e) => { if (e.isTrusted) wlMaybeOpen(e.target, e); }, true);
     document.addEventListener('pointerdown', (e) => {
+      if (e.isTrusted) wlSenastAkta = Date.now();
       if (wlHost && e.target !== wlHost && e.target !== wlField) wlClose();
     }, true);
     document.addEventListener('focusout', (e) => {
@@ -732,17 +722,22 @@ function walletRun() {
       }, 120);
     }, true);
     document.addEventListener('keydown', (e) => {
+      // Bara riktiga tangenttryck: sidans skript kunde förr skicka påhittade ↓+Enter och välja ett kort åt dig.
+      if (!e.isTrusted) return;
+      wlSenastAkta = Date.now();
       if (!WL_KEYS.includes(e.key)) { if (e.key === 'Tab' && wlHost) wlClose(); return; }
       if (wlHost) {                                   // väljaren ritas i den här ramen
         if (e.key === 'Escape') { wlClose(); e.stopPropagation(); return; }
         if (wlNav(e.key)) { e.preventDefault(); e.stopPropagation(); }
         return;
       }
-      if (wlUpOpen) {                                 // väljaren ritas längre upp
+      if (wlUpOpen) {                                 // väljaren ritas i huvudramen – tangenten går via huvudprocessen
         if (e.key === 'Escape') wlUpOpen = false;
         e.preventDefault(); e.stopPropagation();
-        wlUp({ [WL_MSG]: 1, t: 'nav', key: e.key });
+        try { ipcRenderer.send('wallet:nav', e.key); } catch {}
+        return;
       }
+      if (e.key === 'ArrowDown' && !IS_TOP && e.target && e.target.tagName === 'INPUT') wlMaybeOpen(e.target, e);   // ↓ i ett kortfält (iframe) öppnar väljaren igen
     }, true);
     const onScroll = () => {
       if (wlHost && wlStatic) wlClose();               // fryst ankare (iframe-fält) → drar iväg

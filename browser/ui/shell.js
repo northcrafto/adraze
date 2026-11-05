@@ -64,7 +64,10 @@ function searchUrl(q) {
 function normalizeUrl(raw) {
   let s = (raw || '').trim();
   if (!s) return null;
-  if (/^(https?|file|about|adraze):/i.test(s)) return s;
+  // file: släpps ALDRIG in i en flik: lokala filer delar ursprung (file://) med skalet och kom då åt skalets
+  // localStorage (inloggningstoken, historik) och kakvalvet på disken. Texten blir en sökning i stället.
+  if (/^(https?|about|adraze):/i.test(s)) return s;
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(s)) return searchUrl(s);   // file://, ftp:// m.fl. → sökning
   if (/^[^\s]+\.[^\s]{2,}(\/.*)?$/.test(s) && !s.includes(' ')) return 'https://' + s;
   return searchUrl(s);
 }
@@ -149,6 +152,8 @@ function hideOverlayElements() { OVERLAY_IDS.forEach((id) => { const el = $(id);
 function showActiveTab() {
   hideInfobar();
   if (active && active.url) {
+    // Spärrad sida (barnkonto, eller låst barnläge) visas aldrig – inte ens en som laddades innan spärren kom
+    if (typeof famBlocked === 'function' && famBlocked(active.url)) { showBlockScreen(active.url); return; }
     newtabpage.classList.add('hidden'); incogpage.classList.add('hidden');
     window.view.show(active.id);
     if (protectionOn && active.warning && active.warning.url === active.url && !active.toastDismissed.has(active.warning.url)) {
@@ -378,7 +383,13 @@ window.view.onDidNavigate((id, url, b, f) => {
   if (protectionOn && !t.bypassed.has(url) && instantDanger(url)) { try { window.view.stop(t.id); } catch {} t.verdict = localDanger(); if (t === active) { window.view.hide(); setShield('danger'); } showDanger(t, url, t.verdict); return; }
   backgroundCheck(t, url);
 });
-window.view.onTitle((id, title) => { const t = byId(id); if (t) { t.title = title; renderTabs(); if (t.url && !t.incognito) pushHistory(t.url, title, t.favicon); } });
+window.view.onTitle((id, title) => {
+  const t = byId(id); if (!t) return;
+  t.title = title; renderTabs();
+  if (t.url && !t.incognito) pushHistory(t.url, title, t.favicon);
+  // Barnkonto i en inkognitoflik som var öppen sedan tidigare: föräldern ska ändå se besöket (ingen lokal historik)
+  else if (t.url && account && account.isChild && account.token && /^https?:/i.test(t.url)) { try { window.family.historyAdd(account.token, t.url, title || ''); } catch {} }
+});
 window.view.onFavicon((id, fav) => { const t = byId(id); if (t) { t.favicon = fav; renderTabs(); } });
 // Ladda om ⇄ stoppa: byt SVG-ikonen (förr ersattes ikonen med tecknen ✕/⟳ i textform, som såg annorlunda ut än övriga knappar)
 window.view.onLoading((id, loading) => {
@@ -392,7 +403,12 @@ window.view.onOpenNewTab((url) => createTab(url));
   const pp = document.getElementById('privacy-policy-btn'), cr = document.getElementById('chat-rules-btn');
   if (pp) pp.addEventListener('click', () => { createTab(sajt('integritet-webblasaren')); try { closeSettings(); } catch {} });
   if (cr) cr.addEventListener('click', () => { createTab(sajt('chattregler')); try { closeSettings(); } catch {} }); }
-window.view.onNewIncognito(() => createTab(null, true));
+window.view.onNewIncognito(() => {
+  if (famLocked() || (account && account.isChild)) { try { showToast('Inkognito finns inte i barnläge.'); } catch {} return; }
+  createTab(null, true);
+});
+// Huvudprocessen stoppade en spärrad sida (länk, omdirigering, popup) innan den nådde sajten
+window.view.onBarnSparrad((id, url) => { const t = byId(id); if (t && t === active && typeof showBlockScreen === 'function') showBlockScreen(url); });
 
 /* ── Bekräfta stängning med flera flikar (flytande Brave-lik notis) ──
  * Skalet avgör om notisen behövs (det vet flik-antalet); main visar den i ett eget
@@ -913,6 +929,38 @@ let socMe = null;   // { avatar } från AdRaze-kontot
 let chattOpen = false, chattUnread = 0, pendingChattAfterLogin = false;   // chattpanelen (chattSync körs via updateAccountBtn redan vid start)
 try { account = JSON.parse(localStorage.getItem('skoll-account')); } catch {}
 if (account && !account.token) account = null;  // gammalt kontonummer-format → nollställ
+/* ── Familj + barnläge: deklareras HÄR, före restoreTabs() längre ner (förr låg `let fam` efter den, och
+ * en barnflik som återställdes vid start kastade TDZ-fel i famBlocked). ── */
+const FAM_KEY = 'adraze-family';
+function famLoad() { try { const f = JSON.parse(localStorage.getItem(FAM_KEY)); if (f && Array.isArray(f.children)) return f; } catch {} return { children: [], activeChild: null }; }
+function famSave() { try { localStorage.setItem(FAM_KEY, JSON.stringify(fam)); } catch {} famSkickaTillMain(); }
+let fam = famLoad();
+/* Barnläge på enheten: har ett barnkonto loggat in här gäller förälderns regler tills en VUXEN loggar in.
+ * Loggas barnet ut (själv, av föräldern på distans, eller sessionen går ut) blir webbläsaren LÅST – inga
+ * webbsidor, bara inloggningen. Förr föll den tillbaka till helt ospärrat läge utan insyn. */
+const BARNLAGE_KEY = 'adraze-barnlage';
+function barnlageSatt() { try { return localStorage.getItem(BARNLAGE_KEY) === '1'; } catch { return false; } }
+function satBarnlage(pa) { try { if (pa) localStorage.setItem(BARNLAGE_KEY, '1'); else localStorage.removeItem(BARNLAGE_KEY); } catch {} }
+function famLocked() { return barnlageSatt() && !(account && account.isChild); }
+// Normalisering av värdnamn på ETT ställe: gemener, utan avslutande punkt ("blocked.test.") och utan www.
+const famNorm = (s) => String(s || '').trim().toLowerCase().replace(/\.+$/, '').replace(/^www\./, '');
+// Reglerna gäller även i huvudprocessen (iframes, popupar, alla fönster) – skicka dem dit vid varje ändring
+function famSkickaTillMain() {
+  try {
+    if (!window.view || !window.view.barnRegler) return;
+    if (famLocked()) { window.view.barnRegler({ last: true, blocklist: [], allows: [] }); return; }
+    if (account && account.isChild) {
+      const c = fam && fam.activeChild ? fam.children.find((x) => x.id === fam.activeChild) : null;
+      window.view.barnRegler({ last: false, blocklist: (c && c.blocklist) || [], allows: (c && c.allows) || [] });
+      return;
+    }
+    window.view.barnRegler(null);
+  } catch {}
+}
+if (account && account.isChild) satBarnlage(true);   // barn som redan var inloggat före uppdateringen
+famSkickaTillMain();
+// Inget inkognito i barnläge (ingen insyn för föräldern): ett inkognitofönster stänger sig direkt
+if (windowIncognito && (famLocked() || (account && account.isChild))) { try { window.close(); } catch {} }
 let pendingEmail = null;
 let pendingLogin = null;   // (kvar, oanvänt)
 let pendingSubmit = null;  // { type:'login'|'signup', email, password, name } för 2FA-koden + "skicka ny kod"
@@ -967,14 +1015,18 @@ function closeLogin() {
 }
 function accountKey(a) { a = a || account; if (!a) return null; return 'k:' + (a.email || a.childId || a.name || a.token || 'user'); }
 function loginAs(token, email, pro, name) {
+  try { window.auth.googleAvbryt(); } catch {}   // ett väntande "Fortsätt med Google" gäller inte längre
   account = { token, email: email || '', pro: !!pro, name: name || '' };
   socMe = null;   // förra kontots profil (bild m.m.) får inte hänga kvar
   unlockHistoryForParent();   // vuxenkonto → historiken går att rensa igen
+  satBarnlage(false);         // … och barnläget släpper (spärrarna gäller bara barnkonton)
   localStorage.setItem('skoll-account', JSON.stringify(account));
   try { window.auth.remember(account); } catch {}
   updateAccountBtn();
   try { loadSocMe().then(() => updateAccountBtn()); } catch {}   // hämta NYA kontots profilbild → kontoknappen
   try { window.session.login(accountKey(account)); } catch {}   // återställ kontots webbsession (Gmail m.m. tillbaka) + lås upp lösenord
+  famSkickaTillMain();
+  try { const kb = $('kidblock'); if (kb) kb.style.display = 'none'; } catch {}
   try { startParentSync(); } catch {}
   try { synkaInit(); } catch {}   // bokmärken mellan enheter
   if (pendingKryptoAfterLogin) { pendingKryptoAfterLogin = false; openKrypto(true); }
@@ -995,6 +1047,7 @@ function doLogout(reopenKrypto) {
   if (typeof stopParentSync === 'function') stopParentSync();
   try { if (fam && fam.children && fam.children.some((c) => c.self)) { fam = { children: [], activeChild: null }; famSave(); } } catch {}
   if (typeof applyKidIndicator === 'function') applyKidIndicator();
+  famSkickaTillMain();        // barnläge på enheten → huvudprocessen låser allt tills en vuxen loggar in
   if (t) { try { window.auth.logout(t); } catch {} }
   setLoginView('login');
   if (reopenKrypto !== false && kryptoOpen) openKrypto(true);  // lås Falk igen
@@ -1163,9 +1216,11 @@ async function doChildResend() {
   else { $('child-error').textContent = r.message || 'Kunde inte skicka en ny kod.'; $('child-error').style.display = 'block'; }
 }
 async function enterChildMode(token, child) {
+  try { window.auth.googleAvbryt(); } catch {}
   account = { token, email: '', pro: false, name: child.name, isChild: true, childId: child.id };
   socMe = null;
   lockHistoryForChild();      // barnet kan inte radera sin historik — inte ens efter utloggning
+  satBarnlage(true);          // och spärrarna släpper inte vid utloggning: låst tills en vuxen loggar in
   localStorage.setItem('skoll-account', JSON.stringify(account));
   try { window.auth.remember(account); } catch {}
   updateAccountBtn();
@@ -1189,7 +1244,11 @@ async function syncChild() {
     famSave(); applyKidIndicator();
     if (typeof enforceActiveTab === 'function') enforceActiveTab();
     if (typeof ensureAllowTicker === 'function') ensureAllowTicker();
-  } else if (me && me.error === 'no_session') { doLogout(false); }
+  } else if (me && me.error === 'no_session') {
+    // Föräldern loggade ut barnet (eller sessionen gick ut): webbläsaren LÅSES – den blir aldrig ospärrad
+    doLogout(false);
+    try { showBlockScreen((active && active.url) || ''); } catch {}
+  }
 }
 /* ── Kontosida (profil i Inställningar) + radera konto ── */
 function openAccount() { if (account) { openSettings(); showSettingsCat('konto'); } else { openLogin(); } }
@@ -2254,7 +2313,7 @@ function renderHistory() {
   h.forEach((e) => {
     const row = document.createElement('div'); row.className = 'hist-row';
     const fav = e.favicon
-      ? `<img class="hist-fav" src="${e.favicon}" data-glob="hist" alt="">`
+      ? `<img class="hist-fav" src="${escapeHtml(e.favicon)}" data-glob="hist" alt="">`
       : `<span class="hist-fav" style="display:grid;place-items:center;color:#8ba3bf"><svg class="ic" style="width:13px;height:13px"><use href="#i-fav" /></svg></span>`;
     row.innerHTML = `${fav}<div class="hist-txt"><div class="hist-title">${escapeHtml(e.title)}</div><div class="hist-url">${escapeHtml(e.url.replace(/^https?:\/\/(www\.)?/, ''))}</div></div>` + (locked ? '' : `<button class="row-btn" title="Ta bort från historiken"><svg class="ic ic-sm"><use href="#i-trash" /></svg></button>`);
     row.addEventListener('click', () => { closeHistory(); if (active) guardedNavigate(active, e.url); });
@@ -2458,7 +2517,7 @@ function renderBookmarkBar() {
   sendBounds();   // fältet ändrar höjd → flytta native-webbvyn så den inte täcker fältet
 }
 function rowFav(favicon) {
-  return favicon ? `<img class="hist-fav" src="${favicon}" data-glob="hist" alt="">` : `<span class="hist-fav" style="display:grid;place-items:center;color:#8ba3bf"><svg class="ic" style="width:13px;height:13px"><use href="#i-fav" /></svg></span>`;
+  return favicon ? `<img class="hist-fav" src="${escapeHtml(favicon)}" data-glob="hist" alt="">` : `<span class="hist-fav" style="display:grid;place-items:center;color:#8ba3bf"><svg class="ic" style="width:13px;height:13px"><use href="#i-fav" /></svg></span>`;
 }
 function openBookmarks() {
   window.view.hide();
@@ -3026,21 +3085,28 @@ async function maybeShowFlyttBanner() {
 setTimeout(maybeShowFlyttBanner, 1200);
 
 /* ── Familj: föräldrapanel, barn-blocklistor, öppen insyn ── */
-const FAM_KEY = 'adraze-family';
-function famLoad() { try { const f = JSON.parse(localStorage.getItem(FAM_KEY)); if (f && Array.isArray(f.children)) return f; } catch {} return { children: [], activeChild: null }; }
-function famSave() { try { localStorage.setItem(FAM_KEY, JSON.stringify(fam)); } catch {} }
-let fam = famLoad();
-function famHost(u) { try { return new URL(normalizeUrl(u)).hostname.replace(/^www\./, ''); } catch { return String(u || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0]; } }
+// (FAM_KEY, famLoad, famSave och `let fam` ligger högst upp vid kontot – se "Familj + barnläge")
+function famHost(u) { try { return famNorm(new URL(normalizeUrl(u)).hostname); } catch { return famNorm(String(u || '').replace(/^https?:\/\//i, '').split('/')[0].split(':')[0]); } }
 function famChildById(id) { return fam.children.find((c) => c.id === id); }
 function famActive() { return fam.activeChild ? famChildById(fam.activeChild) : null; }
+// AdRazes egen webbproxy öppnar vilken sajt som helst inuti sig → alltid spärrad för barnkonton
+const FAM_ALLTID = ['proxy.adraze.app'];
+// Låst barnläge: bara inloggningen (AdRaze-kontot och Googles inloggning dit) – exakta värdar
+const famLasOk = (h) => h === 'accounts.adraze.app' || h === 'accounts.youtube.com' || /^accounts\.google\.[a-z.]+$/.test(h);
 function famBlocked(url) {
+  if (famLocked()) {
+    let u; try { u = new URL(normalizeUrl(url)); } catch { return false; }
+    if (u.protocol === 'https:' && famNorm(u.hostname) === 'adraze.app' && u.pathname === '/app-google') return false;   // "Fortsätt med Google"
+    return /^https?:$/.test(u.protocol) && !famLasOk(famNorm(u.hostname));
+  }
   if (!account || !account.isChild) return false;   // blockering gäller BARA på barnets konto
+  const h = famHost(url); if (!h) return false;
+  const traff = (b) => { b = famNorm(b); return !!b && (h === b || h.endsWith('.' + b)); };
+  if (FAM_ALLTID.some(traff)) return true;
   const c = famActive(); if (!c) return false;
-  const h = famHost(url);
-  const blocked = (c.blocklist || []).some((b) => h === b || h.endsWith('.' + b));
-  if (!blocked) return false;
+  if (!(c.blocklist || []).some(traff)) return false;
   const now = Date.now();
-  const allowed = (c.allows || []).some((a) => a && a.until > now && (h === a.host || h.endsWith('.' + a.host)));  // tillfälligt tillåten?
+  const allowed = (c.allows || []).some((a) => a && a.until > now && traff(a.host));  // tillfälligt tillåten?
   return !allowed;
 }
 // Kolla aktiv flik – om en tillfällig tillåtelse gått ut och barnet är kvar på sidan → blockera igen
@@ -3087,10 +3153,12 @@ function updateAllowTimer() {
   if (txt) txt.textContent = a.host.replace(/^www\./, '').slice(0, 16) + ' ' + mm + ':' + ('0' + ss).slice(-2) + (acts.length > 1 ? ' +' + (acts.length - 1) : '');
   chip.style.display = 'inline-flex';
 }
+// Barnet med exakt det namnet – aldrig en gissning (Falk kan ha fått namnet från en sida den läst)
+function famBarnMedNamn(namn) { const n = String(namn || '').trim().toLowerCase(); return n ? (fam.children.find((x) => String(x.name || '').toLowerCase() === n) || null) : null; }
 // Exponera för Falk-agenten ("blockera X för barnet")
 window.famBlockFor = function (childName, hosts) {
   if (account && account.isChild) return 0;   // bara föräldern styr spärrar
-  const c = fam.children.find((x) => x.name.toLowerCase() === String(childName || '').toLowerCase()) || famActive() || fam.children[0];
+  const c = famBarnMedNamn(childName);   // okänt namn → inget händer (förr: "första barnet" som reserv)
   if (!c) return 0; let n = 0;
   (Array.isArray(hosts) ? hosts : [hosts]).forEach((raw) => { const h = famHost(raw); if (h && !c.blocklist.includes(h)) { c.blocklist.push(h); n++; } });
   if (n) { famSave(); famPushBlocklist(c); renderFam(); }
@@ -3099,7 +3167,7 @@ window.famBlockFor = function (childName, hosts) {
 // Tillåt (avblockera) igen — förälder säger ja
 window.famUnblockFor = function (childName, hosts) {
   if (account && account.isChild) return 0;   // barn kan inte av-blockera
-  const c = fam.children.find((x) => x.name.toLowerCase() === String(childName || '').toLowerCase()) || famActive() || fam.children[0];
+  const c = famBarnMedNamn(childName);   // okänt namn → inget händer (förr: "första barnet" som reserv)
   if (!c) return 0; let n = 0;
   (Array.isArray(hosts) ? hosts : [hosts]).forEach((raw) => { const h = famHost(raw); const i = (c.blocklist || []).indexOf(h); if (i >= 0) { c.blocklist.splice(i, 1); n++; } });
   if (n) { famSave(); famPushBlocklist(c); renderFam(); }
@@ -3108,7 +3176,7 @@ window.famUnblockFor = function (childName, hosts) {
 // Förälder tillåter en sida tillfälligt (minuter) för ett barn
 async function famAllowFor(childName, host, minutes) {
   if (!account || !account.token || account.isChild) return false;
-  const c = fam.children.find((x) => x.name.toLowerCase() === String(childName || '').toLowerCase()) || famActive() || fam.children[0];
+  const c = famBarnMedNamn(childName);   // okänt namn → inget händer (förr: "första barnet" som reserv)
   if (!c) return false;
   const r = await window.family.allow(account.token, c.id, famHost(host), minutes).catch(() => ({ ok: false }));
   return !!(r && r.ok);
@@ -3149,6 +3217,18 @@ function showBlockScreen(url) {
   if (!ov) { ov = document.createElement('div'); ov.id = 'kidblock'; document.body.appendChild(ov); }
   ov.dataset.url = url;   // så nedräknaren kan öppna sidan automatiskt när den blir tillåten
   ov.style.cssText = 'position:fixed;inset:0;z-index:120;background:linear-gradient(160deg,#2f8fd4,#1f6ea8);display:flex;align-items:center;justify-content:center;padding:24px;';
+  if (famLocked()) {   // barnet är utloggat → låst tills en förälder (eller barnet med sin kod) loggar in
+    ov.innerHTML = '<div style="width:min(460px,94vw);background:#fff;border-radius:22px;padding:30px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.35)">'
+      + '<div style="font-size:20px;font-weight:800;color:var(--color-navy-900);margin-bottom:6px">AdRaze är låst i barnläge</div>'
+      + (host ? '<div style="font-size:14px;color:#2f8fd4;font-weight:700;margin-bottom:14px">' + escapeHtml(host) + '</div>' : '')
+      + '<p style="font-size:14px;color:rgb(28 43 58 / .65);line-height:1.6;margin-bottom:20px">Barnkontot är utloggat. Be en förälder logga in för att låsa upp webbläsaren – eller logga in igen med din barnkod.</p>'
+      + '<div style="display:flex;gap:10px"><button id="kidblock-login" class="btn btn-safe" style="flex:1;height:46px">Logga in</button><button id="kidblock-back" class="btn btn-ghost" style="flex:1;height:46px">Tillbaka</button></div>'
+      + '</div>';
+    ov.style.display = 'flex';
+    ov.querySelector('#kidblock-login').onclick = () => { ov.style.display = 'none'; if (active && active.url && famBlocked(active.url)) { active.url = ''; if (addressInput) addressInput.value = ''; } try { openLogin(); } catch {} };
+    ov.querySelector('#kidblock-back').onclick = () => { ov.style.display = 'none'; if (active && active.url && famBlocked(active.url)) { active.url = ''; if (addressInput) addressInput.value = ''; } if (typeof showActiveTab === 'function') showActiveTab(); };
+    return;
+  }
   ov.innerHTML = '<div style="width:min(460px,94vw);background:#fff;border-radius:22px;padding:30px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.35)">'
     + ''
     + '<div style="font-size:20px;font-weight:800;color:var(--color-navy-900);margin-bottom:6px">Den här sidan är blockerad</div>'
@@ -3547,6 +3627,7 @@ if (!account || !account.token) {
     else { try { const s = await window.auth.session(acc.token); ok = !!(s && s.ok); } catch { ok = true; } }   // nätverkshicka: behåll ändå
     if (!ok) return;
     account = acc;
+    if (account.isChild) satBarnlage(true);
     try { localStorage.setItem('skoll-account', JSON.stringify(account)); } catch {}
     try { updateAccountBtn(); } catch {}
     try { window.session.setkey(accountKey(account)); } catch {}

@@ -2,6 +2,15 @@
 const API = document.getElementById('ag').dataset.api;
 const msg = document.getElementById('ag-msg');
 const visa = (text, bra) => { msg.textContent = text || ''; msg.classList.toggle('bra', !!bra); };
+// Webbläsarens engångsnonce (#n=…) binder svaret till just den här fliken. Den läses direkt, sparas bara i
+// flikens sessionStorage (så att en omladdning fungerar) och tas bort ur adressen, så att varken adressfältet,
+// historiken eller Falk ser den.
+const NONCE = (() => {
+  let n = '';
+  try { const m = /^#n=([0-9a-f]{32})$/.exec(location.hash); if (m) { n = m[1]; sessionStorage.setItem('ag-n', n); } else n = sessionStorage.getItem('ag-n') || ''; } catch {}
+  try { if (location.hash) history.replaceState(null, '', location.pathname + location.search); } catch {}
+  return n;
+})();
 
 async function post(sokvag, kropp) {
   const r = await fetch(API + sokvag, { method: kropp ? 'POST' : 'GET', credentials: 'omit', headers: kropp ? { 'content-type': 'application/json' } : {}, body: kropp ? JSON.stringify(kropp) : undefined });
@@ -25,7 +34,8 @@ async function post(sokvag, kropp) {
       try {
         const j = await post('/auth/google', { credential, app: true });
         visa('Klart! Du är inloggad i AdRaze.', true);
-        location.hash = 'klar=' + encodeURIComponent(JSON.stringify({ token: j.token, enhet: j.enhet, email: j.me.email, namn: j.me.namn || '' }));
+        try { sessionStorage.removeItem('ag-n'); } catch {}
+        location.hash = 'klar=' + encodeURIComponent(JSON.stringify({ n: NONCE, token: j.token, enhet: j.enhet, email: j.me.email, namn: j.me.namn || '' }));
       } catch (e) { visa(e.message); }
     },
   });
