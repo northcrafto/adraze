@@ -155,10 +155,10 @@ async function uppdatera({ torr, tvinga }) {
     const rot = nyWorktree();
     const pj = path.join(rot, 'package.json');
     const p = JSON.parse(fs.readFileSync(pj, 'utf8'));
-    const nyckel = p.dependencies.electron ? 'dependencies' : 'devDependencies';
-    p[nyckel].electron = 'github:castlabs/electron-releases#' + mal.tag;
-    fs.writeFileSync(pj, JSON.stringify(p, null, 2) + '\n');
-    kor('npm', ['install', '--no-audit', '--no-fund'], { cwd: rot });
+    const spar = (p.dependencies || {}).electron ? '--save-prod' : '--save-dev';
+    // Uttrycklig begäran av den nya taggen: en ändrad tagg i package.json + naket "npm install" löser INTE
+    // om git-beroendet (låset står kvar på gamla commiten) – då släpptes den gamla motorn igen.
+    kor('npm', ['install', '--no-audit', '--no-fund', spar, 'electron@github:castlabs/electron-releases#' + mal.tag], { cwd: rot });
     kor('node', ['node_modules/electron/install.js'], { cwd: rot });    // npm hoppar ibland nedladdningen av binären
     const fick = fs.readFileSync(path.join(rot, 'node_modules', 'electron', 'dist', 'version'), 'utf8').trim();
     if (fick !== mal.version + '+wvcus') throw new Error('fel Electron installerad: ' + fick);

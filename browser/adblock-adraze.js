@@ -403,6 +403,7 @@ class AdrazeAdblock {
     this.serveOn(sess);
     try {
       sess.webRequest.onBeforeRequest({ urls: ['<all_urls>'] }, (d, cb) => {
+        if (this.barnStopp && this.barnStopp(d)) { cb({ cancel: true }); return; }   // familjespärren (sida/ram), även när blockeraren är av
         const upp = this.forhand && this.forhand(d); if (upp) { cb({ redirectURL: upp }); return; }   // endast HTTPS
         if (this.natStopp(d)) { cb({ cancel: true }); return; }
         if (!this.isOn() || !/^(https?|wss?):/i.test(d.url) || this.allowHost(d.url)) { cb({}); return; }
@@ -502,6 +503,7 @@ class AdrazeAdblock {
   baraForhand(sess) {
     try {
       sess.webRequest.onBeforeRequest({ urls: ['<all_urls>'] }, (d, cb) => {
+        if (this.barnStopp && this.barnStopp(d)) { cb({ cancel: true }); return; }   // familjespärren (sida/ram)
         const u = this.forhand && this.forhand(d); if (u) { cb({ redirectURL: u }); return; }
         cb(this.natStopp(d) ? { cancel: true } : {});
       });

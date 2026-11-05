@@ -24,6 +24,7 @@ contextBridge.exposeInMainWorld('skoll', {
 contextBridge.exposeInMainWorld('auth', {
   login: (email, password) => ipcRenderer.invoke('auth:login', { email, password }),
   google: () => ipcRenderer.invoke('auth:google'),
+  googleAvbryt: () => ipcRenderer.send('auth:google-avbryt'),
   signup: (email, password, name) => ipcRenderer.invoke('auth:signup', { email, password, name }),
   verifyCode: (email, code) => ipcRenderer.invoke('auth:verify-code', { email, code }),
   resetRequest: (email) => ipcRenderer.invoke('auth:reset-request', { email }),
@@ -106,6 +107,8 @@ contextBridge.exposeInMainWorld('view', {
   openMenu: () => ipcRenderer.send('open-app-menu'),
   markIncognito: (id) => ipcRenderer.send('view:incognito', id),
   onNewIncognito: (cb) => ipcRenderer.on('new-incognito', () => cb()),
+  barnRegler: (r) => ipcRenderer.send('barn:regler', r),                                   // familjespärren gäller i huvudprocessen
+  onBarnSparrad: (cb) => ipcRenderer.on('barn-sparrad', (_e, id, url) => cb(id, url)),
   onToast: (cb) => ipcRenderer.on('toast', (_e, m) => cb(m)),
   onUpdateReady: (cb) => ipcRenderer.on('update-ready', (_e, v) => cb(v)),
   installUpdate: () => ipcRenderer.send('update:install'),

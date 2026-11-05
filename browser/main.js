@@ -8,7 +8,7 @@
  * per-fönster "ctx"-objekt i `wins`, nycklat på skalets webContents-id. IPC
  * routas till rätt fönster via `event.sender`.
  */
-const { app, BrowserWindow, WebContentsView, ipcMain, session, Menu, clipboard, dialog, shell, safeStorage, components, screen, net } = require('electron');
+const { app, BrowserWindow, WebContentsView, ipcMain, session, Menu, clipboard, dialog, shell, safeStorage, components, screen, net, webContents } = require('electron');
 app.setName('AdRaze');  // egen datamapp (~/.config/AdRaze)
 app.enableSandbox();     // alla sidprocesser i Chromiums sandlåda, som i Chrome/Brave (se sandladeFlagga)
 // Oväntade fel i huvudprocessen loggas i ~/.config/AdRaze/fel.log i stället för Electrons
@@ -32,7 +32,7 @@ const UI_URL = require('url').pathToFileURL(path.join(__dirname, 'ui')).href + '
 const WEBB_KANALER = new Set([
   'adraze:start', 'adraze:css', 'adraze:kakor', 'adraze:rakna', 'adraze:dolj-regler',   // adraze-preload.js
   'page:click', 'i18n:t', 'pw:capture', 'pw:for-origin', 'pw:open-manager', 'pip:state',            // content-preload.js
-  'wallet:capture', 'wallet:debug', 'wallet:get', 'wallet:menu', 'wallet:open-manager', 'wallet:token',
+  'wallet:capture', 'wallet:debug', 'wallet:menu', 'wallet:open-manager', 'wallet:token', 'wallet:valj', 'wallet:want', 'wallet:nav',
 ]);
 function ramUrl(e) { try { return (e.senderFrame && e.senderFrame.url) || ''; } catch { return ''; } }
 function kanalTillaten(kanal, e) {
@@ -269,6 +269,35 @@ const adblock = new AdrazeAdblock({
   onCount: (typ) => broadcast('adblock:hit', typ),
 });
 adblock.forhand = (d) => webb.upgradeUrl(d);   // endast HTTPS (webbinst.js)
+/* ── Familjespärren i huvudprocessen ──
+ * Skalet skickar hit barnets regler (spärrlista, tillfälliga tillåtelser) eller "låst barnläge" (barnet
+ * utloggat, ingen vuxen inloggad). Här gäller de för ALLA ramar och fönster i alla sessioner: iframes och
+ * popupar spärras också, och förfrågan når aldrig den spärrade sajten (förr kollade bara skalet flikens
+ * huvudram, i efterhand). Kanalen 'barn:regler' når bara vårt eget skal (IPC-vakten ovan). */
+let barnRegler = null;                                         // null = inget barnläge på den här enheten
+const barnNorm = (x) => String(x || '').trim().toLowerCase().replace(/\.+$/, '').replace(/^www\./, '');
+const BARN_ALLTID = ['proxy.adraze.app'];                      // AdRazes webbproxy öppnar vilken sajt som helst
+const barnLasOk = (h) => h === 'accounts.adraze.app' || h === 'accounts.youtube.com' || /^accounts\.google\.[a-z.]+$/.test(h);
+// "Fortsätt med Google" i inloggningen öppnar exakt adraze.app/app-google (ADRAZE_SITE) – den får laddas när låst
+const barnGoogleSida = (url) => { try { const u = new URL(String(url || '')); return u.protocol === 'https:' && u.origin === new URL(process.env.ADRAZE_SITE || 'https://adraze.app').origin && u.pathname === '/app-google'; } catch { return false; } };
+function barnSparrad(url) {
+  const r = barnRegler; if (!r) return false;
+  let h = '';
+  try { const u = new URL(String(url || '')); if (!/^(https?|wss?):$/.test(u.protocol)) return false; h = barnNorm(u.hostname); } catch { return false; }
+  if (!h) return false;
+  if (r.last) return !barnLasOk(h) && !barnGoogleSida(url);    // låst: bara inloggningen
+  const traff = (b) => { b = barnNorm(b); return !!b && (h === b || h.endsWith('.' + b)); };
+  if (BARN_ALLTID.some(traff)) return true;
+  if (!r.blocklist.some(traff)) return false;
+  const nu = Date.now();
+  return !r.allows.some((a) => a.until > nu && traff(a.host));
+}
+adblock.barnStopp = (d) => {
+  if (!barnRegler || (d.resourceType !== 'mainFrame' && d.resourceType !== 'subFrame')) return false;
+  if (!barnSparrad(d.url)) return false;
+  if (d.resourceType === 'mainFrame') { try { const wc = d.webContents; if (wc && wc.__ctx && wc.__tabId != null) sendTo(wc.__ctx, 'barn-sparrad', wc.__tabId, d.url); } catch {} }
+  return true;
+};
 // Behörighetsfrågor visas som en rad överst i skalet; svaret kommer tillbaka via perm:answer
 let permSeq = 0; const permWait = new Map();
 webb.setAsker((wc, origin, kinds) => new Promise((resolve) => {
@@ -503,7 +532,7 @@ function rehydrate(ctx, tabId) {
   const url = ctx.discarded.get(tabId);
   ctx.discarded.delete(tabId);
   const view = ensureView(ctx, tabId);
-  if (url) { try { view.webContents.loadURL(url).catch(() => {}); } catch {} }
+  if (url && flikUrlOk(url)) { try { view.webContents.loadURL(url).catch(() => {}); } catch {} }
   return view;
 }
 /* Svep: kasta varje dold flik som legat oanvänd längre än DISCARD_MS. */
@@ -611,7 +640,7 @@ function buildContextMenu(ctx, wc, params) {
   t.push({ label: T('Översätt till svenska'), click: () => sendTo(ctx, 'open-new-tab', 'https://translate.google.com/translate?sl=auto&tl=sv&u=' + encodeURIComponent(url)) });
   t.push({ type: 'separator' });
   t.push({ label: T('Visa sidans källa'), click: () => sendTo(ctx, 'open-tab-raw', 'view-source:' + url) });
-  t.push({ label: T('Inspektera'), click: () => { try { wc.inspectElement(params.x, params.y); } catch {} } });
+  if (!barnRegler) t.push({ label: T('Inspektera'), click: () => { try { if (!barnRegler) wc.inspectElement(params.x, params.y); } catch {} } });
   Menu.buildFromTemplate(t).popup({ window: ctx.win });
 }
 
@@ -668,6 +697,7 @@ function ensureView(ctx, tabId) {
     const from = wc.getURL();
     // Webbsidor får aldrig öppna AdRazes egna sidor eller lokala filer (som chrome:// i Chrome)
     if (internAdress(url) && webbAdress(from)) return { action: 'deny' };
+    if (/^(file|devtools|chrome|chrome-extension):/i.test(url)) return { action: 'deny' };
     // Popup-storm: Chrome/Brave tillåter EXAKT ett fönster per klick. Fler window.open inom
     // två sekunder från samma sida är en annonsflod (piratsajter) → allt utom det första dör.
     const st = wc.__popups || (wc.__popups = { t: 0, n: 0 }); const now = Date.now();
@@ -677,9 +707,14 @@ function ensureView(ctx, tabId) {
     // och skickar dit betalsidan först när servern svarat. Brave tillåter det; vi gör samma sak, men bara
     // för ett synligt knappklick nyss – och fönstret vaktas: går det till en annons/skräpadress stängs det.
     const lcK = wc.__lastClick, knappNyss = !!(lcK && lcK.knapp && now - lcK.t < 1500);
+    // Googles inloggningsruta från Google-flödets egen flik (adraze.app/app-google) behöver window.opener –
+    // den är ett riktigt fönster även i barnläge (annars kan en förälder inte låsa upp med Google)
+    const googleRuta = !!(googleVantar && googleVantar.wcId === wc.id && /^https:\/\/accounts\.google\.com\//i.test(url));
     const tomt = !url || url === 'about:blank';
     const fonster = details.disposition === 'new-window' || (details.features && details.features.length);
     if (knappNyss && fonster && (tomt || (/^https?:/i.test(url) && !isBlockedTarget(url, from)))) {
+      // Barnläge: aldrig ett riktigt fönster (där gällde varken spärr eller insyn) – en vanlig flik i stället
+      if (barnRegler && !googleRuta) { if (/^https?:/i.test(url)) sendTo(ctx, 'open-new-tab', url); return { action: 'deny' }; }
       wc.__kassaFonster = now;
       return { action: 'allow', overrideBrowserWindowOptions: { width: 520, height: 720, resizable: true, autoHideMenuBar: true, webPreferences: { preload: path.join(__dirname, 'content-preload.js'), contextIsolation: true, sandbox: true, nodeIntegration: false } } };
     }
@@ -692,6 +727,7 @@ function ensureView(ctx, tabId) {
     // annonssajter (popunder) och dödas helt.
     if (details.disposition === 'new-window' || (details.features && details.features.length)) {
       if (sameSite(url, from) || popupTrustedHost(url)) {
+        if (barnRegler && !googleRuta) { if (/^https?:/i.test(url)) sendTo(ctx, 'open-new-tab', url); return { action: 'deny' }; }   // barnläge: flik, inte fönster
         return { action: 'allow', overrideBrowserWindowOptions: { width: 520, height: 680, resizable: true, autoHideMenuBar: true, webPreferences: { preload: path.join(__dirname, 'content-preload.js'), contextIsolation: true, sandbox: true, nodeIntegration: false } } };   // samma Chrome-förklädnad som flikarna, annars stoppar Google inloggningen
       }
       // Korsdomän-fönster från en okänd sajt = popunder. Dör helt – blir inte ens en flik.
@@ -725,6 +761,7 @@ function ensureView(ctx, tabId) {
   blocksida.fliken(wc);   // Glöm mig när jag stänger webbplatsen
   wc.on('will-navigate', (e, url) => {
     if (internAdress(url) && webbAdress(wc.getURL())) { e.preventDefault(); return; }
+    if (/^(file|devtools|chrome|chrome-extension):/i.test(url)) { e.preventDefault(); return; }   // aldrig lokala filer i en flik
     // Ad/tracker-mål → blockera helt.
     if (adblockOn && isBlockedTarget(url, wc.getURL())) { e.preventDefault(); if (adblock.isDanger(url, wc.getURL())) sendTo(ctx, 'adraze-danger', tabId, url); return; }
     // Aggressiv: sidan försöker skicka hela fliken till en annan sajt utan att du klickat
@@ -763,14 +800,21 @@ function ensureView(ctx, tabId) {
     // Electron visar ingen egen felsida → tom vit sida och man står fast. Rita en "Sidan kan inte nås" i stället.
     else if (isMain && code !== -3 && code !== -20 && /^https?:/i.test(url || '')) visaFelsida(wc, code, _desc, url);
   });
-  wc.on('did-navigate', (_e, url) => sendTo(ctx, 'did-navigate', tabId, url, canGo(wc, -1), canGo(wc, 1)));
+  const wcId = wc.id;
+  wc.on('did-navigate', (_e, url) => { sendTo(ctx, 'did-navigate', tabId, url, canGo(wc, -1), canGo(wc, 1)); googleNavigerade(wcId, url); });
+  wc.once('destroyed', () => { if (googleVantar && googleVantar.wcId === wcId) googleAvbryt(googleVantar); });
   if (ctx.mutedTabs && ctx.mutedTabs.has(tabId)) { try { wc.setAudioMuted(true); } catch {} }
   wc.on('audio-state-changed', (ev) => sendTo(ctx, 'tab-audio', tabId, !!(ev && ev.audible)));
   wc.on('found-in-page', (_e, r) => { if (ctx.findView && ctx.findTab === tabId) { try { ctx.findView.webContents.send('find-result', { active: r.activeMatchOrdinal, total: r.matches }); } catch {} } });
   wc.on('did-start-navigation', (_e, _u, inPage, isMain) => { if (isMain && !inPage && ctx.findTab === tabId) closeFind(ctx, true); });
-  wc.on('did-navigate-in-page', (_e, url, isMain) => { if (isMain) { sendTo(ctx, 'did-navigate', tabId, url, canGo(wc, -1), canGo(wc, 1)); googleKlar(ctx, tabId, url); } });
+  wc.on('did-navigate-in-page', (_e, url, isMain) => { if (isMain) { sendTo(ctx, 'did-navigate', tabId, url, canGo(wc, -1), canGo(wc, 1)); googleKlar(ctx, tabId, wcId, url); } });
   wc.on('page-title-updated', (_e, title) => sendTo(ctx, 'title', tabId, title));
-  wc.on('page-favicon-updated', (_e, favs) => sendTo(ctx, 'favicon', tabId, (favs || [])[0] || null));
+  // Sidans favicon-adress går till skalet: bara http(s)- eller data:image-adresser med rimlig längd
+  wc.on('page-favicon-updated', (_e, favs) => {
+    const f = (favs || [])[0];
+    const ok = typeof f === 'string' && ((/^https?:\/\//i.test(f) && f.length <= 4096) || (/^data:image\//i.test(f) && f.length <= 200000));
+    sendTo(ctx, 'favicon', tabId, ok ? f : null);
+  });
   wc.on('did-start-loading', () => sendTo(ctx, 'loading', tabId, true));
   wc.on('did-stop-loading', () => {
     sendTo(ctx, 'loading', tabId, false);
@@ -881,26 +925,47 @@ ipcMain.handle('auth:login', async (_e, d) => inloggadSvar(await adrazeApi('/aut
 // riktiga Chrome för Google (content-preload) – ett separat Electron-fönster stoppas av Google
 // ("webbläsaren kanske inte är säker"). Sidan lägger nyckeln i #klar=…, fliken fångas här och stängs.
 const ADRAZE_SITE = process.env.ADRAZE_SITE || 'https://adraze.app';
-let googleVantar = null;   // { resolve, ctx, timer }
-function googleKlar(ctx, tabId, url) {
-  if (!googleVantar || !url) return;
+let googleVantar = null;   // { resolve, timer, nonce, wcId } – ett flöde i taget
+const googleSida = (x) => { try { return !!x && x.origin === new URL(ADRAZE_SITE).origin && x.pathname === '/app-google'; } catch { return false; } };
+function googleAvbryt(v) {
+  if (!v || googleVantar !== v) return;
+  googleVantar = null; clearTimeout(v.timer);
+  try { v.resolve({ ok: false, error: 'cancelled' }); } catch {}
+}
+// Flödet binds till fliken som laddar /app-google#n=<engångsnonce> (bara huvudprocessen och den fliken
+// känner noncen). Går den fliken vidare till ett annat dokument, eller stängs, avbryts flödet.
+function googleNavigerade(wcId, url) {
+  const v = googleVantar; if (!v) return;
+  let x = null; try { x = new URL(url); } catch {}
+  if (v.wcId == null) { if (googleSida(x) && x.hash === '#n=' + v.nonce) v.wcId = wcId; return; }
+  if (wcId === v.wcId && !googleSida(x)) googleAvbryt(v);
+}
+function googleKlar(ctx, tabId, wcId, url) {
+  const v = googleVantar;
+  if (!v || !url || v.wcId == null || wcId !== v.wcId) return;   // bara flödets egen flik
   try {
     const x = new URL(url);
-    if (x.origin !== new URL(ADRAZE_SITE).origin || x.pathname !== '/app-google' || !x.hash.startsWith('#klar=')) return;
+    if (!googleSida(x) || !x.hash.startsWith('#klar=')) return;
     const d = JSON.parse(decodeURIComponent(x.hash.slice(6)));
-    if (!d || typeof d.token !== 'string') return;
+    if (!d || typeof d.token !== 'string' || typeof d.n !== 'string') return;
+    const a = Buffer.from(d.n), b = Buffer.from(v.nonce);
+    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return;   // fel/saknad nonce → ignoreras
     if (d.enhet) sparaEnhet(d.enhet);
-    const v = googleVantar; googleVantar = null; clearTimeout(v.timer);
+    googleVantar = null; clearTimeout(v.timer);
     sendTo(ctx, 'close-tab-id', tabId);
     v.resolve({ ok: true, token: d.token, email: d.email || '', name: d.namn || '', pro: false });
   } catch {}
 }
 ipcMain.handle('auth:google', (e) => new Promise((resolve) => {
   const ctx = ctxFor(e);
-  if (googleVantar) { clearTimeout(googleVantar.timer); googleVantar.resolve({ ok: false, error: 'cancelled' }); }
-  googleVantar = { resolve, timer: setTimeout(() => { if (googleVantar && googleVantar.resolve === resolve) { googleVantar = null; resolve({ ok: false, error: 'cancelled' }); } }, 10 * 60_000) };
-  sendTo(ctx, 'open-new-tab', ADRAZE_SITE + '/app-google');
+  googleAvbryt(googleVantar);
+  const v = { resolve, timer: null, nonce: crypto.randomBytes(16).toString('hex'), wcId: null };
+  v.timer = setTimeout(() => googleAvbryt(v), 10 * 60_000);
+  googleVantar = v;
+  sendTo(ctx, 'open-new-tab', ADRAZE_SITE + '/app-google#n=' + v.nonce);
 }));
+// Skalet loggade in på annat sätt (mejl/kod/barn) → ett väntande Google-flöde gäller inte längre
+ipcMain.on('auth:google-avbryt', () => googleAvbryt(googleVantar));
 ipcMain.handle('auth:signup', async (_e, d) => inloggadSvar(await adrazeApi('/auth/signup', { email: d && d.email, password: d && d.password, namn: d && d.name, app: true })));
 ipcMain.handle('auth:verify-code', async (_e, d) => inloggadSvar(await adrazeApi('/auth/verify', { email: d && d.email, code: d && d.code, app: true })));
 ipcMain.handle('auth:reset-request', async (_e, d) => adrazeApi('/auth/forgot', { email: d && d.email }));
@@ -1110,18 +1175,27 @@ function savePwList(l) {
   try { fs.mkdirSync(PW_DIR, { recursive: true }); fs.writeFileSync(pwFileFor(pwKey()), walletEncrypt(JSON.stringify(l)), { mode: 0o600 }); } catch {}
 }
 ipcMain.handle('pw:list', () => loadPw().filter((p) => !p.never));
-// Inloggningar för en sajt: exakt ursprung först, sedan samma domän (t.ex. login.x.se ↔ www.x.se), som Brave/Chrome
+// Inloggningar för en sajt: exakt ursprung, plus samma adress med/utan "www." (samma schema och port).
+// ALDRIG "samma domän" gissat ur de två sista leden: då delade alice.vercel.app och mallory.vercel.app
+// (github.io, netlify.app, pages.dev, co.uk …) lösenord med varandra.
 // Sajten bestäms av huvudprocessen (ramen som frågar), aldrig av vad sidan skickar
 function ramOrigin(e) { try { const o = e.senderFrame && e.senderFrame.origin; return o && /^https?:\/\//.test(o) ? o : ''; } catch { return ''; } }
+function wwwTvilling(origin) {
+  try {
+    const u = new URL(String(origin));
+    if (!/^https?:$/.test(u.protocol) || !u.hostname.includes('.') || /^[\d.]+$|:/.test(u.hostname)) return '';
+    u.hostname = u.hostname.startsWith('www.') ? u.hostname.slice(4) : 'www.' + u.hostname;
+    return u.hostname.includes('.') ? u.origin : '';
+  } catch { return ''; }
+}
 ipcMain.handle('pw:for-origin', (e) => {
   const origin = ramOrigin(e);
-  const host = (() => { try { return new URL(String(origin)).hostname; } catch { return ''; } })();
-  if (!host) return [];
-  const site = siteOf('https://' + host + '/');
+  if (!origin) return [];
+  const tvilling = wwwTvilling(origin);
   const l = loadPw().filter((p) => !p.never && p.password);
   const exact = l.filter((p) => p.origin === origin);
-  const same = l.filter((p) => p.origin !== origin && siteOf(p.origin) === site);
-  return [...exact, ...same].map((p) => ({ id: p.id, username: p.username, password: p.password, origin: p.origin }));
+  const www = tvilling ? l.filter((p) => p.origin === tvilling) : [];
+  return [...exact, ...www].map((p) => ({ id: p.id, username: p.username, password: p.password, origin: p.origin }));
 });
 ipcMain.handle('pw:never', (_e, origin) => {
   const l = loadPw();
@@ -1159,18 +1233,29 @@ ipcMain.on('pw:capture', (e, c) => {
 /* ── Kaka-valv per konto: logga ut → spara+rensa webbsession; logga in → återställ (samma tjänster tillbaka) ── */
 const COOKIE_DIR = path.join(app.getPath('userData'), 'session-cookies');
 function cookieFileFor(key) { return path.join(COOKIE_DIR, 'ck-' + keyHash(key) + '.json'); }
+// Valvet är krypterat på disken (AES-256-GCM, samma nyckelrings-nyckel som lösenorden och korten). Förr låg
+// alla kontots kakor – även HttpOnly-sessioner för Google, banken … – i klartext-JSON. En gammal klartextfil
+// läses en gång och skrivs direkt om krypterad.
+function lasKakvalv(fil) {
+  const buf = fs.readFileSync(fil);
+  try { return JSON.parse(walletDecrypt(buf)); } catch {}
+  const arr = JSON.parse(buf.toString('utf8'));
+  try { fs.writeFileSync(fil, walletEncrypt(JSON.stringify(arr)), { mode: 0o600 }); } catch {}
+  return arr;
+}
 async function saveAccountCookies(key) {
   if (!key) return;
   try {
     const cookies = await session.defaultSession.cookies.get({});
     fs.mkdirSync(COOKIE_DIR, { recursive: true });
-    fs.writeFileSync(cookieFileFor(key), JSON.stringify(cookies), { mode: 0o600 });
+    fs.writeFileSync(cookieFileFor(key), walletEncrypt(JSON.stringify(cookies)), { mode: 0o600 });
   } catch {}
 }
 async function restoreAccountCookies(key) {
   if (!key) return;
   let arr = [];
-  try { arr = JSON.parse(fs.readFileSync(cookieFileFor(key), 'utf8')); } catch { return; }
+  try { arr = lasKakvalv(cookieFileFor(key)); } catch { return; }
+  if (!Array.isArray(arr)) return;
   for (const c of arr) {
     try {
       const host = (c.domain || '').replace(/^\./, '');
@@ -1211,7 +1296,7 @@ async function migrateGoogleCookieFix() {
       for (const f of fs.readdirSync(COOKIE_DIR)) {
         if (!f.startsWith('ck-')) continue;
         const p = path.join(COOKIE_DIR, f);
-        try { const arr = JSON.parse(fs.readFileSync(p, 'utf8')); fs.writeFileSync(p, JSON.stringify(arr.filter((c) => !isGoogle(c.domain)))); } catch {}
+        try { const arr = lasKakvalv(p); fs.writeFileSync(p, walletEncrypt(JSON.stringify(arr.filter((c) => !isGoogle(c.domain)))), { mode: 0o600 }); } catch {}
       }
     } catch {}
     try { fs.writeFileSync(marker, new Date().toISOString()); } catch {}
@@ -1246,6 +1331,20 @@ ipcMain.handle('session:login', async (_e, d) => {
     try { await restoreAccountCookies(key); } catch {} // lägg tillbaka just det här kontots cookies
   }
   return { ok: true };
+});
+// Skalet: barnets regler / låst barnläge / null (se "Familjespärren i huvudprocessen")
+ipcMain.on('barn:regler', (_e, d) => {
+  try {
+    if (!d || typeof d !== 'object') { barnRegler = null; return; }
+    const lista = (x) => (Array.isArray(x) ? x : []).map((v) => String(v || '')).filter(Boolean).slice(0, 5000);
+    const allows = (Array.isArray(d.allows) ? d.allows : []).filter((a) => a && a.host).slice(0, 500).map((a) => ({ host: String(a.host), until: Number(a.until) || 0 }));
+    barnRegler = { last: !!d.last, blocklist: lista(d.blocklist), allows };
+    // Inget inkognito i barnläge (ingen insyn) – och ingen spärrad sida får ligga kvar och spela i någon flik/popup
+    wins.forEach((ctx) => { try { if (ctx && ctx.incognito && ctx.win && !ctx.win.isDestroyed()) { ctx.forceClose = true; ctx.win.close(); } } catch {} });
+    for (const wc of webContents.getAllWebContents()) {
+      try { if (!wc.isDestroyed() && barnSparrad(wc.getURL())) wc.loadURL('about:blank').catch(() => {}); } catch {}
+    }
+  } catch {}
 });
 // Utloggning: spara kontots cookies, rensa sedan webbsessionen (utloggad ur Google m.fl. — inget ligger kvar).
 ipcMain.handle('session:logout', async (_e, d) => {
@@ -1336,10 +1435,53 @@ function normCard(c, id) {
   return { id: id || c.id || ('c' + Date.now() + Math.floor(Math.random() * 1000)), holder: (c.holder || '').trim(), number: num, exp: (c.exp || '').trim(), cvc: digits(c.cvc), nick: (c.nick || '').trim(), brand: cardBrand(num) };
 }
 ipcMain.handle('wallet:list', () => loadCards().map(cardPublic));
-// Fullt kort – för redigering (inställningarna) och autofyll, men bara på krypterade sidor (som Chrome)
+// Fullt kort – bara för redigering i inställningarna (vår egen ui/). Webbsidor får kortet via 'wallet:valj'.
 ipcMain.handle('wallet:get', (e, id) => {
-  if (!ramUrl(e).startsWith(UI_URL) && !/^https:\/\//.test(ramOrigin(e))) return null;
+  if (!ramUrl(e).startsWith(UI_URL)) return null;
   return loadCards().find((c) => c.id === id) || null;
+});
+/* Kortväljarens ifyllning. Väljaren ritas alltid i flikens HUVUDRAM; du väljer med ett äkta klick
+ * eller en äkta tangent (preloaden släpper inte igenom sidans påhittade händelser). Kortet går sedan
+ * bara till (1) huvudramen som bad om det och ramar med samma ursprung, och (2) ramen där DU nyss
+ * klickade/skrev i ett kortfält (t.ex. Stripes iframe) och dess förälderkedja. Aldrig till en
+ * främmande inbäddad ram (annons, widget) på samma kassasida – och aldrig via postMessage, som sidornas
+ * egna skript också ser. Huvudprocessen fyller själv i underramarna. */
+const huvudram = (e) => { try { return !!e.senderFrame && !e.senderFrame.parent; } catch { return false; } };
+const ramKedja = (f) => { const ut = []; try { for (let g = f; g; g = g.parent) { let o = ''; try { o = g.origin; } catch {} ut.push(o); } } catch {} return ut; };
+function walletVill(e) {
+  try {
+    if (huvudram(e)) { e.sender.__wlVill = null; return; }        // väljaren öppnades för huvudramens eget fält
+    if (!/^https:\/\//.test(ramOrigin(e))) return;
+    e.sender.__wlVill = { kedja: ramKedja(e.senderFrame).filter((o) => /^https:\/\//.test(o)), t: Date.now() };
+  } catch {}
+}
+// Underram: du klickade/skrev på riktigt i ett kortfält här (preloaden skickar bara vid äkta händelser)
+ipcMain.on('wallet:want', (e) => walletVill(e));
+// Underram: ↑/↓/Enter/Esc i kortfältet → till väljaren i huvudramen (bara de fyra tangenterna)
+ipcMain.on('wallet:nav', (e, key) => {
+  try {
+    if (huvudram(e) || !['ArrowDown', 'ArrowUp', 'Enter', 'Escape'].includes(key)) return;
+    walletVill(e);
+    e.sender.mainFrame.send('wallet-nav', key);
+  } catch {}
+});
+ipcMain.handle('wallet:valj', (e, id) => {
+  if (!huvudram(e)) return null;
+  const o = ramOrigin(e);
+  if (!/^https:\/\//.test(o)) return null;                     // bara krypterade sidor (som Chrome)
+  const card = loadCards().find((c) => c.id === id);
+  if (!card) return null;
+  const wc = e.sender, vill = wc.__wlVill, ok = new Set([o]);
+  if (vill && Date.now() - vill.t < 120000) for (const x of vill.kedja) ok.add(x);
+  try {
+    for (const f of wc.mainFrame.framesInSubtree) {
+      if (!f.parent) continue;
+      let bra = true;                                            // ramen OCH alla dess förälderramar ska vara godkända
+      for (let g = f; g && g.parent; g = g.parent) { let go = ''; try { go = g.origin; } catch {} if (!ok.has(go)) { bra = false; break; } }
+      if (bra) { try { f.send('wallet-fyll', card); } catch {} }
+    }
+  } catch {}
+  return card;
 });
 ipcMain.handle('wallet:save', (_e, c) => {
   const l = loadCards();
@@ -1352,11 +1494,15 @@ ipcMain.handle('wallet:save', (_e, c) => {
 ipcMain.handle('wallet:delete', (_e, id) => { saveCards(loadCards().filter((c) => c.id !== id)); return { ok: true }; });
 /* Kortväljaren i sidan frågar efter listan (publik vy) + översatta etiketter.
  * Sidans preload har ingen tillgång till skalets språkval, så vi översätter här. */
-ipcMain.handle('wallet:menu', () => ({
-  cards: loadCards().map(cardPublic),
-  labels: { choose: trUi('Välj kort'), manage: trUi('Hantera kort'), exp: trUi('Giltigt till') },
-}));
-// Nyckeln som kortväljarens ramar signerar sina meddelanden med (samma för alla ramar i fliken)
+ipcMain.handle('wallet:menu', (e) => {
+  // Väljaren ritas bara i flikens huvudram – underramar (annonser, widgetar) får ingen kortlista
+  if (!ramUrl(e).startsWith(UI_URL) && !huvudram(e)) return { cards: [], labels: {} };
+  return {
+    cards: loadCards().map(cardPublic),
+    labels: { choose: trUi('Välj kort'), manage: trUi('Hantera kort'), exp: trUi('Giltigt till') },
+  };
+});
+// Nyckeln på kortväljarens öppna/stäng-meddelanden mellan ramar (bär inget kort; ifyllningen går via 'wallet:valj')
 ipcMain.on('wallet:token', (e) => { try { e.returnValue = e.sender.__wlTok ||= crypto.randomBytes(16).toString('hex'); } catch { e.returnValue = ''; } });
 /* Felsökningslogg från kortväljaren (bara när ADRAZE_WALLET_DEBUG=1 satts). */
 ipcMain.on('wallet:debug', (_e, d) => {
@@ -1553,7 +1699,10 @@ ipcMain.on('dl:keep-anyway', (_e, id) => {
 });
 
 /* ────────── IPC – per fönster (routas via event.sender) ────────── */
-ipcMain.on('view:load', (e, tabId, url) => { const ctx = ctxFor(e); if (!ctx) return; ctx.discarded.delete(tabId); ensureView(ctx, tabId).webContents.loadURL(url).catch(() => {}); showOnly(ctx, tabId); });
+// Flikar laddar bara webbadresser och AdRazes egna sidor – aldrig file: (lokala filer delar ursprung med skalet
+// och kom åt dess localStorage med inloggningstoken, historiken och kakvalvet på disken)
+const flikUrlOk = (u) => /^(https?:|adraze:|about:|view-source:https?:)/i.test(String(u || ''));
+ipcMain.on('view:load', (e, tabId, url) => { const ctx = ctxFor(e); if (!ctx || !flikUrlOk(url)) return; ctx.discarded.delete(tabId); ensureView(ctx, tabId).webContents.loadURL(url).catch(() => {}); showOnly(ctx, tabId); });
 ipcMain.on('view:show', (e, tabId) => { const ctx = ctxFor(e); if (!ctx) return; if (ctx.discarded.has(tabId)) rehydrate(ctx, tabId); showOnly(ctx, tabId); });
 ipcMain.on('view:hide', (e) => { const ctx = ctxFor(e); if (!ctx) return; ctx.views.forEach((v) => v.setVisible(false)); ctx.visibleTab = null; });
 ipcMain.on('view:bounds', (e, r) => { const ctx = ctxFor(e); if (ctx) { ctx.bounds = r; applyBounds(ctx); } });
@@ -1773,7 +1922,7 @@ ipcMain.on('open-app-menu', (e) => {
     { label: T('Helskärm'), accelerator: 'F11', click: () => toggleFull(ctx) },
     { label: T('Skriv ut…'), accelerator: 'CmdOrCtrl+P', click: () => sendTo(ctx, 'menu-print') },
     { label: T('Fler verktyg'), submenu: [
-      { label: T('Utvecklarverktyg'), accelerator: 'F12', click: () => { const v = ctx.views.get(ctx.visibleTab); if (v) try { v.webContents.openDevTools(); } catch {} } },
+      { label: T('Utvecklarverktyg'), accelerator: 'F12', enabled: !barnRegler, click: () => { if (barnRegler) return; const v = ctx.views.get(ctx.visibleTab); if (v) try { v.webContents.openDevTools(); } catch {} } },
       { label: T('Rensa surfdata'), click: () => sendTo(ctx, 'open-settings', 'rensa') },
     ] },
     { type: 'separator' },
@@ -1950,7 +2099,7 @@ const FALK_BILD = `(() => {
   const text = (document.body ? document.body.innerText : '').replace(/\\n{3,}/g, '\\n\\n').slice(0, 14000);
   return { url: location.href, titel: document.title, text, items, nere: Math.round(scrollY), hojd: document.documentElement.scrollHeight, fonster: innerHeight };
 })()`;
-const FALK_KOP = /(slutför|genomför|bekräfta|lägg|skicka)\s*(köp|beställning|order)|^\s*(köp|betala|beställ)(\s+(nu|och betala))?\s*$|betala\s+\d|place\s+order|buy\s+now|pay\s+(now|\d)|complete\s+(purchase|order)|confirm\s+(order|purchase|payment)|submit\s+order/i;
+const FALK_KOP = /(slutför|genomför|bekräfta|lägg|skicka|godkänn|fullfölj)\s*(köp|beställning|order|betalning)|^\s*(köp|betala|beställ|swisha)(\s+(nu|och betala|med\s+\S+))?\s*$|\bbetala\b|place\s+order|buy\s+now|\bpay\b|complete\s+(purchase|order|payment)|confirm\s+(order|purchase|payment)|submit\s+(order|payment)|purchase/i;
 const falkInkognito = (wc) => { try { return wc.session === session.fromPartition('skoll-incognito'); } catch { return false; } };
 function falkFlik(ctx) { const v = activeView(ctx) || (ctx.senasteFlik != null && ctx.views.get(ctx.senasteFlik)); const wc = v && v.webContents; return wc && !wc.isDestroyed() ? wc : null; }
 // executeJavaScript väntar tills sidan laddat klart, och vissa sidor (strömmar, annonser som laddar i evighet)
@@ -2009,6 +2158,16 @@ ipcMain.handle('krypto:act', async (e, a) => {
     if (namn === 'scrolla') { await falkKor(wc, `window.scrollBy(0, ${/upp|up/i.test(v) ? -1 : 1} * innerHeight * 0.85)`); await new Promise((r) => setTimeout(r, 500)); return { ok: true }; }
     if (namn === 'tangent') {
       const key = ({ enter: 'Enter', tab: 'Tab', escape: 'Escape', esc: 'Escape', ner: 'Down', upp: 'Up' })[v.toLowerCase()] || 'Enter';
+      if (key === 'Enter' && !a.godkant) {
+        // Enter på en knapp/länk eller i ett formulärfält (eller i en chattruta) skickar något – fråga användaren först
+        const fokus = await falkKor(wc, `(() => { const el = document.activeElement; if (!el || el === document.body || el === document.documentElement) return { risk: false };
+          const tag = el.tagName.toLowerCase(), typ = (el.getAttribute('type') || '').toLowerCase();
+          const knapp = /^(button|a|summary|iframe|frame)$/.test(tag) || el.getAttribute('role') === 'button' || (tag === 'input' && /^(submit|image|button|reset|checkbox|radio)$/.test(typ));
+          const std = el.form && el.form.querySelector('button:not([type]),button[type=submit],input[type=submit],input[type=image]');
+          const namn = ((std && (std.getAttribute('aria-label') || std.innerText || std.value)) || el.getAttribute('aria-label') || el.innerText || el.value || el.title || el.name || '').replace(/\\s+/g, ' ').trim().slice(0, 90);
+          return { risk: !!(knapp || el.form || tag === 'textarea' || el.isContentEditable), namn }; })()`).catch(() => ({ risk: true, namn: '' }));
+        if (fokus && fokus.risk) return { ok: false, godkann: true, vad: (fokus.namn || 'Enter'), slag: FALK_KOP.test(fokus.namn || '') ? 'kop' : 'formular' };
+      }
       wc.sendInputEvent({ type: 'keyDown', keyCode: key }); if (key === 'Enter') wc.sendInputEvent({ type: 'char', keyCode: '\r' }); wc.sendInputEvent({ type: 'keyUp', keyCode: key });
       await falkVantaLaddat(wc, 8000); return { ok: true };
     }
@@ -2019,10 +2178,17 @@ ipcMain.handle('krypto:act', async (e, a) => {
       const r = el.getBoundingClientRect(), typ = (el.getAttribute('type') || '').toLowerCase();
       const namn = (el.getAttribute('aria-label') || el.innerText || el.value || el.title || '').replace(/\\s+/g, ' ').trim().slice(0, 90);
       const hemligt = typ === 'password' || /cc-|card|kort|cvc|cvv|kontonummer/i.test((el.autocomplete || '') + ' ' + (el.name || '') + ' ' + (el.id || ''));
-      return { x: r.left + r.width / 2, y: r.top + r.height / 2, namn, tag: el.tagName.toLowerCase(), hemligt }; })()`);
+      const tag = el.tagName.toLowerCase();
+      // Skickar ett klick formuläret? (knapp utan type räknas som submit) – då frågar vi användaren först
+      const submit = !!el.form && ((tag === 'button' && (!typ || typ === 'submit')) || (tag === 'input' && (typ === 'submit' || typ === 'image')));
+      const skrivbar = tag === 'textarea' || tag === 'select' || el.isContentEditable || (tag === 'input' && /^(|text|search|email|tel|url|number|date|datetime-local|month|week|time)$/.test(typ));
+      const etiketter = [el.getAttribute('aria-label'), el.innerText, el.value, el.title].filter(Boolean).join(' · ').replace(/\\s+/g, ' ').slice(0, 300);
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2, namn, tag, hemligt, submit, skrivbar, etiketter }; })()`);
     if (!info) return { ok: false, fel: 'Hittade inte element ' + id + ' längre. Sidan kan ha ändrats.' };
     if (namn === 'klicka') {
-      if (FALK_KOP.test(info.namn) && !a.godkant) return { ok: false, godkann: true, vad: info.namn };
+      // Köp-/betalknappar OCH alla knappar som skickar ett formulär (publicera, skicka, beställa …) godkänns av användaren
+      if (!a.godkant && FALK_KOP.test(info.etiketter || info.namn)) return { ok: false, godkann: true, vad: info.namn, slag: 'kop' };
+      if (!a.godkant && info.submit) return { ok: false, godkann: true, vad: info.namn || 'Skicka', slag: 'formular' };
       const z = wc.getZoomFactor() || 1, x = Math.round(info.x * z), y = Math.round(info.y * z);
       wc.sendInputEvent({ type: 'mouseMove', x, y });
       wc.sendInputEvent({ type: 'mouseDown', x, y, button: 'left', clickCount: 1 });
@@ -2032,6 +2198,7 @@ ipcMain.handle('krypto:act', async (e, a) => {
     }
     if (namn === 'skriv') {
       if (info.hemligt) return { ok: false, fel: 'Lösenord och kortuppgifter fyller användaren i själv.' };
+      if (!info.skrivbar) return { ok: false, fel: 'Det går bara att skriva i textfält.' };   // annars kunde skriv flytta fokus till en knapp
       const text = rest.join('|');
       if (info.tag === 'select') {
         const r = await falkKor(wc, `(() => { const el = document.querySelector('[data-falk="${id}"]'); const t = ${JSON.stringify(text.toLowerCase())};
@@ -2063,10 +2230,33 @@ ipcMain.on('krypto:action', (e, a) => {
       const q = new URLSearchParams({ kategori: 'webblasare', amne: String(a.amne || 'Rapport: Falk-svar').slice(0, 140), text: String(a.text || '').slice(0, 4000) });
       sendTo(ctx, 'open-new-tab', 'https://support.adraze.app/?' + q); return;
     }
-    // sokmotor / adblock / realtidsskydd / minska_rorelse sköts i skalet
+    // sokmotor / adblock / realtidsskydd / minska_rorelse sköts i skalet.
+    // Handlingar som SÄNKER skyddet körs aldrig direkt på modellens ord – svaret kan bygga på en sida, ett mejl eller en
+    // sökträff som Falk läst. En ruta visar exakt vad som ändras; "Avbryt" är förvalt.
+    const sank = falkSankning(name, a);
+    if (sank) {
+      dialog.showMessageBox(ctx.win, { type: 'warning', title: 'Falk', message: sank, buttons: [T('Avbryt'), T('Tillåt')], defaultId: 0, cancelId: 0, noLink: true,
+        detail: T('Förslaget kommer från Falk (AI) och kan bygga på text från en webbsida, ett mejl eller en sökträff. Godkänn bara om det var du som bad om det.') })
+        .then((r) => { if (r && r.response === 1) sendTo(ctx, 'krypto-set', a); }).catch(() => {});
+      return;
+    }
     sendTo(ctx, 'krypto-set', a);
   } catch {}
 });
+// Vilka Falk-handlingar sänker skyddet? (samma tolkning av "av" som skalets kryptoOnOff)
+const falkAv = (v) => /(^av$|off|nej|stäng|stang|inaktiv|false|^0$|\bav\b)/i.test(String(v || '').trim());
+function falkSankning(name, a) {
+  const v = String((a && a.value) || '').trim();
+  if ((name === 'adblock' || name === 'annonsblockerare') && falkAv(v)) return T('Falk vill stänga av annonsblockeraren.');
+  if ((name === 'realtidsskydd' || name === 'skydd') && falkAv(v)) return T('Falk vill stänga av realtidsskyddet (varningen för farliga sidor).');
+  if (name === 'sokmotor' || name === 'sok') return T('Falk vill byta sökmotor till') + ' "' + v.slice(0, 40) + '".';
+  if (name === 'tillat' || name === 'avblockera' || name === 'unblock') {
+    const [barn, sidor, min] = v.split('|').map((x) => String(x || '').trim());
+    const m = parseInt(min, 10);
+    return T('Falk vill tillåta') + ' ' + ((sidor || '?').slice(0, 200)) + ' ' + T('för') + ' ' + ((barn || '?').slice(0, 40)) + ' ' + (m > 0 ? T('i') + ' ' + m + ' ' + T('minuter') : T('för alltid')) + '.';
+  }
+  return '';
+}
 
 /* ────────── Kortkommandon (Chromium-lika) ──────────
  * Acceleratorerna i popup-menyerna är bara etiketter. Riktiga genvägar fångas
@@ -2120,7 +2310,7 @@ function handleShortcut(wc, input) {
   if (mod && k === '0') { sendTo(ctx, 'menu-zoom', 0); return true; }
   if (mod && !shift && k === 'q') { app.quit(); return true; }
   if (k === 'f11') { toggleFull(ctx); return true; }
-  if (k === 'f12' || (mod && shift && k === 'i')) { const v = activeView(ctx); if (v) try { v.webContents.openDevTools(); } catch {} return true; }
+  if (k === 'f12' || (mod && shift && k === 'i')) { if (barnRegler) return true; const v = activeView(ctx); if (v) try { v.webContents.openDevTools(); } catch {} return true; }   // aldrig i barnläge
   if (k === 'f5') { const v = activeView(ctx); if (v) v.webContents.reload(); return true; }
   return false;
 }
@@ -2132,6 +2322,10 @@ app.on('web-contents-created', (_e, wc) => {
 
 /* ────────── Fönster ────────── */
 function createWindow(incognito) {
+  if (incognito && barnRegler) {   // barnläge: inget inkognito (föräldern ska se historiken)
+    try { const fw = BrowserWindow.getFocusedWindow(); const c = fw && wins.get(fw.webContents.id); if (c) sendTo(c, 'toast', T('Inkognito finns inte i barnläge.')); } catch {}
+    return null;
+  }
   const win = new BrowserWindow({
     icon: path.join(__dirname, 'build', 'icon.png'),
     width: 1280, height: 820, minWidth: 900, minHeight: 600,
@@ -2151,6 +2345,14 @@ function createWindow(incognito) {
   const id = win.webContents.id;
   const ctx = makeCtx(win, incognito);
   wins.set(id, ctx);
+  // Skalet (file://, full IPC) får aldrig navigera bort eller öppna fönster – inte ens om någon lyckas
+  // injicera HTML i det (t.ex. <meta http-equiv=refresh>). Bara omladdning av skalet självt släpps igenom.
+  const skalSokvag = require('url').pathToFileURL(path.join(__dirname, 'ui', 'shell.html')).pathname;
+  win.webContents.on('will-navigate', (ev, url) => {
+    try { const u = new URL((ev && ev.url) || url); if (u.protocol === 'file:' && u.pathname === skalSokvag) return; } catch {}
+    ev.preventDefault();
+  });
+  win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   win.loadFile(path.join(__dirname, 'ui', 'shell.html'), incognito ? { query: { incognito: '1' } } : {});
   // Startades AdRaze med en länk (t.ex. som standardwebbläsare)? Öppna den när skalet laddat.
   win.webContents.once('did-finish-load', () => {
@@ -2523,11 +2725,17 @@ app.whenReady().then(async () => {
   installAdblockOn(session.defaultSession);
   trackDownloads(session.defaultSession);
   migrateGoogleCookieFix();
+  // Kakvalv i gammal klartext (före 0.1.86) skrivs om krypterade direkt vid start – inte först när kontot loggar in igen
+  try { for (const f of fs.readdirSync(COOKIE_DIR)) if (/^ck-[0-9a-f]+\.json$/.test(f)) { try { lasKakvalv(path.join(COOKIE_DIR, f)); } catch {} } } catch {}
   // Ingen OS-menyrad (File/Edit/View…) i fönstret — webbläsaren har sin egen ≡-meny.
   // På macOS behålls en riktig meny (systemets menyrad + Cmd+C/V/A m.m.).
   try {
     if (process.platform === 'darwin') {
-      Menu.setApplicationMenu(Menu.buildFromTemplate([{ role: 'appMenu' }, { role: 'editMenu' }, { role: 'viewMenu' }, { role: 'windowMenu' }]));
+      // Som rollen 'viewMenu', men utvecklarverktygen (skalets!) går inte att öppna i barnläge
+      const visa = { label: 'View', submenu: [{ role: 'reload' }, { role: 'forceReload' },
+        { label: 'Toggle Developer Tools', accelerator: 'Alt+Command+I', click: (_m, w) => { if (!barnRegler && w) try { w.webContents.toggleDevTools(); } catch {} } },
+        { type: 'separator' }, { role: 'resetZoom' }, { role: 'zoomIn' }, { role: 'zoomOut' }, { type: 'separator' }, { role: 'togglefullscreen' }] };
+      Menu.setApplicationMenu(Menu.buildFromTemplate([{ role: 'appMenu' }, { role: 'editMenu' }, visa, { role: 'windowMenu' }]));
     } else {
       Menu.setApplicationMenu(null);
     }

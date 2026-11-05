@@ -9,15 +9,25 @@ NOTES="${1:-Uppdatering}"
 # Electron-vakten kan ha släppt en version sedan sist – ta in den först
 git pull -q --rebase --autostash origin main
 # node_modules måste ha precis den Electron som package.json säger (annars släpps fel Chromium)
-VILL=$(node -p "const p=require('./package.json'); ((p.dependencies||{}).electron||(p.devDependencies||{}).electron||'').replace(/.*#v/,'')")
+SPEC=$(node -p "const p=require('./package.json'); (p.dependencies||{}).electron||(p.devDependencies||{}).electron||''")
+VILL=${SPEC##*#v}
 HAR=$(cat node_modules/electron/dist/version 2>/dev/null || echo "")
 if [ "$VILL" != "$HAR" ]; then
   echo "Electron i node_modules ($HAR) ≠ package.json ($VILL) — installerar"
-  npm install --no-audit --no-fund
+  # Uttryckligt: annars står låset (package-lock) kvar på den gamla git-commiten och fel motor byggs
+  npm install --no-audit --no-fund --save-dev "electron@$SPEC"
   node node_modules/electron/install.js
   [ "$(cat node_modules/electron/dist/version)" = "$VILL" ] || { echo "fel Electron efter installation"; exit 1; }
 fi
-node tools/electron-vakt.js --koll 2>/dev/null | tail -1 | grep -q "uppdatera till" && echo "OBS: $(node tools/electron-vakt.js --koll | tail -1) finns hos castlabs"
+# Finns en nyare castlabs-motor (säkerhetsfixar) släpps INTE den gamla – uppdatera först
+# (npm install -D "electron@github:castlabs/electron-releases#<tagg>"). Nödläge: ADRAZE_GAMMAL_MOTOR_OK=1
+# (Ny huvudversion sköter vakten själv efter några dagar – den stoppar inte, men syns.)
+KOLL=$(node tools/electron-vakt.js --koll 2>/dev/null | grep "uppdatera till" | tail -1 || true)
+if [ -n "$KOLL" ]; then
+  if echo "$KOLL" | grep -q "ny huvudversion"; then echo "OBS: $KOLL finns hos castlabs"
+  elif [ -z "$ADRAZE_GAMMAL_MOTOR_OK" ]; then echo "STOPP: $KOLL finns hos castlabs – släpper inte gammal motor (ADRAZE_GAMMAL_MOTOR_OK=1 för nödläge)"; exit 1
+  else echo "OBS: $KOLL finns hos castlabs (ADRAZE_GAMMAL_MOTOR_OK satt)"; fi
+fi
 V=$(npm version patch --no-git-tag-version | tr -d v)
 rm -f dist-installer/latest-linux.yml dist-installer/AdRaze.AppImage dist-installer/AdRaze.dmg dist-installer/AdRaze-mac.zip dist-installer/AdRaze-mac.zip.blockmap dist-installer/latest-mac.yml
 npm run build:linux -- --publish never
