@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Electron-vakten: håller AdRaze på den senaste castlabs-Electron (= Chromiums säkerhetsfixar) utan att
-// någon behöver komma ihåg det. Körs av en systemd-timer var 2:a timme:
+// någon behöver komma ihåg det. Körs av en systemd-timer en gång om dagen:
 //   1. jämför vår Electron med castlabs senaste stabila Widevine-bygge (och Electrons egna releaser)
 //   2. finns en nyare: byter Electron i en egen git-worktree (rör inte pågående arbete) och kör
 //      tools/release.sh, som bygger och testar exakt paketet (säkerhet mot dev + paketet, inklusive att
@@ -207,11 +207,10 @@ Nice=10
 TimeoutStartSec=90min
 `);
   fs.writeFileSync(path.join(dir, 'adraze-electron-vakt.timer'), `[Unit]
-Description=AdRaze Electron-vakt var 2:a timme
+Description=AdRaze Electron-vakt en gång om dagen
 
 [Timer]
-OnBootSec=10min
-OnUnitActiveSec=2h
+OnCalendar=*-*-* 04:00:00
 RandomizedDelaySec=10min
 Persistent=true
 
