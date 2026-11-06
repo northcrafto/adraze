@@ -353,6 +353,7 @@ section { padding: 120px 0; }
 .jord-tips { font-size: 14px !important; color: var(--dov) !important; margin-top: 20px !important; }
 .jord-klot { position: relative; aspect-ratio: 1; width: 100%; max-width: 680px; justify-self: center; }
 .klot-tips { position: absolute; z-index: 5; pointer-events: none; background: var(--ink); color: #fff; border-radius: 12px; padding: 8px 12px; display: flex; flex-direction: column; gap: 2px; white-space: nowrap; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+.klot-tips[hidden] { display: none; }
 .klot-tips b { font-size: 15px; } .klot-tips span { font-size: 13px; color: var(--accent); font-weight: 600; }
 .jord-klot canvas { width: 100%; height: 100%; cursor: grab; touch-action: pan-y; opacity: 0; transition: opacity .6s ease; contain: layout paint size; }
 .jord-klot canvas.klar { opacity: 1; }
