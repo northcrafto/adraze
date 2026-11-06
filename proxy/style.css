@@ -178,10 +178,10 @@ section { padding: 120px 0; }
 .ladda-scen { position: relative; width: min(100%, 1320px); margin: 0 auto; }
 .ladda-konst { position: relative; container-type: inline-size; }
 .ladda-flagga { display: block; width: 100%; height: auto; }
-.ladda-rubrik { position: absolute; left: 4%; right: 4%; top: 7%; height: 39%; display: grid; place-items: center; font-size: 10.6cqw; line-height: 1; letter-spacing: -0.05em; color: var(--ink); white-space: nowrap; }
+.ladda-rubrik { position: absolute; left: 17.5%; right: 17.5%; top: 8%; height: 37%; display: grid; place-items: center; font-size: 8.2cqw; font-weight: 700; line-height: 1; letter-spacing: -0.03em; color: #0b0b0d; white-space: nowrap; }
 .ladda-rubrik em { font-style: normal; color: var(--accent); }
-.ladda-mitten { position: absolute; left: 36%; right: 36%; top: 62.5%; text-align: center; }
-.ladda-mitten p { font-size: clamp(15px, 1.25vw, 17px); line-height: 1.4; font-weight: 500; }
+.ladda-mitten { position: absolute; left: 31%; right: 31%; top: 54%; text-align: center; }
+.ladda-mitten p { font-size: clamp(17px, 1.5vw, 21px); line-height: 1.35; font-weight: 600; color: #0b0b0d; }
 .ladda-knappar { display: grid; gap: 12px; margin-top: 20px; }
 .btn-jatte { height: auto; min-height: 72px; padding: 12px 20px; font-size: 20px; gap: 12px; letter-spacing: -0.01em; white-space: normal; line-height: 1.2; }
 .btn-jatte svg { width: 28px; height: 28px; }
@@ -190,7 +190,7 @@ section { padding: 120px 0; }
 @media (max-width: 1200px) {
   .ladda { padding: 40px 16px 48px; }
   .ladda-mitten { position: static; margin: 28px auto 0; max-width: 460px; }
-  .ladda-mitten p { font-size: 18px; }
+  .ladda-mitten p { font-size: 19px; }
 }
 
 .demo-sektion { background: var(--yta); border-block: 1px solid var(--linje); }
