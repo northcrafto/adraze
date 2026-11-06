@@ -52,7 +52,7 @@ h3 { font-size: 22px; letter-spacing: -0.02em; line-height: 1.15; }
 .liq:active { transform: translateY(1px); }
 .liq::before {
   content: ""; position: absolute; z-index: -1; left: -15%; width: 130%; bottom: 0; height: 165%;
-  transform: translateY(100%);
+  transform: translateY(104%);
   background: linear-gradient(180deg, var(--sig-fill-top) 0%, var(--sig-fill-bottom) 100%);
   border-radius: 46% 46% 0 0;
   transition: transform .95s cubic-bezier(.2,.75,.25,1);
@@ -70,7 +70,7 @@ h3 { font-size: 22px; letter-spacing: -0.02em; line-height: 1.15; }
 }
 .liq-ghost::before {
   content: ""; position: absolute; z-index: -1; left: -15%; width: 130%; bottom: 0; height: 165%;
-  transform: translateY(100%); background: var(--sig-accent); border-radius: 46% 46% 0 0;
+  transform: translateY(104%); background: var(--sig-accent); border-radius: 46% 46% 0 0;
   transition: transform .95s cubic-bezier(.2,.75,.25,1); pointer-events: none;
 }
 .liq-ghost:hover, .liq-ghost:focus-visible { color: var(--ink); box-shadow: inset 0 0 0 1px transparent; }
@@ -143,6 +143,9 @@ body:has(.menu.open) .top { background: var(--bg); backdrop-filter: none; -webki
 .hero h1 em { font-style: normal; color: var(--accent); display: inline-block; }
 .lead { font-size: clamp(18px, 1.6vw, 21px); color: var(--dov); max-width: 34ch; margin-top: 28px; line-height: 1.5; }
 .cta-rad { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
+.hero-browser { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-top: 20px; font-size: 15px; color: var(--dov); font-weight: 500; }
+.hero-browser-knappar { display: flex; gap: 8px; }
+.hero-browser .btn { color: var(--ink); }
 .bevis { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 32px; font-size: 14px; color: var(--dov); font-weight: 500; }
 .bevis li, .bocklista li { display: flex; align-items: center; gap: 8px; }
 .bevis svg, .bocklista svg { color: var(--accent); width: 18px; height: 18px; }
@@ -163,6 +166,7 @@ body:has(.menu.open) .top { background: var(--bg); backdrop-filter: none; -webki
 .hero-text > :nth-child(2) { animation-delay: .06s; }
 .hero-text > :nth-child(3) { animation-delay: .12s; }
 .hero-text > :nth-child(4) { animation-delay: .18s; }
+.hero-text > :nth-child(5) { animation-delay: .24s; }
 .hero-illu { animation-delay: .1s; }
 @keyframes upp { from { opacity: 0; transform: translateY(12px); } }
 
