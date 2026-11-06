@@ -173,25 +173,38 @@ section { padding: 120px 0; }
 .sektion-huvud p { color: var(--dov); font-size: 19px; margin-top: 18px; max-width: 52ch; }
 
 /* ---------- Demo: riktig inspelning, Chrome mot AdRaze ---------- */
-/* Webbläsaren: mörkt kort framför gubben, som ser ut att sätta upp det på sidan */
-.ladda { padding: 56px 0 104px; overflow: clip; }
-.ladda-sats { position: relative; display: grid; align-items: center; min-height: 680px; }
-.ladda-gubbe { position: absolute; right: 16px; bottom: 0; width: min(62%, 760px); height: auto; pointer-events: none; }
-.ladda-kort { position: relative; width: min(68%, 820px); padding: 64px; border-radius: 36px; background: var(--mork); color: #fff; --sig-btn: #ffffff; --sig-btn-ink: var(--ink); }
-.ladda-kort h2 { font-size: clamp(40px, 5vw, 72px); line-height: 1; letter-spacing: -0.04em; }
-.ladda-kort p { margin-top: 20px; font-size: 19px; line-height: 1.5; color: #c9c9cf; max-width: 46ch; }
-.ladda-knappar { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
+/* Webbläsaren: glada gubbar hoppar runt nedladdningen på orange botten (bara transform, stilla vid reducerad rörelse) */
+.ladda { position: relative; display: grid; place-items: center; min-height: 860px; padding: 96px 24px; overflow: clip; background: var(--accent); color: var(--accent-ink); --sig-btn: #ffffff; --sig-btn-ink: var(--ink); --sig-fill-top: #ffd5c8; --sig-fill-bottom: #ffc4b2; }
+.ladda-text { position: relative; width: min(100%, 640px); text-align: center; }
+.ladda-text h2 { font-size: clamp(46px, 6.4vw, 96px); line-height: .98; letter-spacing: -0.05em; }
+.ladda-text p { margin: 24px auto 0; max-width: 44ch; font-size: 19px; line-height: 1.5; }
+.ladda-knappar { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 36px; }
 .btn-jatte { height: 72px; padding: 0 34px; font-size: 20px; gap: 12px; letter-spacing: -0.01em; }
 .btn-jatte svg { width: 28px; height: 28px; }
 .btn-jatte img { width: 36px; height: 36px; flex: none; }
 .ar-mac .ladda-mac { order: -1; }
+.ladda-gang { position: absolute; inset: 0; pointer-events: none; }
+.f { position: absolute; height: auto; animation: hopp 1.9s ease-in-out infinite alternate; }
+.f1 { left: 3%; top: 8%; width: 13vw; max-width: 230px; }
+.f2 { left: 14%; top: 28%; width: 11vw; max-width: 200px; animation-delay: -.7s; }
+.f3 { left: 2.5%; bottom: 3%; width: 17vw; max-width: 300px; animation-delay: -1.2s; }
+.f4 { right: 15%; top: 5%; width: 10vw; max-width: 180px; animation-delay: -.4s; }
+.f5 { right: 2.5%; top: 11%; width: 13vw; max-width: 230px; animation-delay: -1.5s; }
+.f6 { right: 3.5%; bottom: 2%; width: 11vw; max-width: 200px; animation-delay: -.9s; }
+.f7 { right: 15.5%; bottom: 3%; width: 10vw; max-width: 180px; animation-delay: -.2s; }
+@keyframes hopp { from { transform: translateY(0); } to { transform: translateY(-22px); } }
+@media (max-width: 1360px) { .f2, .f7 { display: none; } .f1 { left: 2%; } .f5 { right: 2%; } .f4 { right: 3%; top: 58%; } .f6 { display: none; } }
 @media (max-width: 900px) {
-  .ladda { padding: 40px 0 72px; }
-  .ladda-sats { display: block; min-height: 0; }
-  .ladda-gubbe { position: static; display: block; width: min(100%, 460px); margin: 0 auto -28px auto; }
-  .ladda-kort { width: 100%; padding: 36px 24px 28px; border-radius: 28px; }
-  .btn-jatte { width: 100%; height: auto; min-height: 68px; padding: 14px 20px; white-space: normal; text-align: center; line-height: 1.2; }
+  .ladda { min-height: 0; display: block; padding: 40px 16px 56px; }
+  .ladda-gang { position: static; display: flex; justify-content: center; align-items: flex-end; gap: 4%; margin-bottom: 28px; }
+  .f { position: static; width: auto; max-width: none; height: 190px; }
+  .f1, .f4, .f5 { width: 27%; height: auto; }
+  .f3 { display: none; }
+  .ladda-text { margin: 0 auto; }
+  .ladda-text p { font-size: 18px; }
+  .btn-jatte { width: 100%; height: auto; min-height: 68px; padding: 14px 20px; white-space: normal; line-height: 1.2; }
 }
+@media (prefers-reduced-motion: reduce) { .f { animation: none; } }
 
 .demo-sektion { background: var(--yta); border-block: 1px solid var(--linje); }
 .jmf { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
