@@ -1,3 +1,6 @@
+// Mac-besökare får Mac-knappen först
+if (/Macintosh/.test(navigator.userAgent)) document.documentElement.classList.add('ar-mac');
+
 // Hamburgarmenyn: cirkeln växer ut från knappens position
 const btn = document.getElementById('menu-btn'), menu = document.getElementById('menu');
 const satt = (open) => {
