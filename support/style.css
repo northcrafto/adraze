@@ -173,38 +173,25 @@ section { padding: 120px 0; }
 .sektion-huvud p { color: var(--dov); font-size: 19px; margin-top: 18px; max-width: 52ch; }
 
 /* ---------- Demo: riktig inspelning, Chrome mot AdRaze ---------- */
-/* Webbläsaren: glada gubbar hoppar runt nedladdningen på orange botten (bara transform, stilla vid reducerad rörelse) */
-.ladda { position: relative; display: grid; place-items: center; min-height: 860px; padding: 96px 24px; overflow: clip; background: var(--accent); color: var(--accent-ink); --sig-btn: #ffffff; --sig-btn-ink: var(--ink); --sig-fill-top: #ffd5c8; --sig-fill-bottom: #ffc4b2; }
-.ladda-text { position: relative; width: min(100%, 640px); text-align: center; }
-.ladda-text h2 { font-size: clamp(46px, 6.4vw, 96px); line-height: .98; letter-spacing: -0.05em; }
-.ladda-text p { margin: 24px auto 0; max-width: 44ch; font-size: 19px; line-height: 1.5; }
-.ladda-knappar { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 36px; }
-.btn-jatte { height: 72px; padding: 0 34px; font-size: 20px; gap: 12px; letter-spacing: -0.01em; }
+/* Webbläsaren: fyra personer håller upp flaggan, rubriken ligger på tyget och knapparna mellan dem */
+.ladda { padding: 56px 24px 0; overflow: clip; background: var(--accent); color: var(--accent-ink); --sig-btn: #ffffff; --sig-btn-ink: var(--ink); --sig-fill-top: #ffd5c8; --sig-fill-bottom: #ffc4b2; }
+.ladda-scen { position: relative; width: min(100%, 1320px); margin: 0 auto; }
+.ladda-konst { position: relative; container-type: inline-size; }
+.ladda-flagga { display: block; width: 100%; height: auto; }
+.ladda-rubrik { position: absolute; left: 4%; right: 4%; top: 7%; height: 39%; display: grid; place-items: center; font-size: 10.6cqw; line-height: 1; letter-spacing: -0.05em; color: var(--ink); white-space: nowrap; }
+.ladda-rubrik em { font-style: normal; color: var(--accent); }
+.ladda-mitten { position: absolute; left: 36%; right: 36%; top: 62.5%; text-align: center; }
+.ladda-mitten p { font-size: clamp(15px, 1.25vw, 17px); line-height: 1.4; font-weight: 500; }
+.ladda-knappar { display: grid; gap: 12px; margin-top: 20px; }
+.btn-jatte { height: auto; min-height: 72px; padding: 12px 20px; font-size: 20px; gap: 12px; letter-spacing: -0.01em; white-space: normal; line-height: 1.2; }
 .btn-jatte svg { width: 28px; height: 28px; }
 .btn-jatte img { width: 36px; height: 36px; flex: none; }
 .ar-mac .ladda-mac { order: -1; }
-.ladda-gang { position: absolute; inset: 0; pointer-events: none; }
-.f { position: absolute; height: auto; animation: hopp 1.9s ease-in-out infinite alternate; }
-.f1 { left: 3%; top: 8%; width: 13vw; max-width: 230px; }
-.f2 { left: 14%; top: 28%; width: 11vw; max-width: 200px; animation-delay: -.7s; }
-.f3 { left: 2.5%; bottom: 3%; width: 17vw; max-width: 300px; animation-delay: -1.2s; }
-.f4 { right: 15%; top: 5%; width: 10vw; max-width: 180px; animation-delay: -.4s; }
-.f5 { right: 2.5%; top: 11%; width: 13vw; max-width: 230px; animation-delay: -1.5s; }
-.f6 { right: 3.5%; bottom: 2%; width: 11vw; max-width: 200px; animation-delay: -.9s; }
-.f7 { right: 15.5%; bottom: 3%; width: 10vw; max-width: 180px; animation-delay: -.2s; }
-@keyframes hopp { from { transform: translateY(0); } to { transform: translateY(-22px); } }
-@media (max-width: 1360px) { .f2, .f7 { display: none; } .f1 { left: 2%; } .f5 { right: 2%; } .f4 { right: 3%; top: 58%; } .f6 { display: none; } }
-@media (max-width: 900px) {
-  .ladda { min-height: 0; display: block; padding: 40px 16px 56px; }
-  .ladda-gang { position: static; display: flex; justify-content: center; align-items: flex-end; gap: 4%; margin-bottom: 28px; }
-  .f { position: static; width: auto; max-width: none; height: 190px; }
-  .f1, .f4, .f5 { width: 27%; height: auto; }
-  .f3 { display: none; }
-  .ladda-text { margin: 0 auto; }
-  .ladda-text p { font-size: 18px; }
-  .btn-jatte { width: 100%; height: auto; min-height: 68px; padding: 14px 20px; white-space: normal; line-height: 1.2; }
+@media (max-width: 1200px) {
+  .ladda { padding: 40px 16px 48px; }
+  .ladda-mitten { position: static; margin: 28px auto 0; max-width: 460px; }
+  .ladda-mitten p { font-size: 18px; }
 }
-@media (prefers-reduced-motion: reduce) { .f { animation: none; } }
 
 .demo-sektion { background: var(--yta); border-block: 1px solid var(--linje); }
 .jmf { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
