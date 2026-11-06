@@ -143,9 +143,12 @@ body:has(.menu.open) .top { background: var(--bg); backdrop-filter: none; -webki
 .hero h1 em { font-style: normal; color: var(--accent); display: inline-block; }
 .lead { font-size: clamp(18px, 1.6vw, 21px); color: var(--dov); max-width: 34ch; margin-top: 28px; line-height: 1.5; }
 .cta-rad { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
-.hero-browser { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-top: 20px; font-size: 15px; color: var(--dov); font-weight: 500; }
-.hero-browser-knappar { display: flex; gap: 8px; }
-.hero-browser .btn { color: var(--ink); }
+.hero-dl-rubrik { margin-top: 36px; font-size: 17px; font-weight: 600; color: var(--ink); }
+.hero-dl { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+.btn-jatte { height: 72px; padding: 0 34px; font-size: 20px; gap: 12px; letter-spacing: -0.01em; }
+.btn-jatte svg { width: 28px; height: 28px; }
+.ar-mac .hero-dl-mac { order: -1; }
+.hero-andra { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .bevis { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 32px; font-size: 14px; color: var(--dov); font-weight: 500; }
 .bevis li, .bocklista li { display: flex; align-items: center; gap: 8px; }
 .bevis svg, .bocklista svg { color: var(--accent); width: 18px; height: 18px; }
@@ -167,6 +170,7 @@ body:has(.menu.open) .top { background: var(--bg); backdrop-filter: none; -webki
 .hero-text > :nth-child(3) { animation-delay: .12s; }
 .hero-text > :nth-child(4) { animation-delay: .18s; }
 .hero-text > :nth-child(5) { animation-delay: .24s; }
+.hero-text > :nth-child(6) { animation-delay: .3s; }
 .hero-illu { animation-delay: .1s; }
 @keyframes upp { from { opacity: 0; transform: translateY(12px); } }
 
@@ -311,6 +315,7 @@ section { padding: 120px 0; }
 @media (max-width: 640px) {
   section { padding: 80px 0; }
   .kort-grid { grid-template-columns: 1fr; }
+  .btn-jatte { width: 100%; height: auto; min-height: 68px; padding: 14px 20px; }
   .btn-stor { width: 100%; white-space: normal; height: auto; min-height: 56px; padding-block: 14px; text-align: center; line-height: 1.25; }
   .fot-grid { grid-template-columns: 1fr; }
   .fot ul { flex-wrap: wrap; }
