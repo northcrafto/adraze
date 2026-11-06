@@ -550,6 +550,7 @@
   "proxy.list_empty": "Inget stoppat än på den här sidan.",
   "proxy.newtab_safe": "AdRaze skyddar dig: reklam och spårare stoppas",
   "proxy.ui": "{}",
-  "hero.browser": "Webbläsaren AdRaze. Gratis.",
-  "hero.dl_linux": "Ladda ner för Linux"
+  "hero.dl_linux": "Ladda ner för Linux",
+  "ladda.title": "En hel webbläsare utan reklam.",
+  "ladda.text": "Blockeraren är inbyggd, så reklamen stoppas innan sidan ens laddas. Gratis för Linux och Mac."
 }
