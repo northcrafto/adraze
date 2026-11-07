@@ -34,9 +34,13 @@ const kopia = (v) => (v === undefined ? undefined : JSON.parse(JSON.stringify(v)
 function standard(nyckel) { const r = register.get(nyckel); return r ? kopia(r.standard) : undefined; }
 function hamta(nyckel, def) { const d = las(); return nyckel in d.varden ? kopia(d.varden[nyckel]) : (def !== undefined ? def : standard(nyckel)); }
 function alla() { return kopia(las().varden); }
+// Registreringen för en nyckel: exakt träff, annars ett mönster "område.*" som täcker den
+function regFor(nyckel) {
+  return register.get(nyckel) || [...register.entries()].find(([k]) => k.endsWith('.*') && nyckel.startsWith(k.slice(0, -1)))?.[1];
+}
 function last(nyckel) {
   if (!arBarn()) return false;
-  const r = register.get(nyckel) || [...register.entries()].find(([k, v]) => v.barnLast && k.endsWith('.*') && nyckel.startsWith(k.slice(0, -1)))?.[1];
+  const r = regFor(nyckel);
   return !!(r && r.barnLast);
 }
 // Fönstren får det SPARADE värdet (undefined = inget sparat → standard gäller) så deras kopia speglar filen exakt;
@@ -95,7 +99,7 @@ function importera(kod, prefix) {
   let n = 0;
   for (const [k, v] of Object.entries(o)) {
     if (prefix && !k.startsWith(prefix)) continue;
-    const r = register.get(k);
+    const r = regFor(k);
     if (r && r.importBar === false) continue;   // t.ex. skript/CSS importeras aldrig via delningskod
     if (satt(k, v, { etikett: 'Importerat' }).ok) n++;
   }
