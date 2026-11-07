@@ -316,10 +316,21 @@
 
   /* ── Placering ── */
   const rot = document.documentElement;
+  // Panelen på sidan är lika hög som webbytan: --vflik-top = webbytans överkant, --vflik-bunn = det som ligger under
+  // den (0, eller verktygsraden + bokmärkesfältet när raden ligger längst ner, Anpassa › verktyg). true = något ändrades.
+  let senastMatt = '';
   function uppdateraMatt() {
     const v = $('views'), tb = $('toolbar');
-    if (v) rot.style.setProperty('--vflik-top', Math.round(v.getBoundingClientRect().top) + 'px');
-    if (tb && tb.offsetHeight) rot.style.setProperty('--zen-h', tb.offsetHeight + 'px');
+    let topp = 50, bunn = 0;
+    if (v) { const r = v.getBoundingClientRect(); topp = Math.round(r.top); bunn = Math.max(0, Math.round(innerHeight - r.bottom)); }
+    const h = tb && tb.offsetHeight ? tb.offsetHeight : 0;
+    const nu = topp + '/' + bunn + '/' + h;
+    if (nu === senastMatt) return false;
+    senastMatt = nu;
+    rot.style.setProperty('--vflik-top', topp + 'px');
+    rot.style.setProperty('--vflik-bunn', bunn + 'px');
+    if (h) rot.style.setProperty('--zen-h', h + 'px');
+    return true;
   }
   function efterLayout() {
     requestAnimationFrame(() => {
@@ -538,7 +549,7 @@
     // Flik som somnat (huvudprocessen släppte minnet): blekare tills den laddas igen
     if (bro.onSover) bro.onSover((id) => { const t = flik(id); if (t && t !== aktiv()) { t.sover = true; kor('renderTabs'); } });
     if (window.view && window.view.onLoading) window.view.onLoading((id, laddar) => { if (!laddar) return; const t = flik(id); if (t && t.sover) { t.sover = false; kor('renderTabs'); } });
-    // Panelens topp följer verktygsraden/bokmärkesfältet; webbvyns mått räknas om när ytan ändras
+    // Panelens över- och underkant följer verktygsraden/bokmärkesfältet; webbvyns mått räknas om när ytan ändras
     try {
       let r = 0;
       const ro = new ResizeObserver(() => {
@@ -546,6 +557,10 @@
         if (!r) r = requestAnimationFrame(() => { r = 0; if (lage() !== 'upptill') kor('sendBounds'); });
       });
       for (const id of ['views', 'toolbar', 'bmbar']) { const el = $(id); if (el) ro.observe(el); }
+      // Verktygsraden längst ner (Anpassa › verktyg växlar anp-vf-nere på <body>): webbytan flyttar utan att byta
+      // storlek, så ResizeObserver märker inget. Mät om när <body>s klasser ändras (före nästa ritning, ingen blinkning).
+      new MutationObserver(() => { if (uppdateraMatt() && lage() !== 'upptill') kor('sendBounds'); })
+        .observe(document.body, { attributes: true, attributeFilter: ['class'] });
     } catch {}
     // Verktygsraden är titelrad i panel- och dolt läge: dubbelklick på en tom yta maximerar, som på flikraden
     const tb = $('toolbar');
