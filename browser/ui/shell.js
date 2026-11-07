@@ -57,10 +57,14 @@ const INCOG_ENGINE = { label: 'AdRaze Search', url: 'https://search.adraze.app/s
 let searchEngine = 'google';   // standard = Google; AdRaze Search går att välja (och används alltid i inkognito)
 try { const e = localStorage.getItem('skoll-engine'); if (e && ENGINES[e]) searchEngine = e; } catch {}
 function searchUrl(q) {
+  // Anpassa: snabbord ("yt katter") och egen standardsökmotor, se ui/anpassa-sokmotorer.js. null = som förut (alltid i barnläge).
+  const egen = window.AnpassaSok ? window.AnpassaSok.url(q, !!(active && active.incognito)) : null; if (egen) return egen;
   // Vanligt: vald sökmotor. Inkognito: alltid AdRaze Search (ingen logg).
   if (active && active.incognito) return INCOG_ENGINE.url + encodeURIComponent(q);
   return (ENGINES[searchEngine] || ENGINES.google).url + encodeURIComponent(q);
 }
+// Sökmotorns namn i adressfältet. Anpassa: en egen standardsökmotor (ui/anpassa-sokmotorer.js) går före den inbyggda.
+function motorEtikett() { return (window.AnpassaSok && window.AnpassaSok.etikett(false)) || (ENGINES[searchEngine] || ENGINES.adraze).label; }
 function normalizeUrl(raw) {
   let s = (raw || '').trim();
   if (!s) return null;
@@ -174,7 +178,7 @@ function switchTab(tab) {
   active = tab;
   document.body.classList.toggle('incog', !!tab.incognito);
   updateTitlebar();
-  $('search-engine').textContent = tab.incognito ? INCOG_ENGINE.label : (ENGINES[searchEngine] || ENGINES.adraze).label;
+  $('search-engine').textContent = tab.incognito ? INCOG_ENGINE.label : motorEtikett();
   addressInput.value = tab.url ? pretty(tab.url) : '';
   setShield(tab.url ? (protectionOn ? (tab.verdict ? tab.verdict.status : 'ok') : 'off') : 'home');
   hideOverlayElements();
@@ -754,6 +758,7 @@ function renderEngines() {
     });
     list.appendChild(el);
   });
+  if (window.AnpassaSok) window.AnpassaSok.motorlista(list);   // Anpassa: egna sökmotorer under de inbyggda
 }
 $('settings-btn').addEventListener('click', openSettings);
 $('settings-close').addEventListener('click', closeSettings);
@@ -854,6 +859,7 @@ function matchEngine(v) {
 function setEngine(k) {
   if (!ENGINES[k]) return false;
   searchEngine = k; try { localStorage.setItem('skoll-engine', k); } catch {}
+  if (window.AnpassaSok) window.AnpassaSok.inbyggd();   // Anpassa: en egen standardsökmotor slutar gälla
   if (active && !active.incognito) $('search-engine').textContent = ENGINES[k].label;
   try { renderEngines(); } catch {}
   return true;
@@ -918,6 +924,7 @@ $('settings-reset').addEventListener('click', () => {
   try { ['skoll-bg', 'skoll-topsites', 'skoll-engine'].forEach((k) => localStorage.removeItem(k)); } catch {}
   setProtection(true); setAdblock(true);
   searchEngine = 'google'; topSitesMode = 'favorites';
+  if (window.AnpassaSok) window.AnpassaSok.inbyggd();   // Anpassa: en egen standardsökmotor slutar gälla
   applyStoredBg(); applyTopSitesMode(); renderEngines();
   if (active && !active.incognito) $('search-engine').textContent = 'Google';
 });
@@ -1890,7 +1897,8 @@ function renderSug() {
     const el = document.createElement('div');
     el.className = 'sug' + ((i === sug.sel || (sug.sel < 0 && i === 0)) ? ' sel' : '') + (it.search ? ' ssearch' : '');
     let txt;
-    if (it.kind === 'typed') txt = `<span class="stext">${escapeHtml(it.q)}</span><span class="sdim"> - ${escapeHtml(sug.engineLabel || '')} ${escapeHtml(t('Sök'))}</span>`;
+    if (it.kind === 'snabbord' && window.AnpassaSok) txt = window.AnpassaSok.rad(it);   // Anpassa: "Sök på YouTube: katter"
+    else if (it.kind === 'typed') txt = `<span class="stext">${escapeHtml(it.q)}</span><span class="sdim"> - ${escapeHtml(sug.engineLabel || '')} ${escapeHtml(t('Sök'))}</span>`;
     else if (it.search) txt = `<span class="stext">${boldRest(it.q, typed)}</span>`;
     else {
       const adr = pretty(it.url).replace(/^www\./, '');
@@ -1921,7 +1929,7 @@ function localSug(query, comp) {
     out.push({ url: comp.url, host: comp.host, title: h.title || comp.host, favicon: h.favicon });
   }
   if (/^[a-z]+:\/\//i.test(query) || /^[^\s]+\.[a-z]{2,}(\/|$)/i.test(query)) { if (!comp) out.push({ url: /^[a-z]+:\/\//i.test(query) ? query : 'https://' + query, host: domainOf('https://' + query.replace(/^[a-z]+:\/\//i, '')), title: '' }); }
-  else out.push({ search: true, kind: 'typed', q: query });
+  else out.push((window.AnpassaSok && window.AnpassaSok.forslag(query)) || { search: true, kind: 'typed', q: query });   // Anpassa: snabbord
   if (active && active.incognito) return out;                  // ingen historik i inkognito
   const hist = getHistory();
   const past = [], seenQ = new Set([q]);
@@ -1959,7 +1967,7 @@ function updateSug(q) {
   const inp = sug.input; if (!inp) return;
   const query = (q || '').trim();
   sug.typed = query;
-  sug.engineLabel = (active && active.incognito) ? INCOG_ENGINE.label : (ENGINES[searchEngine] || ENGINES.adraze).label;
+  sug.engineLabel = (active && active.incognito) ? INCOG_ENGINE.label : motorEtikett();
   const lokala = query ? localSug(query, sug.comp) : topSitesForSug();   // tomt fält → dina mest besökta sajter
   sug.items = lokala;
   if (sug.items.length && document.activeElement === inp) { renderSug(); openSug(); } else closeSug();
@@ -1967,10 +1975,12 @@ function updateSug(q) {
   clearTimeout(sugTimer);
   const incog = !!(active && active.incognito);
   if (!query || /^[a-z]+:\/\//i.test(query) || /^[^\s]+\.[a-z]{2,}(\/|$)/i.test(query)) return;
+  const motor = window.AnpassaSok ? window.AnpassaSok.forslagsMotor(query, searchEngine) : searchEngine;   // Anpassa: null = inga förslag (snabbord)
+  if (!motor) return;
   const seq = ++sugSeq;
   sugTimer = setTimeout(async () => {
     let list = [];
-    if (!incog) { try { list = await window.view.suggest(query, searchEngine); } catch { list = []; } }   // inkognito: inga förslag hämtas – det du skriver lämnar inte datorn förrän du söker
+    if (!incog) { try { list = await window.view.suggest(query, motor); } catch { list = []; } }   // inkognito: inga förslag hämtas – det du skriver lämnar inte datorn förrän du söker
     if (seq !== sugSeq || document.activeElement !== inp || inp.value.slice(0, query.length).trim() !== query) return;   // gammalt svar → släng
     const seen = sug.pastQ || new Set([query.toLowerCase()]);
     const extra = list.filter((t) => t && !seen.has(t.toLowerCase())).slice(0, Math.max(0, 9 - lokala.length)).map((t) => ({ search: true, q: t }));
