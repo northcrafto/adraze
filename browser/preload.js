@@ -20,6 +20,11 @@ contextBridge.exposeInMainWorld('skoll', {
   onBlockinst: (cb) => ipcRenderer.on('blockinst:andrat', (_e, v) => cb(v || {})),
   onAdblockHit: (cb) => ipcRenderer.on('adblock:hit', (_e, type) => cb(type)),
 });
+// Anpassa/startsida: väder och ortsök hämtas av huvudprocessen (skalets CSP släpper inte ut fetch)
+contextBridge.exposeInMainWorld('anpassaStartsida', {
+  vader: (lat, lon) => ipcRenderer.invoke('startsida:vader', { lat, lon }),
+  ortSok: (q) => ipcRenderer.invoke('startsida:ort-sok', String(q || '')),
+});
 
 contextBridge.exposeInMainWorld('auth', {
   login: (email, password) => ipcRenderer.invoke('auth:login', { email, password }),
