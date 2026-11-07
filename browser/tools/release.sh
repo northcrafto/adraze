@@ -7,7 +7,7 @@ set -e
 cd "$(dirname "$0")/.."
 NOTES="${1:-Uppdatering}"
 # Electron-vakten kan ha släppt en version sedan sist – ta in den först
-git pull -q --rebase --autostash origin main
+git pull -q --rebase=merges --autostash origin main
 # node_modules måste ha precis den Electron som package.json säger (annars släpps fel Chromium)
 SPEC=$(node -p "const p=require('./package.json'); (p.dependencies||{}).electron||(p.devDependencies||{}).electron||''")
 VILL=${SPEC##*#v}
