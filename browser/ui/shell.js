@@ -836,8 +836,11 @@ function setTheme(t) {
   if (l) l.classList.toggle('on', theme === 'light');
   if (d) d.classList.toggle('on', theme === 'dark');
 }
-if ($('seg-light')) $('seg-light').addEventListener('click', () => setTheme('light'));
-if ($('seg-dark')) $('seg-dark').addEventListener('click', () => setTheme('dark'));
+// Anpassa-krok (tema): knapparna och importen väljer läge i tema.lage, som ui/anpassa-tema.js tillämpar i alla
+// fönster (även "Följ systemet"). setTheme ovan tillämpar bara ett färdigt ljust/mörkt i det här fönstret.
+function valjTema(t) { if (window.AnpassaTema) window.AnpassaTema.valjLage(t === 'dark' ? 'morkt' : 'ljust'); else setTheme(t); }
+if ($('seg-light')) $('seg-light').addEventListener('click', () => valjTema('light'));
+if ($('seg-dark')) $('seg-dark').addEventListener('click', () => valjTema('dark'));
 setTheme(theme);
 
 /* ── Falk-agent: låt AI:n ändra inställningar via naturligt språk ── */
@@ -2857,7 +2860,7 @@ function mergeHistorik(nya) {
 }
 // Utseende: tema, bokmärkesfält, sidzoom, teckenstorlek
 async function tillampaUtseende(x, rad) {
-  if (x.tema) { setTheme(x.tema); rad(tw(x.tema === 'dark' ? 'Mörkt tema' : 'Ljust tema')); }
+  if (x.tema) { valjTema(x.tema); rad(tw(x.tema === 'dark' ? 'Mörkt tema' : 'Ljust tema')); }
   if (typeof x.bmbar === 'boolean') {
     bmbarOn = x.bmbar; try { localStorage.setItem('adraze-bmbar', bmbarOn ? '1' : '0'); } catch {}
     try { renderBookmarkBar(); } catch {} if ($('tgl-bmbar')) $('tgl-bmbar').checked = bmbarOn;

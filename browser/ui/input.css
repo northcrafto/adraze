@@ -869,3 +869,176 @@ svg:has(use[href="#i-fav"]) { color: #5f6368; opacity: 1; }
 .fam-fraga button { font-size: 12px; font-weight: 700; border-radius: 8px; padding: 5px 10px; cursor: pointer; border: 1px solid var(--color-line); background: #fff; color: var(--color-navy-900); }
 .fam-fraga button[data-svar="nej"] { color: #b4321a; }
 .fam-fraga button:hover { border-color: var(--color-navy-900); }
+
+/* ── Anpassa: tema ── */
+/* Tema och utseende (ui/anpassa-tema.js, nycklar tema.*). Allt styrs av attribut och variabler på <html>:
+   data-anp-accent (egen accentfärg; --anp-accent-l/-d, --anp-on-l/-d och --anp-ink-l/-d räknas ut i JS),
+   data-anp-densitet, data-anp-horn, data-anp-typsnitt och data-anp-storlek. Saknas ett attribut gäller AdRazes
+   standard. Det enda som syns även utan val är accentlisten under den aktiva fliken, fokusramar när man går med
+   tangentbordet och färgen på markerad text (se "Accenten i alla teman"). */
+
+/* Typsnitt för själva webbläsaren: bara systemtypsnitt (inget laddas ned), med reserver för Mac, Windows och Linux */
+:root {
+  --anp-font-system: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --anp-font-klassisk: "Helvetica Neue", Helvetica, Arial, "Liberation Sans", "Nimbus Sans", sans-serif;
+  --anp-font-tydlig: Verdana, "DejaVu Sans", "Bitstream Vera Sans", Tahoma, Geneva, sans-serif;
+  --anp-font-serif: Charter, "Bitstream Charter", "Iowan Old Style", Georgia, Cambria, "Noto Serif", "DejaVu Serif", serif;
+  --anp-font-mono: ui-monospace, "SF Mono", Menlo, "Cascadia Mono", Consolas, "JetBrains Mono", "DejaVu Sans Mono", "Liberation Mono", monospace;
+  --anp-on: #fff;   /* text ovanpå accentfärgen */
+}
+:root[data-anp-typsnitt="klassisk"] { --font-sans: var(--anp-font-klassisk); }
+:root[data-anp-typsnitt="tydlig"] { --font-sans: var(--anp-font-tydlig); }
+:root[data-anp-typsnitt="serif"] { --font-sans: var(--anp-font-serif); }
+:root[data-anp-typsnitt="mono"] { --font-sans: var(--anp-font-mono); }
+
+/* Accentfärgen: allt som redan använder --color-terra följer med. -l = ljust läge, -d = mörkt läge och inkognito. */
+:root[data-anp-accent] { --color-terra: var(--anp-accent-l); --color-terra-300: color-mix(in srgb, var(--anp-accent-d) 62%, #fff); --anp-on: var(--anp-on-l); accent-color: var(--color-terra); }
+:root[data-anp-accent][data-theme="dark"], :root[data-anp-accent] body.incog { --color-terra: var(--anp-accent-d); --anp-on: var(--anp-on-d); }
+:root[data-anp-accent] #settings { --s-accent: var(--color-terra); --s-accent-ink: var(--anp-ink-l); --s-accent-soft: color-mix(in srgb, var(--color-terra) 9%, transparent); }
+:root[data-anp-accent][data-theme="dark"] #settings { --s-accent-ink: var(--anp-ink-d); --s-accent-soft: color-mix(in srgb, var(--color-terra) 14%, transparent); }
+:root[data-anp-accent] #settings :is(.pill:not(.pill-accent), .btn-ghost, .upd-main):is(:hover, :focus-visible) { color: var(--anp-on) !important; }
+:root[data-anp-accent] #settings .fam-code { border-color: color-mix(in srgb, var(--color-terra) 30%, transparent); }
+:root[data-anp-accent] .fam-fragor { border-color: color-mix(in srgb, var(--color-terra) 30%, transparent); background: color-mix(in srgb, var(--color-terra) 5%, transparent); }
+:root[data-anp-accent] .fam-open svg { color: var(--color-terra); }
+:root[data-anp-accent] .pill-accent { color: var(--anp-on); }
+:root[data-anp-accent] .pill-accent:hover { background: color-mix(in srgb, var(--color-terra) 88%, #000); }
+:root[data-anp-accent] :is(#chatt-btn.active, #toolbar .falk-btn:not(.off)) { background: color-mix(in srgb, var(--color-terra) 14%, transparent); }
+:root[data-anp-accent] #falk-granskar { background: color-mix(in srgb, var(--color-terra) 10%, transparent); }
+:root[data-anp-accent] :is(#wsavebar-save, #wfillbar-fill, #cc-yes, #login .lg-chip) { color: var(--anp-on); }
+:root[data-anp-accent] #chatt-badge { color: var(--anp-on) !important; }
+:root[data-anp-accent] .upd-dot { background: var(--color-terra); }
+:root[data-anp-accent] .permbar-ico { background: color-mix(in srgb, var(--color-terra) 10%, transparent); color: var(--color-terra); }
+:root[data-anp-accent] .permbar-sub input { accent-color: var(--color-terra); }
+:root[data-anp-accent] .permbar-btn.on { background: var(--color-terra) !important; color: var(--anp-on); }
+/* Startsidans statistik och QR-rutan ligger alltid på mörkt */
+:root[data-anp-accent] .nt-stats::before { background: linear-gradient(90deg, var(--anp-accent-d), color-mix(in srgb, var(--anp-accent-d) 35%, transparent) 45%, transparent 80%); }
+:root[data-anp-accent] .nt-st-acc { color: var(--anp-accent-d); }
+:root[data-anp-accent] #qr .qr-knapp { background: var(--anp-accent-d); color: var(--anp-on-d); }
+:root[data-anp-accent] #qr .qr-knapp:hover { background: color-mix(in srgb, var(--anp-accent-d) 88%, #000); }
+:root[data-anp-accent] #qr .qr-ram::before { border-color: color-mix(in srgb, var(--anp-accent-d) 55%, transparent); }
+:root[data-anp-accent] #qr :is(.qr-knapp, .qr-x):focus-visible { outline-color: var(--anp-accent-d); }
+/* Notiserna uppe till höger (stilarna ligger i shell.html efter den här filen, därav de längre väljarna) */
+:root[data-anp-accent] .notis button::before { background: var(--color-terra); }
+:root[data-anp-accent] .notis .notis-knapp:not(:disabled):is(:hover, :focus-visible) { background-color: var(--color-terra); }
+:root[data-anp-accent][data-theme] .notis :is(.notis-knapp, .notis-sek):not(:disabled):is(:hover, :focus-visible) { color: var(--anp-on); }
+:root[data-anp-accent] .notis button:focus-visible { outline-color: var(--color-terra); }
+
+/* Accenten i alla teman: en tunn list under den aktiva fliken, fokusramar (bara med tangentbordet, se fokus.js) och markerad text */
+.tab.active::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: 0; height: 2px; border-radius: 2px 2px 0 0; background: var(--color-terra); pointer-events: none; }
+html[data-kbd] :is(.icon-btn, .newtab-btn, .bmchip, .pill, .omni-ab, .winctl button):focus-visible { outline: 2px solid var(--color-terra); outline-offset: 1px; }
+:is(#address, #nt-search, #settings input, #settings textarea)::selection { background: color-mix(in srgb, var(--color-terra) 32%, transparent); }
+
+/* Densitet: höjden på flikraden, flikarna, verktygsraden, adressfältet och knapparna, och luften i inställningarna.
+   Flikradens höjd står också i ../anpassa-tema.js (Macens trafikljus). Normal = grundmåtten. */
+:root[data-anp-densitet="kompakt"] { --anp-flikrad: 36px; --anp-flik: 30px; --anp-verktyg: 42px; --anp-adress: 30px; --anp-knapp: 30px; --anp-ny: 28px; --anp-chip: 24px; --anp-sug: 30px; --anp-rad: 10px; }
+:root[data-anp-densitet="luftig"] { --anp-flikrad: 50px; --anp-flik: 42px; --anp-verktyg: 58px; --anp-adress: 42px; --anp-knapp: 38px; --anp-ny: 34px; --anp-chip: 30px; --anp-sug: 40px; --anp-rad: 18px; }
+:root[data-anp-densitet] #tabstrip { height: var(--anp-flikrad); }
+:root[data-anp-densitet] .winctl button { height: var(--anp-flikrad); }
+:root[data-anp-densitet] .tab { height: var(--anp-flik); }
+:root[data-anp-densitet] #toolbar { height: var(--anp-verktyg); }
+:root[data-anp-densitet] #omnibox { height: var(--anp-adress); }
+:root[data-anp-densitet] #toolbar .icon-btn { width: var(--anp-knapp); height: var(--anp-knapp); }
+:root[data-anp-densitet] .newtab-btn { width: var(--anp-ny); height: var(--anp-ny); }
+:root[data-anp-densitet] .bmchip { height: var(--anp-chip); }
+:root[data-anp-densitet] .sug { height: var(--anp-sug); }
+:root[data-anp-densitet] #settings .set-row { padding-top: var(--anp-rad); padding-bottom: var(--anp-rad); }
+
+/* Hörn: Kantig / Normal (grundmåtten) / Rund */
+:root[data-anp-horn="kantig"] { --anp-r-flik: 3px; --anp-r-falt: 4px; --anp-r-knapp: 4px; --anp-r-inre: 2px; --anp-r-rad: 2px; --anp-r-kort: 6px; --anp-r-ruta: 6px; }
+:root[data-anp-horn="rund"] { --anp-r-flik: 14px; --anp-r-falt: 999px; --anp-r-knapp: 999px; --anp-r-inre: 999px; --anp-r-rad: 10px; --anp-r-kort: 18px; --anp-r-ruta: 22px; }
+:root[data-anp-horn] .tab { border-radius: var(--anp-r-flik); }
+:root[data-anp-horn] #omnibox { border-radius: var(--anp-r-falt); }
+:root[data-anp-horn] :is(.icon-btn, .newtab-btn, .bmchip, .pill, .omni-ab, .tab .tclose, .tab .tsound, #reader-btn, #pip-btn) { border-radius: var(--anp-r-knapp); }
+:root[data-anp-horn] #omni-suggest { border-radius: var(--anp-r-kort); }
+:root[data-anp-horn] .sug { border-radius: var(--anp-r-rad); }
+:root[data-anp-horn] :is(.notis, #closeconf) { border-radius: var(--anp-r-ruta); }
+:root[data-anp-horn] :is(.notis button, #closeconf button) { border-radius: var(--anp-r-knapp); }
+:root[data-anp-horn] #settings .set-row:not(.set-row + .set-row) { border-radius: var(--anp-r-kort) var(--anp-r-kort) 0 0; }
+:root[data-anp-horn] #settings .set-row:not(:has(+ .set-row)) { border-radius: 0 0 var(--anp-r-kort) var(--anp-r-kort); }
+:root[data-anp-horn] #settings .set-row:not(.set-row + .set-row):not(:has(+ .set-row)) { border-radius: var(--anp-r-kort); }
+:root[data-anp-horn] #settings :is(.set-hero, .upd-card, .clear-box, .perm-site, .pro-box, .engine-opt, .wl-card, .kn-card, .anp-tema-kort, .anp-tema-font) { border-radius: var(--anp-r-kort); }
+:root[data-anp-horn] #settings :is(.btn, .set-btn, .pill, .btn-ghost, .btn-safe, .btn-risk, .set-select, .seg, .set-tab, .set-search, .set-chip) { border-radius: var(--anp-r-knapp); }
+:root[data-anp-horn] #settings .seg-btn { border-radius: var(--anp-r-inre); }
+:root[data-anp-horn] #settings :is(input[type="text"], input[type="password"], input[type="email"], .pw-in, .wl-in) { border-radius: var(--anp-r-falt); }
+
+/* Textstorlek i webbläsaren (inte webbsidorna): Liten / Normal / Stor */
+:root[data-anp-storlek="liten"] { --anp-fs: .92; }
+:root[data-anp-storlek="stor"] { --anp-fs: 1.12; }
+:root[data-anp-storlek] .tab { font-size: calc(13px * var(--anp-fs)); }
+:root[data-anp-storlek] #address { font-size: calc(14.5px * var(--anp-fs)); }
+:root[data-anp-storlek] .bmchip { font-size: calc(12px * var(--anp-fs)); }
+:root[data-anp-storlek] :is(.sug, .sug .surl) { font-size: calc(13.5px * var(--anp-fs)); }
+:root[data-anp-storlek] .sug .stitle { font-size: calc(11.5px * var(--anp-fs)); }
+:root[data-anp-storlek] #toolbar .omni-ab { font-size: calc(12.5px * var(--anp-fs)); }
+:root[data-anp-storlek] .notis-titel { font-size: calc(16px * var(--anp-fs)); }
+:root[data-anp-storlek] :is(.notis-under, .notis button) { font-size: calc(13.5px * var(--anp-fs)); }
+:root[data-anp-storlek] #settings .set-tab { font-size: calc(14.5px * var(--anp-fs)); }
+:root[data-anp-storlek] #settings .set-glbl { font-size: calc(12px * var(--anp-fs)); }
+:root[data-anp-storlek] #settings .set-h { font-size: calc(26px * var(--anp-fs)); }
+:root[data-anp-storlek] #settings .set-h3 { font-size: calc(15px * var(--anp-fs)); }
+:root[data-anp-storlek] #settings :is(.set-lead, .set-search input) { font-size: calc(13.5px * var(--anp-fs)); }
+:root[data-anp-storlek] #settings .set-title { font-size: calc(14px * var(--anp-fs)); }
+:root[data-anp-storlek] #settings :is(.set-desc, .start-sub, .seg-btn) { font-size: calc(12.5px * var(--anp-fs)); }
+:root[data-anp-storlek] #settings :is(.set-select, .perm-line) { font-size: calc(13px * var(--anp-fs)); }
+:root[data-anp-storlek] #settings .engine-opt { font-size: calc(14px * var(--anp-fs)); }
+:root[data-anp-storlek] #settings :is(.btn, .set-btn, .pill, .btn-ghost, .btn-safe) { font-size: calc(13.5px * var(--anp-fs)); }
+
+/* Inställningar › Anpassa › Tema (#anp-tema) */
+#settings .anp-tema-grupp { margin: 28px 2px 0; font-size: 12px; font-weight: 600; letter-spacing: .01em; color: var(--s-faint); }
+#settings #anp-tema .anp-tema-grupp + .set-row { margin-top: 8px; }
+#settings #anp-tema .anp-tema-hel { flex-wrap: wrap; row-gap: 14px; }
+#settings #anp-tema .anp-tema-hel > * { flex: 1 1 100%; }
+#settings .anp-tema-fel { color: #d0402f; }
+:root[data-theme="dark"] #settings .anp-tema-fel { color: #ff8a7a; }
+/* Färgprov: rund knapp i färgen, bock i svart eller vit (det som syns bäst) när den är vald */
+#settings .anp-tema-farger { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+#settings .anp-tema-prov { position: relative; display: grid; place-items: center; width: 30px; height: 30px; flex: none; border-radius: 999px; background: var(--prov); color: var(--prov-on, #fff); cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / .12); transition: box-shadow .15s ease; }
+#settings .anp-tema-prov:hover { box-shadow: inset 0 0 0 1px rgb(0 0 0 / .12), 0 0 0 3px color-mix(in srgb, var(--prov) 28%, transparent); }
+#settings .anp-tema-prov.on { box-shadow: 0 0 0 2px var(--s-surface), 0 0 0 4px var(--prov); }
+#settings .anp-tema-prov svg { grid-area: 1 / 1; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+#settings .anp-tema-prov .anp-tema-bock { opacity: 0; transition: opacity .15s ease; }
+#settings .anp-tema-prov.on .anp-tema-bock { opacity: 1; }
+#settings .anp-tema-egen { background: var(--s-surface-2); color: var(--s-mut); box-shadow: inset 0 0 0 1px var(--s-field-line); }
+#settings .anp-tema-egen:hover { color: var(--s-ink); box-shadow: inset 0 0 0 1px var(--s-faint); }
+#settings .anp-tema-egen.on { background: var(--prov); color: var(--prov-on); box-shadow: 0 0 0 2px var(--s-surface), 0 0 0 4px var(--prov); }
+#settings .anp-tema-egen.on .anp-tema-plus { opacity: 0; }
+#settings .anp-tema-egen input { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; opacity: 0; cursor: pointer; }
+#settings .anp-tema-skilj { width: 1px; height: 22px; margin: 0 2px; background: var(--s-line); }
+#settings .anp-tema-hex { width: 92px; height: 32px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--s-field-line); font: 500 12.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+#settings .anp-tema-alt { display: inline-flex; gap: 8px; margin-left: 4px; vertical-align: middle; }
+#settings .anp-tema-alt .anp-tema-prov { width: 20px; height: 20px; }
+#settings .anp-tema-alt .anp-tema-prov svg { width: 12px; height: 12px; stroke-width: 2.8; }
+/* Färdiga teman: liten förhandsbild (flikrad, adressfält, en knapp i accenten) och namnet under */
+#settings .anp-tema-forval { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+#settings .anp-tema-kort { display: flex; flex-direction: column; gap: 7px; padding: 5px 5px 7px; border-radius: 12px; text-align: left; color: var(--s-ink); cursor: pointer; transition: background .15s ease, box-shadow .15s ease; }
+#settings .anp-tema-kort:hover { background: var(--s-hover); }
+#settings .anp-tema-kort.on { box-shadow: inset 0 0 0 2px var(--s-accent); }
+#settings .anp-tema-namn { padding: 0 3px; font-size: 13px; font-weight: 600; }
+#settings .anp-tema-mini { --m-krom: #e7edf4; --m-rad: #f1f5f9; --m-yta: #f9fbfd; --m-falt: #ffffff; --m-linje: #d5dee8; --m-text: #d3dbe5;
+  display: grid; grid-template-rows: 13px 16px 1fr; height: 70px; overflow: hidden; border-radius: 8px; background: var(--m-yta); box-shadow: inset 0 0 0 1px var(--s-line); }
+#settings .anp-tema-mini.mork { --m-krom: #0c0c0d; --m-rad: #171718; --m-yta: #0e0e10; --m-falt: #26262a; --m-linje: #2b2b2d; --m-text: #2e2e33; }
+#settings .anp-tema-mini i { display: block; font-style: normal; }
+#settings .anp-tema-mini .m-flikar { display: flex; align-items: flex-end; gap: 4px; padding: 0 7px; background: var(--m-krom); }
+#settings .anp-tema-mini .m-flik { position: relative; width: 40%; height: 9px; border-radius: min(var(--m-r), 4px) min(var(--m-r), 4px) 0 0; background: var(--m-falt); }
+#settings .anp-tema-mini .m-flik::after { content: ""; position: absolute; left: 5px; right: 5px; bottom: 0; height: 1.5px; background: var(--m-acc); }
+#settings .anp-tema-mini .m-flik2 { width: 24%; height: 4px; margin-bottom: 3px; border-radius: 2px; background: var(--m-text); }
+#settings .anp-tema-mini .m-rad { display: flex; align-items: center; padding: 0 7px; background: var(--m-rad); box-shadow: inset 0 -1px 0 var(--m-linje); }
+#settings .anp-tema-mini .m-falt { flex: 1; height: 8px; border-radius: var(--m-r); background: var(--m-falt); box-shadow: inset 0 0 0 1px var(--m-linje); }
+#settings .anp-tema-mini .m-sida { display: flex; flex-direction: column; gap: 4px; padding: 8px 9px; }
+#settings .anp-tema-mini .m-text { width: 72%; height: 4px; border-radius: 2px; background: var(--m-text); }
+#settings .anp-tema-mini .m-text.kort { width: 48%; }
+#settings .anp-tema-mini .m-knapp { width: 32px; height: 9px; margin-top: 3px; border-radius: var(--m-r); background: var(--m-acc); }
+/* Typsnitt: "Aa" i varje typsnitt */
+#settings .anp-tema-typsnitt { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+#settings .anp-tema-font { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 4px 9px; border-radius: 10px; background: var(--s-surface-2); color: var(--s-ink); cursor: pointer;
+  box-shadow: inset 0 0 0 1px var(--s-line); transition: box-shadow .15s ease, background .15s ease; }
+#settings .anp-tema-font:hover { box-shadow: inset 0 0 0 1px var(--s-faint); }
+#settings .anp-tema-font.on { background: var(--s-surface); box-shadow: inset 0 0 0 2px var(--s-accent); }
+#settings .anp-tema-font b { font-size: 21px; font-weight: 600; line-height: 1.2; }
+#settings .anp-tema-font span { font-size: 12px; color: var(--s-mut); white-space: nowrap; }
+/* Delningskoden */
+#settings .anp-tema-kod { display: flex; gap: 8px; }
+#settings .anp-tema-kod input { flex: 1; min-width: 0; height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--s-field-line); font: 12.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+#settings .anp-tema-kod .set-btn { flex: none; }
+@media (max-width: 760px) { #settings .anp-tema-typsnitt { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
