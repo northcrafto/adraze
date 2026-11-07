@@ -1133,6 +1133,9 @@ ipcMain.handle('family:children', async (_e, d) => {
 });
 ipcMain.handle('family:remove', (_e, d) => adrazeApi('/familj/ta-bort', { barn_id: d && d.child_id }, d && d.token));
 ipcMain.handle('family:blocklist', (_e, d) => adrazeApi('/familj/blocklista', { barn_id: d && d.child_id, blocklista: d && d.blocklist }, d && d.token));
+// Barnets dator: märkning som överlever utloggning, och anmälan när ett annat vuxenkonto loggar in där (föräldern får mejl)
+ipcMain.handle('family:enhet', (_e, d) => adrazeApi('/barn/enhet', {}, d && d.token));
+ipcMain.handle('family:annat-konto', (_e, d) => adrazeApi('/barn/annat-konto', { enhet: d && d.enhet }, d && d.token));
 ipcMain.handle('family:me', async (_e, d) => {
   const j = await adrazeApi('/barn/jag', {}, d && d.token);
   return j.ok ? { ok: true, isChild: true, name: j.namn, age: j.alder, blocklist: j.blocklista, allows: j.tillat, fragor: Array.isArray(j.fragor) ? j.fragor : [] } : j;
