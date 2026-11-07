@@ -12,7 +12,7 @@ contextBridge.exposeInMainWorld('locale', {
   load: (lang) => { try { return ipcRenderer.sendSync('i18n:load', lang) || {}; } catch { return {}; } },
 });
 contextBridge.exposeInMainWorld('chatt', {
-  boot: () => ({ lang: boot.lang, theme: boot.theme }),
+  boot: () => ({ lang: boot.lang, theme: boot.theme, child: !!boot.child }),
   api: (req) => ipcRenderer.invoke('chatt:api', req),
   expand: (full) => ipcRenderer.send('chatt:expand', !!full),
   close: () => ipcRenderer.send('chatt:close'),

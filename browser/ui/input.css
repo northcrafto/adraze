@@ -820,3 +820,52 @@ svg:has(use[href="#i-fav"]) { color: #5f6368; opacity: 1; }
 :root[data-theme="dark"] #toolbar .omni-ab { color: #e9e9ec; }
 :root[data-theme="dark"] #toolbar .omni-ab:hover { background: rgb(255 255 255 / .08); }
 #toolbar .falk-btn:not(.off) { background: rgb(255 75 31 / .14); color: var(--color-terra); }
+
+/* ── Spärrsidan för barn (förslag D: jättetecknet) ── */
+#kidblock { position: fixed; inset: 0; z-index: 120; background: #0a2138; color: #fff; overflow: hidden; display: none; }
+#kidblock .kb-jatte { position: absolute; right: -4vw; top: 50%; transform: translateY(-52%) rotate(90deg); font-size: min(560px, 62vh); font-weight: 900; line-height: 1; color: transparent; -webkit-text-stroke: 3px #ff4b1f; letter-spacing: -.04em; pointer-events: none; user-select: none; transition: -webkit-text-stroke-color .4s ease; }
+#kidblock.kb-ja { background: #0c2f25; }
+#kidblock.kb-ja .kb-jatte { -webkit-text-stroke-color: #2f9e67; }
+#kidblock .kb-text { position: absolute; left: clamp(28px, 8vw, 110px); top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; width: min(560px, 80vw); }
+#kidblock .kb-dom { align-self: flex-start; font-size: 15px; padding: 8px 14px; border-radius: 999px; background: rgb(255 255 255 / .08); border: 1px solid rgb(255 255 255 / .14); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#kidblock h1 { font-size: clamp(38px, 5.4vw, 64px); font-weight: 850; letter-spacing: -.035em; line-height: 1.02; margin-top: 24px; }
+#kidblock p { font-size: 18px; line-height: 1.55; color: rgb(255 255 255 / .7); margin-top: 18px; max-width: 470px; }
+#kidblock .kb-knappar { display: flex; gap: 12px; margin-top: 34px; flex-wrap: wrap; }
+#kidblock button { font: inherit; font-size: 16px; font-weight: 650; height: 50px; padding: 0 26px; cursor: pointer; }
+#kidblock .kb-fel { min-height: 20px; margin-top: 14px; font-size: 14px; color: #ffb59f; }
+#kidblock .kb-in { margin-top: 28px; width: min(470px, 100%); }
+#kidblock .kb-in label { display: block; font-size: 14px; color: rgb(255 255 255 / .7); margin-bottom: 8px; }
+#kidblock .kb-in input { width: 100%; height: 50px; border-radius: 12px; border: 1px solid rgb(255 255 255 / .22); background: rgb(255 255 255 / .07); color: #fff; font: inherit; font-size: 16px; padding: 0 16px; outline: none; }
+#kidblock .kb-in input:focus { border-color: #ff4b1f; }
+#kidblock .kb-in input::placeholder { color: rgb(255 255 255 / .38); }
+#kidblock .kb-vantar { display: inline-flex; align-items: center; gap: 12px; margin-top: 34px; font-size: 16px; color: rgb(255 255 255 / .85); }
+#kidblock .kb-vantar i { width: 10px; height: 10px; border-radius: 50%; background: #ff4b1f; animation: kbPuls 1.6s ease-in-out infinite; }
+@keyframes kbPuls { 50% { opacity: .25; } }
+/* Vätskefyllning (signaturkitet) */
+#kidblock .liq, #kidblock .liq-ghost { --liq-r: 999px; position: relative; isolation: isolate; overflow: hidden; border: 0; border-radius: var(--liq-r); clip-path: inset(0 round var(--liq-r)); background: transparent; transition: color .6s ease, transform .2s ease; }
+#kidblock .liq { color: #fff; }
+#kidblock .liq-ghost { color: #fff; }
+#kidblock .liq::after, #kidblock .liq-ghost::after { content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none; border-radius: var(--liq-r); transition: opacity 0s; }
+#kidblock .liq::after { background: #ff4b1f; box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / .2); }
+#kidblock .liq-ghost::after { box-shadow: inset 0 0 0 1px rgb(255 255 255 / .25); }
+#kidblock .liq::before, #kidblock .liq-ghost::before { content: ""; position: absolute; z-index: -1; left: -15%; width: 130%; bottom: -2px; height: 170%; transform: translateY(100%); border-radius: 46% 46% 0 0; transition: transform .95s cubic-bezier(.2,.75,.25,1); pointer-events: none; }
+#kidblock .liq::before { background: linear-gradient(180deg, #fff 0%, #ffe3da 100%); }
+#kidblock .liq-ghost::before { background: #ff4b1f; }
+#kidblock .liq:hover, #kidblock .liq:focus-visible { color: #ff4b1f; }
+#kidblock :is(.liq, .liq-ghost):is(:hover, :focus-visible)::before { transform: translateY(0); }
+#kidblock :is(.liq, .liq-ghost):is(:hover, :focus-visible)::after { opacity: 0; transition: opacity 0s .95s; }
+#kidblock :is(.liq, .liq-ghost):active { transform: translateY(1px); }
+#kidblock :is(.liq, .liq-ghost):focus-visible { outline: 2px solid #ff4b1f; outline-offset: 3px; }
+#kidblock.kb-ja .liq::after { background: #2f9e67; }
+#kidblock.kb-ja .liq:hover { color: #0c2f25; }
+#kidblock .liq:disabled { opacity: .6; cursor: default; }
+
+/* Förälderns rad för barnets frågor i Familj */
+.fam-fragor { margin: 4px 0 10px; border: 1px solid rgb(255 75 31 / .3); background: rgb(255 75 31 / .05); border-radius: 12px; padding: 4px 12px; }
+.fam-fraga { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 0; border-top: 1px solid var(--color-line); }
+.fam-fraga:first-child { border-top: 0; }
+.fam-fraga .ff-text { flex: 1 1 200px; min-width: 0; font-size: 13px; color: var(--color-navy-900); line-height: 1.4; }
+.fam-fraga .ff-text small { display: block; color: var(--color-navy-600); font-size: 12px; }
+.fam-fraga button { font-size: 12px; font-weight: 700; border-radius: 8px; padding: 5px 10px; cursor: pointer; border: 1px solid var(--color-line); background: #fff; color: var(--color-navy-900); }
+.fam-fraga button[data-svar="nej"] { color: #b4321a; }
+.fam-fraga button:hover { border-color: var(--color-navy-900); }

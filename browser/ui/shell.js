@@ -621,7 +621,7 @@ function openKrypto(open, parking) {
   kryptoOpen = open;
   window.view.kryptoToggle(open, kryptoMode(), account ? account.token : null);
   $('krypto-btn').classList.toggle('off', !open);
-  if (!open && !parking && parkedChatt) { parkedChatt = false; if (account && !account.isChild) { chattOpen = true; chattSync(); } }
+  if (!open && !parking && parkedChatt) { parkedChatt = false; if (account) { chattOpen = true; chattSync(); } }
   rememberPanel();
 }
 $('krypto-btn').addEventListener('click', () => openKrypto(!kryptoOpen));
@@ -1405,6 +1405,7 @@ async function syncChild() {
     fam = { children: [{ id, name: me.name || account.name, age: me.age || 0, blocklist: Array.isArray(me.blocklist) ? me.blocklist : [], allows: Array.isArray(me.allows) ? me.allows : [], self: true }], activeChild: id };
     famSave(); applyKidIndicator();
     if (typeof enforceActiveTab === 'function') enforceActiveTab();
+    try { kbSvar(me.fragor); } catch {}
     if (typeof ensureAllowTicker === 'function') ensureAllowTicker();
   } else if (me && me.error === 'no_session') {
     // Föräldern loggade ut barnet (eller sessionen gick ut): webbläsaren LÅSES – den blir aldrig ospärrad
@@ -1535,10 +1536,9 @@ function closeMsgMenu() { const m = $('fr-msgmenu'); if (m) m.remove(); }   // t
 
 /* ── Chatt: E2E-chatten (vänner, DM, grupper) i en egen panel, se ui/chatt.html ── */
 function chattOpts() { return { token: (account && account.token) || null, child: !!(account && account.isChild), theme, lang: (window.i18n && window.i18n.lang) || 'sv' }; }
-function chattSync() { try { if (!account || account.isChild) chattOpen = false; window.view.chattToggle(chattOpen, chattOpts()); } catch {} renderChattBtn(); }
+function chattSync() { try { if (!account) chattOpen = false; window.view.chattToggle(chattOpen, chattOpts()); } catch {} renderChattBtn(); }
 function openChatt(open) {
   if (open && !account) { pendingChattAfterLogin = true; openLogin(); return; }
-  if (open && account.isChild) { showToast(t('Chatten finns inte för barnkonton. Prata med dina föräldrar i stället.')); return; }
   if (open) { parkedChatt = false; if (kryptoOpen) { parkedKrypto = true; openKrypto(false, true); } }
   chattOpen = !!open;
   chattSync();
@@ -1553,7 +1553,6 @@ function rememberPanel() { if (!active) return; active.panel = panelNow(); activ
 function applyTabPanel(tab) {
   const want = account ? (tab.panel || null) : null;
   parkedKrypto = !!account && tab.parked === 'krypto'; parkedChatt = !!account && tab.parked === 'chatt';
-  if (want === 'chatt' && account.isChild) return;
   if (want === panelNow()) return;
   if (kryptoOpen && want !== 'krypto') { kryptoOpen = false; window.view.kryptoToggle(false, kryptoMode(), account ? account.token : null); $('krypto-btn').classList.add('off'); }
   if (chattOpen && want !== 'chatt') { chattOpen = false; chattSync(); }
@@ -1564,7 +1563,7 @@ function renderChattBtn() {
   const b = $('chatt-btn'); if (!b) return;
   b.classList.toggle('active', chattOpen);
   const bd = $('chatt-badge');
-  if (bd) { bd.textContent = chattUnread > 99 ? '99+' : String(chattUnread); bd.style.display = (chattUnread > 0 && !chattOpen && account && !account.isChild) ? 'block' : 'none'; }
+  if (bd) { bd.textContent = chattUnread > 99 ? '99+' : String(chattUnread); bd.style.display = (chattUnread > 0 && !chattOpen && account) ? 'block' : 'none'; }
 }
 $('chatt-btn') && $('chatt-btn').addEventListener('click', () => openChatt(!chattOpen));
 window.view.onChattClosed(() => { chattOpen = false; renderChattBtn(); restoreKrypto(); rememberPanel(); });
@@ -1587,7 +1586,7 @@ window.view.onChattUnread((n) => { chattUnread = n || 0; renderChattBtn(); });
 function renderFriends() {
   const wrap = $('fr-body'); if (!wrap) return;
   if (!account) { wrap.innerHTML = '<div class="fr-note">' + escapeHtml(t('Logga in för att lägga till vänner och chatta.')) + '</div><button id="fr-login" class="btn btn-safe" style="height:40px;padding:0 16px;">' + escapeHtml(t('Logga in')) + '</button>'; const _l = $('fr-login'); if (_l) _l.addEventListener('click', () => openLogin()); return; }
-  if (account.isChild) { wrap.innerHTML = '<div class="fr-note">' + escapeHtml(t('Chatten finns inte för barnkonton. Prata med dina föräldrar i stället.')) + '</div>'; return; }
+  if (account.isChild) { wrap.innerHTML = '<div class="fr-note">' + escapeHtml(t('Här chattar du med din familj. Bara din familj kan skriva till dig.')) + '</div><button id="fr-open-chatt" class="btn btn-safe" style="height:40px;padding:0 16px;">' + escapeHtml(t('Öppna chatten')) + '</button>'; $('fr-open-chatt').addEventListener('click', () => { closeSettings(); openChatt(true); }); return; }
   wrap.innerHTML = '<div class="fr-note">' + escapeHtml(t('Allt du skriver krypteras på din dator innan det skickas. Bara du och de du chattar med kan läsa det, aldrig AdRaze.')) + '</div><button id="fr-open-chatt" class="btn btn-safe" style="height:40px;padding:0 16px;">' + escapeHtml(t('Öppna chatten')) + '</button>';
   $('fr-open-chatt').addEventListener('click', () => { closeSettings(); openChatt(true); });
 }
@@ -3322,7 +3321,7 @@ function updateAllowTimer() {
   _prevAllowHosts = hostsKey;
   // står barnet på blockeringssidan och sidan just blivit tillåten → gå in automatiskt (ingen omstart)
   const kb = $('kidblock');
-  if (kb && kb.style.display !== 'none' && kb.dataset.url && typeof famBlocked === 'function' && !famBlocked(kb.dataset.url)) {
+  if (kb && kb.style.display !== 'none' && !kb.classList.contains('kb-ja') && !_kbVantar && kb.dataset.url && typeof famBlocked === 'function' && !famBlocked(kb.dataset.url)) {
     const u = kb.dataset.url; kb.style.display = 'none';
     try { if (typeof guardedNavigate === 'function' && active) guardedNavigate(active, u); } catch {}
   }
@@ -3389,40 +3388,115 @@ function allowMenu(host, childName, anchorEl) {
   menu.style.top = Math.min(r.bottom + 4, window.innerHeight - menu.offsetHeight - 8) + 'px';
   setTimeout(() => document.addEventListener('click', closeMsgMenu, { once: true }), 0);
 }
-// Helskärms-blockeringssida för barnet (föräldern tillåter sidan i AdRaze Familj)
-function showBlockScreen(url) {
+// Punycode → läsbart namn (xn--skerkoll-0za.se → säkerkoll.se), RFC 3492
+function visaDoman(host) {
+  return String(host || '').split('.').map((l) => {
+    if (!/^xn--/i.test(l)) return l;
+    try {
+      const s = l.slice(4).toLowerCase(); const d = s.lastIndexOf('-'); const ut = d > 0 ? [...s.slice(0, d)] : [];
+      let n = 128, bias = 72, i = 0, p = d > 0 ? d + 1 : 0;
+      const dig = (c) => { const k = c.charCodeAt(0); return k - 48 < 10 ? k - 22 : k - 97 < 26 ? k - 97 : 36; };
+      while (p < s.length) {
+        const oi = i; let w = 1;
+        for (let k = 36; ; k += 36) { const v = dig(s[p++]); if (v >= 36) throw 0; i += v * w; const t = k <= bias ? 1 : k >= bias + 26 ? 26 : k - bias; if (v < t) break; w *= 36 - t; }
+        const len = ut.length + 1; let delta = oi === 0 ? Math.floor((i - oi) / 700) : (i - oi) >> 1; delta += Math.floor(delta / len); let k = 0;
+        while (delta > 455) { delta = Math.floor(delta / 35); k += 36; } bias = k + Math.floor(36 * delta / (delta + 38));
+        n += Math.floor(i / len); i %= len; ut.splice(i++, 0, String.fromCodePoint(n));
+      }
+      return ut.join('');
+    } catch { return l; }
+  }).join('.');
+}
+// Vilken sida barnet ska fråga om: spärrlistans post som träffade (så ett ja gäller hela sajten), annars värdnamnet
+function kbFragaHost(url) {
+  const h = famHost(url); if (!h) return '';
+  if (FAM_ALLTID.some((b) => { b = famNorm(b); return h === b || h.endsWith('.' + b); })) return '';   // går aldrig att tillåta
+  const c = famActive(); const tr = ((c && c.blocklist) || []).map(famNorm).find((b) => b && (h === b || h.endsWith('.' + b)));
+  return tr || h;
+}
+var _kbVantar = null;   // { id, host, url } medan barnet väntar på svar
+function kbStang(hem) {
+  const ov = $('kidblock'); if (!ov) return;
+  ov.style.display = 'none'; ov.classList.remove('kb-ja');
+  if (_kbVantar && _kbVantar.poll) clearInterval(_kbVantar.poll);
+  _kbVantar = null;
+  if (hem && active && active.url && famBlocked(active.url)) { active.url = ''; if (addressInput) addressInput.value = ''; }
+  if (typeof showActiveTab === 'function') showActiveTab();
+}
+function kbRita(ov, { tecken, dom, rubrik, text, inne }) {
+  ov.innerHTML = '<div class="kb-jatte">' + escapeHtml(tecken) + '</div><div class="kb-text">'
+    + (dom ? '<div class="kb-dom">' + escapeHtml(dom) + '</div>' : '')
+    + '<h1>' + escapeHtml(rubrik) + '</h1>' + (text ? '<p>' + text + '</p>' : '') + (inne || '') + '</div>';
+}
+// Helskärms-spärrsida för barnet: stängd → fråga om lov → väntar → ja/nej
+function showBlockScreen(url, lage) {
   let host; try { host = new URL(normalizeUrl(url)).hostname.replace(/^www\./, ''); } catch { host = String(url || ''); }
   try { window.view.hide(); } catch {}   // dölj webbvyn så rutan täcker sidan
   let ov = $('kidblock');
   if (!ov) { ov = document.createElement('div'); ov.id = 'kidblock'; document.body.appendChild(ov); }
   ov.dataset.url = url;   // så nedräknaren kan öppna sidan automatiskt när den blir tillåten
-  ov.style.cssText = 'position:fixed;inset:0;z-index:120;background:linear-gradient(160deg,#2f8fd4,#1f6ea8);display:flex;align-items:center;justify-content:center;padding:24px;';
+  ov.classList.remove('kb-ja');
+  ov.style.display = 'block';
+  const dom = visaDoman(host);
+  const q = (s) => ov.querySelector(s);
   if (famLocked()) {   // barnet är utloggat → låst tills en förälder (eller barnet med sin kod) loggar in
-    ov.innerHTML = '<div style="width:min(460px,94vw);background:#fff;border-radius:22px;padding:30px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.35)">'
-      + '<div style="font-size:20px;font-weight:800;color:var(--color-navy-900);margin-bottom:6px">AdRaze är låst i barnläge</div>'
-      + (host ? '<div style="font-size:14px;color:#2f8fd4;font-weight:700;margin-bottom:14px">' + escapeHtml(host) + '</div>' : '')
-      + '<p style="font-size:14px;color:rgb(28 43 58 / .65);line-height:1.6;margin-bottom:20px">Barnkontot är utloggat. Be en förälder logga in för att låsa upp webbläsaren – eller logga in igen med din barnkod.</p>'
-      + '<div style="display:flex;gap:10px"><button id="kidblock-login" class="btn btn-safe" style="flex:1;height:46px">Logga in</button><button id="kidblock-back" class="btn btn-ghost" style="flex:1;height:46px">Tillbaka</button></div>'
-      + '</div>';
-    ov.style.display = 'flex';
-    ov.querySelector('#kidblock-login').onclick = () => { ov.style.display = 'none'; if (active && active.url && famBlocked(active.url)) { active.url = ''; if (addressInput) addressInput.value = ''; } try { openLogin(); } catch {} };
-    ov.querySelector('#kidblock-back').onclick = () => { ov.style.display = 'none'; if (active && active.url && famBlocked(active.url)) { active.url = ''; if (addressInput) addressInput.value = ''; } if (typeof showActiveTab === 'function') showActiveTab(); };
+    kbRita(ov, { tecken: ':(', dom, rubrik: 'AdRaze är låst.', text: 'Barnkontot är utloggat. Be en förälder logga in, eller logga in igen med din barnkod.',
+      inne: '<div class="kb-knappar"><button class="liq" id="kidblock-login">Logga in</button><button class="liq-ghost" id="kidblock-back">Tillbaka</button></div>' });
+    q('#kidblock-login').onclick = () => { kbStang(true); try { openLogin(); } catch {} };
+    q('#kidblock-back').onclick = () => kbStang(true);
     return;
   }
-  ov.innerHTML = '<div style="width:min(460px,94vw);background:#fff;border-radius:22px;padding:30px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.35)">'
-    + ''
-    + '<div style="font-size:20px;font-weight:800;color:var(--color-navy-900);margin-bottom:6px">Den här sidan är blockerad</div>'
-    + '<div style="font-size:14px;color:#2f8fd4;font-weight:700;margin-bottom:14px">' + escapeHtml(host) + '</div>'
-    + '<p style="font-size:14px;color:rgb(28 43 58 / .65);line-height:1.6;margin-bottom:20px">Dina föräldrar kan se att du försökte gå hit — men ingen fara.<br>Vill du besöka sidan? Fråga dina föräldrar, så kan de tillåta den i <b>AdRaze Familj</b>.</p>'
-    + '<div id="kidblock-msg" style="font-size:13px;color:var(--color-safe);font-weight:700;min-height:18px;margin-bottom:10px"></div>'
-    + '<div style="display:flex;gap:10px"><button id="kidblock-back" class="btn btn-safe" style="flex:1;height:46px">Tillbaka</button></div>'
-    + '</div>';
-  ov.style.display = 'flex';
-  ov.querySelector('#kidblock-back').onclick = () => {
-    ov.style.display = 'none';
-    if (active && active.url && famBlocked(active.url)) { active.url = ''; if (addressInput) addressInput.value = ''; }  // fortfarande blockerad → hem
-    if (typeof showActiveTab === 'function') showActiveTab();
-  };
+  const fh = kbFragaHost(url);
+  const kanFraga = !!(fh && account && account.isChild && account.token);
+  if (_kbVantar && _kbVantar.host === fh && !lage) lage = 'vantar';
+  if (lage === 'fraga') {
+    kbRita(ov, { tecken: ':/', dom, rubrik: 'Varför vill du dit?',
+      inne: '<div class="kb-in"><label for="kb-varfor">Skriv några ord till din förälder (om du vill)</label><input id="kb-varfor" maxlength="200" placeholder="Jag behöver den till skolan" autocomplete="off"></div>'
+        + '<div class="kb-knappar"><button class="liq" id="kb-skicka">Skicka frågan</button><button class="liq-ghost" id="kb-avbryt">Avbryt</button></div><div class="kb-fel" id="kb-fel"></div>' });
+    const inp = q('#kb-varfor'); setTimeout(() => { try { inp.focus(); } catch {} }, 30);
+    const skicka = async () => {
+      const b = q('#kb-skicka'); b.disabled = true; q('#kb-fel').textContent = '';
+      const r = await window.family.ask(account.token, fh, inp.value).catch(() => null);
+      if (r && r.ok && r.id) { _kbVantar = { id: r.id, host: fh, url }; showBlockScreen(url, 'vantar'); return; }
+      b.disabled = false; q('#kb-fel').textContent = (r && r.message) || 'Frågan gick inte iväg. Kolla internet och försök igen.';
+    };
+    q('#kb-skicka').onclick = skicka;
+    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') skicka(); });
+    q('#kb-avbryt').onclick = () => showBlockScreen(url, 'stangd');
+    return;
+  }
+  if (lage === 'vantar' && _kbVantar) {
+    kbRita(ov, { tecken: ':|', dom, rubrik: 'Frågan är skickad.', text: 'Din förälder får frågan i sin AdRaze. Säger hen ja öppnas sidan av sig själv.',
+      inne: '<div class="kb-vantar"><i></i>Väntar på svar …</div><div class="kb-knappar"><button class="liq-ghost" id="kidblock-back">Tillbaka</button></div>' });
+    q('#kidblock-back').onclick = () => kbStang(true);
+    if (!_kbVantar.poll) _kbVantar.poll = setInterval(() => { try { syncChild(); } catch {} }, 4000);   // tätare koll medan barnet väntar
+    return;
+  }
+  if (lage === 'nej') {
+    kbRita(ov, { tecken: ':(', dom, rubrik: 'Svaret blev nej.', text: 'Din förälder vill inte att du går in på ' + escapeHtml(dom) + ' just nu. Prata gärna med hen om det.',
+      inne: '<div class="kb-knappar"><button class="liq" id="kidblock-back">Tillbaka</button></div>' });
+    q('#kidblock-back').onclick = () => kbStang(true);
+    return;
+  }
+  kbRita(ov, { tecken: ':(', dom, rubrik: 'Den här är stängd.',
+    text: kanFraga ? 'Din familj har spärrat sidan i AdRaze. Tycker du att du behöver den? Fråga, så svarar de direkt.' : 'Din familj har spärrat sidan i AdRaze.',
+    inne: '<div class="kb-knappar">' + (kanFraga ? '<button class="liq" id="kb-fraga">Fråga om lov</button><button class="liq-ghost" id="kidblock-back">Tillbaka</button>' : '<button class="liq" id="kidblock-back">Tillbaka</button>') + '</div>' });
+  if (kanFraga) q('#kb-fraga').onclick = () => showBlockScreen(url, 'fraga');
+  q('#kidblock-back').onclick = () => kbStang(true);
+}
+// Barnets svar från servern (syncChild): nej → visa nej, ja sköts av nedräknaren som öppnar sidan
+function kbSvar(fragor) {
+  if (!_kbVantar || !Array.isArray(fragor)) return;
+  const f = fragor.find((x) => x && x.id === _kbVantar.id); if (!f || !f.svar) return;
+  const ov = $('kidblock'); const u = _kbVantar.url;
+  if (_kbVantar.poll) clearInterval(_kbVantar.poll);
+  _kbVantar = null;
+  if (!ov || ov.style.display === 'none') return;
+  if (f.svar === 'nej') { showBlockScreen(u, 'nej'); return; }
+  // ja: kort ":)" innan sidan öppnas (blocklistan/tillåtelsen är redan uppdaterad i fam)
+  ov.classList.add('kb-ja');
+  kbRita(ov, { tecken: ':)', dom: visaDoman(famHost(u)), rubrik: 'Du fick lov!', text: f.minuter ? 'Du får vara där i ' + escapeHtml(allowLabel(f.minuter)) + '.' : 'Sidan är öppen för dig nu.' });
+  setTimeout(() => { if (ov.style.display === 'none') return; ov.style.display = 'none'; ov.classList.remove('kb-ja'); try { if (active) guardedNavigate(active, u); } catch {} }, 1400);
 }
 function renderFam() {
   const host = $('fam-body'); if (!host) return;
@@ -3461,6 +3535,10 @@ function renderFam() {
     });
     const cp = el.querySelector('[data-a=copy]'); if (cp) cp.addEventListener('click', () => { try { navigator.clipboard.writeText(c.code); } catch {} showToast(tn('Kod kopierad — ge den till {n}', c.name)); });
     const hb = el.querySelector('[data-a=hist]'); if (hb) hb.addEventListener('click', () => famShowHistory(c.id, c.name));
+    el.querySelectorAll('.fam-fraga button[data-svar]').forEach((b) => b.addEventListener('click', () => {
+      el.querySelectorAll('.fam-fraga button').forEach((x) => (x.disabled = true));
+      famSvara(c, Number(b.closest('.fam-fraga').dataset.fraga), b.dataset.svar, Number(b.dataset.min || 0));
+    }));
     const ro = el.querySelector('[data-a=rotate]');
     if (ro) ro.addEventListener('click', async () => {
       const ok = await famConfirm(tn('Byt kod för {n}?', c.name), tn('Den gamla koden slutar fungera direkt, och om {n} är inloggad loggas hän ut. Du får en ny kod att ge {n}.', c.name), 'Byt kod');
@@ -3674,6 +3752,36 @@ function famConfirm(title, msg, okLabel) {
     ov.querySelector('#fam-c-yes').addEventListener('click', () => done(true));
   });
 }
+// Barnets frågor om lov: föräldern svarar direkt i kortet
+function famFragorHtml(c) {
+  const f = (c.requests || []); if (!f.length) return '';
+  return '<div class="fam-sub">' + escapeHtml(tn('{n} frågar om lov', c.name)) + '</div><div class="fam-fragor">' + f.map((x) => '<div class="fam-fraga" data-fraga="' + Number(x.id) + '">'
+    + '<div class="ff-text"><b>' + escapeHtml(visaDoman(x.host)) + '</b>' + (x.text ? ' – ”' + escapeHtml(x.text) + '”' : '') + '<small>' + escapeHtml(fmtTime(x.skapad)) + '</small></div>'
+    + '<button data-svar="ja" data-min="30">Ja, 30 min</button><button data-svar="ja" data-min="60">1 h</button><button data-svar="ja" data-min="0">Alltid</button><button data-svar="nej">Nej</button></div>').join('') + '</div>';
+}
+async function famSvara(c, id, svar, min) {
+  if (!account || !account.token) return;
+  const r = await window.family.answer(account.token, id, svar, min).catch(() => null);
+  if (!r || !r.ok) { showToast((r && r.message) || 'Kunde inte svara just nu.'); return; }
+  c.requests = (c.requests || []).filter((x) => x.id !== id);
+  showToast(svar === 'nej' ? tn('Du sa nej till {n}', c.name) : tn('{n} fick lov', c.name));
+  try { await famSyncParent(); } catch {}
+  renderFam();
+}
+// Ny fråga från ett barn → notis till föräldern (en gång per fråga)
+try { window.family.onOppna(() => { try { openSettings(); showSettingsCat('familj'); } catch {} }); } catch {}
+var _famSettaFragor = new Set(JSON.parse(sessionStorage.getItem('adraze-fam-fragor') || '[]'));
+function famNyaFragor() {
+  let ny = false;
+  for (const c of fam.children) for (const f of (c.requests || [])) {
+    if (_famSettaFragor.has(f.id)) continue;
+    _famSettaFragor.add(f.id); ny = true;
+    const titel = tn('{n} frågar om lov', c.name), text = visaDoman(f.host) + (f.text ? ' – ”' + f.text + '”' : '');
+    try { window.family.notis(titel, text); } catch {}
+    showToast(titel + ': ' + visaDoman(f.host));
+  }
+  if (ny) try { sessionStorage.setItem('adraze-fam-fragor', JSON.stringify([..._famSettaFragor].slice(-200))); } catch {}
+}
 function famChildCard(c) {
   const active = fam.activeChild === c.id;
   const tags = (c.blocklist && c.blocklist.length)
@@ -3687,7 +3795,8 @@ function famChildCard(c) {
     + '<div class="grow"><div class="fam-name">' + escapeHtml(c.name) + '</div><div class="fam-age">' + escapeHtml(tn('{n} år', c.age)) + '</div></div>'
     + '<button class="fam-active' + (active ? ' on' : '') + '" data-a="active">' + (active ? 'Aktiv på denna enhet' : 'Aktivera här') + '</button></div>'
     + (c.code ? '<div class="fam-code"><span class="code">' + escapeHtml(c.code) + '</span><span style="font-size:11.5px;color:var(--color-navy-600)">inloggningskod</span><button data-a="copy">Kopiera</button></div>' : '')
-    + (c.code ? '<div class="fam-loginrow" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 6px;">' + (c.sessions ? '<span style="font-size:11.5px;font-weight:700;color:#178a5a;background:rgba(23,138,90,.1);border-radius:20px;padding:3px 10px;">\u25cf ' + escapeHtml(tn('Inloggad nu', '')) + '</span>' : '<span style="font-size:11.5px;color:var(--color-navy-600);background:rgba(28,43,58,.06);border-radius:20px;padding:3px 10px;">Inte inloggad</span>') + '<button data-a="rotate" style="font-size:12px;font-weight:700;color:#2f8fd4;background:rgba(47,143,212,.1);border:1px solid rgba(47,143,212,.25);border-radius:8px;padding:5px 11px;cursor:pointer;">Byt kod</button>' + (c.sessions ? '<button data-a="sessions" style="font-size:12px;font-weight:700;color:#2f8fd4;background:rgba(47,143,212,.12);border:1px solid rgba(47,143,212,.3);border-radius:8px;padding:5px 11px;cursor:pointer;">' + escapeHtml(tn('Visa enheter', '')) + '</button>' : '') + '</div>' : '')
+    + (c.code ? '<div class="fam-loginrow" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 6px;">' + '<span style="font-size:12.5px;color:var(--color-navy-600);">' + escapeHtml(c.sessions ? tn('Inloggad nu', '') : tn('Inte inloggad', '')) + '</span>' + '<button data-a="rotate" style="font-size:12px;font-weight:700;color:#2f8fd4;background:rgba(47,143,212,.1);border:1px solid rgba(47,143,212,.25);border-radius:8px;padding:5px 11px;cursor:pointer;">Byt kod</button>' + (c.sessions ? '<button data-a="sessions" style="font-size:12px;font-weight:700;color:#2f8fd4;background:rgba(47,143,212,.12);border:1px solid rgba(47,143,212,.3);border-radius:8px;padding:5px 11px;cursor:pointer;">' + escapeHtml(tn('Visa enheter', '')) + '</button>' : '') + '</div>' : '')
+    + famFragorHtml(c)
     + '<div class="fam-sub">Blockerade sidor</div>' + tags + allowsHtml
     + '<div class="fam-addsite"><input class="fam-in" placeholder="t.ex. exempel.se" spellcheck="false" /><button class="btn btn-safe flex-none" style="height:40px;padding:0 14px;">Blockera</button></div>'
     + '<div class="fam-krypto">' + escapeHtml(tn('Säg till Falk: "blockera de här sidorna för {n}" — eller "tillåt X för {n} i en timme".', c.name)).replace('Falk', '<b>Falk</b>') + '</div>'
@@ -3782,7 +3891,8 @@ async function famSyncParent() {
   if (_famPushar) return;   // föräldern ändrade något under tiden: svaret är gammalt
   if (r && r.ok && Array.isArray(r.children)) {
     const prevActive = fam.activeChild;
-    fam.children = r.children.map((c) => ({ id: c.id, name: c.name, age: c.age, blocklist: Array.isArray(c.blocklist) ? c.blocklist : [], allows: Array.isArray(c.allows) ? c.allows : [], code: c.code, sessions: c.sessions || 0, last_seen: c.last_seen || 0 }));
+    fam.children = r.children.map((c) => ({ id: c.id, name: c.name, age: c.age, blocklist: Array.isArray(c.blocklist) ? c.blocklist : [], allows: Array.isArray(c.allows) ? c.allows : [], code: c.code, sessions: c.sessions || 0, last_seen: c.last_seen || 0, requests: Array.isArray(c.requests) ? c.requests : [] }));
+    famNyaFragor();
     fam.activeChild = fam.children.find((c) => c.id === prevActive) ? prevActive : fam.activeChild;
     famSave();
     const _typing = document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('fam-in');

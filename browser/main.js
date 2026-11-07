@@ -1072,7 +1072,7 @@ ipcMain.handle('profiler:ta-bort', async (_e, key) => {
 });
 /* AdRaze Familj (api.adraze.app): föräldern skapar barnkonton; barnet loggar in med sin barnkod
  * och en kod som mejlas till föräldern vid varje inloggning. Svaren översätts till skalets form. */
-const barnUt = (c) => ({ id: c.id, name: c.namn, age: c.alder, code: c.kod, blocklist: c.blocklista || [], allows: c.tillat || [], last_seen: c.senast || 0, sessions: c.inloggningar || 0 });
+const barnUt = (c) => ({ id: c.id, name: c.namn, age: c.alder, code: c.kod, blocklist: c.blocklista || [], allows: c.tillat || [], last_seen: c.senast || 0, sessions: c.inloggningar || 0, requests: Array.isArray(c.fragor) ? c.fragor : [] });
 ipcMain.handle('family:child', async (_e, d) => {
   const j = await adrazeApi('/familj/barn', { namn: d && d.name, alder: d && d.age }, d && d.token);
   return j.ok ? { ok: true, child: { id: j.barn.id, name: j.barn.namn, age: j.barn.alder }, code: j.kod } : j;
@@ -1093,9 +1093,21 @@ ipcMain.handle('family:remove', (_e, d) => adrazeApi('/familj/ta-bort', { barn_i
 ipcMain.handle('family:blocklist', (_e, d) => adrazeApi('/familj/blocklista', { barn_id: d && d.child_id, blocklista: d && d.blocklist }, d && d.token));
 ipcMain.handle('family:me', async (_e, d) => {
   const j = await adrazeApi('/barn/jag', {}, d && d.token);
-  return j.ok ? { ok: true, isChild: true, name: j.namn, age: j.alder, blocklist: j.blocklista, allows: j.tillat } : j;
+  return j.ok ? { ok: true, isChild: true, name: j.namn, age: j.alder, blocklist: j.blocklista, allows: j.tillat, fragor: Array.isArray(j.fragor) ? j.fragor : [] } : j;
 });
 ipcMain.handle('family:allow', (_e, d) => adrazeApi('/familj/tillat', { barn_id: d && d.child_id, host: d && d.host, minuter: d && d.minutes }, d && d.token));
+// Notis till föräldern när ett barn frågar om lov (systemnotis från huvudprocessen; klick öppnar Familj i fönstret)
+ipcMain.on('family:notis', (e, d) => {
+  try {
+    const { Notification } = require('electron');
+    if (!Notification.isSupported()) return;
+    const n = new Notification({ title: String((d && d.title) || '').slice(0, 120), body: String((d && d.body) || '').slice(0, 300) });
+    n.on('click', () => { try { const w = BrowserWindow.fromWebContents(e.sender); if (w) { if (w.isMinimized()) w.restore(); w.show(); w.focus(); } e.sender.send('family:oppna'); } catch {} });
+    n.show();
+  } catch {}
+});
+ipcMain.handle('family:ask', (_e, d) => adrazeApi('/barn/fraga', { host: d && d.host, text: d && d.text }, d && d.token));
+ipcMain.handle('family:answer', (_e, d) => adrazeApi('/familj/svara', { fraga_id: d && d.id, svar: d && d.answer, minuter: d && d.minutes }, d && d.token));
 ipcMain.handle('family:history-add', (_e, d) => adrazeApi('/barn/historik', { url: d && d.url, titel: d && d.title }, d && d.token));
 ipcMain.handle('family:history', async (_e, d) => {
   const j = await adrazeApi('/familj/historik', { barn_id: d && d.child_id }, d && d.token);
@@ -1169,8 +1181,8 @@ ipcMain.on('chatt:toggle', (e, open, o) => {
     chattDestroy(ctx);
     ctx.chattToken = token; ctx.chattChild = child; ctx.chattFull = false;
   }
-  ctx.chattBoot = { lang, theme };
-  ctx.chattOpen = !!open && !!token && !child;
+  ctx.chattBoot = { lang, theme, child };
+  ctx.chattOpen = !!open && !!token;   // barnkonton: familjechatt (servern släpper bara igenom familjen)
   if (ctx.chattOpen && !ctx.chattView) chattCreate(ctx);
   applyBounds(ctx);
   if (ctx.chattOpen) { raiseKrypto(ctx); try { ctx.chattView.webContents.focus(); } catch {} }
@@ -1196,7 +1208,6 @@ const CHATT_PATH_RE = /^\/[a-z0-9][a-z0-9/_-]{0,80}$/;
 ipcMain.handle('chatt:api', async (e, d) => {
   const ctx = chattCtx(e);
   if (!ctx) return { status: 403, json: { ok: false, error: 'Fel avsändare.' } };
-  if (ctx.chattChild) return { status: 403, json: { ok: false, error: 'Chatten finns inte för barnkonton.' } };
   const token = ctx.chattToken;
   if (!token) return { status: 401, json: { ok: false, error: 'Logga in för att chatta.' } };
   d = d || {};
