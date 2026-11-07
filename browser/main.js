@@ -294,6 +294,11 @@ function barnNagonRegel() { if (!KONTO_PER_FONSTER) return barnRegler; for (cons
 // Utvecklarverktyg och inkognito: avstängda så fort något fönster är i barnläge (barnet kan annars öppna dem i ett annat)
 function barnNagonstans() { return !!barnNagonRegel(); }
 anpassa.init({ barnKoll: () => barnNagonstans() });
+// Anpassa: inställningar per sajt och sajt-panelen (anpassa-sajt.js), egna sökmotorer (anpassa-sokmotorer.js)
+const anpassaSajt = require('./anpassa-sajt');
+anpassaSajt.init({ anpassa, adblock, wins, sendTo, barn: () => barnNagonstans(), barnFonster: (c) => !!reglerFor(c), adblockPa: () => adblockOn,
+  blockerad: (u, f) => isBlockedTarget(u, f), sammaSajt: (a, b) => sameSite(a, b) });
+require('./anpassa-sokmotorer').init({ anpassa });
 function barnSparrad(url, regler) {
   const r = regler === undefined ? barnRegler : regler; if (!r) return false;
   let h = '';
@@ -720,6 +725,8 @@ function ensureView(ctx, tabId) {
     const st = wc.__popups || (wc.__popups = { t: 0, n: 0 }); const now = Date.now();
     st.n = (now - st.t < 2000) ? st.n + 1 : 1; st.t = now;
     if (st.n > 1) return { action: 'deny' };
+    // Anpassa: popup-fönster tillåtna/blockerade för sajten (anpassa-sajt.js). Aldrig i barnläge (null = reglerna nedan).
+    const egenPopup = anpassaSajt.popupBeslut(wc, details); if (egenPopup) return egenPopup;
     // Kassafönster (CapCut m.fl.): sidan öppnar ett tomt fönster direkt vid klicket på en riktig knapp
     // och skickar dit betalsidan först när servern svarat. Brave tillåter det; vi gör samma sak, men bara
     // för ett synligt knappklick nyss – och fönstret vaktas: går det till en annons/skräpadress stängs det.
@@ -875,6 +882,7 @@ function ensureView(ctx, tabId) {
       if (res) sendTo(ctx, 'content-warning', tabId, url, res);
     } catch {}
   });
+  anpassaSajt.flik(wc, ctx, tabId);   // Anpassa: zoom, mörkt läge, ljud och JavaScript per sajt (efter dom-ready-zoomen ovan)
   ctx.views.set(tabId, view);
   raiseKrypto(ctx);
   return view;

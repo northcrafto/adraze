@@ -869,3 +869,70 @@ svg:has(use[href="#i-fav"]) { color: #5f6368; opacity: 1; }
 .fam-fraga button { font-size: 12px; font-weight: 700; border-radius: 8px; padding: 5px 10px; cursor: pointer; border: 1px solid var(--color-line); background: #fff; color: var(--color-navy-900); }
 .fam-fraga button[data-svar="nej"] { color: #b4321a; }
 .fam-fraga button:hover { border-color: var(--color-navy-900); }
+
+/* ── Anpassa: sajt ── */
+/* Skölden i adressfältet öppnar sajt-panelen (ui/anpassa-sajt.js, ui/sajtpanel.html). På startsidan är den bara en ikon. */
+#shield:not(.shield-home) { cursor: pointer; }
+#shield:not(.shield-home):hover { background: rgb(14 42 71 / .08); }
+:root[data-theme="dark"] #shield:not(.shield-home):hover, body.incog #shield:not(.shield-home):hover { background: rgb(255 255 255 / .1); }
+#shield:focus-visible { outline: 2px solid #ff4b1f; outline-offset: 1px; }
+/* Inställningar → Anpassa: alla sajter med egna inställningar */
+#settings #anp-sajt { scroll-margin-top: 84px; }   /* "Alla sajter" i panelen rullar hit: under den fasta sökrutan (.set-top) */
+#settings .anp-not { margin-top: 12px; padding: 10px 14px; border-radius: 10px; font-size: 12.5px; line-height: 1.45; color: var(--s-ink); background: var(--s-accent-soft); max-width: 60ch; }
+#settings .anps-sok { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; margin-top: 16px; border-radius: 8px; background: var(--s-field); box-shadow: inset 0 0 0 1px var(--s-field-line); color: var(--s-faint); transition: box-shadow .15s; }
+#settings .anps-sok:focus-within { box-shadow: inset 0 0 0 1.5px var(--s-ink); }
+#settings .anps-sok svg { width: 15px; height: 15px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+#settings .anps-sok input { flex: 1; min-width: 0; height: 100%; background: transparent; border: 0; outline: 0; box-shadow: none; font-size: 13px; color: var(--s-ink); }
+#settings .anps-sok input::-webkit-search-cancel-button { display: none; }
+#settings #anp-sajt .anps-sok input:focus-visible { box-shadow: none; border-color: transparent; }   /* ramen sitter på etiketten (:focus-within) */
+#settings .anps-lista .set-row:not(.set-row + .set-row) { margin-top: 10px; }
+#settings .anps-rad { gap: 12px; padding-block: 11px; }
+#settings .anps-ikon { width: 30px; height: 30px; flex: none; display: grid; place-items: center; border-radius: 8px; background: var(--s-surface-2); color: var(--s-mut); font-size: 13px; font-weight: 700; text-transform: uppercase; }
+#settings .anps-rad .set-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#settings .anps-del { white-space: nowrap; }
+#settings .anps-del + .anps-del::before { content: "·"; margin: 0 6px; color: var(--s-faint); }
+#settings .anps-del.last { color: var(--s-faint); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--s-faint) 60%, transparent); }
+#settings .anps-bort { flex: none; height: 30px; padding: 0 10px; border: 0; border-radius: 7px; background: none; font-size: 12.5px; font-weight: 600; color: var(--s-mut); cursor: pointer; transition: background .15s, color .15s; }
+#settings .anps-bort:hover { color: #c2360e; background: rgb(255 75 31 / .09); }
+#settings .anps-bort:disabled { opacity: .45; cursor: default; background: none; color: var(--s-mut); }
+#settings .anps-bort:focus-visible { outline: 2px solid var(--s-accent); outline-offset: 1px; }
+#settings .anps-tom { margin-top: 14px; font-size: 12.5px; color: var(--s-faint); }
+:root[data-theme="dark"] #settings .anps-bort:hover { color: #ff8a7a; }
+
+/* ── Anpassa: sokmotorer ── */
+/* Egna sökmotorer och snabbord (ui/anpassa-sokmotorer.js): listan i Inställningar → Sökmotor och → Anpassa */
+#settings #anp-sokmotorer { scroll-margin-top: 84px; }
+#settings .anpk-motorrubrik { margin: 14px 2px 2px; font-size: 11.5px; font-weight: 600; color: var(--s-faint); }
+#settings .engine-opt .anpk-mnamn { flex: 1; min-width: 0; }
+#settings .anpk-chip { flex: none; padding: 4px 7px; border-radius: 6px; font: 600 11.5px/1 ui-monospace, "SF Mono", Menlo, monospace; color: var(--s-mut); background: var(--s-surface-2); box-shadow: inset 0 0 0 1px var(--s-line); }
+#settings .anpk-lista .set-row:not(.set-row + .set-row) { margin-top: 14px; }
+#settings .anpk-rad { gap: 12px; padding-block: 11px; }
+#settings .anpk-rad .set-title { display: flex; align-items: center; gap: 8px; }
+#settings .anpk-rad .set-chip { height: 20px; padding: 0 8px; font-size: 11px; }
+#settings .anpk-snabb { flex: none; display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--s-mut); }
+#settings .anpk-snabb input { width: 64px; height: 30px; padding: 0 8px; border: 1px solid var(--s-field-line); border-radius: 7px; font: 600 12.5px ui-monospace, "SF Mono", Menlo, monospace; }
+#settings .anpk-snabb input.fel { border-color: #d0402f; }
+#settings :is(.anpk-snabb, .anpk-falt) input:disabled { opacity: .55; cursor: default; }
+#settings .anpk-std { flex: none; height: 30px; padding: 0 11px; border-radius: 7px; border: 1px solid var(--s-line); background: transparent; font-size: 12.5px; font-weight: 600; color: var(--s-mut); white-space: nowrap; cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
+#settings .anpk-std:hover { color: var(--s-ink); border-color: var(--s-faint); }
+#settings .anpk-std.on { color: var(--s-accent-ink); background: var(--s-accent-soft); border-color: transparent; }
+#settings .anpk-bort { flex: none; width: 30px; height: 30px; display: grid; place-items: center; border: 0; border-radius: 7px; background: none; color: var(--s-faint); cursor: pointer; transition: background .15s, color .15s; }
+#settings .anpk-bort svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+#settings .anpk-bort:hover { color: #c2360e; background: rgb(255 75 31 / .09); }
+#settings :is(.anpk-std, .anpk-bort, .anpk-fchip):focus-visible { outline: 2px solid var(--s-accent); outline-offset: 1px; }
+#settings :is(.anpk-std, .anpk-bort, .anpk-fchip):disabled { opacity: .45; cursor: default; pointer-events: none; }
+#settings .anpk-ny { margin-top: 18px; padding: 16px 18px; border: 1px solid var(--s-line); border-radius: 12px; background: var(--s-surface); }
+#settings .anpk-ny-t { margin-bottom: 10px; font-size: 13.5px; font-weight: 600; color: var(--s-ink); }
+#settings .anpk-falt { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.2fr) 88px; gap: 10px; }
+#settings .anpk-falt label { display: flex; flex-direction: column; gap: 5px; min-width: 0; font-size: 12px; color: var(--s-mut); }
+#settings .anpk-falt input { width: 100%; height: 36px; padding: 0 10px; border: 1px solid var(--s-field-line); border-radius: 8px; font-size: 13px; }
+#settings .anpk-ordf input { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-weight: 600; }
+#settings .anpk-ny-fot { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+#settings .anpk-fel { flex: 1; min-width: 0; font-size: 12.5px; color: #c2360e; }
+#settings .anpk-forslag { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 14px; }
+#settings .anpk-forslag > span { margin-right: 4px; font-size: 12px; color: var(--s-faint); }
+#settings .anpk-fchip { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 11px 0 9px; border: 1px solid var(--s-line); border-radius: 999px; background: var(--s-surface); font-size: 12.5px; font-weight: 600; color: var(--s-ink); cursor: pointer; transition: border-color .15s; }
+#settings .anpk-fchip svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; color: var(--s-accent); }
+#settings .anpk-fchip:hover { border-color: var(--s-ink); }
+:root[data-theme="dark"] #settings :is(.anpk-bort:hover, .anpk-fel) { color: #ff8a7a; }
+:root[data-theme="dark"] #settings .anpk-snabb input.fel { border-color: #ff8a7a; }
