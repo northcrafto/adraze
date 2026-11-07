@@ -131,3 +131,5 @@ function init({ barnKoll } = {}) {
 }
 
 module.exports = { init, hamta, alla, satt, angra, aterstall, exportera, importera, registrera, lyssna };
+// Till Falk och Ångra-panelen (anpassa-falk.js, anpassa-angra.js): registret, barnlåset och hela historiken – som kopior
+Object.assign(module.exports, { registret: () => Object.fromEntries([...register].map(([k, v]) => [k, kopia(v)])), last, historik: () => kopia(las().historik) });
