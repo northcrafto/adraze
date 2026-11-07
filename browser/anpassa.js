@@ -4,7 +4,7 @@
 // Varje ändring hamnar i historiken så att allt går att ångra, och nycklar som är barnlåsta kan inte ändras i barnläge.
 //
 // Nycklar namnges "<område>.<namn>", t.ex. "tema.accent", "flikar.lage", "verktyg.knappar", "sajt.<domän>".
-// Registrera en nyckel med registrera({ nyckel, standard, barnLast, etikett }) där den införs.
+// Registrera en nyckel med registrera({ nyckel, standard, barnLast, etikett, importBar, val }) där den införs.
 const fs = require('fs');
 const path = require('path');
 const { app, ipcMain, BrowserWindow } = require('electron');
@@ -12,7 +12,7 @@ const { app, ipcMain, BrowserWindow } = require('electron');
 const FIL = () => path.join(app.getPath('userData'), 'adraze-anpassa.json');
 const HISTORIK_MAX = 200;
 let data = null;               // { varden: {}, historik: [{ nyckel, fore, efter, etikett, ts }] }
-const register = new Map();    // nyckel → { standard, barnLast, etikett }
+const register = new Map();    // nyckel → { standard, barnLast, etikett, importBar, val? }
 const lyssnare = new Set();    // (nyckel, värde) i huvudprocessen
 let arBarn = () => false;      // sätts av main.js (barnläge någonstans)
 let skrivTimer = null;
@@ -113,9 +113,19 @@ function importera(kod, prefix) {
   }
   return { ok: true, antal: n };
 }
+// val (valfritt) talar om vilka värden nyckeln kan ha, för den som ändrar med ord (Falk, anpassa-falk.js):
+//   ['a', 'b', 'c'] = ett av värdena · { min, max } = ett tal i intervallet · 'text' = valfri text.
+// Utan val ändrar Falk bara på/av (standard true/false) och färger (standard '#rrggbb'); resten görs i Inställningar.
+function rensaVal(v) {
+  if (Array.isArray(v)) { const l = v.filter((x) => ['string', 'number', 'boolean'].includes(typeof x)).slice(0, 50); return l.length ? l : undefined; }
+  if (v === 'text') return v;
+  if (v && typeof v === 'object' && Number.isFinite(v.min) && Number.isFinite(v.max) && v.min <= v.max) return { min: v.min, max: v.max };
+  return undefined;
+}
 function registrera(def) {
   if (!def || !def.nyckel) return;
-  register.set(def.nyckel, { standard: def.standard, barnLast: !!def.barnLast, etikett: def.etikett || def.nyckel, importBar: def.importBar !== false });
+  const val = rensaVal(def.val);
+  register.set(def.nyckel, { standard: def.standard, barnLast: !!def.barnLast, etikett: def.etikett || def.nyckel, importBar: def.importBar !== false, ...(val !== undefined ? { val } : {}) });
 }
 function lyssna(fn) { lyssnare.add(fn); return () => lyssnare.delete(fn); }
 

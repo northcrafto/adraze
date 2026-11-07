@@ -1211,6 +1211,9 @@
   </div><!-- /#sp-rad (Anpassa: sidopanel) -->
 
   <script src="anpassa.js"></script>
+  <!-- Anpassa › Arbetsytor (väljaren i flikraden) först: lägger fram den öppna arbetsytans flikar och deras flikgrupper
+       innan anpassa-flikar.js och shell.js läser dem -->
+  <script src="anpassa-arbetsytor.js"></script>
   <script src="anpassa-tema.js"></script>
   <script src="anpassa-flikar.js"></script>
   <script src="anpassa-verktyg.js"></script>
@@ -1221,10 +1224,8 @@
   <script src="anpassa-sajt.js"></script>
   <script src="anpassa-sokmotorer.js"></script>
   <script src="anpassa-avancerat.js"></script>
-  <!-- Anpassa › Ångra (panel, "Ändrat · Ångra"-rutan, Ctrl+Z) och Arbetsytor (väljaren i flikraden). Före shell.js:
-       arbetsytorna lägger fram rätt flikar innan skalet återställer dem. -->
+  <!-- Anpassa › Ångra (panel, "Ändrat · Ångra"-rutan, Ctrl+Z) -->
   <script src="anpassa-angra.js"></script>
-  <script src="anpassa-arbetsytor.js"></script>
   <script src="anpassa-galleri.js"></script>
   <script src="anpassa-kortkommandon.js"></script>
   <script src="i18n.js"></script>

@@ -114,11 +114,17 @@ contextBridge.exposeInMainWorld('anpassaAvancerat', {
   kolla: (d) => ipcRenderer.invoke('avancerat:kolla', d),
   onRedigeraCss: (fn) => ipcRenderer.on('avancerat:redigera-css', (_e, host) => fn(String(host || ''))),
 });
-// Anpassa › Ångra (ui/anpassa-angra.js): ångra en hel grupp, spara alla inställningar som fil, Falks ändringar → toast
+// Anpassa › Ångra (ui/anpassa-angra.js): ångra en hel grupp, spara alla inställningar som fil, Falks ändringar → toast.
+// Toasten: syns en webbsida lägger huvudprocessen den ovanpå sidan (svarar true), annars ritar skalet den (false).
 contextBridge.exposeInMainWorld('anpassaAngra', {
   angra: () => ipcRenderer.invoke('anpassa-angra:angra'),
   sparaFil: () => ipcRenderer.invoke('anpassa-angra:spara-fil'),
   onFalk: (fn) => ipcRenderer.on('anpassa-angra:falk', (_e, d) => fn(d)),
+  toast: (d) => ipcRenderer.invoke('anpassa-angra:toast', d),
+  gomToast: () => ipcRenderer.send('anpassa-angra:toast-gom'),
+  onToastAngra: (fn) => ipcRenderer.on('anpassa-angra:toast-angra', () => fn()),   // Ångra i toasten ovanpå sidan
+  onToastISkalet: (fn) => ipcRenderer.on('anpassa-angra:toast-i-skalet', (_e, d) => fn(d)),   // sidan göms: toasten fortsätter i skalet
+  onToastOvanpa: (fn) => ipcRenderer.on('anpassa-angra:toast-ovanpa', () => fn()),            // sidan visas: toasten ligger nu ovanpå den
 });
 // Anpassa › Arbetsytor (ui/anpassa-arbetsytor.js): flikar i andra arbetsytor ligger vilande tills de visas
 contextBridge.exposeInMainWorld('anpassaArbetsytor', {
