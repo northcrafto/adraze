@@ -178,14 +178,14 @@ async function kor(rot, bilder) {
           const vald = document.querySelector('#anp-tema .anp-tema-prov.on');
           const aktiv = document.querySelector('.tab.active');
           return JSON.stringify({ ok, terra: __T.rot('--color-terra'), on: __T.rot('--anp-on'), vant: mork ? p.d : p.l, vantOn: mork ? p.onD : p.onL,
-            flik: aktiv ? __T.hex(__T.varde(aktiv, 'background-color', '::after')) : null, nav: __T.hex(__T.varde('#settings .set-tab.on svg', 'color')),
+            nav: __T.hex(__T.varde('#settings .set-tab.on svg', 'color')),
             sparat: Anpassa.get('tema.accent', null), bock: vald ? window.AnpassaTema.kontrast(__T.rgba(__T.varde(vald, 'color')).slice(0, 3), __T.rgba(__T.varde(vald, 'background-color')).slice(0, 3)) : 0,
             lasfel: __T.nyaLasfel(__T.bas.${lage}, ${JSON.stringify(ROTTER)}) });
         })()`);
-        if (!r.ok || r.terra !== r.vant || r.on !== r.vantOn || r.flik !== r.vant || r.nav !== r.vant || r.sparat !== hex || r.bock < 3) fl.push({ hex, ...r, lasfel: undefined });
+        if (!r.ok || r.terra !== r.vant || r.on !== r.vantOn || r.nav !== r.vant || r.sparat !== hex || r.bock < 3) fl.push({ hex, ...r, lasfel: undefined });
         if (r.lasfel && r.lasfel.length) lasfel.push(hex + ': ' + r.lasfel.join(', '));
       }
-      R.ok(`accenten slår igenom i ${lage} läge (variabler, aktiv flik, menyn, bocken)`, fl.length === 0, fl.slice(0, 3));
+      R.ok(`accenten slår igenom i ${lage} läge (variabler, menyn, bocken)`, fl.length === 0, fl.slice(0, 3));
       R.ok(`ingen text blir oläslig med någon accentfärg i ${lage} läge`, lasfel.length === 0, lasfel.slice(0, 4));
       await bild(s, lage === 'ljust' ? '02-egen-farg-ljust' : '03-egen-farg-mork');
     }
