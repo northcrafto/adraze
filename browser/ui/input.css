@@ -869,3 +869,109 @@ svg:has(use[href="#i-fav"]) { color: #5f6368; opacity: 1; }
 .fam-fraga button { font-size: 12px; font-weight: 700; border-radius: 8px; padding: 5px 10px; cursor: pointer; border: 1px solid var(--color-line); background: #fff; color: var(--color-navy-900); }
 .fam-fraga button[data-svar="nej"] { color: #b4321a; }
 .fam-fraga button:hover { border-color: var(--color-navy-900); }
+
+/* ── Anpassa: kortkommandon ── */
+/* Kortkommandon, kommandopaletten (Ctrl+K) och musgester. Logiken: ui/anpassa-kortkommandon.js */
+.anp-kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 5px; font: 600 11px/1 var(--font-sans, system-ui), system-ui, sans-serif; white-space: nowrap; }
+
+/* Kommandopaletten: ett kort mitt i fönstret över en nedtonad bild av sidan */
+#anp-palett { --p-bg: #ffffff; --p-ink: #0e2a47; --p-mut: rgb(14 42 71 / .62); --p-faint: rgb(14 42 71 / .42); --p-kant: rgb(14 42 71 / .1); --p-linje: #e6ecf3;
+  --p-val: #eef3f9; --p-accent: #ff4b1f; --p-kbd: #f3f6fa; --p-kbd-kant: #d5dee8;
+  position: fixed; inset: 0; z-index: 250; display: none; }   /* över notiserna (240): paletten är modal medan den är öppen */
+:root[data-theme="dark"] #anp-palett, body.incog #anp-palett { --p-bg: #17191d; --p-ink: #eef1f5; --p-mut: rgb(238 241 245 / .66); --p-faint: rgb(238 241 245 / .42); --p-kant: rgb(255 255 255 / .09);
+  --p-linje: #262a31; --p-val: rgb(255 255 255 / .065); --p-kbd: #23262c; --p-kbd-kant: #383d46; }
+#anp-palett.syns { display: block; }
+#anp-palett .anp-pal-bild { position: absolute; display: none; object-fit: cover; object-position: top left; pointer-events: none; user-select: none; }
+#anp-palett .anp-pal-dim { position: absolute; inset: 0; background: rgb(6 18 32 / .38); opacity: 0; transition: opacity .14s ease-out; }
+#anp-palett.on .anp-pal-dim { opacity: 1; }
+#anp-palett .anp-pal-kort { position: absolute; left: 50%; top: max(84px, 13vh); width: min(640px, calc(100vw - 48px)); max-height: min(540px, calc(100vh - max(84px, 13vh) - 32px));
+  display: flex; flex-direction: column; overflow: hidden; border-radius: 14px; background: var(--p-bg); color: var(--p-ink);
+  box-shadow: 0 0 0 1px var(--p-kant), 0 24px 64px rgb(6 18 32 / .34), 0 3px 10px rgb(6 18 32 / .16);
+  opacity: 0; transform: translate(-50%, 8px) scale(.985); transition: opacity .14s ease-out, transform .18s cubic-bezier(.2,.8,.2,1); }
+#anp-palett.on .anp-pal-kort { opacity: 1; transform: translate(-50%, 0) scale(1); }
+#anp-palett .anp-pal-falt { display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 14px 0 18px; border-bottom: 1px solid var(--p-linje); flex: none; }
+#anp-palett .anp-pal-sokikon { width: 18px; height: 18px; color: var(--p-faint); flex: none; }
+#anp-palett .anp-pal-falt input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: transparent; color: var(--p-ink); font-size: 16px; font-weight: 450; }
+#anp-palett .anp-pal-falt input::placeholder { color: var(--p-faint); }
+#anp-palett .anp-kbd { color: var(--p-mut); background: var(--p-kbd); box-shadow: inset 0 0 0 1px var(--p-kbd-kant), 0 1px 0 var(--p-kbd-kant); }
+#anp-palett .anp-pal-lista { overflow-y: auto; overscroll-behavior: contain; padding: 4px 0 8px; scroll-padding: 34px 0 8px; scrollbar-width: thin; scrollbar-color: var(--p-kbd-kant) transparent; }
+#anp-palett .anp-pal-grupp { padding: 12px 20px 5px; font-size: 11.5px; font-weight: 650; color: var(--p-faint); }
+#anp-palett .anp-pal-rad { position: relative; display: flex; align-items: center; gap: 12px; height: 42px; margin: 0 8px; padding: 0 12px; border-radius: 9px; cursor: pointer; }
+#anp-palett .anp-pal-rad.val { background: var(--p-val); }
+#anp-palett .anp-pal-rad.val::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--p-accent); }
+#anp-palett .anp-pal-ikon { width: 22px; height: 22px; display: grid; place-items: center; flex: none; color: var(--p-mut); }
+#anp-palett .anp-pal-rad.val .anp-pal-ikon { color: var(--p-ink); }
+#anp-palett .anp-pal-ikon img, #anp-palett .anp-pal-ikon .fav img { width: 16px; height: 16px; border-radius: 3px; object-fit: contain; display: block; }
+#anp-palett .anp-pal-ikon .fav { display: grid; place-items: center; width: 18px; height: 18px; }
+#anp-palett .anp-pal-txt { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 10px; }
+#anp-palett .anp-pal-namn { flex: 0 1 auto; min-width: 0; font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#anp-palett .anp-pal-namn b { font-weight: 700; color: var(--p-ink); }
+#anp-palett .anp-pal-sub { flex: 1 1 0; min-width: 0; font-size: 12.5px; color: var(--p-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#anp-palett .anp-pal-hoger { flex: none; display: flex; align-items: center; gap: 3px; }
+#anp-palett .anp-pal-tagg { font-size: 12px; color: var(--p-faint); opacity: 0; }
+#anp-palett .anp-pal-rad.val .anp-pal-tagg { opacity: 1; }
+#anp-palett .anp-pal-tom { padding: 28px 20px; text-align: center; font-size: 13.5px; color: var(--p-mut); }
+#anp-palett .anp-pal-fot { flex: none; display: flex; align-items: center; gap: 18px; padding: 9px 18px; border-top: 1px solid var(--p-linje); font-size: 12px; color: var(--p-faint); }
+#anp-palett .anp-pal-fot span { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+#anp-palett .anp-pal-fot .anp-pal-fot-hoger { margin-left: auto; }
+#anp-palett .anp-pal-fot .anp-kbd { height: 18px; min-width: 18px; font-size: 10.5px; }
+@media (max-width: 620px) { #anp-palett .anp-pal-fot span:nth-child(3) { display: none; } }
+
+/* Inställningar › Anpassa › Kortkommandon */
+#settings #anp-kortkommandon .anp-kbd { color: var(--s-ink); background: var(--s-surface-2); box-shadow: inset 0 0 0 1px var(--s-line), 0 1px 0 var(--s-field-line); }
+#settings .anp-kort-ikon { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border-radius: 9px; background: var(--s-accent-soft); color: var(--s-accent-ink); }
+#settings .anp-kort-palett { margin-top: 14px; }
+#settings .anp-kort-topp { display: flex; align-items: center; gap: 8px; margin: 22px 0 0; flex-wrap: wrap; }
+#settings .anp-kort-filter { flex: 1 1 220px; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 11px; border-radius: 8px; background: var(--s-field); box-shadow: inset 0 0 0 1px var(--s-field-line); color: var(--s-faint); }
+#settings .anp-kort-filter:focus-within { box-shadow: inset 0 0 0 1.5px var(--s-ink), 0 0 0 3px var(--s-accent-soft); }
+#settings .anp-kort-filter input { flex: 1; min-width: 0; height: 100%; border: 0 !important; outline: 0; background: transparent !important; box-shadow: none !important; padding: 0; font-size: 13px; color: var(--s-ink); }
+#settings .anp-kort-filter input::-webkit-search-cancel-button { display: none; }
+#settings .anp-kort-topp .pill, #settings .anp-kort-topp .set-btn { height: 36px; padding: 0 14px; font-size: 13px; }
+#settings .anp-kort-fraga { font-size: 13px; font-weight: 600; color: var(--s-ink); }
+#settings .anp-kort-gruppnamn { margin: 22px 0 -8px; padding: 0 4px; font-size: 12px; font-weight: 650; color: var(--s-faint); }
+#settings .anp-kort-rad { padding-top: 8px; padding-bottom: 8px; min-height: 50px; flex-wrap: wrap; row-gap: 6px; }
+#settings .anp-kort-palett.anp-kort-rad { padding-top: 13px; padding-bottom: 13px; }
+#settings .anp-kort-rad:not(.set-row + .set-row) { padding-top: 8px; }
+#settings .anp-kort-palett.anp-kort-rad:not(.set-row + .set-row) { padding-top: 13px; }
+#settings .anp-kort-rad .set-title { font-size: 13.5px; font-weight: 550; }
+#settings .anp-kort-rad[hidden], #settings .anp-kort-grupp[hidden] { display: none; }
+#settings .anp-kort-kombos { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+#settings .anp-kort-kombo { position: relative; display: inline-flex; align-items: center; border-radius: 8px; }
+#settings .anp-kort-chip { display: inline-flex; align-items: center; gap: 3px; height: 30px; padding: 0 7px; border-radius: 8px; background: transparent; border: 0; cursor: pointer; transition: background .15s; }
+#settings .anp-kort-chip:hover, #settings .anp-kort-chip:focus-visible { background: var(--s-hover); }
+#settings .anp-kort-chip:focus-visible, #settings .anp-kort-x:focus-visible, #settings .anp-kort-plus:focus-visible, #settings .anp-kort-spela:focus-visible, #settings .anp-kort-lank:focus-visible { outline: 2px solid var(--s-accent); outline-offset: 1px; }
+#settings .anp-kort-x { display: grid; place-items: center; width: 20px; height: 20px; margin-left: -4px; border-radius: 6px; border: 0; background: transparent; color: var(--s-faint); cursor: pointer; opacity: 0; transition: opacity .15s, background .15s, color .15s; }
+#settings .anp-kort-x svg { width: 12px; height: 12px; stroke-width: 2.2; }
+#settings .anp-kort-kombo:hover .anp-kort-x, #settings .anp-kort-kombo:focus-within .anp-kort-x { opacity: 1; }
+#settings .anp-kort-x:hover { background: rgb(208 64 47 / .1); color: #d0402f; }
+#settings .anp-kort-plus { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; border: 1px dashed var(--s-field-line); background: transparent; color: var(--s-faint); cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
+#settings .anp-kort-plus svg { width: 14px; height: 14px; }
+#settings .anp-kort-plus:hover { border-color: var(--s-accent); color: var(--s-accent-ink); background: var(--s-accent-soft); }
+#settings .anp-kort-tom { font-size: 12.5px; color: var(--s-faint); padding: 0 4px; }
+#settings .anp-kort-lank { height: 28px; padding: 0 8px; border: 0; border-radius: 7px; background: transparent; font-size: 12.5px; font-weight: 600; color: var(--s-mut); cursor: pointer; }
+#settings .anp-kort-lank:hover { color: var(--s-ink); background: var(--s-hover); }
+#settings .anp-kort-std { margin-left: -6px; }
+#settings .anp-kort-spela { display: inline-flex; align-items: center; gap: 3px; min-width: 176px; height: 30px; padding: 0 12px; border-radius: 8px; border: 0; cursor: default;
+  background: var(--s-accent-soft); color: var(--s-accent-ink); box-shadow: inset 0 0 0 1.5px var(--s-accent); font-size: 12.5px; font-weight: 600; }
+#settings .anp-kort-plusstreck { margin-left: 3px; }
+#settings .anp-kort-ny .anp-kbd { box-shadow: inset 0 0 0 1.5px var(--s-accent); }
+#settings .anp-kort-medd { flex-basis: 100%; display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; font-size: 12.5px; color: var(--s-mut); }
+#settings .anp-kort-medd b { color: var(--s-ink); font-weight: 650; }
+#settings .anp-kort-medd .set-btn, #settings .anp-kort-medd .pill { height: 30px; padding: 0 12px; font-size: 12.5px; }
+#settings .anp-kort-medd.fel { color: #c2360e; }
+:root[data-theme="dark"] #settings .anp-kort-medd.fel { color: #ff8a7a; }
+#settings .anp-kort-inget { padding: 18px 4px; font-size: 13px; color: var(--s-faint); }
+
+/* Musgester */
+#settings #anp-kort-gester { margin-top: 10px; }
+#settings .anp-gest-lista.av .anp-gest-rad { opacity: .55; }
+#settings .anp-gest-rad { padding-top: 9px; padding-bottom: 9px; }
+#settings .anp-gest-figur { width: 30px; height: 30px; flex: none; padding: 3px; border-radius: 8px; background: var(--s-surface-2); box-shadow: inset 0 0 0 1px var(--s-line);
+  fill: none; stroke: var(--s-accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+#settings .anp-gest-figur circle { fill: var(--s-accent); stroke: none; }
+#settings .anp-gest-rad .set-select { min-width: 210px; }
+
+/* Paletten visar en rad i inställningarna: en kort markering som tonar bort */
+#settings .anp-blink { animation: anpBlink 1.5s ease-out 1; }
+@keyframes anpBlink { 0%, 35% { box-shadow: inset 0 0 0 2px var(--s-accent); background-color: var(--s-accent-soft); } 100% { box-shadow: inset 0 0 0 2px transparent; } }
+@media (prefers-reduced-motion: reduce) { #anp-palett .anp-pal-dim, #anp-palett .anp-pal-kort { transition: none; } #settings .anp-blink { animation: none; } }

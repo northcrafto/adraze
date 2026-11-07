@@ -74,6 +74,18 @@ contextBridge.exposeInMainWorld('anpassaBro', {
   importera: (kod, prefix) => ipcRenderer.invoke('anpassa:importera', { kod, prefix }),
   onAndrad: (fn) => ipcRenderer.on('anpassa:andrad', (_e, d) => fn(d)),
 });
+// Anpassa › kortkommandon, kommandopalett och musgester (ui/anpassa-kortkommandon.js ↔ anpassa-kortkommandon.js)
+contextBridge.exposeInMainWorld('anpassaKortkommandon', {
+  lista: () => ipcRenderer.sendSync('anpassa-kort:lista'),
+  kor: (id) => ipcRenderer.invoke('anpassa-kort:kor', String(id || '')),
+  bild: () => ipcRenderer.invoke('anpassa-kort:bild'),
+  fokusSida: () => ipcRenderer.send('anpassa-kort:fokus'),
+  fokusSkal: () => ipcRenderer.send('anpassa-kort:fokus-skal'),
+  spelaIn: (pa) => ipcRenderer.send('anpassa-kort:spela-in', !!pa),
+  extra: (lista) => ipcRenderer.send('anpassa-kort:extra', lista),
+  onKommando: (fn) => ipcRenderer.on('anpassa-kort:kommando', (_e, id, kalla, franSida) => fn(id, kalla, franSida)),
+  onInspelning: (fn) => ipcRenderer.on('anpassa-kort:inspelning', (_e, d) => fn(d)),
+});
 contextBridge.exposeInMainWorld('kontoLage', {
   fonster: () => ipcRenderer.sendSync('konto:fonster'),
   hamta: () => ipcRenderer.sendSync('konto:lage'),
