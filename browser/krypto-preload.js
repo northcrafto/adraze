@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('locale', {
 });
 contextBridge.exposeInMainWorld('krypto', {
   chat: (messages, opts) => ipcRenderer.invoke('krypto:chat', messages, opts),
+  kvot: () => ipcRenderer.invoke('krypto:kvot'),
   doAction: (a) => ipcRenderer.send('krypto:action', a),
   tab: () => ipcRenderer.invoke('krypto:tab'),
   page: () => ipcRenderer.invoke('krypto:page'),
