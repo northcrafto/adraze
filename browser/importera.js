@@ -533,8 +533,8 @@ function ffKakor(dir) {
   } catch {} finally { stangDb(db); }
   return { kakor: ut, last: 0 };
 }
-async function sattKakor(lista) {
-  const s = session.defaultSession; let n = 0;
+async function sattKakor(lista, ses) {
+  const s = ses || session.defaultSession; let n = 0;
   for (let i = 0; i < lista.length; i += 200) {
     const del = lista.slice(i, i + 200).map(async (c) => {
       const host = c.host.replace(/^\./, ''); if (!host) return;
@@ -613,7 +613,7 @@ function setup(hooks) {
       }
     } catch (e) { return { ok: false, fel: String(e.message || e) }; }
     let kakorSatta = 0;
-    if (kak && kak.kakor.length) { try { kakorSatta = await sattKakor(kak.kakor); } catch {} }
+    if (kak && kak.kakor.length) { try { kakorSatta = await sattKakor(kak.kakor, hooks.kakSession ? hooks.kakSession(_e) : null); } catch {} }
     return { ok: true, bokmarken: bm, historik: hist, installningar: inst, flikar: tabs.slice(0, 60),
       kakor: kak ? { antal: kakorSatta, last: kak.last, sajter: new Set(kak.kakor.map((c) => c.host.replace(/^\./, '').replace(/^www\./, ''))).size } : null };
   });

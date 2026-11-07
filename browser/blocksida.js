@@ -149,7 +149,7 @@ async function blockeraElement(wc, x, y, text) {
 }
 function kanBlockeraElement(wc) {
   if (!opts.adblock.isOn()) return false;
-  let privat = false; try { privat = wc.session !== session.defaultSession; } catch {}
+  let privat = false; try { privat = wc.session === session.fromPartition('skoll-incognito'); } catch {}   // kontopartitioner är inte privata
   return !privat || inst.get().elementPrivat;
 }
 

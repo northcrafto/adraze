@@ -60,6 +60,12 @@ contextBridge.exposeInMainWorld('family', {
 });
 
 
+contextBridge.exposeInMainWorld('kontoLage', {
+  fonster: () => ipcRenderer.sendSync('konto:fonster'),
+  hamta: () => ipcRenderer.sendSync('konto:lage'),
+  satt: (perFonster) => ipcRenderer.invoke('konto:satt-lage', !!perFonster),
+  omstart: () => ipcRenderer.send('app:omstart'),
+});
 contextBridge.exposeInMainWorld('session', {
   setkey: (key) => ipcRenderer.invoke('session:setkey', { key }),
   login: (key) => ipcRenderer.invoke('session:login', { key }),

@@ -178,7 +178,7 @@ function setup({ onDnsChanged } = {}) {
   });
   // Rensa cookies/webbplatsdata och/eller cache i både vanliga och privata sessionen
   ipcMain.handle('webb:clear', async (_e, what) => {
-    const sess = [session.defaultSession, session.fromPartition('skoll-incognito')];
+    const sess = [session.defaultSession, session.fromPartition('skoll-incognito'), ...((typeof module.exports.extraSessioner === 'function' && module.exports.extraSessioner()) || [])];   // + kontonas egna lagringar
     for (const s of sess) {
       if (what && what.cookies) {
         try { await s.clearStorageData({ storages: ['cookies', 'localstorage', 'indexdb', 'serviceworkers', 'cachestorage', 'filesystem', 'websql'] }); } catch {}

@@ -82,6 +82,12 @@ registerAdblockScheme();   // före app.ready
 const KRYPTO_W = 400;
 const CHATT_W = 420;        // chattens sidopanel (helskärm = hela webbytan)
 const wins = new Map();                 // skalets webContents-id -> ctx
+/* Konto per fönster (standard): varje fönster har sitt eget AdRaze-konto, och varje konto sina egna kakor i en
+ * egen lagring (partition) – Google m.fl. är alltid inloggat på rätt konto, och ett byte i ett fönster rör inte
+ * de andra. Av: alla fönster delar ett konto och kakorna byts vid inloggning, som förr. Gäller efter omstart. */
+const KONTO_LAGE_FIL = path.join(app.getPath('userData'), 'adraze-konton-lage.json');
+function lasKontoLage() { try { const j = JSON.parse(fs.readFileSync(KONTO_LAGE_FIL, 'utf8')); return j && j.perFonster === false ? false : true; } catch { return true; } }
+const KONTO_PER_FONSTER = lasKontoLage();
 
 /* ────────── Minnesbesparing (Memory Saver) ──────────
  * Chromium drar mycket RAM eftersom varje flik får en egen renderer-process.
@@ -280,8 +286,14 @@ const BARN_ALLTID = ['proxy.adraze.app'];                      // AdRazes webbpr
 const barnLasOk = (h) => h === 'accounts.adraze.app' || h === 'accounts.youtube.com' || /^accounts\.google\.[a-z.]+$/.test(h);
 // "Fortsätt med Google" i inloggningen öppnar exakt adraze.app/app-google (ADRAZE_SITE) – den får laddas när låst
 const barnGoogleSida = (url) => { try { const u = new URL(String(url || '')); return u.protocol === 'https:' && u.origin === new URL(process.env.ADRAZE_SITE || 'https://adraze.app').origin && u.pathname === '/app-google'; } catch { return false; } };
-function barnSparrad(url) {
-  const r = barnRegler; if (!r) return false;
+/* Konto per fönster: varje fönster har sitt eget konto och därmed sina egna barnregler (ctx.barnRegler).
+ * Delade konton (inställningen av): en uppsättning regler för hela webbläsaren, som förr. */
+function reglerFor(ctx) { return KONTO_PER_FONSTER ? (ctx ? ctx.barnRegler || null : barnNagonRegel()) : barnRegler; }
+function barnNagonRegel() { if (!KONTO_PER_FONSTER) return barnRegler; for (const c of wins.values()) if (c && c.barnRegler) return c.barnRegler; return null; }
+// Utvecklarverktyg och inkognito: avstängda så fort något fönster är i barnläge (barnet kan annars öppna dem i ett annat)
+function barnNagonstans() { return !!barnNagonRegel(); }
+function barnSparrad(url, regler) {
+  const r = regler === undefined ? barnRegler : regler; if (!r) return false;
   let h = '';
   try { const u = new URL(String(url || '')); if (!/^(https?|wss?):$/.test(u.protocol)) return false; h = barnNorm(u.hostname); } catch { return false; }
   if (!h) return false;
@@ -293,8 +305,10 @@ function barnSparrad(url) {
   return !r.allows.some((a) => a.until > nu && traff(a.host));
 }
 adblock.barnStopp = (d) => {
-  if (!barnRegler || (d.resourceType !== 'mainFrame' && d.resourceType !== 'subFrame')) return false;
-  if (!barnSparrad(d.url)) return false;
+  if (d.resourceType !== 'mainFrame' && d.resourceType !== 'subFrame') return false;
+  let ctx = null; try { ctx = d.webContents ? d.webContents.__ctx || null : null; } catch {}
+  const r = reglerFor(ctx);
+  if (!r || !barnSparrad(d.url, r)) return false;
   if (d.resourceType === 'mainFrame') { try { const wc = d.webContents; if (wc && wc.__ctx && wc.__tabId != null) sendTo(wc.__ctx, 'barn-sparrad', wc.__tabId, d.url); } catch {} }
   return true;
 };
@@ -640,7 +654,7 @@ function buildContextMenu(ctx, wc, params) {
   t.push({ label: T('Översätt till svenska'), click: () => sendTo(ctx, 'open-new-tab', 'https://translate.google.com/translate?sl=auto&tl=sv&u=' + encodeURIComponent(url)) });
   t.push({ type: 'separator' });
   t.push({ label: T('Visa sidans källa'), click: () => sendTo(ctx, 'open-tab-raw', 'view-source:' + url) });
-  if (!barnRegler) t.push({ label: T('Inspektera'), click: () => { try { if (!barnRegler) wc.inspectElement(params.x, params.y); } catch {} } });
+  if (!barnNagonstans()) t.push({ label: T('Inspektera'), click: () => { try { if (!barnNagonstans()) wc.inspectElement(params.x, params.y); } catch {} } });
   Menu.buildFromTemplate(t).popup({ window: ctx.win });
 }
 
@@ -658,7 +672,7 @@ function buildShellMenu(ctx, wc, params) {
     t.push({ label: T('Kopiera'), role: 'copy' });
   } else {
     t.push({ label: T('Ny flik'), click: () => sendTo(ctx, 'open-new-tab') });
-    t.push({ label: T('Nytt fönster'), click: () => createWindow(false) });
+    t.push({ label: T('Nytt fönster'), click: () => createWindow(false, ctx) });
     t.push({ label: T('Ny inkognitoflik'), click: () => sendTo(ctx, 'new-incognito') });
     const clip = (clipboard.readText() || '').trim();
     if (clip) {
@@ -682,6 +696,7 @@ function ensureView(ctx, tabId) {
   // från sidans JS (contextIsolation) och exponerar inget till sidan.
   const wp = { preload: path.join(__dirname, 'content-preload.js'), contextIsolation: true, sandbox: true, nodeIntegration: false, nodeIntegrationInSubFrames: true };
   if (incognito) wp.partition = 'skoll-incognito';
+  else if (KONTO_PER_FONSTER) wp.session = kontoSession(ctx.acctKey === undefined ? senasteKonto : ctx.acctKey);
   wp.defaultFontSize = webb.fontSize(); wp.defaultMonospaceFontSize = Math.round(webb.fontSize() * 13 / 16);
   const view = new WebContentsView({ webPreferences: wp });
   view.setVisible(false);
@@ -714,9 +729,9 @@ function ensureView(ctx, tabId) {
     const fonster = details.disposition === 'new-window' || (details.features && details.features.length);
     if (knappNyss && fonster && (tomt || (/^https?:/i.test(url) && !isBlockedTarget(url, from)))) {
       // Barnläge: aldrig ett riktigt fönster (där gällde varken spärr eller insyn) – en vanlig flik i stället
-      if (barnRegler && !googleRuta) { if (/^https?:/i.test(url)) sendTo(ctx, 'open-new-tab', url); return { action: 'deny' }; }
+      if (reglerFor(ctx) && !googleRuta) { if (/^https?:/i.test(url)) sendTo(ctx, 'open-new-tab', url); return { action: 'deny' }; }
       wc.__kassaFonster = now;
-      return { action: 'allow', overrideBrowserWindowOptions: { width: 520, height: 720, resizable: true, autoHideMenuBar: true, webPreferences: { preload: path.join(__dirname, 'content-preload.js'), contextIsolation: true, sandbox: true, nodeIntegration: false } } };
+      return { action: 'allow', overrideBrowserWindowOptions: { width: 520, height: 720, resizable: true, autoHideMenuBar: true, webPreferences: { preload: path.join(__dirname, 'content-preload.js'), contextIsolation: true, sandbox: true, nodeIntegration: false, session: wc.session } } };   // samma kontos kakor som fliken
     }
     if (adblockOn && (!/^https?:/i.test(url) || isBlockedTarget(url, from))) {
       return { action: 'deny' };                                  // annons/pop-under/skräp-schema → död
@@ -727,8 +742,8 @@ function ensureView(ctx, tabId) {
     // annonssajter (popunder) och dödas helt.
     if (details.disposition === 'new-window' || (details.features && details.features.length)) {
       if (sameSite(url, from) || popupTrustedHost(url)) {
-        if (barnRegler && !googleRuta) { if (/^https?:/i.test(url)) sendTo(ctx, 'open-new-tab', url); return { action: 'deny' }; }   // barnläge: flik, inte fönster
-        return { action: 'allow', overrideBrowserWindowOptions: { width: 520, height: 680, resizable: true, autoHideMenuBar: true, webPreferences: { preload: path.join(__dirname, 'content-preload.js'), contextIsolation: true, sandbox: true, nodeIntegration: false } } };   // samma Chrome-förklädnad som flikarna, annars stoppar Google inloggningen
+        if (reglerFor(ctx) && !googleRuta) { if (/^https?:/i.test(url)) sendTo(ctx, 'open-new-tab', url); return { action: 'deny' }; }   // barnläge: flik, inte fönster
+        return { action: 'allow', overrideBrowserWindowOptions: { width: 520, height: 680, resizable: true, autoHideMenuBar: true, webPreferences: { preload: path.join(__dirname, 'content-preload.js'), contextIsolation: true, sandbox: true, nodeIntegration: false, session: wc.session } } };   // inloggningsrutan delar flikens (kontots) kakor   // samma Chrome-förklädnad som flikarna, annars stoppar Google inloggningen
       }
       // Korsdomän-fönster från en okänd sajt = popunder. Dör helt – blir inte ens en flik.
       // (Vanliga länkar med target=_blank har inga fönster-features och blir flik som vanligt.)
@@ -1048,6 +1063,11 @@ ipcMain.handle('profiler:ta-bort', async (_e, key) => {
   }
   // Kontot som är aktivt nu har sina kakor i webbsessionen – dem rör vi inte; bara ett utloggat kontos sparade kakor
   try { if (key !== currentAcctKey) { const f = cookieFileFor(key); if (fs.existsSync(f)) fs.unlinkSync(f); } } catch {}
+  if (KONTO_PER_FONSTER && ![...wins.values()].some((c) => c && c.acctKey === key)) {
+    try { await session.fromPartition(kontoPartition(key)).clearStorageData(); } catch {}
+    try { const reg = lasKontoReg(); delete reg[keyHash(key)]; sparaKontoReg(reg); } catch {}
+    try { const f = cookieFileFor(key); if (fs.existsSync(f)) fs.unlinkSync(f); } catch {}
+  }
   return { ok: true };
 });
 /* AdRaze Familj (api.adraze.app): föräldern skapar barnkonton; barnet loggar in med sin barnkod
@@ -1207,7 +1227,11 @@ const PW_FILE = path.join(app.getPath('userData'), 'skoll-passwords.json');   //
 const PW_DIR = path.join(app.getPath('userData'), 'passwords');
 let currentAcctKey = null;                                                    // vilket AdRaze-konto som är inloggat (kaka-valv + lösenord)
 function keyHash(k) { return crypto.createHash('sha1').update(String(k || '')).digest('hex'); }
-const pwKey = () => currentAcctKey || 'lokal';
+let _pwNyckel;   // satt under ett lösenordsanrop i per fönster-läge (fönstrets konto)
+const pwKey = () => (_pwNyckel !== undefined ? _pwNyckel : currentAcctKey) || 'lokal';
+function kontoNyckelFor(e) { try { const ctx = (e && e.sender && e.sender.__ctx) || ctxFor(e); return ctx ? (ctx.acctKey === undefined ? senasteKonto : ctx.acctKey) : senasteKonto; } catch { return senasteKonto; } }
+// Lösenordsanropen gäller valvet för fönstret de kommer från (synkrona hanterare → säkert att sätta tillfälligt)
+const medKonto = (fn) => (e, ...a) => { if (!KONTO_PER_FONSTER) return fn(e, ...a); _pwNyckel = kontoNyckelFor(e); try { return fn(e, ...a); } finally { _pwNyckel = undefined; } };
 function pwFileFor(key) { return path.join(PW_DIR, 'pw-' + keyHash(key) + '.json'); }
 function loadPw() {
   // Inloggad: kontots valv. Utan konto: ett lokalt valv på den här datorn (som i Brave, inget konto krävs)
@@ -1220,7 +1244,7 @@ function savePwList(l) {
   // E2E-krypterat på enheten (AES-256-GCM med samma nyckelrings-nyckel som plånboken)
   try { fs.mkdirSync(PW_DIR, { recursive: true }); fs.writeFileSync(pwFileFor(pwKey()), walletEncrypt(JSON.stringify(l)), { mode: 0o600 }); } catch {}
 }
-ipcMain.handle('pw:list', () => loadPw().filter((p) => !p.never));
+ipcMain.handle('pw:list', medKonto(() => loadPw().filter((p) => !p.never)));
 // Inloggningar för en sajt: exakt ursprung, plus samma adress med/utan "www." (samma schema och port).
 // ALDRIG "samma domän" gissat ur de två sista leden: då delade alice.vercel.app och mallory.vercel.app
 // (github.io, netlify.app, pages.dev, co.uk …) lösenord med varandra.
@@ -1234,7 +1258,7 @@ function wwwTvilling(origin) {
     return u.hostname.includes('.') ? u.origin : '';
   } catch { return ''; }
 }
-ipcMain.handle('pw:for-origin', (e) => {
+ipcMain.handle('pw:for-origin', medKonto((e) => {
   const origin = ramOrigin(e);
   if (!origin) return [];
   const tvilling = wwwTvilling(origin);
@@ -1242,30 +1266,30 @@ ipcMain.handle('pw:for-origin', (e) => {
   const exact = l.filter((p) => p.origin === origin);
   const www = tvilling ? l.filter((p) => p.origin === tvilling) : [];
   return [...exact, ...www].map((p) => ({ id: p.id, username: p.username, password: p.password, origin: p.origin }));
-});
-ipcMain.handle('pw:never', (_e, origin) => {
+}));
+ipcMain.handle('pw:never', medKonto((_e, origin) => {
   const l = loadPw();
   if (!l.find((p) => p.origin === origin && p.never)) l.push({ id: 'n' + Date.now(), origin: String(origin || ''), username: '', password: '', never: true });
   savePwList(l); return { ok: true };
-});
+}));
 ipcMain.on('pw:open-manager', (e) => { try { const ctx = e.sender.__ctx || ctxFor(e); if (ctx) sendTo(ctx, 'open-passwords'); } catch {} });
 ipcMain.on('i18n:t', (e, sv) => { try { e.returnValue = T(String(sv || '')); } catch { e.returnValue = sv; } });
-ipcMain.handle('pw:get', (_e, origin) => loadPw().find((p) => p.origin === origin) || null);
-ipcMain.handle('pw:save', (_e, c) => {
+ipcMain.handle('pw:get', medKonto((_e, origin) => loadPw().find((p) => p.origin === origin) || null));
+ipcMain.handle('pw:save', medKonto((_e, c) => {
   const l = loadPw();
   const i = l.findIndex((p) => p.origin === c.origin && p.username === c.username);
   const rec = { id: c.id || ('p' + Date.now() + Math.floor(Math.random() * 1000)), origin: c.origin, username: c.username || '', password: c.password || '', autofill: c.autofill !== false };
   if (i >= 0) l[i] = { ...l[i], ...rec }; else l.unshift(rec);
   savePwList(l.filter((p) => !(p.never && p.origin === c.origin))); return { ok: true };
-});
-ipcMain.handle('pw:set-autofill', (_e, o) => {
+}));
+ipcMain.handle('pw:set-autofill', medKonto((_e, o) => {
   o = o || {}; const l = loadPw();
   const p = l.find((x) => x.origin === o.origin && (o.username == null || x.username === o.username));
   if (p) { p.autofill = !!o.on; savePwList(l); }
   return { ok: true };
-});
-ipcMain.handle('pw:delete', (_e, id) => { savePwList(loadPw().filter((p) => p.id !== id)); return { ok: true }; });
-ipcMain.on('pw:capture', (e, c) => {
+}));
+ipcMain.handle('pw:delete', medKonto((_e, id) => { savePwList(loadPw().filter((p) => p.id !== id)); return { ok: true }; }));
+ipcMain.on('pw:capture', medKonto((e, c) => {
   if (!c || !c.password) return;
   const origin = ramOrigin(e); if (!origin) return;
   c = { ...c, origin };
@@ -1274,7 +1298,7 @@ ipcMain.on('pw:capture', (e, c) => {
   if (l.find((p) => p.origin === c.origin && p.username === c.username && p.password === c.password)) return;
   const old = l.find((p) => !p.never && p.origin === c.origin && p.username === c.username);
   sendTo(e.sender.__ctx, 'pw-offer', { ...c, update: !!old });   // erbjud i fönstret där sidan ligger
-});
+}));
 
 /* ── Kaka-valv per konto: logga ut → spara+rensa webbsession; logga in → återställ (samma tjänster tillbaka) ── */
 const COOKIE_DIR = path.join(app.getPath('userData'), 'session-cookies');
@@ -1289,16 +1313,16 @@ function lasKakvalv(fil) {
   try { fs.writeFileSync(fil, walletEncrypt(JSON.stringify(arr)), { mode: 0o600 }); } catch {}
   return arr;
 }
-async function saveAccountCookies(key) {
+async function saveAccountCookies(key, ses) {
   if (!key) return;
   try {
-    const cookies = await session.defaultSession.cookies.get({});
+    const cookies = await (ses || session.defaultSession).cookies.get({});
     if (!cookies.length) return;   // en tom session får aldrig skriva över ett konto med sparade inloggningar
     fs.mkdirSync(COOKIE_DIR, { recursive: true });
     fs.writeFileSync(cookieFileFor(key), walletEncrypt(JSON.stringify(cookies)), { mode: 0o600 });
   } catch {}
 }
-async function restoreAccountCookies(key) {
+async function restoreAccountCookies(key, ses) {
   if (!key) return;
   let arr = [];
   try { arr = lasKakvalv(cookieFileFor(key)); } catch { return; }
@@ -1315,12 +1339,12 @@ async function restoreAccountCookies(key) {
       if (c.httpOnly) set.httpOnly = true;
       if (typeof c.expirationDate === 'number') set.expirationDate = c.expirationDate;
       if (c.sameSite) set.sameSite = c.sameSite;
-      await session.defaultSession.cookies.set(set);
+      await (ses || session.defaultSession).cookies.set(set);
     } catch {}
   }
 }
 // Rensar BARA webb-cookies (Google m.fl.) — ALDRIG localStorage, där skalets AdRaze-inloggning bor.
-async function clearWebSession() { try { await session.defaultSession.clearStorageData({ storages: ['cookies'] }); } catch {} }
+async function clearWebSession(ses) { try { await (ses || session.defaultSession).clearStorageData({ storages: ['cookies'] }); } catch {} }
 
 // Engångsstädning (0.3.50): versioner <=0.3.48 kunde binda Googles icke-Secure auth-cookies
 // (SID/HSID/APISID) till fel source-scheme (http/port 80) vid konto-aterstallning -> Google
@@ -1365,14 +1389,18 @@ function migratePwLegacy(key) {   // första inloggningen: flytta ev. gamla (ick
 }
 // Sätt inloggat konto UTAN att röra webbsessionen (vid uppstart — sessionen ligger redan kvar på disk)
 // Uppstart: sätt kontonyckel utan att röra webbsessionen (cookies ligger redan på disk för rätt konto).
-ipcMain.handle('session:setkey', (_e, d) => { currentAcctKey = (d && d.key) || null; migratePwLegacy(currentAcctKey || 'lokal'); return { ok: true }; });
+ipcMain.handle('session:setkey', (e, d) => {
+  if (KONTO_PER_FONSTER) { const ctx = ctxFor(e); senasteKonto = (d && d.key) || null; migratePwLegacy(senasteKonto || 'lokal'); return ctx ? bytFonsterKonto(ctx, senasteKonto) : { ok: true }; }
+  currentAcctKey = (d && d.key) || null; migratePwLegacy(currentAcctKey || 'lokal'); return { ok: true };
+});
 // Inloggning / kontobyte: spara ev. UTGÅENDE kontots cookies, rensa webbsessionen, återställ det NYA kontots cookies.
 // → varje konto (förälder/barn) får sina EGNA webb-cookies, isolerade från varandra.
 // Bytena körs ett i taget: en utloggning som hinner blandas med nästa inloggning kan annars rensa de återställda kakorna.
 let sessionKo = Promise.resolve();
 const iSessionKo = (f) => { const r = sessionKo.then(f, f); sessionKo = r.catch(() => {}); return r; };
-ipcMain.handle('session:login', (_e, d) => iSessionKo(async () => {
+ipcMain.handle('session:login', (e, d) => iSessionKo(async () => {
   const key = d && d.key;
+  if (KONTO_PER_FONSTER) { const ctx = ctxFor(e); senasteKonto = key || null; if (key) migratePwLegacy(key); return ctx ? bytFonsterKonto(ctx, key || null) : { ok: true }; }
   // Samma konto loggar in igen (t.ex. när inloggningen gått ut): sessionen är redan rätt, och att rensa den tappade allt
   if (key && key === currentAcctKey) { migratePwLegacy(key); return { ok: true }; }
   if (currentAcctKey) { try { await saveAccountCookies(currentAcctKey); } catch {} }
@@ -1385,27 +1413,131 @@ ipcMain.handle('session:login', (_e, d) => iSessionKo(async () => {
   return { ok: true };
 }));
 // Skalet: barnets regler / låst barnläge / null (se "Familjespärren i huvudprocessen")
-ipcMain.on('barn:regler', (_e, d) => {
+ipcMain.on('barn:regler', (e, d) => {
   try {
-    if (!d || typeof d !== 'object') { barnRegler = null; return; }
+    const ctx = ctxFor(e);
+    const satt = (r) => { if (KONTO_PER_FONSTER) { if (ctx) ctx.barnRegler = r; } else barnRegler = r; };
+    if (!d || typeof d !== 'object') { satt(null); return; }
     const lista = (x) => (Array.isArray(x) ? x : []).map((v) => String(v || '')).filter(Boolean).slice(0, 5000);
     const allows = (Array.isArray(d.allows) ? d.allows : []).filter((a) => a && a.host).slice(0, 500).map((a) => ({ host: String(a.host), until: Number(a.until) || 0 }));
-    barnRegler = { last: !!d.last, blocklist: lista(d.blocklist), allows };
+    satt({ last: !!d.last, blocklist: lista(d.blocklist), allows });
     // Inget inkognito i barnläge (ingen insyn) – och ingen spärrad sida får ligga kvar och spela i någon flik/popup
     wins.forEach((ctx) => { try { if (ctx && ctx.incognito && ctx.win && !ctx.win.isDestroyed()) { ctx.forceClose = true; ctx.win.close(); } } catch {} });
     for (const wc of webContents.getAllWebContents()) {
-      try { if (!wc.isDestroyed() && barnSparrad(wc.getURL())) wc.loadURL('about:blank').catch(() => {}); } catch {}
+      try { if (!wc.isDestroyed() && barnSparrad(wc.getURL(), reglerFor(wc.__ctx || null))) wc.loadURL('about:blank').catch(() => {}); } catch {}
     }
   } catch {}
 });
 // Utloggning: spara kontots cookies, rensa sedan webbsessionen (utloggad ur Google m.fl. — inget ligger kvar).
-ipcMain.handle('session:logout', (_e, d) => iSessionKo(async () => {
+ipcMain.handle('session:logout', (e, d) => iSessionKo(async () => {
+  if (KONTO_PER_FONSTER) { const ctx = ctxFor(e); senasteKonto = null; return ctx ? bytFonsterKonto(ctx, null) : { ok: true }; }
   const key = (d && d.key) || currentAcctKey;
   if (key) { try { await saveAccountCookies(key); } catch {} }
   try { await clearWebSession(); } catch {}
   currentAcctKey = null;
   return { ok: true };
 }));
+
+/* ── Konto per fönster: en partition per konto ──
+ * persist:konto-<hash> per AdRaze-konto; utloggade fönster använder standardsessionen.
+ * Första gången en kontopartition används fylls den från kontots kakvalv (det som sparades i delat läge).
+ * Byter man läge flyttas kakorna: delat → per fönster lägger standardsessionens kakor i det senaste kontots
+ * valv; per fönster → delat sparar varje partitions kakor i valven och lägger tillbaka det senaste kontots. */
+let senasteKonto = null;                         // nyckeln som nya fönster (utan ursprungsfönster) får
+const KONTO_REG_FIL = path.join(app.getPath('userData'), 'konto-sessioner.json');
+function lasKontoReg() { try { const j = JSON.parse(fs.readFileSync(KONTO_REG_FIL, 'utf8')); return j && typeof j === 'object' ? j : {}; } catch { return {}; } }
+function sparaKontoReg(r) { try { fs.writeFileSync(KONTO_REG_FIL, JSON.stringify(r), { mode: 0o600 }); } catch {} }
+const kontoPartition = (key) => 'persist:konto-' + keyHash(key).slice(0, 24);
+const kontoSessionerKlara = new Set();
+function forberedSession(s) {
+  try { s.setUserAgent(app.userAgentFallback); } catch {}
+  try { applyClientHints(s); } catch {}
+  try { webb.installPermissions(s, false); } catch {}
+  try { installAdblockOn(s); } catch {}
+  try { trackDownloads(s); } catch {}
+  try { tillagg.laddaISession && tillagg.laddaISession(s); } catch {}
+  // Kontopartitionens kakor skrivs till disk strax efter varje ändring – annars kunde en inloggning
+  // som gjorts nyss saknas efter omstart (Chromium sparar annars bara med jämna mellanrum)
+  try { let t = null; s.cookies.on('changed', () => { clearTimeout(t); t = setTimeout(() => { try { s.cookies.flushStore(); } catch {} }, 1500); }); } catch {}
+}
+function kontoSession(key) {
+  if (!KONTO_PER_FONSTER || !key) return session.defaultSession;
+  const p = kontoPartition(key), s = session.fromPartition(p);
+  if (!kontoSessionerKlara.has(p)) { kontoSessionerKlara.add(p); forberedSession(s); }
+  return s;
+}
+const allaKontoSessioner = () => [session.defaultSession, ...Object.values(lasKontoReg()).map((x) => x && x.p).filter(Boolean).map((p) => session.fromPartition(p))];
+// Fyll kontots partition från valvet första gången (eller efter ett lägesbyte)
+async function fyllKontoSession(key) {
+  if (!KONTO_PER_FONSTER || !key) return;
+  const h = keyHash(key), reg = lasKontoReg();
+  if (reg[h] && reg[h].fylld) return;
+  const s = kontoSession(key);
+  try { await clearWebSession(s); } catch {}
+  try { await restoreAccountCookies(key, s); } catch {}
+  reg[h] = { p: kontoPartition(key), fylld: true }; sparaKontoReg(reg);
+}
+// Fönstrets konto byts: flikarna byggs om i det nya kontots lagring och laddar samma adresser igen
+function byggOmVyer(ctx) {
+  const synlig = ctx.visibleTab;
+  for (const [id, v] of [...ctx.views]) {
+    if (ctx.incognitoTabs.has(id)) continue;
+    let url = ''; try { url = v.webContents.getURL() || ''; } catch {}
+    try { ctx.win.contentView.removeChildView(v); } catch {}
+    try { v.webContents.close(); } catch {}
+    ctx.views.delete(id); ctx.lastActive.delete(id);
+    if (/^(https?:|adraze:)/i.test(url)) ctx.discarded.set(id, url);
+  }
+  if (synlig != null && ctx.discarded.has(synlig)) { try { rehydrate(ctx, synlig); showOnly(ctx, synlig); } catch {} }
+}
+async function bytFonsterKonto(ctx, key) {
+  key = key || null;
+  if (ctx.incognito) { ctx.acctKey = key; return { ok: true }; }   // inkognito har sin egen tillfälliga lagring
+  if (ctx.acctKey === key) return { ok: true };
+  try { await fyllKontoSession(key); } catch {}
+  try { await kontoSession(ctx.acctKey === undefined ? senasteKonto : ctx.acctKey).cookies.flushStore(); } catch {}   // det gamla kontots kakor på disk
+  ctx.acctKey = key;
+  byggOmVyer(ctx);
+  return { ok: true, byggdOm: true };
+}
+// Lägesbyte vid start (se ovan). Körs innan första fönstret skapas.
+async function flyttaVidLagesbyte() {
+  const markor = path.join(app.getPath('userData'), 'konto-lage-senast.txt');
+  let forra = null; try { forra = fs.readFileSync(markor, 'utf8').trim(); } catch {}
+  const nu = KONTO_PER_FONSTER ? 'fonster' : 'delat';
+  let senast = null;
+  try { const blob = fs.readFileSync(SESSION_FILE); let str; try { str = (safeStorage && safeStorage.isEncryptionAvailable()) ? safeStorage.decryptString(blob) : blob.toString('utf8'); } catch { str = blob.toString('utf8'); } const a = JSON.parse(str); if (a && a.token) senast = 'k:' + (a.email || a.childId || a.name || a.token || 'user'); } catch {}
+  senasteKonto = senast;
+  if (forra === nu) return;
+  if (nu === 'fonster') {
+    // Standardsessionen bär det senaste kontots kakor (delat läge) → in i valvet, och alla partitioner fylls om därifrån
+    if (senast) { try { await saveAccountCookies(senast); } catch {} }
+    try { await clearWebSession(); } catch {}
+    const reg = lasKontoReg(); for (const h of Object.keys(reg)) { if (reg[h]) reg[h].fylld = false; } sparaKontoReg(reg);
+  } else if (forra === 'fonster') {
+    // Tillbaka till delat: varje partitions kakor → valvet, sedan det senaste kontots kakor i standardsessionen
+    const reg = lasKontoReg();
+    for (const h of Object.keys(reg)) {
+      try { const s = session.fromPartition(reg[h].p); const c = await s.cookies.get({}); if (c.length) { fs.mkdirSync(COOKIE_DIR, { recursive: true }); fs.writeFileSync(path.join(COOKIE_DIR, 'ck-' + h + '.json'), walletEncrypt(JSON.stringify(c)), { mode: 0o600 }); } } catch {}
+    }
+    try { await clearWebSession(); } catch {}
+    if (senast) { try { await restoreAccountCookies(senast); } catch {} }
+  }
+  try { fs.writeFileSync(markor, nu); } catch {}
+}
+ipcMain.on('konto:lage', (e) => { e.returnValue = { perFonster: KONTO_PER_FONSTER, sparat: lasKontoLage() }; });
+ipcMain.handle('konto:satt-lage', (_e, perFonster) => { try { fs.writeFileSync(KONTO_LAGE_FIL, JSON.stringify({ perFonster: !!perFonster })); } catch {} return { ok: true, perFonster: lasKontoLage(), omstart: lasKontoLage() !== KONTO_PER_FONSTER }; });
+ipcMain.on('app:omstart', () => { try { app.relaunch(); app.exit(0); } catch {} });
+// Fönstrets konto (per fönster-läge): skalet frågar vid start vilket konto just det här fönstret ska ha
+ipcMain.on('konto:fonster', (e) => {
+  try {
+    const ctx = ctxFor(e);
+    if (!KONTO_PER_FONSTER || !ctx) { e.returnValue = { perFonster: KONTO_PER_FONSTER }; return; }
+    const key = ctx.acctKey === undefined ? senasteKonto : ctx.acctKey;
+    const p = key ? lasProfiler().find((x) => x.key === key) : null;
+    e.returnValue = { perFonster: true, key: key || null, account: p ? p.account : null };
+  } catch { e.returnValue = { perFonster: KONTO_PER_FONSTER }; }
+});
 
 /* ── Språk för UI som ritas utanför skalet (t.ex. kortväljaren i sidan) ──
  * Skalet laddar sin ordlista via i18n:load – vi snappar upp språket där och
@@ -1958,8 +2090,8 @@ ipcMain.on('open-app-menu', (e) => {
   const ctx = ctxFor(e); if (!ctx) return;
   const t = [
     { label: T('Ny flik'), accelerator: 'CmdOrCtrl+T', click: () => sendTo(ctx, 'open-new-tab') },
-    { label: T('Nytt fönster'), accelerator: 'CmdOrCtrl+N', click: () => createWindow(false) },
-    { label: T('Nytt inkognitofönster'), accelerator: 'CmdOrCtrl+Shift+N', click: () => createWindow(true) },
+    { label: T('Nytt fönster'), accelerator: 'CmdOrCtrl+N', click: () => createWindow(false, ctx) },
+    { label: T('Nytt inkognitofönster'), accelerator: 'CmdOrCtrl+Shift+N', click: () => createWindow(true, ctx) },
     { label: T('Ny inkognitoflik'), click: () => sendTo(ctx, 'new-incognito') },
     { type: 'separator' },
     { label: T('Lösenord och autofyll'), click: () => sendTo(ctx, 'open-passwords') },
@@ -1974,7 +2106,7 @@ ipcMain.on('open-app-menu', (e) => {
     { label: T('Helskärm'), accelerator: 'F11', click: () => toggleFull(ctx) },
     { label: T('Skriv ut…'), accelerator: 'CmdOrCtrl+P', click: () => sendTo(ctx, 'menu-print') },
     { label: T('Fler verktyg'), submenu: [
-      { label: T('Utvecklarverktyg'), accelerator: 'F12', enabled: !barnRegler, click: () => { if (barnRegler) return; const v = ctx.views.get(ctx.visibleTab); if (v) try { v.webContents.openDevTools(); } catch {} } },
+      { label: T('Utvecklarverktyg'), accelerator: 'F12', enabled: !barnNagonstans(), click: () => { if (barnNagonstans()) return; const v = ctx.views.get(ctx.visibleTab); if (v) try { v.webContents.openDevTools(); } catch {} } },
       { label: T('Rensa surfdata'), click: () => sendTo(ctx, 'open-settings', 'rensa') },
     ] },
     { type: 'separator' },
@@ -2273,7 +2405,7 @@ ipcMain.on('krypto:action', (e, a) => {
   try {
     const ctx = e.sender.__ctx; if (!ctx || !a || !a.name) return;
     const name = String(a.name).toLowerCase().replace(/[åä]/g, 'a').replace(/ö/g, 'o');
-    if (name === 'inkognito' || name === 'incognito') { createWindow(true); return; }
+    if (name === 'inkognito' || name === 'incognito') { createWindow(true, ctx); return; }
     if (name === 'nedladdningar' || name === 'downloads') { sendTo(ctx, 'open-downloads'); return; }
     if (name === 'losenord' || name === 'autofyll' || name === 'autofill') { sendTo(ctx, 'open-passwords'); return; }
     if (name === 'wallet' || name === 'planbok' || name === 'kort' || name === 'adraze wallet') { sendTo(ctx, 'open-settings', 'wallet'); return; }
@@ -2349,8 +2481,8 @@ function handleShortcut(wc, input) {
     try { if (k === 'arrowleft') { if (nav.canGoBack()) nav.goBack(); } else if (nav.canGoForward()) nav.goForward(); } catch {}
     return true;
   }
-  if (mod && !shift && k === 'n') { createWindow(false); return true; }
-  if (mod && shift && k === 'n') { createWindow(true); return true; }
+  if (mod && !shift && k === 'n') { createWindow(false, ctx); return true; }
+  if (mod && shift && k === 'n') { createWindow(true, ctx); return true; }
   if (mod && !shift && k === 'w') { sendTo(ctx, 'close-tab'); return true; }
   if (mod && !shift && k === 'l') { try { ctx.win.webContents.focus(); } catch {} sendTo(ctx, 'focus-address'); return true; }
   if (mod && shift && k === 'r') { const v = activeView(ctx); if (v) v.webContents.reloadIgnoringCache(); return true; }
@@ -2362,7 +2494,7 @@ function handleShortcut(wc, input) {
   if (mod && k === '0') { sendTo(ctx, 'menu-zoom', 0); return true; }
   if (mod && !shift && k === 'q') { app.quit(); return true; }
   if (k === 'f11') { toggleFull(ctx); return true; }
-  if (k === 'f12' || (mod && shift && k === 'i')) { if (barnRegler) return true; const v = activeView(ctx); if (v) try { v.webContents.openDevTools(); } catch {} return true; }   // aldrig i barnläge
+  if (k === 'f12' || (mod && shift && k === 'i')) { if (barnNagonstans()) return true; const v = activeView(ctx); if (v) try { v.webContents.openDevTools(); } catch {} return true; }   // aldrig i barnläge
   if (k === 'f5') { const v = activeView(ctx); if (v) v.webContents.reload(); return true; }
   return false;
 }
@@ -2373,8 +2505,8 @@ app.on('web-contents-created', (_e, wc) => {
 });
 
 /* ────────── Fönster ────────── */
-function createWindow(incognito) {
-  if (incognito && barnRegler) {   // barnläge: inget inkognito (föräldern ska se historiken)
+function createWindow(incognito, fran) {
+  if (incognito && barnNagonstans()) {   // barnläge: inget inkognito (föräldern ska se historiken)
     try { const fw = BrowserWindow.getFocusedWindow(); const c = fw && wins.get(fw.webContents.id); if (c) sendTo(c, 'toast', T('Inkognito finns inte i barnläge.')); } catch {}
     return null;
   }
@@ -2396,6 +2528,8 @@ function createWindow(incognito) {
   });
   const id = win.webContents.id;
   const ctx = makeCtx(win, incognito);
+  // Nytt fönster får samma konto som fönstret det öppnades från (ett barn kan inte öppna ett fönster som förälder)
+  ctx.acctKey = fran && fran.acctKey !== undefined ? fran.acctKey : senasteKonto;
   wins.set(id, ctx);
   // Skalet (file://, full IPC) får aldrig navigera bort eller öppna fönster – inte ens om någon lyckas
   // injicera HTML i det (t.ex. <meta http-equiv=refresh>). Bara omladdning av skalet självt släpps igenom.
@@ -2755,7 +2889,9 @@ app.whenReady().then(async () => {
   } catch {}
   applyClientHints(session.defaultSession);
   webb.setup(); webb.applyDns();
+  webb.extraSessioner = () => (KONTO_PER_FONSTER ? allaKontoSessioner().slice(1) : []);
   importera.setup({
+    kakSession: (e) => { if (!KONTO_PER_FONSTER) return null; try { const ctx = ctxFor(e); return kontoSession(ctx && ctx.acctKey !== undefined ? ctx.acctKey : senasteKonto); } catch { return null; } },
     installeraTillagg: (id) => tillagg.installera(id),
     // Spara importerade lösenord i det aktiva valvet (samma avdubbling som pw:save)
     sparaLosen: (lista) => {
@@ -2776,6 +2912,8 @@ app.whenReady().then(async () => {
   webb.installPermissions(session.defaultSession, false);
   installAdblockOn(session.defaultSession);
   trackDownloads(session.defaultSession);
+  // Kakorna skrivs till disk strax efter varje ändring (inte bara med jämna mellanrum) – en inloggning ska finnas kvar efter omstart
+  try { let ft = null; session.defaultSession.cookies.on('changed', () => { clearTimeout(ft); ft = setTimeout(() => { try { session.defaultSession.cookies.flushStore(); } catch {} }, 1500); }); } catch {}
   migrateGoogleCookieFix();
   // Kakvalv i gammal klartext (före 0.1.86) skrivs om krypterade direkt vid start – inte först när kontot loggar in igen
   try { for (const f of fs.readdirSync(COOKIE_DIR)) if (/^ck-[0-9a-f]+\.json$/.test(f)) { try { lasKakvalv(path.join(COOKIE_DIR, f)); } catch {} } } catch {}
@@ -2785,13 +2923,15 @@ app.whenReady().then(async () => {
     if (process.platform === 'darwin') {
       // Som rollen 'viewMenu', men utvecklarverktygen (skalets!) går inte att öppna i barnläge
       const visa = { label: 'View', submenu: [{ role: 'reload' }, { role: 'forceReload' },
-        { label: 'Toggle Developer Tools', accelerator: 'Alt+Command+I', click: (_m, w) => { if (!barnRegler && w) try { w.webContents.toggleDevTools(); } catch {} } },
+        { label: 'Toggle Developer Tools', accelerator: 'Alt+Command+I', click: (_m, w) => { if (!barnNagonstans() && w) try { w.webContents.toggleDevTools(); } catch {} } },
         { type: 'separator' }, { role: 'resetZoom' }, { role: 'zoomIn' }, { role: 'zoomOut' }, { type: 'separator' }, { role: 'togglefullscreen' }] };
       Menu.setApplicationMenu(Menu.buildFromTemplate([{ role: 'appMenu' }, { role: 'editMenu' }, visa, { role: 'windowMenu' }]));
     } else {
       Menu.setApplicationMenu(null);
     }
   } catch {}
+  try { await flyttaVidLagesbyte(); } catch {}
+  try { await fyllKontoSession(senasteKonto); } catch {}   // första fönstrets konto har sina kakor innan flikarna laddar
   createWindow(false);
   app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(false); });
   startAutoUpdate();

@@ -629,7 +629,7 @@ async function refreshPro() {
   if (!account || !account.token) return;
   try {
     const r = await window.auth.session(account.token);
-    if (r && r.ok) { account.pro = !!r.pro; if (r.name) account.name = r.name; localStorage.setItem('skoll-account', JSON.stringify(account)); try { window.auth.remember(account); } catch {} sparaProfil(); }
+    if (r && r.ok) { account.pro = !!r.pro; if (r.name) account.name = r.name; sparaKontoLokalt(); try { window.auth.remember(account); } catch {} sparaProfil(); }
     // Ett NÄTVERKSFEL (unreachable) kan vara en tillfällig hicka → behåll kontot tyst, logga ALDRIG ut på det.
     // Men om servern UTTRYCKLIGEN svarar no_session är token död på riktigt → be om ny inloggning EN gång
     // (behåll lokal data/inställningar). Annars fastnar man som "inloggad" med en token som inte duger.
@@ -928,6 +928,31 @@ let account = null;   // { email, token, pro }
 let socMe = null;   // { avatar } från AdRaze-kontot
 let chattOpen = false, chattUnread = 0, pendingChattAfterLogin = false;   // chattpanelen (chattSync körs via updateAccountBtn redan vid start)
 try { account = JSON.parse(localStorage.getItem('skoll-account')); } catch {}
+/* Eget konto i varje fönster (standard, Inställningar → Konto): fönstrets konto kommer från huvudprocessen
+ * (samma som fönstret det öppnades från) och sparas i fönstrets sessionStorage. localStorage = senast använda. */
+let PER_FONSTER = false;
+try {
+  const r = window.kontoLage && window.kontoLage.fonster();
+  if (r && r.perFonster) {
+    PER_FONSTER = true;
+    let a = null; try { a = JSON.parse(sessionStorage.getItem('adraze-fonster-konto')); } catch {}
+    if (!a || !a.token) {
+      const key = r.key || null;
+      const lokal = account;
+      const nyckel = (x) => x ? 'k:' + (x.email || x.childId || x.name || x.token || 'user') : null;
+      a = key ? (r.account ? { ...r.account } : (lokal && nyckel(lokal) === key ? lokal : null)) : null;
+    }
+    account = a;
+  }
+} catch {}
+function sparaKontoLokalt() {
+  try { localStorage.setItem('skoll-account', JSON.stringify(account)); } catch {}
+  if (PER_FONSTER) { try { sessionStorage.setItem('adraze-fonster-konto', JSON.stringify(account)); } catch {} }
+}
+function glomKontoLokalt() {
+  if (PER_FONSTER) { try { sessionStorage.setItem('adraze-fonster-konto', 'null'); } catch {} return; }   // de andra fönstren behåller sina konton
+  try { localStorage.removeItem('skoll-account'); } catch {}
+}
 if (account && !account.token) account = null;  // gammalt kontonummer-format → nollställ
 /* ── Familj + barnläge: deklareras HÄR, före restoreTabs() längre ner (förr låg `let fam` efter den, och
  * en barnflik som återställdes vid start kastade TDZ-fel i famBlocked). ── */
@@ -951,7 +976,7 @@ famStadaBarnpost();
 const BARNLAGE_KEY = 'adraze-barnlage';
 function barnlageSatt() { try { return localStorage.getItem(BARNLAGE_KEY) === '1'; } catch { return false; } }
 function satBarnlage(pa) { try { if (pa) localStorage.setItem(BARNLAGE_KEY, '1'); else localStorage.removeItem(BARNLAGE_KEY); } catch {} }
-function famLocked() { return barnlageSatt() && !(account && account.isChild); }
+function famLocked() { return barnlageSatt() && !(account && (account.isChild || PER_FONSTER)); }
 // Normalisering av värdnamn på ETT ställe: gemener, utan avslutande punkt ("blocked.test.") och utan www.
 const famNorm = (s) => String(s || '').trim().toLowerCase().replace(/\.+$/, '').replace(/^www\./, '');
 // Reglerna gäller även i huvudprocessen (iframes, popupar, alla fönster) – skicka dem dit vid varje ändring
@@ -1142,7 +1167,7 @@ function loginAs(token, email, pro, name) {
   socMe = null;   // förra kontots profil (bild m.m.) får inte hänga kvar
   unlockHistoryForParent();   // vuxenkonto → historiken går att rensa igen
   satBarnlage(false);         // … och barnläget släpper (spärrarna gäller bara barnkonton)
-  localStorage.setItem('skoll-account', JSON.stringify(account));
+  sparaKontoLokalt();
   famStadaBarnpost();
   try { window.auth.remember(account); } catch {}
   sparaProfil();
@@ -1167,7 +1192,8 @@ function doLogout(reopenKrypto, glom) {
   const t = account && account.token;
   const sk = account ? accountKey(account) : null;
   const _ut = account || {};
-  account = null; socMe = null; localStorage.removeItem('skoll-account'); updateAccountBtn();
+  account = null; socMe = null; glomKontoLokalt(); updateAccountBtn();
+  if (_ut.isChild) satBarnlage(true);   // ett barn har loggat ut här: fönstret är låst tills en vuxen loggar in
   try { window.auth.forget(); } catch {}
   if (t && !glom) { try { window.auth.sparaProfil(sk, { token: t, email: _ut.email, pro: _ut.pro, name: _ut.name, isChild: _ut.isChild, childId: _ut.childId }); } catch {} }
   let _sl = Promise.resolve();
@@ -1354,7 +1380,7 @@ async function enterChildMode(token, child) {
   socMe = null;
   lockHistoryForChild();      // barnet kan inte radera sin historik — inte ens efter utloggning
   satBarnlage(true);          // och spärrarna släpper inte vid utloggning: låst tills en vuxen loggar in
-  localStorage.setItem('skoll-account', JSON.stringify(account));
+  sparaKontoLokalt();
   try { window.auth.remember(account); } catch {}
   sparaProfil();
   updateAccountBtn();
@@ -1389,6 +1415,7 @@ async function syncChild() {
 /* ── Kontosida (profil i Inställningar) + radera konto ── */
 function openAccount() { if (account) { openSettings(); showSettingsCat('konto'); } else { openLogin(); } }
 async function renderKonto() {
+  try { if (window.__ritaKontoLage) window.__ritaKontoLage(); } catch {}
   const si = $('kn-signedin'), so = $('kn-signedout');
   if (!si) return;
   if (!account) { si.style.display = 'none'; if (so) so.style.display = 'block'; return; }
@@ -1609,6 +1636,20 @@ $('account-btn').addEventListener('click', () => openAccount());
 $('allow-chip') && $('allow-chip').addEventListener('click', () => { openSettings(); showSettingsCat('familj'); });
 $('kn-logout') && $('kn-logout').addEventListener('click', () => { doLogout(); renderKonto(); try { closeSettings(); } catch {} openLogin(); });
 $('kn-login') && $('kn-login').addEventListener('click', () => openLogin());
+(function kontoLageInst() {
+  const t = $('kl-toggle'); if (!t || !window.kontoLage) return;
+  let l; try { l = window.kontoLage.hamta(); } catch { return; }
+  const rita = (sparat) => {
+    t.checked = !!sparat;
+    $('kl-omstart').style.display = (!!sparat !== !!l.perFonster) ? 'flex' : 'none';
+    const last = !!(account && account.isChild) || famLocked();   // barnet får inte ändra hur konton fungerar
+    t.disabled = last; $('kl-rad').style.opacity = last ? '.55' : '';
+  };
+  rita(l.sparat);
+  t.addEventListener('change', async () => { let r; try { r = await window.kontoLage.satt(t.checked); } catch { r = null; } rita(r ? r.perFonster : !t.checked); });
+  $('kl-omstart-btn').addEventListener('click', () => { try { window.kontoLage.omstart(); } catch {} });
+  window.__ritaKontoLage = () => { try { rita(window.kontoLage.hamta().sparat); } catch {} };
+})();
 $('kn-delete') && $('kn-delete').addEventListener('click', showConfirmDelete);
 $('kn-avatar') && $('kn-avatar').addEventListener('click', () => { const f = $('kn-avatar-file'); if (f) f.click(); });
 $('kn-avatar-file') && $('kn-avatar-file').addEventListener('change', knHandleAvatar);
@@ -3775,6 +3816,7 @@ hamtaProfiler();
 // Ett annat fönster bytte konto: följ med, annars loggar det här fönstrets gamla konto senare ut det nya
 window.addEventListener('storage', (e) => {
   if (e.key !== 'skoll-account') return;
+  if (PER_FONSTER) return;   // eget konto i varje fönster: ett byte i ett annat fönster rör inte det här
   let a = null; try { a = JSON.parse(e.newValue); } catch {}
   account = a && a.token ? a : null; fam = famLoad(); socMe = null;
   try { stopChildSync(); stopParentSync(); if (account) { if (account.isChild) startChildSync(); else startParentSync(); } } catch {}
@@ -3783,7 +3825,8 @@ window.addEventListener('storage', (e) => {
 // Föll inloggningen bort ur localStorage men finns krypterad i nyckelringen? Återställ (efter servervalidering).
 if (!account || !account.token) {
   try { window.session.setkey(null); } catch {}   // utloggad → inget lösenordsvalv
-  (async () => {
+  // Eget konto per fönster: ett utloggat fönster är utloggat med flit – logga inte in det med det senaste kontot
+  if (!PER_FONSTER) (async () => {
     let r; try { r = await window.auth.recall(); } catch { return; }
     if (!r || !r.ok || !r.account || !r.account.token) return;
     const acc = r.account; let ok = false;
@@ -3792,7 +3835,7 @@ if (!account || !account.token) {
     if (!ok) return;
     account = acc;
     if (account.isChild) satBarnlage(true);
-    try { localStorage.setItem('skoll-account', JSON.stringify(account)); } catch {}
+    sparaKontoLokalt();
     try { updateAccountBtn(); } catch {}
     try { window.session.setkey(accountKey(account)); } catch {}
     try { loadSocMe().then(() => updateAccountBtn()); } catch {}   // hämta profilbild → visa i kontoknappen
