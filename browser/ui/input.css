@@ -1042,3 +1042,170 @@ html[data-kbd] :is(.icon-btn, .newtab-btn, .bmchip, .pill, .omni-ab, .winctl but
 #settings .anp-tema-kod input { flex: 1; min-width: 0; height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--s-field-line); font: 12.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
 #settings .anp-tema-kod .set-btn { flex: none; }
 @media (max-width: 760px) { #settings .anp-tema-typsnitt { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* ── Anpassa: flikar ── */
+/* Placering, flikgrupper, sovande flikar och stängknapp (ui/anpassa-flikar.js sätter klasserna på <body>):
+   flik-vertikal (panel till vänster), flik-smal (bara ikoner), flik-dolda (raden glider fram uppifrån),
+   flik-zen-visad (raden syns just nu), anp-stang-aktiv (kryss bara på aktiv flik).
+   Webbsidan är en egen vy i huvudprocessen som läggs exakt över #views, så det är #views mått som flyttar sidan.
+   Fönsterflyttning: i panel- och dolt läge är verktygsraden titelrad (drag); dess knappar och fält är no-drag.
+   Fönsterknapparna (Windows/Linux) ligger fast uppe till höger och verktygsraden slutar före dem,
+   så att dragytan aldrig hamnar över knapparna. */
+
+/* Gruppfärger: --g (färgen), --g-ink (text på färgen) */
+.anp-g-gra { --g: #6d7f93; --g-ink: #fff; }
+.anp-g-bla { --g: #2f6fd0; --g-ink: #fff; }
+.anp-g-gron { --g: #2f9e67; --g-ink: #fff; }
+.anp-g-gul { --g: #e2a52a; --g-ink: #2a1d02; }
+.anp-g-orange { --g: #ff4b1f; --g-ink: #fff; }
+.anp-g-rosa { --g: #d2508c; --g-ink: #fff; }
+:root[data-theme="dark"] .anp-g-gra, body.incog .anp-g-gra { --g: #8d9aab; --g-ink: #101418; }
+:root[data-theme="dark"] .anp-g-bla, body.incog .anp-g-bla { --g: #5d95ec; --g-ink: #08142a; }
+:root[data-theme="dark"] .anp-g-gron, body.incog .anp-g-gron { --g: #4cc38a; --g-ink: #06180f; }
+:root[data-theme="dark"] .anp-g-rosa, body.incog .anp-g-rosa { --g: #e77aae; --g-ink: #22060f; }
+
+/* Grupprubriken i flikraden: en färgad etikett med namnet (namnlös grupp = en färgprick) */
+.anp-grupp { position: relative; flex: none; display: inline-flex; align-items: center; gap: 5px; height: 24px; max-width: 150px; padding: 0 9px;
+  border-radius: 6px; background: var(--g); color: var(--g-ink); font-size: 12px; font-weight: 650; line-height: 1; cursor: default; user-select: none;
+  -webkit-app-region: no-drag; transition: box-shadow .12s ease; }
+.anp-grupp:hover { box-shadow: 0 0 0 2px rgb(14 42 71 / .14); }
+.anp-grupp:focus-visible { outline: 2px solid var(--color-terra); outline-offset: 2px; }
+.anp-grupp .anp-gnamn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.anp-grupp .anp-gantal { display: none; font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; opacity: .85; }
+.anp-grupp.hopfalld .anp-gantal { display: inline; }
+.anp-grupp.tom { width: 18px; padding: 0; justify-content: center; background: transparent; }
+.anp-grupp.tom::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--g); flex: none; }
+.anp-grupp.tom .anp-gnamn { display: none; }
+.anp-grupp.tom.hopfalld { width: auto; min-width: 22px; height: 20px; padding: 0 7px; border-radius: 10px; background: var(--g); }
+.anp-grupp.tom.hopfalld::before { display: none; }
+.anp-grupp.anp-redigerar { width: auto; height: 24px; max-width: none; padding: 0 3px; border-radius: 6px; background: var(--g); }
+.anp-grupp.anp-redigerar::before, .anp-grupp.anp-redigerar .anp-gantal { display: none; }
+.anp-gin { width: 140px; height: 18px; border: 0; outline: 0; border-radius: 4px; padding: 0 6px; font: inherit; font-size: 12px; font-weight: 600;
+  background: #fff; color: #1c2b3a; user-select: text; -webkit-app-region: no-drag; }
+.anp-gin::placeholder { color: rgb(28 43 58 / .45); }
+#tabs.narrow .anp-grupp { max-width: 96px; }
+:root[data-theme="dark"] .anp-grupp:hover, body.incog .anp-grupp:hover { box-shadow: 0 0 0 2px rgb(255 255 255 / .16); }
+
+/* Flikar i en grupp: gruppens färg som en linje under fliken. Hopfälld grupp: flikarna syns inte. */
+.tab.anp-ig::after { content: ""; position: absolute; left: 8px; right: 8px; bottom: 1px; height: 2px; border-radius: 2px; background: var(--g); pointer-events: none; }
+.tab.anp-dold { display: none !important; }
+
+/* Sovande flik (minnet släppt): blekare tills du klickar på den */
+.tab.anp-sover:not(.active) .fav, .tab.anp-sover:not(.active) .ttl { opacity: .45; }
+.tab.anp-sover:not(.active) .fav img { filter: grayscale(1); }
+
+/* Stängknapp bara på den aktiva fliken (mittenklick stänger fortfarande alla) */
+body.anp-stang-aktiv .tab:not(.active) .tclose { display: none; }
+
+/* "Ny flik"-texten i plusknappen syns bara i panelen */
+.anp-nyflik-txt { display: none; }
+#anp-vfot, #anp-vdrag, #anp-zenkant { display: none; }
+
+/* ── På sidan: panel till vänster, under verktygsraden ── */
+body.flik-vertikal #tabstrip {
+  position: fixed; z-index: 40; left: 0; top: var(--vflik-top, 50px); bottom: 0; width: var(--vflik-w, 240px); height: auto;
+  flex-direction: column; align-items: stretch; gap: 4px; border-right: 1px solid var(--color-line); -webkit-app-region: no-drag !important;
+}
+body.flik-vertikal #views { margin-left: var(--vflik-w, 240px); }
+body.flik-vertikal #tabs {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 3px; align-content: start;
+  flex: 0 1 auto; min-height: 0; width: 100%; max-width: none !important; overflow-x: hidden; overflow-y: auto; scrollbar-width: thin; padding: 1px 0 2px;
+}
+body.flik-vertikal #tabs > :not(.pinned) { grid-column: 1 / -1; }
+body.flik-vertikal .tab { width: auto; height: 34px; padding-left: 10px; transition: height .18s cubic-bezier(.2,.8,.2,1), opacity .18s ease, background-color .12s, color .12s; }
+body.flik-vertikal .tab.pinned { width: auto !important; height: 36px; }
+body.flik-vertikal .tab.entering, body.flik-vertikal .tab.closing { height: 0; opacity: 0; overflow: hidden; }
+body.flik-vertikal .tab.anp-ig { margin-left: 12px; }
+body.flik-vertikal .tab.anp-ig::after { left: -7px; right: auto; top: 4px; bottom: 4px; width: 2px; height: auto; }
+body.flik-vertikal .anp-grupp { display: flex; width: auto; max-width: none; height: 30px; margin-top: 4px; padding: 0 8px 0 10px; gap: 8px;
+  background: transparent; color: var(--color-navy-900); font-size: 12.5px; border-radius: 7px; }
+body.flik-vertikal .anp-grupp:hover { background: rgb(255 255 255 / .6); box-shadow: none; }
+body.flik-vertikal .anp-grupp::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--g); flex: none; }
+body.flik-vertikal .anp-grupp .anp-gnamn { display: block; flex: 0 1 auto; }
+body.flik-vertikal .anp-grupp .anp-gnamn:empty::before { content: attr(data-tom); font-weight: 500; color: var(--color-muted); }
+body.flik-vertikal .anp-grupp .anp-gantal { display: inline; margin-left: auto; color: var(--color-muted); font-weight: 600; opacity: 1; }
+body.flik-vertikal .anp-grupp::after { content: ""; flex: none; width: 6px; height: 6px; margin: -3px 2px 0 2px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); opacity: .5; }
+body.flik-vertikal .anp-grupp.hopfalld::after { margin-top: 0; transform: rotate(-45deg); }
+body.flik-vertikal .anp-grupp.anp-redigerar { background: transparent; padding-right: 8px; }
+body.flik-vertikal .anp-grupp.anp-redigerar::before { display: block; }
+body.flik-vertikal .anp-grupp.anp-redigerar::after, body.flik-vertikal .anp-grupp.anp-redigerar .anp-gantal { display: none; }
+body.flik-vertikal .anp-gin { flex: 1; width: auto; min-width: 0; height: 22px; box-shadow: inset 0 0 0 1px var(--color-line); }
+body.flik-vertikal #newtab-btn { display: flex; flex: none; align-items: center; justify-content: flex-start; gap: 10px; width: 100%; height: 34px; padding: 0 10px; font-size: 13px; color: var(--color-muted); }
+body.flik-vertikal #newtab-btn:hover { color: var(--color-ink); }
+body.flik-vertikal .anp-nyflik-txt { display: inline; }
+body.flik-vertikal #anp-vfot { display: flex; flex: none; margin: 0 -8px; padding: 6px 8px 8px; border-top: 1px solid var(--color-line); }
+.anp-vknapp { display: flex; align-items: center; gap: 10px; width: 100%; height: 32px; padding: 0 9px; border-radius: 7px; font-size: 12.5px; font-weight: 500; color: var(--color-muted); background: transparent; border: 0; cursor: default; white-space: nowrap; overflow: hidden; }
+.anp-vknapp:hover { background: rgb(255 255 255 / .6); color: var(--color-ink); }
+.anp-vknapp svg { flex: none; }
+body.flik-vertikal:not(.flik-smal) #anp-vdrag { display: block; position: absolute; top: 0; bottom: 0; right: -1px; width: 7px; cursor: col-resize; z-index: 3; }
+#anp-vdrag::after { content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 2px; background: transparent; transition: background-color .15s; }
+#anp-vdrag:hover::after { background: rgb(14 42 71 / .22); }
+body.anp-drar #anp-vdrag::after { background: var(--color-terra); }
+body.anp-drar, body.anp-drar * { cursor: col-resize !important; user-select: none !important; }
+/* Bara ikoner */
+body.flik-smal #tabs { grid-template-columns: 1fr; }
+body.flik-smal .tab { justify-content: center; gap: 0; padding: 0; }
+body.flik-smal .tab .ttl, body.flik-smal .tab .tclose { display: none; }
+body.flik-smal .tab .tsound { position: absolute; right: 0; top: 1px; width: 16px; height: 16px; border-radius: 99px; background: var(--color-chrome); }
+body.flik-smal .tab.anp-ig { margin-left: 0; }
+body.flik-smal .tab.anp-ig::after { left: 1px; top: 9px; bottom: 9px; width: 3px; }
+body.flik-smal .anp-grupp { justify-content: center; height: 20px; margin: 6px 4px 2px; padding: 0; border-radius: 6px; background: var(--g); color: var(--g-ink); }
+body.flik-smal .anp-grupp::before, body.flik-smal .anp-grupp::after, body.flik-smal .anp-grupp .anp-gnamn { display: none; }
+body.flik-smal .anp-grupp .anp-gantal { margin: 0; color: inherit; font-size: 11px; }
+body.flik-smal .anp-grupp:hover { background: var(--g); box-shadow: 0 0 0 2px rgb(14 42 71 / .14); }
+body.flik-smal #newtab-btn { justify-content: center; padding: 0; }
+body.flik-smal .anp-nyflik-txt, body.flik-smal .anp-vknapp span { display: none; }
+body.flik-smal .anp-vknapp { justify-content: center; padding: 0; }
+body.flik-smal #anp-vsmal svg { transform: scaleX(-1); }
+
+/* ── Dolda flikar: flikraden ligger ovanför fönstret och glider ner över verktygsraden ── */
+body.flik-dolda #tabstrip {
+  position: fixed; z-index: 58; left: 0; right: 0; top: calc(-8px - var(--zen-h, 50px)); height: var(--zen-h, 50px);
+  border-bottom: 1px solid var(--color-line); -webkit-app-region: no-drag !important;
+  transition: top .2s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease;
+}
+body.flik-dolda.flik-zen-visad #tabstrip { top: 0; box-shadow: 0 10px 28px rgb(14 42 71 / .16); }
+/* Överkanten: 8 px (Linux/Windows lägger fönstrets storleksram över de översta ~5 px när fönstret inte är maximerat) */
+body.flik-dolda:not(.flik-zen-visad) #anp-zenkant { display: block; position: fixed; z-index: 57; top: 0; left: 0; right: 0; height: 8px; -webkit-app-region: no-drag; }
+body.flik-dolda.flik-zen-visad #toolbar { -webkit-app-region: no-drag; }
+
+/* ── Verktygsraden är titelrad när flikarna inte ligger överst ── */
+body:is(.flik-vertikal, .flik-dolda) #toolbar { -webkit-app-region: drag; }
+body:is(.flik-vertikal, .flik-dolda) #toolbar > :not(.omni-center), body:is(.flik-vertikal, .flik-dolda) #toolbar .omni-center > * { -webkit-app-region: no-drag; }
+body.plat-darwin:is(.flik-vertikal, .flik-dolda) #toolbar { padding-left: 84px; }   /* trafikljusen */
+body:is(.plat-linux, .plat-win32):is(.flik-vertikal, .flik-dolda) #toolbar { margin-right: 138px; }   /* plats för fönsterknapparna (3 × 46 px) */
+body:is(.flik-vertikal, .flik-dolda) .winctl {
+  position: fixed; z-index: 2; top: 0; right: 0; height: var(--zen-h, 50px); margin: 0; box-sizing: border-box;
+  background: var(--color-chrome-2); border-bottom: 1px solid var(--color-line);
+}
+body:is(.flik-vertikal, .flik-dolda) .winctl button { height: 100%; }
+body:is(.flik-vertikal, .flik-dolda):has(#toolbar.has-bmbar) .winctl { border-bottom-color: transparent; }
+body.flik-dolda.flik-zen-visad .winctl { background: transparent; border-bottom-color: transparent; }
+
+/* Mörkt läge och inkognito */
+:root[data-theme="dark"] body.flik-vertikal #tabstrip, :root[data-theme="dark"] body.flik-dolda #tabstrip, :root[data-theme="dark"] #anp-vfot { border-color: #2b2b2d; }
+body.incog.flik-vertikal #tabstrip, body.incog.flik-dolda #tabstrip, body.incog #anp-vfot { border-color: rgba(124,58,237,.22); }
+:root[data-theme="dark"] body:is(.flik-vertikal, .flik-dolda) .winctl { background: #171718; border-bottom-color: #2b2b2d; }
+body.incog:is(.flik-vertikal, .flik-dolda) .winctl { background: #100a1e; border-bottom-color: rgba(124,58,237,.22); }
+:root[data-theme="dark"] body.flik-dolda.flik-zen-visad .winctl, body.incog.flik-dolda.flik-zen-visad .winctl { background: transparent; border-bottom-color: transparent; }
+:root[data-theme="dark"] body.flik-dolda.flik-zen-visad #tabstrip, body.incog.flik-dolda.flik-zen-visad #tabstrip { box-shadow: 0 10px 28px rgb(0 0 0 / .45); }
+:root[data-theme="dark"] body.flik-vertikal .anp-grupp:not(.anp-redigerar), :root[data-theme="dark"] .anp-vknapp:hover { color: #e4e4e8; }
+:root[data-theme="dark"] body.flik-vertikal .anp-grupp:hover, :root[data-theme="dark"] .anp-vknapp:hover { background: rgb(255 255 255 / .08); }
+body.incog.flik-vertikal .anp-grupp:not(.anp-redigerar) { color: #ece3fb; }
+body.incog.flik-vertikal .anp-grupp:hover, body.incog .anp-vknapp:hover { background: rgba(168,85,247,.12); color: #ece3fb; }
+:root[data-theme="dark"] body.flik-smal .tab .tsound { background: #0c0c0d; }
+body.incog.flik-smal .tab .tsound { background: #0b0618; }
+:root[data-theme="dark"] #anp-vdrag:hover::after { background: rgb(255 255 255 / .2); }
+
+/* !important i components-lagret (padding på #tabstrip, bredd 0 på flikar som öppnas/stängs) går bara att
+   ändra inifrån samma lager */
+@layer components {
+  body.flik-vertikal #tabstrip { padding: 8px 8px 0 !important; }
+  body.flik-vertikal .tab.entering, body.flik-vertikal .tab.closing { width: auto !important; }
+}
+
+/* Inställningar → Anpassa → Flikar */
+#settings .anp-gchips { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; max-width: 280px; flex: none; }
+#settings .anp-gchip { display: inline-flex; align-items: center; height: 22px; max-width: 140px; padding: 0 9px; border-radius: 6px; background: var(--g); color: var(--g-ink);
+  font-size: 12px; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#settings .anp-gchip.tom { width: 14px; height: 14px; padding: 0; border-radius: 50%; }
+#settings .anp-ingen { flex: none; font-size: 12.5px; color: var(--s-faint); white-space: nowrap; }
