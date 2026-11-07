@@ -932,9 +932,19 @@ if (account && !account.token) account = null;  // gammalt kontonummer-format �
 /* ── Familj + barnläge: deklareras HÄR, före restoreTabs() längre ner (förr låg `let fam` efter den, och
  * en barnflik som återställdes vid start kastade TDZ-fel i famBlocked). ── */
 const FAM_KEY = 'adraze-family';
+// AdRazes egen webbproxy öppnar vilken sajt som helst inuti sig → alltid spärrad för barnkonton.
+// Används av famBlocked, som körs redan när flikarna återställs vid start (restoreTabs) – därför HÄR uppe.
+// Låg de längre ner kastade de TDZ-fel när ett barn var aktiverat, skalet stannade halvvägs och ingen sida gick att öppna.
+const FAM_ALLTID = ['proxy.adraze.app'];
+// Låst barnläge: bara inloggningen (AdRaze-kontot och Googles inloggning dit) – exakta värdar
+const famLasOk = (h) => h === 'accounts.adraze.app' || h === 'accounts.youtube.com' || /^accounts\.google\.[a-z.]+$/.test(h);
 function famLoad() { try { const f = JSON.parse(localStorage.getItem(FAM_KEY)); if (f && Array.isArray(f.children)) return f; } catch {} return { children: [], activeChild: null }; }
 function famSave() { try { localStorage.setItem(FAM_KEY, JSON.stringify(fam)); } catch {} famSkickaTillMain(); }
 let fam = famLoad();
+// Barnets egen familjepost (self) hör bara till ett inloggat barnkonto. Ligger den kvar på ett vuxenkonto
+// (barnet loggades ut i ett annat fönster) blev vuxnen spärrad som barnet – städa bort den.
+function famStadaBarnpost() { try { if (account && !account.isChild && fam.children.some((c) => c.self)) { fam = { children: [], activeChild: null }; localStorage.setItem(FAM_KEY, JSON.stringify(fam)); } } catch {} }
+famStadaBarnpost();
 /* Barnläge på enheten: har ett barnkonto loggat in här gäller förälderns regler tills en VUXEN loggar in.
  * Loggas barnet ut (själv, av föräldern på distans, eller sessionen går ut) blir webbläsaren LÅST – inga
  * webbsidor, bara inloggningen. Förr föll den tillbaka till helt ospärrat läge utan insyn. */
@@ -1133,6 +1143,7 @@ function loginAs(token, email, pro, name) {
   unlockHistoryForParent();   // vuxenkonto → historiken går att rensa igen
   satBarnlage(false);         // … och barnläget släpper (spärrarna gäller bara barnkonton)
   localStorage.setItem('skoll-account', JSON.stringify(account));
+  famStadaBarnpost();
   try { window.auth.remember(account); } catch {}
   sparaProfil();
   updateAccountBtn();
@@ -3219,10 +3230,6 @@ function famHost(u) {
   try { return famNorm(new URL(normalizeUrl(u)).hostname); } catch { return famNorm(String(u || '').replace(/^https?:\/\//i, '').split('/')[0].split(':')[0]); } }
 function famChildById(id) { return fam.children.find((c) => c.id === id); }
 function famActive() { return fam.activeChild ? famChildById(fam.activeChild) : null; }
-// AdRazes egen webbproxy öppnar vilken sajt som helst inuti sig → alltid spärrad för barnkonton
-const FAM_ALLTID = ['proxy.adraze.app'];
-// Låst barnläge: bara inloggningen (AdRaze-kontot och Googles inloggning dit) – exakta värdar
-const famLasOk = (h) => h === 'accounts.adraze.app' || h === 'accounts.youtube.com' || /^accounts\.google\.[a-z.]+$/.test(h);
 function famBlocked(url) {
   if (famLocked()) {
     let u; try { u = new URL(normalizeUrl(url)); } catch { return false; }
