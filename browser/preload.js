@@ -74,6 +74,10 @@ contextBridge.exposeInMainWorld('anpassaBro', {
   importera: (kod, prefix) => ipcRenderer.invoke('anpassa:importera', { kod, prefix }),
   onAndrad: (fn) => ipcRenderer.on('anpassa:andrad', (_e, d) => fn(d)),
 });
+// Anpassa-krok (tema): engångsflytt av det gamla ljust/mörkt-valet till tema.lage (ui/anpassa-tema.js, ../anpassa-tema.js)
+contextBridge.exposeInMainWorld('anpassaTema', {
+  flyttaLage: (lage) => ipcRenderer.send('anpassa-tema:flytta-lage', lage),
+});
 contextBridge.exposeInMainWorld('kontoLage', {
   fonster: () => ipcRenderer.sendSync('konto:fonster'),
   hamta: () => ipcRenderer.sendSync('konto:lage'),

@@ -622,7 +622,8 @@
             <div class="set-row">
               <span class="set-ico" style="color:var(--color-navy-700);"><svg class="ic ic-sm"><use href="#i-eye" /></svg></span>
               <div class="set-txt"><div class="set-title">Tema</div><div class="set-desc">Ljust eller mörkt utseende på webbläsaren.</div></div>
-              <div class="seg flex-none"><button id="seg-light" class="seg-btn">Ljust</button><button id="seg-dark" class="seg-btn">Mörkt</button></div>
+              <!-- seg-system: Anpassa-krok (tema). Alla tre väljer tema.lage; ui/anpassa-tema.js markerar valet -->
+              <div class="seg flex-none"><button id="seg-light" class="seg-btn">Ljust</button><button id="seg-dark" class="seg-btn">Mörkt</button><button id="seg-system" class="seg-btn">Följ systemet</button></div>
             </div>
             <div class="set-row">
               <span class="set-ico" style="color:var(--color-navy-700);"><svg class="ic ic-sm"><use href="#i-image" /></svg></span>
@@ -1207,6 +1208,7 @@
   </div>
 
   <script src="anpassa.js"></script>
+  <script src="anpassa-tema.js"></script>
   <script src="i18n.js"></script>
   <script src="worldmap.js"></script>
   <script src="shell.js"></script>
