@@ -1511,8 +1511,8 @@ async function flyttaVidLagesbyte() {
   if (forra === nu) return;
   if (nu === 'fonster') {
     // Standardsessionen bär det senaste kontots kakor (delat läge) → in i valvet, och alla partitioner fylls om därifrån
-    if (senast) { try { await saveAccountCookies(senast); } catch {} }
-    try { await clearWebSession(); } catch {}
+    // Ingen inloggad: kakorna hör till den utloggade lagringen (standardsessionen) och stannar där
+    if (senast) { try { await saveAccountCookies(senast); } catch {} try { await clearWebSession(); } catch {} }
     const reg = lasKontoReg(); for (const h of Object.keys(reg)) { if (reg[h]) reg[h].fylld = false; } sparaKontoReg(reg);
   } else if (forra === 'fonster') {
     // Tillbaka till delat: varje partitions kakor → valvet, sedan det senaste kontots kakor i standardsessionen
