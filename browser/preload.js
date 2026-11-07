@@ -74,6 +74,17 @@ contextBridge.exposeInMainWorld('anpassaBro', {
   importera: (kod, prefix) => ipcRenderer.invoke('anpassa:importera', { kod, prefix }),
   onAndrad: (fn) => ipcRenderer.on('anpassa:andrad', (_e, d) => fn(d)),
 });
+// Anpassa → flikar (ui/anpassa-flikar.js): fästa flikar sover aldrig, tyst sparning av grupper, gruppens meny,
+// Ctrl+Shift+A (dolda flikar) och flikar som somnat (main.js skickar tab-discarded)
+contextBridge.exposeInMainWorld('anpassaFlikar', {
+  fasta: (ids) => ipcRenderer.send('anpassa-flikar:fasta', ids),
+  grupperTyst: (lista) => ipcRenderer.invoke('anpassa-flikar:grupper-tyst', lista),
+  gruppMeny: (g) => ipcRenderer.send('anpassa-flikar:gruppmeny', g),
+  antalFonster: () => { try { return ipcRenderer.sendSync('anpassa-flikar:fonster') || 1; } catch { return 1; } },
+  onGruppVal: (fn) => ipcRenderer.on('anpassa-flikar:gruppval', (_e, a, id) => fn(a, id)),
+  onKortkommando: (fn) => ipcRenderer.on('anpassa-flikar:kortkommando', () => fn()),
+  onSover: (fn) => ipcRenderer.on('tab-discarded', (_e, id) => fn(id)),
+});
 contextBridge.exposeInMainWorld('kontoLage', {
   fonster: () => ipcRenderer.sendSync('konto:fonster'),
   hamta: () => ipcRenderer.sendSync('konto:lage'),

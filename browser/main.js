@@ -74,6 +74,7 @@ const webb = require('./webbinst');
 const lasvy = require('./lasvy');   // läsläge (Readability)
 const importera = require('./importera');   // importera bokmärken/historik/lösenord från andra webbläsare
 const anpassa = require('./anpassa');      // gemensam butik för all anpassning (tema, flikar, verktygsfält …)
+const anpFlikar = require('./anpassa-flikar');   // Anpassa → flikar: sovande flikar, flikgrupper i menyn, Ctrl+Shift+A
 const tillagg = require('./tillagg');        // Chrome-tillägg (Chrome Web Store)
 const blockinst = require('./blockinst');     // blockerarens inställningar (adraze://adblock)
 const blocksida = require('./blocksida');     // adraze://adblock, Blockera element, Glöm mig
@@ -100,7 +101,8 @@ app.commandLine.appendSwitch('disable-features', 'Translate,MediaRouter,DialMedi
 // X11 (XWayland), och där krympte/flyttade ett maximerat fönster när fokus
 // gick till en annan skärm (Cetto 2026-09-04). Startad med hinten stod det kvar.
 if (process.platform === 'linux') app.commandLine.appendSwitch('ozone-platform-hint', 'auto');
-const DISCARD_MS = Number(process.env.TAB_DISCARD_MS) || 10 * 60 * 1000;  // kasta flik efter 10 min ledig
+// Hur länge en flik får vara ledig styrs av Anpassa → flikar (flikar.sova: av/15/30/60/120 min, anpFlikar.sovMs();
+// miljövariabeln TAB_DISCARD_MS går före, som förut)
 const DISCARD_SWEEP_MS = 60 * 1000;                                       // svep varje minut
 
 function makeCtx(win, incognito) {
@@ -145,7 +147,8 @@ function positionDlPopup(ctx, h) {
   if (!ctx || !ctx.dlView || !ctx.win || ctx.win.isDestroyed()) return;
   const cb = ctx.win.getContentBounds();
   if (typeof h === 'number') ctx._dlH = h;
-  const top = Math.max(0, Math.round((ctx.topInset || 92) + 6));
+  // Anpassa (flikar): flikraden på sidan/dold → sidan börjar högre upp; upptill blir det som förut (92)
+  const top = Math.max(0, Math.round((ctx.topInset || Math.min(92, ctx.bounds ? ctx.bounds.y : 92)) + 6));
   const height = Math.max(70, Math.min(ctx._dlH || 200, cb.height - top - 12));
   try { ctx.dlView.setBounds({ x: Math.round(cb.width - DL_W - 8), y: top, width: DL_W, height }); } catch {}
 }
@@ -294,6 +297,7 @@ function barnNagonRegel() { if (!KONTO_PER_FONSTER) return barnRegler; for (cons
 // Utvecklarverktyg och inkognito: avstängda så fort något fönster är i barnläge (barnet kan annars öppna dem i ett annat)
 function barnNagonstans() { return !!barnNagonRegel(); }
 anpassa.init({ barnKoll: () => barnNagonstans() });
+anpFlikar.init({ ctxFor, antalFonster: () => wins.size, T: (s) => T(s), svep: () => sweepIdleTabs() });   // Anpassa → flikar
 function barnSparrad(url, regler) {
   const r = regler === undefined ? barnRegler : regler; if (!r) return false;
   let h = '';
@@ -535,6 +539,7 @@ function discardTab(ctx, tabId) {
   if (!v || tabId === ctx.visibleTab || ctx.incognitoTabs.has(tabId)) return;
   const wc = v.webContents;
   try { if (wc.isCurrentlyAudible()) return; } catch {}   // spelar ljud (musik/video) → lämna ifred
+  if (!anpFlikar.farSova(ctx, tabId, wc)) return;          // Anpassa: fästa flikar och bild-i-bild sover aldrig
   let url = ''; try { url = wc.getURL() || ''; } catch {}
   if (!/^https?:/i.test(url)) return;                      // bara riktiga webbsidor kan återuppstå
   ctx.discarded.set(tabId, url);
@@ -551,8 +556,9 @@ function rehydrate(ctx, tabId) {
   if (url && flikUrlOk(url)) { try { view.webContents.loadURL(url).catch(() => {}); } catch {} }
   return view;
 }
-/* Svep: kasta varje dold flik som legat oanvänd längre än DISCARD_MS. */
+/* Svep: kasta varje dold flik som legat oanvänd längre än inställningen (Anpassa → flikar → Sovande flikar). */
 function sweepIdleTabs() {
+  const DISCARD_MS = anpFlikar.sovMs(); if (!DISCARD_MS) return;   // Anpassa: sovande flikar avstängt
   const now = Date.now();
   wins.forEach((ctx) => {
     if (!ctx || !ctx.views) return;
@@ -1853,7 +1859,8 @@ function positionPwPopup(ctx, h) {
   if (!ctx || !ctx.pwView || !ctx.win || ctx.win.isDestroyed()) return;
   const cb = ctx.win.getContentBounds();
   if (typeof h === 'number') ctx._pwH = h;
-  const top = Math.max(0, Math.round((ctx.topInset || 92) + 6));
+  // Anpassa (flikar): flikraden på sidan/dold → sidan börjar högre upp; upptill blir det som förut (92)
+  const top = Math.max(0, Math.round((ctx.topInset || Math.min(92, ctx.bounds ? ctx.bounds.y : 92)) + 6));
   const height = Math.max(60, Math.min(ctx._pwH || 150, cb.height - top - 12));
   try { ctx.pwView.setBounds({ x: Math.round(cb.width - PW_W - 8), y: top, width: PW_W, height }); } catch {}
 }
@@ -1935,6 +1942,7 @@ ipcMain.on('tab:menu', (e, info) => {
     { label: T('Duplicera'), enabled: !!info.hasUrl, click: go('duplicate') },
     { label: info.pinned ? T('Lossa flik') : T('Fäst flik'), click: go('pin') },
     { label: info.muted ? T('Slå på ljudet för webbplatsen') : T('Stäng av ljudet för fliken'), click: go('mute') },
+    ...anpFlikar.menyPoster(info, go),   // Anpassa: Lägg i ny grupp / Lägg i grupp / Ta bort ur gruppen
     { type: 'separator' },
     { label: T('Stäng'), accelerator: 'CmdOrCtrl+W', click: go('close') },
     { label: T('Stäng andra flikar'), enabled: info.count > 1, click: go('close-others') },
