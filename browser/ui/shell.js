@@ -732,6 +732,7 @@ function showSettingsCat(cat) {
   if (cat === 'integritet' || cat === 'nedladdningar' || cat === 'utseende' || cat === 'start') refreshWebbPanel();
   document.querySelectorAll('#settings-nav .set-tab').forEach((b) => b.classList.toggle('on', b.dataset.cat === cat));
   document.querySelectorAll('#settings .set-panel').forEach((p) => p.classList.toggle('hidden', p.dataset.cat !== cat));
+  if (cat === 'anpassa') { try { document.dispatchEvent(new CustomEvent('anpassa:visa')); } catch {} }   // varje område ritar om sin del
   if (cat === 'wallet' && typeof renderWallet === 'function') renderWallet();
   if (cat === 'konto' && typeof renderKonto === 'function') renderKonto();
   if (cat === 'vanner' && typeof renderFriends === 'function') renderFriends();
