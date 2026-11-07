@@ -74,6 +74,21 @@ contextBridge.exposeInMainWorld('anpassaBro', {
   importera: (kod, prefix) => ipcRenderer.invoke('anpassa:importera', { kod, prefix }),
   onAndrad: (fn) => ipcRenderer.on('anpassa:andrad', (_e, d) => fn(d)),
 });
+// Anpassa: temagalleriet (ui/anpassa-galleri.js ↔ anpassa-galleri.js). Kontots token skickas med per anrop, som family:*.
+contextBridge.exposeInMainWorld('anpassaGalleri', {
+  lista: (d) => ipcRenderer.invoke('galleri:lista', d),
+  mina: (d) => ipcRenderer.invoke('galleri:mina', d),
+  rosta: (d) => ipcRenderer.invoke('galleri:rosta', d),
+  anmal: (d) => ipcRenderer.invoke('galleri:anmal', d),
+  taBort: (d) => ipcRenderer.invoke('galleri:ta-bort', d),
+  prova: (d) => ipcRenderer.invoke('galleri:prova', d),
+  behall: (d) => ipcRenderer.invoke('galleri:behall', d),
+  angra: () => ipcRenderer.invoke('galleri:angra'),
+  prov: () => ipcRenderer.invoke('galleri:prov'),
+  onProv: (fn) => ipcRenderer.on('galleri:prov', (_e, p) => fn(p)),
+  mitt: () => ipcRenderer.invoke('galleri:mitt'),
+  publicera: (d) => ipcRenderer.invoke('galleri:publicera', d),
+});
 contextBridge.exposeInMainWorld('kontoLage', {
   fonster: () => ipcRenderer.sendSync('konto:fonster'),
   hamta: () => ipcRenderer.sendSync('konto:lage'),

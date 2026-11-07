@@ -919,6 +919,8 @@ async function adrazeApi(pathname, body, token, method) {
     return j;
   } catch { return { ok: false, error: 'unreachable', message: 'Kunde inte nå servern. Kontrollera din uppkoppling.' }; }
 }
+// Anpassa: temagalleriet (delade teman, topplista, Prova/Behåll/Ångra) – anropen går via adrazeApi, se anpassa-galleri.js
+require('./anpassa-galleri').init({ anpassa, adrazeApi, barnNagonstans, skicka: (...a) => broadcast(...a) });
 // Betrodd webbläsare (som kakan adr_e på sajten): efter en lyckad kod slipper man koden nästa gång
 const ENHET_FILE = path.join(app.getPath('userData'), 'adraze-enhet.dat');
 function lasEnhet() {

@@ -869,3 +869,126 @@ svg:has(use[href="#i-fav"]) { color: #5f6368; opacity: 1; }
 .fam-fraga button { font-size: 12px; font-weight: 700; border-radius: 8px; padding: 5px 10px; cursor: pointer; border: 1px solid var(--color-line); background: #fff; color: var(--color-navy-900); }
 .fam-fraga button[data-svar="nej"] { color: #b4321a; }
 .fam-fraga button:hover { border-color: var(--color-navy-900); }
+
+/* ── Anpassa: galleri ── */
+/* Temagalleriet i Inställningar → Anpassa (ui/anpassa-galleri.js). Korten följer inställningarnas --s-*-färger;
+   förhandsvisningen är en liten webbläsare i temats egna färger (--gp-*). */
+#anp-galleri .gal-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
+#anp-galleri .gal-under { margin-top: 10px; font-size: 12.5px; color: var(--s-mut); }
+#anp-galleri .gal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 12px; }
+#anp-galleri .gal-kort { display: flex; flex-direction: column; min-width: 0; background: var(--s-surface); border: 1px solid var(--s-line); border-radius: 12px; overflow: hidden; transition: border-color .15s, box-shadow .15s; }
+#anp-galleri .gal-kort:hover { border-color: var(--s-field-line); box-shadow: 0 6px 18px rgb(20 20 22 / .06); }
+#anp-galleri .gal-kort.provas { border-color: var(--s-accent); box-shadow: inset 0 0 0 1px var(--s-accent); }
+#anp-galleri .gal-info { flex: 1; min-width: 0; padding: 10px 12px 2px; }
+#anp-galleri .gal-rubrik { display: flex; align-items: center; gap: 6px; min-width: 0; }
+#anp-galleri .gal-namn { min-width: 0; font-size: 13.5px; font-weight: 650; letter-spacing: -.005em; color: var(--s-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#anp-galleri .gal-chip { flex: none; height: 18px; padding: 0 7px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 10.5px; font-weight: 700; background: var(--s-accent-soft); color: var(--s-accent-ink); }
+#anp-galleri .gal-chip.dold { background: rgb(208 64 47 / .1); color: #c2392b; }
+#anp-galleri .gal-av { margin-top: 2px; font-size: 12px; color: var(--s-mut); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#anp-galleri .gal-besk { margin-top: 6px; font-size: 12px; line-height: 1.45; color: var(--s-mut); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+#anp-galleri .gal-dold-text { color: #c2392b; }
+#anp-galleri .gal-fot { display: flex; align-items: center; gap: 2px; min-height: 48px; padding: 8px 8px 10px 12px; }
+#anp-galleri .gal-fot .gal-prova { height: 30px; padding: 0 13px; font-size: 12.5px; margin-right: auto; }
+#anp-galleri .gal-ikon { display: inline-flex; align-items: center; justify-content: center; gap: 4px; height: 30px; min-width: 30px; padding: 0 6px; border: 0; border-radius: 8px; background: transparent; color: var(--s-mut); font-size: 12.5px; font-weight: 600; font-variant-numeric: tabular-nums; cursor: pointer; transition: background .15s, color .15s; }
+#anp-galleri .gal-ikon:hover { background: var(--s-hover); color: var(--s-ink); }
+#anp-galleri .gal-ikon:focus-visible, #anp-galleri .gal-lank:focus-visible { outline: 2px solid var(--s-accent); outline-offset: 1px; }
+#anp-galleri .gal-ikon svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+#anp-galleri .gal-gilla.pa { color: #ff4b1f; }
+#anp-galleri .gal-gilla.pa svg { fill: currentColor; }
+#anp-galleri .gal-ogilla.pa { color: var(--s-ink); background: var(--s-hover); }
+#anp-galleri .gal-ogilla.pa svg { fill: currentColor; fill-opacity: .18; }
+#anp-galleri .gal-gilla-egen { cursor: default; margin-right: 2px; }
+#anp-galleri .gal-gilla-egen:hover { background: transparent; color: var(--s-mut); }
+#anp-galleri .gal-bort:hover { color: #c2392b; }
+#anp-galleri .gal-fraga { gap: 6px; flex-wrap: wrap; }
+#anp-galleri .gal-fraga-text { font-size: 12.5px; font-weight: 600; color: var(--s-ink); margin-right: auto; }
+#anp-galleri .gal-fraga .pill, #anp-galleri .gal-fraga .set-btn { height: 28px; padding: 0 10px; font-size: 12px; }
+#anp-galleri .gal-fraga .gal-x { font-size: 18px; font-weight: 400; min-width: 28px; height: 28px; }
+/* Ta bort: röd kant och röd fyllning (samma vätskefyllning som övriga knappar) */
+#settings #anp-galleri .gal-farlig { color: #c2392b !important; box-shadow: inset 0 0 0 1.5px rgb(194 57 43 / .35); }
+#settings #anp-galleri .gal-farlig::before { background: #c2392b; }
+#settings #anp-galleri .gal-farlig:is(:hover, :focus-visible) { color: #fff !important; box-shadow: none; }
+:root[data-theme="dark"] #settings #anp-galleri .gal-farlig { color: #ff8a7a !important; box-shadow: inset 0 0 0 1.5px rgb(255 138 122 / .35); }
+:root[data-theme="dark"] #settings #anp-galleri .gal-farlig:is(:hover, :focus-visible) { color: #fff !important; box-shadow: none; }
+#anp-galleri .gal-tom { margin-top: 14px; padding: 22px 16px; border: 1px dashed var(--s-field-line); border-radius: 12px; text-align: center; font-size: 13px; color: var(--s-mut); }
+#anp-galleri .gal-lank { border: 0; background: none; padding: 0; font: inherit; font-weight: 600; color: var(--s-accent-ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+#anp-galleri .gal-fler { display: flex; margin: 14px auto 0; }
+#anp-galleri .gal-visarad { margin-top: 22px; }
+
+/* Platshållare medan listan hämtas (stilla, ingen animation) */
+#anp-galleri .gal-platshallare { pointer-events: none; }
+#anp-galleri .gal-platshallare .gp { background: var(--s-surface-2); }
+#anp-galleri .gph-rad { display: block; height: 9px; width: 62%; margin: 14px 12px 0; border-radius: 5px; background: var(--s-surface-2); }
+#anp-galleri .gph-rad.kort { width: 38%; margin: 8px 12px 46px; }
+
+/* Förhandsvisningen: flikrad, verktygsrad och en sida, i temats färger */
+#anp-galleri .gp { position: relative; flex: none; height: 116px; display: flex; flex-direction: column; overflow: hidden; background: var(--gp-sida); border-bottom: 1px solid var(--s-line); }
+#anp-galleri .gp i { display: block; }
+#anp-galleri .gp-ram { display: flex; align-items: flex-end; gap: 3px; height: 21px; padding: 0 8px; background: var(--gp-ram); }
+#anp-galleri .gp-flik { width: 46px; height: 14px; border-radius: 5px 5px 0 0; background: color-mix(in srgb, var(--gp-text) 7%, var(--gp-ram)); }
+#anp-galleri .gp-flik.pa { width: 58px; background: var(--gp-verktyg); }
+#anp-galleri .gp-verktyg { display: flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; background: var(--gp-verktyg); box-shadow: 0 1px 0 color-mix(in srgb, var(--gp-text) 12%, transparent); }
+#anp-galleri .gp-pil { width: 9px; height: 9px; border-radius: 3px; background: color-mix(in srgb, var(--gp-text) 30%, var(--gp-verktyg)); }
+#anp-galleri .gp-adress { flex: 1; height: 12px; border-radius: 6px; background: color-mix(in srgb, var(--gp-text) 9%, var(--gp-verktyg)); }
+#anp-galleri .gp-knapp { width: 12px; height: 12px; border-radius: 4px; background: var(--gp-accent); }
+#anp-galleri .gp-sida { position: relative; flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; }
+#anp-galleri .gp-rubrik { width: 52%; height: 8px; border-radius: 4px; background: var(--gp-text); opacity: .85; }
+#anp-galleri .gp-rad { width: 78%; height: 5px; border-radius: 3px; background: var(--gp-text); opacity: .22; }
+#anp-galleri .gp-rad.kort { width: 58%; }
+#anp-galleri .gp-cta { margin-top: auto; width: 46px; height: 14px; border-radius: 5px; background: var(--gp-accent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gp-accentText) 12%, transparent); }
+/* Färgprickarna: var för sig med en tunn ring, så att en färg som är samma som sidan ändå syns */
+#anp-galleri .gp-farger { position: absolute; right: 10px; bottom: 10px; display: flex; gap: 4px; }
+#anp-galleri .gp-farger i { width: 12px; height: 12px; border-radius: 999px; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gp-text) 22%, transparent); }
+#anp-galleri .gal-plats { position: absolute; top: 50px; right: 10px; min-width: 26px; height: 26px; padding: 0 8px; display: grid; place-items: center; border-radius: 999px; font-size: 12.5px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--gp-sida); background: var(--gp-text); }
+#anp-galleri .gal-plats.topp { color: #fff; background: #ff4b1f; }
+
+/* Publicera: raden och formuläret under den */
+#anp-galleri .gal-pubrad .set-desc { max-width: 52ch; }
+#anp-galleri .gal-form { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 18px; margin-top: 10px; padding: 16px; background: var(--s-surface); border: 1px solid var(--s-line); border-radius: 12px; }
+#anp-galleri .gal-form-vy .gp { border: 1px solid var(--s-line); border-radius: 10px; }
+#anp-galleri .gal-form-om { margin-top: 8px; font-size: 12px; line-height: 1.45; color: var(--s-mut); }
+#anp-galleri .gal-form-falt { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+#anp-galleri .gal-lbl { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--s-ink); }
+#anp-galleri .gal-lbl-rad { display: flex; justify-content: space-between; gap: 8px; }
+#anp-galleri .gal-rakna { font-weight: 500; color: var(--s-faint); font-variant-numeric: tabular-nums; }
+#anp-galleri .gal-in { width: 100%; padding: 9px 12px; border: 1px solid var(--s-field-line); border-radius: 9px; font: inherit; font-size: 13.5px; font-weight: 400; color: var(--s-ink); background: var(--s-field); resize: none; }
+#anp-galleri input.gal-in { height: 38px; padding: 0 12px; }
+#anp-galleri .gal-visanamn { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; }
+#anp-galleri .gal-visanamn-txt b { display: block; font-size: 13px; font-weight: 600; color: var(--s-ink); }
+#anp-galleri .gal-visanamn-txt small { display: block; margin-top: 1px; font-size: 12px; color: var(--s-mut); }
+#anp-galleri .gal-not { font-size: 12px; color: var(--s-faint); }
+#anp-galleri .gal-fel { padding: 8px 12px; border-radius: 9px; font-size: 12.5px; line-height: 1.4; color: #b4321a; background: rgb(208 64 47 / .07); }
+:root[data-theme="dark"] #anp-galleri :is(.gal-fel, .gal-chip.dold, .gal-dold-text) { color: #ff8a7a !important; }
+#anp-galleri .gal-knappar { display: flex; justify-content: flex-end; gap: 8px; }
+@media (max-width: 760px) { #anp-galleri .gal-form { grid-template-columns: 1fr; } }
+
+/* "Du provar …": raden mellan verktygsraden och sidan medan ett tema provas */
+#gal-provbar { flex: none; display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 10px 0 14px; font-size: 13px; color: var(--color-navy-900); background: var(--color-chrome-2); border-bottom: 1px solid var(--color-line); }
+#gal-provbar[hidden] { display: none; }
+#gal-provbar .gpb-farger { display: flex; flex: none; gap: 4px; }
+#gal-provbar .gpb-farger i { display: block; width: 14px; height: 14px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgb(14 42 71 / .2); }
+#gal-provbar .gpb-text { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: rgb(28 43 58 / .75); }
+#gal-provbar .gpb-text b { font-weight: 700; color: var(--color-navy-900); }
+#gal-provbar button { flex: none; height: 30px; padding: 0 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+#gal-provbar button:disabled { opacity: .55; cursor: default; }
+#gal-provbar button:focus-visible { outline: 2px solid #ff4b1f; outline-offset: 2px; }
+#gal-provbar .gpb-angra { border: 1px solid var(--color-line); background: transparent; color: var(--color-navy-900); transition: background .15s; }
+#gal-provbar .gpb-angra:hover { background: rgb(28 43 58 / .06); }
+/* Behåll: Cettos vätskefyllning (som på spärrsidan) */
+#gal-provbar .gpb-behall { position: relative; isolation: isolate; overflow: hidden; border: 0; color: #fff; background: transparent; clip-path: inset(0 round 8px); transition: color .6s ease, transform .2s ease; }
+#gal-provbar .gpb-behall::after { content: ""; position: absolute; inset: 0; z-index: -2; background: #ff4b1f; transition: opacity 0s; }
+#gal-provbar .gpb-behall::before { content: ""; position: absolute; z-index: -1; left: -15%; width: 130%; bottom: -2px; height: 170%; transform: translateY(100%); border-radius: 46% 46% 0 0; background: linear-gradient(180deg, #fff 0%, #ffe3da 100%); transition: transform .95s cubic-bezier(.2,.75,.25,1); pointer-events: none; }
+#gal-provbar .gpb-behall:is(:hover, :focus-visible):not(:disabled) { color: #ff4b1f; }
+#gal-provbar .gpb-behall:is(:hover, :focus-visible):not(:disabled)::before { transform: translateY(0); }
+#gal-provbar .gpb-behall:is(:hover, :focus-visible):not(:disabled)::after { opacity: 0; transition: opacity 0s .95s; }
+#gal-provbar .gpb-behall:active:not(:disabled) { transform: translateY(1px); }
+:root[data-theme="dark"] #gal-provbar { color: #f2f2f4; background: #171718; border-bottom-color: #2b2b2d; }
+:root[data-theme="dark"] #gal-provbar .gpb-farger i { box-shadow: inset 0 0 0 1px rgb(255 255 255 / .22); }
+:root[data-theme="dark"] #gal-provbar .gpb-text { color: rgb(242 242 244 / .7); }
+:root[data-theme="dark"] #gal-provbar :is(.gpb-text b, .gpb-angra) { color: #f2f2f4; }
+:root[data-theme="dark"] #gal-provbar .gpb-angra { border-color: #3b3b40; }
+:root[data-theme="dark"] #gal-provbar .gpb-angra:hover { background: rgb(255 255 255 / .06); }
+body.incog #gal-provbar { color: #ece3fb; background: #100a1e; border-bottom-color: rgba(124,58,237,.22); }
+body.incog #gal-provbar :is(.gpb-text, .gpb-text b, .gpb-angra) { color: #ece3fb; }
+body.incog #gal-provbar .gpb-farger i { box-shadow: inset 0 0 0 1px rgb(255 255 255 / .22); }
+@media (prefers-reduced-motion: reduce) { #gal-provbar .gpb-behall::before { transition: none; } }
