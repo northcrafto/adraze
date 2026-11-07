@@ -1322,6 +1322,12 @@ body.reduce-motion #anp-vf-lage .anp-vf-knapp::before { transition: none; }
 #sp-list, #sp-panel { display: none; }
 #sp-rad.sp-pa #sp-list { display: flex; }
 #sp-rad.sp-pa.sp-panel-pa #sp-panel { display: flex; }
+/* Flikar på sidan (Anpassa: flikar): flikpanelen ligger fast vid vänsterkanten. Raden börjar där den slutar,
+   så listen och panelen hamnar innanför flikpanelen och #views behöver ingen egen marginal. */
+body.flik-vertikal #sp-rad { padding-left: var(--vflik-w, 240px); }
+body.flik-vertikal #sp-rad > #views { margin-left: 0; }
+/* Verktygsraden längst ner (Anpassa: verktyg): hela raden – sidan, listen och panelen – före bokmärkesfältet och verktygsraden */
+body.anp-vf-nere #sp-rad { order: 1; }
 
 /* Listen: samma yta som verktygsraden, en tunn linje mot sidan */
 #sp-list { flex: none; width: 48px; flex-direction: column; align-items: center; gap: 4px; padding: 8px 0; background: var(--color-chrome-2); border-right: 1px solid var(--color-line); overflow-x: hidden; overflow-y: auto; scrollbar-width: none; }

@@ -85,6 +85,7 @@ function pretty(url) {
 function sendBounds() {
   const r = viewsEl.getBoundingClientRect();
   window.view.bounds({ x: r.x, y: r.y, width: r.width, height: r.height });
+  try { if (typeof window.anpSidopanelMatt === 'function') window.anpSidopanelMatt(); } catch {}   // Anpassa: sidopanel – appens vy flyttar med webbytan (flikpanelen, verktygsraden längst ner)
 }
 window.addEventListener('resize', sendBounds);
 window.view.onWindowResized(sendBounds);
