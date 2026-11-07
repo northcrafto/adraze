@@ -16,11 +16,11 @@
   const liten = (s) => { s = String(s || ''); return s.length > 1 && s[1] === s[1].toLowerCase() ? s[0].toLowerCase() + s.slice(1) : s; };
 
   const INSTR =
-    'Du kan också ANPASSA webbläsaren: färger, ljust/mörkt, densitet, hörn, flikarnas placering, verktygsfältet med mera. ' +
+    'Du kan också ANPASSA webbläsaren: färger, ljust/mörkt, densitet, hörn, typsnitt, flikarnas placering, verktygsfältet med mera. ' +
     'Inställningarna som finns, och vad de står på just nu, står i listan ANPASSA längre ner. Lägg taggar sist i svaret – här får du ' +
     'lägga flera (högst 4) om användaren ber om flera ändringar:\n' +
-    '• Ändra: [[gör:anpassa=NYCKEL|VÄRDE]] – bara nycklar från listan, och värden av samma slag som där står. Färger som hex (#rrggbb), ' +
-    'listor med komma emellan. VÄRDE "standard" återställer just den inställningen.\n' +
+    '• Ändra: [[gör:anpassa=NYCKEL|VÄRDE]] – bara nycklar från listan, och bara de värden som står där. Färger som hex (#rrggbb). ' +
+    'VÄRDE "standard" återställer just den inställningen.\n' +
     '• Ångra senaste ändringen: [[gör:anpassa_angra]]\n' +
     '• Återställ ett område: [[gör:anpassa_aterstall=OMRÅDE]] (första delen av nyckeln, t.ex. tema, flikar, verktyg), eller allt: [[gör:anpassa_aterstall=allt]]\n' +
     'Exempel:\n' +
@@ -28,13 +28,15 @@
     '• "mörkgrön accentfärg" → [[gör:anpassa=tema.accent|#1f6b3a]]\n' +
     '• "kompaktare" → [[gör:anpassa=tema.densitet|kompakt]]  ·  "luftigare" → [[gör:anpassa=tema.densitet|luftig]]\n' +
     '• "mörkt läge" → [[gör:anpassa=tema.lage|morkt]]  ·  "följ datorn" → [[gör:anpassa=tema.lage|system]]\n' +
-    '• "dölj flikarna" → [[gör:anpassa=flikar.lage|dolda]]\n' +
+    '• "dölj flikarna" → [[gör:anpassa=flikar.lage|dolda]]  ·  "adressfältet längst ner" → [[gör:anpassa=verktyg.placering|nere]]\n' +
     '• "mörkt och kompakt" → [[gör:anpassa=tema.lage|morkt]] [[gör:anpassa=tema.densitet|kompakt]]\n' +
+    '• "dölj kommentarerna på youtube" → [[gör:anpassa=avancerat.css|youtube.com: #comments{display:none!important}]] (frågar först; tom CSS efter kolonet tar bort sajtens)\n' +
     '• "ångra det" → [[gör:anpassa_angra]]\n' +
     '• "återställ utseendet" → [[gör:anpassa_aterstall=tema]]\n' +
-    'Ändra bara det användaren ber om. Står det "frågar först" (t.ex. egna skript och egen CSS) får användaren godkänna i en ruta. ' +
-    'Står det "låst i barnläge" går den inte att ändra nu – säg det i stället för att lägga taggen. Finns inställningen inte i listan ' +
-    'finns den inte i AdRaze ännu: säg det och hitta aldrig på nycklar. Bekräfta kort vad du ändrade och att det går att ångra.\n';
+    'Ändra bara det användaren ber om. Står det "frågar först" (t.ex. egen CSS) får användaren godkänna i en ruta. ' +
+    'Står det "låst i barnläge" går den inte att ändra nu – säg det i stället för att lägga taggen. Står det "ändras i Inställningar" ' +
+    'kan du inte ändra den: säg att den finns under Inställningar → Anpassa. Finns inställningen inte i listan finns den inte i AdRaze ' +
+    'ännu: säg det och hitta aldrig på nycklar eller värden. Bekräfta kort vad du ändrade och att det går att ångra.\n';
 
   function delar(vad) { const s = String(vad || ''); const i = s.indexOf(': '); return i < 0 ? ['', s] : [s.slice(0, i), s.slice(i + 2)]; }
   function stegFor(a, r) {

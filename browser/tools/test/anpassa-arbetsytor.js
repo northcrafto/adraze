@@ -50,11 +50,27 @@ const stadaSkal = (s) => s.kor(`(() => {
   return 1; })()`);
 
 async function klick(s, sel) {
-  const r = await s.kor(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; e.scrollIntoView({ block: 'center' }); const b = e.getBoundingClientRect(); return { x: b.left + b.width / 2, y: b.top + b.height / 2 }; })()`);
+  const r = await s.kor(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; e.scrollIntoView({ block: 'center' }); const b = e.getBoundingClientRect();
+    const x = b.left + b.width / 2, y = b.top + b.height / 2, o = document.elementFromPoint(x, y);
+    return { x, y, synlig: b.width > 0 && b.height > 0, overst: o && o !== e && !e.contains(o) ? (o.id ? '#' + o.id : String(o.className || o.tagName)).slice(0, 80) : '' }; })()`);
   if (!r || typeof r !== 'object') throw new Error('hittar inte ' + sel);
+  if (!r.synlig || r.overst) res.ok('klicket når ' + sel, false, r);   // något annat ligger över (eller elementet syns inte)
   for (const type of ['mousePressed', 'mouseReleased']) await s.skicka('Input.dispatchMouseEvent', { type, x: r.x, y: r.y, button: 'left', clickCount: 1 });
   await H.sov(150);
 }
+// Vänta tills villkoret (async) är sant, högst ms – så att testet inte hänger på exakta väntetider när datorn är upptagen
+async function vanta(fn, ms = 6000) {
+  const t0 = Date.now();
+  while (Date.now() - t0 < ms) { try { if (await fn()) return true; } catch {} await H.sov(100); }
+  return false;
+}
+const oppnaMenyn = async (s) => {
+  for (let i = 0; i < 3; i++) {
+    await klick(s, '#ws-vaxlare');
+    if (await vanta(() => s.kor(`!!document.querySelector('#ws-meny .ws-rad')`), 2000)) return true;
+  }
+  return false;
+};
 async function skriv(s, text) { await s.skicka('Input.insertText', { text }); await H.sov(80); }
 async function tangent(s, key, code, vk, modifiers = 0) {
   const text = key === 'Enter' ? '\r' : undefined;   // Enter skickar ett tecken också (så att formulär skickas)
@@ -119,8 +135,7 @@ const namnPa = (urls) => (urls || []).map((u) => String(u).replace(/^.*\//, ''))
     // 3. Tillbaka till hem1, skapa "Spel" i väljarens meny (den nya ytan öppnas direkt)
     await s.kor(`closeSettings(); switchTab(tabs.find((t) => t.url && t.url.endsWith('/hem1'))); 1`);
     await H.sov(500);
-    await klick(s, '#ws-vaxlare');
-    await H.sov(250);
+    await oppnaMenyn(s);
     res.ok('menyn öppnas', await s.kor(`!!document.getElementById('ws-meny') && document.querySelectorAll('#ws-meny .ws-rad[data-id]').length === 2`));
     await bild(s, 'arbetsytor-3-meny.png');
     await klick(s, '#ws-meny .ws-ny');
@@ -142,26 +157,46 @@ const namnPa = (urls) => (urls || []).map((u) => String(u).replace(/^.*\//, ''))
 
     // 5. Byt till Hem: bara den valda fliken (hem1) laddas, hem2 vilar
     hamtade.length = 0;
-    await klick(s, '#ws-vaxlare');
+    await oppnaMenyn(s);
     await klick(s, '#ws-meny .ws-rad[data-id="hem"]');
-    await H.sov(1500);
+    await vanta(async () => (await s.kor(`Arbetsytor.aktiv()`)) === 'hem' && hamtade.includes('hem1'));
+    await H.sov(800);   // hinner något mer hämtas syns det nu
     const f5 = await flikar(s);
     res.ok('Hem har sina flikar igen', JSON.stringify(f5.map((t) => t.url)) === JSON.stringify([U('hem1'), U('hem2')]), f5);
     res.ok('Hem minns vald flik (hem1)', (f5.find((t) => t.aktiv) || {}).url === U('hem1'), f5);
     res.ok('bara den valda fliken hämtades', JSON.stringify(hamtade) === JSON.stringify(['hem1']), [...hamtade]);
     res.ok('Spels flikar är stängda (sparar minne)', !namnPa(await laddade(m)).some((n) => n.startsWith('spel')), await laddade(m));
+    res.ok('vilande flik ritas som sovande (blekare)', await s.kor(`(() => { const t = tabs.find((t) => t.url && t.url.endsWith('/hem2')); const el = t && document.querySelector('#tabs [data-tabid="' + t.id + '"]'); return !!el && el.classList.contains('anp-sover'); })()`));
     await bild(s, 'arbetsytor-4-hem.png');
     // Klicka på hem2: först nu hämtas den
     await s.kor(`switchTab(tabs.find((t) => t.url && t.url.endsWith('/hem2'))); 1`);
-    await H.sov(1200);
+    await vanta(() => hamtade.includes('hem2'));
     res.ok('vilande flik laddas när du väljer den', hamtade.includes('hem2'), [...hamtade]);
     await s.kor(`switchTab(tabs.find((t) => t.url && t.url.endsWith('/hem1'))); 1`);
     await H.sov(300);
 
+    // Flikgrupper följer med: hem2 i en ny grupp (som "Lägg i ny grupp" i flikens meny), byt bort och tillbaka
+    const hem2 = await s.kor(`tabs.find((t) => t.url && t.url.endsWith('/hem2')).id`);
+    await m.kor(`(() => { const wc = process.mainModule.require('electron').webContents.getAllWebContents().find((w) => /shell\\.html/.test(w.getURL()) && !/incognito/.test(w.getURL())); wc.send('tab-action', 'grupp-ny', ${hem2}); return 1; })()`);
+    await vanta(() => s.kor(`!!(tabs.find((t) => t.id === ${hem2}) || {}).grupp`), 3000);
+    await H.sov(300);
+    await s.kor(`document.activeElement && document.activeElement.blur(); 1`);   // namnrutan i gruppens rubrik
+    const grupp = await s.kor(`(tabs.find((t) => t.id === ${hem2}) || {}).grupp || ''`);
+    res.ok('flikgrupp: hem2 ligger i en ny grupp', !!grupp, grupp);
+    await s.kor(`Arbetsytor.vaxla(${JSON.stringify(skola.id)})`);
+    await H.sov(800);
+    res.ok('flikgrupp: gruppen finns kvar medan dess flik ligger i en annan arbetsyta', await s.kor(`(Anpassa.get('flikar.grupper') || []).some((g) => g.id === ${JSON.stringify(grupp)}) && Arbetsytor.vilandeGrupper().has(${JSON.stringify(grupp)})`));
+    await s.kor(`Arbetsytor.vaxla('hem')`);
+    await vanta(async () => (await s.kor(`Arbetsytor.aktiv()`)) === 'hem');
+    await H.sov(500);
+    res.ok('flikgrupp: tillbaka i Hem ligger hem2 i sin grupp igen', await s.kor(`(() => { const t = tabs.find((t) => t.url && t.url.endsWith('/hem2')); return !!t && t.grupp === ${JSON.stringify(grupp)} && !!document.querySelector('#tabs [data-grupp="${grupp}"]'); })()`));
+    await bild(s, 'arbetsytor-4b-flikgrupp.png');
+
     // 6. Tillbaka till Spel: spel2 vald, spel1/spel3 vilar
     hamtade.length = 0;
     res.ok('byta med Arbetsytor.vaxla', await s.kor(`Arbetsytor.vaxla(${JSON.stringify(spel.id)})`));
-    await H.sov(1500);
+    await vanta(() => hamtade.includes('spel2'));
+    await H.sov(800);
     const f6 = await flikar(s);
     res.ok('Spel minns sina tre flikar och spel2', f6.length === 3 && (f6.find((t) => t.aktiv) || {}).url === U('spel2'), f6);
     res.ok('bara spel2 hämtades', JSON.stringify(hamtade) === JSON.stringify(['spel2']), [...hamtade]);
@@ -174,10 +209,10 @@ const namnPa = (urls) => (urls || []).map((u) => String(u).replace(/^.*\//, ''))
     const meny = await menyn(`(r) => JSON.stringify(r.map((x) => ({ label: x.label, checked: !!x.checked, type: x.type || '' })))`).then(JSON.parse);
     res.ok('huvudmenyn: Arbetsytor med bock på den öppna', JSON.stringify(meny.slice(0, 3)) === JSON.stringify([{ label: 'Hem', checked: false, type: 'radio' }, { label: 'Skola', checked: false, type: 'radio' }, { label: 'Spel', checked: true, type: 'radio' }]) && meny.some((x) => x.label === 'Ny arbetsyta…') && meny.some((x) => x.label === 'Hantera arbetsytor'), meny);
     await menyn(`(r) => { r.find((x) => x.label === 'Hem').click(); return 1; }`);
-    await H.sov(1000);
+    await vanta(async () => (await s.kor(`Arbetsytor.aktiv()`)) === 'hem', 4000);
     res.ok('huvudmenyn: byter arbetsyta', (await s.kor(`Arbetsytor.aktiv()`)) === 'hem');
     await menyn(`(r) => { r.find((x) => x.label === 'Ny arbetsyta…').click(); return 1; }`);
-    await H.sov(600);
+    await vanta(() => s.kor(`!!document.querySelector('#anp-arbetsytor .ws-red[data-red="ny"]') && !document.getElementById('settings').classList.contains('hidden')`), 4000);
     res.ok('huvudmenyn: "Ny arbetsyta…" öppnar Inställningar med rutan', await s.kor(`!!document.querySelector('#anp-arbetsytor .ws-red[data-red="ny"]') && !document.getElementById('settings').classList.contains('hidden')`));
     await s.kor(`closeSettings(); Arbetsytor.vaxla(${JSON.stringify(spel.id)})`);
     await H.sov(1000);
@@ -185,7 +220,7 @@ const namnPa = (urls) => (urls || []).map((u) => String(u).replace(/^.*\//, ''))
     // 7. Flytta spel3 till Skola
     await s.kor(`switchTab(tabs.find((t) => t.url && t.url.endsWith('/spel3'))); 1`);
     await H.sov(500);
-    await klick(s, '#ws-vaxlare');
+    await oppnaMenyn(s);
     await bild(s, 'arbetsytor-5-meny-flytta.png');
     await klick(s, `#ws-meny .ws-flytta[data-flytta="${skola.id}"]`);
     await H.sov(500);
@@ -302,6 +337,23 @@ const namnPa = (urls) => (urls || []).map((u) => String(u).replace(/^.*\//, ''))
     })()`).then(JSON.parse);
     res.ok('kontobyte: barnkontot ser inte förälderns dolda flikar', konto.barnet === '{}' && konto.fore !== '{}', konto);
     res.ok('kontobyte: tillbaka – flikarna finns kvar', konto.tillbaka === konto.fore, konto);
+
+    // 14. Flikarna på sidan (Anpassa › flikar): väljaren överst i panelen; bara ikoner: bara arbetsytans ikon
+    const matt = () => s.kor(`JSON.stringify((() => { const b = document.getElementById('ws-vaxlare'), p = document.getElementById('tabstrip'); if (!b || !p) return null;
+      const rb = b.getBoundingClientRect(), rp = p.getBoundingClientRect(), n = b.querySelector('.ws-namn');
+      return { b: [rb.left, rb.right, rb.top, rb.width].map(Math.round), p: [rp.left, rp.right, rp.top, rp.width].map(Math.round), namn: n ? getComputedStyle(n).display : '' }; })())`).then(JSON.parse);
+    await s.kor(`(async () => { await Anpassa.set('flikar.lage', 'vertikal', 'Flikarnas placering'); return 1; })()`);
+    await H.sov(800);
+    const v1 = await matt();
+    res.ok('flikarna på sidan: väljaren överst i panelen, nästan hela bredden', !!v1 && v1.b[0] >= v1.p[0] && v1.b[1] <= v1.p[1] && v1.b[3] > v1.p[3] * 0.75 && v1.b[2] - v1.p[2] < 24 && v1.namn !== 'none', v1);
+    await bild(s, 'arbetsytor-10-flikar-pa-sidan.png');
+    await s.kor(`(async () => { await Anpassa.set('flikar.vertikalSmal', true, 'Flikpanelen bara ikoner'); return 1; })()`);
+    await H.sov(800);
+    const v2 = await matt();
+    res.ok('bara ikoner: bara arbetsytans ikon, inom panelen', !!v2 && v2.namn === 'none' && v2.b[0] >= v2.p[0] && v2.b[1] <= v2.p[1], v2);
+    await bild(s, 'arbetsytor-11-bara-ikoner.png');
+    await s.kor(`(async () => { await Anpassa.set('flikar.vertikalSmal', false, 'Flikpanelen bara ikoner'); await Anpassa.set('flikar.lage', 'upptill', 'Flikarnas placering'); return 1; })()`);
+    await H.sov(500);
 
     // Inga fel i skalets konsol
     const fel = s.handelser.filter((h) => h.method === 'Runtime.exceptionThrown' || (h.method === 'Runtime.consoleAPICalled' && h.params.type === 'error'))

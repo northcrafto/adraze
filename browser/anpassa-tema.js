@@ -8,13 +8,14 @@ const { app, ipcMain, BrowserWindow } = require('electron');
 const anpassa = require('./anpassa');
 
 // Rena utseendeval: barn får ändra dem (barnLast: false) och de får delas med en kod (importBar).
+// val = de värden som finns (samma som i ui/anpassa-tema.js) – Falk ändrar bara till något av dem.
 const NYCKLAR = [
   { nyckel: 'tema.accent', standard: '#ff4b1f', etikett: 'Accentfärg' },
-  { nyckel: 'tema.lage', standard: 'ljust', etikett: 'Ljust eller mörkt' },
-  { nyckel: 'tema.densitet', standard: 'normal', etikett: 'Densitet' },
-  { nyckel: 'tema.horn', standard: 'normal', etikett: 'Hörn' },
-  { nyckel: 'tema.typsnitt', standard: 'system', etikett: 'Typsnitt' },
-  { nyckel: 'tema.storlek', standard: 'normal', etikett: 'Textstorlek' },
+  { nyckel: 'tema.lage', standard: 'ljust', etikett: 'Ljust eller mörkt', val: ['ljust', 'morkt', 'system'] },
+  { nyckel: 'tema.densitet', standard: 'normal', etikett: 'Densitet', val: ['kompakt', 'normal', 'luftig'] },
+  { nyckel: 'tema.horn', standard: 'normal', etikett: 'Hörn', val: ['kantig', 'normal', 'rund'] },
+  { nyckel: 'tema.typsnitt', standard: 'system', etikett: 'Typsnitt', val: ['system', 'klassisk', 'tydlig', 'serif', 'mono'] },
+  { nyckel: 'tema.storlek', standard: 'normal', etikett: 'Textstorlek', val: ['liten', 'normal', 'stor'] },
 ];
 for (const n of NYCKLAR) anpassa.registrera({ ...n, barnLast: false, importBar: true });
 

@@ -151,13 +151,16 @@
     const g = def(id); if (!g) return;
     allaFlikar().filter((t) => gruppAv(t) === g).forEach((t) => kor('closeTab', t));
   }
+  // Anpassa › Arbetsytor: grupper som har flikar i en arbetsyta som inte är öppen är inte tomma (ui/anpassa-arbetsytor.js)
+  const vilandeGrupper = () => { try { return window.Arbetsytor && window.Arbetsytor.vilandeGrupper ? window.Arbetsytor.vilandeGrupper() : new Set(); } catch { return new Set(); } };
   // Grupper vars sista flik stängts eller flyttats städas bort (tyst – en tom grupp finns inte att ångra)
   function stadaTomma() {
     const lista = allaFlikar();
     for (const t of lista) if (t.grupp && (t.pinned || !def(t.grupp))) delete t.grupp;   // gruppen ångrad/återställd, eller fliken fäst
     const anv = new Set(lista.map((t) => t.grupp).filter(Boolean));
     anv.forEach((id) => egna.add(id));
-    const tomma = [...egna].filter((id) => !anv.has(id));
+    const vilar = vilandeGrupper();
+    const tomma = [...egna].filter((id) => !anv.has(id) && !vilar.has(id));
     if (!tomma.length) return;
     tomma.forEach((id) => { egna.delete(id); rubriker.delete(id); });
     const kvar = defs.filter((g) => !tomma.includes(g.id));
@@ -503,7 +506,7 @@
     // Grupper utan flikar (från förra gången) städas – bara när det här är enda fönstret, andra fönster kan ha egna grupper
     if (!INKOGNITO) {
       let n = 1; try { n = bro.antalFonster ? bro.antalFonster() : 1; } catch {}
-      if (n <= 1) { const kvar = defs.filter((g) => egna.has(g.id)); if (kvar.length !== defs.length) sparaDefs(kvar); }
+      if (n <= 1) { const vilar = vilandeGrupper(); const kvar = defs.filter((g) => egna.has(g.id) || vilar.has(g.id)); if (kvar.length !== defs.length) sparaDefs(kvar); }
     }
     klar = true;
     senastAktiv = aktiv();
