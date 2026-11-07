@@ -71,7 +71,9 @@ try {
           var brands = [{ brand: 'Not;A=Brand', version: '8' }, { brand: 'Chromium', version: v }, { brand: 'Google Chrome', version: v }];
           var fvl = [{ brand: 'Not;A=Brand', version: '8.0.0.0' }, { brand: 'Chromium', version: fv }, { brand: 'Google Chrome', version: fv }];
           var plat = (navigator.userAgentData && navigator.userAgentData.platform) || 'Windows';
-          var o = { brands: brands, mobile: false, platform: plat, getHighEntropyValues: function () { return Promise.resolve({ architecture: 'x86', bitness: '64', brands: brands, fullVersionList: fvl, mobile: false, model: '', platform: plat, platformVersion: '', uaFullVersion: fv, wow64: false }); }, toJSON: function () { return { brands: brands, mobile: false, platform: plat }; } };
+          // Anpassa: sidopanel – en app i mobilvy har Androids UA; ledtrådarna ska säga samma sak
+          var mob = /Android|Mobile/.test(ua); if (mob) plat = 'Android';
+          var o = { brands: brands, mobile: mob, platform: plat, getHighEntropyValues: function () { return Promise.resolve({ architecture: mob ? '' : 'x86', bitness: mob ? '' : '64', brands: brands, fullVersionList: fvl, mobile: mob, model: mob ? 'K' : '', platform: plat, platformVersion: '', uaFullVersion: fv, wow64: false }); }, toJSON: function () { return { brands: brands, mobile: mob, platform: plat }; } };
           Object.defineProperty(Navigator.prototype, 'userAgentData', { get: function () { return o; }, configurable: true });
         } catch (e) {}
       } catch (e) {}

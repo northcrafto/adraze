@@ -869,3 +869,171 @@ svg:has(use[href="#i-fav"]) { color: #5f6368; opacity: 1; }
 .fam-fraga button { font-size: 12px; font-weight: 700; border-radius: 8px; padding: 5px 10px; cursor: pointer; border: 1px solid var(--color-line); background: #fff; color: var(--color-navy-900); }
 .fam-fraga button[data-svar="nej"] { color: #b4321a; }
 .fam-fraga button:hover { border-color: var(--color-navy-900); }
+
+/* ── Anpassa: sidopanel ── */
+/* Raden runt webbytan: listen, panelen och #views bredvid varandra. Fysisk sida även på arabiska/hebreiska. */
+#sp-rad { display: flex; flex: 1 1 auto; min-height: 0; position: relative; }
+#sp-rad > #views { min-width: 0; }
+#sp-rad.sp-hoger, :root[dir="rtl"] #sp-rad { flex-direction: row-reverse; }
+:root[dir="rtl"] #sp-rad.sp-hoger { flex-direction: row; }
+#sp-list, #sp-panel { display: none; }
+#sp-rad.sp-pa #sp-list { display: flex; }
+#sp-rad.sp-pa.sp-panel-pa #sp-panel { display: flex; }
+
+/* Listen: samma yta som verktygsraden, en tunn linje mot sidan */
+#sp-list { flex: none; width: 48px; flex-direction: column; align-items: center; gap: 4px; padding: 8px 0; background: var(--color-chrome-2); border-right: 1px solid var(--color-line); overflow-x: hidden; overflow-y: auto; scrollbar-width: none; }
+#sp-rad.sp-hoger #sp-list { border-right: 0; border-left: 1px solid var(--color-line); }
+#sp-list .sp-appar { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.sp-app, .sp-plus { position: relative; flex: none; width: 38px; height: 38px; display: grid; place-items: center; border: 0; border-radius: 10px; background: transparent; color: var(--color-navy-800); cursor: pointer; transition: background .15s; }
+.sp-app:hover, .sp-plus:hover, .sp-plus.oppen { background: rgb(14 42 71 / .07); }
+.sp-plus .ic { width: 18px; height: 18px; }
+.sp-app.oppen { background: #fff; box-shadow: 0 1px 3px rgb(14 42 71 / .14), inset 0 0 0 1px rgb(14 42 71 / .06); }
+.sp-app:focus-visible, .sp-plus:focus-visible, .sp-hk:focus-visible, .sp-chip:focus-visible { outline: 2px solid #ff4b1f; outline-offset: 1px; }
+.sp-bild { width: 24px; height: 24px; border-radius: 5px; object-fit: contain; pointer-events: none; }
+.sp-mono { width: 24px; height: 24px; display: grid; place-items: center; flex: none; border-radius: 6px; color: #fff; font-size: 12.5px; font-weight: 700; line-height: 1; pointer-events: none; }
+/* Igång: kort streck vid ytterkanten. Öppen: längre, orange. */
+.sp-app::before { content: ""; position: absolute; left: -5px; top: 50%; width: 3px; height: 0; border-radius: 0 3px 3px 0; background: var(--color-navy-600); opacity: .5; transform: translateY(-50%); transition: height .15s ease; }
+#sp-rad.sp-hoger .sp-app::before { left: auto; right: -5px; border-radius: 3px 0 0 3px; }
+.sp-app.laddad::before { height: 8px; }
+.sp-app.oppen::before { height: 20px; background: #ff4b1f; opacity: 1; }
+/* Olästa (titeln visar "(3)") eller en fråga som väntar: orange prick */
+.sp-prick { display: none; position: absolute; top: 3px; right: 3px; width: 9px; height: 9px; border-radius: 50%; background: #ff4b1f; box-shadow: 0 0 0 2px var(--color-chrome-2); }
+.sp-app.olast .sp-prick { display: block; }
+/* Spelar ljud / ljudet avstängt */
+.sp-ljud { display: none; position: absolute; right: 0; bottom: 0; width: 16px; height: 16px; place-items: center; border-radius: 50%; background: var(--color-chrome-2); color: var(--color-navy-800); }
+.sp-ljud svg { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.sp-app.spelar .sp-ljud, .sp-app.laddad.tyst .sp-ljud { display: grid; }
+.sp-app.tyst .sp-ljud { color: var(--color-muted); }
+.sp-app.oppen .sp-prick { box-shadow: 0 0 0 2px #fff; }
+.sp-app.oppen .sp-ljud { background: #fff; }
+/* Byta ordning genom att dra */
+.sp-sorterar .sp-app { transition: transform .15s ease, background .15s; }
+.sp-sorterar .sp-app.sp-drar { transition: none; z-index: 2; background: #fff; box-shadow: 0 6px 16px rgb(14 42 71 / .2); cursor: grabbing; }
+
+/* Panelen: huvud + webbvyns plats, draghandtaget mot sidan */
+#sp-panel { flex: none; flex-direction: row; min-width: 0; background: var(--color-chrome-2); }
+#sp-rad.sp-hoger #sp-panel, :root[dir="rtl"] #sp-panel { flex-direction: row-reverse; }
+:root[dir="rtl"] #sp-rad.sp-hoger #sp-panel { flex-direction: row; }
+.sp-kol { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.sp-huvud { position: relative; flex: none; height: 40px; display: flex; align-items: center; gap: 1px; padding: 0 6px 0 10px; border-bottom: 1px solid var(--color-line); }
+.sp-h-ikon { width: 20px; height: 20px; display: grid; place-items: center; flex: none; }
+.sp-h-ikon .sp-bild, .sp-h-ikon .sp-mono { width: 18px; height: 18px; border-radius: 4px; font-size: 10.5px; }
+.sp-h-ikon:empty { display: none; }
+.sp-h-txt { flex: 1; min-width: 0; margin: 0 6px 0 8px; display: flex; flex-direction: column; line-height: 1.2; }
+.sp-h-namn { font-size: 12.5px; font-weight: 650; color: var(--color-navy-900); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp-h-adr { font-size: 11px; color: var(--color-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp-h-adr:empty { display: none; }
+.sp-hk { flex: none; width: 28px; height: 28px; display: grid; place-items: center; border: 0; border-radius: 7px; background: transparent; color: var(--color-navy-800); cursor: pointer; transition: background .15s; }
+.sp-hk:hover { background: rgb(14 42 71 / .08); }
+.sp-hk:disabled { opacity: .35; pointer-events: none; }
+.sp-lagg-lage .sp-hk:not([data-g="stang"]) { display: none; }
+/* Laddar: en tunn orange linje som växer och stannar (ingen evig animation) */
+.sp-laddar { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: #ff4b1f; transform-origin: left; transform: scaleX(0); opacity: 0; transition: opacity .3s ease; pointer-events: none; }
+#sp-rad.sp-hoger .sp-laddar { transform-origin: right; }
+.sp-laddar-nu .sp-laddar { opacity: 1; animation: sp-ladd 6s cubic-bezier(.08,.7,.2,1) forwards; }
+@keyframes sp-ladd { from { transform: scaleX(.06); } to { transform: scaleX(.92); } }
+body.reduce-motion .sp-laddar-nu .sp-laddar { animation: none; transform: scaleX(.6); }
+.sp-vy { flex: 1; min-height: 0; background: #fff; }
+.sp-lagg-yta { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 16px 24px; }
+.sp-drag { position: relative; flex: none; width: 5px; cursor: col-resize; background: var(--color-chrome-2); touch-action: none; }
+.sp-drag::after { content: ""; position: absolute; top: 0; bottom: 0; left: 2px; width: 1px; background: var(--color-line); transition: background .15s, left .15s, width .15s; }
+.sp-drag:hover::after, .sp-drag:focus-visible::after, #sp-rad.sp-drar .sp-drag::after { left: 1px; width: 3px; background: #ff4b1f; }
+.sp-drag:focus-visible { outline: none; }
+#sp-rad.sp-drar, #sp-rad.sp-drar * { cursor: col-resize !important; user-select: none; }
+
+/* Behörighetsfrågan i panelen */
+.sp-fraga { flex: none; display: flex; flex-direction: column; gap: 10px; padding: 12px; background: #fff; border-bottom: 1px solid var(--color-line); }
+.sp-f-txt b { display: block; font-size: 13px; font-weight: 650; color: var(--color-navy-900); overflow-wrap: anywhere; }
+.sp-f-txt small { display: block; margin-top: 2px; font-size: 12px; color: var(--color-muted); }
+.sp-f-rad { display: flex; align-items: center; gap: 8px; }
+.sp-f-kom { display: inline-flex; align-items: center; gap: 6px; margin-right: auto; font-size: 12px; color: var(--color-muted); cursor: pointer; }
+.sp-f-kom input, .sp-kryss input { accent-color: #ff4b1f; }
+.sp-f-nej, .sp-avbryt { height: 32px; padding: 0 13px; border: 0; border-radius: 999px; background: transparent; box-shadow: inset 0 0 0 1px rgb(14 42 71 / .2); color: var(--color-navy-900); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: box-shadow .15s; }
+.sp-f-nej:hover, .sp-avbryt:hover { box-shadow: inset 0 0 0 1px var(--color-navy-900); }
+.sp-fraga .sp-liq { height: 32px; padding: 0 15px; font-size: 12.5px; }
+
+/* Primärknapp med vätskefyllning (signaturkitet): marinblå, orange stiger upp vid hover */
+.sp-liq { --liq-r: 999px; position: relative; isolation: isolate; overflow: hidden; height: 38px; padding: 0 18px; border: 0; border-radius: var(--liq-r); clip-path: inset(0 round var(--liq-r)); background: #0e2a47; color: #fff; font: inherit; font-size: 13px; font-weight: 650; cursor: pointer; transition: color .6s ease, transform .2s ease; }
+.sp-liq::before { content: ""; position: absolute; z-index: -1; left: -15%; width: 130%; bottom: -2px; height: 170%; transform: translateY(100%); border-radius: 46% 46% 0 0; background: #ff4b1f; transition: transform .95s cubic-bezier(.2,.75,.25,1); pointer-events: none; }
+.sp-liq:is(:hover, :focus-visible)::before { transform: translateY(0); }
+.sp-liq:active { transform: translateY(1px); }
+.sp-liq:focus-visible { outline: 2px solid #ff4b1f; outline-offset: 2px; }
+body.reduce-motion .sp-liq::before { transition: none; }
+
+/* "Lägg till app" (i panelen och i inställningarna) */
+.sp-form { display: flex; flex-direction: column; gap: 12px; }
+.sp-form-lead { margin: 0 0 14px; font-size: 13px; line-height: 1.5; color: var(--color-muted); }
+.sp-falt { display: flex; flex-direction: column; gap: 5px; font-size: 12px; font-weight: 600; color: var(--color-navy-800); }
+.sp-falt input { height: 38px; padding: 0 11px; border: 1px solid var(--color-line); border-radius: 9px; background: #fff; color: var(--color-navy-900); font: inherit; font-size: 13.5px; font-weight: 400; outline: none; user-select: text; transition: border-color .15s, box-shadow .15s; }
+.sp-falt input:focus { border-color: #ff4b1f; box-shadow: 0 0 0 3px rgb(255 75 31 / .12); }
+.sp-kryss { display: grid; grid-template-columns: auto 1fr; column-gap: 8px; align-items: center; font-size: 13px; color: var(--color-navy-900); cursor: pointer; }
+.sp-kryss input { width: 15px; height: 15px; margin: 0; }
+.sp-kryss small { grid-column: 2; font-size: 11.5px; color: var(--color-muted); }
+.sp-fel { font-size: 12.5px; color: #c0392b; }
+.sp-fel:empty { display: none; }
+.sp-knappar { display: flex; align-items: center; gap: 8px; }
+.sp-forslag-rubrik { margin: 24px 0 8px; font-size: 11.5px; font-weight: 600; color: var(--color-muted); }
+.sp-forslag { display: flex; flex-wrap: wrap; gap: 6px; }
+.sp-chip { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px 0 5px; border: 1px solid var(--color-line); border-radius: 999px; background: #fff; color: var(--color-navy-900); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: border-color .15s; }
+.sp-chip:hover { border-color: var(--color-navy-600); }
+.sp-chip .sp-mono { width: 22px; height: 22px; border-radius: 50%; font-size: 11px; }
+
+/* Inställningar › Anpassa › Sidopanel (rubriken ska synas under den klistrade sökraden när listen hoppar hit) */
+#settings #anp-sidopanel { scroll-margin-top: 96px; }
+#settings .sp-not { margin-top: 12px; font-size: 13px; color: var(--s-mut); }
+#settings .sp-inst-lista { margin-top: 18px; border: 1px solid var(--s-line); border-radius: 12px; background: var(--s-surface); overflow: hidden; }
+#settings .sp-inst-tom { padding: 16px 18px; font-size: 13px; color: var(--s-mut); }
+#settings .sp-irad { display: flex; align-items: center; gap: 12px; padding: 10px 12px 10px 16px; }
+#settings .sp-irad + .sp-irad { border-top: 1px solid var(--s-line); }
+#settings .sp-irad-ikon { width: 28px; height: 28px; display: grid; place-items: center; flex: none; }
+#settings .sp-irad-txt { flex: 1; min-width: 0; }
+#settings .sp-irad-namn { display: block; width: 100%; max-width: 280px; height: 28px; margin-left: -8px; padding: 0 7px; border: 1px solid transparent; border-radius: 7px; background: transparent; color: var(--s-ink); font: inherit; font-size: 13.5px; font-weight: 600; user-select: text; }
+#settings .sp-irad-namn:hover { border-color: var(--s-field-line); }
+#settings .sp-irad-namn:focus { border-color: var(--s-ink); background: var(--s-field); box-shadow: none; outline: none; }
+#settings .sp-irad-txt small { display: block; font-size: 12px; color: var(--s-mut); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#settings .sp-mini { display: inline-flex; align-items: center; gap: 6px; flex: none; font-size: 12.5px; color: var(--s-mut); cursor: pointer; }
+#settings .sp-ik { flex: none; width: 30px; height: 30px; display: grid; place-items: center; border: 0; border-radius: 7px; background: transparent; color: var(--s-mut); cursor: pointer; transition: background .15s, color .15s; }
+#settings .sp-ik:hover { background: var(--s-hover); color: var(--s-ink); }
+#settings .sp-ik:disabled { opacity: .3; pointer-events: none; }
+#settings .sp-ik-bort:hover { color: #d0402f; }
+#settings .sp-inst-lagg { margin-top: 18px; padding: 16px 18px 18px; border: 1px solid var(--s-line); border-radius: 12px; background: var(--s-surface); }
+#settings .sp-inst-lagg h4 { margin-bottom: 12px; font-size: 14px; font-weight: 600; color: var(--s-ink); }
+#settings .sp-inst-lagg .sp-form { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 12px 14px; align-items: end; }
+#settings .sp-inst-lagg .sp-kryss, #settings .sp-inst-lagg .sp-fel { grid-column: 1 / -1; }
+#settings .sp-inst-lagg .sp-knappar { grid-column: 1 / -1; }
+#settings .sp-falt { color: var(--s-ink); }
+#settings .sp-falt input { background: var(--s-field); color: var(--s-ink); border-color: var(--s-field-line); }
+#settings .sp-falt input:focus { border-color: var(--s-ink); box-shadow: 0 0 0 3px var(--s-accent-soft); }
+#settings .sp-kryss { color: var(--s-ink); }
+#settings .sp-kryss small, #settings .sp-forslag-rubrik { color: var(--s-mut); }
+#settings .sp-chip { background: var(--s-surface); border-color: var(--s-field-line); color: var(--s-ink); }
+#settings .sp-chip:hover { border-color: var(--s-ink); }
+
+/* Notiser och stäng-rutan uppe till höger flyttar in när sidopanelen ligger till höger */
+body.sp-hoger-pa .notis { right: calc(12px + var(--pw, 0px) + var(--sp-hb, 0px)) !important; }
+body.sp-hoger-pa #closeconf { right: calc(12px + var(--sp-hb, 0px)); }
+
+/* Mörkt läge */
+:root[data-theme="dark"] #sp-list, :root[data-theme="dark"] #sp-panel, :root[data-theme="dark"] .sp-drag { background: #171718; border-color: #2b2b2d; }
+:root[data-theme="dark"] .sp-huvud, :root[data-theme="dark"] .sp-fraga { border-bottom-color: #2b2b2d; }
+:root[data-theme="dark"] .sp-drag::after { background: #2b2b2d; }
+:root[data-theme="dark"] :is(.sp-app, .sp-plus, .sp-hk) { color: #d4d4d8; }
+:root[data-theme="dark"] :is(.sp-app, .sp-plus, .sp-hk):hover, :root[data-theme="dark"] .sp-plus.oppen { background: rgb(255 255 255 / .08); }
+:root[data-theme="dark"] .sp-app.oppen, :root[data-theme="dark"] .sp-sorterar .sp-app.sp-drar { background: #2b2b2e; box-shadow: none; }
+:root[data-theme="dark"] .sp-app::before { background: #a1a1a8; }
+:root[data-theme="dark"] .sp-app.oppen::before { background: #ff4b1f; }
+:root[data-theme="dark"] .sp-prick { box-shadow: 0 0 0 2px #171718; }
+:root[data-theme="dark"] .sp-ljud { background: #171718; color: #d4d4d8; }
+:root[data-theme="dark"] .sp-app.oppen .sp-prick { box-shadow: 0 0 0 2px #2b2b2e; }
+:root[data-theme="dark"] .sp-app.oppen .sp-ljud { background: #2b2b2e; }
+:root[data-theme="dark"] .sp-h-namn, :root[data-theme="dark"] .sp-f-txt b, :root[data-theme="dark"] .sp-kryss { color: #f2f2f4; }
+:root[data-theme="dark"] :is(.sp-h-adr, .sp-f-txt small, .sp-f-kom, .sp-form-lead, .sp-kryss small, .sp-forslag-rubrik) { color: #a1a1a8; }
+:root[data-theme="dark"] .sp-falt { color: #d4d4d8; }
+:root[data-theme="dark"] .sp-vy { background: #0e0e10; }
+:root[data-theme="dark"] .sp-fraga { background: #161618; }
+:root[data-theme="dark"] .sp-falt input, :root[data-theme="dark"] .sp-chip { background: #1d1d20; border-color: #3b3b40; color: #f2f2f4; }
+:root[data-theme="dark"] .sp-chip:hover { border-color: #6e6e75; }
+:root[data-theme="dark"] :is(.sp-f-nej, .sp-avbryt) { color: #f2f2f4; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .22); }
+:root[data-theme="dark"] :is(.sp-f-nej, .sp-avbryt):hover { box-shadow: inset 0 0 0 1px #f2f2f4; }
+:root[data-theme="dark"] .sp-liq { background: #f2f2f4; color: #141416; }
+:root[data-theme="dark"] .sp-liq:is(:hover, :focus-visible) { color: #fff; }

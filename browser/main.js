@@ -74,6 +74,7 @@ const webb = require('./webbinst');
 const lasvy = require('./lasvy');   // läsläge (Readability)
 const importera = require('./importera');   // importera bokmärken/historik/lösenord från andra webbläsare
 const anpassa = require('./anpassa');      // gemensam butik för all anpassning (tema, flikar, verktygsfält …)
+const sidopanel = require('./anpassa-sidopanel');   // Anpassa: sidopanel med webbappar (egna vyer bredvid sidan)
 const tillagg = require('./tillagg');        // Chrome-tillägg (Chrome Web Store)
 const blockinst = require('./blockinst');     // blockerarens inställningar (adraze://adblock)
 const blocksida = require('./blocksida');     // adraze://adblock, Blockera element, Glöm mig
@@ -294,6 +295,15 @@ function barnNagonRegel() { if (!KONTO_PER_FONSTER) return barnRegler; for (cons
 // Utvecklarverktyg och inkognito: avstängda så fort något fönster är i barnläge (barnet kan annars öppna dem i ett annat)
 function barnNagonstans() { return !!barnNagonRegel(); }
 anpassa.init({ barnKoll: () => barnNagonstans() });
+// Anpassa: sidopanel – webbapparnas vyer får fönstrets kontosession och samma skydd som flikarna
+sidopanel.init({
+  wins, ctxFor, sendTo, broadcast, T, barnNagonstans, visaFelsida, isBlockedTarget, sameSite, popupTrustedHost,
+  sessionFor: (ctx) => kontoSession(ctx.acctKey === undefined ? senasteKonto : ctx.acctKey),
+  barnSparrad: (url, ctx) => barnSparrad(url, reglerFor(ctx)),
+  adblockPa: () => adblockOn, instantDanger: instantDangerMain,
+  kontextmeny: (ctx, wc, params) => buildContextMenu(ctx, wc, params),
+  fontSize: () => webb.fontSize(), contentPreload: path.join(__dirname, 'content-preload.js'),
+});
 function barnSparrad(url, regler) {
   const r = regler === undefined ? barnRegler : regler; if (!r) return false;
   let h = '';
@@ -317,6 +327,7 @@ adblock.barnStopp = (d) => {
 // Behörighetsfrågor visas som en rad överst i skalet; svaret kommer tillbaka via perm:answer
 let permSeq = 0; const permWait = new Map();
 webb.setAsker((wc, origin, kinds) => new Promise((resolve) => {
+  if (wc.__sidopanel) { resolve(sidopanel.fraga(wc, origin, kinds)); return; }   // Anpassa: sidopanel – frågan visas i panelen
   const ctx = wc.__ctx; const id = ++permSeq;
   const done = (a) => { if (!permWait.has(id)) return; permWait.delete(id); resolve(a); };
   permWait.set(id, done);
@@ -377,8 +388,10 @@ function applyClientHints(sess) {
     sess.webRequest.onBeforeSendHeaders((details, cb) => {
       const h = details.requestHeaders;
       h['sec-ch-ua'] = brand;
-      h['sec-ch-ua-mobile'] = '?0';
-      h['sec-ch-ua-platform'] = plat;
+      // Anpassa: sidopanel – en app i mobilvy säger "mobil Android" även i ledtrådarna (annars motsäger de UA:n)
+      let mob = false; try { mob = !!(details.webContents && details.webContents.__adrazeMobil); } catch {}
+      h['sec-ch-ua-mobile'] = mob ? '?1' : '?0';
+      h['sec-ch-ua-platform'] = mob ? '"Android"' : plat;
       try { adblock.utgaende(details); } catch {}   // Blockera cookies (tredjepart/alla)
       cb({ requestHeaders: h });
     });
@@ -458,6 +471,7 @@ function canGo(wc, dir) {
 }
 function applyBounds(ctx) {
   if (!ctx) return;
+  try { sidopanel.placera(ctx); } catch {}   // Anpassa: sidopanel – appens vy följer med (dold när fliken visar video i helskärm)
   if (ctx.findView) positionFind(ctx);
   const b = ctx.bounds;
   if (ctx.htmlFull && ctx.visibleTab && ctx.views.has(ctx.visibleTab)) {   // video/element i helskärm → täck HELA fönstret (över verktygsrad + flikar)
@@ -1423,6 +1437,7 @@ ipcMain.handle('session:login', (e, d) => iSessionKo(async () => {
     try { await clearWebSession(); } catch {}          // börja rent
     try { await restoreAccountCookies(key); } catch {} // lägg tillbaka just det här kontots cookies
   }
+  try { sidopanel.kontoByttAlla(); } catch {}   // Anpassa: sidopanel – apparna laddas om med det nya kontots kakor
   return { ok: true };
 }));
 // Skalet: barnets regler / låst barnläge / null (se "Familjespärren i huvudprocessen")
@@ -1448,6 +1463,7 @@ ipcMain.handle('session:logout', (e, d) => iSessionKo(async () => {
   if (key) { try { await saveAccountCookies(key); } catch {} }
   try { await clearWebSession(); } catch {}
   currentAcctKey = null;
+  try { sidopanel.kontoByttAlla(); } catch {}   // Anpassa: sidopanel – utloggad: inga appar kvar med gamla kakor i minnet
   return { ok: true };
 }));
 
@@ -1511,6 +1527,7 @@ async function bytFonsterKonto(ctx, key) {
   try { await kontoSession(ctx.acctKey === undefined ? senasteKonto : ctx.acctKey).cookies.flushStore(); } catch {}   // det gamla kontots kakor på disk
   ctx.acctKey = key;
   byggOmVyer(ctx);
+  try { sidopanel.kontoBytt(ctx); } catch {}   // Anpassa: sidopanel – appen öppnas i det nya kontots lagring
   return { ok: true, byggdOm: true };
 }
 // Lägesbyte vid start (se ovan). Körs innan första fönstret skapas.
@@ -2465,6 +2482,7 @@ function handleShortcut(wc, input) {
   if (input.type !== 'keyDown') return false;
   const ctx = ctxForWc(wc);
   if (!ctx) return false;
+  if (wc.__sidopanel && sidopanel.genvag(wc, input)) return true;   // Anpassa: sidopanel – F5, Alt+pil och zoom gäller appen i panelen
   const mod = input.control || input.meta;      // Ctrl (eller Cmd på mac)
   const shift = input.shift;
   const k = (input.key || '').toLowerCase();
