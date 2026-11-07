@@ -683,6 +683,7 @@ function buildContextMenu(ctx, wc, params) {
     t.push({ type: 'separator' });
   }
   { const v = avancerat.menyval(wc); if (v.length) t.push(...v, { type: 'separator' }); }   // Anpassa → Avancerat: "Redigera CSS för den här sajten"
+  try { t.push(...sidopanel.menyval(ctx, wc)); } catch {}   // Anpassa: sidopanel – "Lägg till i sidopanelen" (sajten blir en app)
   t.push({ label: T('Spara som…'), click: () => savePage(ctx, wc) });
   t.push({ label: T('Skriv ut…'), click: () => printPage(ctx, wc) });
   t.push({ label: T('Skapa QR-kod för sidan'), click: () => showQR(ctx, url) });
