@@ -16,15 +16,16 @@ const FARGNAMN = { gra: 'Grå', bla: 'Blå', gron: 'Grön', gul: 'Gul', orange: 
 const BREDD_MIN = 170, BREDD_MAX = 420;
 
 // Rena utseende- och beteendeval: inget av det kan kringgå spärrar eller insyn → inte barnlåst.
+// val = de värden som finns (Falk ändrar bara till något av dem, se anpassa.js).
 const NYCKLAR = [
-  { nyckel: 'flikar.lage', standard: 'upptill', etikett: 'Flikarnas placering' },
-  { nyckel: 'flikar.vertikalBredd', standard: 240, etikett: 'Flikpanelens bredd' },
+  { nyckel: 'flikar.lage', standard: 'upptill', etikett: 'Flikarnas placering', val: LAGEN },
+  { nyckel: 'flikar.vertikalBredd', standard: 240, etikett: 'Flikpanelens bredd', val: { min: BREDD_MIN, max: BREDD_MAX } },
   { nyckel: 'flikar.vertikalSmal', standard: false, etikett: 'Flikpanelen bara ikoner' },
   { nyckel: 'flikar.grupper', standard: [], etikett: 'Flikgrupper', importBar: false },   // hör till fönstrets flikar, inte till en delningskod
-  { nyckel: 'flikar.nyFlik', standard: 'sist', etikett: 'Var nya flikar öppnas' },
-  { nyckel: 'flikar.sistaFlik', standard: 'stang', etikett: 'När sista fliken stängs' },
-  { nyckel: 'flikar.stangKnapp', standard: 'alla', etikett: 'Stängknapp på flikarna' },
-  { nyckel: 'flikar.sova', standard: 15, etikett: 'Sovande flikar' },
+  { nyckel: 'flikar.nyFlik', standard: 'sist', etikett: 'Var nya flikar öppnas', val: ['sist', 'bredvid'] },
+  { nyckel: 'flikar.sistaFlik', standard: 'stang', etikett: 'När sista fliken stängs', val: ['stang', 'ny'] },
+  { nyckel: 'flikar.stangKnapp', standard: 'alla', etikett: 'Stängknapp på flikarna', val: ['alla', 'aktiv'] },
+  { nyckel: 'flikar.sova', standard: 15, etikett: 'Sovande flikar', val: SOV_MIN },
 ];
 for (const n of NYCKLAR) anpassa.registrera({ ...n, barnLast: false });
 

@@ -3,6 +3,8 @@
 //  • Flikarna hör till fönstret: varje fönster har sin aktiva arbetsyta och minns de andras flikar och vilken flik
 //    som var vald. Byter du arbetsyta stängs den gamla ytans flikar (de sparas) och den nya ytans flikar läggs
 //    vilande – bara den valda fliken laddas, resten när du klickar på dem. Flikar i en yta du inte står i tar inget minne.
+//  • Flikgrupperna (ui/anpassa-flikar.js) följer med: varje flik minns sin grupp, och en grupp vars flikar ligger i en
+//    annan arbetsyta städas inte bort (window.Arbetsytor.vilandeGrupper).
 //  • Sparas per konto (konto per fönster): ett fönster som startar med ett barnkonto får barnets arbetsytor, aldrig
 //    förälderns flikar. Barnspärren gäller i alla ytor (skalets spärrsida och filtret i huvudprocessen, som för vanliga flikar).
 //  • Väljaren ligger först i flikraden (i #brandbar, som flikradens bredd redan räknar med).
@@ -70,11 +72,13 @@
   // Den aktiva arbetsytans flikar just nu (samma urval som skalets egen sparning). Står du i Inställningar räknas
   // fliken du var på innan som vald; en ny, tom flik som vald blir -1 (en ny flik igen när du kommer tillbaka).
   let senastVanlig = null;
+  // Flikens grupp (flikgrupper, ui/anpassa-flikar.js): bara id:t, och aldrig på en fäst flik
+  const grupp = (g, fast) => (typeof g === 'string' && g && !fast ? { grupp: g.slice(0, 40) } : {});
   function fanga() {
     const keep = skalFlikar().filter(sparbar).slice(0, MAX_FLIKAR), a = skalAktiv();
     let ai = keep.indexOf(a);
     if (ai < 0 && a && a.isSettings && senastVanlig) ai = keep.indexOf(senastVanlig);
-    return { flikar: keep.map((t) => ({ url: t.url, titel: String(t.title || '').slice(0, 200), fav: favOk(t.favicon), fast: !!t.pinned })), aktivFlik: ai };
+    return { flikar: keep.map((t) => ({ url: t.url, titel: String(t.title || '').slice(0, 200), fav: favOk(t.favicon), fast: !!t.pinned, ...grupp(t.grupp, t.pinned) })), aktivFlik: ai };
   }
 
   /* ── Fönstrets läge: aktiv arbetsyta + de andra ytornas flikar ── */
@@ -84,7 +88,7 @@
     const ut = { k: typeof s.k === 'string' ? s.k : '', aktiv: String(s.aktiv || ''), ytor: {} };
     for (const [id, y] of Object.entries(s.ytor).slice(0, MAX_YTOR)) {
       if (!y || !Array.isArray(y.flikar)) continue;
-      const flikar = y.flikar.filter((f) => f && urlOk(f.url)).slice(0, MAX_FLIKAR).map((f) => ({ url: f.url, titel: String(f.titel || '').slice(0, 200), fav: favOk(f.fav), fast: !!f.fast }));
+      const flikar = y.flikar.filter((f) => f && urlOk(f.url)).slice(0, MAX_FLIKAR).map((f) => ({ url: f.url, titel: String(f.titel || '').slice(0, 200), fav: favOk(f.fav), fast: !!f.fast, ...grupp(f.grupp, f.fast) }));
       const a = Number.isInteger(y.aktivFlik) && y.aktivFlik < flikar.length ? y.aktivFlik : (flikar.length ? 0 : -1);
       ut.ytor[String(id).slice(0, 40)] = { flikar, aktivFlik: a };
     }
@@ -166,6 +170,8 @@
           localStorage.setItem('skoll-open-tabs', JSON.stringify(egen.flikar.map((f) => f.url)));
           localStorage.setItem('adraze-pinned-tabs', JSON.stringify(egen.flikar.filter((f) => f.fast).map((f) => f.url)));
           localStorage.setItem('adraze-active-tab', String(egen.aktivFlik));
+          // Flikarnas grupper, i samma ordning (formatet som ui/anpassa-flikar.js sparar och läser: [adress, grupp-id])
+          localStorage.setItem('adraze-flikgrupper', JSON.stringify(egen.flikar.map((f) => (f.grupp ? [f.url, f.grupp] : [f.url]))));
         } catch {}
       }
       delete st.ytor[st.aktiv];   // den aktiva ytans flikar lever i skalets flikrad
@@ -174,11 +180,12 @@
 
   /* ── Flikar ── */
   // En flik som bara har adress, titel och ikon. Huvudprocessen minns adressen och laddar sidan först när fliken visas.
-  // (Samma fält som createTab i shell.js skapar.)
+  // (Samma fält som createTab i shell.js skapar.) Den ritas som en sovande flik (blekare) tills den laddas, och
+  // hamnar i sin flikgrupp igen.
   function vilandeFlik(f) {
     let id; try { id = ++seq; } catch { return null; }
     const tab = { id, url: f.url, title: f.titel || f.url, favicon: f.fav || null, cleared: new Set(), bypassed: new Set(), canBack: false, canForward: false,
-      verdict: null, warning: null, toastDismissed: new Set(), entering: false, incognito: false, overlay: null, pinned: !!f.fast };
+      verdict: null, warning: null, toastDismissed: new Set(), entering: false, incognito: false, overlay: null, pinned: !!f.fast, sover: true, ...grupp(f.grupp, f.fast) };
     skalFlikar().push(tab);
     try { if (bro.vilande) bro.vilande(id, f.url); } catch {}
     return tab;
@@ -464,9 +471,20 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', starta); else setTimeout(starta, 0);
   window.addEventListener('pagehide', () => spara());
 
+  // Flikgrupper som har flikar i en arbetsyta som inte är öppen – här, i papperskorgen eller hos ett annat konto
+  // (grupperna är gemensamma). ui/anpassa-flikar.js städar inte bort dem.
+  function vilandeGrupper() {
+    const ut = new Set();
+    const lagg = (ytorna) => { for (const y of Object.values(ytorna || {})) for (const f of (y && Array.isArray(y.flikar) ? y.flikar : [])) if (f && typeof f.grupp === 'string') ut.add(f.grupp); };
+    lagg(st.ytor);
+    if (papperskorg) lagg({ x: papperskorg.data });
+    try { const all = JSON.parse(localStorage.getItem(LS) || 'null'); for (const [k, s] of Object.entries((all && all.konton) || {})) if (k !== minNyckel && s) lagg(s.ytor); } catch {}
+    return ut;
+  }
+
   // För andra delar och test
   window.Arbetsytor = {
-    lista: ytor, aktiv: () => st.aktiv, vaxla, flytta, skapa, andra, taBort, oppnaMeny, stangMeny, nyckel: kontoNyckel,
+    lista: ytor, aktiv: () => st.aktiv, vaxla, flytta, skapa, andra, taBort, oppnaMeny, stangMeny, nyckel: kontoNyckel, vilandeGrupper,
     lage: () => JSON.parse(JSON.stringify({ aktiv: st.aktiv, ytor: st.ytor })),
   };
 })();

@@ -66,8 +66,8 @@ async function kor(rot) {
   const varde = async (k) => JSON.parse(await E(`return JSON.stringify(Anpassa.get(${JSON.stringify(k)}) ?? null)`));
   const satt = (k, v) => E(`return (await Anpassa.set(${JSON.stringify(k)}, ${JSON.stringify(v)}, 'test')).ok`);
   const adress = () => E(`return document.getElementById('address').value`);
-  // synliga webbvyer i fönstret (flikens sida), i fönstrets koordinater
-  const vyer = async () => JSON.parse(await M(`return JSON.stringify(fonster().contentView.children.filter((c) => c.getVisible && c.getVisible()).map((c) => c.getBounds()))`));
+  // synliga webbvyer i fönstret (flikens sida), i fönstrets koordinater – inte de små rutorna ovanpå sidan (toast, nedladdningar …)
+  const vyer = async () => JSON.parse(await M(`return JSON.stringify(fonster().contentView.children.filter((c) => c.getVisible && c.getVisible() && c.webContents && c.webContents.__tabId != null).map((c) => c.getBounds()))`));
   const rekt = async (sel) => {
     const r = await E(`const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; let r = e.getBoundingClientRect();
       // i inställningarna ligger sökrutan fast överst: ställ alltid raden mitt i bild innan du klickar
@@ -310,7 +310,7 @@ async function kor(rot) {
     // fönstret ändrar storlek: webbsidan får aldrig täcka raden, inte ens en bildruta
     const under = Math.round(mt.h - mt.bm);
     const prov = JSON.parse(await M(`const w = fonster(); const ut = [];
-      const ta = () => { const cb = w.getContentBounds(); const v = w.contentView.children.find((c) => c.getVisible && c.getVisible()); if (v) { const b = v.getBounds(); ut.push({ h: cb.height, w: cb.width, y: b.y, nedre: b.y + b.height, bredd: b.width }); } };
+      const ta = () => { const cb = w.getContentBounds(); const v = w.contentView.children.find((c) => c.getVisible && c.getVisible() && c.webContents && c.webContents.__tabId != null); if (v) { const b = v.getBounds(); ut.push({ h: cb.height, w: cb.width, y: b.y, nedre: b.y + b.height, bredd: b.width }); } };
       const iv = setInterval(ta, 4);
       w.setContentSize(1100, 700);
       await new Promise((r) => setTimeout(r, 350));
@@ -320,7 +320,8 @@ async function kor(rot) {
     const tacker = prov.filter((p) => p.nedre > p.h - under + 1);
     R.ok('inget hopp: sidan täcker aldrig raden när fönstret ändrar storlek', prov.length > 20 && tacker.length === 0, { prover: prov.length, tacker: tacker.slice(0, 3) });
     const sist = prov[prov.length - 1];
-    R.ok('sidan fyller ytan igen efter storleksändringen', !!sist && sist.nedre === sist.h - under && sist.y === v.y && sist.bredd === sist.w, sist);
+    // samma bredd som före storleksändringen (sidopanelens ikonrad kan ta en remsa till vänster om sidan)
+    R.ok('sidan fyller ytan igen efter storleksändringen', !!sist && sist.nedre === sist.h - under && sist.y === v.y && sist.bredd === v.width, { sist, v });
     // anpassa-läget med raden nere
     await E(`AnpassaVerktyg.anpassa(); return 1`); await H.sov(400);
     await bild('11-anpassa-nere');

@@ -2508,7 +2508,7 @@ function falkSankning(name, a) {
   return '';
 }
 // Anpassa › Ångra (ångra en grupp, spara som fil) och Falk ändrar Anpassa-inställningar (anpassa-falk.js, ui/anpassa-falk.js)
-require('./anpassa-angra').init();
+require('./anpassa-angra').init({ ctxFor, sendTo, POPUP_PREFS });   // + toasten "Ändrat · Ångra" ovanpå webbsidan
 require('./anpassa-falk').init({ T });
 
 /* ────────── Kortkommandon (Chromium-lika) ──────────

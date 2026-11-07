@@ -1965,11 +1965,15 @@ body.sp-hoger-pa #closeconf { right: calc(12px + var(--sp-hb, 0px)); }
 #anp-avancerat .anp-last > svg { flex: none; }
 @media (prefers-reduced-motion: reduce) { #anp-avancerat .anp-ny, #anp-avancerat .anp-kod, #anp-avancerat .anp-bort { transition: none; } }
 /* ── Anpassa: angra ── */
-/* Toasten "Ändrat: X · Ångra" – högst upp som appens andra rutor (webbsidan ritas ovanpå resten av skalet) */
-#anp-toast { position: fixed; top: 9px; left: 50%; z-index: 82; display: flex; align-items: center; gap: 8px; max-width: min(560px, calc(100vw - 32px));
+/* Toasten "Ändrat: X · Ångra" – längst ner i mitten av innehållsytan (#views, till vänster om Falk/chatten: --pw), så att
+   den aldrig ligger över flikraden eller verktygsraden, var de än är. Klick går igenom rutan, utom på Ångra-knappen.
+   Syns en webbsida (som ritas ovanpå skalet) visas samma toast i en egen liten vy ovanpå sidan: ui/anpassa-toast.html. */
+#anp-toast { position: absolute; bottom: 18px; left: calc((100% - var(--pw, 0px)) / 2); z-index: 85; display: flex; align-items: center; gap: 8px;
+  width: max-content; max-width: min(560px, calc(100% - var(--pw, 0px) - 32px));
   padding: 5px 5px 5px 14px; border-radius: 10px; background: #0e2a47; color: #fff; font-size: 13px; font-weight: 600; line-height: 1.2;
-  box-shadow: 0 10px 28px rgb(14 42 71 / .32); opacity: 0; transform: translate(-50%, -8px); pointer-events: none; transition: opacity .18s ease, transform .22s cubic-bezier(.2,.8,.2,1); }
-#anp-toast.pa { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+  box-shadow: 0 10px 28px rgb(14 42 71 / .32); opacity: 0; transform: translate(-50%, 8px); pointer-events: none; transition: opacity .18s ease, transform .22s cubic-bezier(.2,.8,.2,1); }
+#anp-toast.pa { opacity: 1; transform: translate(-50%, 0); }
+#anp-toast.pa .anp-toast-angra { pointer-events: auto; }
 #anp-toast.utan-angra { padding-right: 14px; }
 #anp-toast.utan-angra .anp-toast-prick, #anp-toast.utan-angra .anp-toast-angra { display: none; }
 #anp-toast .anp-toast-txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 4px 0; }
@@ -1984,6 +1988,8 @@ body.sp-hoger-pa #closeconf { right: calc(12px + var(--sp-hb, 0px)); }
 :root[data-theme="dark"] #anp-toast .anp-toast-prick { color: rgb(20 20 22 / .35); }
 :root[data-theme="dark"] #anp-toast .anp-toast-angra { color: #c2360e; background: rgb(20 20 22 / .07); }
 :root[data-theme="dark"] #anp-toast .anp-toast-angra:is(:hover, :focus-visible) { color: #fff; }
+@media (prefers-reduced-motion: reduce) { #anp-toast, #anp-toast .anp-toast-angra, #anp-toast .anp-toast-angra::before { transition: none; } }
+body.reduce-motion #anp-toast, body.reduce-motion #anp-toast .anp-toast-angra, body.reduce-motion #anp-toast .anp-toast-angra::before { transition: none; }
 
 /* Panelen högst upp i Anpassa */
 #settings #anp-angra > .set-h3:first-child { margin-top: 22px; }
@@ -1997,8 +2003,9 @@ body.sp-hoger-pa #closeconf { right: calc(12px + var(--sp-hb, 0px)); }
 #settings .anp-h-varde { flex: none; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; height: 22px; line-height: 22px; padding: 0 8px; border-radius: 6px;
   font-size: 12px; font-weight: 600; color: var(--s-ink); background: var(--s-surface-2); box-shadow: inset 0 0 0 1px var(--s-line); }
 #settings .anp-h-falk { flex: none; height: 20px; line-height: 20px; padding: 0 7px; border-radius: 999px; font-size: 11px; font-weight: 700; color: var(--s-accent-ink); background: var(--s-accent-soft); }
-#settings .anp-h-tid { flex: none; font-size: 12px; color: var(--s-faint); font-variant-numeric: tabular-nums; }
-#settings .anp-h-tom { padding: 10px 0 8px; font-size: 13px; color: var(--s-faint); }
+/* Tiden och små förklaringar: --s-mut (inte --s-faint) så att texten alltid går att läsa, med vilken accentfärg som helst */
+#settings .anp-h-tid { flex: none; font-size: 12px; color: var(--s-mut); font-variant-numeric: tabular-nums; }
+#settings .anp-h-tom { padding: 10px 0 8px; font-size: 13px; color: var(--s-mut); }
 #settings .anp-hist-mer { display: block; margin: 2px 0 4px; padding: 4px 0; border: 0; background: none; cursor: pointer; font: inherit; font-size: 12.5px; font-weight: 600; color: var(--s-accent-ink); }
 #settings .anp-hist-mer:hover { text-decoration: underline; text-underline-offset: 3px; }
 #settings .anp-hist-mer[hidden] { display: none; }
@@ -2009,8 +2016,9 @@ body.sp-hoger-pa #closeconf { right: calc(12px + var(--sp-hb, 0px)); }
 #settings .anp-ruta textarea { display: block; width: 100%; min-height: 64px; padding: 9px 11px; border: 1px solid var(--s-field-line); border-radius: 8px; resize: vertical;
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 12px; line-height: 1.45; word-break: break-all; }
 #settings .anp-knappar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+#settings .anp-par { display: flex; flex-wrap: wrap; gap: 8px; flex: none; }
 #settings .anp-not { font-size: 12.5px; color: var(--s-mut); }
-#settings .anp-liten { margin-top: 8px; font-size: 12px; color: var(--s-faint); }
+#settings .anp-liten { margin-top: 8px; font-size: 12px; color: var(--s-mut); }
 #settings .anp-bekrafta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 14px; padding: 12px 14px; border-radius: 10px;
   background: rgb(208 64 47 / .05); box-shadow: inset 0 0 0 1px rgb(208 64 47 / .28); }
 #settings .anp-bekrafta .anp-knappar { margin-top: 0; }
@@ -2041,6 +2049,16 @@ body.sp-hoger-pa #closeconf { right: calc(12px + var(--sp-hb, 0px)); }
 :root[data-theme="dark"] .ws-chip { box-shadow: inset 0 0 0 1px rgb(255 255 255 / .12); }
 body.incog .ws-vaxlare { color: #ece3fb; }
 body.incog .ws-vaxlare:hover { background: rgba(168,85,247,.14); }
+/* Flikarna på sidan (Anpassa › flikar): väljaren överst i panelen över hela bredden, med en linje under */
+body.flik-vertikal #brandbar:not(.hidden) { width: 100%; padding-bottom: 6px; margin-bottom: 2px; border-bottom: 1px solid var(--color-line); }
+body.flik-vertikal #brandbar:not(.hidden)::after { display: none; }
+body.flik-vertikal .ws-vaxlare { flex: 1; max-width: none; height: 34px; padding: 0 9px 0 6px; }
+body.flik-vertikal .ws-vaxlare .ws-pil { margin-left: auto; }
+:root[data-theme="dark"] body.flik-vertikal #brandbar:not(.hidden) { border-color: #2b2b2d; }
+body.incog.flik-vertikal #brandbar:not(.hidden) { border-color: rgba(124,58,237,.22); }
+/* Bara ikoner: bara arbetsytans ikon (namnet står i knappens titel) */
+body.flik-smal .ws-vaxlare { justify-content: center; padding: 0; }
+body.flik-smal .ws-vaxlare :is(.ws-namn, .ws-pil) { display: none; }
 
 /* Menyn under väljaren */
 #ws-meny { position: fixed; z-index: 70; width: 290px; padding: 6px; border-radius: 12px; background: #fff; border: 1px solid var(--color-line); box-shadow: 0 16px 40px rgb(14 42 71 / .2);
