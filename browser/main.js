@@ -2296,6 +2296,16 @@ ipcMain.handle('billing:intent', (e, plan) => billingCall(e, 'intent', { plan: S
 ipcMain.handle('billing:confirm', (e, d) => billingCall(e, 'confirm', { subscription: d && d.subscription, payment_intent: d && d.payment_intent }));
 // Samtycke (Store-policy 10.5.2): inget skickas till AI-tjänsten förrän användaren sagt ja i Falk-panelen
 ipcMain.handle('krypto:samtycke', (_e, v) => { if (typeof v === 'boolean') webb.setFalkSamtycke(v); return !!webb.prefs.falkSamtycke; });
+// Falks kvot (gratis: 50 000 tokens och 2 sökfrågor per 14 dagar, Pro: 2 miljoner per 30 dagar), visas i panelen
+ipcMain.handle('krypto:kvot', async (e) => {
+  const ctx = e.sender.__ctx, token = ctx && ctx.authToken;
+  if (!token) return null;
+  try {
+    const r = await fetch(ADRAZE_API + '/falk/kvot', { headers: { accept: 'application/json', authorization: 'Bearer ' + token }, signal: AbortSignal.timeout(10000) });
+    const j = await r.json().catch(() => ({}));
+    return r.ok && j.kvot ? j.kvot : null;
+  } catch { return null; }
+});
 ipcMain.handle('krypto:chat', async (e, messages, opts) => {
   if (!webb.prefs.falkSamtycke) return { ok: false, samtycke: true, message: 'Godkänn först att Falk får skicka till AI-tjänsten.' };
   const ctx = e.sender.__ctx;
@@ -2304,16 +2314,17 @@ ipcMain.handle('krypto:chat', async (e, messages, opts) => {
   const payload = { messages: (Array.isArray(messages) ? messages : []).slice(-16), ...(opts && opts.flik ? { flik: true } : {}) };
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
-      // AdRazes egen server (pro.js /falk/chat), bara för Pro
+      // AdRazes egen server (pro.js /falk/chat): gratis med liten kvot, Pro med stor
       const r = await fetch(ADRAZE_API + '/falk/chat', {
         method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json', authorization: 'Bearer ' + token },
         body: JSON.stringify(payload), signal: AbortSignal.timeout(90000),
       });
       const json = await r.json().catch(() => ({}));
       if (r.status === 401) return { ok: false, needLogin: true, message: 'Logga in igen för att använda Falk.' };
-      if (!r.ok || !json.ok) { klog({ stage: 'http', attempt, status: r.status, error: json.error }); return { ok: false, error: json.error, message: json.message || json.error || 'Något gick fel. Försök igen om en stund.' }; }
+      if (!r.ok || !json.ok) { klog({ stage: 'http', attempt, status: r.status, error: json.error }); return { ok: false, error: json.error, message: json.message || json.error || 'Något gick fel. Försök igen om en stund.', ...(json.kvot ? { kvot: json.kvot } : {}) }; }
       klog({ stage: 'ok', attempt });
-      return { ok: true, reply: json.reply, sources: Array.isArray(json.sources) ? json.sources.slice(0, 6) : [], actions: Array.isArray(json.actions) ? json.actions.slice(0, 3) : [] };
+      return { ok: true, reply: json.reply, sources: Array.isArray(json.sources) ? json.sources.slice(0, 6) : [], actions: Array.isArray(json.actions) ? json.actions.slice(0, 3) : [],
+        ...(json.kvot ? { kvot: json.kvot } : {}), ...(json.uppgradera ? { uppgradera: String(json.uppgradera) } : {}) };
     } catch (err) {
       klog({ stage: 'throw', attempt, err: String(err && (err.name || err.message || err)) });
       if (attempt === 2) return { ok: false, message: 'Kunde inte nå Falk just nu. Kontrollera din uppkoppling och försök igen.' };

@@ -60,6 +60,26 @@
   .samtycke p { color: var(--mut); margin: 0 0 8px; }
   .samtycke .rad { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
   .samtycke button { height: 34px; padding: 0 14px; border-radius: 9px; font-size: 13.5px; font-weight: 600; cursor: pointer; border: 1px solid var(--field-line); background: transparent; color: var(--ink); }
+  /* Falks kvot (gratis: 50 000 tokens och 2 webbsökningar per 14 dagar) och Pro-rutan när något tar slut */
+  .fk-kvot { margin: 2px 4px 6px; font-size: 11.5px; color: var(--mut); }
+  .fk-kvot-rad { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+  .fk-kvot-rad #fkkvot-pa { color: var(--faint); white-space: nowrap; }
+  .fk-kvot-bar { height: 3px; border-radius: 3px; background: var(--line); overflow: hidden; }
+  .fk-kvot-bar i { display: block; height: 100%; width: 0; border-radius: 3px; background: var(--accent); transition: width .4s ease; }
+  .fk-kvot.lag .fk-kvot-rad #fkkvot-text { color: var(--accent-ink); }
+  .fk-pro { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 14px 15px; font-size: 13.5px; line-height: 1.55; color: var(--ink); animation: msgin .2s ease-out both; }
+  .fk-pro b { display: block; font-size: 14.5px; margin-bottom: 3px; }
+  .fk-pro p { margin: 0 0 12px; color: var(--mut); }
+  .fk-pro .fk-pro-rad { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .fk-pro .liq { position: relative; isolation: isolate; overflow: hidden; height: 36px; padding: 0 16px; border: 0; border-radius: 9px; font-size: 13.5px; font-weight: 650;
+    cursor: pointer; color: #fff; background: var(--accent); transition: color .6s ease, transform .2s ease; }
+  .fk-pro .liq::before { content: ""; position: absolute; inset: -2px; z-index: -1; background: #fff; transform: translateY(102%); border-radius: 40% 40% 0 0 / 14px 14px 0 0;
+    transition: transform .95s cubic-bezier(.2,.8,.2,1), border-radius .95s ease; }
+  .fk-pro .liq:is(:hover, :focus-visible)::before { transform: translateY(0); border-radius: 0; }
+  .fk-pro .liq:is(:hover, :focus-visible) { color: #0e0e10; }
+  .fk-pro .liq:active { transform: translateY(1px); }
+  .fk-pro .fk-pro-pris { color: var(--faint); font-size: 12.5px; }
+  @media (prefers-reduced-motion: reduce) { .fk-pro .liq::before { transition: none; } }
   .samtycke button.ja { background: var(--accent); border-color: var(--accent); color: #fff; }
   .samtycke button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   /* Välkomstvyn när samtalet är tomt */
@@ -476,6 +496,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
       </button>
     </div>
+    <div class="fk-kvot" id="fkkvot" hidden><div class="fk-kvot-rad"><span id="fkkvot-text"></span><span id="fkkvot-pa"></span></div><div class="fk-kvot-bar"><i id="fkkvot-bar"></i></div></div>
     <div class="foot-note">Falk kan ha fel. Dela aldrig lösenord eller BankID.</div>
   </footer>
   </div>
@@ -487,6 +508,38 @@
     const log = $('log'), inp = $('inp'), sendBtn = $('send');
     const MEM = 'krypto-memories', CONV = 'krypto-convos', HIST = 'krypto-chat-history';
     let busy = false;
+
+    /* ── Falks kvot: mätaren ovanför "Falk kan ha fel" och Pro-rutan när sökningarna eller tokens tar slut ── */
+    const KVOT_DATUM = (ms) => { try { return new Date(ms).toLocaleDateString(document.documentElement.lang || 'sv-SE', { day: 'numeric', month: 'short' }).replace(/\.$/, ''); } catch { return ''; } };
+    let proKortSok = false;   // sök-rutan högst en gång per gång panelen öppnas, inte efter varje fråga
+    function visaKvot(k) {
+      const box = $('fkkvot'); if (!box) return;
+      if (!k || typeof k.tak !== 'number') { box.hidden = true; return; }
+      const kvar = Math.max(0, Math.min(1, (k.kvar ?? (k.tak - k.anvant)) / k.tak)), proc = Math.round(kvar * 100);
+      // Pro: bara när det börjar ta slut. Gratis: alltid, så man vet var man står.
+      if (k.plan === 'pro' && kvar > 0.2) { box.hidden = true; return; }
+      const delar = [(k.plan === 'pro' ? 'Pro' : tx('Gratis')) + ' · ' + proc + ' % ' + tx('kvar')];
+      if (k.sokKvar != null) delar.push(k.sokKvar === 1 ? tx('1 webbsökning kvar') : k.sokKvar + ' ' + tx('webbsökningar kvar'));
+      $('fkkvot-text').textContent = delar.join(' · ');
+      $('fkkvot-pa').textContent = k.fyllsPa ? tx('Fylls på') + ' ' + KVOT_DATUM(k.fyllsPa) : '';
+      $('fkkvot-bar').style.width = proc + '%';
+      box.classList.toggle('lag', kvar < 0.15 || k.sokKvar === 0);
+      box.hidden = false;
+    }
+    function proKort(orsak, k) {
+      const el = document.createElement('div'); el.className = 'msg krypto';
+      const rub = orsak === 'sok' ? tx('Webbsökningarna är slut för den här gången') : tx('Gratiskvoten är slut för den här gången');
+      const text = (orsak === 'sok' ? tx('Med Pro söker Falk på webben i varje fråga, läser hela sidor och använder en smartare AI-modell.')
+        : tx('Med Pro får du 40 gånger mer Falk varje månad, webbsökning i varje fråga och en smartare AI-modell.'))
+        + (k && k.fyllsPa ? ' ' + tx('Annars fylls gratiskvoten på') + ' ' + KVOT_DATUM(k.fyllsPa) + '.' : '');
+      el.innerHTML = '<div class="fk-pro"><b></b><p></p><div class="fk-pro-rad"><button class="liq" type="button"></button><span class="fk-pro-pris"></span></div></div>';
+      el.querySelector('b').textContent = rub; el.querySelector('p').textContent = text;
+      el.querySelector('.liq').textContent = tx('Skaffa Pro');
+      el.querySelector('.fk-pro-pris').textContent = '79 kr / ' + tx('mån');
+      el.querySelector('.liq').addEventListener('click', () => { location.href = 'https://krypto.local/checkout?plan=pro_month'; });
+      log.appendChild(el); scrollBottom();
+    }
+    if (window.krypto && window.krypto.kvot) window.krypto.kvot().then(visaKvot).catch(() => {});
 
     /* ── Samtal ── */
     let convos = [], activeId = null, history = [];
@@ -1187,6 +1240,7 @@
         const messages = [p0, priming[1]].concat(extra.length ? hist.slice(-8) : hist, extra.slice(-4));
         try { res = await window.krypto.chat(messages, { flik: pageOn }); }
         catch { res = { ok: false, message: 'Kunde inte nå Falk just nu.' }; }
+        if (res && res.kvot) visaKvot(res.kvot);
         if (!res || !res.ok) break;
         const acts = (Array.isArray(res.actions) && res.actions.length ? res.actions : agentTags(res.reply)).slice(0, 3);
         // Skrev Falk "jag klickar på …" men glömde själva verktyget? Påminn en gång i stället för att stanna mitt i.
@@ -1251,6 +1305,7 @@
         history.push({ role: 'assistant', content: clean, ts: Date.now(), ...(Array.isArray(res.sources) && res.sources.length ? { sources: res.sources.slice(0, 6) } : {}) }); saveConvos();
         await writeOut(bubble('krypto', md(clean || '(tomt svar)'), '', history.length - 1));
         for (const f of forslag) minnesForslag(f);   // sparas/glöms bara om du klickar
+        if (res.uppgradera === 'sok' && !proKortSok) { proKortSok = true; proKort('sok', res.kvot); }
       } else {
         const lost = history.pop(); saveConvos(); setStatus('');
         // Inget går förlorat: din text och dina filer läggs tillbaka i skrivfältet så du kan skicka igen
@@ -1258,7 +1313,8 @@
           if (!inp.value.trim()) { inp.value = lost.content || ''; autosize(); }
           if (lost.files && lost.files.length) Promise.all(lost.files.map(async (f) => { const o = await idb.get(f.id).catch(() => null); return o ? { ...f, text: o.text } : null; })).then((l) => { pending = pending.concat(l.filter(Boolean)); renderPending(); });
         }
-        bubble('krypto', fmt((res && res.message) || 'Något gick fel. Försök igen om en stund.'));
+        if (res && res.error === 'kvot_slut' && res.kvot && res.kvot.plan === 'gratis') proKort('kvot', res.kvot);
+        else bubble('krypto', fmt((res && res.message) || 'Något gick fel. Försök igen om en stund.'));
       }
       busy = false; sendBtn.disabled = false; inp.focus();
     }

@@ -633,7 +633,8 @@ $('adblock').addEventListener('click', () => setAdblock($('adblock').classList.c
 
 /* ── Falk (kräver inloggning + Pro) ── */
 let kryptoOpen = false;
-function kryptoMode() { return account ? (account.pro ? 'pro' : 'nopro') : 'signedout'; }
+// Falk finns för alla inloggade vuxna: gratis med liten kvot (servern håller koll), Pro med stor. Barnkonton har inte Falk än.
+function kryptoMode() { return account ? (account.pro || !account.isChild ? 'pro' : 'nopro') : 'signedout'; }
 let pendingKryptoAfterLogin = false;
 // Falk och chatten visas en i taget. Öppnar du den ena göms den andra och kommer tillbaka när du stänger.
 var parkedKrypto = false, parkedChatt = false;
