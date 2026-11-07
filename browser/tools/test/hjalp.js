@@ -24,12 +24,21 @@ function tempDir(namn) {
 }
 
 // Egen X-server på en ledig skärm. Ingenting får hamna på användarens riktiga skärm.
+// Xvfb väljer själv en ledig skärm (-displayfd) och säger vilken när den är redo. Förr letade testet upp en ledig
+// skärm och startade Xvfb på den: två tester som startade samtidigt kunde då välja samma skärm, och det andra
+// körde sin app i det förstas X-server (klick och fokus blandades ihop mellan testerna).
 async function startaXvfb() {
-  let n = 90;
-  while (fs.existsSync('/tmp/.X11-unix/X' + n) || fs.existsSync('/tmp/.X' + n + '-lock')) n++;   // upptagen (eller kvarlämnad) skärm
-  const p = spawn('Xvfb', [':' + n, '-screen', '0', '1600x1000x24', '-nolisten', 'tcp'], { stdio: 'ignore', detached: true });
-  for (let i = 0; i < 50 && !fs.existsSync('/tmp/.X11-unix/X' + n); i++) await sov(100);
-  if (!fs.existsSync('/tmp/.X11-unix/X' + n)) throw new Error('Xvfb startade inte');
+  const p = spawn('Xvfb', ['-displayfd', '3', '-screen', '0', '1600x1000x24', '-nolisten', 'tcp'], { stdio: ['ignore', 'ignore', 'ignore', 'pipe'], detached: true });
+  const n = await new Promise((klar) => {
+    let buf = '', gjort = false;
+    const svar = (v) => { if (gjort) return; gjort = true; clearTimeout(t); klar(v); };
+    const t = setTimeout(() => svar(null), 10000);
+    p.stdio[3].on('data', (d) => { buf += d; const m = /^(\d+)\s/.exec(buf); if (m) svar(+m[1]); });
+    p.once('exit', () => svar(null));
+    p.once('error', () => svar(null));
+  });
+  try { p.stdio[3].destroy(); } catch {}
+  if (n === null || !fs.existsSync('/tmp/.X11-unix/X' + n)) { try { process.kill(p.pid, 'SIGTERM'); } catch {} throw new Error('Xvfb startade inte'); }
   return { display: ':' + n, stoppa: () => { try { process.kill(p.pid, 'SIGTERM'); } catch {} } };   // SIGTERM: Xvfb städar bort uttag och låsfil
 }
 
