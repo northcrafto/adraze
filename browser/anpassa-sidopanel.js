@@ -5,7 +5,8 @@
  * vyn lever kvar (musiken spelar vidare) tills appen avslutas, tas bort eller fönstret stängs.
  *
  * Nycklar i Anpassa-butiken (alla barnlåsta):
- *   sidopanel.visa   true/false                                listen syns
+ *   sidopanel.visa   true/false (standard av)                  listen syns – slås på när du lägger till en app
+ *                                                              (inställningarna, listens "+" eller sidans högerklicksmeny)
  *   sidopanel.sida   'vanster' | 'hoger'                       vid vilken kant
  *   sidopanel.appar  [{ id, namn, url, mobil, ljud, bredd }]   appar i ordning (importeras aldrig via delningskod)
  *
@@ -27,7 +28,8 @@ const FRAGA_MS = 90000;                         // obesvarad behörighetsfråga 
 const ID_OK = /^[a-z0-9][a-z0-9-]{3,39}$/i;
 const INTERN = /^(adraze|adraze-res|file|devtools|chrome|chrome-extension|view-source):/i;
 
-anpassa.registrera({ nyckel: 'sidopanel.visa', standard: true, etikett: 'Visa sidopanelen', barnLast: true });
+// Av som standard: listen tar ingen plats förrän du lagt till en app (eller själv slagit på den i Anpassa)
+anpassa.registrera({ nyckel: 'sidopanel.visa', standard: false, etikett: 'Visa sidopanelen', barnLast: true });
 anpassa.registrera({ nyckel: 'sidopanel.sida', standard: 'vanster', etikett: 'Sidopanelens placering', barnLast: true });
 anpassa.registrera({ nyckel: 'sidopanel.appar', standard: [], etikett: 'Appar i sidopanelen', barnLast: true, importBar: false });
 
@@ -72,7 +74,8 @@ function mobilUA() {
 
 /* ── Får fönstret ha en sidopanel? Aldrig i inkognito, aldrig när något fönster är i barnläge ── */
 function tillatenHar(ctx) { return !!(ctx && ctx.win && !ctx.win.isDestroyed() && !ctx.incognito && !D.barnNagonstans()); }
-function kanOppna(ctx) { return tillatenHar(ctx) && anpassa.hamta('sidopanel.visa', true) !== false; }
+const visas = () => anpassa.hamta('sidopanel.visa') === true;
+function kanOppna(ctx) { return tillatenHar(ctx) && visas(); }
 
 function st(ctx) {
   let s = tillstand.get(ctx);
@@ -517,7 +520,7 @@ function barnKoll() {
 // Anpassa ändrades (här, i ett annat fönster, via ångra eller import): följ med i alla fönster
 function andrat() {
   const lista = appar(); const ids = new Set(lista.map((a) => a.id));
-  const visa = anpassa.hamta('sidopanel.visa', true) !== false;
+  const visa = visas();
   for (const ctx of D.wins.values()) {
     const s = tillstand.get(ctx); if (!s) continue;
     for (const [id, p] of [...s.vyer]) {
@@ -575,6 +578,49 @@ function meny(ctx, id) {
   try { Menu.buildFromTemplate(t).popup({ window: ctx.win }); } catch {}
 }
 
+/* ── Sidans högerklicksmeny (main.js buildContextMenu): "Lägg till i sidopanelen" gör sajten till en app ── */
+const KANDA_NAMN = { 'open.spotify.com': 'Spotify', 'web.whatsapp.com': 'WhatsApp', 'www.messenger.com': 'Messenger', 'calendar.google.com': 'Google Kalender', 'music.youtube.com': 'YouTube Music', 'chatgpt.com': 'ChatGPT' };
+const hostAv = (u) => { try { return new URL(u).host.toLowerCase().replace(/^www\./, ''); } catch { return ''; } };
+const nyttId = () => 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+// Namnet: känd app, annars titelns första del ("Spotify – Web Player" → "Spotify", olästa-räknaren bort), annars domänen
+function namnFor(url, titel) {
+  let h = ''; try { h = new URL(url).hostname.toLowerCase(); } catch {}
+  if (KANDA_NAMN[h]) return KANDA_NAMN[h];
+  const t = String(titel || '').replace(/\(\d{1,5}\+?\)/g, '').replace(/^\s*[•●]\s*/, '').split(/\s+[-–—|·:]\s+/)[0].replace(/\s+/g, ' ').trim();
+  if (t.length >= 2 && t.length <= 30 && !/^[a-z]+:\/\//i.test(t)) return t;
+  const d = h.replace(/^www\./, '').split('.'); const b = d.length > 1 ? d[d.length - 2] : d[0] || '';
+  return b ? b.charAt(0).toUpperCase() + b.slice(1) : h;
+}
+// Lägg till en app. Listen slås på samtidigt om den var avslagen (annars syns inget av det du just gjorde).
+function laggTillApp(ctx, { namn, url }) {
+  if (!tillatenHar(ctx)) return { ok: false };
+  const ren = rensaUrl(url); if (!ren || D.barnSparrad(ren, ctx)) return { ok: false };
+  const ra = anpassa.hamta('sidopanel.appar', []); const l = (Array.isArray(ra) ? ra : []).filter((a) => a && typeof a === 'object');
+  if (appar().length >= MAX_APPAR) return { ok: false };
+  const ny = { id: nyttId(), namn: String(namn || vardnamn(ren)).slice(0, 60), url: ren, mobil: false, ljud: true };
+  if (!visas()) { const r = anpassa.satt('sidopanel.visa', true, { etikett: 'Visa sidopanelen' }); if (!r.ok) return r; }
+  const r = anpassa.satt('sidopanel.appar', l.concat(ny), { etikett: 'La till ' + ny.namn });
+  if (r.ok) D.sendTo(ctx, 'sidopanel:atgard', 'tillagd', ny.id, ny.namn);
+  return r;
+}
+// Inkognitoflik i ett vanligt fönster (egen efemär session): sajten får aldrig hamna i den sparade applistan
+const inkognitoFlik = (wc) => { try { return wc.session === session.fromPartition('skoll-incognito'); } catch { return true; } };
+function menyval(ctx, wc) {
+  try {
+    if (!wc || wc.__sidopanel || !tillatenHar(ctx) || inkognitoFlik(wc)) return [];
+    const sida = rensaUrl(wc.getURL()); if (!sida || D.barnSparrad(sida, ctx)) return [];
+    const u = new URL(sida), appUrl = u.origin + u.pathname;       // utan ?fråga och #: inga inloggningskoder följer med
+    const finns = appar().find((a) => hostAv(a.url) === hostAv(appUrl));
+    if (finns) return [{ label: D.T('Öppna i sidopanelen'), click: () => {
+      if (!visas()) anpassa.satt('sidopanel.visa', true, { etikett: 'Visa sidopanelen' });
+      D.sendTo(ctx, 'sidopanel:atgard', 'oppna', finns.id);
+    } }];
+    if (appar().length >= MAX_APPAR) return [];
+    let titel = ''; try { titel = wc.getTitle(); } catch {}
+    return [{ label: D.T('Lägg till i sidopanelen'), click: () => laggTillApp(ctx, { namn: namnFor(appUrl, titel), url: appUrl }) }];
+  } catch { return []; }
+}
+
 /* ── Konto byttes: vyerna hör till det gamla kontots lagring → riv och öppna samma app i den nya ── */
 function kontoBytt(ctx) {
   const s = ctx ? tillstand.get(ctx) : null; if (!s) return;
@@ -618,4 +664,4 @@ function init(deps) {
   app.whenReady().then(() => setTimeout(() => { for (const a of appar()) hamtaIkon(a); }, 6000)).catch(() => {});
 }
 
-module.exports = { init, placera, kontoBytt, kontoByttAlla, fraga, genvag, _test: { olasta, ikonKandidater, bildTyp, adressOk, rensaUrl, hamta } };
+module.exports = { init, placera, kontoBytt, kontoByttAlla, fraga, genvag, menyval, _test: { olasta, ikonKandidater, bildTyp, adressOk, rensaUrl, hamta, namnFor } };

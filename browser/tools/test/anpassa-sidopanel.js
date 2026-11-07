@@ -46,6 +46,7 @@ async function kor(rot, bilder) {
       '<link rel="icon" type="image/svg+xml" href="/flytt-ikon">'));
     if (u === '/notis/') return html(sida('Notistest', '#cf9128', `<header>Notistest</header><main><button id="be" onclick="Notification.requestPermission().then((r) => { document.title = 'svar:' + r; })">Slå på notiser</button></main>`));
     if (u === '/extern/') return html(sida('Extern sida', '#1d4a76', '<header>Extern sida</header>'));
+    if (u === '/sajt/') return html(sida('Testkalender – vecka 45', '#2a5c8f', '<header>Testkalender</header><main><p>Måndag: tandläkare 9.00</p><p>Onsdag: fotboll 18.00</p></main>'));
     if (u === '/ikon1.png') { res.writeHead(200, { 'content-type': 'image/png' }); return res.end(IKON1); }
     if (u === '/ikon2.svg') { res.writeHead(200, { 'content-type': 'image/svg+xml' }); return res.end(IKON2); }
     // Ikonhämtningens gränser: omdirigering (följs, varje hopp kontrolleras), till en lokal fil (stoppas), för stort svar
@@ -105,10 +106,21 @@ async function kor(rot, bilder) {
       await H.sov(150); mus('mouseup', 1); await H.sov(400);
     };
 
-    // 1. Listen syns från början (tom, bara +), webbytan börjar efter den
-    const start = JSON.parse(await S.kor(`JSON.stringify({ rad: document.getElementById('views').parentElement.id, list: getComputedStyle(document.getElementById('sp-list')).display, plus: !!document.querySelector('#sp-list .sp-plus'), vx: Math.round(document.getElementById('views').getBoundingClientRect().x), lw: Math.round(document.getElementById('sp-list').getBoundingClientRect().width) })`));
-    R.ok('listen syns med en plusknapp', start.rad === 'sp-rad' && start.list === 'flex' && start.plus, start);
-    R.ok('webbytan börjar efter listen', start.vx === start.lw && start.lw > 30, start);
+    // 1. Som standard syns ingen list (den tar ingen plats förrän du lagt till en app eller slagit på den)
+    const lage = () => S.kor(`JSON.stringify({ rad: document.getElementById('views').parentElement.id, list: getComputedStyle(document.getElementById('sp-list')).display, plus: !!document.querySelector('#sp-list .sp-plus'), vx: Math.round(document.getElementById('views').getBoundingClientRect().x), lw: Math.round(document.getElementById('sp-list').getBoundingClientRect().width), visa: Anpassa.get('sidopanel.visa') })`).then((s) => JSON.parse(s));
+    const fore = await lage();
+    R.ok('standard: ingen list, webbytan börjar vid kanten', fore.rad === 'sp-rad' && fore.list === 'none' && fore.vx === 0 && fore.visa === false, fore);
+    // Lätt att hitta: raden "Visa sidopanelen" i Inställningar › Anpassa slår på listen (tom, bara +)
+    await S.kor(`openSettings(); showSettingsCat('anpassa'); document.getElementById('anp-sidopanel').scrollIntoView(); 1`);
+    await H.sov(600);
+    R.ok('Anpassa: raden "Visa sidopanelen" finns och är av', await S.kor(`(() => { const c = document.querySelector('#anp-sidopanel [data-sp="visa"]'); return !!c && c.checked === false; })()`));
+    await S.kor(`document.querySelector('#anp-sidopanel [data-sp="visa"]').click(); 1`);
+    await H.sov(600);
+    await S.kor(`document.getElementById('settings-close').click(); 1`);
+    await H.sov(500);
+    const start = await lage();
+    R.ok('påslagen: listen syns med en plusknapp', start.list === 'flex' && start.plus && start.visa === true, start);
+    R.ok('påslagen: webbytan börjar efter listen', start.vx === start.lw && start.lw > 30, start);
     await dump('1-tom-list');
 
     // 2. Lägg till en app via panelens formulär → den öppnas direkt
@@ -286,6 +298,30 @@ async function kor(rot, bilder) {
     await S.kor(`Anpassa.set('sidopanel.sida', 'vanster', 'test').then(() => 1)`);
     await H.sov(500);
 
+    // 12b. Ihop med Anpassa › Flikar och Verktyg: listen ligger innanför flikpanelen på sidan och följer med när
+    //      flikpanelen breddas eller verktygsraden flyttas ned (platsen ändras utan att storleken gör det)
+    const ihop = async () => { const q = await panelInfo(); const v = q.vyer.find((y) => y.syns); return { vy: v && v.b, plats: await rekt('#sp-vy'), list: await rekt('#sp-list'), views: await rekt('#views'), flik: q.flik, flikpanel: await rekt('#tabstrip'), verktyg: await rekt('#toolbar') }; };
+    const anp = (k, v) => S.kor(`Anpassa.set(${JSON.stringify(k)}, ${JSON.stringify(v)}, 'test').then(() => 1)`);
+    await anp('flikar.lage', 'vertikal'); await H.sov(1000);
+    let ih = await ihop();
+    R.ok('flikar på sidan: listen börjar där flikpanelen slutar', !!ih.list && ih.flikpanel.x === 0 && ih.list.x === ih.flikpanel.width, ih);
+    R.ok('flikar på sidan: appens vy och webbsidan på rätt plats', lika(ih.vy, ih.plats) && !!ih.flik && Math.abs(ih.flik.x - ih.views.x) <= 1 && ih.flik.x >= ih.plats.x + ih.plats.width, ih);
+    await dump('12b-flikar-pa-sidan');
+    const platsFore = ih.plats;
+    await anp('flikar.vertikalBredd', 300); await H.sov(1000);
+    ih = await ihop();
+    R.ok('bredare flikpanel: listen och appens vy flyttar med', ih.list.x === ih.flikpanel.width && ih.plats.x === platsFore.x + 60 && lika(ih.vy, ih.plats), ih);
+    await anp('verktyg.placering', 'nere'); await H.sov(1000);
+    ih = await ihop();
+    R.ok('verktygsraden längst ner: appens vy följer med', ih.plats.y < platsFore.y && lika(ih.vy, ih.plats) && ih.list.y + ih.list.height <= ih.verktyg.y + 1 && ih.verktyg.y > ih.plats.y, ih);
+    await dump('12c-verktyg-nere');
+    await anp('flikar.lage', 'upptill'); await H.sov(800);
+    ih = await ihop();
+    R.ok('flikar upptill + verktyg nere: appens vy följer med', lika(ih.vy, ih.plats) && ih.list.x === 0 && ih.list.y + ih.list.height <= ih.verktyg.y + 1, ih);
+    await anp('verktyg.placering', 'uppe'); await anp('flikar.vertikalBredd', 240); await H.sov(1000);
+    ih = await ihop();
+    R.ok('tillbaka som förut: appens vy på platshållaren', lika(ih.vy, ih.plats) && ih.list.x === 0, ih);
+
     // 13. Behörighetsfråga från en app: visas i panelen, svaret går tillbaka till appen
     await setAppar((await appar()).concat({ id: 'testnotis01', namn: 'Notistest', url: BAS + '/notis/', mobil: false, ljud: true }));
     await H.sov(300);
@@ -376,6 +412,67 @@ async function kor(rot, bilder) {
     await S.kor(`window.anpassaSidopanel.gor('${chattId}', 'avsluta'); 1`);
     await H.sov(700);
     R.ok('avsluta app: vyn borta och panelen stängd', (await panelInfo()).n === 0 && (await S.kor(`!document.querySelector('.sp-app.laddad') && getComputedStyle(document.getElementById('sp-panel')).display === 'none'`)));
+
+    // 19b. Sidans högerklicksmeny (riktig högerklick i fliken): "Lägg till i sidopanelen" gör sajten till en app och
+    //      slår på listen om den var av; finns sajten redan blir valet "Öppna i sidopanelen"
+    const NF = (u, t) => M(`return process.mainModule.require('./anpassa-sidopanel')._test.namnFor(${JSON.stringify(u)}, ${JSON.stringify(t)})`);
+    R.ok('namn ur sidan: känd app, titelns första del, annars domänen', (await NF('https://open.spotify.com/', 'Spotify – Web Player')) === 'Spotify'
+      && (await NF('https://exempel.se/inkorg', '(3) Inkorg - Exempelpost')) === 'Inkorg' && (await NF('https://www.svt.se/', '')) === 'Svt', [await NF('https://exempel.se/inkorg', '(3) Inkorg - Exempelpost'), await NF('https://www.svt.se/', '')]);
+    await M(`if (!global.__spBygg) { global.__spBygg = el.Menu.buildFromTemplate; el.Menu.buildFromTemplate = (t) => { const m = global.__spBygg.call(el.Menu, t); global.__spMeny = t; m.popup = () => {}; return m; }; } global.__spMeny = null; return 1`);
+    const menyEtiketter = () => M(`return JSON.stringify({ l: (global.__spMeny || []).map((i) => i.label || '-') })`).then((r) => (r && r.l) || []);
+    const hogerklick = async () => {
+      await M(`global.__spMeny = null; return 1`);
+      fb = (await panelInfo()).fonster; const v = await rekt('#views');
+      mus('mousemove', fb.x + v.x + Math.round(v.width / 2), fb.y + v.y + 220); await H.sov(150); mus('click', 3); await H.sov(700);
+      return menyEtiketter();
+    };
+    await S.kor(`Anpassa.set('sidopanel.visa', false, 'test').then(() => 1)`);
+    await H.sov(500);
+    const LOK = BAS.replace('127.0.0.1', 'localhost');
+    await S.kor(`createTab('${LOK}/sajt/?kod=hemlig#topp'); 1`);
+    const sajtT = await H.mal(cdp, (t) => t.url.startsWith(LOK + '/sajt/'), 10000);
+    await H.sov(900);
+    const m1 = sajtT ? await hogerklick() : [];
+    R.ok('högerklick på en sida: "Lägg till i sidopanelen"', m1.includes('Lägg till i sidopanelen'), m1);
+    await M(`const it = (global.__spMeny || []).find((i) => i.label === 'Lägg till i sidopanelen'); if (it) it.click(); return 1`);
+    await H.sov(800);
+    const ny = (await appar()).find((a) => a.url.startsWith(LOK));
+    R.ok('sajten blev en app (namn ur titeln, adress utan ?kod och #)', !!ny && ny.namn === 'Testkalender' && ny.url === LOK + '/sajt/', ny);
+    R.ok('listen slogs på av sig själv', (await S.kor(`Anpassa.get('sidopanel.visa') === true && getComputedStyle(document.getElementById('sp-list')).display === 'flex' && !!document.querySelector('.sp-app[data-id="${ny && ny.id}"]')`)) === true);
+    R.ok('besked: "Tillagd i sidopanelen"', String(await S.kor(`document.getElementById('apptoast').textContent`)).startsWith('Tillagd i sidopanelen'));
+    const m2 = await hogerklick();
+    R.ok('finns redan: "Öppna i sidopanelen" i stället', m2.includes('Öppna i sidopanelen') && !m2.includes('Lägg till i sidopanelen'), m2);
+    await M(`const it = (global.__spMeny || []).find((i) => i.label === 'Öppna i sidopanelen'); if (it) it.click(); return 1`);
+    R.ok('"Öppna i sidopanelen" öppnar appen', !!(await vanta(async () => (await panelInfo()).vyer.some((v) => v.syns && v.url.startsWith(LOK + '/sajt/')), 8000)));
+    await H.sov(600);
+    await dump('19b-hogerklick');
+    // 19c. Inkognitoflik i ett vanligt fönster: inget sidopanelsval alls – sajten får aldrig sparas som app
+    //      (samma värd är redan en app, så en vanlig flik hade fått "Öppna i sidopanelen")
+    const antalFore = (await appar()).length;
+    await S.kor(`createTab('${LOK}/sajt/?inkognito=1', true); 1`);
+    const inkFlik = await H.mal(cdp, (t) => t.url.includes('inkognito=1'), 10000);
+    await H.sov(900);
+    const m3 = inkFlik ? await hogerklick() : [];
+    R.ok('inkognitoflik: inget sidopanelsval i högerklicksmenyn', m3.length > 0 && !m3.some((l) => /sidopanelen/.test(l)), m3);
+    R.ok('inkognitoflik: applistan orörd', (await appar()).length === antalFore);
+    await M(`if (global.__spBygg) { el.Menu.buildFromTemplate = global.__spBygg; delete global.__spBygg; } return 1`);
+
+    // 19d. Rader som andra delar lägger in "före #views" (galleriets "Du provar …") hamnar ovanför raden runt
+    //      webbytan, inte bredvid sidan inne i den; det som läggs efter webbytan hamnar under raden
+    const RI = JSON.parse(await S.kor(`(async () => {
+      const rad = document.getElementById('sp-rad'), views = document.getElementById('views');
+      const fore = document.createElement('div'); fore.id = 'sp-test-fore'; fore.style.height = '30px'; rad.insertBefore(fore, views);
+      const efter = document.createElement('div'); efter.id = 'sp-test-efter'; rad.appendChild(efter);
+      await new Promise((r) => setTimeout(r, 100));
+      const ut = { fore: [fore.parentNode && fore.parentNode.id, fore.nextElementSibling && fore.nextElementSibling.id],
+        efter: [efter.parentNode && efter.parentNode.id, efter.previousElementSibling && efter.previousElementSibling.id],
+        avstand: Math.round(views.getBoundingClientRect().top - fore.getBoundingClientRect().bottom), barn: [...rad.children].map((n) => n.id) };
+      fore.remove(); efter.remove();
+      const g = document.getElementById('gal-provbar'); ut.galleri = g ? (g.nextElementSibling && g.nextElementSibling.id) : 'saknas';
+      return JSON.stringify(ut); })()`));
+    R.ok('andra delars rader: före webbytan → ovanför raden, efter → under den', RI.fore[0] !== 'sp-rad' && RI.fore[1] === 'sp-rad' && RI.efter[0] !== 'sp-rad' && RI.efter[1] === 'sp-rad'
+      && RI.avstand >= 0 && RI.barn.every((id) => ['sp-list', 'sp-panel', 'views'].includes(id)), RI);
+    R.ok('galleriets "Du provar …" ligger ovanför raden', RI.galleri === 'sp-rad' || RI.galleri === 'saknas', RI.galleri);
 
     // 20. Loggen och skalet: inga nekade kanaler, inga JS-fel
     let text = fs.readFileSync(logg, 'utf8');

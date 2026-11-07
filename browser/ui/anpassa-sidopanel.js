@@ -8,6 +8,22 @@
   'use strict';
   const bro = window.anpassaSidopanel, A = window.Anpassa;
   const rad = document.getElementById('sp-rad'), views = document.getElementById('views');
+  // Raden får bara innehålla listen, panelen och webbytan. Rader som andra delar lägger in "före #views" (t.ex.
+  // galleriets "Du provar …") flyttas ut ovanför raden, och det som läggs efter webbytan ut under den – annars
+  // hamnade de bredvid sidan i stället för över/under den. Gäller alla fönster, även där panelen aldrig visas.
+  if (rad && views && rad.parentNode) {
+    const EGNA = new Set(['sp-list', 'sp-panel', 'views']);
+    const stada = () => {
+      let sist = rad;
+      for (const n of [...rad.children]) {
+        if (EGNA.has(n.id)) continue;
+        if (n.compareDocumentPosition(views) & Node.DOCUMENT_POSITION_FOLLOWING) rad.before(n);   // låg före webbytan
+        else { sist.after(n); sist = n; }
+      }
+    };
+    stada();
+    new MutationObserver(stada).observe(rad, { childList: true });
+  }
   if (!bro || !A || !rad || !views) return;
   const INKOGNITO = new URLSearchParams(location.search).has('incognito');
   const tt = (s) => (typeof window.t === 'function' ? window.t(s) : s);
@@ -28,7 +44,8 @@
   /* ── Hjälpare ── */
   const lista = () => { const l = A.get('sidopanel.appar', []); return Array.isArray(l) ? l.filter((a) => a && a.id && a.url) : []; };
   const appAv = (id) => (id ? lista().find((a) => a.id === id) || null : null);
-  const visas = () => !INKOGNITO && S.tillaten && A.get('sidopanel.visa', true) !== false;
+  const pa = () => A.get('sidopanel.visa', false) === true;           // av som standard: slås på med första appen
+  const visas = () => !INKOGNITO && S.tillaten && pa();
   const hoger = () => A.get('sidopanel.sida', 'vanster') === 'hoger';
   const mork = () => document.documentElement.getAttribute('data-theme') === 'dark';
   const vard = (u) => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return ''; } };
@@ -137,6 +154,9 @@
     S.senYta = k;
     bro.yta({ x: r.x, y: r.y, width: r.width, height: r.height });
   }
+  // shell.js sendBounds anropar den här varje gång webbytan mäts om: platsen kan flytta utan att storleken ändras
+  // (flikpanelens bredd, verktygsraden längst ner), och då märker ResizeObserver inget
+  window.anpSidopanelMatt = skickaYta;
   // Webbytan (#views) krymper när panelen öppnas: flikens vy ska följa med. Platshållaren: panelens vy.
   try { new ResizeObserver(() => { try { if (typeof window.sendBounds === 'function') window.sendBounds(); } catch {} }).observe(views); } catch {}
   try { new ResizeObserver(() => skickaYta()).observe(vy); } catch {}
@@ -377,8 +397,11 @@
     const l = lista();
     if (l.length >= MAX_APPAR) { if (felEl) felEl.textContent = tt('Du kan ha högst 24 appar.'); return false; }
     const app = { id: nyttId(), namn: (ny.namn || namnForslag(ny.url)).slice(0, 60), url: ny.url, mobil: !!ny.mobil, ljud: true };
+    const fel = (r) => { if (felEl) felEl.textContent = r && r.error === 'barnlast' ? tt('Det går inte i barnläge.') : tt('Det gick inte att spara.'); return false; };
+    // Listen är av som standard: första appen (eller en app medan listen är dold) slår på den, annars syns inget
+    if (!pa()) { const r0 = await A.set('sidopanel.visa', true, 'Visa sidopanelen'); if (!r0 || !r0.ok) return fel(r0); }
     const r = await A.set('sidopanel.appar', l.concat(app), 'La till ' + app.namn);
-    if (!r || !r.ok) { if (felEl) felEl.textContent = r && r.error === 'barnlast' ? tt('Det går inte i barnläge.') : tt('Det gick inte att spara.'); return false; }
+    if (!r || !r.ok) return fel(r);
     if (iPanel) oppna(app.id); else toast(tt('Appen finns nu i sidopanelen.'));
     return true;
   }
@@ -431,17 +454,17 @@
     instRitad = true;
     const barnlage = S.barn || A.barnlage();
     inst.innerHTML = '<h3 class="set-h3">Sidopanel</h3>'
-      + '<p class="set-lead">Webbappar i en smal list vid fönstrets kant. Klicka på en ikon så öppnas appen bredvid sidan. Musik spelar vidare när du stänger panelen.</p>';
+      + '<p class="set-lead">Webbappar i en smal list vid fönstrets kant. Klicka på en ikon så öppnas appen bredvid sidan. Musik spelar vidare när du stänger panelen. Lägg till en app här, eller högerklicka på en sida och välj Lägg till i sidopanelen.</p>';
     if (barnlage) { inst.insertAdjacentHTML('beforeend', '<p class="sp-not">Sidopanelen är avstängd i barnläge.</p>'); return; }
     if (INKOGNITO) inst.insertAdjacentHTML('beforeend', '<p class="sp-not">Sidopanelen visas inte i inkognitofönster.</p>');
     inst.insertAdjacentHTML('beforeend',
-      '<div class="set-row"><div class="set-txt"><div class="set-title">Visa sidopanelen</div><div class="set-desc">Listen med dina webbappar.</div></div>'
+      '<div class="set-row"><div class="set-txt"><div class="set-title">Visa sidopanelen</div><div class="set-desc">Listen med dina webbappar. Slås på av sig själv när du lägger till en app.</div></div>'
       + '<label class="switch flex-none"><input type="checkbox" data-sp="visa"><span class="track"></span></label></div>'
       + '<div class="set-row"><div class="set-txt"><div class="set-title">Placering</div><div class="set-desc">Vid vänster eller höger kant av fönstret.</div></div>'
       + '<div class="seg flex-none"><button type="button" class="seg-btn" data-sida="vanster">Vänster</button><button type="button" class="seg-btn" data-sida="hoger">Höger</button></div></div>'
       + '<div class="sp-inst-lista"></div><div class="sp-inst-lagg"></div>');
     const visaIn = inst.querySelector('[data-sp="visa"]');
-    visaIn.checked = A.get('sidopanel.visa', true) !== false;
+    visaIn.checked = pa();
     visaIn.addEventListener('change', () => A.set('sidopanel.visa', visaIn.checked, visaIn.checked ? 'Visa sidopanelen' : 'Dölj sidopanelen'));
     inst.querySelectorAll('[data-sida]').forEach((b) => {
       b.classList.toggle('on', (b.dataset.sida === 'hoger') === hoger());
@@ -541,6 +564,7 @@
     else if (vad === 'installningar') visaInstallningar();
     else if (vad === 'dold') toast(tt('Sidopanelen är dold. Du får tillbaka den under Inställningar › Anpassa.'));
     else if (vad === 'borttagen') toast(tt('Appen togs bort. Ångra under Inställningar › Anpassa.'));
+    else if (vad === 'tillagd') toast(tt('Tillagd i sidopanelen') + ': ' + String(namn || '').slice(0, 60));   // från sidans högerklicksmeny
   });
   A.on('sidopanel.', () => {
     allt();
