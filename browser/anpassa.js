@@ -39,9 +39,16 @@ function last(nyckel) {
   const r = register.get(nyckel) || [...register.entries()].find(([k, v]) => v.barnLast && k.endsWith('.*') && nyckel.startsWith(k.slice(0, -1)))?.[1];
   return !!(r && r.barnLast);
 }
+// Bara våra egna fönster (ui/) får värdena – inte popupfönster med webbsidor (inloggning/kassa via window.open),
+// som också är BrowserWindows. Egen CSS och skript får aldrig skickas till en webbsidas process.
+const UI_URL = require('url').pathToFileURL(path.join(__dirname, 'ui')).href + '/';
 function sandUt(nyckel, varde) {
   for (const fn of lyssnare) { try { fn(nyckel, varde); } catch {} }
-  for (const w of BrowserWindow.getAllWindows()) { try { if (!w.isDestroyed()) w.webContents.send('anpassa:andrad', { nyckel, varde }); } catch {} }
+  for (const w of BrowserWindow.getAllWindows()) { try { if (!w.isDestroyed() && w.webContents.getURL().startsWith(UI_URL)) w.webContents.send('anpassa:andrad', { nyckel, varde }); } catch {} }
+}
+// Registreringen för en nyckel: exakt, eller ett prefix registrerat som "område.namn.*"
+function regFor(nyckel) {
+  return register.get(nyckel) || [...register.entries()].find(([k]) => k.endsWith('.*') && nyckel.startsWith(k.slice(0, -1)))?.[1];
 }
 // Sätter ett värde (undefined = tillbaka till standard). Returnerar { ok } eller { ok:false, error:'barnlast' }.
 function satt(nyckel, varde, { etikett, utanHistorik } = {}) {
@@ -81,7 +88,12 @@ function aterstall(prefix) {
 // Dela: en kod med alla värden under ett prefix (t.ex. ett tema). Inget som rör konton eller säkerhet ska ligga här.
 function exportera(prefix) {
   const v = las().varden; const ut = {};
-  for (const k of Object.keys(v)) if (!prefix || k.startsWith(prefix)) ut[k] = v[k];
+  for (const k of Object.keys(v)) {
+    if (prefix && !k.startsWith(prefix)) continue;
+    const r = regFor(k);
+    if (r && r.importBar === false) continue;   // egen CSS, skript m.m. följer aldrig med i en delningskod
+    ut[k] = v[k];
+  }
   return 'ADRZ1.' + Buffer.from(JSON.stringify(ut)).toString('base64url');
 }
 function importera(kod, prefix) {
@@ -92,7 +104,7 @@ function importera(kod, prefix) {
   let n = 0;
   for (const [k, v] of Object.entries(o)) {
     if (prefix && !k.startsWith(prefix)) continue;
-    const r = register.get(k);
+    const r = regFor(k);
     if (r && r.importBar === false) continue;   // t.ex. skript/CSS importeras aldrig via delningskod
     if (satt(k, v, { etikett: 'Importerat' }).ok) n++;
   }
