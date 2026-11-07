@@ -43,6 +43,13 @@ if [ -z "$ADRAZE_UTAN_TEST" ]; then
   fi
   rm -rf "$FORRA"
 fi
+# Cetto får den nya versionen direkt (testad), utan att vänta på Mac-bygget eller GitHubs uppdateringsflöde.
+# Byts med mv så att en AdRaze som körs behåller sin gamla fil tills den startas om. Andra användare uppdateras som vanligt.
+if [ -z "$ADRAZE_TORR" ] && [ -f "$HOME/Applications/AdRaze.AppImage" ]; then
+  cp dist-installer/AdRaze.AppImage "$HOME/Applications/.AdRaze.ny" && chmod +x "$HOME/Applications/.AdRaze.ny" \
+    && mv -f "$HOME/Applications/.AdRaze.ny" "$HOME/Applications/AdRaze.AppImage" && echo "Installerad hos Cetto: $V"
+  command -v notify-send >/dev/null && notify-send "AdRaze $V" "Installerad hos dig – starta om AdRaze för att få den" 2>/dev/null || true
+fi
 # Mac (universell dmg + zip för uppdateringar), byggd och notariserad på MacBooken. Går det inte –
 # Mac:en avstängd eller bygget föll – följer förra versionens Mac-filer med, så att nedladdningslänken
 # alltid fungerar (Mac-användarna får då ingen uppdatering just den här gången).
