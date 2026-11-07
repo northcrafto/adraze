@@ -6,6 +6,8 @@
 //  - flikgrupper: flikens och gruppens meny, namn, färg, fäll ihop/ut, ny flik i gruppen, ta bort ur, dela upp,
 //    stäng gruppen, ångra, kvar efter omstart, inkognito sparar aldrig
 //  - fliklogik (nya flikar, sista fliken, stängknapp) och sovande flikar (fästa flikar sover aldrig, klick väcker)
+//  - alla placeringar × verktygsraden uppe/nere (Anpassa › verktyg): raden hel och klickbar, fönsterknapparna
+//    synliga och klickbara, panelen och webbsidan på rätt plats, dolda flikar fram med riktig mus
 // Skärmdumpar sparas i en mapp som skrivs ut på slutet (titta på dem).
 // Användning (från browser/): node tools/test/anpassa-flikar.js [--bilder <mapp>]
 'use strict';
@@ -80,7 +82,17 @@ async function kor() {
 
   const fonster = (ink = false) => app.main(`const w = ${FONSTER(ink)}; return w ? w.getContentBounds() : null;`);
   const mus = async (cx, cy) => { const b = await fonster(); xdo('mousemove', Math.round(b.x + cx), Math.round(b.y + cy)); await sov(150); };
-  const klick = async (cx, cy, knapp = 1) => { await mus(cx, cy); xdo('click', knapp); await sov(300); };
+  // Ångra-toasten (Anpassa, uppe i mitten) visas en stund efter en ändring och kan ligga över det som ska klickas:
+  // vänta ut den. Står musen på toasten stannar den kvar, så musen flyttas först ut på sidan.
+  const toastOver = (cx, cy) => app.kor(`(() => { const t = document.getElementById('anp-toast'); if (!t || !t.classList.contains('pa')) return 0;
+    const q = t.getBoundingClientRect(); if (${cx} < q.left - 4 || ${cx} > q.right + 4 || ${cy} < q.top - 4 || ${cy} > q.bottom + 4) return 0; return t.matches(':hover') ? 2 : 1; })()`);
+  const utanToast = async (cx, cy) => {
+    for (let i = 0, o = await toastOver(cx, cy); o && i < 50; i++, o = await toastOver(cx, cy)) {
+      if (o === 2) { const v = await rect('#views'); await mus(v.cx, v.cy); }
+      await sov(250);
+    }
+  };
+  const klick = async (cx, cy, knapp = 1) => { await utanToast(cx, cy); await mus(cx, cy); xdo('click', knapp); await sov(300); };
   const rect = (sel) => app.kor(`(() => { const e = document.querySelector(${js(sel)}); if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, cx: r.x + r.width / 2, cy: r.y + r.height / 2 }; })()`);
   const flik = (titel) => app.kor(`(() => { const t = tabs.find((t) => t.title === ${js(titel)}); const e = t && document.querySelector('[data-tabid="' + t.id + '"]'); if (!e) return null; const r = e.getBoundingClientRect(); return { id: t.id, cx: r.x + r.width / 2, cy: r.y + r.height / 2, w: r.width, h: r.height }; })()`);
   const aktiv = () => app.kor('active && active.title');
@@ -120,6 +132,8 @@ async function kor() {
 
   try {
     app = await startaApp(x, profil);
+    // Sidopanelen (egen del med eget test, av som standard) stängs av: här mäts webbytan bredvid flikarna utan den
+    await satt('sidopanel.visa', false);
     const SIDOR = [['Nyheter', 'dfe8f3'], ['Mejl', 'e6f4ea'], ['Kalender', 'fdf3e1'], ['Recept', 'fbe9f1'], ['Karta', 'eceff3']]
       .map(([n, f]) => `http://127.0.0.1:${srv.port}/sida/${n}?f=${f}`);
     await app.kor(`(async () => { for (const u of ${js(SIDOR)}) { createTab(u); await new Promise((r) => setTimeout(r, 350)); } return tabs.length; })()`);
@@ -450,7 +464,90 @@ async function kor() {
       await app.main(`${FONSTER(true)}.close(); return 1;`); await sov(1000);
     }
 
-    /* ── 10. Sista fliken ── */
+    /* ── 10. Flikarnas placering × verktygsraden uppe/nere (Anpassa › verktyg) ──
+       Webbsidan ritas ovanpå skalet: verktygsraden, panelen och fönsterknapparna får aldrig hamna under den, och
+       inget av skalet får täcka verktygsraden. Varje steg byter en sak, så både byte av rad och av läge provas. */
+    const NAMN = { upptill: 'flikar upptill', vertikal: 'flikar på sidan', dolda: 'dolda flikar' };
+    const korsar = (a, b) => !!(a && b) && a.x < b.r && b.x < a.r && a.y < b.b && b.y < a.b;
+    const ruta = (b) => (b ? { x: b.x, y: b.y, r: b.x + b.width, b: b.y + b.height } : null);
+    // Mått och träffar i skalet. Det som tar emot ett klick i en punkt: översta elementet (toasten, som bara syns
+    // en kort stund, räknas inte). Avstängda knappar (pointer-events: none) ska släppa igenom till verktygsraden.
+    const geo = () => app.kor(`(() => {
+      const r = (s) => { const e = document.querySelector(s); if (!e || !e.getClientRects().length) return null; const q = e.getBoundingClientRect();
+        return { x: Math.round(q.left), y: Math.round(q.top), r: Math.round(q.right), b: Math.round(q.bottom), w: Math.round(q.width), h: Math.round(q.height) }; };
+      const traff = (x, y) => document.elementsFromPoint(x, y).find((n) => !n.closest('#anp-toast')) || null;
+      const nar = (e, x, y) => { const t = traff(x, y); return !!t && (e.contains(t) || (e.disabled && !!t.closest('#toolbar'))); };
+      const mitt = (e) => { const q = e.getBoundingClientRect(); return [q.left + q.width / 2, q.top + q.height / 2]; };
+      const ctl = [...document.querySelectorAll('#toolbar > button, #toolbar .omni-center > button, #address')].filter((e) => e.offsetWidth > 0);
+      const miss = ctl.filter((e) => { const [x, y] = mitt(e); return !nar(e, e.id === 'address' ? e.getBoundingClientRect().left + 10 : x, y); }).map((e) => e.id);
+      const wcMiss = ['wc-min', 'wc-max', 'wc-close'].filter((id) => { const e = document.getElementById(id); const [x, y] = mitt(e); return !nar(e, x, y); });
+      return { W: innerWidth, H: innerHeight, tb: r('#toolbar'), bm: r('#bmbar'), st: r('#tabstrip'), wc: r('#winctl'), v: r('#views'),
+        ctl: ctl.map((e) => e.id), miss, wcMiss, visad: document.body.classList.contains('flik-zen-visad') };
+    })()`);
+    const kombo = async (l, p, nr) => {
+      const n = NAMN[l] + ', verktygsraden ' + p;
+      await mus(600, 400);
+      const g = await geo(), m = await matt();
+      const { W, H, tb, bm, st, wc, v } = g, vy = ruta(m.b);
+      T.ok(`${n}: rätt lägen`, (await app.kor('AnpFlikar._lage()')) === l && (await klass('anp-vf-nere')) === (p === 'nere'));
+      // Verktygsraden: hel (från vänsterkanten till fönsterknapparna eller kanten), överst/under flikraden eller längst ner
+      const radSlut = l === 'upptill' ? W : wc.x;
+      const radY = p === 'nere' ? tb.b === H : tb.y === (l === 'upptill' ? st.b : 0);
+      T.ok(`${n}: verktygsraden hel och på sin plats`, tb.x === 0 && Math.abs(tb.r - radSlut) <= 1 && tb.h >= 40 && radY, { tb, st, wc, W, H });
+      T.ok(`${n}: inget ligger över knapparna eller adressfältet`, g.miss.length === 0 && ['back', 'reload', 'address', 'menu-btn'].every((id) => g.ctl.includes(id)), { miss: g.miss, ctl: g.ctl });
+      // Fönsterknapparna: i flikraden (upptill), annars i verktygsradens högra ände
+      const wcPlats = l === 'upptill' ? wc.y >= st.y && wc.b <= st.b : wc.y === tb.y && wc.b === tb.b;
+      T.ok(`${n}: fönsterknapparna syns och går att nå`, wc.w >= 130 && wc.r === W && wc.x >= 0 && wc.y >= 0 && wc.b <= H && wcPlats && g.wcMiss.length === 0 && !korsar(wc, vy) && !korsar(wc, v), { wc, tb, wcMiss: g.wcMiss });
+      // Webbsidan: exakt över #views, aldrig över verktygsraden, panelen eller fönsterknapparna
+      const topp = p === 'nere' ? (l === 'upptill' ? st.b : 0) : (bm && bm.y >= tb.b ? bm.b : tb.b);
+      const botten = p === 'nere' ? (bm && bm.b <= tb.y ? bm.y : tb.y) : H;
+      T.ok(`${n}: webbsidan på rätt plats`, stammer(m) && vy.x === (l === 'vertikal' ? 240 : 0) && vy.r === W && vy.y === topp && vy.b === botten
+        && !korsar(vy, tb) && !korsar(vy, wc) && (l !== 'vertikal' || !korsar(vy, st)), { b: m.b, topp, botten, tb, st });
+      if (l === 'vertikal') T.ok(`${n}: panelen lika hög som webbsidan, verktygsraden fri`, st.x === 0 && st.w === 240 && st.y === v.y && st.b === v.b && !korsar(st, tb) && !korsar(st, wc), { st, v, tb });
+      if (l === 'upptill') T.ok(`${n}: flikraden högst upp`, st.x === 0 && st.y === 0 && st.w === W && !korsar(st, tb), st);
+      if (l === 'dolda') T.ok(`${n}: flikraden gömd ${p === 'nere' ? 'under' : 'ovanför'} fönstret`, !g.visad && (p === 'nere' ? st.y >= H : st.b <= 0), st);
+      await bild(`21-${nr}-${l}-${p}`);
+      // Riktig mus: knapparna i raden och minimera tar emot klicket (fångas innan knappen gör något)
+      await app.kor(`(() => { window.__anpTraff = []; window.__anpStopp = (e) => { const t = e.target.closest('[id]'); window.__anpTraff.push(t ? t.id : '?'); e.stopPropagation(); e.preventDefault(); };
+        window.addEventListener('click', window.__anpStopp, true); return 1; })()`);
+      for (const id of ['reload', 'menu-btn', 'wc-min']) { const q = await rect('#' + id); await klick(q.cx, q.cy); }
+      const traff = await app.kor(`(() => { window.removeEventListener('click', window.__anpStopp, true); return window.__anpTraff; })()`);
+      T.ok(`${n}: riktig mus: ladda om, menyn och minimera tar emot klicket`, traff.join() === 'reload,menu-btn,wc-min', traff);
+      const ad = await rect('#address');
+      await klick(ad.x + 10, ad.cy);
+      const fokus = await app.kor('document.activeElement && document.activeElement.id');
+      await app.kor(`(() => { closeSug(); document.getElementById('address').blur(); return 1; })()`); await sov(400);
+      T.ok(`${n}: riktig mus: klick i adressfältets början ger fokus`, fokus === 'address', fokus);
+      // Flikarna går att använda: klick på en flik (dolda: raden fram med musen vid kanten, sedan undan igen)
+      const mal = (await app.kor('tabs.filter((t) => t !== active && !t.pinned).map((t) => t.title)'))[0];
+      if (l === 'dolda') {
+        await mus(600, p === 'nere' ? H - 7 : 6); await sov(600);   // inom 8 px från kanten, innanför fönstrets storleksram
+        const s = await geo();
+        T.ok(`${n}: musen vid ${p === 'nere' ? 'underkanten' : 'överkanten'} visar flikraden över verktygsraden`,
+          s.visad && (p === 'nere' ? s.st.b === H && s.st.y >= s.tb.y : s.st.y === 0 && s.st.b <= s.tb.b), s.st);
+        await bild(`21-${nr}-${l}-${p}-visad`);
+      }
+      const fr = await flik(mal);
+      await klick(fr.cx, fr.cy);
+      T.ok(`${n}: klick på en flik byter flik (riktig mus)`, (await aktiv()) === mal, { mal, aktiv: await aktiv() });
+      if (l === 'dolda') { await mus(600, 400); await sov(1000); }
+      const m2 = await matt();
+      T.ok(`${n}: webbsidan kvar på sin plats efter klicken`, stammer(m2) && m2.b.x === m.b.x && m2.b.y === m.b.y && m2.b.height === m.b.height
+        && (l !== 'dolda' || !(await klass('flik-zen-visad'))), m2);
+    };
+    await lage('vertikal');
+    await satt('verktyg.placering', 'uppe');
+    const nu = { 'flikar.lage': 'vertikal', 'verktyg.placering': 'uppe' };
+    await kombo(nu['flikar.lage'], nu['verktyg.placering'], 1);
+    const STEG = [['verktyg.placering', 'nere'], ['flikar.lage', 'dolda'], ['verktyg.placering', 'uppe'], ['flikar.lage', 'upptill'],
+      ['verktyg.placering', 'nere'], ['flikar.lage', 'vertikal'], ['verktyg.placering', 'uppe']];
+    for (let i = 0; i < STEG.length; i++) {
+      nu[STEG[i][0]] = STEG[i][1];
+      await satt(STEG[i][0], STEG[i][1]); await sov(300);
+      await kombo(nu['flikar.lage'], nu['verktyg.placering'], i + 2);
+    }
+
+    /* ── 11. Sista fliken ── */
     await lage('upptill');
     await satt('flikar.sistaFlik', 'ny');
     await app.kor(`(async () => { for (const t of tabs.slice()) closeTab(t); await new Promise((r) => setTimeout(r, 900)); return tabs.length; })()`);

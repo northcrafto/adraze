@@ -1100,9 +1100,9 @@ body.anp-stang-aktiv .tab:not(.active) .tclose { display: none; }
 .anp-nyflik-txt { display: none; }
 #anp-vfot, #anp-vdrag, #anp-zenkant { display: none; }
 
-/* ── På sidan: panel till vänster, under verktygsraden ── */
+/* ── På sidan: panel till vänster, lika hög som webbytan (verktygsraden ovanför eller under, se längre ner) ── */
 body.flik-vertikal #tabstrip {
-  position: fixed; z-index: 40; left: 0; top: var(--vflik-top, 50px); bottom: 0; width: var(--vflik-w, 240px); height: auto;
+  position: fixed; z-index: 40; left: 0; top: var(--vflik-top, 50px); bottom: var(--vflik-bunn, 0px); width: var(--vflik-w, 240px); height: auto;
   flex-direction: column; align-items: stretch; gap: 4px; border-right: 1px solid var(--color-line); -webkit-app-region: no-drag !important;
 }
 body.flik-vertikal #views { margin-left: var(--vflik-w, 240px); }
@@ -1171,7 +1171,7 @@ body.flik-dolda.flik-zen-visad #toolbar { -webkit-app-region: no-drag; }
 /* ── Verktygsraden är titelrad när flikarna inte ligger överst ── */
 body:is(.flik-vertikal, .flik-dolda) #toolbar { -webkit-app-region: drag; }
 body:is(.flik-vertikal, .flik-dolda) #toolbar > :not(.omni-center), body:is(.flik-vertikal, .flik-dolda) #toolbar .omni-center > * { -webkit-app-region: no-drag; }
-body.plat-darwin:is(.flik-vertikal, .flik-dolda) #toolbar { padding-left: 84px; }   /* trafikljusen */
+body.plat-darwin:is(.flik-vertikal, .flik-dolda):not(.anp-vf-nere) #toolbar { padding-left: 84px; }   /* trafikljusen */
 body:is(.plat-linux, .plat-win32):is(.flik-vertikal, .flik-dolda) #toolbar { margin-right: 138px; }   /* plats för fönsterknapparna (3 × 46 px) */
 body:is(.flik-vertikal, .flik-dolda) .winctl {
   position: fixed; z-index: 2; top: 0; right: 0; height: var(--zen-h, 50px); margin: 0; box-sizing: border-box;
@@ -1179,7 +1179,24 @@ body:is(.flik-vertikal, .flik-dolda) .winctl {
 }
 body:is(.flik-vertikal, .flik-dolda) .winctl button { height: 100%; }
 body:is(.flik-vertikal, .flik-dolda):has(#toolbar.has-bmbar) .winctl { border-bottom-color: transparent; }
+body.anp-bm-gomd:is(.flik-vertikal, .flik-dolda):has(#toolbar.has-bmbar) .winctl { border-bottom-color: var(--anp-linje, var(--color-line)); }   /* bokmärkesfältet bara på ny flik */
 body.flik-dolda.flik-zen-visad .winctl { background: transparent; border-bottom-color: transparent; }
+
+/* ── Verktygsraden längst ner (Anpassa › verktyg sätter anp-vf-nere på <body>) ──
+   Överst ligger då webbsidan, som ritas ovanpå skalet: inget av skalet får ligga där. Panelen slutar ovanför
+   raden (--vflik-bunn), fönsterknapparna ligger i radens högra ände och dolda flikar glider upp nerifrån. */
+body.anp-vf-nere.flik-vertikal #tabstrip { box-shadow: none; }
+body.anp-vf-nere:is(.flik-vertikal, .flik-dolda) .winctl { top: auto; bottom: 0; border-bottom: 0; border-top: 1px solid var(--anp-linje, var(--color-line)); }
+body.anp-vf-nere:is(.flik-vertikal, .flik-dolda):has(#toolbar.has-bmbar) .winctl { border-top-color: transparent; }
+body.anp-vf-nere.anp-bm-gomd:is(.flik-vertikal, .flik-dolda):has(#toolbar.has-bmbar) .winctl { border-top-color: var(--anp-linje, var(--color-line)); }
+body.flik-dolda.anp-vf-nere #tabstrip {
+  top: auto; bottom: calc(-8px - var(--zen-h, 50px)); border-bottom: 0; border-top: 1px solid var(--anp-linje, var(--color-line));
+  transition: bottom .2s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease;
+}
+body.flik-dolda.anp-vf-nere.flik-zen-visad #tabstrip { top: auto; bottom: 0; box-shadow: 0 -10px 28px rgb(14 42 71 / .16); }
+body.flik-dolda.anp-vf-nere.flik-zen-visad .winctl { border-top-color: transparent; }
+/* Underkanten i stället för överkanten (samma 8 px, storleksramen ligger även där) */
+body.flik-dolda.anp-vf-nere:not(.flik-zen-visad) #anp-zenkant { top: auto; bottom: 0; }
 
 /* Mörkt läge och inkognito */
 :root[data-theme="dark"] body.flik-vertikal #tabstrip, :root[data-theme="dark"] body.flik-dolda #tabstrip, :root[data-theme="dark"] #anp-vfot { border-color: #2b2b2d; }
@@ -1188,6 +1205,7 @@ body.incog.flik-vertikal #tabstrip, body.incog.flik-dolda #tabstrip, body.incog 
 body.incog:is(.flik-vertikal, .flik-dolda) .winctl { background: #100a1e; border-bottom-color: rgba(124,58,237,.22); }
 :root[data-theme="dark"] body.flik-dolda.flik-zen-visad .winctl, body.incog.flik-dolda.flik-zen-visad .winctl { background: transparent; border-bottom-color: transparent; }
 :root[data-theme="dark"] body.flik-dolda.flik-zen-visad #tabstrip, body.incog.flik-dolda.flik-zen-visad #tabstrip { box-shadow: 0 10px 28px rgb(0 0 0 / .45); }
+:root[data-theme="dark"] body.flik-dolda.anp-vf-nere.flik-zen-visad #tabstrip, body.incog.flik-dolda.anp-vf-nere.flik-zen-visad #tabstrip { box-shadow: 0 -10px 28px rgb(0 0 0 / .45); }
 :root[data-theme="dark"] body.flik-vertikal .anp-grupp:not(.anp-redigerar), :root[data-theme="dark"] .anp-vknapp:hover { color: #e4e4e8; }
 :root[data-theme="dark"] body.flik-vertikal .anp-grupp:hover, :root[data-theme="dark"] .anp-vknapp:hover { background: rgb(255 255 255 / .08); }
 body.incog.flik-vertikal .anp-grupp:not(.anp-redigerar) { color: #ece3fb; }
@@ -1200,6 +1218,7 @@ body.incog.flik-smal .tab .tsound { background: #0b0618; }
    ändra inifrån samma lager */
 @layer components {
   body.flik-vertikal #tabstrip { padding: 8px 8px 0 !important; }
+  body.plat-darwin.flik-vertikal.anp-vf-nere #tabstrip { padding-top: 40px !important; }   /* Mac: trafikljusen hamnar överst i panelen */
   body.flik-vertikal .tab.entering, body.flik-vertikal .tab.closing { width: auto !important; }
 }
 
