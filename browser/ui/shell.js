@@ -130,6 +130,7 @@ function saveOpenTabs() {
     localStorage.setItem('adraze-active-tab', String(keep.indexOf(active)));   // -1 = startsidan var öppen
     if (window.AnpFlikar) AnpFlikar.sparat(keep);   // Anpassa (flikar): flikarnas grupper sparas bredvid adresserna
   } catch {}
+  try { if (window.arbetsytorSparat) window.arbetsytorSparat(); } catch {}   // Anpassa › Arbetsytor sparar samtidigt (ui/anpassa-arbetsytor.js)
 }
 // Vid start: 'tidigare' (förra flikarna + startsidan), 'ny' (bara en ny flik) eller 'sida' (en viss adress)
 let startMode = 'tidigare', startUrl = '';
