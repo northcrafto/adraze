@@ -1999,6 +1999,7 @@ ipcMain.on('view:destroy', (e, id) => {
   ctx.incognitoTabs.delete(id); ctx.discarded.delete(id); ctx.lastActive.delete(id);
   if (ctx.visibleTab === id) ctx.visibleTab = null;
 });
+require('./anpassa-arbetsytor').init({ ctxFor, flikUrlOk });   // Anpassa › Arbetsytor: vilande flikar som laddas först när de visas
 ipcMain.on('app:fullscreen', (e) => { const ctx = ctxFor(e); if (ctx) toggleFull(ctx); });
 ipcMain.on('app:quit', () => app.quit());
 /* ── Sökförslag till adressfältet ──
@@ -2106,6 +2107,7 @@ ipcMain.on('open-app-menu', (e) => {
     { label: T('Nytt fönster'), accelerator: 'CmdOrCtrl+N', click: () => createWindow(false, ctx) },
     { label: T('Nytt inkognitofönster'), accelerator: 'CmdOrCtrl+Shift+N', click: () => createWindow(true, ctx) },
     { label: T('Ny inkognitoflik'), click: () => sendTo(ctx, 'new-incognito') },
+    ...require('./anpassa-arbetsytor').menyRader(ctx, T),   // Anpassa › Arbetsytor: byt, ny, hantera
     { type: 'separator' },
     { label: T('Lösenord och autofyll'), click: () => sendTo(ctx, 'open-passwords') },
     { label: T('Importera från en annan webbläsare'), click: () => sendTo(ctx, 'open-passwords') },
@@ -2454,6 +2456,9 @@ function falkSankning(name, a) {
   }
   return '';
 }
+// Anpassa › Ångra (ångra en grupp, spara som fil) och Falk ändrar Anpassa-inställningar (anpassa-falk.js, ui/anpassa-falk.js)
+require('./anpassa-angra').init();
+require('./anpassa-falk').init({ T });
 
 /* ────────── Kortkommandon (Chromium-lika) ──────────
  * Acceleratorerna i popup-menyerna är bara etiketter. Riktiga genvägar fångas

@@ -74,6 +74,18 @@ contextBridge.exposeInMainWorld('anpassaBro', {
   importera: (kod, prefix) => ipcRenderer.invoke('anpassa:importera', { kod, prefix }),
   onAndrad: (fn) => ipcRenderer.on('anpassa:andrad', (_e, d) => fn(d)),
 });
+// Anpassa › Ångra (ui/anpassa-angra.js): ångra en hel grupp, spara alla inställningar som fil, Falks ändringar → toast
+contextBridge.exposeInMainWorld('anpassaAngra', {
+  angra: () => ipcRenderer.invoke('anpassa-angra:angra'),
+  sparaFil: () => ipcRenderer.invoke('anpassa-angra:spara-fil'),
+  onFalk: (fn) => ipcRenderer.on('anpassa-angra:falk', (_e, d) => fn(d)),
+});
+// Anpassa › Arbetsytor (ui/anpassa-arbetsytor.js): flikar i andra arbetsytor ligger vilande tills de visas
+contextBridge.exposeInMainWorld('anpassaArbetsytor', {
+  vilande: (id, url) => ipcRenderer.send('arbetsytor:vilande', id, url),
+  aktiv: (id) => ipcRenderer.send('arbetsytor:aktiv', id),                       // för huvudmenyns bock
+  onByt: (fn) => ipcRenderer.on('arbetsytor:byt', (_e, v) => fn(v)),             // huvudmenyn › Arbetsytor
+});
 contextBridge.exposeInMainWorld('kontoLage', {
   fonster: () => ipcRenderer.sendSync('konto:fonster'),
   hamta: () => ipcRenderer.sendSync('konto:lage'),

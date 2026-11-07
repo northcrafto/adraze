@@ -17,6 +17,11 @@ contextBridge.exposeInMainWorld('krypto', {
   me: () => ipcRenderer.invoke('krypto:me'),
   samtycke: (v) => ipcRenderer.invoke('krypto:samtycke', v),
 });
+/* Falk ändrar Anpassa-inställningar (ui/anpassa-falk.js). Huvudprocessen avgör allt (anpassa-falk.js). */
+contextBridge.exposeInMainWorld('anpassaFalk', {
+  lista: () => ipcRenderer.invoke('anpassa-falk:lista'),
+  gor: (a) => ipcRenderer.invoke('anpassa-falk:gor', a),
+});
 /* Kassan (ui/checkout.html): huvudprocessen lägger på kontots token. */
 contextBridge.exposeInMainWorld('billing', {
   intent: (plan) => ipcRenderer.invoke('billing:intent', plan),
