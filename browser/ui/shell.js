@@ -1189,12 +1189,31 @@ async function valjProfil(p, el) {
   profilFel((s && s.message) || 'Kunde inte nå AdRaze. Kontrollera din uppkoppling.');
 }
 function accountKey(a) { a = a || account; if (!a) return null; return 'k:' + (a.email || a.childId || a.name || a.token || 'user'); }
+// Barnets dator: en märkning från servern som finns kvar när barnet loggar ut. Loggar någon annan än föräldern
+// sedan in med ett vuxenkonto här släpper spärren som vanligt, men föräldern får ett mejl om det.
+var BARN_ENHET_KEY = 'adraze-barnenhet';
+async function barnEnhetMark(token, child) {
+  try {
+    const m = JSON.parse(localStorage.getItem(BARN_ENHET_KEY) || 'null');
+    if (m && m.barnId === child.id && m.enhet) return;
+    const r = await window.family.enhet(token);
+    if (r && r.ok && r.enhet) localStorage.setItem(BARN_ENHET_KEY, JSON.stringify({ barnId: child.id, enhet: r.enhet }));
+  } catch {}
+}
+async function barnEnhetAnmal(token) {
+  let m; try { m = JSON.parse(localStorage.getItem(BARN_ENHET_KEY) || 'null'); } catch { m = null; }
+  if (!m || !m.enhet || !token) return;
+  const r = await window.family.annatKonto(token, m.enhet).catch(() => null);
+  // Föräldern själv loggade in, eller märkningen finns inte längre → datorn är inte barnets längre
+  if (r && r.ok && (r.foralder || r.kand === false)) { try { localStorage.removeItem(BARN_ENHET_KEY); } catch {} }
+}
 function loginAs(token, email, pro, name) {
   try { window.auth.googleAvbryt(); } catch {}   // ett väntande "Fortsätt med Google" gäller inte längre
   account = { token, email: email || '', pro: !!pro, name: name || '' };
   socMe = null;   // förra kontots profil (bild m.m.) får inte hänga kvar
   unlockHistoryForParent();   // vuxenkonto → historiken går att rensa igen
   satBarnlage(false);         // … och barnläget släpper (spärrarna gäller bara barnkonton)
+  barnEnhetAnmal(token);      // barnets dator: föräldern får mejl om det inte var hen
   sparaKontoLokalt();
   famStadaBarnpost();
   try { window.auth.remember(account); } catch {}
@@ -1421,6 +1440,7 @@ async function enterChildMode(token, child) {
   if (typeof renderFam === 'function') renderFam();
   window.__kidShown = false;
   applyKidIndicator();
+  barnEnhetMark(token, child);   // datorn märks som barnets (finns kvar efter utloggning)
   if (typeof startChildSync === 'function') startChildSync();
 }
 async function syncChild() {

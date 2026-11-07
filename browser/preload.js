@@ -57,6 +57,8 @@ contextBridge.exposeInMainWorld('family', {
   allow: (token, child_id, host, minutes) => ipcRenderer.invoke('family:allow', { token, child_id, host, minutes }),
   notis: (title, body) => ipcRenderer.send('family:notis', { title, body }),
   onOppna: (fn) => ipcRenderer.on('family:oppna', () => fn()),
+  enhet: (token) => ipcRenderer.invoke('family:enhet', { token }),
+  annatKonto: (token, enhet) => ipcRenderer.invoke('family:annat-konto', { token, enhet }),
   ask: (token, host, text) => ipcRenderer.invoke('family:ask', { token, host, text }),
   answer: (token, id, answer, minutes) => ipcRenderer.invoke('family:answer', { token, id, answer, minutes }),
   historyAdd: (token, url, title) => ipcRenderer.invoke('family:history-add', { token, url, title }),
