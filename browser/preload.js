@@ -100,6 +100,12 @@ contextBridge.exposeInMainWorld('anpassaVerktyg', {
   kanter: (k) => ipcRenderer.send('anpassa-verktyg:kanter', k),
   onVal: (fn) => ipcRenderer.on('anpassa-verktyg:val', (_e, d) => fn(d)),
 });
+// Anpassa → per sajt (anpassa-sajt.js): sajt-panelen från skölden, tystade sajter, "Alla sajter" från panelen
+contextBridge.exposeInMainWorld('anpassaSajt', {
+  oppna: (d) => ipcRenderer.send('sajt:oppna', d),
+  onLjud: (fn) => ipcRenderer.on('sajt:ljud', (_e, flik, tyst) => fn(flik, !!tyst)),
+  onVisaAlla: (fn) => ipcRenderer.on('sajt:visa-alla', () => fn()),
+});
 contextBridge.exposeInMainWorld('kontoLage', {
   fonster: () => ipcRenderer.sendSync('konto:fonster'),
   hamta: () => ipcRenderer.sendSync('konto:lage'),

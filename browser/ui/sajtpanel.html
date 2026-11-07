@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8" />
+<title>Inställningar för sajten</title>
+<style>
+  /* Sajt-panelen (Anpassa → per sajt). Öppnas från skölden i adressfältet och ligger som en egen liten vy ovanpå
+     fliken (skalets HTML ritas under sidan). Tema från skalet: ?theme=dark. Allt sparas direkt, utom att JavaScript,
+     reklam och popup-fönster gäller från nästa laddning – då visas "Ladda om". */
+  :root {
+    --bg: #ffffff; --ink: #0e2a47; --mut: rgb(14 42 71 / .6); --faint: rgb(14 42 71 / .4);
+    --line: #e2e8ef; --soft: #eef3f9; --soft-h: #e2eaf3; --track: #cfd9e4;
+    --acc: #ff4b1f; --ok: #2f9e67; --warn: #c2410c; --fill: #0e2a47; --fill-ink: #ffffff;
+    --shadow: 0 6px 14px -2px rgb(14 42 71 / .2), 0 1px 3px rgb(14 42 71 / .1);
+  }
+  :root[data-theme="dark"] {
+    --bg: #19191c; --ink: #f2f2f4; --mut: rgb(242 242 244 / .62); --faint: rgb(242 242 244 / .4);
+    --line: #2b2b30; --soft: #232327; --soft-h: #2d2d32; --track: #3b3b42;
+    --ok: #4cc38a; --warn: #ff8a5c; --fill: #f2f2f4; --fill-ink: #141416;
+    --shadow: 0 6px 14px -2px rgb(0 0 0 / .55), 0 1px 3px rgb(0 0 0 / .35);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: transparent; overflow: hidden; font: 13.5px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; }
+  .kort { margin: 6px 14px 22px 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; animation: in .14s ease-out; }
+  @keyframes in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+  .huvud { display: flex; align-items: center; gap: 11px; padding: 14px 10px 12px 16px; }
+  .ikon { width: 34px; height: 34px; border-radius: 9px; background: var(--soft); display: grid; place-items: center; flex: none; overflow: hidden; font-size: 15px; font-weight: 700; text-transform: uppercase; }
+  .ikon img { width: 18px; height: 18px; object-fit: contain; }
+  .namn { flex: 1; min-width: 0; }
+  h1 { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .anslutning { display: flex; align-items: center; gap: 5px; margin-top: 1px; font-size: 12px; font-weight: 500; color: var(--ok); }
+  .anslutning.osaker { color: var(--warn); }
+  .anslutning svg { width: 13px; height: 13px; flex: none; }
+  .x { flex: none; align-self: flex-start; width: 28px; height: 28px; border: 0; border-radius: 7px; background: transparent; color: var(--mut); cursor: pointer; display: grid; place-items: center; transition: background .15s, color .15s; }
+  .x:hover { background: var(--soft); color: var(--ink); }
+  svg.ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+  .grupp { border-top: 1px solid var(--line); padding: 4px 0; }
+  .rad { display: flex; align-items: center; gap: 12px; min-height: 42px; padding: 3px 16px; }
+  .rad .t { flex: 1; min-width: 0; }
+  .rad .t b { display: block; font-size: 13.5px; font-weight: 600; }
+  .rad .t small { display: block; font-size: 11.5px; color: var(--mut); margin-top: 1px; }
+  .rad.av .t { opacity: .5; }
+
+  /* Reglage */
+  .sw { position: relative; width: 36px; height: 21px; flex: none; }
+  .sw input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; z-index: 1; }
+  .sw span { position: absolute; inset: 0; border-radius: 999px; background: var(--track); transition: background .18s; pointer-events: none; }
+  .sw span::after { content: ""; position: absolute; top: 2.5px; left: 2.5px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgb(0 0 0 / .25); transition: transform .18s cubic-bezier(.4,0,.2,1); }
+  .sw input:checked + span { background: var(--acc); }
+  .sw input:checked + span::after { transform: translateX(15px); }
+  .sw input:disabled { cursor: default; }
+  .sw input:disabled + span { opacity: .45; }
+  .sw input:focus-visible + span { outline: 2px solid var(--acc); outline-offset: 2px; }
+  .seg, .zoom { display: inline-flex; align-items: center; gap: 2px; padding: 2px; border-radius: 8px; background: var(--soft); flex: none; }
+  .seg button { height: 26px; padding: 0 9px; border: 0; border-radius: 6px; background: transparent; color: var(--mut); font-size: 12px; font-weight: 600; cursor: pointer; transition: background .15s, color .15s; }
+  .seg button:hover:not(:disabled) { color: var(--ink); }
+  .seg button.on { background: var(--bg); color: var(--ink); box-shadow: 0 1px 2px rgb(14 42 71 / .14), inset 0 0 0 1px var(--line); }
+  .seg button:disabled { cursor: default; opacity: .5; }
+  .zoom button { height: 26px; min-width: 28px; border: 0; border-radius: 6px; background: transparent; cursor: pointer; display: grid; place-items: center; transition: background .15s; }
+  .zoom button:hover:not(:disabled) { background: var(--bg); }
+  .zoom button:disabled { cursor: default; opacity: .4; }
+  .zoom svg.ic { width: 14px; height: 14px; stroke-width: 2.2; }
+  #zvarde { min-width: 54px; font-size: 12.5px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  :is(.seg, .zoom, .x, .lank, .liq) :focus-visible, :is(.seg, .zoom) button:focus-visible, .x:focus-visible, .lank:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+
+  .not { display: flex; align-items: flex-start; gap: 8px; margin: 4px 16px 8px; padding: 8px 10px; border-radius: 8px; background: var(--soft); font-size: 12px; line-height: 1.45; color: var(--mut); }
+  .not svg.ic { width: 14px; height: 14px; margin-top: 1px; flex: none; }
+  .ladda { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-top: 1px solid var(--line); background: rgb(255 75 31 / .06); font-size: 12.5px; }
+  .ladda span { flex: 1; }
+  .fot { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 16px 14px; border-top: 1px solid var(--line); }
+  .lank { border: 0; background: none; padding: 4px 2px; font-size: 12.5px; font-weight: 600; color: var(--mut); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; border-radius: 4px; }
+  .lank:hover { color: var(--ink); }
+  .lank svg.ic { width: 14px; height: 14px; transition: transform .2s ease; }
+  .lank:hover svg.ic { transform: translateX(2px); }
+
+  /* Knappar: vätskefyllning (Cettos signatur) – fyllningen stiger vid hover och rinner av igen */
+  .liq { --r: 8px; position: relative; isolation: isolate; overflow: hidden; height: 32px; padding: 0 14px; border: 0; border-radius: var(--r); clip-path: inset(0 round var(--r));
+    background: transparent; font-size: 12.5px; font-weight: 650; cursor: pointer; transition: color .6s ease, transform .2s ease; flex: none; }
+  .liq::after { content: ""; position: absolute; inset: 0; z-index: -2; border-radius: var(--r); pointer-events: none; }
+  .liq::before { content: ""; position: absolute; z-index: -1; left: -15%; width: 130%; bottom: -2px; height: 170%; transform: translateY(100%); border-radius: 46% 46% 0 0;
+    background: var(--fill); transition: transform .95s cubic-bezier(.2,.75,.25,1); pointer-events: none; }
+  .liq:is(:hover, :focus-visible):not(:disabled)::before { transform: translateY(0); }
+  .liq:active:not(:disabled) { transform: translateY(1px); }
+  .liq.prim { color: #fff; }
+  .liq.prim::after { background: var(--acc); }
+  :root:not([data-theme="dark"]) .liq.prim::before { background: linear-gradient(180deg, #17406b 0%, #0e2a47 100%); }
+  :root[data-theme="dark"] .liq.prim:is(:hover, :focus-visible) { color: var(--fill-ink); }
+  .liq.spok { color: var(--ink); }
+  .liq.spok::after { box-shadow: inset 0 0 0 1.5px var(--line); }
+  .liq.spok:is(:hover, :focus-visible):not(:disabled) { color: var(--fill-ink); }
+  .liq:disabled { opacity: .45; cursor: default; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+  <div class="kort" id="kort" role="dialog" aria-labelledby="doman">
+    <div class="huvud">
+      <div class="ikon" id="ikon" aria-hidden="true"></div>
+      <div class="namn">
+        <h1 id="doman"></h1>
+        <div class="anslutning" id="anslutning"></div>
+      </div>
+      <button class="x" id="stang" title="Stäng" aria-label="Stäng"><svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="not" id="not-privat" hidden><svg class="ic" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Privat flik: inget här sparas. Zoomen går att ändra för stunden.</span></div>
+
+    <div class="grupp">
+      <div class="rad">
+        <div class="t"><b>Zoom</b><small id="zoom-info"></small></div>
+        <div class="zoom">
+          <button id="zminus" title="Zooma ut" aria-label="Zooma ut"><svg class="ic" viewBox="0 0 24 24"><path d="M6 12h12"/></svg></button>
+          <button id="zvarde" title="Tillbaka till standard"></button>
+          <button id="zplus" title="Zooma in" aria-label="Zooma in"><svg class="ic" viewBox="0 0 24 24"><path d="M12 6v12M6 12h12"/></svg></button>
+        </div>
+      </div>
+      <div class="rad" id="rad-mork">
+        <div class="t"><b>Mörkt läge</b><small>Gör ljusa sidor mörka.</small></div>
+        <label class="sw"><input type="checkbox" role="switch" id="mork" aria-label="Mörkt läge"><span></span></label>
+      </div>
+      <div class="rad" id="rad-ljud">
+        <div class="t"><b>Ljud</b><small id="ljud-info"></small></div>
+        <label class="sw"><input type="checkbox" role="switch" id="ljud" aria-label="Ljud"><span></span></label>
+      </div>
+    </div>
+
+    <div class="grupp" id="grupp-skydd">
+      <div class="rad" id="rad-reklam">
+        <div class="t"><b>Reklamblockering</b><small id="reklam-info"></small></div>
+        <label class="sw"><input type="checkbox" role="switch" id="reklam" aria-label="Reklamblockering"><span></span></label>
+      </div>
+      <div class="rad" id="rad-js">
+        <div class="t"><b>JavaScript</b><small id="js-info"></small></div>
+        <label class="sw"><input type="checkbox" role="switch" id="js" aria-label="JavaScript"><span></span></label>
+      </div>
+      <div class="rad" id="rad-popup">
+        <div class="t"><b>Popup-fönster</b></div>
+        <div class="seg" id="popup" role="radiogroup" aria-label="Popup-fönster">
+          <button data-v="standard" role="radio">Standard</button><button data-v="tillat" role="radio">Tillåt</button><button data-v="blockera" role="radio">Blockera</button>
+        </div>
+      </div>
+      <div class="not" id="not-barn" hidden><svg class="ic" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Låst i barnläge. Reklam, JavaScript och popup-fönster följer familjens regler.</span></div>
+    </div>
+
+    <div class="grupp" id="grupp-perm" hidden></div>
+
+    <div class="ladda" id="ladda" hidden><span>Ladda om sidan så att ändringen gäller.</span><button class="liq prim" id="ladda-om">Ladda om</button></div>
+    <div class="fot">
+      <button class="liq spok" id="aterstall">Återställ sajten</button>
+      <button class="lank" id="alla">Alla sajter<svg class="ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+  </div>
+  <script>
+    // Översättning: samma ordlista som skalet (adraze-lang i localStorage delas, samma file://-origin)
+    window.locale = { load: (l) => { try { return window.adrazeIpc.sendSync('i18n:load', l) || {}; } catch (e) { return {}; } } };
+  </script>
+  <script src="i18n.js"></script>
+  <script>
+  (function () {
+    const ipc = window.adrazeIpc;
+    if (new URLSearchParams(location.search).get('theme') === 'dark') document.documentElement.dataset.theme = 'dark';
+    const $ = (id) => document.getElementById(id);
+    const tt = (s) => (typeof window.t === 'function' ? window.t(s) : s);
+    const PERM = { camera: 'Kamera', microphone: 'Mikrofon', geolocation: 'Plats', notifications: 'Notiser', 'clipboard-read': 'Läsa urklipp', midi: 'MIDI-enheter', external: 'Öppna ett annat program' };
+    let d = null, laddaOm = false, perms = {};
+
+    const stang = () => ipc.send('sajt:panel-stang');
+    const storlek = () => { try { ipc.send('sajt:panel-storlek', Math.ceil($('kort').getBoundingClientRect().bottom) + 22); } catch (e) {} };
+    const pct = (z) => Math.round(z * 100) + ' %';
+
+    function rita() {
+      if (!d) return;
+      $('doman').textContent = d.doman;
+      const ik = $('ikon'); ik.textContent = '';
+      if (d.favicon) { const img = document.createElement('img'); img.alt = ''; img.src = d.favicon; img.onerror = () => { ik.textContent = d.doman.charAt(0); }; ik.appendChild(img); }
+      else ik.textContent = d.doman.charAt(0);
+      const an = $('anslutning');
+      an.className = 'anslutning' + (d.sakert ? '' : ' osaker');
+      an.innerHTML = d.sakert
+        ? '<svg class="ic" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'
+        : '<svg class="ic" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>';
+      an.append(tt(d.sakert ? 'Säker anslutning' : 'Inte säker anslutning'));
+
+      const priv = d.inkognito;
+      $('not-privat').hidden = !priv;
+      // Zoom
+      $('zvarde').textContent = pct(d.zoom);
+      $('zminus').disabled = d.zoom <= 0.5 + 0.001; $('zplus').disabled = d.zoom >= 3 - 0.001;
+      $('zoom-info').textContent = d.zoomSparad && !priv ? tt('Sparas för sajten') : (Math.abs(d.zoom - d.standardZoom) < 0.001 ? tt('Standard') : '');
+      // Mörkt läge och ljud (barn får ändra)
+      $('mork').checked = d.mork; $('mork').disabled = priv;
+      $('ljud').checked = d.ljud; $('ljud').disabled = priv;
+      $('ljud-info').textContent = d.ljud ? '' : tt('Tyst i alla flikar på sajten');
+      $('rad-mork').classList.toggle('av', priv); $('rad-ljud').classList.toggle('av', priv);
+      // Reklam, JavaScript, popup-fönster (barnlåsta)
+      const last = d.barn || priv;
+      $('reklam').checked = d.reklam && d.adblockPa; $('reklam').disabled = last || !d.adblockPa;
+      $('reklam-info').textContent = !d.adblockPa ? tt('AdRaze är avstängt överallt') : (d.reklam ? '' : tt('Av på den här sajten'));
+      $('js').checked = d.js; $('js').disabled = last;
+      $('js-info').textContent = d.js ? '' : tt('Av på den här sajten');
+      for (const b of $('popup').querySelectorAll('button')) { const on = b.dataset.v === d.popup; b.classList.toggle('on', on); b.setAttribute('aria-checked', on ? 'true' : 'false'); b.disabled = last; }
+      for (const id of ['rad-reklam', 'rad-js', 'rad-popup']) $(id).classList.toggle('av', last);
+      $('not-barn').hidden = !d.barn;
+      $('aterstall').disabled = !d.andrat || priv;
+      $('ladda').hidden = !laddaOm;
+      ritaPerms();
+      storlek();
+    }
+    // Behörigheter för sajten (samma lista som Inställningar → Integritet, webbinst.js)
+    function ritaPerms() {
+      const g = $('grupp-perm'); g.textContent = '';
+      const sorter = Object.keys(perms).filter((k) => PERM[k]);
+      g.hidden = !sorter.length;
+      for (const k of sorter) {
+        const rad = document.createElement('div'); rad.className = 'rad';
+        const t = document.createElement('div'); t.className = 't'; const b = document.createElement('b'); b.textContent = tt(PERM[k]); t.appendChild(b); rad.appendChild(t);
+        const seg = document.createElement('div'); seg.className = 'seg'; seg.setAttribute('role', 'radiogroup'); seg.setAttribute('aria-label', tt(PERM[k]));
+        for (const [v, txt] of [['fraga', 'Fråga'], ['allow', 'Tillåt'], ['block', 'Blockera']]) {
+          const knapp = document.createElement('button'); knapp.textContent = tt(txt); knapp.setAttribute('role', 'radio');
+          const on = (perms[k] || 'fraga') === v; knapp.classList.toggle('on', on); knapp.setAttribute('aria-checked', on ? 'true' : 'false');
+          // Privat flik: inget sparas. Barnläge: bara strängare (Fråga/Blockera), aldrig Tillåt.
+          knapp.disabled = !!(d && (d.inkognito || (d.barn && v === 'allow')));
+          knapp.onclick = async () => {
+            try { await ipc.invoke('webb:set', 'perm', { origin: d.origin, kind: k, value: v }); } catch (e) {}
+            if (v === 'fraga') delete perms[k]; else perms[k] = v;
+            rita();
+          };
+          seg.appendChild(knapp);
+        }
+        rad.appendChild(seg); g.appendChild(rad);
+      }
+    }
+    async function hamta() {
+      try { d = await ipc.invoke('sajt:panel-data'); } catch (e) { d = null; }
+      if (!d) { stang(); return; }
+      try { const w = await ipc.invoke('webb:get'); perms = Object.assign({}, (w && w.perms && w.perms[d.origin]) || {}); } catch (e) { perms = {}; }
+      rita();
+    }
+    async function satt(falt, varde) {
+      let r = null; try { r = await ipc.invoke('sajt:panel-satt', { falt, varde }); } catch (e) {}
+      if (r && r.data) d = r.data;
+      if (r && r.ok && (falt === 'reklam' || falt === 'js' || falt === 'popup')) laddaOm = true;
+      rita();
+    }
+    async function zoom(steg) { try { const r = await ipc.invoke('sajt:panel-zoom', steg); if (r) d = r; } catch (e) {} rita(); }
+
+    $('stang').onclick = stang;
+    $('zminus').onclick = () => zoom(-1);
+    $('zplus').onclick = () => zoom(1);
+    $('zvarde').onclick = () => zoom(0);
+    $('mork').onchange = (e) => satt('mork', e.target.checked);
+    $('ljud').onchange = (e) => satt('ljud', e.target.checked);
+    $('reklam').onchange = (e) => satt('reklam', e.target.checked);
+    $('js').onchange = (e) => satt('js', e.target.checked);
+    for (const b of $('popup').querySelectorAll('button')) b.onclick = () => { if (d && b.dataset.v !== d.popup) satt('popup', b.dataset.v); };
+    $('aterstall').onclick = async () => {
+      let r = null; try { r = await ipc.invoke('sajt:panel-aterstall'); } catch (e) {}
+      if (r && r.data) d = r.data;
+      laddaOm = true; rita();
+    };
+    $('ladda-om').onclick = () => ipc.send('sajt:panel-ladda-om');
+    $('alla').onclick = () => ipc.send('sajt:panel-alla');
+    // Klick utanför panelen (på sidan eller i skalet) eller Esc stänger
+    window.addEventListener('blur', () => setTimeout(() => { if (!document.hasFocus()) stang(); }, 0));
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') stang(); });
+    hamta();
+  })();
+  </script>
+</body>
+</html>

@@ -208,6 +208,7 @@ class AdrazeAdblock {
     const i = this.inst; if (!i || !this.isOn()) return false;
     const lage = i.get().kakor; if (lage === 'av') return false;
     if (this.allowHost(url) || (toppUrl && this.allowHost(toppUrl))) return false;   // inloggning/betalning
+    if (toppUrl && this.sajtAv && this.sajtAv(toppUrl)) return false;                // Anpassa: blockeraren av för sajten
     if (lage === 'alla') return true;
     const h = hostAv(url), t = hostAv(toppUrl);
     return !!h && !!t && bas(h) !== bas(t);
@@ -413,6 +414,9 @@ class AdrazeAdblock {
         // Inloggnings-/2FA-sidor (GitHub, Google-konto, Microsoft …): blockera ingenting på dem
         if (typ !== 'main_frame' && kalla && this.allowHost(kalla)) { cb({}); return; }
         if (d.webContents && !d.webContents.isDestroyed() && this.allowHost(d.webContents.getURL() || '')) { cb({}); return; }
+        // Anpassa → per sajt: blockeraren avstängd för sajten i fliken. Sidans delar släpps igenom; huvudsidan kollas
+        // ändå (farliga sidor), och sajtens adresser blockeras som vanligt när de laddas på andra sajter.
+        if (typ !== 'main_frame' && this.sajtAv && d.webContents && !d.webContents.isDestroyed() && this.sajtAv(d.webContents.getURL() || '')) { cb({}); return; }
         const inst = this.inst ? this.inst.get() : null;
         if (inst && typ !== 'main_frame') {
           let topp = ''; try { topp = d.webContents && !d.webContents.isDestroyed() ? hostAv(d.webContents.getURL()) : ''; } catch {}
@@ -461,6 +465,12 @@ class AdrazeAdblock {
       sess.webRequest.onHeadersReceived({ urls: ['<all_urls>'] }, (d, cb) => {
         const typ = TYPE_MAP[d.resourceType] || 'other';
         if (!this.isOn()) { cb({}); return; }
+        // Anpassa: blockeraren av för sajten → inga ändrade rubriker (kakor, CSP) på sajtens sidor
+        if (this.sajtAv) {
+          let topp = typ === 'main_frame' ? d.url : '';
+          if (!topp) { try { topp = d.webContents && !d.webContents.isDestroyed() ? d.webContents.getURL() : ''; } catch {} }
+          if (topp && this.sajtAv(topp)) { cb({}); return; }
+        }
         let rubriker = null;
         const inst = this.inst ? this.inst.get() : null;
         // Kakor: stryk Set-Cookie från tredjepart (eller allt), som Braves "Blockera cookies"
@@ -535,6 +545,7 @@ class AdrazeAdblock {
       if (!this.index || !this.isOn()) { e.returnValue = ut; return; }
       let topp = ''; try { topp = hostAv(e.sender.getURL()); } catch {}
       if (this.allowHost('https://' + (topp || host) + '/')) { e.returnValue = ut; return; }
+      try { if (this.sajtAv && this.sajtAv(e.sender.getURL())) { e.returnValue = ut; return; } } catch {}   // Anpassa: av för sajten
       // scriptlets gäller den aktuella ramens värd → bygg per host (lätt, cachas)
       const ram = String(host || topp || '');
       const ut2 = { pa: true, skript: { ...this.skript, scriptlets: this.scriptletKod(ram) } };
