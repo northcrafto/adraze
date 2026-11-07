@@ -33,6 +33,7 @@ const WEBB_KANALER = new Set([
   'adraze:start', 'adraze:css', 'adraze:kakor', 'adraze:rakna', 'adraze:dolj-regler',   // adraze-preload.js
   'page:click', 'i18n:t', 'pw:capture', 'pw:for-origin', 'pw:open-manager', 'pip:state',            // content-preload.js
   'wallet:capture', 'wallet:debug', 'wallet:menu', 'wallet:open-manager', 'wallet:token', 'wallet:valj', 'wallet:want', 'wallet:nav',
+  'avancerat:skript',   // anpassa-avancerat-preload.js (användarskript; huvudprocessen väljer utifrån ramens egen adress)
 ]);
 function ramUrl(e) { try { return (e.senderFrame && e.senderFrame.url) || ''; } catch { return ''; } }
 function kanalTillaten(kanal, e) {
@@ -74,6 +75,7 @@ const webb = require('./webbinst');
 const lasvy = require('./lasvy');   // läsläge (Readability)
 const importera = require('./importera');   // importera bokmärken/historik/lösenord från andra webbläsare
 const anpassa = require('./anpassa');      // gemensam butik för all anpassning (tema, flikar, verktygsfält …)
+const avancerat = require('./anpassa-avancerat');   // Anpassa → Avancerat: egen CSS (sajter + AdRaze) och användarskript
 const tillagg = require('./tillagg');        // Chrome-tillägg (Chrome Web Store)
 const blockinst = require('./blockinst');     // blockerarens inställningar (adraze://adblock)
 const blocksida = require('./blocksida');     // adraze://adblock, Blockera element, Glöm mig
@@ -294,6 +296,7 @@ function barnNagonRegel() { if (!KONTO_PER_FONSTER) return barnRegler; for (cons
 // Utvecklarverktyg och inkognito: avstängda så fort något fönster är i barnläge (barnet kan annars öppna dem i ett annat)
 function barnNagonstans() { return !!barnNagonRegel(); }
 anpassa.init({ barnKoll: () => barnNagonstans() });
+avancerat.init({ anpassa, barn: () => barnNagonstans(), T: (s) => T(s) });   // av i barnläge (alla fönster) och inkognito
 function barnSparrad(url, regler) {
   const r = regler === undefined ? barnRegler : regler; if (!r) return false;
   let h = '';
@@ -650,6 +653,7 @@ function buildContextMenu(ctx, wc, params) {
     t.push({ label: T('Blockera element'), click: () => blocksida.blockeraElement(wc, params.x, params.y, { rad: T('Klicka på det du vill dölja · Esc avbryter'), klar: T('Dolt. Ångra under adraze://adblock') }) });
     t.push({ type: 'separator' });
   }
+  { const v = avancerat.menyval(wc); if (v.length) t.push(...v, { type: 'separator' }); }   // Anpassa → Avancerat: "Redigera CSS för den här sajten"
   t.push({ label: T('Spara som…'), click: () => savePage(ctx, wc) });
   t.push({ label: T('Skriv ut…'), click: () => printPage(ctx, wc) });
   t.push({ label: T('Skapa QR-kod för sidan'), click: () => showQR(ctx, url) });
@@ -776,6 +780,7 @@ function ensureView(ctx, tabId) {
     } catch {}
   });
   blocksida.fliken(wc);   // Glöm mig när jag stänger webbplatsen
+  avancerat.flik(wc);     // Anpassa → Avancerat: egen CSS vid varje sidladdning + användarskript (inte inkognito/barnläge)
   wc.on('will-navigate', (e, url) => {
     if (internAdress(url) && webbAdress(wc.getURL())) { e.preventDefault(); return; }
     if (/^(file|devtools|chrome|chrome-extension):/i.test(url)) { e.preventDefault(); return; }   // aldrig lokala filer i en flik
@@ -2498,7 +2503,7 @@ function handleShortcut(wc, input) {
   if (mod && shift && k === 'n') { createWindow(true, ctx); return true; }
   if (mod && !shift && k === 'w') { sendTo(ctx, 'close-tab'); return true; }
   if (mod && !shift && k === 'l') { try { ctx.win.webContents.focus(); } catch {} sendTo(ctx, 'focus-address'); return true; }
-  if (mod && shift && k === 'r') { const v = activeView(ctx); if (v) v.webContents.reloadIgnoringCache(); return true; }
+  if (mod && shift && k === 'r' && !input.alt) { const v = activeView(ctx); if (v) v.webContents.reloadIgnoringCache(); return true; }   // Ctrl+Shift+Alt+R = nödutgången (anpassa-avancerat.js)
   if (mod && !shift && k === 'r') { const v = activeView(ctx); if (v) v.webContents.reload(); return true; }
   if (mod && shift && k === 'p') { const v = activeView(ctx); if (v) bildIBild(ctx, v.webContents); return true; }
   if (mod && !shift && k === 'p') { const v = activeView(ctx); if (v) printPage(ctx, v.webContents); return true; }

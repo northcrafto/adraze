@@ -74,6 +74,12 @@ contextBridge.exposeInMainWorld('anpassaBro', {
   importera: (kod, prefix) => ipcRenderer.invoke('anpassa:importera', { kod, prefix }),
   onAndrad: (fn) => ipcRenderer.on('anpassa:andrad', (_e, d) => fn(d)),
 });
+// Anpassa → Avancerat (ui/anpassa-avancerat.js): kontrollera ett skript (kompileras, körs aldrig) och
+// "Redigera CSS för den här sajten" från sidans högerklicksmeny. Värdena själva går via anpassaBro.
+contextBridge.exposeInMainWorld('anpassaAvancerat', {
+  kolla: (d) => ipcRenderer.invoke('avancerat:kolla', d),
+  onRedigeraCss: (fn) => ipcRenderer.on('avancerat:redigera-css', (_e, host) => fn(String(host || ''))),
+});
 contextBridge.exposeInMainWorld('kontoLage', {
   fonster: () => ipcRenderer.sendSync('konto:fonster'),
   hamta: () => ipcRenderer.sendSync('konto:lage'),

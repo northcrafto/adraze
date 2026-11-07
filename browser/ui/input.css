@@ -869,3 +869,81 @@ svg:has(use[href="#i-fav"]) { color: #5f6368; opacity: 1; }
 .fam-fraga button { font-size: 12px; font-weight: 700; border-radius: 8px; padding: 5px 10px; cursor: pointer; border: 1px solid var(--color-line); background: #fff; color: var(--color-navy-900); }
 .fam-fraga button[data-svar="nej"] { color: #b4321a; }
 .fam-fraga button:hover { border-color: var(--color-navy-900); }
+
+/* ── Anpassa: avancerat ── */
+/* Egen CSS för sajter, egen CSS för AdRaze och användarskript (ui/anpassa-avancerat.js). Följer inställningarnas
+   gråskala (--s-*) med orange accent, så både ljust och mörkt läge fungerar utan egna färger. */
+#anp-avancerat { --anp-mono: ui-monospace, "JetBrains Mono", "Cascadia Code", "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", "Liberation Mono", monospace; }
+#anp-avancerat .anp-rad .set-title, #anp-avancerat .anp-rad .set-desc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#anp-avancerat .anp-rad.anp-vald { box-shadow: inset 3px 0 0 var(--s-accent); }
+#anp-avancerat .anp-rad.anp-av .set-title { color: var(--s-mut); }
+#anp-avancerat .anp-rad .pill { height: 32px; padding: 0 14px; font-size: 13px; }
+#anp-avancerat .anp-tom { margin-top: 14px; font-size: 13px; color: var(--s-faint); }
+#anp-avancerat .anp-ny { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 42px; margin-top: 12px; border-radius: 10px;
+  border: 1.5px dashed var(--s-field-line); background: transparent; color: var(--s-mut); font-size: 13.5px; font-weight: 600; cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
+#anp-avancerat .anp-ny:hover, #anp-avancerat .anp-ny:focus-visible { border-color: var(--s-accent); color: var(--s-accent-ink); background: var(--s-accent-soft); outline: none; }
+#anp-avancerat .anp-status { margin-top: 10px; font-size: 12.5px; font-weight: 600; color: var(--color-safe); }
+#anp-avancerat .anp-status[data-typ="fel"] { color: #c0392b; }
+#anp-avancerat .anp-status[data-typ="varning"] { color: var(--s-accent-ink); }
+:root[data-theme="dark"] #anp-avancerat .anp-status[data-typ="fel"] { color: #ff8a7a; }
+
+/* Redigeraren (CSS-regel eller skript) */
+#anp-avancerat .anp-red { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; padding: 14px 18px 18px; border: 1px solid var(--s-line); border-radius: 12px; background: var(--s-surface); box-shadow: var(--s-shadow);
+  scroll-margin: 92px 0 24px; }   /* rullas fram under den klistrade sökrutan (.set-top, 80px) */
+#anp-avancerat .anp-red-topp { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+#anp-avancerat .anp-red-topp b { font-size: 14.5px; font-weight: 650; letter-spacing: -.01em; color: var(--s-ink); }
+#anp-avancerat .anp-x { display: grid; place-items: center; width: 30px; height: 30px; margin-right: -6px; border: 0; border-radius: 8px; background: transparent; color: var(--s-mut); cursor: pointer; transition: background .15s, color .15s; }
+#anp-avancerat .anp-x:hover, #anp-avancerat .anp-x:focus-visible { background: var(--s-hover); color: var(--s-ink); outline: none; }
+#anp-avancerat .anp-falt { display: flex; align-items: center; gap: 10px 12px; flex-wrap: wrap; }
+#anp-avancerat .anp-falt[hidden] { display: none; }
+#anp-avancerat .anp-falt-topp { align-items: flex-start; }
+#anp-avancerat .anp-etikett { width: 62px; flex: none; font-size: 13px; font-weight: 600; color: var(--s-mut); }
+#anp-avancerat .anp-falt-topp .anp-etikett { padding-top: 8px; }
+#anp-avancerat .anp-in { flex: 1 1 220px; min-width: 0; height: 36px; padding: 0 12px; border: 1px solid var(--s-field-line); border-radius: 8px; font-size: 13.5px; outline: none; }
+#anp-avancerat .anp-sajtfalt .anp-in, #anp-avancerat .anp-sajter { font-family: var(--anp-mono); font-size: 12.5px; }
+#anp-avancerat textarea.anp-in { width: 100%; height: auto; min-height: 66px; padding: 8px 12px; line-height: 1.6; resize: vertical; white-space: pre; }
+#anp-avancerat .anp-kol { flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+#anp-avancerat .anp-kol .anp-in { flex: none; }   /* i en kolumn skulle flex-basis bli höjden */
+#anp-avancerat .anp-hint { font-size: 12px; line-height: 1.45; color: var(--s-faint); }
+#anp-avancerat .anp-val { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--s-ink); cursor: pointer; }
+#anp-avancerat .anp-medd { margin: 0; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; line-height: 1.45; background: var(--s-surface-2); color: var(--s-ink); }
+#anp-avancerat .anp-medd[hidden] { display: none; }
+#anp-avancerat .anp-medd[data-typ="fel"] { background: rgb(208 64 47 / .08); color: #b7392a; }
+#anp-avancerat .anp-medd[data-typ="varning"] { background: var(--s-accent-soft); color: var(--s-accent-ink); }
+:root[data-theme="dark"] #anp-avancerat .anp-medd[data-typ="fel"] { background: rgb(255 138 122 / .1); color: #ff8a7a; }
+#anp-avancerat .anp-knappar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+#anp-avancerat .anp-fyll { flex: 1; }
+/* Spara: fylld (mörk i ljust läge, ljus i mörkt) – vätskefyllningen stiger i accentfärgen */
+#anp-avancerat .anp-huvud { background: var(--s-ink) !important; color: var(--s-bg) !important; box-shadow: none !important; }
+#anp-avancerat .anp-huvud::before { background: var(--s-accent) !important; }
+#anp-avancerat .anp-huvud:is(:hover, :focus-visible) { color: #fff !important; }
+#anp-avancerat .anp-bort { height: 36px; padding: 0 14px; border: 1px solid rgb(208 64 47 / .4); border-radius: 8px; background: transparent; color: #c0392b; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
+#anp-avancerat .anp-bort:hover, #anp-avancerat .anp-bort:focus-visible, #anp-avancerat .anp-bort.anp-sakert { background: #c0392b; border-color: #c0392b; color: #fff; outline: none; }
+:root[data-theme="dark"] #anp-avancerat .anp-bort:not(:hover):not(.anp-sakert) { color: #ff8a7a; }
+
+/* Kodfältet: radnummer till vänster, samma radhöjd (20px) som texten */
+#anp-avancerat .anp-kod { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); overflow: hidden; border: 1px solid var(--s-field-line); border-radius: 10px; background: var(--s-field); transition: border-color .15s, box-shadow .15s; }
+#anp-avancerat .anp-kod:focus-within { border-color: var(--s-ink); box-shadow: 0 0 0 3px var(--s-accent-soft); }
+#anp-avancerat .anp-kod-nr { min-width: 44px; padding: 12px 10px 28px 12px; overflow: hidden; text-align: right; white-space: pre; user-select: none; font: 12.5px/20px var(--anp-mono); font-variant-numeric: tabular-nums; color: var(--s-faint); background: var(--s-surface-2); border-right: 1px solid var(--s-line); }
+#anp-avancerat .anp-kod-text { display: block; width: 100%; height: calc(var(--rader, 14) * 20px + 24px); min-height: 104px; max-height: 70vh; margin: 0; padding: 12px 14px; overflow: auto; resize: vertical;
+  border: 0 !important; border-radius: 0; outline: none; box-shadow: none !important; background: transparent !important; color: var(--s-ink); caret-color: var(--s-accent);
+  font: 12.5px/20px var(--anp-mono); white-space: pre; tab-size: 2; }
+#anp-avancerat .anp-kod-text::placeholder { color: var(--s-faint); }
+#anp-avancerat .anp-kod-fel { position: absolute; top: 0; left: 0; right: 0; height: 20px; pointer-events: none; background: rgb(208 64 47 / .1); box-shadow: inset 3px 0 0 #d0402f; }
+#anp-avancerat .anp-kod-fel[hidden] { display: none; }
+
+/* Egen CSS för AdRaze: varningen, kortkommandot och redigeraren */
+#anp-avancerat .anp-varning { display: flex; gap: 12px; align-items: flex-start; margin-top: 14px; padding: 12px 14px; border: 1px solid rgb(255 75 31 / .35); border-radius: 12px; background: var(--s-accent-soft); font-size: 13px; line-height: 1.6; color: var(--s-ink); }
+#anp-avancerat .anp-varning > svg { flex: none; margin-top: 3px; color: var(--s-accent); }
+#anp-avancerat .anp-varning b { font-weight: 650; }
+#anp-avancerat kbd { display: inline-block; min-width: 20px; padding: 0 5px; border: 1px solid var(--s-field-line); border-bottom-width: 2px; border-radius: 5px; background: var(--s-surface); font: 600 11.5px/17px var(--anp-mono); color: var(--s-ink); text-align: center; }
+#anp-avancerat code { padding: 1px 5px; border: 1px solid var(--s-line); border-radius: 5px; background: var(--s-surface); font: 12px var(--anp-mono); }
+#anp-avancerat .anp-skal { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+#anp-avancerat .anp-skal .anp-status { margin-top: 0; }
+#anp-avancerat .anp-not { display: flex; gap: 10px; align-items: flex-start; margin-top: 16px; font-size: 12.5px; line-height: 1.5; color: var(--s-mut); }
+#anp-avancerat .anp-not > svg { flex: none; margin-top: 1px; color: var(--color-safe); }
+#anp-avancerat .anp-not-topp { margin: 22px 0 0; }
+#anp-avancerat .anp-not-topp > svg { color: var(--s-mut); }
+#anp-avancerat .anp-last { display: flex; gap: 10px; align-items: center; margin-top: 12px; padding: 14px 16px; border: 1px solid var(--s-line); border-radius: 12px; background: var(--s-surface); font-size: 13px; line-height: 1.5; color: var(--s-mut); }
+#anp-avancerat .anp-last > svg { flex: none; }
+@media (prefers-reduced-motion: reduce) { #anp-avancerat .anp-ny, #anp-avancerat .anp-kod, #anp-avancerat .anp-bort { transition: none; } }
