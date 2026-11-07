@@ -102,7 +102,10 @@ function createTab(url, incognito) {
   if (incognito === undefined) incognito = windowIncognito;  // inkognitofönster → alla flikar inkognito
   const tab = { id: ++seq, url: null, title: incognito ? 'Inkognito' : 'Ny flik', favicon: null, cleared: new Set(), bypassed: new Set(), canBack: false, canForward: false, verdict: null, warning: null, toastDismissed: new Set(), entering: true, incognito: !!incognito, overlay: null };
   if (incognito) window.view.markIncognito(tab.id);
-  tabs.push(tab); switchTab(tab);
+  // Anpassa (flikar): ny flik sist eller bredvid den aktiva, se ui/anpassa-flikar.js (-1 = sist, som förut)
+  const plats = window.AnpFlikar ? AnpFlikar.nyPlats(tab) : -1;
+  if (plats >= 0) tabs.splice(plats, 0, tab); else tabs.push(tab);
+  switchTab(tab);
   setTimeout(() => { tab.entering = false; }, 280);
   if (url) guardedNavigate(tab, url);
   // Ny tom flik: markören står redan i adressfältet, så man kan skriva direkt
@@ -121,6 +124,7 @@ function saveOpenTabs() {
     localStorage.setItem(OPEN_TABS_KEY, JSON.stringify(keep.map((t) => t.url)));
     localStorage.setItem('adraze-pinned-tabs', JSON.stringify(keep.filter((t) => t.pinned).map((t) => t.url)));
     localStorage.setItem('adraze-active-tab', String(keep.indexOf(active)));   // -1 = startsidan var öppen
+    if (window.AnpFlikar) AnpFlikar.sparat(keep);   // Anpassa (flikar): flikarnas grupper sparas bredvid adresserna
   } catch {}
 }
 // Vid start: 'tidigare' (förra flikarna + startsidan), 'ny' (bara en ny flik) eller 'sida' (en viss adress)
@@ -210,7 +214,10 @@ function finalizeClose(tab) {
   window.view.destroy(tab.id);
   tabs.splice(i, 1);
   saveOpenTabs();
-  if (!tabs.length) { window.view.doClose(); return; }   // sista fliken stängd → stäng browsern
+  if (!tabs.length) {   // sista fliken stängd → stäng browsern (Anpassa → flikar kan välja en ny flik i stället)
+    if (window.AnpFlikar && AnpFlikar.sistaStangd()) return;
+    window.view.doClose(); return;
+  }
   if (active === tab) switchTab(tabs[Math.max(0, i - 1)]); else renderTabs();
 }
 // Somliga sajter (t.ex. GitHub) skickar en VIT mörklägeslogga som blir osynlig på den ljusa flik-raden.
@@ -275,22 +282,29 @@ function tabRoom() {
 }
 const PIN_W = 40;
 function layoutTabs() {
+  // Anpassa (flikar): true = flikarna ligger på sidan (egen layout); annars plats för grupprubriker och hopfällda grupper
+  const anp = window.AnpFlikar ? AnpFlikar.layout() : null;
+  if (anp === true) return;
   const host = $('tabs');
   const pinned = tabs.filter((t) => !t._closing && t.pinned).length;
-  const n = Math.max(1, tabs.filter((t) => !t._closing && !t.pinned).length);
+  const n = Math.max(1, tabs.filter((t) => !t._closing && !t.pinned).length - (anp ? anp.dolda : 0));
   const room = tabRoom() - pinned * (PIN_W + TAB_GAP);
-  let w = tabWidthLock != null ? tabWidthLock : Math.floor((room - TAB_GAP * (n - 1)) / n);
+  let w = tabWidthLock != null ? tabWidthLock : Math.floor((room - (anp ? anp.px : 0) - TAB_GAP * (n - 1)) / n);
   w = Math.max(TAB_MIN, Math.min(TAB_MAX, w));
   currentTabW = w;
   host.style.setProperty('--tab-w', w + 'px');
-  host.style.maxWidth = room + 'px';
+  // Fästa flikar ligger också i raden: räkna in dem, annars scrollar raden (och den fästa fliken hamnar utanför) fast allt får plats
+  host.style.maxWidth = (room + pinned * (PIN_W + TAB_GAP)) + 'px';
   host.classList.toggle('narrow', w < TAB_NARROW);
 }
 function renderTabs() {
   const host = $('tabs');
-  const old = new Map([...host.children].map((el) => [el.dataset.tabid, el]));
+  const old = new Map([...host.children].map((el) => [el.dataset.tabid || 'g:' + el.dataset.grupp, el]));   // Anpassa: grupprubriker har data-grupp
   let prev = null;
   tabs.forEach((tab) => {
+    // Anpassa (flikar): gruppens rubrik före gruppens första flik (ui/anpassa-flikar.js)
+    const rub = window.AnpFlikar ? AnpFlikar.rubrik(tab) : null;
+    if (rub) { old.delete('g:' + rub.dataset.grupp); const w = prev ? prev.nextSibling : host.firstChild; if (w !== rub) host.insertBefore(rub, w); prev = rub; }
     if (tab.favicon) detectFavLight(tab.favicon);
     let el = old.get(String(tab.id));
     const fresh = !el;
@@ -306,7 +320,8 @@ function renderTabs() {
       el.addEventListener('contextmenu', (e) => { e.preventDefault(); tabMenu(tab); });
     }
     old.delete(String(tab.id));
-    const cls = 'tab' + (tab === active ? ' active' : '') + (tab.incognito ? ' incognito' : '') + (tab._closing ? ' closing' : '') + (tab.pinned ? ' pinned' : '');
+    const cls = 'tab' + (tab === active ? ' active' : '') + (tab.incognito ? ' incognito' : '') + (tab._closing ? ' closing' : '') + (tab.pinned ? ' pinned' : '')
+      + (window.AnpFlikar ? AnpFlikar.klass(tab) : '');   // Anpassa: gruppfärg, hopfälld grupp, sovande flik
     if (el.className.replace(' entering', '') !== cls) el.className = cls + (el.classList.contains('entering') ? ' entering' : '');
     // Bygg om innehållet bara när det ändrats (annars blinkar favicons)
     // Ljudikon när fliken spelar ljud eller är tystad; klick växlar ljud av/på
@@ -325,6 +340,7 @@ function renderTabs() {
   old.forEach((el) => el.remove());
   if (tabs.some((t) => t.entering)) tabWidthLock = null;
   layoutTabs();
+  if (window.AnpFlikar) AnpFlikar.ritat();   // Anpassa (flikar): aktiv flik synlig i panelen, fästa flikar till huvudprocessen
   // Efter bredd-animationen: se till att den aktiva fliken syns när raden scrollar
   clearTimeout(renderTabs._t);
   renderTabs._t = setTimeout(() => {
@@ -2282,7 +2298,8 @@ function setPinned(tab, on) {
 }
 function setMuted(tab, on) { if (!tab) return; tab.muted = !!on; window.view.mute(tab.id, tab.muted); renderTabs(); }
 function tabMenu(tab) {
-  window.view.tabMenu({ id: tab.id, pinned: !!tab.pinned, muted: !!tab.muted, hasUrl: !!tab.url, count: tabs.length, canReopen: closedTabs.length > 0 });
+  window.view.tabMenu({ id: tab.id, pinned: !!tab.pinned, muted: !!tab.muted, hasUrl: !!tab.url, count: tabs.length, canReopen: closedTabs.length > 0,
+    ...(window.AnpFlikar ? AnpFlikar.menyInfo(tab) : {}) });   // Anpassa: flikens grupp + fönstrets grupper till menyn
 }
 window.view.onTabAudio((id, audible) => { const t = byId(id); if (t && t.audible !== audible) { t.audible = audible; renderTabs(); } });
 window.view.onTabAction((action, id) => {
