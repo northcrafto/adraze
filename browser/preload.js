@@ -240,3 +240,18 @@ contextBridge.exposeInMainWorld('view', {
   onContentWarning: (cb) => ipcRenderer.on('content-warning', (_e, id, url, res) => cb(id, url, res)),
   onWindowResized: (cb) => ipcRenderer.on('window-resized', () => cb()),
 });
+
+// Anpassa: sidopanel med webbappar (ui/anpassa-sidopanel.js ↔ anpassa-sidopanel.js). Bara de egna kanalerna.
+const SP_HANDELSER = new Set(['tillstand', 'info', 'ikon', 'ikon-ra', 'fraga', 'fraga-klar', 'stangd', 'atgard']);
+contextBridge.exposeInMainWorld('anpassaSidopanel', {
+  tillstand: () => { try { return ipcRenderer.sendSync('sidopanel:tillstand'); } catch { return null; } },
+  oppna: (id, yta, bakgrund) => ipcRenderer.send('sidopanel:oppna', id, yta, bakgrund),
+  stang: () => ipcRenderer.send('sidopanel:stang'),
+  yta: (r) => ipcRenderer.send('sidopanel:yta', r),
+  skymd: (on) => ipcRenderer.send('sidopanel:skymd', !!on),
+  gor: (id, vad) => ipcRenderer.send('sidopanel:gor', id, vad),
+  meny: (id) => ipcRenderer.send('sidopanel:meny', id || null),
+  sparaIkon: (id, png, kalla) => ipcRenderer.send('sidopanel:spara-ikon', id, png, kalla),
+  svar: (qid, allow, remember) => ipcRenderer.send('sidopanel:svar', qid, !!allow, !!remember),
+  on: (namn, fn) => { if (SP_HANDELSER.has(namn)) ipcRenderer.on('sidopanel:' + namn, (_e, ...a) => fn(...a)); },
+});
