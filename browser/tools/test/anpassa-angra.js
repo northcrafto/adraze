@@ -103,7 +103,7 @@ const TESTNYCKLAR = [
     await H.sov(4200);   // så att inget räknas som "nyss klickat"
 
     // Ändringar som inte kommer från dig här (t.ex. ett annat fönster) ger ingen toast, men syns i listan
-    await s.kor(`(async () => { await Anpassa.set('tema.accent', '#2f9e67', 'Accentfärg'); await Anpassa.set('flikar.lage', 'vertikalt', 'Flikarnas placering');
+    await s.kor(`(async () => { await Anpassa.set('tema.accent', '#2f9e67', 'Accentfärg'); await Anpassa.set('flikar.lage', 'vertikal', 'Flikarnas placering');
       await Anpassa.set('verktyg.knappar', ['bakat', 'ladda'], 'Knappar i verktygsfältet'); await Anpassa.set('arbetsytor.vaxlare', false, 'Väljaren för arbetsytor');
       await Anpassa.set('tema.densitet', 'kompakt', 'Densitet'); await Anpassa.set('tema.lage', 'morkt', 'Ljust eller mörkt'); return 1; })()`);
     await H.sov(500);
@@ -155,7 +155,7 @@ const TESTNYCKLAR = [
     await H.sov(400);
     const kod = await s.kor(`document.getElementById('anp-exp-kod').value`);
     let innehall = {}; try { innehall = JSON.parse(Buffer.from(String(kod).slice(6), 'base64url').toString('utf8')); } catch {}
-    res.ok('export: ADRZ1-kod med inställningarna', /^ADRZ1\./.test(kod) && innehall['tema.accent'] === '#2f9e67' && innehall['flikar.lage'] === 'vertikalt', Object.keys(innehall));
+    res.ok('export: ADRZ1-kod med inställningarna', /^ADRZ1\./.test(kod) && innehall['tema.accent'] === '#2f9e67' && innehall['flikar.lage'] === 'vertikal', Object.keys(innehall));
     res.ok('export: antal visas', /\d+ inställningar/.test(await s.kor(`document.getElementById('anp-exp-not').textContent`)));
     await klick(s, '#anp-exp-fil');
     await H.sov(500);
@@ -173,7 +173,7 @@ const TESTNYCKLAR = [
     res.ok('återställ allt: toast "Allt återställt · Ångra"', (await toast(s)) === 'Allt återställt · Ångra', await toast(s));
     await klick(s, '#anp-toast .anp-toast-angra');
     await H.sov(450);
-    res.ok('återställ allt: Ångra tar tillbaka allt', (await A(`A.hamta('tema.accent') + '|' + A.hamta('flikar.lage') + '|' + A.hamta('avancerat.css')`)) === '#2f9e67|vertikalt|body { outline: 1px solid red }');
+    res.ok('återställ allt: Ångra tar tillbaka allt', (await A(`A.hamta('tema.accent') + '|' + A.hamta('flikar.lage') + '|' + A.hamta('avancerat.css')`)) === '#2f9e67|vertikal|body { outline: 1px solid red }');
 
     // Importera kod (egen CSS följer aldrig med)
     await A(`A.aterstall()`);
@@ -182,7 +182,7 @@ const TESTNYCKLAR = [
     await skriv(s, kod);
     await klick(s, '#anp-imp-kor');
     await H.sov(500);
-    res.ok('import: värdena tillbaka', (await A(`A.hamta('tema.accent') + '|' + A.hamta('flikar.lage')`)) === '#2f9e67|vertikalt');
+    res.ok('import: värdena tillbaka', (await A(`A.hamta('tema.accent') + '|' + A.hamta('flikar.lage')`)) === '#2f9e67|vertikal');
     res.ok('import: egen CSS följer inte med', (await A(`A.hamta('avancerat.css')`)) === '');
     res.ok('import: meddelande', /^Klart! \d+ inställningar importerades\.$/.test(await s.kor(`document.getElementById('anp-imp-not').textContent`)), await s.kor(`document.getElementById('anp-imp-not').textContent`));
     // Importera fil
@@ -191,7 +191,7 @@ const TESTNYCKLAR = [
     const nod = await s.skicka('DOM.querySelector', { nodeId: doc.result.root.nodeId, selector: '#anp-imp-fil' });
     await s.skicka('DOM.setFileInputFiles', { nodeId: nod.result.nodeId, files: [fil] });
     await H.sov(700);
-    res.ok('import från fil', (await A(`A.hamta('tema.accent') + '|' + A.hamta('flikar.lage')`)) === '#2f9e67|vertikalt');
+    res.ok('import från fil', (await A(`A.hamta('tema.accent') + '|' + A.hamta('flikar.lage')`)) === '#2f9e67|vertikal');
     // Fel kod
     await s.kor(`document.getElementById('anp-imp-kod').value = 'hej'; 1`);
     await klick(s, '#anp-imp-kor');
@@ -207,11 +207,11 @@ const TESTNYCKLAR = [
     await A(`A.aterstall()`);
     const lista = await m.kor(`JSON.stringify(__T.F.lista())`).then(JSON.parse);
     const rad = (k) => lista.find((x) => x.nyckel === k) || {};
-    res.ok('Falk: listan läses ur registret', rad('flikar.lage').val === 'upptill | vertikalt | dolda' && rad('tema.accent').val === 'färg (#rrggbb)' && rad('tema.accent').nu === '#ff4b1f', lista.slice(0, 4));
+    res.ok('Falk: listan läses ur registret', rad('flikar.lage').val === 'upptill | vertikal | dolda' && rad('tema.accent').val === 'färg (#rrggbb)' && rad('tema.accent').nu === '#ff4b1f', lista.slice(0, 4));
     res.ok('Falk: egen CSS "frågar först", arbetsytorna ändras i Inställningar', rad('avancerat.css').fraga === true && rad('arbetsytor.lista').val === 'ändras i Inställningar' && !!rad('sajt.<namn>').nyckel);
 
     let r = await gor({ name: 'anpassa', value: 'flikar.lage|vertikala' });
-    res.ok('Falk: "gör flikarna vertikala"', r.r.ok && (await A(`A.hamta('flikar.lage')`)) === 'vertikalt' && r.med[0].etiketter[0] === 'Flikarnas placering', r);
+    res.ok('Falk: "gör flikarna vertikala"', r.r.ok && (await A(`A.hamta('flikar.lage')`)) === 'vertikal' && r.med[0].etiketter[0] === 'Flikarnas placering', r);
     r = await gor({ name: 'anpassa', value: 'tema.accent|mörkgrön' });
     res.ok('Falk: "mörkgrön accentfärg"', r.r.ok && (await A(`A.hamta('tema.accent')`)) === '#1f6b3a', r.r);
     r = await gor({ name: 'anpassa', value: 'tema.accent|#1F6B3A' });
@@ -244,7 +244,7 @@ const TESTNYCKLAR = [
     await gor({ name: 'anpassa', value: 'flikar.lage|dolda' });
     r = await gor({ name: 'anpassa_angra' });
     const efterF = await A(`[A.hamta('tema.accent'), A.hamta('flikar.lage'), A.hamta('tema.lage')].join('|')`);
-    res.ok('Falk: "ångra det" ångrar hela svaret', r.r.ok && r.r.antal === 2 && efterF === '#1f6b3a|vertikalt|ljust' && r.med[0].angrat === true, { r: r.r, efterF });
+    res.ok('Falk: "ångra det" ångrar hela svaret', r.r.ok && r.r.antal === 2 && efterF === '#1f6b3a|vertikal|ljust' && r.med[0].angrat === true, { r: r.r, efterF });
 
     // Egen CSS: bara efter "Tillåt" i en ruta – med värdet och varningen i rutan
     r = await gor({ name: 'anpassa', value: 'avancerat.css|body{background:red}' }, false);
@@ -262,9 +262,9 @@ const TESTNYCKLAR = [
 
     // "återställ utseendet" (tema) – frågar inte; "återställ allt" frågar
     r = await gor({ name: 'anpassa_aterstall', value: 'utseendet' });
-    res.ok('Falk: "återställ utseendet" → tema', r.r.ok && r.r.vad === 'tema' && r.fragor.length === 0 && (await A(`A.hamta('tema.accent') + A.hamta('tema.lage')`)) === '#ff4b1fsystem' && (await A(`A.hamta('flikar.lage')`)) === 'vertikalt', r);
+    res.ok('Falk: "återställ utseendet" → tema', r.r.ok && r.r.vad === 'tema' && r.fragor.length === 0 && (await A(`A.hamta('tema.accent') + A.hamta('tema.lage')`)) === '#ff4b1fsystem' && (await A(`A.hamta('flikar.lage')`)) === 'vertikal', r);
     r = await gor({ name: 'anpassa_aterstall', value: 'allt' }, false);
-    res.ok('Falk: "återställ allt" frågar först', !r.r.ok && r.r.stoppad && (await A(`A.hamta('flikar.lage')`)) === 'vertikalt', r.r);
+    res.ok('Falk: "återställ allt" frågar först', !r.r.ok && r.r.stoppad && (await A(`A.hamta('flikar.lage')`)) === 'vertikal', r.r);
 
     // Barnläge: barnlåst går inte (och frågar inte ens), utseende går
     await s.kor(`window.view.barnRegler({ last: false, blocklist: [], allows: [] }); 1`);
@@ -303,13 +303,13 @@ const TESTNYCKLAR = [
       const fel = await m.kor(`(async () => { const wc = __T.fonster().webContents; return JSON.stringify(await __T.el.ipcMain._invokeHandlers.get('anpassa-falk:gor')({ sender: wc, senderFrame: wc.mainFrame }, { name: 'anpassa', value: 'tema.accent|röd' })); })()`).then(JSON.parse);
       res.ok('huvudprocessen nekar andra än Falk-panelen', !fel.ok && /avsändare/.test(fel.fel), fel);
       await A(`A.aterstall('tema.')`); await A(`A.satt('flikar.lage', 'upptill', { etikett: 'Flikarnas placering' }) && 1`);
-      await m.kor(`(() => { __T.svar.push('Klart! Flikarna ligger nu på sidan och accentfärgen är mörkgrön. Det går att ångra. [[gör:anpassa=flikar.lage|vertikalt]] [[gör:anpassa=tema.accent|#1f6b3a]]'); return 1; })()`);
+      await m.kor(`(() => { __T.svar.push('Klart! Flikarna ligger nu på sidan och accentfärgen är mörkgrön. Det går att ångra. [[gör:anpassa=flikar.lage|vertikal]] [[gör:anpassa=tema.accent|#1f6b3a]]'); return 1; })()`);
       await vantaToastBort(s);
       await k.kor(`inp.value = 'gör flikarna vertikala och accentfärgen mörkgrön'; send(); 1`);
       await H.sov(3200);
-      res.ok('panelen: båda ändringarna gjordes', (await A(`A.hamta('flikar.lage') + '|' + A.hamta('tema.accent')`)) === 'vertikalt|#1f6b3a');
+      res.ok('panelen: båda ändringarna gjordes', (await A(`A.hamta('flikar.lage') + '|' + A.hamta('tema.accent')`)) === 'vertikal|#1f6b3a');
       const steg = await k.kor(`JSON.stringify([...document.querySelectorAll('#log .steps .step')].map((e) => e.textContent))`).then(JSON.parse);
-      res.ok('panelen: stegen visas i chatten', steg.includes('Ändrade flikarnas placeringvertikalt') && steg.includes('Ändrade accentfärg#1f6b3a'), steg);
+      res.ok('panelen: stegen visas i chatten', steg.includes('Ändrade flikarnas placeringvertikal') && steg.includes('Ändrade accentfärg#1f6b3a'), steg);
       const svarText = await k.kor(`String((history.filter((h) => h.role === 'assistant').slice(-1)[0] || {}).content || '')`);
       res.ok('panelen: taggarna syns inte i svaret', !/\[\[gör/.test(svarText) && /Klart! Flikarna ligger nu på sidan/.test(svarText), svarText);
       const prompt = await m.kor(`(() => { const ms = __T.skickat[0] || []; return String((ms[0] || {}).content || ''); })()`);

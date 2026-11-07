@@ -19,9 +19,11 @@ const HEX = /^#[0-9a-f]{6}$/i;
 // Kända nycklar: tillåtna värden och vanliga sätt att säga dem. Används bara om nyckeln registrerats med ett av värdena
 // som standard (annars har området valt andra värden, och då gäller de allmänna reglerna nedan).
 const KANDA = {
+  'tema.horn': { val: ['kantig', 'normal', 'rund'], syn: { kantigare: 'kantig', fyrkantig: 'kantig', skarp: 'kantig', skarpa: 'kantig', rundare: 'rund', runda: 'rund', mjuk: 'rund', mjuka: 'rund' } },
+  'verktyg.placering': { val: ['uppe', 'nere'], syn: { upptill: 'uppe', overst: 'uppe', nertill: 'nere', botten: 'nere', langst_ner: 'nere', nederst: 'nere' } },
   'tema.lage': { val: ['ljust', 'morkt', 'system'], syn: { ljus: 'ljust', light: 'ljust', dag: 'ljust', mork: 'morkt', dark: 'morkt', natt: 'morkt', morkerlage: 'morkt', morklage: 'morkt', auto: 'system', automatiskt: 'system', datorns: 'system', samma_som_datorn: 'system' } },
   'tema.densitet': { val: ['kompakt', 'normal', 'luftig'], syn: { kompaktare: 'kompakt', tat: 'kompakt', tatare: 'kompakt', mindre: 'kompakt', tight: 'kompakt', standard: 'normal', mellan: 'normal', vanlig: 'normal', luftigare: 'luftig', rymlig: 'luftig', rymligare: 'luftig', storre: 'luftig', glesare: 'luftig' } },
-  'flikar.lage': { val: ['upptill', 'vertikalt', 'dolda'], syn: { vertikal: 'vertikalt', vertikala: 'vertikalt', sidan: 'vertikalt', pa_sidan: 'vertikalt', vansterkant: 'vertikalt', sidopanel: 'vertikalt', uppe: 'upptill', overst: 'upptill', horisontellt: 'upptill', horisontella: 'upptill', vanligt: 'upptill', dold: 'dolda', gomda: 'dolda', gom: 'dolda', dolj: 'dolda', inga: 'dolda' } },
+  'flikar.lage': { val: ['upptill', 'vertikal', 'dolda'], syn: { vertikalt: 'vertikal', vertikala: 'vertikal', sidan: 'vertikal', pa_sidan: 'vertikal', vansterkant: 'vertikal', sidopanel: 'vertikal', uppe: 'upptill', overst: 'upptill', horisontellt: 'upptill', horisontella: 'upptill', vanligt: 'upptill', dold: 'dolda', gomda: 'dolda', gom: 'dolda', dolj: 'dolda', inga: 'dolda' } },
 };
 // Färgnamn → hex (för nycklar vars standard är en färg). Falk skriver oftast hex, men "mörkgrön" ska också gå.
 const FARGER = {
