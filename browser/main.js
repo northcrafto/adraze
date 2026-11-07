@@ -3068,7 +3068,7 @@ ipcMain.handle('update:status', async (_e, force) => {
   const l = await latestRelease(!!force);
   const current = app.getVersion();
   return {
-    current, latest: l.v || current, notes: l.notes, date: l.date,
+    current, latest: (l.v && semverGt(l.v, current)) ? l.v : current, notes: (l.v && !semverGt(current, l.v)) ? l.notes : '', date: l.date,   // en förhandsinstallerad version (nyare än den publicerade) visas som senaste
     available: !!(l.v && semverGt(l.v, current)),
     ready: !!(updDownloaded && semverGt(updDownloaded, current)), readyVersion: updDownloaded,
     auto: !!autoUpdater && !process.env.ADRAZE_NO_UPDATES,
