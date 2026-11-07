@@ -407,6 +407,15 @@
       <div class="lg-brand"><img src="adraze-mark.png" alt="" width="26" height="26"><span class="lg-brand-name">AdRaze</span></div>
       <div class="lg-card">
 
+        <!-- Profiler (som Netflix): konton som loggat in på enheten -->
+        <div id="login-profiles" class="lg-view" style="display:none;">
+          <h1 class="lg-h" id="prof-rubrik">Vem surfar?</h1>
+          <p class="lg-lead" id="prof-lead">Välj en profil för att fortsätta.</p>
+          <div id="lg-profiler" class="lg-prof"></div>
+          <div id="prof-error" class="lg-err" style="display:none;"></div>
+          <div class="lg-row center"><button id="prof-hantera" type="button" class="lg-pf-hantera">Hantera profiler</button></div>
+        </div>
+
         <!-- Steg 1: Google eller mejl -->
         <div id="login-form" class="lg-view">
           <h1 class="lg-h">Logga in på AdRaze</h1>
@@ -417,6 +426,7 @@
           <div id="start-error" class="lg-err" style="display:none;"></div>
           <button id="login-next" class="lg-btn">Fortsätt med mejl</button>
           <button id="to-child" type="button" class="lg-alt">Är du ett barn? <span>Logga in med din kod</span></button>
+          <button id="to-profiles" type="button" class="lg-link dim" style="display:none;margin:18px auto 0;font-size:13.5px">← Tillbaka till profilerna</button>
         </div>
 
         <!-- Steg 2: lösenord -->

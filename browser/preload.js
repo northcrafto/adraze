@@ -36,6 +36,10 @@ contextBridge.exposeInMainWorld('auth', {
   remember: (account) => ipcRenderer.invoke('auth:remember', account),
   recall: () => ipcRenderer.invoke('auth:recall'),
   forget: () => ipcRenderer.invoke('auth:forget'),
+  profiler: () => ipcRenderer.invoke('profiler:lista'),
+  sparaProfil: (key, account, avatar) => ipcRenderer.invoke('profiler:spara', { key, account, avatar }),
+  hamtaProfil: (key) => ipcRenderer.invoke('profiler:hamta', key),
+  taBortProfil: (key) => ipcRenderer.invoke('profiler:ta-bort', key),
 });
 
 contextBridge.exposeInMainWorld('family', {
