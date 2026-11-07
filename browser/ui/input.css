@@ -874,7 +874,7 @@ svg:has(use[href="#i-fav"]) { color: #5f6368; opacity: 1; }
 /* Tema och utseende (ui/anpassa-tema.js, nycklar tema.*). Allt styrs av attribut och variabler på <html>:
    data-anp-accent (egen accentfärg; --anp-accent-l/-d, --anp-on-l/-d och --anp-ink-l/-d räknas ut i JS),
    data-anp-densitet, data-anp-horn, data-anp-typsnitt och data-anp-storlek. Saknas ett attribut gäller AdRazes
-   standard. Det enda som syns även utan val är accentlisten under den aktiva fliken, fokusramar när man går med
+   standard. Det enda som syns även utan val är fokusramar när man går med
    tangentbordet och färgen på markerad text (se "Accenten i alla teman"). */
 
 /* Typsnitt för själva webbläsaren: bara systemtypsnitt (inget laddas ned), med reserver för Mac, Windows och Linux */
@@ -923,8 +923,7 @@ svg:has(use[href="#i-fav"]) { color: #5f6368; opacity: 1; }
 :root[data-anp-accent][data-theme] .notis :is(.notis-knapp, .notis-sek):not(:disabled):is(:hover, :focus-visible) { color: var(--anp-on); }
 :root[data-anp-accent] .notis button:focus-visible { outline-color: var(--color-terra); }
 
-/* Accenten i alla teman: en tunn list under den aktiva fliken, fokusramar (bara med tangentbordet, se fokus.js) och markerad text */
-.tab.active::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: 0; height: 2px; border-radius: 2px 2px 0 0; background: var(--color-terra); pointer-events: none; }
+/* Accenten i alla teman: fokusramar (bara med tangentbordet, se fokus.js) och markerad text */
 html[data-kbd] :is(.icon-btn, .newtab-btn, .bmchip, .pill, .omni-ab, .winctl button):focus-visible { outline: 2px solid var(--color-terra); outline-offset: 1px; }
 :is(#address, #nt-search, #settings input, #settings textarea)::selection { background: color-mix(in srgb, var(--color-terra) 32%, transparent); }
 
