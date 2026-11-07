@@ -122,6 +122,7 @@ function saveOpenTabs() {
     localStorage.setItem('adraze-pinned-tabs', JSON.stringify(keep.filter((t) => t.pinned).map((t) => t.url)));
     localStorage.setItem('adraze-active-tab', String(keep.indexOf(active)));   // -1 = startsidan var öppen
   } catch {}
+  try { if (window.arbetsytorSparat) window.arbetsytorSparat(); } catch {}   // Anpassa › Arbetsytor sparar samtidigt (ui/anpassa-arbetsytor.js)
 }
 // Vid start: 'tidigare' (förra flikarna + startsidan), 'ny' (bara en ny flik) eller 'sida' (en viss adress)
 let startMode = 'tidigare', startUrl = '';
