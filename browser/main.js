@@ -73,6 +73,7 @@ const { AdrazeAdblock, registerScheme: registerAdblockScheme } = require('./adbl
 const webb = require('./webbinst');
 const lasvy = require('./lasvy');   // läsläge (Readability)
 const importera = require('./importera');   // importera bokmärken/historik/lösenord från andra webbläsare
+const anpassa = require('./anpassa');      // gemensam butik för all anpassning (tema, flikar, verktygsfält …)
 const tillagg = require('./tillagg');        // Chrome-tillägg (Chrome Web Store)
 const blockinst = require('./blockinst');     // blockerarens inställningar (adraze://adblock)
 const blocksida = require('./blocksida');     // adraze://adblock, Blockera element, Glöm mig
@@ -292,6 +293,7 @@ function reglerFor(ctx) { return KONTO_PER_FONSTER ? (ctx ? ctx.barnRegler || nu
 function barnNagonRegel() { if (!KONTO_PER_FONSTER) return barnRegler; for (const c of wins.values()) if (c && c.barnRegler) return c.barnRegler; return null; }
 // Utvecklarverktyg och inkognito: avstängda så fort något fönster är i barnläge (barnet kan annars öppna dem i ett annat)
 function barnNagonstans() { return !!barnNagonRegel(); }
+anpassa.init({ barnKoll: () => barnNagonstans() });
 function barnSparrad(url, regler) {
   const r = regler === undefined ? barnRegler : regler; if (!r) return false;
   let h = '';
