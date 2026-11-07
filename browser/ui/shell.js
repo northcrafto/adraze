@@ -2054,6 +2054,7 @@ function visaBg(bg) {
 // Anropas när en flik visar startsidan: fliken behåller sin bild, en ny flik får en ny.
 async function tabBg(tab) {
   if (!tab || tab.incognito || bgMode() !== 'slump') return;
+  try { if (window.AnpassaStartsida && window.AnpassaStartsida.utanBild()) return; } catch {}   // Anpassa/startsida: bilden är avslagen → hämta ingen
   if (!tab.bg) {
     await laddaBgLista();
     if (tab.bg || active !== tab) return;
@@ -2063,6 +2064,7 @@ async function tabBg(tab) {
   if (active === tab) visaBg(tab.bg);
 }
 function applyStoredBg() {
+  try { if (window.AnpassaStartsida && window.AnpassaStartsida.utanBild()) return; } catch {}   // Anpassa/startsida: bilden är avslagen → hämta ingen
   const bg = bgMode();
   if (bg === 'slump') { tabBg(active); return; }
   $('nt-bg').style.backgroundColor = '';

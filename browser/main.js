@@ -883,6 +883,7 @@ function ensureView(ctx, tabId) {
 /* ────────── IPC – globala tjänster (fönsteroberoende) ────────── */
 ipcMain.handle('skoll:check-url', (_e, url) => checkUrl(url));
 ipcMain.handle('skoll:daily-image', () => dailyImage());
+require('./anpassa-startsida').init();   // Anpassa/startsida: startsidans nycklar + väder och ortsök (Open-Meteo)
 async function setAdblockOn(on) {
   adblockOn = !!on;
   await loadEngine();
@@ -2178,7 +2179,9 @@ ipcMain.on('krypto:toggle', (e, open, mode, token) => {
 // Skicka en färdig fråga (från "Var ska jag börja?"-quizet) in i Falk-panelen.
 ipcMain.on('krypto:prefill', (e, text) => {
   const ctx = ctxFor(e) || e.sender.__ctx; if (!ctx || !ctx.kryptoView) return;
-  try { ctx.kryptoView.webContents.send('krypto-prefill', String(text || '')); } catch {}
+  const wc = ctx.kryptoView.webContents, skicka = () => { try { wc.send('krypto-prefill', String(text || '')); } catch {} };
+  // Anpassa/startsida (Falk-rutan): panelen kan just ha öppnats och laddar fortfarande → skicka när den laddat klart
+  if (wc.isLoading()) wc.once('did-finish-load', skicka); else skicka();
 });
 // Falk helskärm på/av: panelen täcker hela webbytan (enklare att läsa/skriva långa rapporter).
 // Förnamnet till Falks hälsning ("Hej, Cetto"). Bara namnet, aldrig token.
