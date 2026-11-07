@@ -1024,6 +1024,7 @@ ipcMain.handle('family:children', async (_e, d) => {
   const j = await adrazeApi('/familj/lista', {}, d && d.token);
   return j.ok ? { ok: true, children: j.barn.map(barnUt) } : j;
 });
+ipcMain.handle('family:remove', (_e, d) => adrazeApi('/familj/ta-bort', { barn_id: d && d.child_id }, d && d.token));
 ipcMain.handle('family:blocklist', (_e, d) => adrazeApi('/familj/blocklista', { barn_id: d && d.child_id, blocklista: d && d.blocklist }, d && d.token));
 ipcMain.handle('family:me', async (_e, d) => {
   const j = await adrazeApi('/barn/jag', {}, d && d.token);
