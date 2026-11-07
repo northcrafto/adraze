@@ -320,6 +320,10 @@
     const v = $('views'), tb = $('toolbar');
     if (v) rot.style.setProperty('--vflik-top', Math.round(v.getBoundingClientRect().top) + 'px');
     if (tb && tb.offsetHeight) rot.style.setProperty('--zen-h', tb.offsetHeight + 'px');
+    // Verktygsraden längst ner (verktyg.placering): panelen slutar ovanför den och bokmärkesfältet (input.css: samspel)
+    const nere = !!document.body && document.body.classList.contains('anp-vf-nere');
+    const ovan = nere ? [$('bmbar'), tb].filter((e) => e && e.offsetHeight).map((e) => e.getBoundingClientRect().top) : [];
+    rot.style.setProperty('--vflik-bottom', (ovan.length ? Math.max(0, Math.round(innerHeight - Math.min(...ovan))) : 0) + 'px');
   }
   function efterLayout() {
     requestAnimationFrame(() => {
@@ -547,6 +551,8 @@
       });
       for (const id of ['views', 'toolbar', 'bmbar']) { const el = $(id); if (el) ro.observe(el); }
     } catch {}
+    // Verktygsraden uppe ↔ nere flyttar webbytan utan att storleken ändras (det märker inte ResizeObserver): mät om
+    if (A) A.on('verktyg.placering', () => efterLayout());
     // Verktygsraden är titelrad i panel- och dolt läge: dubbelklick på en tom yta maximerar, som på flikraden
     const tb = $('toolbar');
     if (tb) tb.addEventListener('dblclick', (e) => {

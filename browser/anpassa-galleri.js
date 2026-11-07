@@ -5,8 +5,10 @@
 // (så att Ångra under Anpassa kan backa den) och räknar en nedladdning. "Ångra" sätter tillbaka EXAKT de tema.*-värden
 // man hade innan man började prova. Avbryts provningen (krasch, omstart) återställs de vid nästa start.
 //
-// Bara det som går att dela följer med åt båda hållen: tema.*-nycklar med hex-färger, sant/falskt eller kända val.
-// Sådant som inte kan delas (t.ex. en egen bakgrundsbild) rörs aldrig, varken när man provar eller publicerar.
+// Bara det som går att dela följer med åt båda hållen, och servern bestämmer vad det är (/galleri/schema): i dag
+// tema-områdets accentfärg (tema.accent), läge (tema.lage), hörn (tema.horn) och densitet (tema.densitet).
+// Typsnitt och textstorlek (tema.typsnitt, tema.storlek) är personliga val och rörs aldrig, varken när man provar,
+// behåller, ångrar eller publicerar. Utan svar från servern går inget att prova eller publicera.
 // Barnläge: bläddra, prova och gilla går; publicera går inte. Galleriet kan stängas av (galleri.visa, barnlåst).
 'use strict';
 const fs = require('fs');
@@ -17,12 +19,11 @@ const PROV_FIL = () => path.join(app.getPath('userData'), 'adraze-galleri-prov.j
 const ID_RE = /^t[0-9a-f]{20}$/;
 const TOKEN_RE = /^[A-Za-z0-9_-]{20,100}$/;
 const NYCKEL_RE = /^tema\.[a-z][a-zA-Z0-9]{0,39}$/;
-const HEX_RE = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
-const VAL_RE = /^[a-z][a-z0-9-]{0,23}$/;   // ett val (enum); servern avgör vilka som finns
+const HEX_RE = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
 let anpassa = null, api = null, barnKoll = () => false, skickaAlla = () => {};
 let prov = null;                     // { id, namn, skapare, varden, fore } medan ett tema provas
-let schema = null, schemaTid = 0;    // /galleri/schema: vilka val servern känner till
+let schema = null, schemaTid = 0;    // /galleri/schema: { farger: [nycklar], val: { nyckel: [val] } }
 
 const kopia = (v) => (v === undefined ? undefined : JSON.parse(JSON.stringify(v)));
 const tok = (d) => (d && typeof d.token === 'string' && TOKEN_RE.test(d.token) ? d.token : null);
@@ -30,33 +31,32 @@ const avstangt = () => anpassa.hamta('galleri.visa') === false;
 const AV = { ok: false, error: 'av', message: 'Temagalleriet är avstängt.' };
 
 function temaNu() { return Object.fromEntries(Object.entries(anpassa.alla()).filter(([k]) => k.startsWith('tema.'))); }
-// Får värdet följa med ett delat tema? Med servers schema (val) krävs ett känt val; utan det räcker formen.
-function delbart(k, v, val) {
-  if (typeof k !== 'string' || !NYCKEL_RE.test(k)) return false;
-  if (typeof v === 'string' && HEX_RE.test(v)) return true;
-  if (typeof v === 'boolean') return true;
-  if (typeof v !== 'string' || !VAL_RE.test(v)) return false;
-  return val ? !!(Object.hasOwn(val, k) && Array.isArray(val[k]) && val[k].includes(v)) : true;
+// Får värdet följa med ett delat tema? Bara exakt det serverns schema säger: en färgnyckel med hex, eller ett känt val.
+// Utan schema (servern nås inte) är inget delbart.
+function delbart(k, v, s) {
+  if (!s || typeof k !== 'string' || !NYCKEL_RE.test(k) || typeof v !== 'string') return false;
+  if (Array.isArray(s.farger) && s.farger.includes(k)) return HEX_RE.test(v);
+  return !!(s.val && typeof s.val === 'object' && Object.hasOwn(s.val, k) && Array.isArray(s.val[k]) && s.val[k].includes(v));
 }
 // Mitt tema som det kan delas (via Anpassas export, så samma urval som delningskoden)
-function delbartTema(val) {
+function delbartTema(s) {
   let alla = {};
   try { alla = JSON.parse(Buffer.from(anpassa.exportera('tema.').slice(6), 'base64url').toString('utf8')) || {}; } catch {}
   const varden = {}; let utanfor = 0;
-  for (const k of Object.keys(alla).sort()) { if (delbart(k, alla[k], val)) varden[k] = alla[k]; else utanfor++; }
+  for (const k of Object.keys(alla).sort()) { if (delbart(k, alla[k], s)) varden[k] = alla[k]; else utanfor++; }
   return { varden, antal: Object.keys(varden).length, utanfor };
 }
 async function hamtaSchema() {
   if (schema && Date.now() - schemaTid < 3_600_000) return schema;
   const j = await api('/galleri/schema', null, null, 'GET');
-  if (j && j.ok && j.val && typeof j.val === 'object') { schema = j; schemaTid = Date.now(); }
+  if (j && j.ok && j.val && typeof j.val === 'object' && Array.isArray(j.farger)) { schema = j; schemaTid = Date.now(); }
   return schema;
 }
 
-// Sätter de delbara tema.*-värdena till exakt `mal`: delbara värden som inte finns i målet går tillbaka till standard
-// (med serverns val, så att t.ex. ett eget val som inte går att dela får vara kvar)
-function tillampa(mal, opts, val) {
-  for (const [k, v] of Object.entries(temaNu())) if (!(k in mal) && delbart(k, v, val)) anpassa.satt(k, undefined, opts);
+// Sätter de delbara tema.*-värdena till exakt `mal`: delbara värden som inte finns i målet går tillbaka till standard.
+// Det som inte kan delas (typsnitt, textstorlek) får vara kvar som det är.
+function tillampa(mal, opts, s) {
+  for (const [k, v] of Object.entries(temaNu())) if (!(k in mal) && delbart(k, v, s)) anpassa.satt(k, undefined, opts);
   for (const [k, v] of Object.entries(mal)) anpassa.satt(k, v, opts);
 }
 // Tillbaka till exakt `fore` (alla tema.*-nycklar, även de som inte kan delas)
@@ -126,15 +126,16 @@ function init({ anpassa: a, adrazeApi, barnNagonstans, skicka }) {
     if (!d || !ID_RE.test(String(d.id))) return { ok: false, message: 'Temat finns inte.' };
     const j = await api(`/galleri/tema?id=${d.id}${barnKoll() ? '&barn=1' : ''}`, null, tok(d), 'GET');
     if (!j.ok) return j;
-    const val = ((await hamtaSchema()) || {}).val;
+    const s = await hamtaSchema();
+    if (!s) return { ok: false, error: 'unreachable', message: 'Kunde inte nå galleriet. Kontrollera din uppkoppling.' };
     const t = j.tema || {};
     const varden = {};
-    for (const [k, v] of Object.entries(t.varden && typeof t.varden === 'object' ? t.varden : {})) if (delbart(k, v, val)) varden[k] = v;
+    for (const [k, v] of Object.entries(t.varden && typeof t.varden === 'object' ? t.varden : {})) if (delbart(k, v, s)) varden[k] = v;
     if (!Object.keys(varden).length) return { ok: false, message: 'Temat gick inte att använda.' };
     if (!prov) prov = { fore: temaNu() };   // bilden av hur det var tas när man BÖRJAR prova; byter man tema behålls den
     Object.assign(prov, { id: t.id, namn: String(t.namn || '').slice(0, 60), skapare: t.skapare ? String(t.skapare).slice(0, 40) : null, varden });
     sparaProv();
-    tillampa(varden, { utanHistorik: true }, val);
+    tillampa(varden, { utanHistorik: true }, s);
     skickaProv();
     return { ok: true, prov: provUt() };
   });
@@ -156,7 +157,7 @@ function init({ anpassa: a, adrazeApi, barnNagonstans, skicka }) {
 
   ipcMain.handle('galleri:mitt', async () => {
     const s = await hamtaSchema();
-    return { ok: true, ...delbartTema(s && s.val), provar: !!prov, barn: !!barnKoll(), schema: !!s };
+    return { ok: true, ...delbartTema(s), provar: !!prov, barn: !!barnKoll(), schema: !!s };
   });
   ipcMain.handle('galleri:publicera', async (_e, d) => {
     d = d || {};
@@ -166,8 +167,8 @@ function init({ anpassa: a, adrazeApi, barnNagonstans, skicka }) {
     if (!token) return { ok: false, error: 'no_session', message: 'Logga in för att publicera.' };
     const s = await hamtaSchema();
     if (!s) return { ok: false, error: 'unreachable', message: 'Kunde inte nå galleriet. Kontrollera din uppkoppling.' };
-    const m = delbartTema(s.val);
-    if (!m.antal) return { ok: false, message: 'Ditt tema är som standardtemat. Ändra något under Tema först.' };
+    const m = delbartTema(s);
+    if (!m.antal) return { ok: false, message: 'Ditt tema ser ut som standardtemat. Byt färg, läge, hörn eller densitet under Tema först.' };
     const kod = 'ADRZ1.' + Buffer.from(JSON.stringify(m.varden)).toString('base64url');
     return api('/galleri/publicera', { namn: String(d.namn || '').slice(0, 200), beskrivning: String(d.beskrivning || '').slice(0, 600), kod, anonym: d.anonym === true }, token);
   });
