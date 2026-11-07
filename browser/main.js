@@ -1005,6 +1005,51 @@ ipcMain.handle('auth:recall', () => {
   } catch { return { ok: false }; }
 });
 ipcMain.handle('auth:forget', () => { try { if (fs.existsSync(SESSION_FILE)) fs.unlinkSync(SESSION_FILE); } catch {} return { ok: true }; });
+/* Profiler (som Netflix): konton som loggat in på enheten sparas krypterat med sin token, så att
+ * "Logga ut" visar profilväljaren och man kan fortsätta som någon av dem utan att logga in igen.
+ * Skalet får bara se namn/bild – token lämnas ut först när en profil väljs. */
+const PROFILER_FILE = path.join(app.getPath('userData'), 'adraze-profiler.dat');
+function lasProfiler() {
+  try {
+    if (!fs.existsSync(PROFILER_FILE)) return [];
+    const blob = fs.readFileSync(PROFILER_FILE);
+    let str; try { str = (safeStorage && safeStorage.isEncryptionAvailable()) ? safeStorage.decryptString(blob) : blob.toString('utf8'); }
+    catch { str = blob.toString('utf8'); }
+    const l = JSON.parse(str);
+    return Array.isArray(l) ? l.filter((p) => p && p.key && p.account && p.account.token) : [];
+  } catch { return []; }
+}
+function sparaProfiler(l) {
+  try {
+    const str = JSON.stringify(l.slice(0, 12));
+    fs.writeFileSync(PROFILER_FILE, (safeStorage && safeStorage.isEncryptionAvailable()) ? safeStorage.encryptString(str) : Buffer.from(str, 'utf8'), { mode: 0o600 });
+  } catch {}
+}
+const profilUt = (p) => ({ key: p.key, name: p.account.name || '', email: p.account.email || '', isChild: !!p.account.isChild, pro: !!p.account.pro, avatar: p.avatar || null });
+ipcMain.handle('profiler:lista', () => lasProfiler().sort((a, b) => (b.senast || 0) - (a.senast || 0)).map(profilUt));
+ipcMain.handle('profiler:spara', (_e, d) => {
+  const acc = d && d.account, key = d && d.key;
+  if (!acc || typeof acc.token !== 'string' || typeof key !== 'string') return { ok: false };
+  const l = lasProfiler();
+  const gammal = l.find((p) => p.key === key);
+  const avatar = (d.avatar === undefined) ? (gammal && gammal.avatar) || null : (typeof d.avatar === 'string' && d.avatar.length < 400000 ? d.avatar : null);
+  const ny = { key, account: { token: acc.token, email: acc.email || '', pro: !!acc.pro, name: acc.name || '', isChild: !!acc.isChild, childId: acc.childId || undefined }, avatar, senast: Date.now() };
+  sparaProfiler([ny].concat(l.filter((p) => p.key !== key)));
+  return { ok: true };
+});
+ipcMain.handle('profiler:hamta', (_e, key) => { const p = lasProfiler().find((x) => x.key === key); return p ? { ok: true, account: p.account } : { ok: false }; });
+// Ta bort från enheten = riktig utloggning: token ogiltigförklaras på servern och kontots sparade kakor raderas
+ipcMain.handle('profiler:ta-bort', async (_e, key) => {
+  const l = lasProfiler(), p = l.find((x) => x.key === key);
+  sparaProfiler(l.filter((x) => x.key !== key));
+  if (p && p.account && p.account.token) {
+    try { await adrazeApi('/barn/logout', {}, p.account.token); } catch {}
+    try { await adrazeApi('/auth/logout', {}, p.account.token); } catch {}
+  }
+  // Kontot som är aktivt nu har sina kakor i webbsessionen – dem rör vi inte; bara ett utloggat kontos sparade kakor
+  try { if (key !== currentAcctKey) { const f = cookieFileFor(key); if (fs.existsSync(f)) fs.unlinkSync(f); } } catch {}
+  return { ok: true };
+});
 /* AdRaze Familj (api.adraze.app): föräldern skapar barnkonton; barnet loggar in med sin barnkod
  * och en kod som mejlas till föräldern vid varje inloggning. Svaren översätts till skalets form. */
 const barnUt = (c) => ({ id: c.id, name: c.namn, age: c.alder, code: c.kod, blocklist: c.blocklista || [], allows: c.tillat || [], last_seen: c.senast || 0, sessions: c.inloggningar || 0 });

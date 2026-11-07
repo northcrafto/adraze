@@ -629,7 +629,7 @@ async function refreshPro() {
   if (!account || !account.token) return;
   try {
     const r = await window.auth.session(account.token);
-    if (r && r.ok) { account.pro = !!r.pro; if (r.name) account.name = r.name; localStorage.setItem('skoll-account', JSON.stringify(account)); try { window.auth.remember(account); } catch {} }
+    if (r && r.ok) { account.pro = !!r.pro; if (r.name) account.name = r.name; localStorage.setItem('skoll-account', JSON.stringify(account)); try { window.auth.remember(account); } catch {} sparaProfil(); }
     // Ett NÄTVERKSFEL (unreachable) kan vara en tillfällig hicka → behåll kontot tyst, logga ALDRIG ut på det.
     // Men om servern UTTRYCKLIGEN svarar no_session är token död på riktigt → be om ny inloggning EN gång
     // (behåll lokal data/inställningar). Annars fastnar man som "inloggad" med en token som inte duger.
@@ -991,7 +991,7 @@ function updateAccountBtn() {
   try { if (typeof historyOpen !== 'undefined' && historyOpen) renderHistory(); } catch {}
 }
 function setLoginView(name) {
-  const map = { login: 'login-form', pw: 'login-pw-view', signup: 'login-signup', signuppw: 'login-signup-pw', code: 'login-code', reset: 'login-reset', resetconfirm: 'login-reset-confirm', resetpw: 'login-reset-pw', account: 'login-account-view', child: 'login-child' };
+  const map = { profiles: 'login-profiles', login: 'login-form', pw: 'login-pw-view', signup: 'login-signup', signuppw: 'login-signup-pw', code: 'login-code', reset: 'login-reset', resetconfirm: 'login-reset-confirm', resetpw: 'login-reset-pw', account: 'login-account-view', child: 'login-child' };
   for (const k in map) { const el = $(map[k]); if (el) el.style.display = (k === name) ? 'block' : 'none'; }
 }
 function openLogin() {
@@ -1002,8 +1002,15 @@ function openLogin() {
     $('login-pro-badge').style.display = account.pro ? 'inline-flex' : 'none';
   } else {
     $('login-email').value = ''; $('login-pw').value = ''; $('login-error').style.display = 'none'; $('start-error').style.display = 'none';
-    setLoginView('login');
-    setTimeout(() => $('login-email').focus(), 30);
+    if (profilLista.length) visaProfiler();
+    else { setLoginView('login'); setTimeout(() => $('login-email').focus(), 30); }
+    // listan kan ha ändrats (annat fönster, borttagen profil) → hämta och rita om
+    hamtaProfiler().then((l) => {
+      const pv = $('login-profiles'), lv = $('login-form');
+      if (account || $('login').classList.contains('hidden')) return;
+      if (l.length && lv && lv.style.display === 'block' && !$('login-email').value) visaProfiler();
+      else if (pv && pv.style.display === 'block') { if (l.length) ritaProfiler(); else { setLoginView('login'); visaTillbakaTillProfiler(); } }
+    });
   }
   hideOverlayElements();
   if (active) active.overlay = 'login';
@@ -1014,6 +1021,110 @@ function closeLogin() {
   $('login').classList.add('hidden');
   showActiveTab();
 }
+/* ── Profiler (som Netflix) ──
+ * Varje konto som loggat in på enheten blir en profil (token krypterad i huvudprocessen).
+ * "Logga ut" visar profilväljaren: välj en profil och fortsätt direkt, eller lägg till ett konto.
+ * Barnläge: en vuxenprofil kräver lösenordet, annars kunde barnet bara klicka sig förbi spärrarna. */
+let profilLista = [];
+let profilHantera = false;
+async function hamtaProfiler() { try { const l = await window.auth.profiler(); profilLista = Array.isArray(l) ? l : []; } catch { profilLista = []; } return profilLista; }
+function sparaProfil() {
+  if (!account || !account.token) return;
+  const av = account.isChild ? null : (socMe ? (socMe.avatar || null) : undefined);   // undefined = behåll sparad bild
+  try { window.auth.sparaProfil(accountKey(account), account, av).then(() => hamtaProfiler()); } catch {}
+}
+const PROFIL_FARGER = ['#3d5a80', '#c8553d', '#2a9d8f', '#8e5ad6', '#d08c1c', '#4f772d', '#b23a6b', '#33658a'];
+function profilFarg(key) { let h = 0; for (const ch of String(key)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return PROFIL_FARGER[h % PROFIL_FARGER.length]; }
+function visaTillbakaTillProfiler() { const b = $('to-profiles'); if (b) b.style.display = (!account && profilLista.length) ? 'block' : 'none'; }
+function ritaProfiler() {
+  const wrap = $('lg-profiler'); if (!wrap) return;
+  wrap.classList.toggle('hantera', profilHantera);
+  $('prof-rubrik').textContent = profilHantera ? 'Hantera profiler' : 'Vem surfar?';
+  $('prof-lead').textContent = profilHantera ? 'Klicka på en profil för att ta bort den från den här datorn.' : 'Välj en profil för att fortsätta.';
+  $('prof-hantera').textContent = profilHantera ? 'Klar' : 'Hantera profiler';
+  wrap.innerHTML = '';
+  for (const p of profilLista) {
+    const nm = p.name || (p.email ? p.email.split('@')[0] : (p.isChild ? 'Barn' : 'Profil'));
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'lg-pf'; b.title = p.email || nm;
+    const bild = document.createElement('span'); bild.className = 'lg-pf-bild'; bild.style.setProperty('--pf', profilFarg(p.key));
+    if (p.avatar && /^(data:image\/|https:)/.test(p.avatar)) { const im = document.createElement('img'); im.src = p.avatar; im.alt = ''; bild.appendChild(im); }
+    else bild.textContent = (nm[0] || '?').toUpperCase();
+    const x = document.createElement('span'); x.className = 'lg-pf-x'; x.textContent = 'Ta bort'; bild.appendChild(x);
+    const n = document.createElement('span'); n.className = 'lg-pf-namn'; n.textContent = nm;
+    const ty = document.createElement('span'); ty.className = 'lg-pf-typ'; ty.textContent = p.isChild ? 'Barnkonto' : (p.email || 'Vuxenkonto');
+    b.append(bild, n, ty);
+    b.addEventListener('click', () => valjProfil(p, b));
+    wrap.appendChild(b);
+  }
+  if (!profilHantera) {
+    const ny = document.createElement('button'); ny.type = 'button'; ny.className = 'lg-pf ny';
+    ny.innerHTML = '<span class="lg-pf-bild">+</span><span class="lg-pf-namn">Lägg till konto</span><span class="lg-pf-typ">Logga in</span>';
+    ny.addEventListener('click', () => { $('login-email').value = ''; $('start-error').style.display = 'none'; setLoginView('login'); visaTillbakaTillProfiler(); setTimeout(() => $('login-email').focus(), 30); });
+    wrap.appendChild(ny);
+  }
+}
+function visaProfiler() {
+  profilHantera = false;
+  $('prof-error').style.display = 'none';
+  ritaProfiler();
+  setLoginView('profiles');
+  setTimeout(() => { const f = document.querySelector('#lg-profiler .lg-pf'); if (f) f.focus(); }, 30);
+}
+function profilFel(msg) { const e = $('prof-error'); e.textContent = msg; e.style.display = 'block'; }
+// Inloggningen med e-post ifylld (profilens token har gått ut, eller vuxenprofil i barnläge)
+function profilTillLosenord(email, msg) {
+  $('login-email').value = email || '';
+  if (!email) { setLoginView('login'); visaTillbakaTillProfiler(); return; }
+  goPw();
+  if (msg) { const e = $('login-error'); e.textContent = msg; e.style.display = 'block'; }
+}
+async function valjProfil(p, el) {
+  if (profilHantera) {
+    el.classList.add('laddar');
+    try { await window.auth.taBortProfil(p.key); } catch {}
+    await hamtaProfiler();
+    if (!profilLista.length) { profilHantera = false; setLoginView('login'); visaTillbakaTillProfiler(); return; }
+    ritaProfiler(); return;
+  }
+  $('prof-error').style.display = 'none';
+  if (!p.isChild && famLocked()) { profilTillLosenord(p.email, 'Barnläget är på. Skriv lösenordet för att fortsätta som vuxen.'); return; }
+  el.classList.add('laddar');
+  let r; try { r = await window.auth.hamtaProfil(p.key); } catch { r = null; }
+  if (!r || !r.ok || !r.account) { el.classList.remove('laddar'); await hamtaProfiler(); ritaProfiler(); profilFel('Profilen finns inte längre. Logga in igen.'); return; }
+  const a = r.account;
+  if (a.isChild) {
+    let me; try { me = await window.family.me(a.token); } catch { me = null; }
+    el.classList.remove('laddar');
+    if (me && me.ok && me.isChild) {
+      if (account) return;   // någon hann logga in under tiden
+      await enterChildMode(a.token, { id: a.childId || me.id || 'self', name: me.name || a.name, age: me.age || 0 });
+      closeLogin(); showToast('Inloggad som ' + (me.name || a.name));
+      return;
+    }
+    if (me && me.error === 'no_session') {
+      try { await window.auth.taBortProfil(p.key); } catch {} await hamtaProfiler();
+      childPendingCode = null; $('child-code-input').value = ''; setLoginView('child'); showChildStep(1);
+      $('child-error').textContent = 'Inloggningen har gått ut. Skriv din barnkod igen.'; $('child-error').style.display = 'block';
+      return;
+    }
+    profilFel((me && me.message) || 'Kunde inte nå AdRaze. Kontrollera din uppkoppling.'); return;
+  }
+  let s; try { s = await window.auth.session(a.token); } catch { s = null; }
+  el.classList.remove('laddar');
+  if (s && s.ok) {
+    if (account) return;
+    loginAs(a.token, s.email || a.email, s.pro, s.name || a.name);
+    closeLogin(); showToast('Inloggad som ' + (s.name || s.email || a.email));
+    return;
+  }
+  if (s && s.error === 'no_session') {
+    try { await window.auth.taBortProfil(p.key); } catch {} await hamtaProfiler();
+    profilTillLosenord(a.email, 'Inloggningen har gått ut. Skriv ditt lösenord igen.');
+    return;
+  }
+  profilFel((s && s.message) || 'Kunde inte nå AdRaze. Kontrollera din uppkoppling.');
+}
 function accountKey(a) { a = a || account; if (!a) return null; return 'k:' + (a.email || a.childId || a.name || a.token || 'user'); }
 function loginAs(token, email, pro, name) {
   try { window.auth.googleAvbryt(); } catch {}   // ett väntande "Fortsätt med Google" gäller inte längre
@@ -1023,8 +1134,9 @@ function loginAs(token, email, pro, name) {
   satBarnlage(false);         // … och barnläget släpper (spärrarna gäller bara barnkonton)
   localStorage.setItem('skoll-account', JSON.stringify(account));
   try { window.auth.remember(account); } catch {}
+  sparaProfil();
   updateAccountBtn();
-  try { loadSocMe().then(() => updateAccountBtn()); } catch {}   // hämta NYA kontots profilbild → kontoknappen
+  try { loadSocMe().then(() => { updateAccountBtn(); sparaProfil(); }); } catch {}   // hämta NYA kontots profilbild → kontoknappen + profilen
   try { window.session.login(accountKey(account)); } catch {}   // återställ kontots webbsession (Gmail m.m. tillbaka) + lås upp lösenord
   famSkickaTillMain();
   // Låsskärmen hade gömt webbvyn: visa den igen, annars är sidorna tomma trots att man är inloggad
@@ -1036,22 +1148,30 @@ function loginAs(token, email, pro, name) {
   if (pendingChattAfterLogin) { pendingChattAfterLogin = false; openChatt(true); }
   setTimeout(() => { try { refreshPro(); } catch {} }, 400);   // Pro-status från servern (Google-inloggningen vet den inte)
 }
-function doLogout(reopenKrypto) {
+// glom = logga ut på riktigt och ta bort profilen (kontot raderat, barnet utloggat av föräldern).
+// Annars sparas kontot som profil och profilväljaren visas, som på Netflix.
+function doLogout(reopenKrypto, glom) {
   chattOpen = false; chattUnread = 0; parkedKrypto = false; parkedChatt = false;
   for (const x of tabs) { x.panel = null; x.parked = null; }
   const t = account && account.token;
   const sk = account ? accountKey(account) : null;
+  const _ut = account || {};
   account = null; socMe = null; localStorage.removeItem('skoll-account'); updateAccountBtn();
   try { window.auth.forget(); } catch {}
-  if (sk) { try { window.session.logout(sk); } catch {} }   // spara + rensa webbsession (utloggad ur Gmail m.fl.) + lås lösenord
+  if (t && !glom) { try { window.auth.sparaProfil(sk, { token: t, email: _ut.email, pro: _ut.pro, name: _ut.name, isChild: _ut.isChild, childId: _ut.childId }); } catch {} }
+  let _sl = Promise.resolve();
+  if (sk) { try { _sl = window.session.logout(sk) || _sl; } catch {} }   // spara + rensa webbsession (utloggad ur Gmail m.fl.) + lås lösenord
+  if (glom && sk) { _sl.catch(() => {}).then(() => window.auth.taBortProfil(sk)).catch(() => {}).then(() => hamtaProfiler()); }
   window.__kidShown = false;
   if (typeof stopChildSync === 'function') stopChildSync();
   if (typeof stopParentSync === 'function') stopParentSync();
   try { if (fam && fam.children && fam.children.some((c) => c.self)) { fam = { children: [], activeChild: null }; famSave(); } } catch {}
   if (typeof applyKidIndicator === 'function') applyKidIndicator();
   famSkickaTillMain();        // barnläge på enheten → huvudprocessen låser allt tills en vuxen loggar in
-  if (t) { try { window.auth.logout(t); } catch {} }
-  setLoginView('login');
+  // Ingen utloggning på servern här: token ligger kvar i profilen så att man kan fortsätta. Riktig utloggning = ta bort profilen.
+  if (glom && !sk && t) { try { window.auth.logout(t); } catch {} }
+  hamtaProfiler().then(() => { if (!account) { if (profilLista.length) visaProfiler(); else setLoginView('login'); } });
+  setLoginView(profilLista.length ? 'profiles' : 'login');
   if (reopenKrypto !== false && kryptoOpen) openKrypto(true);  // lås Falk igen
 }
 function busyBtn(id, busy, busyText, text) {
@@ -1225,6 +1345,7 @@ async function enterChildMode(token, child) {
   satBarnlage(true);          // och spärrarna släpper inte vid utloggning: låst tills en vuxen loggar in
   localStorage.setItem('skoll-account', JSON.stringify(account));
   try { window.auth.remember(account); } catch {}
+  sparaProfil();
   updateAccountBtn();
   try { loadSocMe().then(() => updateAccountBtn()); } catch {}
   try { window.session.login(accountKey(account)); } catch {}   // barnets egen webbsession
@@ -1250,7 +1371,7 @@ async function syncChild() {
     if (typeof ensureAllowTicker === 'function') ensureAllowTicker();
   } else if (me && me.error === 'no_session') {
     // Föräldern loggade ut barnet (eller sessionen gick ut): webbläsaren LÅSES – den blir aldrig ospärrad
-    doLogout(false);
+    doLogout(false, true);
     try { showBlockScreen((active && active.url) || ''); } catch {}
   }
 }
@@ -1363,7 +1484,7 @@ function showConfirmDelete() {
     const btn = ov.querySelector('#kn-del-yes'); btn.disabled = true; btn.textContent = 'Tar bort…';
     let r; try { r = await window.auth.deleteAccount(account.token, ov.querySelector('#kn-del-pw').value); } catch { r = { ok: false }; }
     if (!r || !r.ok) { btn.disabled = false; btn.textContent = 'Ja, ta bort'; showToast((r && r.message) || 'Kunde inte ta bort kontot.'); return; }
-    close(); doLogout(false); renderKonto(); showToast('Ditt konto är borttaget.');
+    close(); doLogout(false, true); renderKonto(); showToast('Ditt konto är borttaget.');
   });
 }
 /* ── Profilbild (AdRaze-kontots, samma som på adraze.app) ── */
@@ -1475,7 +1596,7 @@ document.querySelectorAll('.pw-eye').forEach((b) => {
 });
 $('account-btn').addEventListener('click', () => openAccount());
 $('allow-chip') && $('allow-chip').addEventListener('click', () => { openSettings(); showSettingsCat('familj'); });
-$('kn-logout') && $('kn-logout').addEventListener('click', () => { doLogout(); renderKonto(); });
+$('kn-logout') && $('kn-logout').addEventListener('click', () => { doLogout(); renderKonto(); try { closeSettings(); } catch {} openLogin(); });
 $('kn-login') && $('kn-login').addEventListener('click', () => openLogin());
 $('kn-delete') && $('kn-delete').addEventListener('click', showConfirmDelete);
 $('kn-avatar') && $('kn-avatar').addEventListener('click', () => { const f = $('kn-avatar-file'); if (f) f.click(); });
@@ -1529,10 +1650,12 @@ $('reset-confirm-submit').addEventListener('click', doResetConfirm);
 $('reset-confirm-back').addEventListener('click', () => setLoginView('reset'));
 $('reset-resend').addEventListener('click', doResetResend);
 $('logout-btn').addEventListener('click', () => doLogout());
+$('prof-hantera').addEventListener('click', () => { profilHantera = !profilHantera; $('prof-error').style.display = 'none'; ritaProfiler(); });
+$('to-profiles').addEventListener('click', () => { if (profilLista.length) visaProfiler(); });
 $('to-child').addEventListener('click', () => { childPendingCode = null; $('child-code-input').value = ''; setLoginView('child'); showChildStep(1); });
 $('child-back').addEventListener('click', () => {
   if (childPendingCode) { childPendingCode = null; showChildStep(1); return; }
-  setLoginView('login'); setTimeout(() => $('login-email').focus(), 20);
+  setLoginView('login'); visaTillbakaTillProfiler(); setTimeout(() => $('login-email').focus(), 20);
 });
 $('child-resend').addEventListener('click', doChildResend);
 $('child-submit').addEventListener('click', doChildLogin);
@@ -3640,7 +3763,8 @@ applyKidIndicator();
 
 // ── Session-återställning vid uppstart — MÅSTE köras SIST, efter att all state (fam, timers, konto) är deklarerad, annars TDZ-krasch som dödar hela boot ──
 // Rensa ALDRIG webbsessionen vid start: cookies (Google-inlogg m.m.) ska överleva att man stänger browsern.
-if (account && account.token) { try { window.session.setkey(accountKey(account)); } catch {} if (account.isChild) { syncChild(); startChildSync(); } else { refreshPro(); startParentSync(); try { synkaInit(); } catch {} } try { loadSocMe().then(() => updateAccountBtn()); } catch {} }   // hämta profilbild → visa i kontoknappen
+if (account && account.token) { try { window.session.setkey(accountKey(account)); } catch {} if (account.isChild) { syncChild(); startChildSync(); } else { refreshPro(); startParentSync(); try { synkaInit(); } catch {} } try { loadSocMe().then(() => { updateAccountBtn(); sparaProfil(); }); } catch {} sparaProfil(); }   // hämta profilbild → visa i kontoknappen; kontot blir en profil
+hamtaProfiler();
 // Ett annat fönster bytte konto: följ med, annars loggar det här fönstrets gamla konto senare ut det nya
 window.addEventListener('storage', (e) => {
   if (e.key !== 'skoll-account') return;

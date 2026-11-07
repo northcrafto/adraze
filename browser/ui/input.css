@@ -625,6 +625,24 @@ body.incog #views, :root[data-theme="dark"] body.incog #views { background-color
 #login .lg-chip { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 4px; font-size: 11.5px; font-weight: 700; color: #fff; background: var(--color-terra); vertical-align: 1px; }
 #login .lg-status { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 18px; font-size: 14px; }
 #login .lg-status i { width: 8px; height: 8px; border-radius: 50%; background: #2f9e67; flex: none; }
+/* Profilväljaren: runda profilbilder i ett rutnät, bredare kort än inloggningsstegen */
+#login .lg-card:has(#login-profiles[style*="block"]) { max-width: 640px; }
+#login .lg-prof { display: flex; flex-wrap: wrap; justify-content: center; gap: 22px 18px; margin: 4px 0 8px; }
+#login .lg-pf { position: relative; width: 112px; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 6px 0; cursor: pointer; border-radius: 14px; color: var(--lg-ink); }
+#login .lg-pf-bild { position: relative; width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; overflow: hidden; font-size: 36px; font-weight: 600; color: #fff; background: var(--pf, #3d5a80); border: 2px solid transparent; transition: border-color .15s, transform .15s; }
+#login .lg-pf-bild img { width: 100%; height: 100%; object-fit: cover; }
+#login .lg-pf:hover .lg-pf-bild, #login .lg-pf:focus-visible .lg-pf-bild { border-color: var(--lg-ink); transform: translateY(-2px); }
+#login .lg-pf:focus-visible { outline: none; }
+#login .lg-pf-namn { font-size: 14.5px; font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#login .lg-pf-typ { margin-top: -6px; font-size: 12px; color: var(--lg-mut); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#login .lg-pf.ny .lg-pf-bild { background: transparent; border: 2px dashed var(--lg-line); color: var(--lg-mut); font-weight: 300; font-size: 44px; }
+#login .lg-pf.ny:hover .lg-pf-bild { border-color: var(--lg-ink); color: var(--lg-ink); }
+#login .lg-pf-x { position: absolute; inset: 0; display: none; place-items: center; background: rgb(0 0 0 / .55); color: #fff; font-size: 12.5px; font-weight: 700; }
+#login .lg-prof.hantera .lg-pf:not(.ny) .lg-pf-x { display: grid; }
+#login .lg-prof.hantera .lg-pf:not(.ny):hover .lg-pf-bild { border-color: var(--lg-err); }
+#login .lg-pf.laddar { opacity: .55; pointer-events: none; }
+#login .lg-pf-hantera { padding: 8px 16px; border: 1px solid var(--lg-line); border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--lg-mut); cursor: pointer; }
+#login .lg-pf-hantera:hover { color: var(--lg-ink); border-color: var(--lg-ink); }
 
 
 /* Sidopanel (Falk/chatten) öppen: skalets egna sidor slutar där panelen börjar */
