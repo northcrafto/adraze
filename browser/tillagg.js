@@ -130,4 +130,16 @@ function setup() {
   ipcMain.on('ext:store', (_e, id) => { try { shell.openExternal(id ? 'https://chrome.google.com/webstore/detail/' + id : 'https://chromewebstore.google.com'); } catch {} });
 }
 
-module.exports = { setup, laddaSparade, installera };
+// Konto per fönster: varje kontos lagring (partition) får de aktiva tilläggen när den skapas
+async function laddaISession(ses) {
+  try {
+    initPaths();
+    const api = ses.extensions || ses; const o = lasLista();
+    for (const id of Object.keys(o)) {
+      if (!o[id] || !o[id].aktiv) continue;
+      const dir = krMapp(id);
+      if (fs.existsSync(path.join(dir, 'manifest.json'))) { try { await api.loadExtension(dir, { allowFileAccess: true }); } catch {} }
+    }
+  } catch {}
+}
+module.exports = { setup, laddaSparade, installera, laddaISession };
