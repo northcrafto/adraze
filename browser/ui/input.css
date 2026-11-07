@@ -2206,7 +2206,7 @@ body.incog .ws-vaxlare:hover { background: rgba(168,85,247,.14); }
 #gal-provbar { --gpb-linje: var(--color-line); flex: none; display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 10px 0 14px; font-size: 13px; color: var(--color-navy-900); background: var(--color-chrome-2); border-bottom: 1px solid var(--gpb-linje); }
 #gal-provbar[hidden] { display: none; }
 /* Verktygsraden längst ner: raden ligger ovanför den (under sidan), och bredvid flikpanelen som slutar vid verktygsraden */
-body.anp-vf-nere #gal-provbar { order: 1; border-bottom: 0; border-top: 1px solid var(--gpb-linje); }
+body.anp-vf-nere #gal-provbar { order: 2; border-bottom: 0; border-top: 1px solid var(--gpb-linje); }
 body.anp-vf-nere.flik-vertikal #gal-provbar { margin-left: var(--vflik-w, 240px); }
 #gal-provbar .gpb-farg { flex: none; width: 14px; height: 14px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgb(14 42 71 / .2); }
 #gal-provbar .gpb-text { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: rgb(28 43 58 / .75); }

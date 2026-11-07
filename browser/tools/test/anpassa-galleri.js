@@ -272,7 +272,7 @@ async function kor(rot) {
       R.ok(`prova (${namn}): webbsidan ligger exakt i webbytan`, W.stammer(m) && !!g.rad && Math.round(m.v.h) <= g.h - g.rad.h - (g.verktyg ? g.verktyg.h : 0) + 1, m);
       // Det runt omkring (andra Anpassa-delar) med raden synlig: flikpanelen, sidopanelens list och fönsterknapparna
       if (fl === 'vertikal') {
-        const botten = nere ? Math.min(g.verktyg.y, g.bm ? g.bm.y : Infinity) : g.h;
+        const botten = nere ? Math.min(g.verktyg.y, g.bm ? g.bm.y : Infinity, g.rad ? g.rad.y : Infinity) : g.h;   // provraden ligger mellan sidan och verktygsraden
         R.ok(`prova (${namn}): flikpanelen går från sidans topp ned till ${nere ? 'verktygsraden' : 'fönstrets botten'}`, !!g.flikar && Math.abs(g.flikar.y - g.views.y) <= 1 && Math.abs(g.flikar.b - botten) <= 1 && !overlappar(g.flikar, g.verktyg) && !overlappar(g.flikar, g.lista), { flikar: g.flikar, lista: g.lista, botten });
       }
       R.ok(`prova (${namn}): fönsterknapparna ligger inte under webbsidan`, !overlappar(g.knappar, g.views), g.knappar);
