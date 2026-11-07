@@ -20,6 +20,16 @@ applyChatPrefs();
 // ===== Tema + panel =====
 function setTheme(th) { document.documentElement.dataset.theme = th === 'dark' ? 'dark' : 'light'; }
 try { setTheme(window.chatt.boot().theme); } catch {}
+// Barnkonto: familjechatt. Familjen blir kontakter av sig själv (servern), så rutan för att lägga till vänner försvinner.
+const BARN = (() => { try { return !!window.chatt.boot().child; } catch { return false; } })();
+if (BARN) {
+  try {
+    const sek = document.getElementById('add-username').closest('.side-sec');
+    sek.innerHTML = '<div class="side-title" translate="yes"></div><p class="empty-hint" translate="yes" style="margin:0"></p>';
+    sek.querySelector('.side-title').textContent = T('Familjechatt');
+    sek.querySelector('p').textContent = T('Här chattar du med din familj. Bara din familj kan skriva till dig.');
+  } catch {}
+}
 window.chatt.onTheme(setTheme);
 let panelVisible = true;
 let fullView = false;
@@ -333,8 +343,8 @@ async function getPubKey(userId) {
 }
 
 // ===== Kontakter =====
-$('btn-add').addEventListener('click', addContact);
-$('add-username').addEventListener('keydown', (e) => { if (e.key === 'Enter') addContact(); });
+if ($('btn-add')) $('btn-add').addEventListener('click', addContact);
+if ($('add-username')) $('add-username').addEventListener('keydown', (e) => { if (e.key === 'Enter') addContact(); });
 async function addContact() {
   const input = $('add-username'), msg = $('add-msg');
   msg.textContent = ''; msg.className = 'msg-error';
@@ -374,7 +384,7 @@ async function refreshContacts() {
     checkNotify('c:', contactsCache.map((c) => ({ id: c.id, unread: unread[c.id] || 0 })));
     unreadContacts = 0;
     const cl = $('contacts-list'); cl.innerHTML = '';
-    if (!contactsCache.length) cl.innerHTML = '<div class="empty-hint" translate="yes">' + esc(T('Inga vänner än. Lägg till någon med användarnamnet ovan.')) + '</div>';
+    if (!contactsCache.length) cl.innerHTML = '<div class="empty-hint" translate="yes">' + esc(BARN ? T('Din familj syns här när de har öppnat chatten i AdRaze.') : T('Inga vänner än. Lägg till någon med användarnamnet ovan.')) + '</div>';
     for (const c of contactsCache) {
       const isOpen = active && active.kind === 'contact' && active.id === c.id;
       const div = document.createElement('div'); div.className = 'contact' + (isOpen ? ' active' : '');
