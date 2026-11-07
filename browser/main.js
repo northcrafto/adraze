@@ -150,7 +150,7 @@ function positionDlPopup(ctx, h) {
   // Anpassa (flikar): flikraden på sidan/dold → sidan börjar högre upp; upptill blir det som förut (92)
   const top = Math.max(0, Math.round((ctx.topInset || Math.min(92, ctx.bounds ? ctx.bounds.y : 92)) + 6));
   const height = Math.max(70, Math.min(ctx._dlH || 200, cb.height - top - 12));
-  try { ctx.dlView.setBounds({ x: Math.round(cb.width - DL_W - 8), y: top, width: DL_W, height }); } catch {}
+  try { ctx.dlView.setBounds({ x: Math.round(cb.width - DL_W - 8), y: anpVerktyg.popupY(ctx, top, height), width: DL_W, height }); } catch {}   // popupY: verktygsraden längst ner → rutan ovanför raden
 }
 function closeDlPopup(ctx) {
   if (!ctx || !ctx.dlView) return;
@@ -299,6 +299,9 @@ function barnNagonstans() { return !!barnNagonRegel(); }
 anpassa.init({ barnKoll: () => barnNagonstans() });
 require('./anpassa-tema');   // Anpassa-krok (tema): tema.*-nycklarna, Macens trafikljus följer flikradens höjd
 anpFlikar.init({ ctxFor, antalFonster: () => wins.size, T: (s) => T(s), svep: () => sweepIdleTabs() });   // Anpassa → flikar
+// Anpassa › verktyg: verktyg.*-nycklarna, högerklicksmenyn på verktygsraden och raden längst ner (anpassa-verktyg.js)
+const anpVerktyg = require('./anpassa-verktyg');
+anpVerktyg.init({ anpassa, wins, applyBounds, T: (s) => T(s) });
 function barnSparrad(url, regler) {
   const r = regler === undefined ? barnRegler : regler; if (!r) return false;
   let h = '';
@@ -1863,7 +1866,7 @@ function positionPwPopup(ctx, h) {
   // Anpassa (flikar): flikraden på sidan/dold → sidan börjar högre upp; upptill blir det som förut (92)
   const top = Math.max(0, Math.round((ctx.topInset || Math.min(92, ctx.bounds ? ctx.bounds.y : 92)) + 6));
   const height = Math.max(60, Math.min(ctx._pwH || 150, cb.height - top - 12));
-  try { ctx.pwView.setBounds({ x: Math.round(cb.width - PW_W - 8), y: top, width: PW_W, height }); } catch {}
+  try { ctx.pwView.setBounds({ x: Math.round(cb.width - PW_W - 8), y: anpVerktyg.popupY(ctx, top, height), width: PW_W, height }); } catch {}   // popupY: verktygsraden längst ner → rutan ovanför raden
 }
 function closePwPopup(ctx) {
   if (!ctx || !ctx.pwView) return;
