@@ -562,6 +562,8 @@
       new MutationObserver(() => { if (uppdateraMatt() && lage() !== 'upptill') kor('sendBounds'); })
         .observe(document.body, { attributes: true, attributeFilter: ['class'] });
     } catch {}
+    // Verktygsraden uppe ↔ nere flyttar webbytan utan att storleken ändras (det märker inte ResizeObserver): mät om
+    if (A) A.on('verktyg.placering', () => efterLayout());
     // Verktygsraden är titelrad i panel- och dolt läge: dubbelklick på en tom yta maximerar, som på flikraden
     const tb = $('toolbar');
     if (tb) tb.addEventListener('dblclick', (e) => {
