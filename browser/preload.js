@@ -64,6 +64,16 @@ contextBridge.exposeInMainWorld('family', {
 });
 
 
+contextBridge.exposeInMainWorld('anpassaBro', {
+  alla: () => ipcRenderer.sendSync('anpassa:alla'),
+  satt: (nyckel, varde, etikett) => ipcRenderer.invoke('anpassa:satt', { nyckel, varde, etikett }),
+  angra: () => ipcRenderer.invoke('anpassa:angra'),
+  aterstall: (prefix) => ipcRenderer.invoke('anpassa:aterstall', prefix),
+  historik: () => ipcRenderer.invoke('anpassa:historik'),
+  exportera: (prefix) => ipcRenderer.invoke('anpassa:exportera', prefix),
+  importera: (kod, prefix) => ipcRenderer.invoke('anpassa:importera', { kod, prefix }),
+  onAndrad: (fn) => ipcRenderer.on('anpassa:andrad', (_e, d) => fn(d)),
+});
 contextBridge.exposeInMainWorld('kontoLage', {
   fonster: () => ipcRenderer.sendSync('konto:fonster'),
   hamta: () => ipcRenderer.sendSync('konto:lage'),
