@@ -588,6 +588,7 @@
             <button class="set-tab" style="--i:4" data-cat="wallet"><svg class="ic"><use href="#i-card" /></svg>AdRaze Wallet</button>
             <div class="set-glbl">Webbläsaren</div>
             <button class="set-tab" style="--i:5" data-cat="utseende"><svg class="ic"><use href="#i-palette" /></svg>Utseende</button>
+            <button class="set-tab" style="--i:5" data-cat="anpassa"><svg class="ic"><use href="#i-sparkle" /></svg>Anpassa</button>
             <button class="set-tab" style="--i:6" data-cat="start"><svg class="ic"><use href="#i-power" /></svg>Vid start</button>
             <button class="set-tab" style="--i:6" data-cat="sok"><svg class="ic"><use href="#i-search" /></svg>Sökmotor</button>
             <button class="set-tab" style="--i:7" data-cat="sprak"><svg class="ic"><use href="#i-translate" /></svg>Språk</button>
@@ -645,6 +646,23 @@
                 <option value="9">Mycket liten</option><option value="12">Liten</option><option value="16">Medel (rekommenderas)</option><option value="20">Stor</option><option value="24">Mycket stor</option>
               </select>
             </div>
+          </div>
+
+          <!-- Anpassa: varje område ritar sin egen del i sin behållare (ui/anpassa-<område>.js). Värden i Anpassa-butiken. -->
+          <div class="set-panel hidden" data-cat="anpassa">
+            <h2 class="set-h">Anpassa</h2>
+            <div id="anp-angra"></div>
+            <section class="anp-del" id="anp-tema" data-omrade="tema"></section>
+            <section class="anp-del" id="anp-flikar" data-omrade="flikar"></section>
+            <section class="anp-del" id="anp-verktyg" data-omrade="verktyg"></section>
+            <section class="anp-del" id="anp-sidopanel" data-omrade="sidopanel"></section>
+            <section class="anp-del" id="anp-startsida" data-omrade="startsida"></section>
+            <section class="anp-del" id="anp-kortkommandon" data-omrade="kortkommandon"></section>
+            <section class="anp-del" id="anp-sajt" data-omrade="sajt"></section>
+            <section class="anp-del" id="anp-sokmotorer" data-omrade="sokmotorer"></section>
+            <section class="anp-del" id="anp-avancerat" data-omrade="avancerat"></section>
+            <section class="anp-del" id="anp-arbetsytor" data-omrade="arbetsytor"></section>
+            <section class="anp-del" id="anp-galleri" data-omrade="galleri"></section>
           </div>
 
           <div class="set-panel hidden" data-cat="start">
