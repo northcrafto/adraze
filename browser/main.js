@@ -2513,11 +2513,15 @@ require('./anpassa-falk').init({ T });
  * så de funkar även när fokus ligger i en webbsida. */
 function ctxForWc(wc) { return wins.get(wc.id) || wc.__ctx || null; }
 function activeView(ctx) { return ctx && ctx.visibleTab ? ctx.views.get(ctx.visibleTab) : null; }
+// Anpassa › kortkommandon, kommandopalett och musgester: egna kortkommandon, Ctrl+K och högerklicksgester (anpassa-kortkommandon.js)
+const anpKortkommandon = require('./anpassa-kortkommandon');
+anpKortkommandon.init({ anpassa, wins, sendTo, activeView, openFind, closeFind, openDlPopup, savePage, printPage, bildIBild, createWindow, toggleFull, barnNagonstans, showQR, T });
 function handleShortcut(wc, input) {
   if (input.type !== 'keyDown') return false;
   const ctx = ctxForWc(wc);
   if (!ctx) return false;
   if (wc.__sidopanel && sidopanel.genvag(wc, input)) return true;   // Anpassa: sidopanel – F5, Alt+pil och zoom gäller appen i panelen
+  { const r = anpKortkommandon.tangent(wc, input, ctx); if (r !== undefined) return r; }   // Anpassa: användarens kortkommandon först; undefined = inte deras
   const mod = input.control || input.meta;      // Ctrl (eller Cmd på mac)
   const shift = input.shift;
   const k = (input.key || '').toLowerCase();
