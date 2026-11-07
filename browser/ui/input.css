@@ -658,7 +658,7 @@ body.incog #views, :root[data-theme="dark"] body.incog #views { background-color
 /* ── Startsidans statistik: AdRaze-listen längst ned ──
    En låg glasremsa med falken, tunn orange linje överst och hårfina avdelare. */
 .nt-stats { position: absolute; left: 50%; bottom: 44px; transform: translateX(-50%); display: flex; align-items: stretch; width: max-content; max-width: 92%;
-  border-radius: 16px; background: rgb(10 10 12 / .58); border: 1px solid rgb(255 255 255 / .09); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); overflow: hidden; text-align: left; }
+  border-radius: 16px; background: rgb(10 10 12 / .58); border: 1px solid rgb(255 255 255 / .09); backdrop-filter: blur(16px) saturate(1.2); overflow: hidden; text-align: left; }
 .nt-stats::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, #ff4b1f, rgb(255 75 31 / .35) 45%, transparent 80%); }
 .nt-st { padding: 15px 22px 14px; display: flex; flex-direction: column; justify-content: center; }
 .nt-st + .nt-st { border-left: 1px solid rgb(255 255 255 / .08); }

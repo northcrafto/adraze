@@ -145,13 +145,16 @@ function downloadDir() {
 }
 
 /* ── IPC till inställningarna ── */
-function setup({ onDnsChanged } = {}) {
+function setup({ onDnsChanged, arBarn } = {}) {
+  const barn = () => { try { return typeof arBarn === 'function' && !!arBarn(); } catch { return true; } };
   ipcMain.handle('webb:get', () => ({
     dns: prefs.dns, httpsOnly: prefs.httpsOnly, fontSize: prefs.fontSize,
     downloadDir: downloadDir(), downloadDirCustom: !!prefs.downloadDir, askDownload: prefs.askDownload,
     permDefaults: prefs.permDefaults, perms: prefs.perms, falkSida: prefs.falkSida !== false, falkSamtycke: !!prefs.falkSamtycke,
   }));
   ipcMain.handle('webb:set', (_e, k, v) => {
+    // Barnläge: inga nya behörigheter till sajter, och inga skydd (DNS, endast HTTPS, standardbehörigheter) får sänkas
+    if (barn() && (k === 'dns' || k === 'httpsOnly' || k === 'permDefault' || (k === 'perm' && v && v.value === 'allow'))) return false;
     if (k === 'dns' && (v === 'off' || v === 'automatic' || DNS_SERVERS[v])) { prefs.dns = v; applyDns(); if (onDnsChanged) onDnsChanged(); }
     else if (k === 'httpsOnly') { prefs.httpsOnly = !!v; if (!v) httpOk.clear(); }
     else if (k === 'fontSize') { const n = parseInt(v, 10); if (n >= 9 && n <= 30) prefs.fontSize = n; }

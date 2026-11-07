@@ -2954,7 +2954,7 @@ app.whenReady().then(async () => {
     session.defaultSession.setUserAgent(app.userAgentFallback);
   } catch {}
   applyClientHints(session.defaultSession);
-  webb.setup(); webb.applyDns();
+  webb.setup({ arBarn: () => barnNagonstans() }); webb.applyDns();   // barnläge: inga behörigheter/skydd ändras via Integritet
   webb.extraSessioner = () => (KONTO_PER_FONSTER ? allaKontoSessioner().slice(1) : []);
   importera.setup({
     kakSession: (e) => { if (!KONTO_PER_FONSTER) return null; try { const ctx = ctxFor(e); return kontoSession(ctx && ctx.acctKey !== undefined ? ctx.acctKey : senasteKonto); } catch { return null; } },

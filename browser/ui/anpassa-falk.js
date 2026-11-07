@@ -24,7 +24,7 @@
     '• Ångra senaste ändringen: [[gör:anpassa_angra]]\n' +
     '• Återställ ett område: [[gör:anpassa_aterstall=OMRÅDE]] (första delen av nyckeln, t.ex. tema, flikar, verktyg), eller allt: [[gör:anpassa_aterstall=allt]]\n' +
     'Exempel:\n' +
-    '• "gör flikarna vertikala" → [[gör:anpassa=flikar.lage|vertikalt]]\n' +
+    '• "gör flikarna vertikala" → [[gör:anpassa=flikar.lage|vertikal]]\n' +
     '• "mörkgrön accentfärg" → [[gör:anpassa=tema.accent|#1f6b3a]]\n' +
     '• "kompaktare" → [[gör:anpassa=tema.densitet|kompakt]]  ·  "luftigare" → [[gör:anpassa=tema.densitet|luftig]]\n' +
     '• "mörkt läge" → [[gör:anpassa=tema.lage|morkt]]  ·  "följ datorn" → [[gör:anpassa=tema.lage|system]]\n' +
