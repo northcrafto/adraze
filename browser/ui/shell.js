@@ -1083,11 +1083,11 @@ function visaProfiler() {
 }
 function profilFel(msg) { const e = $('prof-error'); e.textContent = msg; e.style.display = 'block'; }
 // Inloggningen med e-post ifylld (profilens token har gått ut, eller vuxenprofil i barnläge)
+// Inloggningen med mejlen ifylld OCH "Fortsätt med Google" kvar (många vuxna loggar in med Google och har inget lösenord)
 function profilTillLosenord(email, msg) {
   $('login-email').value = email || '';
-  if (!email) { setLoginView('login'); visaTillbakaTillProfiler(); return; }
-  goPw();
-  if (msg) { const e = $('login-error'); e.textContent = msg; e.style.display = 'block'; }
+  setLoginView('login'); visaTillbakaTillProfiler();
+  const e = $('start-error'); if (msg) { e.textContent = msg; e.style.display = 'block'; } else e.style.display = 'none';
 }
 async function valjProfil(p, el) {
   if (profilHantera) {
@@ -1098,7 +1098,7 @@ async function valjProfil(p, el) {
     ritaProfiler(); return;
   }
   $('prof-error').style.display = 'none';
-  if (!p.isChild && famLocked()) { profilTillLosenord(p.email, 'Barnläget är på. Skriv lösenordet för att fortsätta som vuxen.'); return; }
+  if (!p.isChild && famLocked()) { profilTillLosenord(p.email, 'Barnläget är på. Logga in som vuxen med Google eller med mejl och lösenord.'); return; }
   el.classList.add('laddar');
   let r; try { r = await window.auth.hamtaProfil(p.key); } catch { r = null; }
   if (!r || !r.ok || !r.account) { el.classList.remove('laddar'); await hamtaProfiler(); ritaProfiler(); profilFel('Profilen finns inte längre. Logga in igen.'); return; }
@@ -1130,7 +1130,7 @@ async function valjProfil(p, el) {
   }
   if (s && s.error === 'no_session') {
     try { await window.auth.taBortProfil(p.key); } catch {} await hamtaProfiler();
-    profilTillLosenord(a.email, 'Inloggningen har gått ut. Skriv ditt lösenord igen.');
+    profilTillLosenord(a.email, 'Inloggningen har gått ut. Logga in igen med Google eller med mejl och lösenord.');
     return;
   }
   profilFel((s && s.message) || 'Kunde inte nå AdRaze. Kontrollera din uppkoppling.');
