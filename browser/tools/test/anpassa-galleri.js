@@ -1,22 +1,40 @@
 #!/usr/bin/env node
 // Temagalleriet (Inställningar → Anpassa) mot en tillfällig kopia av adraze-api med egen temp-databas.
 // Allt körs osynligt (egen Xvfb). Testar listor, gilla, Prova/Ångra/Behåll (exakt återställning, även efter
-// omstart), publicering (bara delbara tema.*-värden), Mina/ta bort, anmälan, avstängt galleri och barnläge.
+// omstart), raden "Du provar" i alla flik-, verktygsrads- och sidopanellägen (webbsidans riktiga vy flyttas),
+// publicering (bara tema-områdets färg, läge, hörn och densitet; aldrig typsnitt eller textstorlek), Mina/ta bort,
+// anmälan, avstängt galleri och barnläge.
 // Användning: node tools/test/anpassa-galleri.js [webbläsarmapp]
 //   ADRAZE_API_REPO = mappen med adraze-api (standard ~/adraze-api, måste ha galleri.js)
 //   ADRAZE_TEST_BILDER = mapp att spara skärmdumpar i (valfritt)
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const http = require('http');
 const crypto = require('crypto');
-const { spawn } = require('child_process');
+const { spawn, execFileSync } = require('child_process');
 const H = require('./hjalp');
 
 const BILDER = process.env.ADRAZE_TEST_BILDER || '';
+const BREDD = 1280, HOJD = 900;
 const kod = (o) => 'ADRZ1.' + Buffer.from(JSON.stringify(o)).toString('base64url');
 // Samma värden (ordningen på nycklarna spelar ingen roll i Anpassa)
 const sorterad = (o) => JSON.stringify(Object.fromEntries(Object.entries(o || {}).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))));
 const lika = (a, b) => sorterad(a) === sorterad(b);
+// Två rutor { x, y, r, b } som överlappar (mer än en halv pixel)
+const overlappar = (a, b) => !!(a && b && a.x < b.r - 0.5 && b.x < a.r - 0.5 && a.y < b.b - 0.5 && b.y < a.b - 0.5);
+
+// En testsida med orange ram runt hela vyn: hamnar vyn fel syns det direkt på bilderna
+function sidserver() {
+  return new Promise((res) => {
+    const s = http.createServer((req, ut) => {
+      ut.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+      ut.end('<!doctype html><meta charset="utf-8"><title>Testsida</title><style>html,body{margin:0;height:100%;font:600 26px system-ui;background:#dfe8f3;color:#0e2a47}'
+        + '.r{position:fixed;inset:0;border:6px solid #ff4b1f;box-sizing:border-box;display:grid;place-items:center}</style><div class="r">Webbsidan</div>');
+    });
+    s.listen(0, '127.0.0.1', () => res({ url: 'http://127.0.0.1:' + s.address().port + '/', stang: () => s.close() }));
+  });
+}
 
 async function startaApi(repo) {
   const tmp = H.tempDir('galleri-api');
@@ -56,15 +74,24 @@ async function startaApi(repo) {
 
 async function startaApp(R, x, namn, apiBas, profil) {
   profil = profil || H.tempDir('galleri-' + namn);
-  const cdp = await H.ledigPort();
-  const p = H.starta(path.join(R, 'node_modules', 'electron', 'dist', 'electron'), [R, '--remote-debugging-port=' + cdp], H.testMiljo(x.display, profil, { ADRAZE_API: apiBas }), path.join(profil, 'logg.txt'));
+  const cdp = await H.ledigPort(), insp = await H.ledigPort();   // lediga portar för just den här körningen
+  const p = H.starta(path.join(R, 'node_modules', 'electron', 'dist', 'electron'), ['--inspect=' + insp, R, '--remote-debugging-port=' + cdp], H.testMiljo(x.display, profil, { ADRAZE_API: apiBas }), path.join(profil, 'logg.txt'));
   await H.vantaPaPort(cdp);
   const t = await H.mal(cdp, (t) => t.url.includes('shell.html'));
   if (!t) throw new Error('skalet startade inte (' + namn + ')');
+  let mj = null;
+  for (let i = 0; i < 80 && !mj; i++) { try { mj = (await H.hamtaJson(insp, '/json'))[0]; } catch { await H.sov(250); } }
+  if (!mj) throw new Error('huvudprocessen svarade inte (' + namn + ')');
+  const huvud = await H.anslut(mj.webSocketDebuggerUrl);
+  await huvud.skicka('Runtime.enable');
+  // Huvudprocessen: fönstret och flikens riktiga vy (main.js sätter wc.__ctx på flikarnas webContents)
+  const main = (js) => huvud.kor(`(async () => { const el = process.mainModule.require('electron'); const fonster = () => el.BrowserWindow.getAllWindows().find((w) => w.webContents.getURL().includes('shell.html') && !w.webContents.getURL().includes('incognito')); ${js} })()`);
   await H.sov(2500);
   const s = await H.anslut(t.webSocketDebuggerUrl);
   await s.skicka('Runtime.enable');
-  await s.skicka('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
+  // Riktig fönsterstorlek (ingen emulering), så att skalets mått och webbsidans vy stämmer med det som syns
+  await main(`const w = fonster(); if (!w) return 0; if (w.isMaximized()) w.unmaximize(); w.setPosition(0, 0); w.setContentSize(${BREDD}, ${HOJD}); return 1`);
+  await H.sov(800);
   // Introt bort, och inga notiser (huvudwebbläsare, flytt från Firefox …) över bilderna
   const stada = `document.querySelectorAll('#hxintro, .notis').forEach((e) => e.remove()); try { localStorage.setItem('skoll-defbrowser-snooze', String(Date.now() + 864e6)); } catch {} 1`;
   await s.kor(stada);
@@ -85,7 +112,32 @@ async function startaApp(R, x, namn, apiBas, profil) {
     const r = await s.skicka('Page.captureScreenshot', { format: 'png' });
     fs.writeFileSync(path.join(BILDER, fil), Buffer.from(r.result.data, 'base64'));
   };
-  return { p, s, E, vanta, visa, hovra, bild, profil };
+  // Hela fönstret från Xvfb, med webbsidans riktiga vy (Page.captureScreenshot ser bara skalet)
+  const skarm = async (fil) => {
+    if (!BILDER) return;
+    await s.kor(stada);
+    await H.sov(450);
+    const b = JSON.parse(await main(`const w = fonster(); return JSON.stringify(w ? w.getContentBounds() : null)`) || 'null');
+    if (!b) return;
+    try {
+      execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-f', 'x11grab', '-video_size', Math.min(b.width, 1600 - b.x) + 'x' + Math.min(b.height, 1000 - b.y),
+        '-i', x.display + '+' + b.x + ',' + b.y, '-frames:v', '1', path.join(BILDER, fil)], { stdio: 'ignore' });
+    } catch { await bild(fil); }   // utan ffmpeg: bara skalet
+  };
+  // #views i skalet och flikens vy i huvudprocessen
+  const matt = async () => {
+    const v = JSON.parse(await E(`const r = document.getElementById('views').getBoundingClientRect(); return JSON.stringify({ x: r.x, y: r.y, w: r.width, h: r.height })`));
+    const b = JSON.parse(await main(`const c = [...new Set(el.webContents.getAllWebContents().filter((w) => !w.isDestroyed() && w.__ctx && w.__tabId != null).map((w) => w.__ctx))]
+        .find((c) => c.win && !c.win.isDestroyed() && !c.win.webContents.getURL().includes('incognito'));
+      const vy = c && c.visibleTab != null ? c.views.get(c.visibleTab) : null; return JSON.stringify(vy ? vy.getBounds() : null)`) || 'null');
+    return { v, b };
+  };
+  const stammer = (m) => {
+    if (!m || !m.v || !m.b) return false;
+    const nara = (a, b) => Math.abs(a - b) <= 1;
+    return nara(m.b.x, Math.round(m.v.x)) && nara(m.b.y, Math.round(m.v.y)) && nara(m.b.width, Math.round(m.v.w)) && nara(m.b.height, Math.round(m.v.h));
+  };
+  return { p, s, huvud, E, main, vanta, visa, hovra, bild, skarm, matt, stammer, profil };
 }
 
 async function kor(rot) {
@@ -104,13 +156,14 @@ async function kor(rot) {
     for (const [v, u] of [[A, 'Anna_A'], [C, 'Cello']]) await srv.api(v, 'POST', '/chatt/registrera', { username: u, login_hash: hash(u), public_key: 'PK' + u, enc_priv: 'EP' + u });
     const pub = async (v, namn, varden, beskrivning, anonym) => (await srv.api(v, 'POST', '/galleri/publicera', { namn, beskrivning, kod: kod(varden), anonym })).tema;
     const T = {};
-    T.midnatt = await pub(A, 'Midnatt', { 'tema.lage': 'mork', 'tema.accent': '#ff4b1f', 'tema.bakgrund': '#0e2a47', 'tema.yta': '#14375c' }, 'Mörkblått med orange accent.');
-    T.skog = await pub(A, 'Skogsglänta', { 'tema.accent': '#2f9e67', 'tema.bakgrund': '#eef6f0', 'tema.yta': '#ffffff' }, 'Ljust och grönt, lugnt för ögonen.');
-    T.persika = await pub(C, 'Persika', { 'tema.accent': '#ff7a52', 'tema.bakgrund': '#fff3ef', 'tema.yta': '#ffffff', 'tema.text': '#4a2a1f' }, 'Varma toner hela dagen.');
-    T.kontor = await pub(C, 'Kontorsgrå', { 'tema.accent': '#1d4a76', 'tema.bakgrund': '#f1f1ee', 'tema.yta': '#ffffff' }, '', true);
-    T.neon = await pub(D, 'Neonnatt', { 'tema.lage': 'mork', 'tema.accent': '#5fd08a', 'tema.bakgrund': '#081a2e' }, 'Grönt som lyser i mörkret.');
-    T.sand = await pub(D, 'Sand', { 'tema.accent': '#cf9128', 'tema.bakgrund': '#f7f1e3', 'tema.yta': '#fffaf0' }, '');
-    T.spam = await pub(F, 'Anmält tema', { 'tema.accent': '#000000', 'tema.bakgrund': '#ffffff' }, 'Det här temat har anmälts.');
+    // Tema-områdets riktiga nycklar och värden (browser/anpassa-tema.js)
+    T.midnatt = await pub(A, 'Midnatt', { 'tema.lage': 'morkt', 'tema.accent': '#ff4b1f', 'tema.horn': 'rund' }, 'Mörkt med orange accent och runda hörn.');
+    T.skog = await pub(A, 'Skogsglänta', { 'tema.accent': '#2f9e67', 'tema.densitet': 'luftig', 'tema.horn': 'rund' }, 'Ljust och grönt, lugnt för ögonen.');
+    T.persika = await pub(C, 'Persika', { 'tema.accent': '#ff7a52', 'tema.densitet': 'luftig' }, 'Varma toner hela dagen.');
+    T.kontor = await pub(C, 'Kontorsgrå', { 'tema.accent': '#1d4a76', 'tema.horn': 'kantig', 'tema.densitet': 'kompakt' }, '', true);
+    T.neon = await pub(D, 'Neonnatt', { 'tema.lage': 'morkt', 'tema.accent': '#5fd08a' }, 'Grönt som lyser i mörkret.');
+    T.sand = await pub(D, 'Sand', { 'tema.accent': '#cf9128', 'tema.lage': 'system' }, '');
+    T.spam = await pub(F, 'Anmält tema', { 'tema.accent': '#000000' }, 'Det här temat har anmälts.');
     R.ok('galleriet fylldes', Object.values(T).every((t) => t && t.id), Object.keys(T).filter((k) => !T[k]));
     for (const [v, t] of [[D, T.midnatt], [C, T.midnatt], [D, T.persika], [A, T.persika], [A, T.neon], [A, T.sand], [C, T.skog]]) await srv.api(v, 'POST', '/galleri/rosta', { id: t.id, rost: 1 });
     for (let i = 1; i <= 3; i++) await srv.api({ ip: '10.5.0.' + i }, 'POST', '/galleri/nedladdad', { id: T.midnatt.id });
@@ -120,8 +173,8 @@ async function kor(rot) {
     const W = await startaApp(rot, x, 'vuxen', srv.bas); appar.push(W);
     const { E, vanta, visa, hovra, bild } = W;
     await E(`account = { token: '${B.token}', email: '${B.email}', name: 'Bo' }; try { sparaKontoLokalt(); } catch {} return 1`);
-    // Mitt tema innan galleriet: två delbara värden och en egen bild som aldrig får röras
-    await E(`await Anpassa.set('tema.accent', '#123abc', 'Accent'); await Anpassa.set('tema.lage', 'ljus', 'Läge'); await Anpassa.set('tema.bild', 'data:image/png;base64,AAAA', 'Bild'); return 1`);
+    // Mitt tema innan galleriet: två delbara värden, och typsnitt + textstorlek som är personliga och aldrig får röras
+    await E(`await Anpassa.set('tema.accent', '#123abc', 'Accent'); await Anpassa.set('tema.densitet', 'kompakt', 'Densitet'); await Anpassa.set('tema.typsnitt', 'klassisk', 'Typsnitt'); await Anpassa.set('tema.storlek', 'stor', 'Textstorlek'); return 1`);
     const fore = JSON.parse(await E(`return JSON.stringify(Object.fromEntries(Object.entries(Anpassa.alla()).filter(([k]) => k.startsWith('tema.'))))`));
     await E(`openSettings(); showSettingsCat('anpassa'); return 1`);
     const antal = await vanta(`const n = document.querySelectorAll('#anp-galleri .gal-kort:not(.gal-platshallare)').length; return n >= 6 ? n : 0`);
@@ -131,7 +184,10 @@ async function kor(rot) {
     R.ok('skaparen visas med användarnamn', (await E(`return document.querySelector('#anp-galleri .gal-kort[data-id="${T.midnatt.id}"] .gal-av').textContent`)).startsWith('av Anna_A'));
     R.ok('anonymt tema visar Anonym', (await E(`return document.querySelector('#anp-galleri .gal-kort[data-id="${T.kontor.id}"] .gal-av').textContent`)).startsWith('av Anonym'));
     R.ok('antal gillar och användare', (await E(`const k = document.querySelector('#anp-galleri .gal-kort[data-id="${T.midnatt.id}"]'); return k.querySelector('.gal-gilla .gal-antal').textContent + '|' + k.querySelector('.gal-av').textContent`)) === '2|av Anna_A · 3 använder');
-    R.ok('förhandsvisningen ritas i temats färger', (await E(`const g = document.querySelector('#anp-galleri .gal-kort[data-id="${T.midnatt.id}"] .gp'); return getComputedStyle(g).backgroundColor + '|' + getComputedStyle(g.querySelector('.gp-cta')).backgroundColor`)) === 'rgb(14, 42, 71)|rgb(255, 75, 31)');
+    const gp = (id) => E(`const g = document.querySelector('#anp-galleri .gal-kort[data-id="${id}"] .gp'); const s = (sel, p) => getComputedStyle(sel ? g.querySelector(sel) : g)[p];
+      return [s(null, 'backgroundColor'), s('.gp-cta', 'backgroundColor'), s('.gp-flik', 'borderTopLeftRadius'), s('.gp-ram', 'height')].join('|')`);
+    R.ok('förhandsvisningen: mörkt läge, accentfärgen och runda hörn (Midnatt)', (await gp(T.midnatt.id)) === 'rgb(14, 14, 16)|rgb(255, 75, 31)|6px|21px', await gp(T.midnatt.id));
+    R.ok('förhandsvisningen: ljust, kantiga hörn och kompakt (Kontorsgrå)', (await gp(T.kontor.id)) === 'rgb(249, 251, 253)|rgb(29, 74, 118)|1px|17px', await gp(T.kontor.id));
     R.ok('publicera-raden finns för vuxna', !!(await E(`return document.querySelector('#anp-galleri .gal-pubrad [data-g="pub"]') ? 1 : 0`)));
     R.ok('fliken Mina finns för vuxna', !!(await E(`return document.querySelector('#anp-galleri [data-flik="mina"]') ? 1 : 0`)));
     await visa('#anp-galleri .gal-flikar');
@@ -169,11 +225,13 @@ async function kor(rot) {
     const raden = await vanta(`const r = document.getElementById('gal-provbar'); return r && !r.hidden ? r.textContent : ''`);
     R.ok('prova: raden "Du provar" visas', /Du provar Midnatt av Anna_A/.test(raden), raden);
     let t1 = await tema();
-    R.ok('prova: temats värden läggs på', t1['tema.accent'] === '#ff4b1f' && t1['tema.lage'] === 'mork' && t1['tema.bakgrund'] === '#0e2a47' && t1['tema.yta'] === '#14375c', t1);
-    R.ok('prova: egen bild (kan inte delas) rörs inte', t1['tema.bild'] === fore['tema.bild'], t1['tema.bild']);
+    R.ok('prova: temats värden läggs på (accent, mörkt, runda hörn)', t1['tema.accent'] === '#ff4b1f' && t1['tema.lage'] === 'morkt' && t1['tema.horn'] === 'rund', t1);
+    R.ok('prova: min densitet går till temats (standard)', !('tema.densitet' in t1), t1);
+    R.ok('prova: typsnitt och textstorlek (personliga) rörs inte', t1['tema.typsnitt'] === 'klassisk' && t1['tema.storlek'] === 'stor', t1);
+    R.ok('prova: skalet blir mörkt', (await E(`return document.documentElement.dataset.theme`)) === 'dark');
     R.ok('prova: kortet markeras', (await E(`const k = document.querySelector('#anp-galleri .gal-kort[data-id="${T.midnatt.id}"]'); return k.classList.contains('provas') + '|' + k.querySelector('.gal-prova').textContent`)) === 'true|Provas');
     R.ok('prova: ingen historik medan man provar', !(await E(`const h = await Anpassa.historik(); return h.some((x) => /galleriet/.test(x.etikett)) ? 1 : 0`)));
-    R.ok('prova: webbsidan flyttas ned under raden', (await E(`const r = document.getElementById('gal-provbar').getBoundingClientRect(), v = document.getElementById('views').getBoundingClientRect(); return r.height > 30 && v.top >= r.bottom ? 1 : 0`)) === 1);
+    R.ok('prova: raden ligger i skalets kolumn, direkt före webbytan', (await E(`const r = document.getElementById('gal-provbar'); return r.parentElement === document.body && r.nextElementSibling && r.nextElementSibling.contains(document.getElementById('views')) ? 1 : 0`)) === 1);
     await visa('#anp-galleri .gal-flikar');
     await hovra('#gal-provbar .gpb-behall');
     await bild('galleri-provar.png');
@@ -181,11 +239,68 @@ async function kor(rot) {
     await E(`document.querySelector('#anp-galleri .gal-kort[data-id="${T.persika.id}"] .gal-prova').click(); return 1`);
     await vanta(`return /Persika/.test(document.getElementById('gal-provbar').textContent) ? 1 : 0`);
     t1 = await tema();
-    R.ok('byt till ett annat tema: läget går tillbaka till standard', t1['tema.accent'] === '#ff7a52' && t1['tema.text'] === '#4a2a1f' && !('tema.lage' in t1) && !('tema.yta' in t1 && t1['tema.yta'] !== '#ffffff'), t1);
+    R.ok('byt till ett annat tema: läge och hörn går tillbaka till standard', t1['tema.accent'] === '#ff7a52' && t1['tema.densitet'] === 'luftig' && !('tema.lage' in t1) && !('tema.horn' in t1) && t1['tema.typsnitt'] === 'klassisk', t1);
+
+    // Raden och webbsidan i alla lägen: flikar upptill/på sidan/dolda × verktygsraden uppe/nere, sidopanelen
+    // till vänster (standard), till höger och av. Webbsidan är en egen vy i huvudprocessen; den ska ligga exakt
+    // över #views, och raden får inte täcka sidan, verktygsraden, bokmärkena eller flikpanelen.
+    const sid = await sidserver();
+    const satt = async (k, v) => { await E(`await Anpassa.set(${JSON.stringify(k)}, ${v === undefined ? 'undefined' : JSON.stringify(v)}, 'test'); return 1`); };
+    await E(`closeSettings(); createTab(${JSON.stringify(sid.url)}); return 1`);
+    await vanta(`return active && /127\\.0\\.0\\.1/.test(active.url || '') ? 1 : 0`, 10000);
+    await H.sov(1500);
+    const LAGEN = [
+      ['upptill', 'uppe'], ['upptill', 'nere'], ['vertikal', 'uppe'], ['vertikal', 'nere'], ['dolda', 'uppe'], ['dolda', 'nere'],
+      ['upptill', 'uppe', 'hoger'], ['vertikal', 'nere', 'hoger'], ['upptill', 'uppe', 'av'],
+    ];
+    for (const [fl, vp, sp] of LAGEN) {
+      await satt('flikar.lage', fl === 'upptill' ? undefined : fl);
+      await satt('verktyg.placering', vp === 'uppe' ? undefined : vp);
+      await satt('sidopanel.sida', sp === 'hoger' ? 'hoger' : undefined);
+      await satt('sidopanel.visa', sp === 'av' ? false : undefined);
+      await H.sov(900);
+      const namn = `flikar ${fl}, verktygsraden ${vp}` + (sp ? ', sidopanelen ' + (sp === 'av' ? 'av' : 'till höger') : '');
+      const g = JSON.parse(await E(`const r = (id) => { const e = document.getElementById(id); if (!e) return null; const b = e.getBoundingClientRect(); return b.width && b.height ? { x: b.x, y: b.y, r: b.right, b: b.bottom, h: b.height } : null; };
+        return JSON.stringify({ rad: r('gal-provbar'), views: r('views'), verktyg: r('toolbar'), flikar: r('tabstrip'), bm: r('bmbar'), lista: r('sp-list'), knappar: r('winctl'), h: innerHeight, w: innerWidth })`));
+      const m = await W.matt();
+      const nere = vp === 'nere';
+      const lagd = !!g.rad && g.rad.h >= 40 && g.rad.y >= 0 && g.rad.b <= g.h + 0.5
+        && !overlappar(g.rad, g.views) && !overlappar(g.rad, g.verktyg) && !overlappar(g.rad, g.bm) && !overlappar(g.rad, g.flikar) && !overlappar(g.rad, g.knappar)
+        && Math.abs(nere ? g.rad.y - g.views.b : g.views.y - g.rad.b) <= 1   // direkt intill sidan
+        && g.rad.x <= g.views.x + 1 && g.rad.r >= g.views.r - 1;            // minst lika bred som sidan
+      R.ok(`prova (${namn}): raden ligger intill sidan och täcker inget`, lagd, g);
+      R.ok(`prova (${namn}): webbsidan ligger exakt i webbytan`, W.stammer(m) && !!g.rad && Math.round(m.v.h) <= g.h - g.rad.h - (g.verktyg ? g.verktyg.h : 0) + 1, m);
+      // Det runt omkring (andra Anpassa-delar) med raden synlig: flikpanelen, sidopanelens list och fönsterknapparna
+      if (fl === 'vertikal') {
+        const botten = nere ? Math.min(g.verktyg.y, g.bm ? g.bm.y : Infinity) : g.h;
+        R.ok(`prova (${namn}): flikpanelen går från sidans topp ned till ${nere ? 'verktygsraden' : 'fönstrets botten'}`, !!g.flikar && Math.abs(g.flikar.y - g.views.y) <= 1 && Math.abs(g.flikar.b - botten) <= 1 && !overlappar(g.flikar, g.verktyg) && !overlappar(g.flikar, g.lista), { flikar: g.flikar, lista: g.lista, botten });
+      }
+      R.ok(`prova (${namn}): fönsterknapparna ligger inte under webbsidan`, !overlappar(g.knappar, g.views), g.knappar);
+      if (fl === 'dolda') {   // de dolda flikarna tas fram (som med musen vid kanten eller kortkommandot)
+        await E(`AnpFlikar._zen(true); return 1`);
+        await H.sov(600);
+        const z = JSON.parse(await E(`const r = (id) => { const b = document.getElementById(id).getBoundingClientRect(); return { x: b.x, y: b.y, r: b.right, b: b.bottom, h: b.height }; };
+          return JSON.stringify({ flikar: r('tabstrip'), views: r('views'), rad: r('gal-provbar'), h: innerHeight })`));
+        if (nere) await W.skarm('galleri-lage-dolda-nere-framtagna.png');
+        await E(`AnpFlikar._zen(false); return 1`);
+        await H.sov(500);
+        R.ok(`prova (${namn}): framtagna flikar syns i fönstret, inte under webbsidan eller över raden`, z.flikar.h > 20 && z.flikar.y >= -0.5 && z.flikar.b <= z.h + 0.5 && !overlappar(z.flikar, z.views) && !overlappar(z.flikar, z.rad), z);
+      }
+      if (!sp || sp === 'hoger') await W.skarm(`galleri-lage-${fl}-${vp}${sp ? '-' + sp : ''}.png`);
+    }
+    for (const k of ['flikar.lage', 'verktyg.placering', 'sidopanel.sida', 'sidopanel.visa']) await satt(k, undefined);
+    await H.sov(900);
     await E(`document.querySelector('#gal-provbar .gpb-angra').click(); return 1`);
     await vanta(`return document.getElementById('gal-provbar').hidden ? 1 : 0`);
+    await H.sov(900);
+    const utanRad = await W.matt();
+    const ovanfor = await E(`const b = (id) => { const e = document.getElementById(id); const r = e && e.getBoundingClientRect(); return r && r.height ? r.bottom : 0; }; return Math.round(Math.max(b('toolbar'), b('bmbar')))`);
+    R.ok('ångra: raden försvinner och webbsidan får tillbaka platsen', W.stammer(utanRad) && Math.round(utanRad.v.y) === ovanfor, { utanRad, ovanfor });
+    sid.stang();
     const efterAngra = await tema();
     R.ok('ångra: exakt det tema man hade', lika(efterAngra, fore), { nu: efterAngra, fore });
+    await E(`openSettings(); showSettingsCat('anpassa'); return 1`);
+    await vanta(`return document.querySelector('#anp-galleri .gal-kort[data-id="${T.midnatt.id}"] .gal-prova') ? 1 : 0`);
 
     // Behåll → historik + nedladdning
     await E(`document.querySelector('#anp-galleri .gal-kort[data-id="${T.midnatt.id}"] .gal-prova').click(); return 1`);
@@ -193,7 +308,7 @@ async function kor(rot) {
     await E(`document.querySelector('#gal-provbar .gpb-behall').click(); return 1`);
     await vanta(`return document.getElementById('gal-provbar').hidden ? 1 : 0`);
     const behallet = await tema();
-    R.ok('behåll: temat ligger kvar', behallet['tema.accent'] === '#ff4b1f' && behallet['tema.lage'] === 'mork' && behallet['tema.bild'] === fore['tema.bild'], behallet);
+    R.ok('behåll: temat ligger kvar, typsnitt och textstorlek orörda', behallet['tema.accent'] === '#ff4b1f' && behallet['tema.lage'] === 'morkt' && behallet['tema.horn'] === 'rund' && !('tema.densitet' in behallet) && behallet['tema.typsnitt'] === 'klassisk' && behallet['tema.storlek'] === 'stor', behallet);
     const hist = JSON.parse(await E(`return JSON.stringify((await Anpassa.historik()).slice(0, 6).map((h) => [h.nyckel, h.etikett, h.fore]))`));
     R.ok('behåll: ändringen hamnar i historiken (går att ångra)', hist.filter((h) => h[1] === 'Tema från galleriet: Midnatt').length === 4 && hist.some((h) => h[0] === 'tema.accent' && h[2] === '#123abc'), hist);
     await H.sov(500);
@@ -201,11 +316,12 @@ async function kor(rot) {
     const angrat = await E(`const r = await Anpassa.angra(); return r.nyckel`);
     R.ok('Ångra under Anpassa backar temat en inställning i taget', typeof angrat === 'string' && angrat.startsWith('tema.'), angrat);
 
-    // Publicera mitt tema: bara delbara värden följer med, länken försvinner ur beskrivningen
-    await E(`await Anpassa.set('tema.accent', '#d6336c', 'Accent'); await Anpassa.set('tema.bakgrund', '#fff0f5', 'Bakgrund'); await Anpassa.set('tema.yta', '#ffffff', 'Yta'); await Anpassa.set('tema.lage', 'ljus', 'Läge'); return 1`);
+    // Publicera mitt tema: bara färg, läge, hörn och densitet följer med, länken försvinner ur beskrivningen
+    await E(`await Anpassa.set('tema.accent', '#d6336c', 'Accent'); await Anpassa.set('tema.horn', 'rund', 'Hörn'); await Anpassa.set('tema.densitet', 'luftig', 'Densitet'); await Anpassa.set('tema.lage', undefined, 'Läge'); return 1`);
     await E(`document.querySelector('#anp-galleri .gal-pubrad [data-g="pub"]').click(); return 1`);
     const om = await vanta(`const o = document.querySelector('#anp-galleri .gal-form-om'); return o && o.textContent ? o.textContent : ''`);
-    R.ok('publicera: formuläret visar vad som delas', om === '4 inställningar delas, 1 kan inte delas (t.ex. bilder).', om);
+    R.ok('publicera: formuläret visar vad som delas', om === 'Delas: egen accentfärg, runda hörn, luftigt.', om);
+    R.ok('publicera: förhandsvisningen visar mitt tema', (await E(`const g = document.querySelector('#anp-galleri .gal-form .gp'); return getComputedStyle(g.querySelector('.gp-cta')).backgroundColor + '|' + getComputedStyle(g.querySelector('.gp-ram')).height`)) === 'rgb(214, 51, 108)|25px');
     R.ok('publicera: knappen väntar på ett namn', !!(await E(`return document.querySelector('#anp-galleri .gal-form [type=submit]').disabled ? 1 : 0`)));
     await E(`const n = document.getElementById('gal-namn'); n.value = 'Hallon'; n.dispatchEvent(new Event('input', { bubbles: true })); const b = document.getElementById('gal-besk'); b.value = 'Rosa och lugnt. https://spam.example/x'; b.dispatchEvent(new Event('input', { bubbles: true })); return 1`);
     await visa('#anp-galleri .gal-pubrad');
@@ -214,7 +330,7 @@ async function kor(rot) {
     const forst = await vanta(`const k = document.querySelector('#anp-galleri .gal-kort:not(.gal-platshallare)'); return !document.querySelector('#anp-galleri .gal-form') && document.querySelector('#anp-galleri [data-flik="nya"].on') && k ? k.querySelector('.gal-namn').textContent + '|' + (k.querySelector('.gal-chip') || {}).textContent : ''`, 10000);
     R.ok('publicera: temat ligger först under Nya, märkt Ditt', forst === 'Hallon|Ditt', forst);
     const rad = srv.db.prepare("SELECT * FROM galleri_teman WHERE namn='Hallon'").get();
-    R.ok('publicera: bara delbara tema.*-värden skickades', rad && JSON.stringify(JSON.parse(rad.varden)) === JSON.stringify({ 'tema.accent': '#d6336c', 'tema.bakgrund': '#fff0f5', 'tema.lage': 'ljus', 'tema.yta': '#ffffff' }), rad && rad.varden);
+    R.ok('publicera: bara färg, hörn och densitet skickades (inte typsnitt eller textstorlek)', rad && lika(JSON.parse(rad.varden), { 'tema.accent': '#d6336c', 'tema.densitet': 'luftig', 'tema.horn': 'rund' }), rad && rad.varden);
     R.ok('publicera: länken rensades ur beskrivningen', rad && rad.beskrivning === 'Rosa och lugnt.', rad && rad.beskrivning);
     R.ok('publicera: användarnamn saknas → Anonym', (await E(`return document.querySelector('#anp-galleri .gal-kort .gal-av').textContent`)).startsWith('av Anonym'));
 
@@ -242,15 +358,17 @@ async function kor(rot) {
     await vanta(`return document.querySelector('#anp-galleri .gal-kort[data-id="${T.sand.id}"]') ? 0 : 1`);
     R.ok('anmäl: temat försvinner och anmälan finns på servern', !!srv.db.prepare("SELECT 1 FROM galleri_anmalningar WHERE tema_id=? AND vem=? AND orsak='spam'").get(T.sand.id, 'u:' + B.id));
 
-    // Mörkt läge
-    await E(`setTheme('dark'); showSettingsCat('anpassa'); return 1`);
-    await vanta(`return document.querySelectorAll('#anp-galleri .gal-kort:not(.gal-platshallare)').length >= 5 ? 1 : 0`);
-    await E(`document.querySelector('#anp-galleri .gal-kort[data-id="${T.persika.id}"] .gal-prova').click(); return 1`);
+    // Mörkt läge (tema-områdets tema.lage) och ett mörkt tema som provas
+    await E(`await Anpassa.set('tema.lage', 'morkt', 'Läge'); showSettingsCat('anpassa'); return 1`);
+    await vanta(`return document.documentElement.dataset.theme === 'dark' && document.querySelectorAll('#anp-galleri .gal-kort:not(.gal-platshallare)').length >= 5 ? 1 : 0`);
+    await E(`document.querySelector('#anp-galleri .gal-kort[data-id="${T.neon.id}"] .gal-prova').click(); return 1`);
     await vanta(`const r = document.getElementById('gal-provbar'); return r && !r.hidden ? 1 : 0`);
     await visa('#anp-galleri .gal-flikar');
     await bild('galleri-mork.png');
-    await E(`document.querySelector('#gal-provbar .gpb-angra').click(); setTheme('light'); return 1`);
+    await E(`document.querySelector('#gal-provbar .gpb-angra').click(); return 1`);
     await vanta(`return document.getElementById('gal-provbar').hidden ? 1 : 0`);
+    R.ok('mörkt: ångra behåller mitt mörka läge', (await tema())['tema.lage'] === 'morkt');
+    await E(`await Anpassa.set('tema.lage', undefined, 'Läge'); return 1`);
 
     // Galleriet avstängt
     await E(`await Anpassa.set('galleri.visa', false, 'Dölj temagalleriet'); return 1`);
@@ -266,13 +384,13 @@ async function kor(rot) {
     await vanta(`const r = document.getElementById('gal-provbar'); return r && !r.hidden ? 1 : 0`);
     R.ok('omstart: provningen är igång', (await tema())['tema.accent'] === '#5fd08a');
     const fel1 = W.s.handelser.filter((e) => e.method === 'Runtime.exceptionThrown').map((e) => e.params.exceptionDetails.exception && e.params.exceptionDetails.exception.description);
-    W.s.stang(); await H.sov(800); await H.stang(W.p); appar.splice(appar.indexOf(W), 1);
+    W.s.stang(); W.huvud.stang(); await H.sov(800); await H.stang(W.p); appar.splice(appar.indexOf(W), 1);
     const W2 = await startaApp(rot, x, 'vuxen2', srv.bas, W.profil); appar.push(W2);
     const efterOmstart = JSON.parse(await W2.E(`return JSON.stringify(Object.fromEntries(Object.entries(Anpassa.alla()).filter(([k]) => k.startsWith('tema.'))))`));
     R.ok('omstart: temat från före provningen är tillbaka', lika(efterOmstart, innan), { nu: efterOmstart, innan });
     R.ok('omstart: ingen "Du provar"-rad', !!(await W2.E(`await new Promise((r) => setTimeout(r, 500)); return document.getElementById('gal-provbar').hidden ? 1 : 0`)));
     const fel2 = W2.s.handelser.filter((e) => e.method === 'Runtime.exceptionThrown').map((e) => e.params.exceptionDetails.exception && e.params.exceptionDetails.exception.description);
-    W2.s.stang(); await H.stang(W2.p); appar.splice(appar.indexOf(W2), 1);
+    W2.s.stang(); W2.huvud.stang(); await H.stang(W2.p); appar.splice(appar.indexOf(W2), 1);
     R.ok('inga JS-fel i skalet (vuxen)', !fel1.length && !fel2.length, fel1.concat(fel2));
 
     // ── Utloggad och barnläge ──
@@ -323,7 +441,7 @@ async function kor(rot) {
   } catch (e) {
     R.ok('testet kördes klart', false, String((e && e.stack) || e));
   } finally {
-    for (const a of appar) { try { a.s.stang(); } catch {} await H.stang(a.p); }
+    for (const a of appar) { try { a.s.stang(); a.huvud.stang(); } catch {} await H.stang(a.p); }
     x.stoppa();
     srv.stang();
     for (const a of appar) { try { fs.rmSync(a.profil, { recursive: true, force: true }); } catch {} }

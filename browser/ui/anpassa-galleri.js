@@ -8,7 +8,7 @@
   const G = window.anpassaGalleri, A = window.Anpassa;
   if (!G || !A) return;
 
-  const HEX_RE = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+  const HEX_RE = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
   const FLIKAR = [['populara', 'Populära'], ['nya', 'Nya'], ['vecka', 'Topplistan'], ['mina', 'Mina']];
   const UNDER = { populara: 'De mest gillade och använda temana.', nya: 'Senast publicerade först.', vecka: 'Veckans mest gillade teman.', mina: '' };
   const TOMT = { populara: 'Inga teman än.', nya: 'Inga teman än.', vecka: 'Inga röster den här veckan än.', mina: 'Du har inte publicerat något tema än.' };
@@ -36,38 +36,29 @@
     return d <= 0 ? 'i dag' : d === 1 ? 'i går' : d < 7 ? d + ' dagar sedan' : d < 14 ? 'förra veckan' : new Date(ts).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
   }
 
-  // ---------- färger och förhandsvisning ----------
-  // Rollerna i den lilla webbläsaren gissas ur nyckelnamnen (tema.accent, tema.bakgrund …); läget ger grundfärgerna.
-  const LJUS = { ram: '#e7edf4', verktyg: '#f1f5f9', flik: '#ffffff', sida: '#eef3f9', text: '#0e2a47', accent: '#ff4b1f' };
-  const MORK = { ram: '#111113', verktyg: '#1b1b1e', flik: '#2a2a2f', sida: '#0e0e10', text: '#f2f2f4', accent: '#ff4b1f' };
-  const ROLLER = [
-    ['accent', /accent|primar|huvudfarg|markering|knapp/i],
-    ['sida', /bakgrund|^bg|sida|start/i],
-    ['ram', /ram|flikrad|flikfalt|chrome|titel|kant/i],
-    ['verktyg', /verktyg|yta|panel|toolbar|adress|meny/i],
-    ['flik', /flik|kort/i],
-    ['text', /text|skrift|ink|forgrund|rubrik/i],
-  ];
-  function ljushet(hex) {
-    const h = hex.length === 4 ? hex.replace(/^#(.)(.)(.)$/, '#$1$1$2$2$3$3') : hex.slice(0, 7);
-    const [r, g, b] = [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  }
+  // ---------- förhandsvisning ----------
+  // En liten webbläsare ritad som tema-området ritar AdRaze (ui/anpassa-tema.js): ljust eller mörkt (tema.lage,
+  // "system" följer datorn), accentfärgen kontrastjusterad på samma sätt (AnpassaTema.justera), hörn (tema.horn)
+  // och densitet (tema.densitet). Typsnitt och textstorlek ingår inte i delade teman.
+  const STD_ACCENT = '#ff4b1f';
+  const LJUS = { ram: '#e7edf4', verktyg: '#f1f5f9', falt: '#ffffff', sida: '#f9fbfd', linje: '#d5dee8', text: '#0e2a47' };
+  const MORK = { ram: '#0c0c0d', verktyg: '#171718', falt: '#26262a', sida: '#0e0e10', linje: '#2b2b2d', text: '#f2f2f4' };
+  // [flikar, fält och knappar], i skala med AdRazes egna (input.css: data-anp-horn); fälten begränsas i CSS med min()
+  const HORN = { kantig: ['1px', '1px'], normal: ['4px', '3px'], rund: ['6px', '99px'] };
+  const TATHET = { kompakt: ['17px', '18px'], normal: ['21px', '22px'], luftig: ['25px', '27px'] };   // [flikrad, verktygsrad]
+  const morktLage = (l) => l === 'morkt' || (l === 'system' && !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches));
+  const accentAv = (v) => (v && typeof v['tema.accent'] === 'string' && HEX_RE.test(v['tema.accent']) ? v['tema.accent'] : STD_ACCENT);
   function palett(v) {
     v = v && typeof v === 'object' ? v : {};
-    const p = { ...(['mork', 'morkt', 'dark'].includes(v['tema.lage']) ? MORK : LJUS) };
-    const satt = new Set();
-    for (const [roll, re] of ROLLER) {
-      for (const [k, x] of Object.entries(v)) {
-        if (typeof x === 'string' && HEX_RE.test(x) && re.test(k.slice(5))) { p[roll] = x; satt.add(roll); break; }
-      }
-    }
-    // Text som syns mot sidan om temat inte säger något om texten
-    if (!satt.has('text')) p.text = ljushet(p.sida) < 0.22 ? '#f2f2f4' : '#0e2a47';
-    p.accentText = ljushet(p.accent) > 0.45 ? '#141416' : '#ffffff';
+    const p = { ...(morktLage(v['tema.lage']) ? MORK : LJUS) };
+    const T = window.AnpassaTema;
+    let acc = accentAv(v), on = '#ffffff';
+    try { if (T && T.justera && T.normFarg) acc = T.justera(T.normFarg(acc) || acc, p.verktyg, 3); if (T && T.textPa) on = T.textPa(acc); } catch {}
+    p.accent = acc; p.accentText = on;
+    [p.rFlik, p.rKnapp] = HORN[v['tema.horn']] || HORN.normal;
+    [p.hRam, p.hVerktyg] = TATHET[v['tema.densitet']] || TATHET.normal;
     return p;
   }
-  const fargerAv = (v) => [...new Set(Object.values(v || {}).filter((x) => typeof x === 'string' && HEX_RE.test(x)).map((x) => x.toLowerCase()))];
   function forhand(varden, plats) {
     const p = palett(varden);
     const f = el('div', 'gp');
@@ -76,12 +67,21 @@
     const ram = el('div', 'gp-ram'); ram.append(el('i', 'gp-flik pa'), el('i', 'gp-flik'), el('i', 'gp-flik'));
     const verktyg = el('div', 'gp-verktyg'); verktyg.append(el('i', 'gp-pil'), el('i', 'gp-adress'), el('i', 'gp-knapp'));
     const sida = el('div', 'gp-sida'); sida.append(el('i', 'gp-rubrik'), el('i', 'gp-rad'), el('i', 'gp-rad kort'), el('i', 'gp-cta'));
-    const prickar = el('div', 'gp-farger');
-    for (const c of fargerAv(varden).slice(0, 5)) { const i = el('i'); i.style.background = c; prickar.append(i); }
-    sida.append(prickar);
     f.append(ram, verktyg, sida);
     if (plats) f.append(el('span', 'gal-plats' + (plats <= 3 ? ' topp' : ''), plats));
     return f;
+  }
+  // Vad som delas, i ord (publiceringsformuläret)
+  const ORD = {
+    'tema.lage': { ljust: 'ljust', morkt: 'mörkt', system: 'följer datorns ljust eller mörkt' },
+    'tema.horn': { kantig: 'kantiga hörn', normal: 'vanliga hörn', rund: 'runda hörn' },
+    'tema.densitet': { kompakt: 'kompakt', normal: 'normal densitet', luftig: 'luftigt' },
+  };
+  function beskriv(v) {
+    const ut = [];
+    if (v['tema.accent']) ut.push('egen accentfärg');
+    for (const k of Object.keys(ORD)) if (v[k] && ORD[k][v[k]]) ut.push(ORD[k][v[k]]);
+    return ut;
   }
 
   // ---------- kort ----------
@@ -227,7 +227,7 @@
     visa.append(vt, sw);
     cb.addEventListener('change', () => { A.set('galleri.visaNamn', cb.checked, 'Visa mitt användarnamn i galleriet'); });
     const felrad = el('p', 'gal-fel'); felrad.hidden = true; felrad.setAttribute('role', 'alert');
-    const not = el('p', 'gal-not', 'Bara färger och val under Tema delas. Inga länkar.');
+    const not = el('p', 'gal-not', 'Färg, ljust eller mörkt, hörn och densitet delas. Typsnitt och textstorlek är dina egna.');
     const knappar = el('div', 'gal-knappar');
     const avbryt = knapp('pill', 'Avbryt', 'pub');
     const skicka = el('button', 'set-btn', 'Publicera'); skicka.type = 'submit';
@@ -246,8 +246,8 @@
       const om = el('p', 'gal-form-om');
       if (!mitt || !mitt.schema) om.textContent = 'Kunde inte nå galleriet just nu.';
       else if (mitt.provar) om.textContent = 'Du provar ett tema. Välj Behåll eller Ångra först.';
-      else if (!mitt.antal) om.textContent = 'Ditt tema är som standardtemat. Ändra något under Tema först.';
-      else om.textContent = (mitt.antal === 1 ? '1 inställning delas' : mitt.antal + ' inställningar delas') + (mitt.utanfor ? ', ' + mitt.utanfor + ' kan inte delas (t.ex. bilder).' : '.');
+      else if (!mitt.antal) om.textContent = 'Ditt tema ser ut som standardtemat. Byt färg, läge, hörn eller densitet under Tema först.';
+      else { const d = beskriv(mitt.varden); om.textContent = d.length ? 'Delas: ' + d.join(', ') + '.' : (mitt.antal === 1 ? '1 inställning delas.' : mitt.antal + ' inställningar delas.'); }
       vy.append(om);
       kolla();
     }).catch(() => {});
@@ -382,25 +382,36 @@
   document.addEventListener('anpassa:visa', visaDel);
   A.on('galleri.visa', () => { if (document.getElementById('gal-grid') || document.querySelector('#anp-galleri .gal-visarad')) visaDel(); });
 
-  // ---------- "Du provar …" ovanför webbsidan ----------
-  // Raden ligger i skalets flöde före #views (som bokmärkesfältet), så webbvyn flyttas ned och raden syns över sidor.
+  // ---------- "Du provar …" vid webbsidan ----------
+  // Raden ligger i skalets kolumn (<body>) direkt före den del som innehåller #views: #sp-rad (sidopanelens rad)
+  // eller #views själv. Den hamnar alltså mellan verktygsraden och sidan, och CSS flyttar den ovanför verktygsraden
+  // när den ligger längst ner (anp-vf-nere). Webbsidan är en egen vy i huvudprocessen som läggs över #views,
+  // så sendBounds() efter varje visa/dölj ger den nya mått i alla flik- och verktygslägen.
   const rad = el('div'); rad.id = 'gal-provbar'; rad.hidden = true; rad.setAttribute('role', 'status');
-  const radFarger = el('span', 'gpb-farger'), radText = el('span', 'gpb-text');
+  const radFarg = el('i', 'gpb-farg'), radText = el('span', 'gpb-text');
   const radAngra = knapp('gpb-angra', 'Ångra'), radBehall = knapp('gpb-behall', 'Behåll');
   radAngra.title = 'Tillbaka till temat du hade'; radBehall.title = 'Behåll det här temat';
-  rad.append(radFarger, radText, radAngra, radBehall);
-  const views = document.getElementById('views');
-  if (views && views.parentNode) views.parentNode.insertBefore(rad, views);
+  radFarg.setAttribute('aria-hidden', 'true');
+  rad.append(radFarg, radText, radAngra, radBehall);
+  function placeraRad() {
+    let del = document.getElementById('views');
+    while (del && del.parentElement && del.parentElement !== document.body) del = del.parentElement;
+    if (del && del.parentElement === document.body && rad.nextElementSibling !== del) document.body.insertBefore(rad, del);
+  }
+  placeraRad();
   function visaProv(p) {
     st.prov = p && typeof p === 'object' ? p : null;
     if (st.prov) {
-      radFarger.textContent = '';
-      for (const c of fargerAv(st.prov.varden).slice(0, 4)) { const i = el('i'); i.style.background = c; radFarger.append(i); }
+      radFarg.style.background = accentAv(st.prov.varden);
       radText.textContent = '';
       radText.append('Du provar ', el('b', null, st.prov.namn || 'ett tema'), st.prov.skapare ? ' av ' + st.prov.skapare : '');
     }
     const syns = !!st.prov;
-    if (rad.hidden === syns) { rad.hidden = !syns; try { if (typeof sendBounds === 'function') sendBounds(); } catch {} }
+    if (rad.hidden === syns) {
+      if (syns) placeraRad();
+      rad.hidden = !syns;
+      try { if (typeof sendBounds === 'function') sendBounds(); } catch {}
+    }
     radAngra.disabled = radBehall.disabled = false;
     document.querySelectorAll('#anp-galleri .gal-kort').forEach((a) => {
       const pa = !!(st.prov && st.prov.id === a.dataset.id);
