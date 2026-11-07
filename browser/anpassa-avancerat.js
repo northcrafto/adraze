@@ -313,14 +313,16 @@ function redigeraCss(wc, host) {
 // Nödutgången: stäng av skalets CSS (sparas, så den är av även efter omstart tills man slår på den igen)
 function nodutgang(tyst) {
   skalAvFlagga = true;
+  let varPa = false;   // meddelande bara om det fanns något att stänga av
   try {
     const v = anpassa.hamta('avancerat.skalcss');
-    if (v && v.pa) anpassa.satt('avancerat.skalcss', { ...v, pa: false }, { etikett: 'Nödutgång: egen CSS för AdRaze av' });
+    varPa = !!(v && v.pa);
+    if (varPa) anpassa.satt('avancerat.skalcss', { ...v, pa: false }, { etikett: 'Nödutgång: egen CSS för AdRaze av' });
   } catch {}
   for (const wc of skal) {
     if (wc.isDestroyed()) continue;
     skalensCss(wc);
-    if (!tyst) { try { wc.send('toast', T('Egen CSS för AdRaze är avstängd. Slå på den igen under Inställningar → Anpassa.')); } catch {} }
+    if (!tyst && varPa) { try { wc.send('toast', T('Egen CSS för AdRaze är avstängd. Slå på den igen under Inställningar → Anpassa.')); } catch {} }
   }
 }
 const arNodtangent = (i) => !!i && i.type === 'keyDown' && !!(i.control || i.meta) && !!i.shift && !!i.alt && (i.code === 'KeyR' || String(i.key).toLowerCase() === 'r');
