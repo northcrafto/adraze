@@ -39,9 +39,12 @@ function last(nyckel) {
   const r = register.get(nyckel) || [...register.entries()].find(([k, v]) => v.barnLast && k.endsWith('.*') && nyckel.startsWith(k.slice(0, -1)))?.[1];
   return !!(r && r.barnLast);
 }
-function sandUt(nyckel, varde) {
-  for (const fn of lyssnare) { try { fn(nyckel, varde); } catch {} }
-  for (const w of BrowserWindow.getAllWindows()) { try { if (!w.isDestroyed()) w.webContents.send('anpassa:andrad', { nyckel, varde }); } catch {} }
+// Fönstren får det SPARADE värdet (undefined = inget sparat → standard gäller) så deras kopia speglar filen exakt;
+// lyssnare (här och i fönstren) får det verkliga värdet inklusive standard.
+function sandUt(nyckel) {
+  const d = las(); const sparat = nyckel in d.varden ? kopia(d.varden[nyckel]) : undefined;
+  for (const fn of lyssnare) { try { fn(nyckel, hamta(nyckel)); } catch {} }
+  for (const w of BrowserWindow.getAllWindows()) { try { if (!w.isDestroyed()) w.webContents.send('anpassa:andrad', { nyckel, varde: sparat }); } catch {} }
 }
 // Sätter ett värde (undefined = tillbaka till standard). Returnerar { ok } eller { ok:false, error:'barnlast' }.
 function satt(nyckel, varde, { etikett, utanHistorik } = {}) {
@@ -56,7 +59,7 @@ function satt(nyckel, varde, { etikett, utanHistorik } = {}) {
     d.historik.push({ nyckel, fore: kopia(fore), efter: kopia(varde), etikett: etikett || (register.get(nyckel) || {}).etikett || nyckel, ts: Date.now() });
     if (d.historik.length > HISTORIK_MAX) d.historik.splice(0, d.historik.length - HISTORIK_MAX);
   }
-  spara(); sandUt(nyckel, hamta(nyckel));
+  spara(); sandUt(nyckel);
   return { ok: true };
 }
 function angra() {
@@ -66,7 +69,7 @@ function angra() {
     if (last(h.nyckel)) continue;
     d.historik.splice(i, 1);
     if (h.fore === undefined) delete d.varden[h.nyckel]; else d.varden[h.nyckel] = kopia(h.fore);
-    spara(); sandUt(h.nyckel, hamta(h.nyckel));
+    spara(); sandUt(h.nyckel);
     return { ok: true, nyckel: h.nyckel, etikett: h.etikett };
   }
   return { ok: false, error: 'tomt' };

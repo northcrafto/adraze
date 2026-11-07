@@ -12,7 +12,8 @@
   const kopia = (v) => (v === undefined ? undefined : JSON.parse(JSON.stringify(v)));
   b.onAndrad(({ nyckel, varde }) => {
     if (varde === undefined || varde === null) delete st.varden[nyckel]; else st.varden[nyckel] = varde;
-    for (const [m, fn] of lyss) if (m === '*' || m === nyckel || (m.endsWith('.') && nyckel.startsWith(m))) { try { fn(nyckel, kopia(varde)); } catch (e) { console.warn('[anpassa]', e); } }
+    const effektivt = window.Anpassa.get(nyckel);   // sparat värde, annars registrerat standardvärde
+    for (const [m, fn] of lyss) if (m === '*' || m === nyckel || (m.endsWith('.') && nyckel.startsWith(m))) { try { fn(nyckel, effektivt); } catch (e) { console.warn('[anpassa]', e); } }
   });
   window.Anpassa = {
     get(nyckel, def) {
