@@ -1027,8 +1027,9 @@ function loginAs(token, email, pro, name) {
   try { loadSocMe().then(() => updateAccountBtn()); } catch {}   // hämta NYA kontots profilbild → kontoknappen
   try { window.session.login(accountKey(account)); } catch {}   // återställ kontots webbsession (Gmail m.m. tillbaka) + lås upp lösenord
   famSkickaTillMain();
-  try { const kb = $('kidblock'); if (kb) kb.style.display = 'none'; } catch {}
-  try { startParentSync(); } catch {}
+  // Låsskärmen hade gömt webbvyn: visa den igen, annars är sidorna tomma trots att man är inloggad
+  try { const kb = $('kidblock'); if (kb && kb.style.display !== 'none') { kb.style.display = 'none'; showActiveTab(); } } catch {}
+  try { stopChildSync(); startParentSync(); } catch {}
   try { synkaInit(); } catch {}   // bokmärken mellan enheter
   if (pendingKryptoAfterLogin) { pendingKryptoAfterLogin = false; openKrypto(true); }
   else if (kryptoOpen) openKrypto(true);
@@ -1238,7 +1239,9 @@ async function enterChildMode(token, child) {
 }
 async function syncChild() {
   if (!account || !account.isChild || !account.token) return;
-  let me; try { me = await window.family.me(account.token); } catch { return; }
+  const tok = account.token;
+  let me; try { me = await window.family.me(tok); } catch { return; }
+  if (!account || account.token !== tok) return;   // kontot byttes under tiden: svaret gäller inte det nya kontot
   if (me && me.ok && me.isChild) {
     const id = account.childId || 'self';
     fam = { children: [{ id, name: me.name || account.name, age: me.age || 0, blocklist: Array.isArray(me.blocklist) ? me.blocklist : [], allows: Array.isArray(me.allows) ? me.allows : [], self: true }], activeChild: id };
@@ -3638,6 +3641,14 @@ applyKidIndicator();
 // ── Session-återställning vid uppstart — MÅSTE köras SIST, efter att all state (fam, timers, konto) är deklarerad, annars TDZ-krasch som dödar hela boot ──
 // Rensa ALDRIG webbsessionen vid start: cookies (Google-inlogg m.m.) ska överleva att man stänger browsern.
 if (account && account.token) { try { window.session.setkey(accountKey(account)); } catch {} if (account.isChild) { syncChild(); startChildSync(); } else { refreshPro(); startParentSync(); try { synkaInit(); } catch {} } try { loadSocMe().then(() => updateAccountBtn()); } catch {} }   // hämta profilbild → visa i kontoknappen
+// Ett annat fönster bytte konto: följ med, annars loggar det här fönstrets gamla konto senare ut det nya
+window.addEventListener('storage', (e) => {
+  if (e.key !== 'skoll-account') return;
+  let a = null; try { a = JSON.parse(e.newValue); } catch {}
+  account = a && a.token ? a : null; fam = famLoad(); socMe = null;
+  try { stopChildSync(); stopParentSync(); if (account) { if (account.isChild) startChildSync(); else startParentSync(); } } catch {}
+  try { updateAccountBtn(); applyKidIndicator(); famSkickaTillMain(); } catch {}
+});
 // Föll inloggningen bort ur localStorage men finns krypterad i nyckelringen? Återställ (efter servervalidering).
 if (!account || !account.token) {
   try { window.session.setkey(null); } catch {}   // utloggad → inget lösenordsvalv

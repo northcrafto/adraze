@@ -1248,6 +1248,7 @@ async function saveAccountCookies(key) {
   if (!key) return;
   try {
     const cookies = await session.defaultSession.cookies.get({});
+    if (!cookies.length) return;   // en tom session får aldrig skriva över ett konto med sparade inloggningar
     fs.mkdirSync(COOKIE_DIR, { recursive: true });
     fs.writeFileSync(cookieFileFor(key), walletEncrypt(JSON.stringify(cookies)), { mode: 0o600 });
   } catch {}
@@ -1322,9 +1323,14 @@ function migratePwLegacy(key) {   // första inloggningen: flytta ev. gamla (ick
 ipcMain.handle('session:setkey', (_e, d) => { currentAcctKey = (d && d.key) || null; migratePwLegacy(currentAcctKey || 'lokal'); return { ok: true }; });
 // Inloggning / kontobyte: spara ev. UTGÅENDE kontots cookies, rensa webbsessionen, återställ det NYA kontots cookies.
 // → varje konto (förälder/barn) får sina EGNA webb-cookies, isolerade från varandra.
-ipcMain.handle('session:login', async (_e, d) => {
+// Bytena körs ett i taget: en utloggning som hinner blandas med nästa inloggning kan annars rensa de återställda kakorna.
+let sessionKo = Promise.resolve();
+const iSessionKo = (f) => { const r = sessionKo.then(f, f); sessionKo = r.catch(() => {}); return r; };
+ipcMain.handle('session:login', (_e, d) => iSessionKo(async () => {
   const key = d && d.key;
-  if (currentAcctKey && currentAcctKey !== key) { try { await saveAccountCookies(currentAcctKey); } catch {} }
+  // Samma konto loggar in igen (t.ex. när inloggningen gått ut): sessionen är redan rätt, och att rensa den tappade allt
+  if (key && key === currentAcctKey) { migratePwLegacy(key); return { ok: true }; }
+  if (currentAcctKey) { try { await saveAccountCookies(currentAcctKey); } catch {} }
   currentAcctKey = key || null;
   if (key) {
     migratePwLegacy(key);
@@ -1332,7 +1338,7 @@ ipcMain.handle('session:login', async (_e, d) => {
     try { await restoreAccountCookies(key); } catch {} // lägg tillbaka just det här kontots cookies
   }
   return { ok: true };
-});
+}));
 // Skalet: barnets regler / låst barnläge / null (se "Familjespärren i huvudprocessen")
 ipcMain.on('barn:regler', (_e, d) => {
   try {
@@ -1348,13 +1354,13 @@ ipcMain.on('barn:regler', (_e, d) => {
   } catch {}
 });
 // Utloggning: spara kontots cookies, rensa sedan webbsessionen (utloggad ur Google m.fl. — inget ligger kvar).
-ipcMain.handle('session:logout', async (_e, d) => {
+ipcMain.handle('session:logout', (_e, d) => iSessionKo(async () => {
   const key = (d && d.key) || currentAcctKey;
   if (key) { try { await saveAccountCookies(key); } catch {} }
   try { await clearWebSession(); } catch {}
   currentAcctKey = null;
   return { ok: true };
-});
+}));
 
 /* ── Språk för UI som ritas utanför skalet (t.ex. kortväljaren i sidan) ──
  * Skalet laddar sin ordlista via i18n:load – vi snappar upp språket där och
