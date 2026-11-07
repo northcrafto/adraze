@@ -43,6 +43,7 @@ contextBridge.exposeInMainWorld('family', {
   join: (code) => ipcRenderer.invoke('family:join', { code }),
   approve: (code, approval) => ipcRenderer.invoke('family:approve', { code, approval }),
   children: (token) => ipcRenderer.invoke('family:children', { token }),
+  removeChild: (token, child_id) => ipcRenderer.invoke('family:remove', { token, child_id }),
   setBlocklist: (token, child_id, blocklist) => ipcRenderer.invoke('family:blocklist', { token, child_id, blocklist }),
   allow: (token, child_id, host, minutes) => ipcRenderer.invoke('family:allow', { token, child_id, host, minutes }),
   historyAdd: (token, url, title) => ipcRenderer.invoke('family:history-add', { token, url, title }),

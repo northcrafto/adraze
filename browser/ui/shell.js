@@ -949,8 +949,9 @@ function famSkickaTillMain() {
   try {
     if (!window.view || !window.view.barnRegler) return;
     if (famLocked()) { window.view.barnRegler({ last: true, blocklist: [], allows: [] }); return; }
-    if (account && account.isChild) {
-      const c = fam && fam.activeChild ? fam.children.find((x) => x.id === fam.activeChild) : null;
+    // Barnkonto, eller ett barn som föräldern valt "Aktivera här" för: barnets spärrar gäller på enheten
+    const c = fam && fam.activeChild ? fam.children.find((x) => x.id === fam.activeChild) : null;
+    if ((account && account.isChild) || c) {
       window.view.barnRegler({ last: false, blocklist: (c && c.blocklist) || [], allows: (c && c.allows) || [] });
       return;
     }
@@ -3086,7 +3087,10 @@ setTimeout(maybeShowFlyttBanner, 1200);
 
 /* ── Familj: föräldrapanel, barn-blocklistor, öppen insyn ── */
 // (FAM_KEY, famLoad, famSave och `let fam` ligger högst upp vid kontot – se "Familj + barnläge")
-function famHost(u) { try { return famNorm(new URL(normalizeUrl(u)).hostname); } catch { return famNorm(String(u || '').replace(/^https?:\/\//i, '').split('/')[0].split(':')[0]); } }
+function famHost(u) {
+  // Ett ord utan punkt ("facebook") är ingen adress: normalizeUrl gör det till en sökning, och då spärrades sökmotorn
+  const r = String(u || '').trim(); if (!r || (!r.includes('.') && !/^[a-z][a-z0-9+.-]*:\/\//i.test(r))) return '';
+  try { return famNorm(new URL(normalizeUrl(u)).hostname); } catch { return famNorm(String(u || '').replace(/^https?:\/\//i, '').split('/')[0].split(':')[0]); } }
 function famChildById(id) { return fam.children.find((c) => c.id === id); }
 function famActive() { return fam.activeChild ? famChildById(fam.activeChild) : null; }
 // AdRazes egen webbproxy öppnar vilken sajt som helst inuti sig → alltid spärrad för barnkonton
@@ -3099,11 +3103,13 @@ function famBlocked(url) {
     if (u.protocol === 'https:' && famNorm(u.hostname) === 'adraze.app' && u.pathname === '/app-google') return false;   // "Fortsätt med Google"
     return /^https?:$/.test(u.protocol) && !famLasOk(famNorm(u.hostname));
   }
-  if (!account || !account.isChild) return false;   // blockering gäller BARA på barnets konto
+  // Spärrarna gäller på barnets konto och när föräldern valt "Aktivera här" för ett barn, annars inte
+  const c = famActive();
+  if (!c && !(account && account.isChild)) return false;
   const h = famHost(url); if (!h) return false;
   const traff = (b) => { b = famNorm(b); return !!b && (h === b || h.endsWith('.' + b)); };
   if (FAM_ALLTID.some(traff)) return true;
-  const c = famActive(); if (!c) return false;
+  if (!c) return false;
   if (!(c.blocklist || []).some(traff)) return false;
   const now = Date.now();
   const allowed = (c.allows || []).some((a) => a && a.until > now && traff(a.host));  // tillfälligt tillåten?
@@ -3271,7 +3277,14 @@ function renderFam() {
   fam.children.forEach((c) => {
     const el = host.querySelector('[data-child="' + c.id + '"]'); if (!el) return;
     el.querySelector('[data-a=active]').addEventListener('click', () => { fam.activeChild = (fam.activeChild === c.id ? null : c.id); famSave(); renderFam(); applyKidIndicator(); });
-    el.querySelector('[data-a=del]').addEventListener('click', () => { fam.children = fam.children.filter((x) => x.id !== c.id); if (fam.activeChild === c.id) fam.activeChild = null; famSave(); renderFam(); applyKidIndicator(); });
+    el.querySelector('[data-a=del]').addEventListener('click', async () => {
+      // Barnet tas bort på servern också, annars kommer det tillbaka vid nästa synk
+      if (!c.local && account && account.token) {
+        const r = await window.family.removeChild(account.token, c.id).catch(() => ({ ok: false }));
+        if (!r || !r.ok) { showToast((r && r.message) || 'Kunde inte ta bort barnet just nu.'); return; }
+      }
+      fam.children = fam.children.filter((x) => x.id !== c.id); if (fam.activeChild === c.id) fam.activeChild = null; famSave(); renderFam(); applyKidIndicator();
+    });
     const cp = el.querySelector('[data-a=copy]'); if (cp) cp.addEventListener('click', () => { try { navigator.clipboard.writeText(c.code); } catch {} showToast(tn('Kod kopierad — ge den till {n}', c.name)); });
     const hb = el.querySelector('[data-a=hist]'); if (hb) hb.addEventListener('click', () => famShowHistory(c.id, c.name));
     const ro = el.querySelector('[data-a=rotate]');
@@ -3286,10 +3299,11 @@ function renderFam() {
     });
     const se = el.querySelector('[data-a=sessions]');
     if (se) se.addEventListener('click', () => famShowSessions(c.id, c.name));
-    el.querySelectorAll('.fam-tag button[data-host]').forEach((b) => b.addEventListener('click', () => { c.blocklist = c.blocklist.filter((h) => h !== b.dataset.host); famSave(); famPushBlocklist(c); renderFam(); }));
+    el.querySelectorAll('.fam-tag button[data-host]').forEach((b) => b.addEventListener('click', () => { const x = famChildById(c.id) || c; x.blocklist = (x.blocklist || []).filter((h) => h !== b.dataset.host); famSave(); famPushBlocklist(x); renderFam(); }));
     el.querySelectorAll('.fam-tag button[data-t]').forEach((b) => b.addEventListener('click', () => allowMenu(b.dataset.t, c.name, b)));  // tillåt tillfälligt
     const inp = el.querySelector('.fam-addsite input');
-    const addSite = () => { const h = famHost(inp.value); if (h && !c.blocklist.includes(h)) { c.blocklist.push(h); famSave(); famPushBlocklist(c); renderFam(); } };
+    // Barnet slås upp på nytt: synken byter ut objekten medan föräldern skriver
+    const addSite = () => { const x = famChildById(c.id) || c; const h = famHost(inp.value); if (!h) { if (inp.value.trim()) showToast('Skriv hela adressen, till exempel facebook.com'); return; } if (!x.blocklist.includes(h)) { x.blocklist.push(h); famSave(); famPushBlocklist(x); renderFam(); } };
     el.querySelector('.fam-addsite button').addEventListener('click', addSite);
     inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') addSite(); });
   });
@@ -3565,10 +3579,16 @@ function applyKidIndicator() {
   }, 6000);
 }
 // Skicka barnets blocklista till servern (så den syns på barnets enhet). Best-effort.
-function famPushBlocklist(c) {
+let _famPushar = 0;   // pågående sparningar: en synk som hann starta före får inte skriva över ändringen
+async function famPushBlocklist(c) {
   if (!c || c.self || c.local) return;
   if (!account || !account.token || account.isChild) return;
-  try { window.family.setBlocklist(account.token, c.id, c.blocklist || []); } catch {}
+  _famPushar++;
+  let r; try { r = await window.family.setBlocklist(account.token, c.id, c.blocklist || []); } catch { r = { ok: false }; }
+  _famPushar--;
+  if (r && r.ok) return;
+  if (r && r.error === 'no_session') { showToast('Din inloggning har g\u00e5tt ut \u2014 logga in igen f\u00f6r att spara sp\u00e4rren.'); try { openLogin(); } catch {} return; }
+  showToast((r && r.message) || 'Sp\u00e4rren kunde inte sparas. Kontrollera din uppkoppling och f\u00f6rs\u00f6k igen.');
 }
 // Förälder: hämta barnen från servern (koder + blocklistor) när panelen öppnas.
 let _parentSyncTimer = null;
@@ -3583,10 +3603,12 @@ function stopParentSync() { if (_parentSyncTimer) { clearInterval(_parentSyncTim
 window.addEventListener('focus', () => { if (account && account.token && !account.isChild) { try { famSyncParent(); } catch {} } });
 async function famSyncParent() {
   if (!account || !account.token || account.isChild) return;
+  if (_famPushar) return;
   let r; try { r = await window.family.children(account.token); } catch { return; }
+  if (_famPushar) return;   // föräldern ändrade något under tiden: svaret är gammalt
   if (r && r.ok && Array.isArray(r.children)) {
     const prevActive = fam.activeChild;
-    fam.children = r.children.map((c) => ({ id: c.id, name: c.name, age: c.age, blocklist: Array.isArray(c.blocklist) ? c.blocklist : [], code: c.code, sessions: c.sessions || 0, last_seen: c.last_seen || 0 }));
+    fam.children = r.children.map((c) => ({ id: c.id, name: c.name, age: c.age, blocklist: Array.isArray(c.blocklist) ? c.blocklist : [], allows: Array.isArray(c.allows) ? c.allows : [], code: c.code, sessions: c.sessions || 0, last_seen: c.last_seen || 0 }));
     fam.activeChild = fam.children.find((c) => c.id === prevActive) ? prevActive : fam.activeChild;
     famSave();
     const _typing = document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('fam-in');
