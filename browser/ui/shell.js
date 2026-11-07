@@ -1855,6 +1855,7 @@ function positionSug() {
   if (!sug.anchor) return;
   const r = sug.anchor.getBoundingClientRect();
   suggestEl.style.left = r.left + 'px'; suggestEl.style.top = (r.bottom + 5) + 'px'; suggestEl.style.width = r.width + 'px';
+  try { if (window.AnpassaVerktyg) window.AnpassaVerktyg.forslag(suggestEl, r, sug.anchor); } catch {}   // Anpassa › verktyg: adressfältet längst ner → listan öppnas uppåt
 }
 // Brave-stil: en rad per förslag. Sökningar: det du skrivit normalt, resten fett.
 // Sidor: "Titel - adress" med adressen i blått och dina ord feta.

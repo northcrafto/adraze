@@ -74,6 +74,12 @@ contextBridge.exposeInMainWorld('anpassaBro', {
   importera: (kod, prefix) => ipcRenderer.invoke('anpassa:importera', { kod, prefix }),
   onAndrad: (fn) => ipcRenderer.on('anpassa:andrad', (_e, d) => fn(d)),
 });
+// Anpassa › verktyg (ui/anpassa-verktyg.js): högerklicksmenyn på verktygsraden + webbytans kanter när raden ligger längst ner
+contextBridge.exposeInMainWorld('anpassaVerktyg', {
+  meny: (info) => ipcRenderer.send('anpassa-verktyg:meny', info),
+  kanter: (k) => ipcRenderer.send('anpassa-verktyg:kanter', k),
+  onVal: (fn) => ipcRenderer.on('anpassa-verktyg:val', (_e, d) => fn(d)),
+});
 contextBridge.exposeInMainWorld('kontoLage', {
   fonster: () => ipcRenderer.sendSync('konto:fonster'),
   hamta: () => ipcRenderer.sendSync('konto:lage'),

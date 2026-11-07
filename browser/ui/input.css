@@ -869,3 +869,108 @@ svg:has(use[href="#i-fav"]) { color: #5f6368; opacity: 1; }
 .fam-fraga button { font-size: 12px; font-weight: 700; border-radius: 8px; padding: 5px 10px; cursor: pointer; border: 1px solid var(--color-line); background: #fff; color: var(--color-navy-900); }
 .fam-fraga button[data-svar="nej"] { color: #b4321a; }
 .fam-fraga button:hover { border-color: var(--color-navy-900); }
+
+/* ── Anpassa: verktyg ── */
+/* Verktygsfältet (ui/anpassa-verktyg.js): dolda knappar, raden längst ner, bokmärkesfältet "bara på ny flik", anpassa-läget */
+body { --anp-linje: var(--color-line); }
+:root[data-theme="dark"] body { --anp-linje: #2b2b2d; }
+body.incog, :root[data-theme="dark"] body.incog { --anp-linje: rgba(124,58,237,.22); }
+#toolbar > .anp-dold { display: none !important; }
+body.anp-vf-lasvy #reader-btn { display: none !important; }   /* läslägesknappen ligger i verktygsraden i stället */
+#toolbar [data-anp-id="lasvy"].on { color: var(--color-terra); }
+
+/* Verktygsraden längst ner: sidan först, sedan bokmärkesfältet och raden. Flikraden ligger kvar överst. */
+body.anp-vf-nere #views { order: 1; }
+body.anp-vf-nere #bmbar { order: 2; margin: 0; padding: 5px 10px 0; border-bottom-width: 0; border-top: 1px solid var(--anp-linje); }
+body.anp-vf-nere #toolbar { order: 3; border-bottom-width: 0; border-top: 1px solid var(--anp-linje); }
+body.anp-vf-nere #toolbar.has-bmbar { border-top-color: transparent; }
+body.anp-vf-nere #tabstrip { box-shadow: inset 0 -1px 0 var(--anp-linje); }
+#omni-suggest.anp-upp { overflow-y: auto; box-shadow: 0 -14px 38px rgb(14 42 71 / .20); }
+:root[data-theme="dark"] #omni-suggest.anp-upp { box-shadow: 0 -14px 38px rgb(0 0 0 / .5); }
+body.incog #omni-suggest.anp-upp { box-shadow: 0 -14px 38px rgb(0 0 0 / .45); }
+
+/* Bokmärkesfältet "bara på ny flik": dolt på vanliga sidor */
+body.anp-bm-gomd #bmbar { display: none !important; }
+body.anp-bm-gomd #toolbar.has-bmbar { border-bottom-color: var(--anp-linje); }
+body.anp-vf-nere.anp-bm-gomd #toolbar.has-bmbar { border-top-color: var(--anp-linje); }
+
+/* Anpassa-läget: raden får en orange ram, knapparna dras i stället för att klickas */
+body.anp-vf-anpassar #toolbar { box-shadow: inset 0 0 0 2px rgb(255 75 31 / .55); }
+body.anp-vf-anpassar #toolbar [data-anp-id] { cursor: grab; }
+body.anp-vf-anpassar #toolbar [data-anp-id]:hover { background: rgb(14 42 71 / .07); box-shadow: inset 0 0 0 1.5px rgb(14 42 71 / .22); border-radius: 9px; }
+:root[data-theme="dark"] body.anp-vf-anpassar #toolbar [data-anp-id]:hover, body.incog.anp-vf-anpassar #toolbar [data-anp-id]:hover { background: rgb(255 255 255 / .07); box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / .2); }
+body.anp-vf-anpassar #toolbar [data-anp-id]:disabled { opacity: 1; pointer-events: auto; }
+body.anp-vf-anpassar #toolbar #dl-btn:not(.anp-dold) { display: grid !important; }
+body.anp-vf-anpassar #toolbar .omni-center { padding: 0 8px; margin: 0 16px; }
+body.anp-vf-anpassar #toolbar :is(#omnibox, #bm-star) { pointer-events: none; }
+body.anp-vf-anpassar #toolbar #omnibox { opacity: .7; }
+body.anp-vf-drag, body.anp-vf-drag * { cursor: grabbing !important; user-select: none; }
+#toolbar .anp-vf-drar, #anp-vf-lage .anp-vf-drar { opacity: .3; }
+/* markören ligger över den dragna knappen (som är lite genomskinlig, som en vanlig dragbild) så att platsen alltid syns */
+.anp-vf-markor { position: fixed; z-index: 302; display: none; width: 3px; border-radius: 2px; background: #ff4b1f; pointer-events: none; }
+.anp-vf-spoke { position: fixed; left: 0; top: 0; z-index: 301; pointer-events: none; display: flex; align-items: center; gap: 8px; height: 38px; min-width: 38px; justify-content: center; padding: 0 9px; border-radius: 10px; opacity: .88;
+  background: #fff; color: #0e2a47; font-size: 13px; font-weight: 600; white-space: nowrap; box-shadow: 0 12px 30px rgb(14 42 71 / .24), 0 0 0 1px rgb(14 42 71 / .1); }
+.anp-vf-spoke.bred { padding: 0 14px 0 11px; }
+.anp-vf-spoke svg { width: 20px; height: 20px; flex: none; }
+.anp-vf-spoke img { width: 22px; height: 22px; border-radius: 50%; }
+:root[data-theme="dark"] .anp-vf-spoke { background: #232326; color: #f2f2f4; box-shadow: 0 12px 30px rgb(0 0 0 / .5), 0 0 0 1px rgb(255 255 255 / .1); }
+body.incog .anp-vf-spoke { background: #1a1030; color: #efe9fb; box-shadow: 0 12px 30px rgb(0 0 0 / .5), 0 0 0 1px rgba(124,58,237,.35); }
+
+/* Lådan: täcker webbytan medan du anpassar (sidan göms, annars ritas den ovanpå) */
+#anp-vf-lage { --l-bg: #eef3f9; --l-kort: #fff; --l-linje: #d5dee8; --l-ink: #0e2a47; --l-mut: #5b6c7e; --l-yta: #f6f9fc; --l-streck: #c3d0de;
+  position: absolute; inset: 0; z-index: 76; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 22px 24px; overflow: auto; background: var(--l-bg); color: var(--l-ink); }
+:root[data-theme="dark"] #anp-vf-lage { --l-bg: #0e0e10; --l-kort: #161618; --l-linje: #2b2b2d; --l-ink: #f2f2f4; --l-mut: #a1a1a8; --l-yta: #121214; --l-streck: #3b3b40; }
+body.incog #anp-vf-lage { --l-bg: #0a0512; --l-kort: #150c28; --l-linje: rgba(124,58,237,.3); --l-ink: #efe9fb; --l-mut: #a08cc4; --l-yta: #100a1e; --l-streck: rgba(124,58,237,.42); }
+body.anp-vf-nere #anp-vf-lage { justify-content: flex-end; }
+#anp-vf-lage .anp-vf-kort { width: min(780px, 100%); padding: 22px 24px 18px; border-radius: 14px; background: var(--l-kort); border: 1px solid var(--l-linje); box-shadow: 0 1px 2px rgb(14 42 71 / .06); }
+#anp-vf-lage h2 { font-size: 20px; font-weight: 750; letter-spacing: -.02em; line-height: 1.2; }
+#anp-vf-lage .anp-vf-ingress { margin-top: 5px; max-width: 62ch; font-size: 13.5px; line-height: 1.5; color: var(--l-mut); }
+#anp-vf-lage .anp-vf-lada { margin-top: 16px; min-height: 110px; padding: 12px; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 10px; border-radius: 12px; border: 1.5px dashed var(--l-streck); background: var(--l-yta); transition: border-color .15s, background-color .15s; }
+#anp-vf-lage .anp-vf-lada.anp-vf-over { border-color: #ff4b1f; background: rgb(255 75 31 / .07); }
+#anp-vf-lage .anp-vf-lada.anp-vf-nej { border-color: #d64b45; background: rgb(214 75 69 / .07); }
+#anp-vf-lage .anp-vf-tom { margin: auto; padding: 0 12px; font-size: 13px; color: var(--l-mut); text-align: center; }
+#anp-vf-lage .anp-vf-bit { width: 96px; height: 82px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 0 6px; border-radius: 10px;
+  background: var(--l-kort); border: 1px solid var(--l-linje); color: var(--l-ink); font-size: 12px; font-weight: 600; line-height: 1.2; text-align: center; cursor: grab; transition: border-color .15s, background-color .15s; }
+#anp-vf-lage .anp-vf-bit:hover { border-color: var(--l-ink); }
+#anp-vf-lage .anp-vf-bit:focus-visible { outline: 2px solid #ff4b1f; outline-offset: 2px; }
+#anp-vf-lage .anp-vf-bit svg { width: 20px; height: 20px; }
+#anp-vf-lage .anp-vf-bit img { width: 22px; height: 22px; border-radius: 50%; }
+#anp-vf-lage .anp-vf-tips { min-height: 18px; margin-top: 8px; font-size: 12.5px; font-weight: 600; color: #c0362f; }
+:root[data-theme="dark"] #anp-vf-lage .anp-vf-tips, body.incog #anp-vf-lage .anp-vf-tips { color: #ff8a7a; }
+#anp-vf-lage .anp-vf-fot { margin-top: 6px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; }
+#anp-vf-lage .anp-vf-val { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: 12.5px; font-weight: 600; color: var(--l-mut); }
+#anp-vf-lage .anp-vf-val > span + .anp-vf-seg { margin-right: 8px; }
+#anp-vf-lage .anp-vf-seg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 9px; background: var(--l-yta); box-shadow: inset 0 0 0 1px var(--l-linje); }
+#anp-vf-lage .anp-vf-seg button { padding: 5px 11px; border-radius: 7px; font-size: 12.5px; font-weight: 600; color: var(--l-mut); cursor: pointer; transition: color .15s, background-color .15s; }
+#anp-vf-lage .anp-vf-seg button:hover { color: var(--l-ink); }
+#anp-vf-lage .anp-vf-seg button.on { background: var(--l-kort); color: var(--l-ink); box-shadow: 0 1px 2px rgb(14 42 71 / .12), inset 0 0 0 1px var(--l-linje); }
+#anp-vf-lage .anp-vf-seg button:focus-visible { outline: 2px solid #ff4b1f; outline-offset: 1px; }
+#anp-vf-lage .anp-vf-knappar { display: flex; gap: 8px; margin-left: auto; }
+/* Knapparna: vätskefyllning (signaturkitet) */
+#anp-vf-lage .anp-vf-knapp { position: relative; isolation: isolate; overflow: hidden; height: 38px; padding: 0 18px; border: 0; border-radius: 999px; font-size: 13.5px; font-weight: 650; cursor: pointer; transition: color .6s ease, transform .2s ease; }
+#anp-vf-lage .anp-vf-knapp::before { content: ""; position: absolute; z-index: -1; left: -15%; width: 130%; bottom: -2px; height: 170%; transform: translateY(100%); border-radius: 46% 46% 0 0; transition: transform .95s cubic-bezier(.2,.75,.25,1); pointer-events: none; }
+#anp-vf-lage .anp-vf-knapp:is(:hover, :focus-visible)::before { transform: translateY(0); }
+#anp-vf-lage .anp-vf-knapp:active { transform: translateY(1px); }
+#anp-vf-lage .anp-vf-knapp:focus-visible { outline: 2px solid #ff4b1f; outline-offset: 3px; }
+#anp-vf-lage .anp-vf-klar { background: var(--l-ink); color: var(--l-kort); }
+#anp-vf-lage .anp-vf-klar::before { background: #ff4b1f; }
+#anp-vf-lage .anp-vf-klar:is(:hover, :focus-visible) { color: #fff; }
+#anp-vf-lage .anp-vf-sek { background: transparent; color: var(--l-ink); box-shadow: inset 0 0 0 1.5px var(--l-streck); }
+#anp-vf-lage .anp-vf-sek::before { background: var(--l-ink); }
+#anp-vf-lage .anp-vf-sek:is(:hover, :focus-visible) { color: var(--l-kort); }
+@media (prefers-reduced-motion: reduce) { #anp-vf-lage .anp-vf-knapp::before { transition: none; } }
+body.reduce-motion #anp-vf-lage .anp-vf-knapp::before { transition: none; }
+
+/* Inställningar › Anpassa › Verktygsfältet: lista med på/av och ordning */
+#settings #anp-verktyg .anp-vf-rad.set-row { padding-top: 8px; padding-bottom: 8px; gap: 12px; }
+#settings #anp-verktyg .anp-vf-ikon { width: 32px; height: 32px; flex: none; display: grid; place-items: center; border-radius: 8px; background: var(--s-surface-2); color: var(--s-ink); }
+#settings #anp-verktyg .anp-vf-ikon svg { width: 18px; height: 18px; }
+#settings #anp-verktyg .anp-vf-ikon img { width: 20px; height: 20px; border-radius: 50%; }
+#settings #anp-verktyg .anp-vf-rad.av :is(.anp-vf-ikon, .set-title) { opacity: .45; }
+#settings #anp-verktyg .anp-vf-pilar { display: flex; gap: 2px; flex: none; }
+#settings #anp-verktyg .anp-vf-pil { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 7px; color: var(--s-mut); transition: background-color .15s, color .15s; }
+#settings #anp-verktyg .anp-vf-pil:hover { background: var(--s-hover); color: var(--s-ink); }
+#settings #anp-verktyg .anp-vf-pil:focus-visible { outline: 2px solid var(--s-accent); outline-offset: 1px; }
+#settings #anp-verktyg .anp-vf-pil:disabled { opacity: .25; pointer-events: none; }
+#settings #anp-verktyg .switch input:disabled + .track { opacity: .5; cursor: default; }
+#settings #anp-verktyg .anp-vf-atgarder { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
