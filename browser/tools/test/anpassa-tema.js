@@ -171,7 +171,7 @@ async function kor(rot, bilder) {
       for (const hex of TESTFARGER) {
         const r = await J(`(async () => {
           const f = document.querySelector('#anp-tema [data-hex]'), knapp = document.querySelector('#anp-tema .anp-tema-farger > [data-accent="${hex}"]');
-          if (knapp) knapp.click(); else { f.focus(); f.value = '${hex}'; f.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); f.blur(); }
+          if (knapp) knapp.click(); else { f.focus({ preventScroll: true }); f.value = '${hex}'; f.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); f.blur(); }
           const ok = await __T.tills(() => __T.anp('accent') === '${hex}');
           await __T.lugn();
           const p = window.AnpassaTema.palett('${hex}'), mork = '${lage}' === 'morkt';

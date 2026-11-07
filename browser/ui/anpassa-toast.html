@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'none'; connect-src 'none'; font-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Ändrat</title>
+<style>
+  /* Anpassa › Ångra: toasten "Ändrat: X · Ångra" när en webbsida syns. Huvudprocessen (anpassa-angra.js) lägger den här
+     genomskinliga vyn längst ner i mitten av sidan, exakt så stor som rutan plus skuggan. Ser ut som toasten i skalet. */
+  html, body { margin: 0; background: transparent; overflow: hidden; user-select: none; cursor: default; }
+  /* Så lite genomskinlig kant som möjligt runt rutan (bara skuggan): vyn tar klick där den ligger */
+  body { width: max-content; padding: 4px 8px 10px; font: 600 13px/1.2 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  /* Sidan under kan ha vilken färg som helst: en hårfin kant håller rutan synlig även mot samma färg */
+  #t { display: flex; align-items: center; gap: 8px; width: max-content; max-width: 560px; box-sizing: border-box; padding: 5px 5px 5px 14px;
+    border-radius: 10px; background: #0e2a47; color: #fff; box-shadow: 0 0 0 1px rgb(255 255 255 / .1), 0 3px 7px rgb(14 42 71 / .3), 0 1px 2px rgb(14 42 71 / .2); }
+  #t.in { animation: in .2s cubic-bezier(.2,.8,.2,1); }
+  @keyframes in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #t.utan-angra { padding-right: 14px; }
+  #t.utan-angra #prick, #t.utan-angra #angra { display: none; }
+  #txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 4px 0; }
+  #prick { color: rgb(255 255 255 / .4); }
+  /* Ångra: orange vätska fyller knappen underifrån vid hover (signaturkitet). Hover som klass (.hov), inte :hover: vyn göms
+     medan musen är kvar på knappen, och :hover skulle då hänga kvar till nästa toast */
+  #angra { position: relative; overflow: hidden; isolation: isolate; flex: none; height: 26px; padding: 0 11px; border: 0; border-radius: 7px; cursor: pointer;
+    font: inherit; font-size: 12.5px; color: #ffb59f; background: rgb(255 255 255 / .09); transition: color .5s ease; }
+  #angra::before { content: ""; position: absolute; z-index: -1; left: -15%; width: 130%; bottom: 0; height: 170%; transform: translateY(104%);
+    background: #ff4b1f; border-radius: 46% 46% 0 0; transition: transform .7s cubic-bezier(.2,.75,.25,1); }
+  #angra:is(.hov, :focus-visible) { color: #fff; outline: none; }
+  #angra:is(.hov, :focus-visible)::before { transform: translateY(0); }
+  :root[data-theme="dark"] #t { background: #f2f2f4; color: #141416; box-shadow: 0 0 0 1px rgb(14 42 71 / .16), 0 3px 7px rgb(0 0 0 / .35), 0 1px 2px rgb(0 0 0 / .25); }
+  :root[data-theme="dark"] #prick { color: rgb(20 20 22 / .35); }
+  :root[data-theme="dark"] #angra { color: #c2360e; background: rgb(20 20 22 / .07); }
+  :root[data-theme="dark"] #angra:is(.hov, :focus-visible) { color: #fff; }
+  @media (prefers-reduced-motion: reduce) { #t.in { animation: none; } #angra, #angra::before { transition: none; } }
+</style>
+</head>
+<body>
+<div id="t" role="status" aria-live="polite" translate="no"><span id="txt"></span><span id="prick" aria-hidden="true">·</span><button type="button" id="angra"></button></div>
+<script src="anpassa-toast.js"></script>
+</body>
+</html>

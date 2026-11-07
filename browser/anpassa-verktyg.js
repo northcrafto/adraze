@@ -74,10 +74,10 @@ function init(o) {
   anp = o.anpassa; wins = o.wins; tillamPa = o.applyBounds;
   if (typeof o.T === 'function') T = o.T;
   anp.registrera({ nyckel: 'verktyg.knappar', standard: null, etikett: 'Verktygsfältets knappar' });            // { ordning: [id…], dolda: [id…] }, null = standard
-  anp.registrera({ nyckel: 'verktyg.adress', standard: 'hel', etikett: 'Adressfältet: hela adressen eller domänen' });   // 'hel' | 'doman'
+  anp.registrera({ nyckel: 'verktyg.adress', standard: 'hel', etikett: 'Adressfältet: hela adressen eller domänen', val: ['hel', 'doman'] });   // 'hel' | 'doman'
   anp.registrera({ nyckel: 'verktyg.doljSchema', standard: true, etikett: 'Dölj https:// och www.' });
-  anp.registrera({ nyckel: 'verktyg.placering', standard: 'uppe', etikett: 'Adressfältets placering' });          // 'uppe' | 'nere'
-  anp.registrera({ nyckel: 'verktyg.bokmarkesfalt', standard: 'alltid', etikett: 'Bokmärkesfältet' });          // 'alltid' | 'nyflik' | 'aldrig'
+  anp.registrera({ nyckel: 'verktyg.placering', standard: 'uppe', etikett: 'Adressfältets placering', val: ['uppe', 'nere'] });          // 'uppe' | 'nere'
+  anp.registrera({ nyckel: 'verktyg.bokmarkesfalt', standard: 'alltid', etikett: 'Bokmärkesfältet', val: ['alltid', 'nyflik', 'aldrig'] });          // 'alltid' | 'nyflik' | 'aldrig'
 
   ipcMain.on('anpassa-verktyg:meny', (e, info) => { try { bygg(e, info); } catch (err) { console.warn('[anpassa-verktyg] meny', err && err.message); } });
   // Skalet rapporterar avståndet från webbytans under- och högerkant till fönstrets kant (CSS-px = DIP i skalet)
