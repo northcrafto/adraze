@@ -45,9 +45,11 @@ jobs:
         working-directory: browser
         run: |
           npm version "${{ inputs.version }}" --no-git-tag-version --allow-same-version
-          npm ci --no-audit --no-fund
+          # GitHubs filservrar (castlabs Electron-zippar) svarar ibland 504 – försök igen några gånger
+          for i in 1 2 3 4 5 6; do npm ci --no-audit --no-fund && break; echo "npm ci misslyckades (försök $i), väntar"; sleep 30; done
           npm install -g node-gyp
-          node node_modules/electron/install.js
+          for i in 1 2 3 4 5 6; do node node_modules/electron/install.js && break; echo "Electron-hämtningen misslyckades (försök $i), väntar"; sleep 30; done
+          test -d node_modules/electron/dist
       - name: Certifikat i en tillfällig nyckelring
         env:
           P12: ${{ secrets.MAC_CERT_P12 }}
