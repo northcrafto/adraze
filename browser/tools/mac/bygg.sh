@@ -17,7 +17,7 @@ EV=$(node -p "require('./node_modules/electron/package.json').version")      # t
 ZIPS=$HOME/electron-zips; mkdir -p "$ZIPS"
 for a in x64 arm64; do
   f="electron-v$EV-darwin-$a.zip"
-  [ -s "$ZIPS/$f" ] || curl -fsSL -o "$ZIPS/$f" "https://github.com/castlabs/electron-releases/releases/download/v${EV/+/%2B}/$f"
+  [ -s "$ZIPS/$f" ] || curl -fsSL --retry 8 --retry-delay 15 --retry-all-errors -o "$ZIPS/$f" "https://github.com/castlabs/electron-releases/releases/download/v${EV/+/%2B}/$f"
   ln -sf "$f" "$ZIPS/electron-v${EV%+*}-darwin-$a.zip"
 done
 
