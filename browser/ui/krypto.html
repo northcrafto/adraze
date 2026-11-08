@@ -67,7 +67,18 @@
   .fk-kvot-bar { height: 3px; border-radius: 3px; background: var(--line); overflow: hidden; }
   .fk-kvot-bar i { display: block; height: 100%; width: 0; border-radius: 3px; background: var(--accent); transition: width .4s ease; }
   /* Modellväljaren ovanför skrivfältet: logga + namn, klick öppnar en meny. Gratis kör Qwen, Pro väljer (samma kvot). */
-  .fk-modell { position: relative; align-self: flex-start; margin: 0 0 8px; }
+  .fk-modell { position: relative; align-self: flex-start; display: flex; align-items: center; gap: 4px; margin: 0 0 8px; max-height: 40px;
+    transition: max-height .32s cubic-bezier(.4,0,.2,1), margin .32s cubic-bezier(.4,0,.2,1), opacity .22s ease, transform .32s cubic-bezier(.4,0,.2,1); }
+  /* Gömd: glider ner bakom skrivfältet; en liten pil tar upp den igen */
+  .fk-modell.gomd { max-height: 0; margin-bottom: 0; opacity: 0; transform: translateY(14px); pointer-events: none; }
+  .fk-modell-gom, .fk-modell-upp { width: 24px; height: 24px; display: inline-grid; place-items: center; border-radius: 50%; border: 0; background: transparent; color: var(--faint); cursor: pointer; transition: color .15s, background .15s; }
+  .fk-modell-gom:hover, .fk-modell-upp:hover { color: var(--ink); background: var(--line); }
+  .fk-modell-gom svg, .fk-modell-upp svg { width: 13px; height: 13px; }
+  .fk-modell-upp { position: absolute; left: 18px; top: -15px; z-index: 2; width: 30px; height: 15px; border-radius: 8px 8px 0 0; background: var(--surface); border: 1px solid var(--field-line); border-bottom: 0;
+    opacity: 0; transform: translateY(6px); pointer-events: none; transition: opacity .2s ease .12s, transform .28s cubic-bezier(.4,0,.2,1) .12s, color .15s; }
+  .fk-modell-upp svg { width: 12px; height: 12px; }
+  .fk-modell-upp.syns { opacity: 1; transform: none; pointer-events: auto; }
+  .inwrap-hold { position: relative; }
   .fk-modell[hidden] { display: none; }
   .fk-modell-knapp { display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 10px 0 9px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: border-color .15s; }
   .fk-modell-knapp:hover, .fk-modell.oppen .fk-modell-knapp { border-color: var(--field-line); }
@@ -370,6 +381,9 @@
   #pagechip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
   #pagechip.on { color: var(--ink); border-color: var(--accent-soft); background: var(--accent-soft); }
   #pagechip.on svg { color: var(--accent-ink); }
+  #pagechip .pc-x { display: inline-flex; flex: none; width: 18px; height: 18px; margin: 0 -4px 0 2px; align-items: center; justify-content: center; border-radius: 50%; color: var(--mut); }
+  #pagechip .pc-x svg { width: 11px; height: 11px; color: currentColor; }
+  #pagechip .pc-x:hover { background: var(--line); color: var(--ink); }
   .fk-ok { align-self: stretch; margin: 6px 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); font-size: 13px; line-height: 1.5; color: var(--ink); }
   .fk-ok p { margin: 0 0 10px; } .fk-ok .rad { display: flex; gap: 8px; }
   .fk-ok button { flex: 1; height: 36px; border-radius: 10px; border: 1px solid var(--line); background: transparent; color: var(--ink); font: inherit; font-weight: 600; cursor: pointer; }
@@ -513,13 +527,17 @@
     <div class="fk-modell" id="fkmodell" hidden>
       <button class="fk-modell-knapp" id="fkmodell-knapp" type="button" aria-haspopup="menu" aria-expanded="false"><span class="fk-logga"></span><span class="namn"></span><svg class="pil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg></button>
       <div class="fk-modell-meny" id="fkmodell-meny" role="menu" hidden></div>
+      <button class="fk-modell-gom" id="fkmodell-gom" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
     </div>
+    <div class="inwrap-hold">
+    <button class="fk-modell-upp" id="fkmodell-upp" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg></button>
     <div class="inwrap">
       <button class="hbtn" id="attach" title="Lägg till filer, mapp eller projekt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
       <textarea id="inp" rows="1" placeholder="Fråga Falk" spellcheck="false"></textarea>
       <button id="send" title="Skicka">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
       </button>
+    </div>
     </div>
     <div class="fk-kvot" id="fkkvot" hidden><div class="fk-kvot-rad"><span id="fkkvot-text"></span><span id="fkkvot-pa"></span></div><div class="fk-kvot-bar"><i id="fkkvot-bar"></i></div></div>
     <div class="foot-note">Falk kan ha fel. Dela aldrig lösenord eller BankID.</div>
@@ -585,7 +603,8 @@
       const not = document.createElement('div'); not.className = 'fk-modell-not';
       not.textContent = k.plan === 'pro' ? tx('Båda modellerna delar på dina 2 miljoner tokens.') : tx('Med Pro väljer du själv modell.');
       meny.appendChild(not);
-      box.hidden = false;
+      const forst = box.hidden; box.hidden = false;
+      gomModell(box.classList.contains('gomd') || (forst && localStorage.getItem('falk-modell-gomd') === '1'), forst);
     }
     function stangModellMeny() { const box = $('fkmodell'); box.classList.remove('oppen'); $('fkmodell-meny').hidden = true; $('fkmodell-knapp').setAttribute('aria-expanded', 'false'); }
     $('fkmodell-knapp').addEventListener('click', (e) => {
@@ -596,6 +615,19 @@
     });
     document.addEventListener('click', (e) => { if (!$('fkmodell').contains(e.target)) stangModellMeny(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') stangModellMeny(); });
+    // Göm/visa modellraden: glider ner bakom skrivfältet, pilen ovanför fältet tar upp den (sparas)
+    function gomModell(gom, direkt) {
+      const box = $('fkmodell'), upp = $('fkmodell-upp');
+      if (direkt) { box.style.transition = 'none'; requestAnimationFrame(() => requestAnimationFrame(() => { box.style.transition = ''; })); }
+      if (gom) stangModellMeny();
+      box.classList.toggle('gomd', gom); box.setAttribute('aria-hidden', gom ? 'true' : 'false');
+      upp.hidden = box.hidden; upp.classList.toggle('syns', gom && !box.hidden);
+      localStorage.setItem('falk-modell-gomd', gom ? '1' : '0');
+    }
+    $('fkmodell-gom').title = tx('Göm modellvalet'); $('fkmodell-gom').setAttribute('aria-label', tx('Göm modellvalet'));
+    $('fkmodell-upp').title = tx('Visa modellvalet'); $('fkmodell-upp').setAttribute('aria-label', tx('Visa modellvalet'));
+    $('fkmodell-gom').addEventListener('click', (e) => { e.stopPropagation(); gomModell(true); });
+    $('fkmodell-upp').addEventListener('click', () => gomModell(false));
     function proKort(orsak, k) {
       const el = document.createElement('div'); el.className = 'msg krypto';
       const rub = orsak === 'modell' ? tx('DeepSeek ingår i Falk Pro') : orsak === 'sok' ? tx('Webbsökningarna är slut för den här gången') : tx('Gratiskvoten är slut för den här gången');
@@ -1230,13 +1262,20 @@
     let pageOn = true, pageTab = null, falkStopp = false;
     const PAGE_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>';
     const CURSOR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m4 4 7 17 2.5-7.5L21 11Z"/></svg>';
+    // Krysset tar bort raden: Falk läser inte den sidan förrän du går till en annan sida eller flik
+    let sidaBortUrl = null;
+    const KRYSS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
     function renderPageChip() {
       const c = $('pagechip');
-      pageOn = !(pageTab && pageTab.av);
-      if (!pageTab) { c.hidden = true; return; }
-      c.hidden = false; c.classList.toggle('on', pageOn);
-      c.innerHTML = PAGE_IC + '<span>' + esc(pageOn ? tx('Sidan granskas') + ': ' + (pageTab.titel || pageTab.url) : tx('Sidgranskning är avstängd')) + '</span>';
-      c.title = pageOn ? tx('Falk läser och kan använda sidan du har öppen. Stäng av i Inställningar → Falk.') : tx('Slå på i Inställningar → Falk.');
+      const bort = !!(pageTab && sidaBortUrl && pageTab.url === sidaBortUrl);
+      if (pageTab && sidaBortUrl && pageTab.url !== sidaBortUrl) sidaBortUrl = null;
+      pageOn = !!pageTab && !pageTab.av && !bort;
+      // Avstängt i inställningarna eller bortklickat: ingen rad alls
+      if (!pageTab || pageTab.av || bort) { c.hidden = true; return; }
+      c.hidden = false; c.classList.add('on');
+      c.innerHTML = PAGE_IC + '<span>' + esc(tx('Sidan granskas') + ': ' + (pageTab.titel || pageTab.url)) + '</span><i class="pc-x" role="button" aria-label="' + esc(tx('Låt Falk inte läsa den här sidan')) + '" title="' + esc(tx('Låt Falk inte läsa den här sidan')) + '">' + KRYSS + '</i>';
+      c.title = tx('Falk läser och kan använda sidan du har öppen. Klicka på krysset för att ta bort den.');
+      c.querySelector('.pc-x').addEventListener('click', (e) => { e.stopPropagation(); sidaBortUrl = pageTab.url; renderPageChip(); });
     }
     $('pagechip').addEventListener('click', () => { try { window.krypto.doAction({ name: 'falk_installningar' }); } catch {} });
     async function pollTab() { try { const t = window.krypto.tab ? await window.krypto.tab() : null; if (JSON.stringify(t) !== JSON.stringify(pageTab)) { pageTab = t; renderPageChip(); } } catch {} }
