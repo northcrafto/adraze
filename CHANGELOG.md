@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.3 (2026-11-08)
+
+- YouTube: the "Ad blockers are not allowed" box is closed automatically (always the dismiss button, never "Allow ads") and the video starts again.
+- The popup's support box now points to the AdRaze browser (download.adraze.app) instead of donations.
+- Fresh filter lists.
+
 ## 0.2.1 (2026-10-31)
 
 - New icon: the AdRaze eagle.
