@@ -128,7 +128,10 @@
             ]
           }
         ]
-      }
+      },
+      "signIgnore": [
+        "\\.pak$"
+      ]
     },
     "dmg": {
       "title": "AdRaze",
