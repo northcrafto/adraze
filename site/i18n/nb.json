@@ -553,5 +553,9 @@
   "hero.dl_linux": "Last ned for Linux",
   "ladda.text": "Blokkeringen er innebygd, så reklamen stoppes før siden i det hele tatt lastes. Gratis for Linux og Mac.",
   "dl.windows_maybe": "Kanskje senere",
-  "dl.windows_you": "Bruker du Windows nå? Linux Mint er gratis og tar et kvarter å installere."
+  "dl.windows_you": "Bruker du Windows nå? Linux Mint er gratis og tar et kvarter å installere.",
+  "err404.title": "Siden finnes ikke.",
+  "err404.text": "Adressen er feilstavet, eller så har siden flyttet. Sjekk stavingen eller gå tilbake.",
+  "err404.home": "Til forsiden",
+  "err404.back": "Tilbake"
 }

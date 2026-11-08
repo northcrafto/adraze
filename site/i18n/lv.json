@@ -553,5 +553,9 @@
   "hero.dl_linux": "Lejupielādēt Linux datoram",
   "ladda.text": "Bloķētājs ir iebūvēts, tāpēc reklāmas tiek apturētas, pirms lapa vispār ielādējas. Bez maksas Linux un Mac.",
   "dl.windows_maybe": "Varbūt vēlāk",
-  "dl.windows_you": "Pašlaik izmanto Windows? Linux Mint ir bezmaksas un uzstādās ceturtdaļstundā."
+  "dl.windows_you": "Pašlaik izmanto Windows? Linux Mint ir bezmaksas un uzstādās ceturtdaļstundā.",
+  "err404.title": "Šī lapa nepastāv.",
+  "err404.text": "Adrese ir uzrakstīta nepareizi, vai lapa ir pārvietota. Pārbaudi adresi vai atgriezies.",
+  "err404.home": "Uz sākumlapu",
+  "err404.back": "Atpakaļ"
 }

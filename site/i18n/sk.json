@@ -553,5 +553,9 @@
   "hero.dl_linux": "Stiahnuť pre Linux",
   "ladda.text": "Blokátor je zabudovaný, takže reklamy zastaví ešte pred načítaním stránky. Zadarmo pre Linux a Mac.",
   "dl.windows_maybe": "Možno neskôr",
-  "dl.windows_you": "Ste práve na Windows? Linux Mint je zadarmo a nainštalujete ho za štvrť hodiny."
+  "dl.windows_you": "Ste práve na Windows? Linux Mint je zadarmo a nainštalujete ho za štvrť hodiny.",
+  "err404.title": "Táto stránka neexistuje.",
+  "err404.text": "Adresa je napísaná zle alebo sa stránka presunula. Skontrolujte ju alebo sa vráťte späť.",
+  "err404.home": "Na úvodnú stránku",
+  "err404.back": "Späť"
 }

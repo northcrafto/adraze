@@ -553,5 +553,9 @@
   "hero.dl_linux": "Hent til Linux",
   "ladda.text": "Blokeringen er indbygget, så reklamer stoppes, før siden overhovedet indlæses. Gratis til Linux og Mac.",
   "dl.windows_maybe": "Måske senere",
-  "dl.windows_you": "Kører du Windows lige nu? Linux Mint er gratis og tager et kvarter at installere."
+  "dl.windows_you": "Kører du Windows lige nu? Linux Mint er gratis og tager et kvarter at installere.",
+  "err404.title": "Siden findes ikke.",
+  "err404.text": "Adressen er stavet forkert, eller også er siden flyttet. Tjek stavningen eller gå tilbage.",
+  "err404.home": "Til forsiden",
+  "err404.back": "Tilbage"
 }

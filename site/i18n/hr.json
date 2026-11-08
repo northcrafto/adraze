@@ -553,5 +553,9 @@
   "hero.dl_linux": "Preuzmi za Linux",
   "ladda.text": "Blokator je ugrađen, pa se oglasi zaustavljaju prije nego što se stranica učita. Besplatno za Linux i Mac.",
   "dl.windows_maybe": "Možda kasnije",
-  "dl.windows_you": "Trenutno ste na Windowsu? Linux Mint je besplatan i instalira se za četvrt sata."
+  "dl.windows_you": "Trenutno ste na Windowsu? Linux Mint je besplatan i instalira se za četvrt sata.",
+  "err404.title": "Ova stranica ne postoji.",
+  "err404.text": "Adresa je krivo napisana ili je stranica premještena. Provjerite adresu ili se vratite.",
+  "err404.home": "Na početnu",
+  "err404.back": "Natrag"
 }

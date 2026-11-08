@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Sidan finns inte – AdRaze</title>
+<link rel="icon" href="/favicon.png">
+<style>
+  /* 404 i samma stil som barnspärren i webbläsaren: mörkblå yta, jättestor kontur-gubbe i orange, text till vänster. */
+  @font-face { font-family: "Familjen Grotesk"; src: url("/fonts/familjen.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body { background: #0a2138; color: #fff; font-family: "Familjen Grotesk", system-ui, sans-serif; overflow: hidden; -webkit-font-smoothing: antialiased; }
+  .jatte { position: fixed; right: -4vw; top: 50%; transform: translateY(-52%) rotate(90deg); font-size: min(560px, 62vh); font-weight: 900; line-height: 1;
+    color: transparent; -webkit-text-stroke: 3px #ff4b1f; letter-spacing: -.04em; pointer-events: none; user-select: none; }
+  .text { position: fixed; left: clamp(28px, 8vw, 110px); top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; width: min(560px, 84vw); }
+  .logo { position: fixed; left: clamp(28px, 8vw, 110px); top: 32px; display: inline-flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; font-weight: 700; font-size: 22px; letter-spacing: -.02em; }
+  .logo img { width: 30px; height: 30px; }
+  .dom { align-self: flex-start; display: inline-flex; gap: 10px; align-items: center; font-size: 15px; padding: 8px 14px; border-radius: 999px; background: rgb(255 255 255 / .08);
+    border: 1px solid rgb(255 255 255 / .14); max-width: 100%; overflow: hidden; white-space: nowrap; }
+  .dom b { color: #ff4b1f; font-weight: 700; }
+  .dom span { overflow: hidden; text-overflow: ellipsis; }
+  h1 { font-size: clamp(38px, 5.4vw, 64px); font-weight: 700; letter-spacing: -.035em; line-height: 1.02; margin-top: 24px; }
+  p { font-size: 18px; line-height: 1.55; color: rgb(255 255 255 / .7); margin-top: 18px; max-width: 470px; }
+  .knappar { display: flex; gap: 12px; margin-top: 34px; flex-wrap: wrap; }
+  /* Vätskefyllning (Cettos signaturkit) */
+  .liq, .liq-ghost { --r: 999px; position: relative; isolation: isolate; overflow: hidden; display: inline-flex; align-items: center; height: 50px; padding: 0 26px; border: 0;
+    border-radius: var(--r); clip-path: inset(0 round var(--r)); background: transparent; color: #fff; font: inherit; font-size: 16px; font-weight: 650; text-decoration: none; cursor: pointer;
+    transition: color .6s ease, transform .2s ease; }
+  .liq::after, .liq-ghost::after { content: ""; position: absolute; inset: 0; z-index: -2; border-radius: var(--r); pointer-events: none; }
+  .liq::after { background: #ff4b1f; box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / .2); }
+  .liq-ghost::after { box-shadow: inset 0 0 0 1px rgb(255 255 255 / .25); }
+  .liq::before, .liq-ghost::before { content: ""; position: absolute; z-index: -1; left: -15%; width: 130%; bottom: -2px; height: 170%; transform: translateY(100%);
+    border-radius: 46% 46% 0 0; transition: transform .95s cubic-bezier(.2,.75,.25,1); pointer-events: none; }
+  .liq::before { background: linear-gradient(180deg, #fff 0%, #ffe3da 100%); }
+  .liq-ghost::before { background: #ff4b1f; }
+  .liq:is(:hover, :focus-visible) { color: #ff4b1f; }
+  :is(.liq, .liq-ghost):is(:hover, :focus-visible)::before { transform: translateY(0); }
+  :is(.liq, .liq-ghost):is(:hover, :focus-visible)::after { opacity: 0; transition: opacity 0s .95s; }
+  :is(.liq, .liq-ghost):active { transform: translateY(1px); }
+  :is(.liq, .liq-ghost):focus-visible { outline: 2px solid #ff4b1f; outline-offset: 3px; }
+  @media (max-width: 700px) { .jatte { top: auto; bottom: -6vh; right: -14vw; transform: rotate(90deg); font-size: min(300px, 34vh); opacity: .55; } .text { justify-content: flex-start; padding-top: 20vh; } }
+  @media (prefers-reduced-motion: reduce) { .liq::before, .liq-ghost::before { transition: none; } }
+</style>
+</head>
+<body>
+<a class="logo" href="{{hem}}"><img src="/logo-mark.svg" alt="">adraze</a>
+<div class="jatte" aria-hidden="true">:/</div>
+<main class="text">
+  <div class="dom"><b>404</b><span id="adress"></span></div>
+  <h1 id="rubrik">Sidan finns inte.</h1>
+  <p id="text">Adressen är felstavad, eller så har sidan flyttat. Kolla stavningen eller gå tillbaka.</p>
+  <div class="knappar">
+    <a class="liq" id="hem" href="{{hem}}">Till startsidan</a>
+    <button class="liq-ghost" id="tillbaka" type="button">Tillbaka</button>
+  </div>
+</main>
+<script>
+  // Samma sida för alla språk: språket tas från adressen (/en/…) eller webbläsaren. Texterna byggs in av bygg.py.
+  (() => {
+    const T = {{texter}};
+    const $ = (id) => document.getElementById(id);
+    const forsta = location.pathname.split('/')[1];
+    const kod = T[forsta] ? forsta : (navigator.languages || [navigator.language || 'sv']).map((l) => String(l).slice(0, 2).toLowerCase()).find((l) => T[l]) || 'sv';
+    const t = T[kod];
+    document.documentElement.lang = kod;
+    document.title = t.title + ' – AdRaze';
+    $('rubrik').textContent = t.title; $('text').textContent = t.text; $('hem').textContent = t.home; $('tillbaka').textContent = t.back;
+    if (kod !== 'sv' && T[forsta]) $('hem').href = '/' + kod + '/';
+    $('adress').textContent = location.host + decodeURIComponent(location.pathname);
+    $('tillbaka').addEventListener('click', () => { if (history.length > 1 && document.referrer) history.back(); else location.href = $('hem').href; });
+  })();
+</script>
+</body>
+</html>
