@@ -25,14 +25,18 @@ function start() {
   const glod = new THREE.PointLight(0xff4b1f, 18, 12); glod.position.set(-2.5, -1, 3); scene.add(glod);
 
   // ---------- gorillan: framsida + 16 mörkare lager bakom = tjocklek ----------
+  // Bilderna packas upp helt (decode) och laddas upp till grafikkortet (initTexture) INNAN gorillan visas.
+  // Annars kunde första bilderna ritas medan texturen ännu inte fanns i grafikkortet = en vit platta i några sekunder.
   let klar = false;
-  const hanterare = new THREE.LoadingManager(() => { klar = true; gorilla.visible = true; if (stilla) rita(0); },
-    undefined, () => { wrap.classList.add('utan-3d'); });
-  const laddare = new THREE.TextureLoader(hanterare);
-  const rutor = [1, 2, 3, 4].map((k) => {
-    const t = laddare.load(`/bilder/gorilla/g${k}.png`);
-    t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
-  });
+  const rutor = [1, 2, 3, 4].map(() => { const t = new THREE.Texture(); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; });
+  Promise.all(rutor.map(async (t, i) => {
+    const img = new Image(); img.src = `/bilder/gorilla/g${i + 1}.png`;
+    await img.decode();
+    t.image = img; t.needsUpdate = true; renderer.initTexture(t);
+  })).then(() => {
+    // två bildrutor till innan scenen tonas in, så uppladdningen garanterat är klar
+    requestAnimationFrame(() => requestAnimationFrame(() => { klar = true; gorilla.visible = true; if (stilla) rita(0); }));
+  }).catch(() => { wrap.classList.add('utan-3d'); });
   const gorilla = new THREE.Group(); gorilla.visible = false; scene.add(gorilla);
   const STL = 4.1, plan = new THREE.PlaneGeometry(STL, STL);
   const lager = [];
