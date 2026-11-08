@@ -526,6 +526,8 @@ function applyBounds(ctx) {
   if (ctx.kryptoView) {
     const vis = full ? true : ctx.pK > 0;
     ctx.kryptoView.setVisible(vis);
+    // Falk får veta när panelen öppnas/stängs (nytt samtal om den varit stängd i 30 min, se krypto.html)
+    if (ctx.kryptoView._vis !== vis) { ctx.kryptoView._vis = vis; try { ctx.kryptoView.webContents.send('krypto-synlig', vis); } catch {} }
     if (vis) {
       if (full) ctx.kryptoView.setBounds({ x: R(b.x + ctx.leftInset), y: R(b.y), width: R(b.width - ctx.leftInset), height: R(b.height) });
       else ctx.kryptoView.setBounds({ x: R(b.x + b.width - KRYPTO_W * eK), y: R(b.y), width: KRYPTO_W, height: R(b.height) });
