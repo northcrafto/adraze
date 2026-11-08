@@ -442,6 +442,9 @@
   .msg.user .bubble { background: #2a2926; }
   .inwrap { background: #22211f; border-color: #33322e; border-radius: 16px; }
   .inwrap:focus-within { border-color: #4a4843; }
+  .think .tt.byt { animation: ttin .35s ease-out both, shimmer 1.8s linear infinite; }
+  @keyframes ttin { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .think .tt.byt { animation: none; } }
 </style>
 <style>#modes{display:none}</style>
 <script>
@@ -1356,9 +1359,52 @@
       el.querySelector('.nej').addEventListener('click', () => { el.querySelector('.rad').remove(); el.querySelector('.p3').textContent = tx('Inget har skickats. Skriv igen när du vill fortsätta.'); });
       log.appendChild(el); scrollBottom();
     }
+
+    /* ── Tänkord: Falk visar vad den "gör" medan den tänker. Lätta ord för korta frågor, djupa för långa/svåra
+       (lång text, bifogade filer, "varför/förklara/jämför…") – och en lätt fråga som drar ut på tiden blir djup efter 9 s.
+       Svenska på svenska, engelska på alla andra språk (orden är ordlekar som inte går att översätta rakt). */
+    const TANKORD = {
+      sv: {
+        latt: ['Tänker', 'Spanar', 'Kikar', 'Funderar', 'Nosar runt', 'Klurar', 'Vässar klorna', 'Lyfter', 'Glidflyger',
+          'Vrider på huvudet', 'Rufsar fjädrarna', 'Pickar på det', 'Kollar läget', 'Sitter på pinnen'],
+        djup: ['Grubblar', 'Funderar djupt', 'Ruvar', 'Cirklar högt', 'Spanar från ovan', 'Dyker djupt', 'Gräver', 'Vänder på varje sten',
+          'Lägger pussel', 'Knäcker nöten', 'Läser mellan raderna', 'Tar höjd', 'Frågar gorillan', 'Kläcker en plan', 'Ser helheten'],
+      },
+      en: {
+        latt: ['Thinking', 'Scouting', 'Peeking', 'Pondering', 'Sniffing around', 'Ruffling feathers', 'Gliding', 'Perching',
+          'Pecking at it', 'Tilting head', 'Sharpening talons', 'Taking off'],
+        djup: ['Brooding', 'Circling high', 'Diving deep', 'Digging in', 'Hatching a plan', 'Connecting the dots', 'Reading between the lines',
+          'Cracking it', 'Turning every stone', 'Gaining altitude', 'Asking the gorilla', 'Seeing the big picture'],
+      },
+    };
+    const DJUP_RE = /(varför|förklara|jämför|analysera|granska|skriv en|rapport|steg för steg|hur fungerar|why|explain|compare|analy[sz]e|review|write an?|step by step|how does)/i;
+    function arDjup() {
+      const m = history[history.length - 1] || {}, t = String(m.content || '');
+      return t.length > 350 || (Array.isArray(m.files) && m.files.length > 0) || DJUP_RE.test(t);
+    }
+    let tankId = 0;
+    function tankOrd(djup) {
+      clearInterval(tankId);   // en växlare i taget (en ny fråga direkt efter ett svar)
+      let sprak = 'sv'; try { sprak = localStorage.getItem('adraze-lang') || 'sv'; } catch {}
+      const L = TANKORD[sprak === 'sv' ? 'sv' : 'en'], start = Date.now();
+      let forra = null;
+      const satt = () => {
+        if (!busy) { clearInterval(tankId); return; }
+        if (!djup && Date.now() - start > 9000) djup = true;
+        const lista = djup ? L.djup : L.latt;
+        let n; do { n = lista[Math.floor(Math.random() * lista.length)]; } while (n === forra && lista.length > 1);
+        const tt = log.querySelector('.msg.typing .tt');
+        if (tt) { tt.classList.remove('byt'); void tt.offsetWidth; tt.textContent = n; tt.classList.add('byt'); }
+        const el = $('convtitle');   // rubriken byts bara när den visar tänkordet, inte ett steg ("Klickar på …")
+        if (el.classList.contains('live') && (forra === null || el.textContent === forra + '…')) el.textContent = n + '…';
+        forra = n;
+      };
+      satt(); tankId = setInterval(satt, 2400);
+    }
     async function ask() {
       busy = true; sendBtn.disabled = true; document.body.classList.add('thinking'); setStatus(tx('Tänker') + '…');
       let typing = bubble('krypto', '<span class="think">' + OWL_FLY + '<span class="tt">' + esc((typeof window.t === 'function') ? window.t('Falk tänker') : 'Falk tänker') + '</span></span>', 'typing');
+      tankOrd(arDjup());
       const priming = buildPriming(); priming[0].content += neutral(await projectText(activeConvo()));
       if (window.FalkAnpassa) priming[0].content += await window.FalkAnpassa.lista();   // Anpassa-nycklarna som finns just nu
       const hist = await Promise.all(history.slice(-12).map(withFiles));   // bara roll + text (+ filerna) till servern
