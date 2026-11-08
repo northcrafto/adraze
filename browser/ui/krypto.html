@@ -1776,6 +1776,26 @@
 
     /* ── Start ── */
     loadConvos(); applyModeUI((activeConvo() && activeConvo().mode) || kMode); updateBadge(); updateConvTitle(); render(); renderSide();
+
+    /* ── Nytt samtal efter 30 min ── Har Falk varit stängd i 30 minuter (eller webbläsaren avslutad så länge) öppnas
+       ett nytt samtal. Det gamla ligger kvar i listan. Ett tomt samtal återanvänds, och ett svar som pågår avbryts aldrig. */
+    const SENAST = 'krypto-senast', PAUS = 30 * 60 * 1000;
+    let synlig = true;
+    const sett = () => { try { localStorage.setItem(SENAST, String(Date.now())); } catch {} };
+    function nyttOmGammalt() {
+      let s = 0; try { s = +localStorage.getItem(SENAST) || 0; } catch {}
+      const c = activeConvo();
+      if (s && Date.now() - s > PAUS && c && c.messages.length && !busy) newConvo();
+      sett();
+    }
+    nyttOmGammalt();
+    setInterval(() => { if (synlig) sett(); }, 60 * 1000);   // öppen panel räknas som öppnad (även om datorn stängs av utan att panelen stängs)
+    window.addEventListener('pagehide', () => { if (synlig) sett(); });
+    if (window.krypto && window.krypto.onSynlig) window.krypto.onSynlig((v) => {
+      if (v && !synlig) nyttOmGammalt();
+      else if (!v && synlig) sett();
+      synlig = v;
+    });
     setTimeout(() => inp.focus(), 60);
   </script>
 </body>

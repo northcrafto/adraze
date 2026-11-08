@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('krypto', {
   act: (a) => ipcRenderer.invoke('krypto:act', a),
   expand: (full) => ipcRenderer.send('krypto:expand', !!full),
   onPrefill: (cb) => ipcRenderer.on('krypto-prefill', (_e, t) => cb(t)),
+  onSynlig: (cb) => ipcRenderer.on('krypto-synlig', (_e, v) => cb(!!v)),
   me: () => ipcRenderer.invoke('krypto:me'),
   samtycke: (v) => ipcRenderer.invoke('krypto:samtycke', v),
 });
