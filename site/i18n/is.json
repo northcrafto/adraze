@@ -553,5 +553,9 @@
   "hero.dl_linux": "Sækja fyrir Linux",
   "ladda.text": "Lokunin er innbyggð, svo auglýsingar stöðvast áður en síðan hleðst. Ókeypis fyrir Linux og Mac.",
   "dl.windows_maybe": "Kannski seinna",
-  "dl.windows_you": "Ertu á Windows núna? Linux Mint er ókeypis og tekur korter að setja upp."
+  "dl.windows_you": "Ertu á Windows núna? Linux Mint er ókeypis og tekur korter að setja upp.",
+  "err404.title": "Síðan er ekki til.",
+  "err404.text": "Slóðin er rangt stafsett eða síðan hefur verið færð. Athugaðu stafsetninguna eða farðu til baka.",
+  "err404.home": "Á forsíðuna",
+  "err404.back": "Til baka"
 }

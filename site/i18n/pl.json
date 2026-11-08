@@ -553,5 +553,9 @@
   "hero.dl_linux": "Pobierz na Linuksa",
   "ladda.text": "Blokada jest wbudowana, więc reklamy są zatrzymywane, zanim strona się załaduje. Za darmo na Linuksa i Maca.",
   "dl.windows_maybe": "Może później",
-  "dl.windows_you": "Używasz teraz Windowsa? Linux Mint jest darmowy i instaluje się w kwadrans."
+  "dl.windows_you": "Używasz teraz Windowsa? Linux Mint jest darmowy i instaluje się w kwadrans.",
+  "err404.title": "Ta strona nie istnieje.",
+  "err404.text": "Adres jest błędnie wpisany albo strona została przeniesiona. Sprawdź pisownię lub wróć.",
+  "err404.home": "Na stronę główną",
+  "err404.back": "Wstecz"
 }

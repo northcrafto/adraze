@@ -553,5 +553,9 @@
   "hero.dl_linux": "Download for Linux",
   "ladda.text": "The blocker is built in, so ads are stopped before the page even loads. Free for Linux and Mac.",
   "dl.windows_maybe": "Maybe later",
-  "dl.windows_you": "On Windows right now? Linux Mint is free and takes 15 minutes to install."
+  "dl.windows_you": "On Windows right now? Linux Mint is free and takes 15 minutes to install.",
+  "err404.title": "This page doesn’t exist.",
+  "err404.text": "The address is misspelled, or the page has moved. Check the spelling or go back.",
+  "err404.home": "Go to the homepage",
+  "err404.back": "Go back"
 }

@@ -553,5 +553,9 @@
   "hero.dl_linux": "Letöltés Linuxra",
   "ladda.text": "A blokkoló beépített, így a reklámok már az oldal betöltése előtt megállnak. Ingyenes Linuxra és Macre.",
   "dl.windows_maybe": "Talán később",
-  "dl.windows_you": "Most Windowst használsz? A Linux Mint ingyenes, és negyed óra alatt telepíthető."
+  "dl.windows_you": "Most Windowst használsz? A Linux Mint ingyenes, és negyed óra alatt telepíthető.",
+  "err404.title": "Ez az oldal nem létezik.",
+  "err404.text": "A cím el van gépelve, vagy az oldal elköltözött. Ellenőrizd a címet, vagy menj vissza.",
+  "err404.home": "A kezdőlapra",
+  "err404.back": "Vissza"
 }

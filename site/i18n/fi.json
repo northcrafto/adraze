@@ -553,5 +553,9 @@
   "hero.dl_linux": "Lataa Linuxille",
   "ladda.text": "Esto on sisäänrakennettu, joten mainokset pysähtyvät jo ennen sivun latautumista. Ilmainen Linuxille ja Macille.",
   "dl.windows_maybe": "Ehkä myöhemmin",
-  "dl.windows_you": "Käytätkö nyt Windowsia? Linux Mint on ilmainen ja asentuu vartissa."
+  "dl.windows_you": "Käytätkö nyt Windowsia? Linux Mint on ilmainen ja asentuu vartissa.",
+  "err404.title": "Sivua ei ole olemassa.",
+  "err404.text": "Osoite on kirjoitettu väärin, tai sivu on siirtynyt. Tarkista kirjoitusasu tai palaa takaisin.",
+  "err404.home": "Etusivulle",
+  "err404.back": "Takaisin"
 }

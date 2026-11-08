@@ -115,3 +115,13 @@ for sajt, mapp in MAPP.items():
             rader.append(f'<url><loc>{sajt}{url(kod, sida)}</loc>{alt}</url>')
     (mapp / 'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' + '\n'.join(rader) + '\n</urlset>\n')
     (mapp / 'robots.txt').write_text(f'User-agent: *\nAllow: /\nSitemap: {sajt}/sitemap.xml\n')
+
+# 404-sidan (samma stil som barnspärren) på alla sajter. En fil per sajt; språket väljs i sidan från adressen eller webbläsaren.
+texter = {}
+for kod, _ in finns:
+    t = {**sv, **json.loads((rot / 'i18n' / f'{kod}.json').read_text())}
+    texter[kod] = {'title': t['err404.title'], 'text': t['err404.text'], 'home': t['err404.home'], 'back': t['err404.back']}
+for sajt, mapp in MAPP.items():
+    sida = (rot / '404.src.html').read_text().replace('{{hem}}', '/').replace('{{texter}}', json.dumps(texter, ensure_ascii=False).replace('</', '<\\/'))
+    (mapp / '404.html').write_text(sida)
+

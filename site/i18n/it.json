@@ -553,5 +553,9 @@
   "hero.dl_linux": "Scarica per Linux",
   "ladda.text": "Il blocco è integrato, quindi la pubblicità viene fermata prima ancora che la pagina si carichi. Gratis per Linux e Mac.",
   "dl.windows_maybe": "Forse più avanti",
-  "dl.windows_you": "Sei su Windows adesso? Linux Mint è gratuito e si installa in un quarto d’ora."
+  "dl.windows_you": "Sei su Windows adesso? Linux Mint è gratuito e si installa in un quarto d’ora.",
+  "err404.title": "Questa pagina non esiste.",
+  "err404.text": "L’indirizzo è scritto male oppure la pagina è stata spostata. Controlla l’ortografia o torna indietro.",
+  "err404.home": "Vai alla home",
+  "err404.back": "Indietro"
 }

@@ -553,5 +553,9 @@
   "hero.dl_linux": "Télécharger pour Linux",
   "ladda.text": "Le bloqueur est intégré : les pubs sont arrêtées avant même le chargement de la page. Gratuit pour Linux et Mac.",
   "dl.windows_maybe": "Peut-être plus tard",
-  "dl.windows_you": "Sous Windows en ce moment ? Linux Mint est gratuit et s’installe en un quart d’heure."
+  "dl.windows_you": "Sous Windows en ce moment ? Linux Mint est gratuit et s’installe en un quart d’heure.",
+  "err404.title": "Cette page n’existe pas.",
+  "err404.text": "L’adresse est mal orthographiée ou la page a été déplacée. Vérifiez l’orthographe ou revenez en arrière.",
+  "err404.home": "Aller à l’accueil",
+  "err404.back": "Retour"
 }

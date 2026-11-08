@@ -553,5 +553,9 @@
   "hero.dl_linux": "Für Linux laden",
   "ladda.text": "Der Blocker ist eingebaut, deshalb wird Werbung gestoppt, bevor die Seite überhaupt lädt. Kostenlos für Linux und Mac.",
   "dl.windows_maybe": "Vielleicht später",
-  "dl.windows_you": "Gerade unter Windows? Linux Mint ist kostenlos und in einer Viertelstunde installiert."
+  "dl.windows_you": "Gerade unter Windows? Linux Mint ist kostenlos und in einer Viertelstunde installiert.",
+  "err404.title": "Diese Seite gibt es nicht.",
+  "err404.text": "Die Adresse ist falsch geschrieben oder die Seite ist umgezogen. Prüf die Schreibweise oder geh zurück.",
+  "err404.home": "Zur Startseite",
+  "err404.back": "Zurück"
 }

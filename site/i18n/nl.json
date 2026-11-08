@@ -553,5 +553,9 @@
   "hero.dl_linux": "Download voor Linux",
   "ladda.text": "De blocker is ingebouwd, dus reclame wordt gestopt voordat de pagina laadt. Gratis voor Linux en Mac.",
   "dl.windows_maybe": "Misschien later",
-  "dl.windows_you": "Nu op Windows? Linux Mint is gratis en in een kwartier geïnstalleerd."
+  "dl.windows_you": "Nu op Windows? Linux Mint is gratis en in een kwartier geïnstalleerd.",
+  "err404.title": "Deze pagina bestaat niet.",
+  "err404.text": "Het adres is verkeerd gespeld of de pagina is verhuisd. Controleer de spelling of ga terug.",
+  "err404.home": "Naar de startpagina",
+  "err404.back": "Terug"
 }

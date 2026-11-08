@@ -553,5 +553,9 @@
   "hero.dl_linux": "Atsisiųsti „Linux“",
   "ladda.text": "Blokatorius įtaisytas, todėl reklamos sustabdomos dar prieš įkeliant puslapį. Nemokamai Linux ir Mac.",
   "dl.windows_maybe": "Gal vėliau",
-  "dl.windows_you": "Dabar naudojate Windows? Linux Mint nemokamas ir įdiegiamas per ketvirtį valandos."
+  "dl.windows_you": "Dabar naudojate Windows? Linux Mint nemokamas ir įdiegiamas per ketvirtį valandos.",
+  "err404.title": "Šio puslapio nėra.",
+  "err404.text": "Adresas parašytas su klaida arba puslapis perkeltas. Patikrinkite adresą arba grįžkite atgal.",
+  "err404.home": "Į pradžią",
+  "err404.back": "Atgal"
 }

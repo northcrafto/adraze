@@ -553,5 +553,9 @@
   "hero.dl_linux": "Prenesi za Linux",
   "ladda.text": "Blokator je vgrajen, zato se oglasi ustavijo, še preden se stran naloži. Brezplačno za Linux in Mac.",
   "dl.windows_maybe": "Mogoče kasneje",
-  "dl.windows_you": "Ste trenutno na Windowsih? Linux Mint je brezplačen in se namesti v četrt ure."
+  "dl.windows_you": "Ste trenutno na Windowsih? Linux Mint je brezplačen in se namesti v četrt ure.",
+  "err404.title": "Ta stran ne obstaja.",
+  "err404.text": "Naslov je napačno zapisan ali pa je bila stran premaknjena. Preverite naslov ali se vrnite.",
+  "err404.home": "Na začetno stran",
+  "err404.back": "Nazaj"
 }

@@ -553,5 +553,9 @@
   "hero.dl_linux": "Linux için indir",
   "ladda.text": "Engelleyici yerleşik olduğu için reklamlar sayfa yüklenmeden durdurulur. Linux ve Mac için ücretsiz.",
   "dl.windows_maybe": "Belki sonra",
-  "dl.windows_you": "Şu an Windows mu kullanıyorsun? Linux Mint ücretsiz ve çeyrek saatte kurulur."
+  "dl.windows_you": "Şu an Windows mu kullanıyorsun? Linux Mint ücretsiz ve çeyrek saatte kurulur.",
+  "err404.title": "Bu sayfa yok.",
+  "err404.text": "Adres yanlış yazılmış ya da sayfa taşınmış. Yazımı kontrol et veya geri dön.",
+  "err404.home": "Ana sayfaya git",
+  "err404.back": "Geri"
 }

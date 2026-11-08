@@ -553,5 +553,9 @@
   "hero.dl_linux": "Descarcă pentru Linux",
   "ladda.text": "Blocarea este integrată, așa că reclamele sunt oprite înainte să se încarce pagina. Gratuit pentru Linux și Mac.",
   "dl.windows_maybe": "Poate mai târziu",
-  "dl.windows_you": "Folosești Windows acum? Linux Mint e gratuit și se instalează într-un sfert de oră."
+  "dl.windows_you": "Folosești Windows acum? Linux Mint e gratuit și se instalează într-un sfert de oră.",
+  "err404.title": "Această pagină nu există.",
+  "err404.text": "Adresa e scrisă greșit sau pagina s-a mutat. Verifică adresa sau întoarce-te.",
+  "err404.home": "La pagina principală",
+  "err404.back": "Înapoi"
 }
