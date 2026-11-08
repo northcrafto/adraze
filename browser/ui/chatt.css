@@ -1,22 +1,22 @@
 /* AdRaze-chatten (ui/chatt.html). Samma tokens som skalet: ljust = navy/papper, mörkt = grafit. Accent #ff4b1f. */
 :root {
-  --bg: #ffffff; --bg-alt: #eef3f9; --bg-deep: #e4ebf3; --paper: #ffffff;
-  --ink: #0e2a47; --ink-soft: #3d5670; --ink-mute: #6d7f93; --ink-faint: #a3b1c0;
-  --line: #d5dee8; --line-strong: #bccad8;
+  --bg: #ffffff; --bg-alt: #f2f1ec; --bg-deep: #e4ebf3; --paper: #ffffff;
+  --ink: #1f1e1b; --ink-soft: #3d5670; --ink-mute: #6f6d66; --ink-faint: #a3b1c0;
+  --line: #e1dfd8; --line-strong: #bccad8;
   --accent: #ff4b1f; --accent-deep: #d93a12; --accent-ink: #ffffff;
   --safe: #2f9e67; --warn: #cf9128; --danger: #d64b45;
-  --field: #f6f9fc; --shadow: rgba(14, 42, 71, .28); --overlay: rgba(14, 42, 71, .45);
-  --them: #eef3f9; --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --field: #fbf8f4; --shadow: rgba(14, 42, 71, .28); --overlay: rgba(14, 42, 71, .45);
+  --them: #f2f1ec; --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   color-scheme: light;
 }
 :root[data-theme="dark"] {
-  --bg: #0c0c0d; --bg-alt: #1d1d20; --bg-deep: #141416; --paper: #171718;
-  --ink: #f2f2f4; --ink-soft: #c4c4ca; --ink-mute: #8d8d95; --ink-faint: #5a5a61;
-  --line: #2b2b2d; --line-strong: #3b3b40;
+  --bg: #151413; --bg-alt: #262523; --bg-deep: #1c1b19; --paper: #1f1e1c;
+  --ink: #eeede8; --ink-soft: #c8c5c1; --ink-mute: #918e8a; --ink-faint: #5d5b58;
+  --line: #2e2d2a; --line-strong: #3f3e3a;
   --accent: #ff4b1f; --accent-deep: #ff6a43;
-  --field: #1d1d20; --shadow: rgba(0, 0, 0, .6); --overlay: rgba(0, 0, 0, .6);
-  --them: #232327;
+  --field: #262523; --shadow: rgba(0, 0, 0, .6); --overlay: rgba(0, 0, 0, .6);
+  --them: #252320;
   color-scheme: dark;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -300,13 +300,13 @@ a.c-link { color: inherit; text-decoration: underline; text-decoration-thickness
 .st-empty-hint { grid-column: 1 / -1; font-size: 12.5px; color: var(--ink-mute); padding: 6px 4px; line-height: 1.45; }
 .stx-ov { position: fixed; inset: 0; z-index: 420; background: rgba(8, 10, 14, .9); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 16px; gap: 12px; }
 .stx-ov.open { display: flex; }
-.stx-top { color: #f4f4f6; font-size: 16px; font-weight: 700; text-align: center; }
+.stx-top { color: #f7f4f0; font-size: 16px; font-weight: 700; text-align: center; }
 .stx-top small { display: block; font-size: 12.5px; font-weight: 400; opacity: .7; margin-top: 4px; }
 .stx-stage { position: relative; max-width: 92vw; max-height: 64vh; touch-action: none; }
 .stx-stage canvas { display: block; max-width: 92vw; max-height: 64vh; border-radius: 10px; cursor: crosshair; touch-action: none; }
 .stx-stage.checker canvas { background-color: #ddd; background-image: linear-gradient(45deg, #bbb 25%, transparent 25%), linear-gradient(-45deg, #bbb 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #bbb 75%), linear-gradient(-45deg, transparent 75%, #bbb 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0; cursor: default; }
 .stx-bar { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-.stx-bar button { font-size: 13px; font-weight: 650; border-radius: 999px; padding: 9px 16px; cursor: pointer; border: 1px solid rgba(255, 255, 255, .35); background: transparent; color: #f4f4f6; }
+.stx-bar button { font-size: 13px; font-weight: 650; border-radius: 999px; padding: 9px 16px; cursor: pointer; border: 1px solid rgba(255, 255, 255, .35); background: transparent; color: #f7f4f0; }
 .stx-bar button:hover:not(:disabled) { background: rgba(255, 255, 255, .12); }
 .stx-bar button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
 .stx-bar button:disabled { opacity: .45; cursor: default; }
@@ -460,3 +460,7 @@ a.c-link { color: inherit; text-decoration: underline; text-decoration-thickness
 .block-list .cname { flex: 1; font-weight: 550; }
 .danger-zone { margin-top: 18px; padding: 12px 14px; border: 1px solid rgba(214, 75, 69, .35); border-radius: 12px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
 .danger-zone .acc-form { width: 100%; }
+
+/* Designlagret (2026-11-08): rubriker i AdRaze Display (Fraunces, fonts/), som i inställningarna och Falk */
+@font-face { font-family: "AdRaze Display"; src: url("fonts/fraunces.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+.auth-card h2 { font-family: "AdRaze Display", Charter, Georgia, serif; font-size: 24px; font-weight: 520; letter-spacing: -.02em; font-variation-settings: "opsz" 28; }

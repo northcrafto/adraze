@@ -12,7 +12,7 @@
   body { width: max-content; padding: 4px 8px 10px; font: 600 13px/1.2 system-ui, -apple-system, "Segoe UI", sans-serif; }
   /* Sidan under kan ha vilken färg som helst: en hårfin kant håller rutan synlig även mot samma färg */
   #t { display: flex; align-items: center; gap: 8px; width: max-content; max-width: 560px; box-sizing: border-box; padding: 5px 5px 5px 14px;
-    border-radius: 10px; background: #0e2a47; color: #fff; box-shadow: 0 0 0 1px rgb(255 255 255 / .1), 0 3px 7px rgb(14 42 71 / .3), 0 1px 2px rgb(14 42 71 / .2); }
+    border-radius: 10px; background: #1f1e1b; color: #fff; box-shadow: 0 0 0 1px rgb(255 255 255 / .1), 0 3px 7px rgb(31 30 27 / .3), 0 1px 2px rgb(31 30 27 / .2); }
   #t.in { animation: in .2s cubic-bezier(.2,.8,.2,1); }
   @keyframes in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
   #t.utan-angra { padding-right: 14px; }
@@ -27,9 +27,9 @@
     background: #ff4b1f; border-radius: 46% 46% 0 0; transition: transform .7s cubic-bezier(.2,.75,.25,1); }
   #angra:is(.hov, :focus-visible) { color: #fff; outline: none; }
   #angra:is(.hov, :focus-visible)::before { transform: translateY(0); }
-  :root[data-theme="dark"] #t { background: #f2f2f4; color: #141416; box-shadow: 0 0 0 1px rgb(14 42 71 / .16), 0 3px 7px rgb(0 0 0 / .35), 0 1px 2px rgb(0 0 0 / .25); }
-  :root[data-theme="dark"] #prick { color: rgb(20 20 22 / .35); }
-  :root[data-theme="dark"] #angra { color: #c2360e; background: rgb(20 20 22 / .07); }
+  :root[data-theme="dark"] #t { background: #eeede8; color: #1c1b19; box-shadow: 0 0 0 1px rgb(31 30 27 / .16), 0 3px 7px rgb(0 0 0 / .35), 0 1px 2px rgb(0 0 0 / .25); }
+  :root[data-theme="dark"] #prick { color: rgb(28 27 25 / .35); }
+  :root[data-theme="dark"] #angra { color: #c2360e; background: rgb(28 27 25 / .07); }
   :root[data-theme="dark"] #angra:is(.hov, :focus-visible) { color: #fff; }
   @media (prefers-reduced-motion: reduce) { #t.in { animation: none; } #angra, #angra::before { transition: none; } }
 </style>

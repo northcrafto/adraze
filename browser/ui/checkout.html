@@ -8,10 +8,10 @@
 <style>
   /* Kassan i Falk-panelen. Samma tokens som Pro-rutan och inställningarna i mörkt läge. */
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  :root { --bg: #0e0e10; --surface: #161618; --surface-2: #1d1d20; --line: #26262a; --field-line: #34343a; --ink: #f2f2f4; --mut: #a1a1a8; --faint: #6f6f76; --accent: #ff4b1f; --accent-ink: #ff7a52; }
+  :root { --bg: #191816; --surface: #1f1e1c; --surface-2: #262523; --line: #2c2b28; --field-line: #3a3935; --ink: #eeede8; --mut: #a2a097; --faint: #77756d; --accent: #ff4b1f; --accent-ink: #ff7a52; }
   html, body { height: 100%; }
   /* mörk rullningslist utan color-scheme: dark – det skulle ge Stripes kortfält (iframe) en vit bakgrund */
-  html { scrollbar-color: #3b3b40 var(--bg); }
+  html { scrollbar-color: #3f3e3a var(--bg); }
   body { font-family: Inter, -apple-system, "Segoe UI", Roboto, system-ui, sans-serif; color: var(--ink); background: var(--bg); min-height: 100%; padding: 18px 20px 24px; overflow-y: auto; -webkit-font-smoothing: antialiased; }
   .top { display: flex; align-items: center; gap: 10px; margin-bottom: 26px; }
   .back { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; color: var(--mut); text-decoration: none; transition: background .15s, color .15s; }
@@ -27,7 +27,7 @@
   .plan { display: flex; align-items: center; gap: 12px; width: 100%; padding: 13px 14px; text-align: left; background: transparent; border: 0; color: var(--ink); font: inherit; cursor: pointer; transition: background .15s; }
   .plan + .plan { border-top: 1px solid var(--line); }
   .plan:hover { background: rgb(255 255 255 / .03); }
-  .plan .dot { width: 18px; height: 18px; flex: none; border-radius: 50%; border: 1.5px solid #4a4a52; background: transparent; transition: border-color .2s, background .2s, box-shadow .2s; }
+  .plan .dot { width: 18px; height: 18px; flex: none; border-radius: 50%; border: 1.5px solid #4d4b48; background: transparent; transition: border-color .2s, background .2s, box-shadow .2s; }
   .plan.on { background: rgb(255 75 31 / .06); }
   .plan.on .dot { border-color: var(--accent); background: #fff; box-shadow: inset 0 0 0 3.5px var(--accent); }
   .plan .n { flex: 1; font-size: 14px; font-weight: 600; }
