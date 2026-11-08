@@ -66,13 +66,27 @@
   .fk-kvot-rad #fkkvot-pa { color: var(--faint); white-space: nowrap; }
   .fk-kvot-bar { height: 3px; border-radius: 3px; background: var(--line); overflow: hidden; }
   .fk-kvot-bar i { display: block; height: 100%; width: 0; border-radius: 3px; background: var(--accent); transition: width .4s ease; }
-  /* Modellväljaren: gratis kör Qwen, Pro väljer DeepSeek eller Qwen (samma kvot) */
-  .fk-modell { display: flex; align-items: center; gap: 6px; margin: 0 4px 6px; font-size: 11.5px; color: var(--mut); }
-  .fk-modell-lbl { color: var(--faint); margin-right: 2px; }
-  .fk-modell button { height: 24px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--mut); font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: border-color .15s, color .15s, background .15s; }
-  .fk-modell button:hover { color: var(--ink); border-color: var(--field-line); }
-  .fk-modell button.pa { color: var(--ink); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
-  .fk-modell button .las { font-size: 10px; font-weight: 700; color: var(--accent-ink); letter-spacing: .02em; }
+  /* Modellväljaren ovanför skrivfältet: logga + namn, klick öppnar en meny. Gratis kör Qwen, Pro väljer (samma kvot). */
+  .fk-modell { position: relative; align-self: flex-start; margin: 0 0 8px; }
+  .fk-modell[hidden] { display: none; }
+  .fk-modell-knapp { display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 10px 0 9px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: border-color .15s; }
+  .fk-modell-knapp:hover, .fk-modell.oppen .fk-modell-knapp { border-color: var(--field-line); }
+  .fk-modell-knapp .pil { width: 12px; height: 12px; color: var(--mut); transition: transform .18s; }
+  .fk-modell.oppen .fk-modell-knapp .pil { transform: rotate(180deg); }
+  .fk-logga { width: 16px; height: 16px; flex: none; display: inline-flex; }
+  .fk-logga svg { width: 100%; height: 100%; }
+  .fk-modell-meny { position: absolute; left: 0; bottom: calc(100% + 6px); z-index: 20; width: 284px; padding: 5px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); box-shadow: 0 10px 30px rgba(0,0,0,.28); }
+  .fk-modell-meny[hidden] { display: none; }
+  .fk-modell-val { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 9px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+  .fk-modell-val:hover { background: var(--line); }
+  .fk-modell-val .fk-logga { width: 20px; height: 20px; }
+  .fk-modell-val .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+  .fk-modell-val .txt b { font-size: 13px; font-weight: 600; }
+  .fk-modell-val .txt small { font-size: 11.5px; color: var(--mut); }
+  .fk-modell-val .bock { width: 15px; height: 15px; color: var(--accent-ink); visibility: hidden; flex: none; }
+  .fk-modell-val.pa .bock { visibility: visible; }
+  .fk-modell-val .las { font-size: 10px; font-weight: 700; letter-spacing: .03em; padding: 2px 6px; border-radius: 999px; color: var(--accent-ink); background: var(--accent-soft); flex: none; }
+  .fk-modell-not { padding: 6px 9px 4px; font-size: 11px; color: var(--faint); border-top: 1px solid var(--line); margin-top: 4px; }
   .fk-kvot.lag .fk-kvot-rad #fkkvot-text { color: var(--accent-ink); }
   .fk-pro { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 14px 15px; font-size: 13.5px; line-height: 1.55; color: var(--ink); animation: msgin .2s ease-out both; }
   .fk-pro b { display: block; font-size: 14.5px; margin-bottom: 3px; }
@@ -496,6 +510,10 @@
     <div class="att-note" id="attnote"></div>
     <button id="pagechip" type="button" hidden></button>
     <div id="chips"></div>
+    <div class="fk-modell" id="fkmodell" hidden>
+      <button class="fk-modell-knapp" id="fkmodell-knapp" type="button" aria-haspopup="menu" aria-expanded="false"><span class="fk-logga"></span><span class="namn"></span><svg class="pil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg></button>
+      <div class="fk-modell-meny" id="fkmodell-meny" role="menu" hidden></div>
+    </div>
     <div class="inwrap">
       <button class="hbtn" id="attach" title="Lägg till filer, mapp eller projekt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
       <textarea id="inp" rows="1" placeholder="Fråga Falk" spellcheck="false"></textarea>
@@ -503,7 +521,6 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
       </button>
     </div>
-    <div class="fk-modell" id="fkmodell" hidden><span class="fk-modell-lbl"></span></div>
     <div class="fk-kvot" id="fkkvot" hidden><div class="fk-kvot-rad"><span id="fkkvot-text"></span><span id="fkkvot-pa"></span></div><div class="fk-kvot-bar"><i id="fkkvot-bar"></i></div></div>
     <div class="foot-note">Falk kan ha fel. Dela aldrig lösenord eller BankID.</div>
   </footer>
@@ -534,31 +551,51 @@
       box.classList.toggle('lag', kvar < 0.15 || k.sokKvar === 0);
       box.hidden = false;
     }
-    /* Modellen: Pro väljer själv (sparas), gratis ser Qwen och DeepSeek som låst Pro-val */
-    const MODELL_NAMN = { deepseek: 'DeepSeek V4 Flash', qwen: 'Qwen 3.7 Flash' };
-    let falkModell = localStorage.getItem('falk-modell') === 'qwen' ? 'qwen' : 'deepseek';
+    /* Modellen: knapp med logga och namn ovanför skrivfältet. Pro väljer i menyn (sparas), gratis kör Qwen och ser DeepSeek som Pro.
+       Loggorna: @lobehub/icons (MIT). */
+    const MODELLER = {
+      deepseek: { namn: 'DeepSeek V4 Flash', om: 'Smartast, bäst på svåra frågor', logga: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.748 4.482c-.254-.124-.364.113-.512.234-.051.039-.094.09-.137.136-.372.397-.806.657-1.373.626-.829-.046-1.537.214-2.163.848-.133-.782-.575-1.248-1.247-1.548-.352-.156-.708-.311-.955-.65-.172-.241-.219-.51-.305-.774-.055-.16-.11-.323-.293-.35-.2-.031-.278.136-.356.276-.313.572-.434 1.202-.422 1.84.027 1.436.633 2.58 1.838 3.393.137.093.172.187.129.323-.082.28-.18.552-.266.833-.055.179-.137.217-.329.14a5.526 5.526 0 01-1.736-1.18c-.857-.828-1.631-1.742-2.597-2.458a11.365 11.365 0 00-.689-.471c-.985-.957.13-1.743.388-1.836.27-.098.093-.432-.779-.428-.872.004-1.67.295-2.687.684a3.055 3.055 0 01-.465.137 9.597 9.597 0 00-2.883-.102c-1.885.21-3.39 1.102-4.497 2.623C.082 8.606-.231 10.684.152 12.85c.403 2.284 1.569 4.175 3.36 5.653 1.858 1.533 3.997 2.284 6.438 2.14 1.482-.085 3.133-.284 4.994-1.86.47.234.962.327 1.78.397.63.059 1.236-.03 1.705-.128.735-.156.684-.837.419-.961-2.155-1.004-1.682-.595-2.113-.926 1.096-1.296 2.746-2.642 3.392-7.003.05-.347.007-.565 0-.845-.004-.17.035-.237.23-.256a4.173 4.173 0 001.545-.475c1.396-.763 1.96-2.015 2.093-3.517.02-.23-.004-.467-.247-.588zM11.581 18c-2.089-1.642-3.102-2.183-3.52-2.16-.392.024-.321.471-.235.763.09.288.207.486.371.739.114.167.192.416-.113.603-.673.416-1.842-.14-1.897-.167-1.361-.802-2.5-1.86-3.301-3.307-.774-1.393-1.224-2.887-1.298-4.482-.02-.386.093-.522.477-.592a4.696 4.696 0 011.529-.039c2.132.312 3.946 1.265 5.468 2.774.868.86 1.525 1.887 2.202 2.891.72 1.066 1.494 2.082 2.48 2.914.348.292.625.514.891.677-.802.09-2.14.11-3.054-.614zm1-6.44a.306.306 0 01.415-.287.302.302 0 01.2.288.306.306 0 01-.31.307.303.303 0 01-.304-.308zm3.11 1.596c-.2.081-.399.151-.59.16a1.245 1.245 0 01-.798-.254c-.274-.23-.47-.358-.552-.758a1.73 1.73 0 01.016-.588c.07-.327-.008-.537-.239-.727-.187-.156-.426-.199-.688-.199a.559.559 0 01-.254-.078c-.11-.054-.2-.19-.114-.358.028-.054.16-.186.192-.21.356-.202.767-.136 1.146.016.352.144.618.408 1.001.782.391.451.462.576.685.914.176.265.336.537.445.848.067.195-.019.354-.25.452z" fill="#4D6BFE"></path></svg>` },
+      qwen: { namn: 'Qwen 3.7 Flash', om: 'Snabb och lätt', logga: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.713 2.825h-5.907c0-.251-.066-.503-.196-.728L12.819.728A1.46 1.46 0 0 0 11.559 0h-1.58c-.52 0-1 .275-1.26.728l-2.42 4.19a1.45 1.45 0 0 0 0 1.453l.791 1.37c.26.448.74.727 1.26.727h11.36c.52 0 1-.275 1.26-.728l.79-1.37a1.45 1.45 0 0 0 0-1.451l-.79-1.37a1.46 1.46 0 0 0-1.26-.728zM.195 9.905l2.951 5.115a1.46 1.46 0 0 0-.531.531l-.791 1.37a1.45 1.45 0 0 0 0 1.452l.79 1.37c.26.448.74.727 1.26.727h4.84c.52 0 1-.275 1.26-.728l.79-1.37a1.45 1.45 0 0 0 0-1.451L5.086 7.083a1.46 1.46 0 0 0-1.26-.728h-1.58c-.52 0-1 .276-1.26.728l-.79 1.37a1.45 1.45 0 0 0 0 1.452m15.888 13.367 2.951-5.115c.217.125.469.196.728.196h1.582c.52 0 1-.275 1.26-.728l.79-1.37a1.45 1.45 0 0 0 0-1.451l-2.42-4.191a1.46 1.46 0 0 0-1.259-.728h-1.582c-.52 0-1 .276-1.259.728l-5.678 9.838a1.45 1.45 0 0 0 0 1.452l.79 1.37c.26.448.74.727 1.26.727h1.582c.52 0 1-.275 1.26-.728z" fill="#6F69F7"></path></svg>` },
+    };
+    const BOCK = '<svg class="bock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg>';
+    let falkModell = localStorage.getItem('falk-modell') === 'qwen' ? 'qwen' : 'deepseek', modellKvot = null;
     function visaModell(k) {
       const box = $('fkmodell'); if (!box) return;
       if (!k || !k.plan) { box.hidden = true; return; }
+      modellKvot = k;
       const kan = Array.isArray(k.modeller) && k.modeller.length ? k.modeller : (k.plan === 'pro' ? ['deepseek', 'qwen'] : ['qwen']);
       const aktiv = kan.includes(falkModell) ? falkModell : kan[0];
-      box.querySelector('.fk-modell-lbl').textContent = tx('Modell');
-      box.querySelectorAll('button').forEach((b) => b.remove());
+      const knapp = $('fkmodell-knapp');
+      knapp.querySelector('.fk-logga').innerHTML = MODELLER[aktiv].logga;
+      knapp.querySelector('.namn').textContent = MODELLER[aktiv].namn;
+      knapp.title = tx('Byt AI-modell');
+      const meny = $('fkmodell-meny'); meny.innerHTML = '';
       for (const n of ['deepseek', 'qwen']) {
-        const b = document.createElement('button'); b.type = 'button'; b.textContent = MODELL_NAMN[n];
-        const last = !kan.includes(n);
-        if (last) { const s = document.createElement('span'); s.className = 'las'; s.textContent = 'PRO'; b.appendChild(s); b.title = tx('Ingår i Falk Pro'); }
-        else if (k.plan === 'pro') b.title = tx('Båda modellerna delar på samma kvot');
-        b.classList.toggle('pa', n === aktiv);
+        const m = MODELLER[n], last = !kan.includes(n);
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'fk-modell-val' + (n === aktiv ? ' pa' : ''); b.setAttribute('role', 'menuitemradio');
+        b.innerHTML = '<span class="fk-logga">' + m.logga + '</span><span class="txt"><b></b><small></small></span>' + (last ? '<span class="las">PRO</span>' : BOCK);
+        b.querySelector('b').textContent = m.namn; b.querySelector('small').textContent = tx(m.om);
         b.addEventListener('click', () => {
+          stangModellMeny();
           if (last) { proKort('modell', k); return; }
-          if (kan.length < 2) return;
           falkModell = n; localStorage.setItem('falk-modell', n); visaModell(k);
         });
-        box.appendChild(b);
+        meny.appendChild(b);
       }
+      const not = document.createElement('div'); not.className = 'fk-modell-not';
+      not.textContent = k.plan === 'pro' ? tx('Båda modellerna delar på dina 2 miljoner tokens.') : tx('Med Pro väljer du själv modell.');
+      meny.appendChild(not);
       box.hidden = false;
     }
+    function stangModellMeny() { const box = $('fkmodell'); box.classList.remove('oppen'); $('fkmodell-meny').hidden = true; $('fkmodell-knapp').setAttribute('aria-expanded', 'false'); }
+    $('fkmodell-knapp').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const box = $('fkmodell'), oppna = !box.classList.contains('oppen');
+      if (!oppna) return stangModellMeny();
+      box.classList.add('oppen'); $('fkmodell-meny').hidden = false; $('fkmodell-knapp').setAttribute('aria-expanded', 'true');
+    });
+    document.addEventListener('click', (e) => { if (!$('fkmodell').contains(e.target)) stangModellMeny(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') stangModellMeny(); });
     function proKort(orsak, k) {
       const el = document.createElement('div'); el.className = 'msg krypto';
       const rub = orsak === 'modell' ? tx('DeepSeek ingår i Falk Pro') : orsak === 'sok' ? tx('Webbsökningarna är slut för den här gången') : tx('Gratiskvoten är slut för den här gången');
