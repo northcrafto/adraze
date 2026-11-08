@@ -340,7 +340,7 @@
   "dl.version": "Senaste versionen: {v}",
   "dl.copy": "Kopiera",
   "dl.copied": "Kopierat",
-  "dl.windows_note": "Kommer till Microsoft Store.",
+  "dl.windows_note": "Ingen Windows-version. Medvetet. AdRaze byggs för Linux och Mac, utan reklam, spårning och tvångsomstarter.",
   "dl.mac_note": "Öppna filen och dra AdRaze till Program. För macOS 12 eller nyare, både Apple-chip och Intel.",
   "dl.soon": "Kommer snart",
   "dl.ext_note": "För Chrome, Brave, Edge och andra webbläsare byggda på Chromium.",
@@ -551,5 +551,7 @@
   "proxy.newtab_safe": "AdRaze skyddar dig: reklam och spårare stoppas",
   "proxy.ui": "{}",
   "hero.dl_linux": "Ladda ner för Linux",
-  "ladda.text": "Blockeraren är inbyggd, så reklamen stoppas innan sidan ens laddas. Gratis för Linux och Mac."
+  "ladda.text": "Blockeraren är inbyggd, så reklamen stoppas innan sidan ens laddas. Gratis för Linux och Mac.",
+  "dl.windows_maybe": "Kanske sen",
+  "dl.windows_you": "Kör du Windows just nu? Linux Mint är gratis och tar en kvart att installera."
 }

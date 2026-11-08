@@ -77,3 +77,9 @@
   .dl-ext { padding: 56px 0 !important; }
   .dl-ext-grid { grid-template-columns: 1fr; gap: 24px; }
 }
+
+/* Windows-kortet: medvetet ingen version. Gråtonad logga; den som kör Windows får ett tips om Linux Mint. */
+.dl-win > img { filter: grayscale(1); opacity: .45; }
+.dl-win .dl-win-du { display: none; margin-top: 8px; font-size: 14px; }
+.dl-win.dl-ditt .dl-win-du { display: block; }
+.dl-win .dl-snart { border-style: dashed; }
