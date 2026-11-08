@@ -24,7 +24,7 @@ SPRAK = [
 ]
 # Källa → (sajt, sökväg på sajten)
 SIDOR = {'index.src.html': (SAJT, ''), 'integritet.src.html': (SAJT, 'integritet'), 'chattregler.src.html': (SAJT, 'chattregler'), 'integritet-webblasaren.src.html': (SAJT, 'integritet-webblasaren'), 'statistik.src.html': (SAJT, 'statistik'),
-         'stod.src.html': (SAJT, 'stod'), 'kolla.src.html': (SAJT, 'kolla'),
+         'kolla.src.html': (SAJT, 'kolla'),
          'konto.src.html': (KONTO, ''), 'download.src.html': (LADDA, ''),
          'support.src.html': (HJALP, ''), 'arende.src.html': (HJALP, 'arende'), 'team.src.html': (HJALP, 'team'),
          'proxy.src.html': (PROXY, '')}
