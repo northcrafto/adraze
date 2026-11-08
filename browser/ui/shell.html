@@ -103,7 +103,7 @@
 
     <div class="omni-center">
     <button id="bm-star" class="icon-btn flex-none" title="Spara sida i bokmärkesfältet"><svg class="ic" style="width:18px;height:18px"><use href="#i-bookmark" /></svg></button>
-    <div id="omnibox" class="flex-1 flex items-center gap-2.5 h-9 px-3 rounded-[10px] bg-white ring-1 ring-[color:var(--color-line)] shadow-[0_1px_3px_rgba(14,42,71,.06)] focus-within:ring-2 focus-within:ring-terra/50 transition">
+    <div id="omnibox" class="flex-1 flex items-center gap-2.5 h-9 px-3 rounded-[10px] bg-white ring-1 ring-[color:var(--color-line)] shadow-[0_1px_3px_rgba(31,30,27,.06)] focus-within:ring-2 focus-within:ring-terra/50 transition">
       <span id="shield" class="shield-wrap shield-home"><svg class="ic ic-sm"><use href="#i-shield" /></svg></span>
       <input id="address" type="text" spellcheck="false" placeholder="Sök tryggt eller skriv en adress"
              class="flex-1 bg-transparent outline-none text-[14.5px] text-navy-900 placeholder:text-navy-900/40" />
@@ -120,8 +120,8 @@
       <svg class="ic ic-sm"><use href="#i-unlock" /></svg><span id="allow-chip-txt" class="tabular-nums"></span>
     </button>
     <button id="krypto-btn" class="icon-btn falk-btn off" title="Falk AI: din säkerhetsassistent"><svg class="ic"><use href="#i-sparkle" /></svg></button>
-    <button id="chatt-btn" class="icon-btn relative" title="Chatt: vänner och grupper"><svg class="ic"><use href="#i-chat" /></svg><span id="chatt-badge" style="display:none;position:absolute;top:1px;right:0;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--color-terra);color:#fff;font-size:9.5px;font-weight:800;line-height:16px;text-align:center;box-shadow:0 0 0 2px var(--color-chrome,#eef2f6)"></span></button>
-    <button id="dl-btn" class="icon-btn relative" title="Nedladdningar" style="display:none"><svg class="ic"><use href="#i-download" /></svg><span id="dl-badge" style="display:none;position:absolute;bottom:2px;right:2px;min-width:15px;height:15px;padding:0 3px;border-radius:999px;background:#2f8fd4;color:#fff;font-size:9px;font-weight:700;line-height:15px;text-align:center;box-shadow:0 0 0 2px var(--color-chrome,#eef2f6)"></span></button>
+    <button id="chatt-btn" class="icon-btn relative" title="Chatt: vänner och grupper"><svg class="ic"><use href="#i-chat" /></svg><span id="chatt-badge" style="display:none;position:absolute;top:1px;right:0;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--color-terra);color:#fff;font-size:9.5px;font-weight:800;line-height:16px;text-align:center;box-shadow:0 0 0 2px var(--color-chrome,#f4f1ed)"></span></button>
+    <button id="dl-btn" class="icon-btn relative" title="Nedladdningar" style="display:none"><svg class="ic"><use href="#i-download" /></svg><span id="dl-badge" style="display:none;position:absolute;bottom:2px;right:2px;min-width:15px;height:15px;padding:0 3px;border-radius:999px;background:#2f8fd4;color:#fff;font-size:9px;font-weight:700;line-height:15px;text-align:center;box-shadow:0 0 0 2px var(--color-chrome,#f4f1ed)"></span></button>
     <button id="settings-btn" class="icon-btn" title="Inställningar"><svg class="ic"><use href="#i-settings" /></svg></button>
     <button id="account-btn" class="icon-btn relative" title="Konto"><svg class="ic"><use href="#i-user" /></svg></button>
     <button id="menu-btn" class="icon-btn" title="Meny"><svg class="ic"><use href="#i-menu" /></svg></button>
@@ -159,7 +159,7 @@
     </div>
 
     <!-- AdRaze Wallet: spara kort-notis -->
-    <div id="wsavebar" class="absolute top-0 left-0 right-0 z-[60] flex items-center gap-3 px-4 text-navy-900" style="height:56px;display:none;background:#fff;border-bottom:1px solid var(--color-line);box-shadow:0 6px 20px rgba(14,42,71,.12);">
+    <div id="wsavebar" class="absolute top-0 left-0 right-0 z-[60] flex items-center gap-3 px-4 text-navy-900" style="height:56px;display:none;background:#fff;border-bottom:1px solid var(--color-line);box-shadow:0 6px 20px rgba(31,30,27,.12);">
       <span class="grid place-items-center w-8 h-8 rounded-[7px] flex-none" style="background:var(--color-paper);color:var(--color-navy-700);"><svg class="ic ic-sm"><use href="#i-card" /></svg></span>
       <div class="min-w-0 flex-1">
         <div class="text-[13.5px] font-semibold leading-tight">Vill du spara kortet till nästa köp?</div>
@@ -170,7 +170,7 @@
     </div>
 
     <!-- AdRaze Wallet: fyll i kort-notis -->
-    <div id="wfillbar" class="absolute top-0 left-0 right-0 z-[60] flex items-center gap-3 px-4 text-navy-900" style="height:56px;display:none;background:#fff;border-bottom:1px solid var(--color-line);box-shadow:0 6px 20px rgba(14,42,71,.12);">
+    <div id="wfillbar" class="absolute top-0 left-0 right-0 z-[60] flex items-center gap-3 px-4 text-navy-900" style="height:56px;display:none;background:#fff;border-bottom:1px solid var(--color-line);box-shadow:0 6px 20px rgba(31,30,27,.12);">
       <span class="grid place-items-center w-8 h-8 rounded-[7px] flex-none" style="background:var(--color-paper);color:var(--color-navy-700);"><svg class="ic ic-sm"><use href="#i-card" /></svg></span>
       <div class="min-w-0 flex-1">
         <div class="text-[13.5px] font-semibold leading-tight">Fyll i med ditt sparade kort?</div>
@@ -183,7 +183,7 @@
     <!-- Startsida -->
     <div id="newtabpage" class="absolute inset-0 hidden overflow-hidden">
       <div id="nt-bg" class="absolute inset-0 bg-cover bg-center transition-opacity duration-700"></div>
-      <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(8,20,35,.28), rgba(8,20,35,.72));"></div>
+      <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(20,19,17,.28), rgba(20,19,17,.72));"></div>
       <div class="relative z-10 h-full flex flex-col items-center justify-center px-8 text-white">
         <div id="nt-clock"></div>
         <div id="nt-greet"></div>
@@ -212,13 +212,13 @@
       /* Notiser uppe till höger, i samma stil som adraze.app: svart huvudknapp med ikon + tunn kantknapp,
          orange vätska fyller knappen vid hover (signaturkitet). */
       .notis { position: fixed; top: 100px; right: 12px; width: 344px; max-width: 88vw; z-index: 240;
-        background: #fff; color: #111113; border-radius: 18px; padding: 18px 18px 16px; border: 1px solid #e4e4df;
+        background: #fff; color: #13110e; border-radius: 18px; padding: 18px 18px 16px; border: 1px solid #e4e4df;
         box-shadow: 0 22px 60px rgba(17,17,19,.18), 0 2px 8px rgba(17,17,19,.06);
         animation: ccpop .16s cubic-bezier(.2,.7,.2,1); }
       .notis.ut { opacity: 0; transform: translateY(-6px); transition: opacity .15s, transform .15s; }
       body.reduce-motion .notis { animation: none; }
-      .notis-titel { font-size: 16px; font-weight: 700; color: #111113; margin: 0 0 4px; letter-spacing: -.015em; }
-      .notis-under { font-size: 13.5px; color: #5c5c63; margin: 0; line-height: 1.5; }
+      .notis-titel { font-size: 16px; font-weight: 700; color: #13110e; margin: 0 0 4px; letter-spacing: -.015em; }
+      .notis-under { font-size: 13.5px; color: #5f5d5a; margin: 0; line-height: 1.5; }
       .notis-rad { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
       .notis button { position: relative; overflow: hidden; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
         height: 40px; padding: 0 18px; border-radius: 999px; font-weight: 600; font-size: 13.5px; font-family: inherit; cursor: pointer; border: 0; white-space: nowrap;
@@ -229,21 +229,21 @@
         transition: transform .95s cubic-bezier(.2,.75,.25,1); pointer-events: none; }
       .notis button:hover::before, .notis button:focus-visible::before { transform: translateY(0); }
       .notis button:active { transform: translateY(1px); }
-      .notis .notis-knapp { background: #111113; color: #fff; }
-      .notis .notis-knapp:hover, .notis .notis-knapp:focus-visible { color: #111113; background-color: #ff4b1f; transition: color .6s ease, transform .2s ease, background-color 0s .6s; }
-      .notis .notis-sek { background: transparent; color: #111113; box-shadow: inset 0 0 0 1px rgba(17,17,19,.18); }
-      .notis .notis-sek:hover, .notis .notis-sek:focus-visible { color: #111113; box-shadow: inset 0 0 0 1px transparent; }
-      .notis .notis-knapp:disabled { cursor: default; color: #fff; background: #111113; }
+      .notis .notis-knapp { background: #13110e; color: #fff; }
+      .notis .notis-knapp:hover, .notis .notis-knapp:focus-visible { color: #13110e; background-color: #ff4b1f; transition: color .6s ease, transform .2s ease, background-color 0s .6s; }
+      .notis .notis-sek { background: transparent; color: #13110e; box-shadow: inset 0 0 0 1px rgba(17,17,19,.18); }
+      .notis .notis-sek:hover, .notis .notis-sek:focus-visible { color: #13110e; box-shadow: inset 0 0 0 1px transparent; }
+      .notis .notis-knapp:disabled { cursor: default; color: #fff; background: #13110e; }
       .notis .notis-knapp:disabled::before { transform: translateY(100%); }
       .notis button:focus-visible { outline: 2px solid #ff4b1f; outline-offset: 2px; }
       body.reduce-motion .notis button::before { transition: none; }
-      :root[data-theme="dark"] .notis { background: #1c1c20; color: #f2f2f4; border-color: #2c2c31; box-shadow: 0 22px 60px rgb(0 0 0 / .55), 0 2px 8px rgb(0 0 0 / .3); }
-      :root[data-theme="dark"] .notis-titel { color: #f5f5f7; }
-      :root[data-theme="dark"] .notis-under { color: #a1a1a8; }
-      :root[data-theme="dark"] .notis .notis-knapp { background: #fff; color: #111113; }
-      :root[data-theme="dark"] .notis .notis-knapp:disabled { background: #fff; color: #111113; }
-      :root[data-theme="dark"] .notis .notis-sek { color: #f5f5f7; box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); }
-      :root[data-theme="dark"] .notis .notis-sek:hover, :root[data-theme="dark"] .notis .notis-sek:focus-visible { color: #111113; }
+      :root[data-theme="dark"] .notis { background: #1e1c19; color: #eeede8; border-color: #2f2d2a; box-shadow: 0 22px 60px rgb(0 0 0 / .55), 0 2px 8px rgb(0 0 0 / .3); }
+      :root[data-theme="dark"] .notis-titel { color: #f8f5f1; }
+      :root[data-theme="dark"] .notis-under { color: #a2a097; }
+      :root[data-theme="dark"] .notis .notis-knapp { background: #fff; color: #13110e; }
+      :root[data-theme="dark"] .notis .notis-knapp:disabled { background: #fff; color: #13110e; }
+      :root[data-theme="dark"] .notis .notis-sek { color: #f8f5f1; box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); }
+      :root[data-theme="dark"] .notis .notis-sek:hover, :root[data-theme="dark"] .notis .notis-sek:focus-visible { color: #13110e; }
     </style>
     <style>
       #hxintro{position:absolute;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;
@@ -276,29 +276,29 @@
          Ett eget OS-fönster gick inte att positionera på Wayland (setPosition är no-op där). -->
     <style>
       #closeconf { position: fixed; top: 100px; right: 12px; width: 320px; max-width: 88vw; z-index: 240;
-        background: #fff; border-radius: 14px; padding: 16px 18px; border: 1px solid var(--color-line, #e6ebf1);
-        box-shadow: 0 18px 50px rgba(14,42,71,.30), 0 2px 8px rgba(14,42,71,.12);
+        background: #fff; border-radius: 14px; padding: 16px 18px; border: 1px solid var(--color-line, #edeae6);
+        box-shadow: 0 18px 50px rgba(31,30,27,.30), 0 2px 8px rgba(31,30,27,.12);
         animation: ccpop .16s cubic-bezier(.2,.7,.2,1); }
       @keyframes ccpop { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
-      #closeconf h1 { font-size: 15px; font-weight: 700; color: var(--color-navy-900, #0e2a47); margin: 0 0 5px; letter-spacing: -.01em; }
+      #closeconf h1 { font-size: 15px; font-weight: 700; color: var(--color-navy-900, #1f1e1b); margin: 0 0 5px; letter-spacing: -.01em; }
       #closeconf p { font-size: 13px; color: #5a6b7b; margin: 0; line-height: 1.5; }
-      #closeconf p b { color: var(--color-navy-900, #0e2a47); font-weight: 700; }
+      #closeconf p b { color: var(--color-navy-900, #1f1e1b); font-weight: 700; }
       #closeconf label { display: flex; align-items: center; gap: 9px; margin-top: 13px; cursor: pointer; user-select: none; }
       #closeconf label input { width: 15px; height: 15px; accent-color: var(--color-terra, #ff4b1f); cursor: pointer; }
       #closeconf label span { font-size: 12.5px; color: #5a6b7b; }
       #closeconf .row { display: flex; justify-content: flex-end; gap: 9px; margin-top: 15px; }
       #closeconf button { height: 36px; padding: 0 18px; border-radius: 999px; font-weight: 600; font-size: 13px;
         cursor: pointer; border: 1px solid transparent; transition: filter .15s, background .15s; }
-      #closeconf #cc-cancel { background: #fff; color: var(--color-navy-900, #0e2a47); border-color: #d3dce6; }   /* #closeconf först: annars vinner "border: transparent" ovan och Avbryt saknar kant */
-      #cc-cancel:hover { background: #f4f7fa; }
+      #closeconf #cc-cancel { background: #fff; color: var(--color-navy-900, #1f1e1b); border-color: #d3dce6; }   /* #closeconf först: annars vinner "border: transparent" ovan och Avbryt saknar kant */
+      #cc-cancel:hover { background: #f9f6f2; }
       #cc-yes { background: var(--color-terra, #ff4b1f); color: #fff; }
       #cc-yes:hover { filter: brightness(1.06); }
       #closeconf button:focus-visible { outline: 2px solid var(--color-terra, #ff4b1f); outline-offset: 2px; }
       /* mörkt läge: mörkt kort i stället för en vit ruta */
-      :root[data-theme="dark"] #closeconf { background: #161618; border-color: #2b2b2d; box-shadow: 0 18px 50px rgb(0 0 0 / .55), 0 2px 8px rgb(0 0 0 / .3); }
-      :root[data-theme="dark"] #closeconf h1, :root[data-theme="dark"] #closeconf p b { color: #f2f2f4; }
-      :root[data-theme="dark"] #closeconf p, :root[data-theme="dark"] #closeconf label span { color: #a1a1a8; }
-      :root[data-theme="dark"] #closeconf #cc-cancel { background: transparent; color: #f2f2f4; border-color: #3b3b40; }
+      :root[data-theme="dark"] #closeconf { background: #1f1e1c; border-color: #2e2d2a; box-shadow: 0 18px 50px rgb(0 0 0 / .55), 0 2px 8px rgb(0 0 0 / .3); }
+      :root[data-theme="dark"] #closeconf h1, :root[data-theme="dark"] #closeconf p b { color: #eeede8; }
+      :root[data-theme="dark"] #closeconf p, :root[data-theme="dark"] #closeconf label span { color: #a2a097; }
+      :root[data-theme="dark"] #closeconf #cc-cancel { background: transparent; color: #eeede8; border-color: #3f3e3a; }
       :root[data-theme="dark"] #closeconf #cc-cancel:hover { background: rgb(255 255 255 / .07); }
     </style>
     <div id="closeconf" class="hidden">
@@ -312,7 +312,7 @@
     </div>
 
     <!-- Inkognito-startsida -->
-    <div id="incogpage" class="absolute inset-0 hidden overflow-hidden" style="background: radial-gradient(125% 92% at 50% 18%, #2a1148 0%, #170b2c 48%, #08040f 100%);">
+    <div id="incogpage" class="absolute inset-0 hidden overflow-hidden" style="background: radial-gradient(125% 92% at 50% 18%, #2a1148 0%, #170b2c 48%, #080603 100%);">
       <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(38% 30% at 76% 26%, rgba(168,85,247,.20), transparent 70%), radial-gradient(46% 36% at 18% 78%, rgba(124,58,237,.16), transparent 72%);"></div>
       <div class="relative z-10 h-full flex flex-col items-center justify-center px-8 text-center">
         <div class="mb-6 incog-hero">
@@ -541,24 +541,24 @@
     <!-- QR-kod för sidan -->
     <div id="qr" class="hidden absolute inset-0 z-[70]">
       <style>
-        #qr{display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 30%,#202020 0,#121212 65%);color:#ececec;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+        #qr{display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 30%,#22201d 0,#14120f 65%);color:#efece8;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
         #qr.hidden{display:none}
-        #qr .qr-kort{position:relative;width:340px;max-width:100%;padding:26px 26px 22px;background:#1b1b1b;border:1px solid #2c2c2c;border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,.55);text-align:center;animation:qr-in .22s cubic-bezier(.2,.8,.2,1)}
+        #qr .qr-kort{position:relative;width:340px;max-width:100%;padding:26px 26px 22px;background:#1d1b18;border:1px solid #2e2c29;border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,.55);text-align:center;animation:qr-in .22s cubic-bezier(.2,.8,.2,1)}
         @keyframes qr-in{from{opacity:0;transform:translateY(8px) scale(.98)}}
         @media (prefers-reduced-motion:reduce){#qr .qr-kort{animation:none}}
-        #qr .qr-x{position:absolute;top:14px;right:14px;width:32px;height:32px;display:grid;place-items:center;border-radius:999px;color:#9a9a9a;background:transparent;border:0;cursor:pointer}
-        #qr .qr-x:hover{background:#2a2a2a;color:#fff}
-        #qr .qr-site{display:inline-flex;align-items:center;gap:8px;max-width:100%;padding:5px 12px 5px 6px;border-radius:999px;background:#242424;border:1px solid #303030;font-size:12.5px;color:#cfcfcf}
-        #qr .qr-site img{width:18px;height:18px;border-radius:5px;flex:none;background:#2e2e2e}
+        #qr .qr-x{position:absolute;top:14px;right:14px;width:32px;height:32px;display:grid;place-items:center;border-radius:999px;color:#9d9a96;background:transparent;border:0;cursor:pointer}
+        #qr .qr-x:hover{background:#2c2a27;color:#fff}
+        #qr .qr-site{display:inline-flex;align-items:center;gap:8px;max-width:100%;padding:5px 12px 5px 6px;border-radius:999px;background:#262421;border:1px solid #32302d;font-size:12.5px;color:#d2cfcb}
+        #qr .qr-site img{width:18px;height:18px;border-radius:5px;flex:none;background:#302e2b}
         #qr .qr-site span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-        #qr h1{margin:16px 0 4px;font-size:19px;font-weight:650;letter-spacing:-.01em;color:#f3f3f3}
-        #qr .qr-sub{margin:0 0 20px;font-size:13px;color:#8d8d8d}
+        #qr h1{margin:16px 0 4px;font-size:19px;font-weight:650;letter-spacing:-.01em;color:#f6f3ef}
+        #qr .qr-sub{margin:0 0 20px;font-size:13px;color:#908d89}
         #qr .qr-ram{position:relative;width:236px;height:236px;margin:0 auto;padding:14px;border-radius:16px;background:#fff;box-shadow:0 0 0 1px rgba(255,255,255,.06),0 10px 30px rgba(0,0,0,.4)}
         #qr .qr-ram::before{content:"";position:absolute;inset:-6px;border-radius:21px;border:1.5px solid rgba(255,75,31,.55);pointer-events:none}
         #qr #qr-img{display:block;width:208px;height:208px;image-rendering:pixelated}
         #qr .qr-logo{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:12px;background:#fff;padding:5px;box-shadow:0 0 0 3px #fff}
         #qr .qr-logo img{width:100%;height:100%;display:block}
-        #qr #qr-url{margin:18px auto 0;max-width:280px;font:11.5px ui-monospace,monospace;color:#6f6f6f;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        #qr #qr-url{margin:18px auto 0;max-width:280px;font:11.5px ui-monospace,monospace;color:#716f6c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
         #qr .qr-knapp{margin-top:16px;display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:999px;background:#ff4b1f;color:#fff;border:0;font:600 13.5px system-ui,sans-serif;cursor:pointer;transition:background .15s}
         #qr .qr-knapp:hover{background:#e8401a}
         #qr .qr-knapp:focus-visible,#qr .qr-x:focus-visible{outline:2px solid #ff4b1f;outline-offset:3px}
@@ -1170,7 +1170,7 @@
     </div>
 
     <!-- Bakgrundsväljare -->
-    <div id="bgpick" class="hidden absolute inset-0 z-[70] grid place-items-center p-6" style="background:linear-gradient(160deg,#0e2a47,#14375c);">
+    <div id="bgpick" class="hidden absolute inset-0 z-[70] grid place-items-center p-6" style="background:linear-gradient(160deg,#1f1e1b,#2e2c29);">
       <div class="w-full max-w-[560px] bg-white rounded-[10px] px-7 py-6 shadow-[0_30px_80px_rgba(0,0,0,.45)] relative">
         <button id="bgpick-close" class="absolute top-3.5 right-3.5 icon-btn w-8 h-8" style="color:var(--color-navy-900);"><svg class="ic ic-sm"><use href="#i-close" /></svg></button>
         <h1 class="text-[20px] font-extrabold text-navy-900">Bakgrund</h1>
@@ -1186,7 +1186,7 @@
     </div>
 
     <!-- Historik-panel (vänster) -->
-    <div id="history" class="hidden absolute top-0 left-0 bottom-0 bg-white" style="width:320px;z-index:65;box-shadow:6px 0 24px rgba(14,42,71,.15);">
+    <div id="history" class="hidden absolute top-0 left-0 bottom-0 bg-white" style="width:320px;z-index:65;box-shadow:6px 0 24px rgba(31,30,27,.15);">
       <div class="flex items-center justify-between px-4 h-12 border-b" style="border-color:var(--color-line);">
         <div class="flex items-center gap-2 text-[14px] font-bold text-navy-900"><svg class="ic ic-sm"><use href="#i-history" /></svg>Historik</div>
         <div class="flex items-center gap-1">
@@ -1198,7 +1198,7 @@
     </div>
 
     <!-- Bokmärken -->
-    <div id="bookmarks" class="hidden absolute inset-0 z-[70] grid place-items-center p-6" style="background:linear-gradient(160deg,#0e2a47,#14375c);">
+    <div id="bookmarks" class="hidden absolute inset-0 z-[70] grid place-items-center p-6" style="background:linear-gradient(160deg,#1f1e1b,#2e2c29);">
       <div class="w-full max-w-[480px] bg-white rounded-[10px] px-7 py-6 shadow-[0_30px_80px_rgba(0,0,0,.45)] relative" style="max-height:82%;display:flex;flex-direction:column;">
         <button id="bookmarks-close" class="absolute top-3.5 right-3.5 icon-btn w-8 h-8" style="color:var(--color-navy-900);"><svg class="ic ic-sm"><use href="#i-close" /></svg></button>
         <h1 class="text-[20px] font-extrabold text-navy-900">Bokmärken</h1>

@@ -1,13 +1,13 @@
 /* adraze://adblock – samma tokens som inställningarna (ui/input.css, #settings) */
 :root {
-  --bg: #f4f4f2; --surface: #ffffff; --surface-2: #f1f1ee; --ink: #141416; --mut: #66666d; --faint: #95959c;
-  --line: #e2e2de; --field: #ffffff; --field-line: #d6d6d1; --accent: #ff4b1f; --accent-ink: #c2360e; --accent-soft: rgb(255 75 31 / .09);
-  --hover: rgb(20 20 22 / .045); --shadow: 0 1px 2px rgb(20 20 22 / .05);
+  --bg: #f6f5f1; --surface: #ffffff; --surface-2: #f1f0eb; --ink: #1c1b19; --mut: #6b6962; --faint: #9a978f;
+  --line: #e5e3dc; --field: #ffffff; --field-line: #d9d7cf; --accent: #ff4b1f; --accent-ink: #c2360e; --accent-soft: rgb(255 75 31 / .09);
+  --hover: rgb(28 27 25 / .045); --shadow: 0 1px 2px rgb(28 27 25 / .05);
   color-scheme: light;
 }
 :root[data-theme="dark"] {
-  --bg: #0e0e10; --surface: #161618; --surface-2: #1d1d20; --ink: #f2f2f4; --mut: #a1a1a8; --faint: #6f6f76;
-  --line: #26262a; --field: #1b1b1e; --field-line: #34343a; --accent-ink: #ff7a52; --accent-soft: rgb(255 75 31 / .14);
+  --bg: #191816; --surface: #1f1e1c; --surface-2: #262523; --ink: #eeede8; --mut: #a2a097; --faint: #77756d;
+  --line: #2c2b28; --field: #232220; --field-line: #3a3935; --accent-ink: #ff7a52; --accent-soft: rgb(255 75 31 / .14);
   --hover: rgb(255 255 255 / .05); --shadow: none;
   color-scheme: dark;
 }
