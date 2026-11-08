@@ -24,6 +24,16 @@
       "permanent": true
     },
     {
+      "source": "/stod",
+      "destination": "https://download.adraze.app/",
+      "permanent": true
+    },
+    {
+      "source": "/:lang(en|nb|da|fi|is|de|nl|fr|es|pt|it|pl|cs|sk|hu|ro|bg|el|hr|sl|et|lv|lt|uk|tr)/stod",
+      "destination": "https://download.adraze.app/:lang/",
+      "permanent": true
+    },
+    {
       "source": "/konto",
       "destination": "https://accounts.adraze.app/",
       "permanent": true
