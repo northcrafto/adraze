@@ -2311,7 +2311,7 @@ ipcMain.handle('krypto:chat', async (e, messages, opts) => {
   const ctx = e.sender.__ctx;
   const token = ctx && ctx.authToken;
   if (!token) { klog({ stage: 'no-token' }); return { ok: false, needLogin: true, message: 'Logga in med din mejl (kontoknappen) för att låsa upp Falk.' }; }
-  const payload = { messages: (Array.isArray(messages) ? messages : []).slice(-16), ...(opts && opts.flik ? { flik: true } : {}) };
+  const payload = { messages: (Array.isArray(messages) ? messages : []).slice(-16), ...(opts && opts.flik ? { flik: true } : {}), ...(opts && (opts.modell === 'qwen' || opts.modell === 'deepseek') ? { modell: opts.modell } : {}) };
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
       // AdRazes egen server (pro.js /falk/chat): gratis med liten kvot, Pro med stor
@@ -2324,7 +2324,7 @@ ipcMain.handle('krypto:chat', async (e, messages, opts) => {
       if (!r.ok || !json.ok) { klog({ stage: 'http', attempt, status: r.status, error: json.error }); return { ok: false, error: json.error, message: json.message || json.error || 'Något gick fel. Försök igen om en stund.', ...(json.kvot ? { kvot: json.kvot } : {}) }; }
       klog({ stage: 'ok', attempt });
       return { ok: true, reply: json.reply, sources: Array.isArray(json.sources) ? json.sources.slice(0, 6) : [], actions: Array.isArray(json.actions) ? json.actions.slice(0, 3) : [],
-        ...(json.kvot ? { kvot: json.kvot } : {}), ...(json.uppgradera ? { uppgradera: String(json.uppgradera) } : {}) };
+        ...(json.kvot ? { kvot: json.kvot } : {}), ...(json.modell ? { modell: String(json.modell) } : {}), ...(json.uppgradera ? { uppgradera: String(json.uppgradera) } : {}) };
     } catch (err) {
       klog({ stage: 'throw', attempt, err: String(err && (err.name || err.message || err)) });
       if (attempt === 2) return { ok: false, message: 'Kunde inte nå Falk just nu. Kontrollera din uppkoppling och försök igen.' };

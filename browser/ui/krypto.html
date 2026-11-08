@@ -66,6 +66,13 @@
   .fk-kvot-rad #fkkvot-pa { color: var(--faint); white-space: nowrap; }
   .fk-kvot-bar { height: 3px; border-radius: 3px; background: var(--line); overflow: hidden; }
   .fk-kvot-bar i { display: block; height: 100%; width: 0; border-radius: 3px; background: var(--accent); transition: width .4s ease; }
+  /* Modellväljaren: gratis kör Qwen, Pro väljer DeepSeek eller Qwen (samma kvot) */
+  .fk-modell { display: flex; align-items: center; gap: 6px; margin: 0 4px 6px; font-size: 11.5px; color: var(--mut); }
+  .fk-modell-lbl { color: var(--faint); margin-right: 2px; }
+  .fk-modell button { height: 24px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--mut); font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: border-color .15s, color .15s, background .15s; }
+  .fk-modell button:hover { color: var(--ink); border-color: var(--field-line); }
+  .fk-modell button.pa { color: var(--ink); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+  .fk-modell button .las { font-size: 10px; font-weight: 700; color: var(--accent-ink); letter-spacing: .02em; }
   .fk-kvot.lag .fk-kvot-rad #fkkvot-text { color: var(--accent-ink); }
   .fk-pro { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 14px 15px; font-size: 13.5px; line-height: 1.55; color: var(--ink); animation: msgin .2s ease-out both; }
   .fk-pro b { display: block; font-size: 14.5px; margin-bottom: 3px; }
@@ -496,6 +503,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
       </button>
     </div>
+    <div class="fk-modell" id="fkmodell" hidden><span class="fk-modell-lbl"></span></div>
     <div class="fk-kvot" id="fkkvot" hidden><div class="fk-kvot-rad"><span id="fkkvot-text"></span><span id="fkkvot-pa"></span></div><div class="fk-kvot-bar"><i id="fkkvot-bar"></i></div></div>
     <div class="foot-note">Falk kan ha fel. Dela aldrig lösenord eller BankID.</div>
   </footer>
@@ -526,10 +534,35 @@
       box.classList.toggle('lag', kvar < 0.15 || k.sokKvar === 0);
       box.hidden = false;
     }
+    /* Modellen: Pro väljer själv (sparas), gratis ser Qwen och DeepSeek som låst Pro-val */
+    const MODELL_NAMN = { deepseek: 'DeepSeek V4 Flash', qwen: 'Qwen 3.7 Flash' };
+    let falkModell = localStorage.getItem('falk-modell') === 'qwen' ? 'qwen' : 'deepseek';
+    function visaModell(k) {
+      const box = $('fkmodell'); if (!box) return;
+      if (!k || !k.plan) { box.hidden = true; return; }
+      const kan = Array.isArray(k.modeller) && k.modeller.length ? k.modeller : (k.plan === 'pro' ? ['deepseek', 'qwen'] : ['qwen']);
+      const aktiv = kan.includes(falkModell) ? falkModell : kan[0];
+      box.querySelector('.fk-modell-lbl').textContent = tx('Modell');
+      box.querySelectorAll('button').forEach((b) => b.remove());
+      for (const n of ['deepseek', 'qwen']) {
+        const b = document.createElement('button'); b.type = 'button'; b.textContent = MODELL_NAMN[n];
+        const last = !kan.includes(n);
+        if (last) { const s = document.createElement('span'); s.className = 'las'; s.textContent = 'PRO'; b.appendChild(s); b.title = tx('Ingår i Falk Pro'); }
+        else if (k.plan === 'pro') b.title = tx('Båda modellerna delar på samma kvot');
+        b.classList.toggle('pa', n === aktiv);
+        b.addEventListener('click', () => {
+          if (last) { proKort('modell', k); return; }
+          if (kan.length < 2) return;
+          falkModell = n; localStorage.setItem('falk-modell', n); visaModell(k);
+        });
+        box.appendChild(b);
+      }
+      box.hidden = false;
+    }
     function proKort(orsak, k) {
       const el = document.createElement('div'); el.className = 'msg krypto';
-      const rub = orsak === 'sok' ? tx('Webbsökningarna är slut för den här gången') : tx('Gratiskvoten är slut för den här gången');
-      const text = (orsak === 'sok' ? tx('Med Pro söker Falk på webben i varje fråga, läser hela sidor och använder en smartare AI-modell.')
+      const rub = orsak === 'modell' ? tx('DeepSeek ingår i Falk Pro') : orsak === 'sok' ? tx('Webbsökningarna är slut för den här gången') : tx('Gratiskvoten är slut för den här gången');
+      const text = orsak === 'modell' ? tx('Med Pro väljer du själv mellan DeepSeek och Qwen, får 2 miljoner tokens i månaden och webbsökning i varje fråga.') : (orsak === 'sok' ? tx('Med Pro söker Falk på webben i varje fråga, läser hela sidor och använder en smartare AI-modell.')
         : tx('Med Pro får du 40 gånger mer Falk varje månad, webbsökning i varje fråga och en smartare AI-modell.'))
         + (k && k.fyllsPa ? ' ' + tx('Annars fylls gratiskvoten på') + ' ' + KVOT_DATUM(k.fyllsPa) + '.' : '');
       el.innerHTML = '<div class="fk-pro"><b></b><p></p><div class="fk-pro-rad"><button class="liq" type="button"></button><span class="fk-pro-pris"></span></div></div>';
@@ -539,7 +572,7 @@
       el.querySelector('.liq').addEventListener('click', () => { location.href = 'https://krypto.local/checkout?plan=pro_month'; });
       log.appendChild(el); scrollBottom();
     }
-    if (window.krypto && window.krypto.kvot) window.krypto.kvot().then(visaKvot).catch(() => {});
+    if (window.krypto && window.krypto.kvot) window.krypto.kvot().then((k) => { visaKvot(k); visaModell(k); }).catch(() => {});
 
     /* ── Samtal ── */
     let convos = [], activeId = null, history = [];
@@ -1238,9 +1271,9 @@
         const sida = await hamtaSida();
         const p0 = { ...priming[0], content: priming[0].content + (sida ? pageBlock(sida) : '') };
         const messages = [p0, priming[1]].concat(extra.length ? hist.slice(-8) : hist, extra.slice(-4));
-        try { res = await window.krypto.chat(messages, { flik: pageOn }); }
+        try { res = await window.krypto.chat(messages, { flik: pageOn, modell: falkModell }); }
         catch { res = { ok: false, message: 'Kunde inte nå Falk just nu.' }; }
-        if (res && res.kvot) visaKvot(res.kvot);
+        if (res && res.kvot) { visaKvot(res.kvot); visaModell(res.kvot); }
         if (!res || !res.ok) break;
         const acts = (Array.isArray(res.actions) && res.actions.length ? res.actions : agentTags(res.reply)).slice(0, 3);
         // Skrev Falk "jag klickar på …" men glömde själva verktyget? Påminn en gång i stället för att stanna mitt i.
