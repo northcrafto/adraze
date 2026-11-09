@@ -24,7 +24,7 @@
   const las = (k, std) => { try { const v = localStorage.getItem(k); return v == null ? std : JSON.parse(v); } catch { return std; } };
   const spara = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
   const NYCKLAR = ['adraze-proxy-inst', 'adraze-proxy-genvagar', 'adraze-proxy-historik', 'adraze-proxy-statistik', 'adraze-proxy-egenbild'];
-  const STD_INST = { tema: 'light', bg: 'slump', topp: 'mina', klocka: true, statistik: true, motor: 'duckduckgo' };
+  const STD_INST = { tema: 'light', bg: 'slump', topp: 'mina', klocka: true, statistik: true, motor: 'duckduckgo', lage: 'krypterad' };
   let inst = { ...STD_INST, ...las('adraze-proxy-inst', {}) };
   const sparaInst = () => spara('adraze-proxy-inst', inst);
   const MOTORER = {
@@ -51,7 +51,39 @@
   const ikon = (namn, sm) => `<svg class="ic${sm ? ' ic-sm' : ''}" aria-hidden="true"><use href="#${namn}"/></svg>`;
 
   // ---------- motorn ----------
-  let sj = null, klar = null;
+  // Två lägen: 'krypterad' = TLS i webbläsaren (Go/uTLS-motor i wasm, ser ut som Chrome) genom Wisp, servern ser
+  // bara krypterad data. 'server' ("Lätt") = servern hämtar sidan (som de flesta webbproxyer), okrypterat på servern.
+  let sj = null, klar = null, anslutning = null;
+  const LAGEN = {
+    krypterad: { titel: 'Fullt krypterad', text: 'Krypteringen sker i din webbläsare. Vår server skickar bara vidare krypterad data och kan inte läsa sidorna du besöker, bara se vilka sajter det är.' },
+    server: { titel: 'Lätt', text: 'Vår server hämtar sidorna åt dig, som de flesta webbproxyer gör. Lättare för din enhet, men trafiken är okrypterad på vår server medan den passerar. Vi sparar den inte.' },
+  };
+  const lage = () => (LAGEN[inst.lage] ? inst.lage : 'krypterad');
+  function satTransport() {
+    const wisp = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/wisp/';
+    return anslutning.setTransport(`/motor/adraze/${lage()}.mjs`, [{ wisp }]);
+  }
+  async function bytLage(l) {
+    if (!LAGEN[l] || l === lage()) return;
+    inst.lage = l; sparaInst(); ritaLagen();
+    if (!anslutning) return;
+    try { await klar; await satTransport(); } catch {}
+    // Öppna sidor laddas om i det nya läget
+    for (const f of flikar) if (f.frame && f.url) { try { f.frame.reload(); } catch {} }
+  }
+  // Väljaren finns både på startsidan och i inställningarna
+  function ritaLagen() {
+    for (const el of document.querySelectorAll('.px-lagen')) {
+      el.replaceChildren(...Object.entries(LAGEN).map(([k, l]) => {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'px-lage' + (lage() === k ? ' on' : '');
+        b.setAttribute('aria-pressed', lage() === k ? 'true' : 'false'); b.dataset.lage = k;
+        b.innerHTML = '<span class="inst-radio"></span><span class="px-lage-txt"><b></b><small></small></span>';
+        b.querySelector('b').textContent = T(l.titel); b.querySelector('small').textContent = T(l.text);
+        b.addEventListener('click', () => bytLage(k));
+        return b;
+      }));
+    }
+  }
   function starta() {
     if (klar) return klar;
     klar = (async () => {
@@ -72,9 +104,8 @@
         });
       }
       reg.update().catch(() => {});
-      const anslutning = new BareMux.BareMuxConnection('/motor/baremux/worker.js');
-      const wisp = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/wisp/';
-      await anslutning.setTransport('/motor/libcurl/index.mjs', [{ wisp }]);
+      anslutning = new BareMux.BareMuxConnection('/motor/baremux/worker.js');
+      await satTransport();
     })();
     klar.catch(() => { klar = null; });
     return klar;
@@ -360,6 +391,7 @@
   function ritaInst() {
     for (const b of instEl.querySelectorAll('[data-tema]')) b.classList.toggle('on', b.dataset.tema === inst.tema);
     for (const b of instEl.querySelectorAll('[data-topp]')) b.classList.toggle('on', b.dataset.topp === inst.topp);
+    ritaLagen();
     $('inst-klocka').checked = !!inst.klocka;
     $('inst-statistik').checked = !!inst.statistik;
     $('inst-motorer').replaceChildren(...Object.entries(MOTORER).map(([k, m]) => {
@@ -575,6 +607,8 @@
     const u = new URLSearchParams(location.search).get('u');
     if (u) { if (surf.hidden) oppna(u, false); } else if (!surf.hidden) stang(false);
   });
+
+  ritaLagen();
 
   // Länk som /?u=https://… öppnar sidan direkt
   const start = new URLSearchParams(location.search).get('u');
