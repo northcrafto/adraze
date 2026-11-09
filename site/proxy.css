@@ -33,6 +33,30 @@
 }
 .px-snabb button:hover, .px-snabb button:focus-visible { border-color: var(--accent); color: #fff; }
 
+/* ---------- lägesväljaren (krypterad / snabb), på startsidan och i inställningarna ---------- */
+.px-lagen { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.px-lage { display: flex; align-items: flex-start; gap: 12px; text-align: left; font: inherit; cursor: pointer; border-radius: 16px; padding: 14px 16px;
+  transition: border-color .2s ease, box-shadow .2s ease; }
+.px-lage .inst-radio { margin-top: 2px; }
+.px-lage-txt { display: grid; gap: 4px; }
+.px-lage b { font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+.px-lage small { font-size: 13px; line-height: 1.45; }
+.px-lagen-start { margin-top: 16px; max-width: 640px; }
+.px-lagen-start .px-lage { background: none; border: 1px solid #34343c; color: #d6d6db; }
+.px-lagen-start .px-lage small { color: #8b8b93; }
+.px-lagen-start .px-lage:hover { border-color: #55555f; }
+.px-lagen-start .px-lage.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); color: #fff; }
+.px-lagen-start .inst-radio { border: 2px solid #55555f; }
+.px-lagen-start .px-lage.on .inst-radio { border-color: var(--accent); padding: 3px; background: var(--accent) content-box; }
+.inst-motorer.px-lagen { grid-template-columns: 1fr; }
+.inst-motorer .px-lage { border: 1px solid var(--s-line); background: var(--s-surface); color: inherit; border-radius: 10px; }
+.inst-motorer .px-lage small { color: var(--s-faint); }
+.inst-motorer .px-lage:hover { border-color: var(--s-faint); }
+.inst-motorer .px-lage.on { border-color: var(--s-accent); box-shadow: inset 0 0 0 1px var(--s-accent); }
+.inst-motorer .px-lage.on .inst-radio { border-color: var(--s-accent); padding: 3px; background: var(--s-accent) content-box; }
+.inst-rad-lage { border-bottom: 0; padding-bottom: 4px; }
+@media (max-width: 640px) { .px-lagen { grid-template-columns: 1fr; } }
+
 /* ---------- fördelar ---------- */
 .px-fordelar { padding: 112px 0 96px; }
 .px-fordelar h2 { max-width: 16ch; }
