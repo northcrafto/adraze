@@ -19,6 +19,11 @@ contextBridge.exposeInMainWorld('krypto', {
   me: () => ipcRenderer.invoke('krypto:me'),
   samtycke: (v) => ipcRenderer.invoke('krypto:samtycke', v),
 });
+/* Inställningar › Falk (falk-inst.js): panelens färg, textstorlek, svarslängd, hälsning och tänkord. */
+contextBridge.exposeInMainWorld('falkInst', {
+  alla: () => { try { return ipcRenderer.sendSync('falk-inst:alla') || {}; } catch { return {}; } },
+  onAndrad: (cb) => ipcRenderer.on('falk-inst:andrad', (_e, v) => cb(v)),
+});
 /* Falk ändrar Anpassa-inställningar (ui/anpassa-falk.js). Huvudprocessen avgör allt (anpassa-falk.js). */
 contextBridge.exposeInMainWorld('anpassaFalk', {
   lista: () => ipcRenderer.invoke('anpassa-falk:lista'),
