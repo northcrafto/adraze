@@ -2402,3 +2402,12 @@ body.incog #gal-provbar .gpb-farg { box-shadow: inset 0 0 0 1px rgb(255 255 255 
 /* Kort i inställningarna: ton i stället för ram (varningar, kodrutor och streckade tomlägen behåller sin ram) */
 #settings :is(.kn-card, .kn-rows, .pro-box, .ext-card, .upd-card, .fam-create, .sp-inst-lista, #hist-list) { border-color: transparent !important; box-shadow: none !important; background-color: var(--s-surface); }
 #settings .engine-opt:not(.on) { border-color: transparent; background: var(--s-surface); }
+
+/* ── Inställningar › Falk (ui/falk-inst.js) ── */
+#settings #falk-inst .anp-tema-grupp + .set-row { margin-top: 8px; }
+#settings #falk-inst .anp-tema-hel { flex-wrap: wrap; row-gap: 14px; }
+#settings #falk-inst .anp-tema-hel > * { flex: 1 1 100%; }
+#settings .falk-av-not { margin: 14px 2px 0; }
+#settings .falk-inst-knappar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 26px; }
+/* Falk avstängd: inget av Falk syns någonstans i webbläsaren */
+:root.falk-av #krypto-btn, :root.falk-av #falk-granskar, :root.falk-av .anp-w[data-w="falk"], :root.falk-av .falk-bara { display: none !important; }

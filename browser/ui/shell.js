@@ -639,6 +639,8 @@ let pendingKryptoAfterLogin = false;
 // Falk och chatten visas en i taget. Öppnar du den ena göms den andra och kommer tillbaka när du stänger.
 var parkedKrypto = false, parkedChatt = false;
 function openKrypto(open, parking) {
+  // Inställningar › Falk › Använd Falk av: Falk öppnas inte från något håll (knapp, kortkommando, startsidan)
+  if (open && window.FalkInst && window.FalkInst.av()) { showToast('Falk är avstängd. Slå på den under Inställningar › Falk.'); return; }
   if (open && !account) { pendingKryptoAfterLogin = true; openLogin(); return; }
   if (open) { parkedKrypto = false; if (chattOpen) { parkedChatt = true; chattOpen = false; chattSync(); } }
   kryptoOpen = open;
@@ -648,6 +650,14 @@ function openKrypto(open, parking) {
   rememberPanel();
 }
 $('krypto-btn').addEventListener('click', () => openKrypto(!kryptoOpen));
+// Falk stängs av helt (ui/falk-inst.js): panelen bort i alla flikar. Huvudprocessen har redan rivit vyn.
+function falkStangAllt() {
+  pendingKryptoAfterLogin = false;
+  if (kryptoOpen) openKrypto(false);
+  parkedKrypto = false;
+  try { tabs.forEach((f) => { if (f.panel === 'krypto') f.panel = null; if (f.parked === 'krypto') f.parked = null; }); } catch {}
+  $('krypto-btn').classList.add('off');
+}
 async function refreshPro() {
   if (!account || !account.token) return;
   try {
@@ -3856,7 +3866,7 @@ function famChildCard(c) {
     + famFragorHtml(c)
     + '<div class="fam-sub">Blockerade sidor</div>' + tags + allowsHtml
     + '<div class="fam-addsite"><input class="fam-in" placeholder="t.ex. exempel.se" spellcheck="false" /><button class="btn btn-safe flex-none" style="height:40px;padding:0 14px;">Blockera</button></div>'
-    + '<div class="fam-krypto">' + escapeHtml(tn('Säg till Falk: "blockera de här sidorna för {n}" — eller "tillåt X för {n} i en timme".', c.name)).replace('Falk', '<b>Falk</b>') + '</div>'
+    + '<div class="fam-krypto falk-bara">' + escapeHtml(tn('Säg till Falk: "blockera de här sidorna för {n}" — eller "tillåt X för {n} i en timme".', c.name)).replace('Falk', '<b>Falk</b>') + '</div>'
     + '<button class="fam-histbtn" data-a="hist" style="display:block;font-size:12.5px;font-weight:700;color:#2f8fd4;background:rgba(47,143,212,.08);border:1px solid rgba(47,143,212,.25);border-radius:9px;padding:8px 12px;cursor:pointer;margin-top:10px;">' + escapeHtml(tn('Se historik för {n}', c.name)) + '</button>'
     + '<button class="fam-del" data-a="del">' + escapeHtml(tn('Ta bort {n} ur familjen', c.name)) + '</button></div>';
 }

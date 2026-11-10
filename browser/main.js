@@ -84,7 +84,7 @@ const blocksida = require('./blocksida');     // adraze://adblock, Blockera elem
 const sok = require('./sok');                 // sök på sidan (markerar i sidan, oberoende av findInPage)   // säker DNS, endast HTTPS, behörigheter, nedladdningsmapp, teckenstorlek   // AdRaze-blockeraren (samma regler som tillägget)
 registerAdblockScheme();   // före app.ready
 
-const KRYPTO_W = 400;
+const falkInst = require('./falk-inst');   // Inställningar › Falk: av/på, panelens bredd, färg, svarslängd …
 const CHATT_W = 420;        // chattens sidopanel (helskärm = hela webbytan)
 const wins = new Map();                 // skalets webContents-id -> ctx
 /* Konto per fönster (standard): varje fönster har sitt eget AdRaze-konto, och varje konto sina egna kakor i en
@@ -183,7 +183,7 @@ const FIND_W = 380, FIND_H = 62;
 function positionFind(ctx) {
   if (!ctx || !ctx.findView || ctx.win.isDestroyed()) return;
   const b = ctx.bounds || { x: 0, y: 92, width: ctx.win.getContentBounds().width };
-  const kw = (ctx.kryptoOpen && !ctx.kryptoFull) ? KRYPTO_W : 0;
+  const kw = (ctx.kryptoOpen && !ctx.kryptoFull) ? falkInst.bredd() : 0;
   try { ctx.findView.setBounds({ x: Math.round(b.x + b.width - kw - FIND_W - 10), y: Math.round(b.y + (ctx.topInset || 0)), width: FIND_W, height: FIND_H }); } catch {}
 }
 async function openFind(ctx, text) {
@@ -507,7 +507,7 @@ function applyBounds(ctx) {
   if (ctx.pK !== tK || ctx.pC !== tC) panelSlide(ctx);
   const ease = (t) => 1 - Math.pow(1 - t, 3);
   const eK = ease(ctx.pK), eC = ease(ctx.pC);
-  const kw = (tK && ctx.pK === 1) ? KRYPTO_W : 0;             // sidopanelens bredd för webbsidan (0 i helskärm – panelen ligger ovanpå)
+  const kw = (tK && ctx.pK === 1) ? falkInst.bredd() : 0;             // sidopanelens bredd för webbsidan (0 i helskärm – panelen ligger ovanpå)
   const cw = (tC && ctx.pC === 1) ? CHATT_W : 0;              // chattens sidopanel (till vänster om Falk om båda är öppna)
   const R = Math.round;
   { const inset = (ctx.kryptoOpen && full) || (ctx.chattOpen && ctx.chattFull) ? R(b.width) : kw + cw;   // skalets egna sidor får samma högerkant som webbsidan
@@ -520,7 +520,7 @@ function applyBounds(ctx) {
     ctx.chattView.setVisible(vis);
     if (vis) {
       if (ctx.chattFull) ctx.chattView.setBounds({ x: R(b.x + ctx.leftInset), y: R(b.y), width: Math.max(0, R(b.width - kw - ctx.leftInset)), height: R(b.height) });
-      else ctx.chattView.setBounds({ x: R(b.x + b.width - (tK && tC ? KRYPTO_W * eK : 0) - CHATT_W * eC), y: R(b.y), width: CHATT_W, height: R(b.height) });   // vid byte glider chatten rakt in under Falk som glider ut
+      else ctx.chattView.setBounds({ x: R(b.x + b.width - (tK && tC ? falkInst.bredd() * eK : 0) - CHATT_W * eC), y: R(b.y), width: CHATT_W, height: R(b.height) });   // vid byte glider chatten rakt in under Falk som glider ut
     }
   }
   if (ctx.kryptoView) {
@@ -530,7 +530,7 @@ function applyBounds(ctx) {
     if (ctx.kryptoView._vis !== vis) { ctx.kryptoView._vis = vis; try { ctx.kryptoView.webContents.send('krypto-synlig', vis); } catch {} }
     if (vis) {
       if (full) ctx.kryptoView.setBounds({ x: R(b.x + ctx.leftInset), y: R(b.y), width: R(b.width - ctx.leftInset), height: R(b.height) });
-      else ctx.kryptoView.setBounds({ x: R(b.x + b.width - KRYPTO_W * eK), y: R(b.y), width: KRYPTO_W, height: R(b.height) });
+      else ctx.kryptoView.setBounds({ x: R(b.x + b.width - falkInst.bredd() * eK), y: R(b.y), width: falkInst.bredd(), height: R(b.height) });
     }
   }
 }
@@ -2197,7 +2197,7 @@ function loadKrypto(ctx, mode) {
 }
 ipcMain.on('krypto:toggle', (e, open, mode, token) => {
   const ctx = ctxFor(e); if (!ctx) return;
-  ctx.kryptoOpen = !!open;
+  ctx.kryptoOpen = !!open && !falkInst.av();   // Falk avstängd i Inställningar › Falk: panelen öppnas aldrig
   if (token) ctx.authToken = token;   // sessionstoken för Falk-chattens API-anrop
   if (ctx.kryptoOpen) {
     if (!ctx.kryptoView) {
@@ -2230,7 +2230,7 @@ ipcMain.on('krypto:toggle', (e, open, mode, token) => {
 });
 // Skicka en färdig fråga (från "Var ska jag börja?"-quizet) in i Falk-panelen.
 ipcMain.on('krypto:prefill', (e, text) => {
-  const ctx = ctxFor(e) || e.sender.__ctx; if (!ctx || !ctx.kryptoView) return;
+  const ctx = ctxFor(e) || e.sender.__ctx; if (!ctx || !ctx.kryptoView || falkInst.av()) return;
   const wc = ctx.kryptoView.webContents, skicka = () => { try { wc.send('krypto-prefill', String(text || '')); } catch {} };
   // Anpassa/startsida (Falk-rutan): panelen kan just ha öppnats och laddar fortfarande → skicka när den laddat klart
   if (wc.isLoading()) wc.once('did-finish-load', skicka); else skicka();
@@ -2301,7 +2301,7 @@ ipcMain.handle('krypto:samtycke', (_e, v) => { if (typeof v === 'boolean') webb.
 // Falks kvot (gratis: 50 000 tokens och 2 sökfrågor per 14 dagar, Pro: 2 miljoner per 30 dagar), visas i panelen
 ipcMain.handle('krypto:kvot', async (e) => {
   const ctx = e.sender.__ctx, token = ctx && ctx.authToken;
-  if (!token) return null;
+  if (!token || falkInst.av()) return null;
   try {
     const r = await fetch(ADRAZE_API + '/falk/kvot', { headers: { accept: 'application/json', authorization: 'Bearer ' + token }, signal: AbortSignal.timeout(10000) });
     const j = await r.json().catch(() => ({}));
@@ -2309,6 +2309,8 @@ ipcMain.handle('krypto:kvot', async (e) => {
   } catch { return null; }
 });
 ipcMain.handle('krypto:chat', async (e, messages, opts) => {
+  // Falk avstängd: ingenting lämnar datorn, även om en gammal panel skulle leva kvar
+  if (falkInst.av()) return { ok: false, message: 'Falk är avstängd. Slå på den under Inställningar › Falk.' };
   if (!webb.prefs.falkSamtycke) return { ok: false, samtycke: true, message: 'Godkänn först att Falk får skicka till AI-tjänsten.' };
   const ctx = e.sender.__ctx;
   const token = ctx && ctx.authToken;
@@ -2393,7 +2395,7 @@ function falkGranskar(ctx, wc) {
 }
 ipcMain.handle('krypto:page', async (e) => {
   const ctx = e.sender.__ctx; const wc = ctx && falkFlik(ctx);
-  if (webb.prefs.falkSida === false || !webb.prefs.falkSamtycke) return null;
+  if (falkInst.av() || webb.prefs.falkSida === false || !webb.prefs.falkSamtycke) return null;
   if (!wc || !/^https?:/i.test(wc.getURL())) return null;
   if (falkInkognito(wc)) return null;   // inkognito: Falk läser aldrig sidan
   falkGranskar(ctx, wc);
@@ -2401,6 +2403,7 @@ ipcMain.handle('krypto:page', async (e) => {
 });
 ipcMain.handle('krypto:act', async (e, a) => {
   const ctx = e.sender.__ctx; if (!ctx || !a) return { ok: false, fel: 'Ingen flik.' };
+  if (falkInst.av()) return { ok: false, fel: 'Falk är avstängd i Inställningar.' };
   if (webb.prefs.falkSida === false || !webb.prefs.falkSamtycke) return { ok: false, fel: 'Sidgranskning är avstängd i Inställningar.' };
   let wc = falkFlik(ctx);
   if (wc && falkInkognito(wc)) return { ok: false, fel: 'Falk läser och styr inte inkognitoflikar.' };
@@ -2523,6 +2526,13 @@ function falkSankning(name, a) {
 // Anpassa › Ångra (ångra en grupp, spara som fil) och Falk ändrar Anpassa-inställningar (anpassa-falk.js, ui/anpassa-falk.js)
 require('./anpassa-angra').init({ ctxFor, sendTo, POPUP_PREFS });   // + toasten "Ändrat · Ångra" ovanpå webbsidan
 require('./anpassa-falk').init({ T });
+// Inställningar › Falk. Stängs Falk av rivs panelen i alla fönster direkt (samtalen ligger kvar på datorn).
+falkInst.init({ anpassa, wins, applyBounds, stang(ctx) {
+  ctx.kryptoOpen = false; ctx.kryptoFull = false;
+  if (ctx.kryptoView) { const v = ctx.kryptoView; ctx.kryptoView = null; try { ctx.win.contentView.removeChildView(v); } catch {} try { v.webContents.close(); } catch {} }
+  ctx.pK = 0;
+  try { applyBounds(ctx); } catch {}
+} });
 
 /* ────────── Kortkommandon (Chromium-lika) ──────────
  * Acceleratorerna i popup-menyerna är bara etiketter. Riktiga genvägar fångas
