@@ -151,7 +151,7 @@
     ['luva', 'Gorillan i tomteluva', 'På nya fliken och i blockerarknappen.'],
     ['kalender', 'Julkalender', 'En lucka om dagen på nya fliken, 1–24 december.'],
     ['stat', 'Statistik i julspråk', 'Hur mycket reklam du har sluppit i december.'],
-    ['flikar', 'Snö på flikarna', 'Ett tunt snötäcke överst på flikarna.'],
+    ['flikar', 'Snö på flikarna', 'Ett tunt snötäcke på den flik du har framme.'],
   ];
   function el(tag, a, ...barnen) {
     const e = document.createElement(tag);

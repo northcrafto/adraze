@@ -1,8 +1,10 @@
-// Jultemats pynt i fönstret: gorillan i tomteluva (del "luva") och snön på nya fliken (del "sno").
-// Laddas efter jul.js (kärnan, window.Jul) och före shell.js. Stilen står i jul.css, sektion 2 och 3.
+// Jultemats pynt i fönstret: gorillan i tomteluva (del "luva"), snön på nya fliken (del "sno") och snötäcket på
+// flikarna (del "flikar"). Laddas efter jul.js (kärnan, window.Jul) och före shell.js. Stilen står i jul.css,
+// sektion 2, 3 och 4.
 //
 // Kärnan anropar pa() när en del blir aktiv och av() när den slås av eller julen är slut. Allt som läggs i sidan
-// här tas bort igen i av(). Inget ritas i inkognito och inget över webbsidor: båda delarna ligger i #newtabpage.
+// här tas bort igen i av(). Inget ritas i inkognito och inget över webbsidor: luvan och snöfallet ligger i
+// #newtabpage, snötäcket i flikraden.
 (function () {
   'use strict';
   const Jul = window.Jul;
@@ -111,4 +113,9 @@
     if (sno) { sno.remove(); sno = null; }
   }
   Jul.del('sno', { pa: snoPa, av: snoAv });
+
+  /* ── Snö på flikarna ──
+   * Bara CSS (jul.css, sektion 4): ett tunt snötäcke ovanpå den aktiva fliken och den man pekar på. Inget läggs i
+   * sidan här; registreringen gör att "flikar" står i data-jul och att brytaren visas i inställningarna. */
+  Jul.del('flikar', {});
 })();
