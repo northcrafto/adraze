@@ -16,6 +16,9 @@ const NYCKLAR = [
   { nyckel: 'tema.horn', standard: 'normal', etikett: 'Hörn', val: ['kantig', 'normal', 'rund'] },
   { nyckel: 'tema.typsnitt', standard: 'system', etikett: 'Typsnitt', val: ['system', 'klassisk', 'tydlig', 'serif', 'mono'] },
   { nyckel: 'tema.storlek', standard: 'normal', etikett: 'Textstorlek', val: ['liten', 'normal', 'stor'] },
+  // Färguppsättning för själva ytorna (flikrad, verktygsrad, inställningar). 'jul' = mörkgrönt och djuprött (ui/jul.css),
+  // gäller i mörkt läge. Sätts av det färdiga temat Jul och av julfärgerna under julen (jul.js).
+  { nyckel: 'tema.palett', standard: 'standard', etikett: 'Färguppsättning', val: ['standard', 'jul'] },
 ];
 for (const n of NYCKLAR) anpassa.registrera({ ...n, barnLast: false, importBar: true });
 

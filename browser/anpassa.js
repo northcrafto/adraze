@@ -24,11 +24,16 @@ function las() {
   if (!Array.isArray(data.historik)) data.historik = [];
   return data;
 }
+// Skriver filen direkt. Annars skrivs den 150 ms efter sista ändringen (spara); sparaNu är för den som måste veta att
+// värdena ligger på disk innan något annat skrivs (jul.js: temat innan julfärgerna).
+function sparaNu() {
+  clearTimeout(skrivTimer);
+  if (!data) return;
+  try { const f = FIL(); fs.writeFileSync(f + '.tmp', JSON.stringify(data)); fs.renameSync(f + '.tmp', f); } catch (e) { console.warn('[anpassa] kunde inte spara', e.message); }
+}
 function spara() {
   clearTimeout(skrivTimer);
-  skrivTimer = setTimeout(() => {
-    try { const f = FIL(); fs.writeFileSync(f + '.tmp', JSON.stringify(data)); fs.renameSync(f + '.tmp', f); } catch (e) { console.warn('[anpassa] kunde inte spara', e.message); }
-  }, 150);
+  skrivTimer = setTimeout(sparaNu, 150);
 }
 const kopia = (v) => (v === undefined ? undefined : JSON.parse(JSON.stringify(v)));
 function standard(nyckel) { const r = register.get(nyckel); return r ? kopia(r.standard) : undefined; }
@@ -140,6 +145,6 @@ function init({ barnKoll } = {}) {
   ipcMain.handle('anpassa:importera', (_e, d) => importera(d && d.kod, d && d.prefix));
 }
 
-module.exports = { init, hamta, alla, satt, angra, aterstall, exportera, importera, registrera, lyssna };
+module.exports = { init, hamta, alla, satt, angra, aterstall, exportera, importera, registrera, lyssna, sparaNu };
 // Till Falk och Ångra-panelen (anpassa-falk.js, anpassa-angra.js): registret, barnlåset och hela historiken – som kopior
 Object.assign(module.exports, { registret: () => Object.fromEntries([...register].map(([k, v]) => [k, kopia(v)])), last, historik: () => kopia(las().historik) });

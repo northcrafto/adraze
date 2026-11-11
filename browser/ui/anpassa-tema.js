@@ -16,8 +16,8 @@
   const $ = (id) => document.getElementById(id);
 
   /* ── Valen ── */
-  const STANDARD = { accent: '#ff4b1f', lage: 'ljust', densitet: 'normal', horn: 'normal', typsnitt: 'system', storlek: 'normal' };
-  const ETIKETT = { accent: 'Accentfärg', lage: 'Ljust eller mörkt', densitet: 'Densitet', horn: 'Hörn', typsnitt: 'Typsnitt', storlek: 'Textstorlek' };
+  const STANDARD = { accent: '#ff4b1f', lage: 'ljust', densitet: 'normal', horn: 'normal', typsnitt: 'system', storlek: 'normal', palett: 'standard' };
+  const ETIKETT = { accent: 'Accentfärg', lage: 'Ljust eller mörkt', densitet: 'Densitet', horn: 'Hörn', typsnitt: 'Typsnitt', storlek: 'Textstorlek', palett: 'Färguppsättning' };
   // Åtta kulörer runt färghjulet. Alla håller minst 3:1 mot ljus och mörk yta, utom Bärnsten som mörkas lite i ljust läge.
   const ACCENTER = [['#ff4b1f', 'AdRaze'], ['#d6336c', 'Hallon'], ['#7354d6', 'Viol'], ['#3b6fe0', 'Blå'],
     ['#0b8a8f', 'Hav'], ['#2f9e67', 'Skog'], ['#e8a317', 'Bärnsten'], ['#5f6b7a', 'Grafit']];
@@ -27,13 +27,17 @@
     horn: [['kantig', 'Kantig'], ['normal', 'Normal'], ['rund', 'Rund']],
     typsnitt: [['system', 'Standard'], ['klassisk', 'Klassisk'], ['tydlig', 'Tydlig'], ['serif', 'Serif'], ['mono', 'Mono']],
     storlek: [['liten', 'Liten'], ['normal', 'Normal'], ['stor', 'Stor']],
+    palett: [['standard', 'Standard'], ['jul', 'Jul']],   // färgerna på själva ytorna; 'jul' = mörkgrönt och djuprött (jul.css), i mörkt läge
   };
-  // Färdiga teman sätter färg, läge, hörn och densitet. Typsnitt och textstorlek är personliga val och rörs inte.
+  // Färdiga teman sätter färg, läge, hörn och densitet (och färguppsättning: bara Jul har en egen, övriga standard).
+  // Typsnitt och textstorlek är personliga val och rörs inte.
   const FORVAL = [
     { id: 'adraze', namn: 'AdRaze', v: { accent: '#ff4b1f', lage: 'ljust', horn: 'normal', densitet: 'normal' } },
     { id: 'skog', namn: 'Skog', v: { accent: '#2f9e67', lage: 'ljust', horn: 'rund', densitet: 'luftig' } },
     { id: 'natt', namn: 'Natt', v: { accent: '#3b6fe0', lage: 'morkt', horn: 'normal', densitet: 'normal' } },
     { id: 'sand', namn: 'Sand', v: { accent: '#e8a317', lage: 'ljust', horn: 'rund', densitet: 'normal' } },
+    // Jul: SAMMA värden som julfärgerna (TEMA i ../jul.js) – ändra på båda ställena. Går att välja året runt.
+    { id: 'jul', namn: 'Jul', v: { accent: '#d9a441', lage: 'morkt', horn: 'normal', densitet: 'normal', palett: 'jul' } },
     { id: 'hav', namn: 'Hav', v: { accent: '#0b8a8f', lage: 'system', horn: 'normal', densitet: 'normal' } },
     { id: 'grafit', namn: 'Grafit', v: { accent: '#5f6b7a', lage: 'morkt', horn: 'kantig', densitet: 'kompakt' } },
   ];
@@ -228,6 +232,7 @@
     attr('data-anp-horn', h, 'normal');
     attr('data-anp-typsnitt', f, 'system');
     attr('data-anp-storlek', s, 'normal');
+    attr('data-anp-palett', varde('palett'), 'standard');
     const nu = [d, f, s].join();
     if (senastForm !== null && nu !== senastForm) {
       // Flikraden och verktygsraden kan ha bytt höjd: flytta webbvyn och räkna om flikbredderna (shell.js)
@@ -274,7 +279,8 @@
     const f = FORVAL.find((x) => x.id === id);
     if (!f) return;
     gammalt = null;
-    for (const namn of ['accent', 'horn', 'densitet', 'lage']) await A.set('tema.' + namn, f.v[namn] === STANDARD[namn] ? undefined : f.v[namn], 'Tema ' + f.namn);
+    // Färguppsättningen före läget: när fönstret blir mörkt är ytornas färger redan valda (teman utan egen får standard)
+    for (const namn of ['accent', 'horn', 'densitet', 'palett', 'lage']) await A.set('tema.' + namn, f.v[namn] === STANDARD[namn] ? undefined : f.v[namn], 'Tema ' + f.namn);
   }
 
   /* ── Dela med en kod (samma format som Anpassa.exportera: ADRZ1.<base64url av JSON>) ── */
@@ -369,7 +375,7 @@
     const mork = effektivt(v.lage) === 'dark';
     const acc = justera(v.accent, mork ? '#171718' : '#f1f5f9', 3);
     const r = { kantig: '1px', normal: '3px', rund: '99px' }[v.horn] || '3px';
-    return '<span class="anp-tema-mini' + (mork ? ' mork' : '') + '" style="--m-acc:' + acc + ';--m-r:' + r + '" aria-hidden="true">' +
+    return '<span class="anp-tema-mini' + (mork ? ' mork' : '') + (mork && v.palett === 'jul' ? ' jul' : '') + '" style="--m-acc:' + acc + ';--m-r:' + r + '" aria-hidden="true">' +
       '<i class="m-flikar"><i class="m-flik"></i><i class="m-flik2"></i></i><i class="m-rad"><i class="m-falt"></i></i>' +
       '<i class="m-sida"><i class="m-text"></i><i class="m-text kort"></i><i class="m-knapp"></i></i></span>';
   }
@@ -413,11 +419,12 @@
   function uppdateraUi() {
     const s = $('anp-tema');
     if (!s || !s.dataset.ritad) return;
-    const v = { accent: varde('accent'), lage: lage(), densitet: varde('densitet'), horn: varde('horn'), typsnitt: varde('typsnitt'), storlek: varde('storlek') };
+    const v = { accent: varde('accent'), lage: lage(), densitet: varde('densitet'), horn: varde('horn'), typsnitt: varde('typsnitt'), storlek: varde('storlek'), palett: varde('palett') };
     const pa = (el, on) => { el.classList.toggle('on', on); el.setAttribute('aria-pressed', String(on)); };
     s.querySelectorAll('[data-namn][data-v]').forEach((b) => pa(b, v[b.dataset.namn] === b.dataset.v));
     s.querySelectorAll('[data-accent]').forEach((b) => pa(b, b.dataset.accent === v.accent));
-    s.querySelectorAll('[data-forval]').forEach((b) => { const f = FORVAL.find((x) => x.id === b.dataset.forval); pa(b, !!f && Object.keys(f.v).every((k) => v[k] === f.v[k])); });
+    // Ett kort är valt när allt det sätter stämmer, även färguppsättningen (standard för alla utom Jul)
+    s.querySelectorAll('[data-forval]').forEach((b) => { const f = FORVAL.find((x) => x.id === b.dataset.forval), fv = f && { palett: STANDARD.palett, ...f.v }; pa(b, !!f && Object.keys(fv).every((k) => v[k] === fv[k])); });
     const egen = s.querySelector('.anp-tema-egen');
     if (egen) {
       egen.classList.toggle('on', !ACCENTER.some(([h]) => h === v.accent));

@@ -57,6 +57,9 @@ async function hamtaSchema() {
 // Det som inte kan delas (typsnitt, textstorlek) får vara kvar som det är.
 function tillampa(mal, opts, s) {
   for (const [k, v] of Object.entries(temaNu())) if (!(k in mal) && delbart(k, v, s)) anpassa.satt(k, undefined, opts);
+  // Färguppsättningen (temat Jul, julfärgerna) delas inte i galleriet men hör ihop med färgerna: den nollställs, annars
+  // blandas gröna ytor med ett främmande tema. Ångra lägger tillbaka den (aterstallExakt), Behåll skriver den i historiken.
+  if (!('tema.palett' in mal)) anpassa.satt('tema.palett', undefined, opts);
   for (const [k, v] of Object.entries(mal)) anpassa.satt(k, v, opts);
 }
 // Tillbaka till exakt `fore` (alla tema.*-nycklar, även de som inte kan delas)
@@ -174,4 +177,4 @@ function init({ anpassa: a, adrazeApi, barnNagonstans, skicka }) {
   });
 }
 
-module.exports = { init, delbart };
+module.exports = { init, delbart, provar: () => !!prov };   // provar: jul.js väntar med att lägga tillbaka temat medan något provas

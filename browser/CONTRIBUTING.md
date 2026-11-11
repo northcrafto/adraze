@@ -26,6 +26,7 @@ Useful flags while developing:
 - `--remote-debugging-port=9333` — attach Chrome DevTools or a CDP script to the shell and tabs.
 - `ADRAZE_DEBUG=1` — log every blocked request to the terminal.
 - `ADRAZE_NO_UPDATES=1` — skip the update check.
+- `ADRAZE_DATUM=2026-12-05` (or `2026-12-24T09:30`) — pretend it is another date, for the Christmas theme (`jul.js`). Only the theme's own clock moves; it is active 1 December–6 January.
 
 ## Project layout
 
