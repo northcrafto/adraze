@@ -102,9 +102,11 @@
     widgetar() { stangPanel(); forsok(() => window.AnpassaStartsida.redigera()); },
     blockerare() { stangPanel(); forsok(() => createTab('adraze://adblock')); },
     inkognito() { forsok(() => window.anpassaKortkommandon.kor('inkognito')); },
+    // Bara texten och markören: ingen input-händelse, så inga sökförslag hämtas från nätet förrän man själv skriver.
+    // Texten sätts före fokus: ett tomt fält som får fokus visar listan med mest besökta sajter.
     adress(text) {
       stangPanel();
-      forsok(() => { const a = $('address'); a.focus(); a.value = text; a.setSelectionRange(text.length, text.length); a.dispatchEvent(new Event('input', { bubbles: true })); });
+      forsok(() => { const a = $('address'); a.value = text; a.focus(); a.setSelectionRange(text.length, text.length); });
     },
     kombination: (id) => { const l = forsok(() => window.AnpassaKortkommandon.kombinationer(id), []); return Array.isArray(l) && l.length ? String(l[0]) : ''; },
     snabbord: () => forsok(() => /youtube\./.test(window.AnpassaSok.url('yt x')) && /wikipedia\./.test(window.AnpassaSok.url('w x')), false),
@@ -255,15 +257,18 @@
    * Tre former med lika många punkter: stängd, på glänt (när pekaren är över) och öppen. Bladets bana ligger som
    * CSS-variabler på knappen och jul.css väljer mellan dem, så att dörren glider upp av sig själv när klassen byts. */
   const DORR = { stangd: [[[3, 3], [43, 3], [43, 43], [3, 43]], 6], glant: [[[3, 3], [38.6, 1.4], [38.6, 44.6], [3, 43]], 5], oppen: [[[3, 3], [13.6, -1.4], [13.6, 47.4], [3, 43]], 2.6] };
-  const dorrBana = (form, n) => mjuk(darr(fyrhorning(DORR[form][0], DORR[form][1]), n * 17 + 3, 0.7), true);
-  function byggDorr(n) {
-    const stangd = dorrBana('stangd', n);
+  // lut = grader dörren hänger på sned (luckan vid sökrutan). Lutningen ligger i själva ritningen: vrids hela knappen
+  // med CSS ritas den först rak och samplas sedan om, och då blir bläcklinjen och siffran suddiga på en vanlig skärm.
+  const vrid = (p, lut) => { if (!lut) return p; const v = lut * Math.PI / 180, c = Math.cos(v), si = Math.sin(v); return p.map(([x, y]) => [23 + (x - 23) * c - (y - 23) * si, 23 + (x - 23) * si + (y - 23) * c]); };
+  const dorrBana = (form, n, lut) => mjuk(vrid(darr(fyrhorning(DORR[form][0], DORR[form][1]), n * 17 + 3, 0.7), lut), true);
+  function byggDorr(n, lut) {
+    const stangd = dorrBana('stangd', n, lut);
     const b = h('button', { type: 'button', class: 'jul-dorr', 'data-n': n },
       h('span', { class: 'jul-dorr-inne' }, svg('0 0 46 46', stangd), h('b', { text: n })),
       h('span', { class: 'jul-dorr-blad' }, svg('0 0 46 46', stangd), h('b', { text: n })),
-      h('i', { class: 'jul-dorr-ny' }, svg('0 0 46 46', mjuk(darr(klick(40.5, 5.5, 5.4, n + 2, 9, 0.1), n + 5, 0.3), true))),
-      h('i', { class: 'jul-dorr-vald' }, svg('0 0 46 46', mjuk(darr(streck(6, 51, 40, 51, 4), n + 9, 0.7), false))));
-    for (const form of ['stangd', 'glant', 'oppen']) b.style.setProperty('--jd-' + form, 'path("' + dorrBana(form, n) + '")');
+      h('i', { class: 'jul-dorr-ny' }, svg('0 0 46 46', mjuk(vrid(darr(klick(40.5, 5.5, 5.4, n + 2, 9, 0.1), n + 5, 0.3), lut), true))),
+      h('i', { class: 'jul-dorr-vald' }, svg('0 0 46 46', mjuk(vrid(darr(streck(6, 51, 40, 51, 4), n + 9, 0.7), lut), false))));
+    for (const form of ['stangd', 'glant', 'oppen']) b.style.setProperty('--jd-' + form, 'path("' + dorrBana(form, n, lut) + '")');
     return b;
   }
   // läge: { oppnad, kommande, ny, vald }
@@ -283,9 +288,9 @@
   function ritaLucka() {
     if (!plats) return;
     const n = sistaLucka();
-    if (!n) { if (lucka) { lucka.remove(); lucka = null; luckaNr = 0; } return; }
+    if (!n) { if (lucka) { lucka.remove(); lucka = null; luckaNr = 0; } nt.classList.remove('jul-lucka-nere'); return; }
     if (!lucka || luckaNr !== n) {
-      const ny = byggDorr(n);
+      const ny = byggDorr(n, -3);   // hänger lite på sned
       ny.id = 'jul-lucka';
       ny.addEventListener('click', () => oppnaPanel('kalender', sistaLucka()));
       if (lucka) lucka.replaceWith(ny); else plats.append(ny);
@@ -306,6 +311,7 @@
       const fritt = document.documentElement.dir === 'rtl' ? sida.right - r.right : r.left - sida.left;
       nere = r.width > 0 && fritt < 78;   // luckan (52) och luften runt den
     }
+    nt.classList.toggle('jul-lucka-nere', nere);   // remsan längst ned lyfts lite, så att luckan går fri under den (jul.css)
     if (nere) {
       const knapp = $('anp-st-anpassa');
       const fran = knapp && knapp.offsetWidth ? knapp.offsetLeft + knapp.offsetWidth + 8 : 16;
@@ -346,6 +352,14 @@
       galler, blad, fot);
     nt.append(panel);
   }
+  // Panelen ligger vid högerkanten. Medan den är öppen flyttar kolumnen med klocka och sökruta åt sidan, som när lådan
+  // med widgetar är öppen (jul.css): annars låg panelen över sökrutans hörn och den sista genvägen i ett fönster på
+  // 1280 px. Remsan längst ned följer med om den får rum bredvid panelen, annars göms den så länge.
+  function passaPanel() {
+    const oppen = panelOppen(), smal = nt.classList.contains('anp-smal'), r = nt.querySelector('.nt-stats');
+    nt.classList.toggle('jul-panel-oppen', oppen);
+    nt.classList.toggle('jul-panel-trangt', oppen && (smal || (!!r && r.offsetWidth + 32 > nt.clientWidth - 384)));
+  }
   function rivPanel() {
     stangPanel();
     if (panel) panel.remove();
@@ -367,6 +381,7 @@
     byggPanel();
     forsok(() => window.AnpassaStartsida.klar());   // lådan med widgetar ligger på samma plats
     if (panel.hidden) { aterFokus = document.activeElement; panel.hidden = false; document.addEventListener('keydown', escTangent); }
+    passaPanel();
     if (lage === 'kalender') visaKalender(n); else visaSummering();
   }
   function sattLage(lage) {
@@ -394,6 +409,7 @@
   function stangPanel(tillbaka) {
     if (!panelOppen()) return;
     panel.hidden = true; valNr++;
+    passaPanel();
     document.removeEventListener('keydown', escTangent);
     if (blad) blad.replaceChildren();
     if (tillbaka && aterFokus && aterFokus.isConnected) fokusera(aterFokus);
@@ -635,7 +651,7 @@
       re.band.textContent = band; re.bandU.textContent = bandU;
       re.tid.textContent = tid; re.tidU.textContent = tidU;
     }
-    if (remsa.className !== fore) forsok(() => fitNtStats());
+    if (remsa.className !== fore) { forsok(() => fitNtStats()); passaPanel(); }
   }
 
   /* ── Uppdatering ── */
@@ -661,6 +677,7 @@
     const dold = nt.classList.contains('hidden');
     if (dold || nt.classList.contains('anp-redigerar') || nt.classList.contains('anp-tom') || RUTOR.some((id) => { const el = $(id); return !!el && !el.classList.contains('hidden'); })) stangPanel();
     if (dold) return;
+    passaPanel();
     placeraLucka();
     if (statGammal && delPa.stat) uppdatera();
   }
@@ -701,6 +718,7 @@
       if (lucka) lucka.remove();
       if (plats) plats.remove();
       plats = lucka = null; luckaNr = 0;
+      nt.classList.remove('jul-lucka-nere');
       vaktAv();
     },
     andrat(vad) {

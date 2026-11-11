@@ -27,9 +27,10 @@
   const forsok = (f, reserv) => { try { return f(); } catch { return reserv; } };
 
   /* ── Läget från huvudprocessen ── */
-  // { offset, test, sasong, dag, fragad, luckor, bilder }: offset = låtsat datum minus riktig tid (0 utan ADRAZE_DATUM),
-  // sasong = årtalet säsongen började eller null, fragad = frågan ska inte visas (mer) i år.
-  let lage = { offset: 0, test: false, sasong: null, dag: '', fragad: true, luckor: [], bilder: {} };
+  // { offset, test, sasong, dag, fragad, svarad, luckor, bilder }: offset = låtsat datum minus riktig tid (0 utan
+  // ADRAZE_DATUM), sasong = årtalet säsongen började eller null, fragad = ingen ny fråga ska visas (besvarad, redan
+  // visad en gång, eller inte december), svarad = frågan har fått svar (då tas den bort där den står kvar).
+  let lage = { offset: 0, test: false, sasong: null, dag: '', fragad: true, svarad: true, luckor: [], bilder: {} };
   const tolka = (l) => (l && typeof l === 'object' ? { ...lage, ...l, luckor: Array.isArray(l.luckor) ? l.luckor : [], bilder: l.bilder && typeof l.bilder === 'object' ? l.bilder : {} } : lage);
   lage = tolka(forsok(() => bro.lage(), null));
 
@@ -41,8 +42,10 @@
   /* ── Bilderna (ui/jul/) ── */
   // En <img> som fått sin bild bytt med CSS (content: url) till en fil som inte går att läsa visar en trasig bild som
   // sitter kvar. Därför räknas en bild som "finns" först när huvudprocessen ser filen OCH en provladdning har lyckats.
+  // Bilderna hämtas bara när jultemat är på: resten av året, och hos den som tackat nej, laddas ingenting.
   const bildOk = {};   // namn → true/false när provladdningen är klar
   function provladda() {
+    if (!aktiv()) return;
     for (const [namn, sokvag] of Object.entries(lage.bilder)) {
       if (!sokvag || namn in bildOk) continue;
       bildOk[namn] = null;
@@ -54,12 +57,8 @@
   }
   const bild = (namn) => (bildOk[namn] === true && lage.bilder[namn]) || null;
   const avgjord = (namn) => !lage.bilder[namn] || bildOk[namn] === true || bildOk[namn] === false;
-  // Luvan slås på först när alla bilder är provade. Saknas den mörka varianten av märket används den ljusa.
-  function luvaKlar() {
-    if (!bild('liten') || !avgjord('litenMork') || !avgjord('stor')) return false;
-    if (bild('litenMork')) root.style.removeProperty('--jul-gorilla-liten-mork'); else root.style.setProperty('--jul-gorilla-liten-mork', 'var(--jul-gorilla-liten)');
-    return true;
-  }
+  // Luvan slås på först när båda bilderna är provade. Utan märket ingen luva; utan den stora bilden bara de små ikonerna.
+  const luvaKlar = () => !!bild('liten') && avgjord('stor');
 
   /* ── Delarna ── */
   const NAMN = ['sno', 'luva', 'kalender', 'stat', 'flikar'];
@@ -94,13 +93,21 @@
   }
 
   /* ── Frågan "Vill du ha jultema?" ──
-   * En gång per jul, och bara när nya fliken syns: skalets rutor ritas under webbsidan, så över en sida syns den inte.
-   * Väntar på introt och på andra notiser (de ligger på samma plats). Inget slås på förrän man svarat Ja tack. */
-  const START = Date.now();
-  let fragaEl = null, fragaTimer = 0;
+   * EN gång per jul, bara i december, och bara när nya fliken syns: skalets rutor ritas under webbsidan, så över en
+   * sida syns den inte. Väntar på introt och på andra notiser (de ligger på samma plats). Inget slås på förrän man
+   * svarat Ja tack.
+   *
+   * Frågan räknas som ställd när den har synts i åtta sekunder (nya fliken framme, fönstret i fokus): då säger
+   * fönstret till huvudprocessen, och sedan visas den varken i fler fönster eller nästa gång AdRaze startas. Stänger
+   * man AdRaze innan dess har man knappast hunnit se den, och då kommer den nästa gång. Ett fönster som redan visar
+   * frågan behåller den tills den fått svar (i vilket fönster som helst). Den som låter den stå hittar Jultema under
+   * Inställningar › Anpassa hela julen. */
+  const START = Date.now(), SYNLIG_MS = 8000;
+  let fragaEl = null, fragaTimer = 0, egenFraga = false, synligMs = 0, synligTimer = 0;
   const RUTOR = ['settings', 'login', 'bookmarks', 'bgpick', 'qr'];
   function skaFraga() {
-    return !!sasong() && !lage.fragad && !INKOGNITO && A.get('jul.pa') !== true && !forsok(() => famLocked(), false);
+    // egenFraga = det här fönstret visar redan frågan (eller lät en annan notis gå före): den är kvar tills den fått svar
+    return !!sasong() && (egenFraga ? !lage.svarad : !lage.fragad) && !INKOGNITO && A.get('jul.pa') !== true && !forsok(() => famLocked(), false);
   }
   function nyaFlikenSyns() {
     const nt = $('newtabpage');
@@ -113,9 +120,19 @@
     return !!overst && nt.contains(overst);
   }
   const annanNotis = () => !!document.querySelector('body > .notis:not(#jul-fraga)');
-  function taBortFraga() { if (fragaEl) { const el = fragaEl; fragaEl = null; if (el.isConnected) el.remove(); } }
+  function slutaMata() { clearInterval(synligTimer); synligTimer = 0; }
+  // Räknar sekunderna frågan faktiskt syns. Efter åtta är den ställd (bro.visad), och då behövs ingen mätning mer.
+  function mataSynlig() {
+    if (synligTimer || synligMs >= SYNLIG_MS) return;
+    synligTimer = setInterval(() => {
+      if (!fragaEl || !fragaEl.isConnected || !nyaFlikenSyns() || !document.hasFocus()) return;
+      synligMs += 1000;
+      if (synligMs >= SYNLIG_MS) { slutaMata(); forsok(() => bro.visad()); }
+    }, 1000);
+  }
+  function taBortFraga() { slutaMata(); if (fragaEl) { const el = fragaEl; fragaEl = null; if (el.isConnected) el.remove(); } }
   function svara(svar) {
-    lage.fragad = true;
+    lage.fragad = lage.svarad = true; egenFraga = false; slutaMata();
     forsok(() => window.AnpassaAngra.tyst(1200));   // julfärgerna som slås på är inget man ska kunna "Ångra" i toasten
     Promise.resolve(forsok(() => bro.svara(svar))).catch(() => {});
     if (svar !== 'ja') return;
@@ -124,7 +141,7 @@
   }
   function fraga() {
     clearTimeout(fragaTimer); fragaTimer = 0;
-    if (!skaFraga()) { taBortFraga(); return; }
+    if (!skaFraga()) { egenFraga = false; taBortFraga(); return; }
     if (fragaEl && fragaEl.isConnected) {
       if (annanNotis()) taBortFraga(); else return;   // en annan notis kom: den får platsen, frågan kommer tillbaka
     }
@@ -139,7 +156,8 @@
       onKnapp: (el) => { fragaEl = null; svara('ja'); el.stang(); },
       onSek: () => { fragaEl = null; svara('nej'); },
     });
-    forsok(() => bro.visad());
+    egenFraga = true;
+    mataSynlig();
   }
 
   /* ── Inställningar › Anpassa › Jul (#anp-jul) ──

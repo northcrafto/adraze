@@ -33,10 +33,10 @@
   --jul-ink: #1b1916;
   /* Bilderna (tecknarens filer i ui/jul/). SAMMA namn som BILDER i ../jul.js – byts de, byt på båda ställena.
      Stor = hela loggan med AD-lappen och hög luva. Liten = märket med lägre luva och större tofs, gjord för 16–30 px:
-     i den är gorillan 91 % av sin vanliga storlek, så bilden visas lite större än platsen och sticker upp ovanför. */
+     i den är gorillan 91 % av sin vanliga storlek, så bilden visas lite större än platsen och sticker upp ovanför.
+     Samma märke i ljust och mörkt läge, som det vanliga märket. */
   --jul-gorilla: url(jul/gorilla-luva-512.png);
   --jul-gorilla-liten: url(jul/mark-luva.png);
-  --jul-gorilla-liten-mork: url(jul/mark-luva-dark.png);
 }
 
 
@@ -44,7 +44,9 @@
    Mörkgrönt och djuprött med varm guldaccent. Guldet är accentfärgen (tema.accent, räknas ut i anpassa-tema.js);
    här byts bara ytornas färger, som i det vanliga mörka läget är hårdkodade i input.css. Varje regel har därför
    attributet och body:not(.incog) för att vinna över dem (inkognito behåller sitt lila).
-   Falk, chatten och de små rutorna över sidan (nedladdningar, sök på sidan) är egna sidor och behåller vanligt mörkt. */
+   Falk och chatten är egna sidor och behåller vanligt mörkt. De små rutorna över sidan (nedladdningar, sök på sidan)
+   är också egna sidor: de får veta att temat Jul gäller via adressen (palettFraga i ../main.js) och har granens färger
+   i sina egna filer (find.html, downloads.html). */
 :root[data-anp-palett="jul"][data-theme="dark"] body:not(.incog) {
   background: var(--jul-gran-950); color: var(--jul-gradde);
   --anp-linje: var(--jul-gran-700);
@@ -101,6 +103,8 @@
   & #closeconf #cc-cancel { color: var(--jul-gradde); border-color: var(--jul-gran-700); }
   & #anp-palett { --p-bg: var(--jul-gran-850); --p-ink: var(--jul-gradde); --p-mut: var(--jul-dimgron); --p-faint: var(--jul-svag); --p-kant: rgb(244 236 216 / .12);
     --p-linje: var(--jul-gran-700); --p-val: rgb(244 236 216 / .08); --p-accent: var(--jul-guld); --p-kbd: var(--jul-gran-800); --p-kbd-kant: var(--jul-gran-700); }
+  /* Bokmärken och bakgrundsväljaren lägger en egen yta över hela sidan (färgen står i style-attributet i shell.html) */
+  & :is(#bookmarks, #bgpick) { background: linear-gradient(160deg, var(--jul-gran-950), var(--jul-gran-850)) !important; }
   & #anp-vf-lage { --l-bg: var(--jul-gran-925); --l-kort: var(--jul-gran-850); --l-linje: var(--jul-gran-700); --l-ink: var(--jul-gradde); --l-mut: var(--jul-dimgron); --l-yta: var(--jul-gran-900); --l-streck: var(--jul-gran-700); }
   & .anp-vf-spoke { background: var(--jul-gran-800); color: var(--jul-gradde); }
 
@@ -161,11 +165,14 @@
    med negativa marginaler: gorillan hamnar där den brukar, luvan sticker upp ovanför och inget annat flyttar sig.
    Namnet "luva" står i data-jul först när bilden bevisligen går att ladda (en saknad bild fastnar som trasig). */
 :root[data-jul~="luva"] body:not(.incog) :is(#toolbar .omni-ab .ab-mark, #tabs .tab .fav img[src="adraze-mark.png"], #newtabpage .nt-st-mark, #newtabpage .anp-blk-mark) { content: var(--jul-gorilla-liten); max-width: none; border-radius: 0; }
-:root[data-jul~="luva"][data-theme="dark"] body:not(.incog) :is(#toolbar .omni-ab .ab-mark, #tabs .tab .fav img[src="adraze-mark.png"], #newtabpage .nt-st-mark, #newtabpage .anp-blk-mark) { content: var(--jul-gorilla-liten-mork); }
 /* Blockerarknappen (platsen är 17 px): avstängd blockerare gör bilden grå som vanligt, luvan med */
 :root[data-jul~="luva"] body:not(.incog) #toolbar .omni-ab .ab-mark { width: 20px; height: 20px; margin: -3px -3px 0 0; }
 /* Flikens ikon på en ny flik och Blockerat-widgeten (16 px) */
 :root[data-jul~="luva"] body:not(.incog) :is(#tabs .tab .fav img[src="adraze-mark.png"], #newtabpage .anp-blk-mark) { width: 18px; height: 18px; margin: -2px -2px 0 0; }
+/* Temat Jul: den aktiva fliken är röd och luvan är röd. En tunn gräddvit kant runt märket, som på ett klistermärke,
+   gör att luvan syns mot fliken (annars bärs den bara av den vita kanten och tofsen). */
+:root[data-jul~="luva"][data-anp-palett="jul"][data-theme="dark"] body:not(.incog) #tabs .tab.active .fav img[src="adraze-mark.png"] {
+  filter: drop-shadow(.6px 0 0 var(--jul-gradde)) drop-shadow(-.6px 0 0 var(--jul-gradde)) drop-shadow(0 .6px 0 var(--jul-gradde)) drop-shadow(0 -.6px 0 var(--jul-gradde)); }
 /* Statistikremsan (30 px) */
 :root[data-jul~="luva"] body:not(.incog) #newtabpage .nt-st-mark { width: 34px; height: 34px; margin: -4px -4px 0 0; }
 /* Loggan ovanför sökrutan (startsida.logga, 46 px): hela gorillan med AD-lappen. Då visas ingen egen stor gorilla. */
@@ -195,8 +202,13 @@
    Ett lager i #newtabpage, bakom kolumnen med klocka och sökruta (z 10) och framför bilden. Högst 40 flingor.
    Varje flinga är en liten bild som faller med en transform-animation och svajar med en translate-animation: båda
    körs av grafikprocessen, utan layout och utan skript per bildruta. Inga skuggor, ingen oskärpa, inga masker.
+   Animationerna går i steg, 30 i sekunden och alla flingor på samma klocka (--n = fallets steg, --nv = svajningens
+   steg per åttondel, jul-pynt.js): mellan stegen behöver ingenting ritas om, vilket halverar arbetet på en vanlig
+   skärm. Fallet är jämnt; svajningen följer en mjuk båge (åtta raka bitar av en sinuskurva), så att flingan saktar in
+   innan den vänder.
    Avstånden är i lagrets egen höjd (cqh). Står still när fliken inte syns (#newtabpage är display: none då), pausas
-   när en ruta ligger över (klassen jul-paus, jul-pynt.js) och är helt stilla med Minska rörelse. */
+   när en ruta ligger över, när fönstret inte har fokus och när ingen rört mus eller tangentbord på en stund (klassen
+   jul-paus, jul-pynt.js), och är helt stilla med Minska rörelse. */
 :root {
   /* Handritade former i snövitt (--jul-sno): två ojämna prickar och två flingor */
   --jul-flinga-1: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='%23fdfcf8'%3E%3Cpath d='M6.3.9C8.9.6 11.2 2.6 11.3 5.5 11.5 8.3 9.4 10.8 6.5 11.1 3.6 11.3 1 9.3.8 6.3.6 3.5 3 1.2 6.3.9Z'/%3E%3C/svg%3E");
@@ -209,16 +221,27 @@
 :root[data-jul~="sno"] body:not(.incog) #newtabpage.anp-tom #jul-sno { display: none; }
 :root[data-jul~="sno"] body:not(.incog) #jul-sno .jul-flinga { position: absolute; top: 0; left: var(--x); width: var(--s); height: var(--s); opacity: var(--o);
   background: var(--jul-flinga-1) center / contain no-repeat; will-change: transform;
-  animation: jul-fall var(--t) linear var(--d) infinite, jul-svaj var(--tv) ease-in-out var(--dv) infinite alternate; }
+  animation: jul-fall var(--t) steps(var(--n)) var(--d) infinite, jul-svaj var(--tv) steps(var(--nv)) var(--dv) infinite alternate; }
 :root[data-jul~="sno"] body:not(.incog) #jul-sno .jul-f2 { background-image: var(--jul-flinga-2); }
 :root[data-jul~="sno"] body:not(.incog) #jul-sno .jul-f3 { background-image: var(--jul-flinga-3); }
 :root[data-jul~="sno"] body:not(.incog) #jul-sno .jul-f4 { background-image: var(--jul-flinga-4); }
 @keyframes jul-fall { from { transform: translateY(calc(-2cqh - 20px)) rotate(0deg); } to { transform: translateY(102cqh) rotate(var(--r, 0deg)); } }
-@keyframes jul-svaj { from { translate: calc(var(--v) * -1) 0; } to { translate: var(--v) 0; } }
+@keyframes jul-svaj {
+  0% { translate: calc(var(--v) * -1) 0; } 12.5% { translate: calc(var(--v) * -.9239) 0; } 25% { translate: calc(var(--v) * -.7071) 0; } 37.5% { translate: calc(var(--v) * -.3827) 0; }
+  50% { translate: 0 0; } 62.5% { translate: calc(var(--v) * .3827) 0; } 75% { translate: calc(var(--v) * .7071) 0; } 87.5% { translate: calc(var(--v) * .9239) 0; } 100% { translate: var(--v) 0; }
+}
 :root[data-jul~="sno"] body:not(.incog) #jul-sno.jul-paus .jul-flinga { animation-play-state: paused; }
 /* Minska rörelse (inställningen eller systemet): flingorna hänger stilla där de är utspridda */
 :root[data-jul~="sno"] body.reduce-motion:not(.incog) #jul-sno .jul-flinga { animation: none; will-change: auto; transform: translateY(var(--y)); }
 @media (prefers-reduced-motion: reduce) { :root[data-jul~="sno"] body:not(.incog) #jul-sno .jul-flinga { animation: none; will-change: auto; transform: translateY(var(--y)); } }
+/* Medan snön faller är oskärpan bakom glasrutorna av (sökrutan, genvägarna, remsan, widgetarna): den måste annars
+   räknas om för varje steg snön tar, och utan grafikkort kostade det mer än dubbelt så mycket som själva snön.
+   Remsan och widgetarna blir lite tätare i stället. Med Minska rörelse står flingorna still, och då är oskärpan kvar. */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-jul~="sno"] body:not(.incog, .reduce-motion) #newtabpage:not(.anp-tom) :is(.anp-st-sok, .sc-tile, .nt-stats, #anp-st-anpassa, .anp-w) { backdrop-filter: none; }
+  :root[data-jul~="sno"] body:not(.incog, .reduce-motion) #newtabpage:not(.anp-tom, .anp-utan-bild) .nt-stats { background-color: rgb(10 10 12 / .72); }
+  :root[data-jul~="sno"] body:not(.incog, .reduce-motion) #newtabpage:not(.anp-tom, .anp-utan-bild, .anp-solid) { --anp-bg: rgb(10 12 16 / .6); }
+}
 /* Ljus sida utan bild (ljust tema): vit snö syns inte mot nästan vitt, så den blir blågrå */
 :root[data-jul~="sno"]:not([data-theme="dark"]) body:not(.incog) #newtabpage.anp-utan-bild #jul-sno {
   --jul-flinga-1: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='%238b9fb3'%3E%3Cpath d='M6.3.9C8.9.6 11.2 2.6 11.3 5.5 11.5 8.3 9.4 10.8 6.5 11.1 3.6 11.3 1 9.3.8 6.3.6 3.5 3 1.2 6.3.9Z'/%3E%3C/svg%3E");
@@ -243,9 +266,10 @@
    flikens egen rundning. Varje flik börjar på sitt eget ställe i remsan, så att två flikar inte får samma snö.
    Ingen animation, bara samma korta toning som flikens egen bakgrund. Aldrig på en inkognitoflik. */
 :root {
-  /* Snövitt med blågrå skuggkant (mörkt läge och temat Jul); i ljust läge vitt med tydligare skuggkant och en svag kontur */
+  /* Snövitt med blågrå skuggkant (mörkt läge och temat Jul). I ljust läge är fliken själv vit: där dras underkanten med
+     bläck, som luvans vita kant – en blek skugga syntes bara som ett blått streck. */
   --jul-tacke: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='12' viewBox='0 0 240 12' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cpath id='s' d='M-21 0.7 Q-9 1.4 -4.5 1.8 Q0 2.2 5 1.6 Q10 0.9 16 0.6 Q22 0.3 27 0.3 Q32 0.4 37.5 1 Q43 1.6 47.5 2.4 Q52 3.2 57 2.8 Q62 2.4 68 1.6 Q74 0.8 81 0.5 Q88 0.2 94 0.3 Q100 0.5 106 1.1 Q112 1.8 118 2.4 Q124 2.9 127.5 3.1 Q131 3.3 136 2.6 Q141 2 147.5 1.4 Q154 0.7 160 0.5 Q166 0.3 172 0.4 Q178 0.6 183 1.3 Q188 1.9 192.5 2.5 Q197 3.1 202 2.5 Q207 1.9 213 1.3 Q219 0.7 225 1 Q231 1.4 235.5 1.8 Q240 2.2 245 1.6 Q250 0.9 256 0.6 L262 0.3 L264 6.5 Q252 7.7 246 7.3 Q240 7 233 6.5 Q226 6.1 219 6.4 Q212 6.7 207.5 7.3 Q203 7.9 196.5 7.3 Q190 6.6 181 6.3 Q172 6 164.5 6.5 Q157 7.1 153.5 8.1 Q150 9 146 8.2 Q142 7.4 136 7.2 Q130 6.9 123 7 Q116 7.1 108 6.8 Q100 6.4 91 6.2 Q82 5.9 73.5 6.4 Q65 6.9 61.5 7.9 Q58 8.8 54.5 8 Q51 7.2 45 6.5 Q39 5.8 31.5 6.2 Q24 6.5 18 7.1 Q12 7.7 6 7.3 Q0 7 -7 6.5 Q-14 6.1 -21 6.4 L-28 6.7Z'/%3E%3C/defs%3E%3Cuse href='%23s' y='1.1' fill='%23b4c2d1'/%3E%3Cuse href='%23s' fill='%23fdfcf8'/%3E%3C/svg%3E");
-  --jul-tacke-ljust: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='12' viewBox='0 0 240 12' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cpath id='s' d='M-21 0.7 Q-9 1.4 -4.5 1.8 Q0 2.2 5 1.6 Q10 0.9 16 0.6 Q22 0.3 27 0.3 Q32 0.4 37.5 1 Q43 1.6 47.5 2.4 Q52 3.2 57 2.8 Q62 2.4 68 1.6 Q74 0.8 81 0.5 Q88 0.2 94 0.3 Q100 0.5 106 1.1 Q112 1.8 118 2.4 Q124 2.9 127.5 3.1 Q131 3.3 136 2.6 Q141 2 147.5 1.4 Q154 0.7 160 0.5 Q166 0.3 172 0.4 Q178 0.6 183 1.3 Q188 1.9 192.5 2.5 Q197 3.1 202 2.5 Q207 1.9 213 1.3 Q219 0.7 225 1 Q231 1.4 235.5 1.8 Q240 2.2 245 1.6 Q250 0.9 256 0.6 L262 0.3 L264 6.5 Q252 7.7 246 7.3 Q240 7 233 6.5 Q226 6.1 219 6.4 Q212 6.7 207.5 7.3 Q203 7.9 196.5 7.3 Q190 6.6 181 6.3 Q172 6 164.5 6.5 Q157 7.1 153.5 8.1 Q150 9 146 8.2 Q142 7.4 136 7.2 Q130 6.9 123 7 Q116 7.1 108 6.8 Q100 6.4 91 6.2 Q82 5.9 73.5 6.4 Q65 6.9 61.5 7.9 Q58 8.8 54.5 8 Q51 7.2 45 6.5 Q39 5.8 31.5 6.2 Q24 6.5 18 7.1 Q12 7.7 6 7.3 Q0 7 -7 6.5 Q-14 6.1 -21 6.4 L-28 6.7Z'/%3E%3C/defs%3E%3Cuse href='%23s' y='1.7' fill='%23a3b8cf'/%3E%3Cuse href='%23s' fill='%23ffffff' stroke='%23c3cfdc' stroke-width='0.7'/%3E%3C/svg%3E");
+  --jul-tacke-ljust: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='12' viewBox='0 0 240 12' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cpath id='s' d='M-21 0.7 Q-9 1.4 -4.5 1.8 Q0 2.2 5 1.6 Q10 0.9 16 0.6 Q22 0.3 27 0.3 Q32 0.4 37.5 1 Q43 1.6 47.5 2.4 Q52 3.2 57 2.8 Q62 2.4 68 1.6 Q74 0.8 81 0.5 Q88 0.2 94 0.3 Q100 0.5 106 1.1 Q112 1.8 118 2.4 Q124 2.9 127.5 3.1 Q131 3.3 136 2.6 Q141 2 147.5 1.4 Q154 0.7 160 0.5 Q166 0.3 172 0.4 Q178 0.6 183 1.3 Q188 1.9 192.5 2.5 Q197 3.1 202 2.5 Q207 1.9 213 1.3 Q219 0.7 225 1 Q231 1.4 235.5 1.8 Q240 2.2 245 1.6 Q250 0.9 256 0.6 L262 0.3 L264 6.5 Q252 7.7 246 7.3 Q240 7 233 6.5 Q226 6.1 219 6.4 Q212 6.7 207.5 7.3 Q203 7.9 196.5 7.3 Q190 6.6 181 6.3 Q172 6 164.5 6.5 Q157 7.1 153.5 8.1 Q150 9 146 8.2 Q142 7.4 136 7.2 Q130 6.9 123 7 Q116 7.1 108 6.8 Q100 6.4 91 6.2 Q82 5.9 73.5 6.4 Q65 6.9 61.5 7.9 Q58 8.8 54.5 8 Q51 7.2 45 6.5 Q39 5.8 31.5 6.2 Q24 6.5 18 7.1 Q12 7.7 6 7.3 Q0 7 -7 6.5 Q-14 6.1 -21 6.4 L-28 6.7Z'/%3E%3C/defs%3E%3Cuse href='%23s' fill='%23fdfcf8'/%3E%3Cpath d='M-28 6.7 Q-14 6.1 -7 6.5 Q0 7 6 7.3 Q12 7.7 18 7.1 Q24 6.5 31.5 6.2 Q39 5.8 45 6.5 Q51 7.2 54.5 8 Q58 8.8 61.5 7.9 Q65 6.9 73.5 6.4 Q82 5.9 91 6.2 Q100 6.4 108 6.8 Q116 7.1 123 7 Q130 6.9 136 7.2 Q142 7.4 146 8.2 Q150 9 153.5 8.1 Q157 7.1 164.5 6.5 Q172 6 181 6.3 Q190 6.6 196.5 7.3 Q203 7.9 207.5 7.3 Q212 6.7 219 6.4 Q226 6.1 233 6.5 Q240 7 246 7.3 Q252 7.7 258 7.1 L264 6.5' fill='none' stroke='%231b1916' stroke-width='1' stroke-linecap='round'/%3E%3C/svg%3E");
 }
 :root[data-jul~="flikar"] body:not(.incog) {
   --jul-tak: 4px;
@@ -325,16 +349,20 @@
   & .jul-dorr:focus-visible { outline: 2px solid var(--jk-klick); outline-offset: 4px; border-radius: 9px; }
 
   /* Luckan på nya fliken: till vänster om sökrutan, i en plats lika bred som sökrutan men utan höjd.
+     Den hänger lite på sned: lutningen ligger i ritningen (jul-kalender.js), inte i CSS, så att linjerna är skarpa.
      Är dagens lucka inte öppnad knackar den till en gång varje gång nya fliken visas. */
   & #jul-lucka-plats { display: block; position: relative; flex: none; width: min(560px, 92%); height: 0; }
-  & #jul-lucka { display: block; position: absolute; inset-inline-end: calc(100% + 18px); bottom: 0; width: 52px; height: 52px; rotate: -3deg; filter: drop-shadow(0 5px 10px rgb(0 0 0 / .32)); }
+  & #jul-lucka { display: block; position: absolute; inset-inline-end: calc(100% + 18px); bottom: 0; width: 52px; height: 52px; filter: drop-shadow(0 5px 10px rgb(0 0 0 / .32)); }
   & #jul-lucka b { font-size: 21px; }
   & #jul-lucka.ny { animation: jul-knack .9s .6s 1 both; }
-  /* Får den inte rum bredvid sökrutan (smalt fönster, sökrutan avstängd): nere bredvid Anpassa-knappen */
-  & #jul-lucka.jul-nere { z-index: 12; inset-inline-end: auto; bottom: 10px; width: 40px; height: 40px; }
-  & #jul-lucka.jul-nere b { font-size: 16px; }
+  /* Får den inte rum bredvid sökrutan (smal sida, sökrutan avstängd): nere bredvid Anpassa-knappen, i samma höjd som
+     den. Remsan längst ned lyfts då lite, så att luckan (och knappen) går fri under den när remsan är bred. */
+  & #jul-lucka.jul-nere { z-index: 12; inset-inline-end: auto; bottom: 13px; width: 34px; height: 34px; }
+  & #jul-lucka.jul-nere b { font-size: 14.5px; }
+  & #newtabpage.jul-lucka-nere > .nt-stats { bottom: 52px; }
   & #newtabpage.anp-redigerar #jul-lucka { opacity: .4; pointer-events: none; transition: opacity .2s; }
-  & #newtabpage.anp-tom #jul-lucka, & #newtabpage.anp-redigerar #jul-lucka.jul-nere { display: none; }
+  /* Nere bredvid Anpassa-knappen ligger den över det som rullar förbi: borta i redigeringsläget, och medan panelen är öppen */
+  & #newtabpage.anp-tom #jul-lucka, & #newtabpage:is(.anp-redigerar, .jul-panel-oppen) #jul-lucka.jul-nere { display: none; }
   & .jul-kal-luckor .jul-dorr { width: 100%; height: auto; aspect-ratio: 1; }
 
   /* Minska rörelse (inställningen eller systemet): dörren står öppen direkt, luckan knackar inte */
@@ -346,7 +374,7 @@
   }
   @media (max-height: 800px) { & .jul-kal-luckor .jul-dorr b { font-size: 15.5px; } }
 }
-@keyframes jul-knack { 0%, 100% { rotate: -3deg; } 18% { rotate: 4deg; } 38% { rotate: -8deg; } 58% { rotate: 1deg; } 78% { rotate: -5deg; } }
+@keyframes jul-knack { 0%, 100% { rotate: 0deg; } 18% { rotate: 7deg; } 38% { rotate: -5deg; } 58% { rotate: 4deg; } 78% { rotate: -2deg; } }
 /* På den ljusa sidan utan bild (ljust tema) räcker en lätt skugga */
 :root[data-jul~="kalender"]:not([data-theme="dark"]) body:not(.incog) #newtabpage.anp-utan-bild #jul-lucka { filter: drop-shadow(0 3px 6px rgb(31 30 27 / .16)); }
 
@@ -355,6 +383,15 @@
   & #jul-kalender { display: flex; flex-direction: column; position: absolute; z-index: 25; top: 12px; inset-inline-end: 14px; width: 352px; max-width: calc(100% - 28px); max-height: calc(100% - 24px); overflow: hidden; text-align: start;
     color: var(--jk-text); background: var(--jk-bg); border-radius: 16px; box-shadow: 0 24px 70px rgb(20 19 17 / .34), 0 0 0 1px rgb(31 30 27 / .08); animation: jul-kal-in .26s cubic-bezier(.2, .8, .2, 1); }
   & #jul-kalender[hidden] { display: none; }
+  /* Medan panelen är öppen flyttar kolumnen åt sidan, precis som när lådan med widgetar är öppen (redigeringsläget i
+     input.css): annars ligger panelen över sökrutans hörn och den sista genvägen i ett fönster på 1280 px. Remsan
+     längst ned följer med; får den inte rum bredvid panelen göms den så länge (jul-panel-trangt, jul-kalender.js).
+     I ett smalt fönster ligger panelen över sidan, som lådan gör, och sidan bakom tonas ned. */
+  & #newtabpage.jul-panel-oppen:not(.anp-smal) .anp-st-inre { padding-inline-end: 384px; }
+  & #newtabpage.jul-panel-oppen:not(.anp-smal) > .nt-stats { left: calc(50% - 192px); }
+  :root[dir="rtl"] & #newtabpage.jul-panel-oppen:not(.anp-smal) > .nt-stats { left: calc(50% + 192px); }   /* panelen står till vänster då */
+  & #newtabpage.jul-panel-trangt > .nt-stats { visibility: hidden; }
+  & #newtabpage.jul-panel-oppen.anp-smal #jul-kalender { box-shadow: 0 0 0 100vmax rgb(12 11 10 / .5), 0 24px 70px rgb(0 0 0 / .45); }
   & .jul-kal-topp { flex: none; display: flex; align-items: flex-start; gap: 12px; padding: 18px 16px 10px 22px; }
   & .jul-kal-topp > div { flex: 1; min-width: 0; }
   & .jul-kal-topp h2 { font-family: var(--font-display); font-size: 25px; font-weight: 560; line-height: 1.1; letter-spacing: -.02em; font-variation-settings: "opsz" 28; }

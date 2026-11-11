@@ -3,3 +3,5 @@ dist/
 dist-installer/
 *.bak
 native/adblock/build/
+# Skärmdumpar av jultemat att titta på (tas om vid behov)
+jul-bilder/

@@ -46,7 +46,9 @@ const { ipcRenderer, webFrame } = require('electron');
 
   // Sidans egen värld först, så vakten (och scriptlets) hinner före sidans skript
   const huvud = [...(start.skydd || []), start.skript.guard];   // skydden (fingeravtryck m.m.) allra först
-  document.addEventListener('adraze-injektion', () => { try { ipcRenderer.send('adraze:rakna', 'ad'); } catch {} });
+  // Sidskyddet säger till när det stoppat en injektion. Händelsens namn är slumpat för den här ramen (adblock-adraze.js)
+  // och känt bara här och i skyddets egen kod: sidan kan inte skicka den själv och räkna upp statistiken.
+  if (start.handelse) document.addEventListener(String(start.handelse), () => { try { ipcRenderer.send('adraze:rakna', 'ad'); } catch {} });
   if (start.skript.scriptlets) huvud.push(start.skript.scriptlets);   // ##+js(...) för den här värden
   if (/(^|\.)youtube(-nocookie)?\.com$/.test(location.hostname)) huvud.push(start.skript.youtube);
   for (const s of huvud) if (s) { try { webFrame.executeJavaScript(s).catch(() => {}); } catch {} }

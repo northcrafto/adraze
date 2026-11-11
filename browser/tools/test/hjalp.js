@@ -54,7 +54,7 @@ function testMiljo(display, profil, extra = {}) {
   return { ...env, DISPLAY: display, XDG_RUNTIME_DIR: rt, XDG_CONFIG_HOME: path.join(profil, 'config'), ADRAZE_NO_UPDATES: '1', ADRAZE_DATUM: '2026-07-01', ...extra };
 }
 
-// Startar ett program (dev-electron eller AppImage) i en egen processgrupp och loggar till fil
+// Startar ett program (dev-electron eller AppImage) fristående (det överlever inte testet: stang() nedan) och loggar till fil
 function starta(prog, args, env, loggfil) {
   const ut = fs.openSync(loggfil, 'a');
   const p = spawn(prog, ['--ozone-platform=x11', ...args], { env, stdio: ['ignore', ut, ut], detached: true });
@@ -71,15 +71,25 @@ function lever(pid) { try { process.kill(pid, 0); return true; } catch { return 
 function kommando(pid) { try { return fs.readFileSync('/proc/' + pid + '/cmdline', 'utf8').split('\0').join(' ').trim().split(/\s+/).filter(Boolean); } catch { return []; } }
 
 // Stänger snällt (SIGTERM = app.quit) och väntar; returnerar true om allt dog av sig självt.
-// Sedan SIGKILL på hela gruppen och bort med en ev. kvarlämnad AppImage-montering.
+// Det som är kvar får sedan SIGKILL – varje process för sig, via sin PID, och bara de som bevisligen hör till testet
+// (processer under den vi startade, som fortfarande kör samma program). Aldrig på processgruppen: en grupp kan
+// innehålla mer än man tror. Sist tas en ev. kvarlämnad AppImage-montering bort.
 async function stang(p, ms = 15000) {
+  const kanda = new Map();   // pid → programmet (argv[0]) när vi såg processen i trädet under p
+  const minns = () => { for (const b of [p.pid, ...allaUnder(p.pid)]) { const c = kommando(b); if (c.length && !kanda.has(b)) kanda.set(b, c[0]); } };
+  minns();
   const monteringar = new Set();
-  for (const b of [p.pid, ...allaUnder(p.pid)]) { const m = (kommando(b)[0] || '').match(/^(\/tmp\/\.mount_[^/]+)\//); if (m) monteringar.add(m[1]); }
-  const huvud = [p.pid, ...allaUnder(p.pid)].find((b) => { const c = kommando(b); return c.length && !c.some((a) => a.startsWith('--type=')) && /adraze-browser(\.bin)?$|electron$/.test(c[0]); }) || p.pid;
+  for (const prog of kanda.values()) { const m = (prog || '').match(/^(\/tmp\/\.mount_[^/]+)\//); if (m) monteringar.add(m[1]); }
+  const huvud = [...kanda.keys()].find((b) => { const c = kommando(b); return c.length && !c.some((a) => a.startsWith('--type=')) && /adraze-browser(\.bin)?$|electron$/.test(c[0]); }) || p.pid;
   try { process.kill(huvud, 'SIGTERM'); } catch {}
   let snallt = false;
-  for (let i = 0; i < ms / 100; i++) { if (!lever(p.pid) || kommando(p.pid).length === 0) { snallt = true; break; } await sov(100); }
-  try { process.kill(-p.pid, 'SIGKILL'); } catch {}
+  for (let i = 0; i < ms / 100; i++) {
+    if (!lever(p.pid) || kommando(p.pid).length === 0) { snallt = true; break; }
+    if (i % 5 === 0) minns();   // barn som kommit till under tiden (när huvudprocessen dött syns de inte längre under den)
+    await sov(100);
+  }
+  minns();
+  for (const [b, prog] of kanda) { if (lever(b) && kommando(b)[0] === prog) { try { process.kill(b, 'SIGKILL'); } catch {} } }
   await sov(300);
   for (const m of monteringar) { try { execFileSync('fusermount', ['-uz', m], { stdio: 'ignore' }); } catch {} }
   return snallt;

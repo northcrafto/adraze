@@ -139,10 +139,15 @@ function setFull(ctx, want) {
 }
 function toggleFull(ctx) { setFull(ctx, !ctx.win.isFullScreen()); }
 function sendTo(ctx, ...a) { if (ctx && ctx.win && !ctx.win.isDestroyed()) ctx.win.webContents.send(...a); }
-function broadcast(...a) {
-  wins.forEach((ctx) => sendTo(ctx, ...a));
-  if (a[0] === 'download-update') pushDownloadPopups();
-  else if (a[0] === 'adblock:hit') jul.raknaTraff(a[1]);   // stoppat per dag (en gång, oavsett antal fönster)
+function broadcast(...a) { wins.forEach((ctx) => sendTo(ctx, ...a)); if (a[0] === 'download-update') pushDownloadPopups(); }
+// Något stoppades (annons, spårare, kakruta, popup-fönster): säg till fönstren, och räkna det i julens räknare per dag
+// (jul.js) – en gång oavsett antal fönster, och aldrig från inkognitosessionen (den lämnar inga spår på disk, inte
+// ens ett antal på ett datum). sess = sessionen stoppet kom från.
+function traff(typ, sess) {
+  broadcast('adblock:hit', typ);
+  let inkognito = false;
+  try { inkognito = incognitoAdblockDone && !!sess && sess === session.fromPartition('skoll-incognito'); } catch {}
+  if (!inkognito) jul.raknaTraff(typ);
 }
 /* Nedladdnings-popup = WebContentsView OVANPÅ fliken (ej separat fönster: Wayland kan ej
  * positionera fönster; ej DOM-overlay: flikens native-vy ritas ovanpå skalets HTML och skulle
@@ -167,6 +172,9 @@ function closeDlPopup(ctx) {
   if (ctx._dlRepos) { try { ctx.win.removeListener('resize', ctx._dlRepos); ctx.win.removeListener('move', ctx._dlRepos); } catch {} ctx._dlRepos = null; }
   ctx.dlView = null;
 }
+// De små rutorna över sidan (nedladdningar, sök på sidan) är egna sidor: de får veta om temat Jul gäller (tema.palett),
+// så att de inte ligger grafitgrå under en grön verktygsrad. De läser själva om läget är mörkt.
+const palettFraga = () => (anpassa.hamta('tema.palett') === 'jul' ? { palett: 'jul' } : {});
 function openDlPopup(ctx) {
   if (!ctx || !ctx.win || ctx.win.isDestroyed()) return;
   if (ctx.dlView) { try { ctx.win.contentView.addChildView(ctx.dlView); } catch {} positionDlPopup(ctx); ctx.dlView.webContents.send('dl-data', downloads); return; }  // redan öppen → höj + uppdatera
@@ -179,7 +187,7 @@ function openDlPopup(ctx) {
   const repos = () => positionDlPopup(ctx);
   ctx._dlRepos = repos;
   ctx.win.on('resize', repos); ctx.win.on('move', repos);
-  view.webContents.loadFile(path.join(__dirname, 'ui', 'downloads.html'));
+  view.webContents.loadFile(path.join(__dirname, 'ui', 'downloads.html'), { query: palettFraga() });
   view.webContents.on('did-finish-load', () => { view.webContents.send('dl-data', downloads); });
 }
 
@@ -204,7 +212,7 @@ async function openFind(ctx, text) {
     ctx.win.contentView.addChildView(view);
     positionFind(ctx);
     const t = JSON.stringify({ 'Sök på sidan': T('Sök på sidan') });
-    await view.webContents.loadFile(path.join(__dirname, 'ui', 'find.html'), { query: { theme, t } }).catch(() => {});
+    await view.webContents.loadFile(path.join(__dirname, 'ui', 'find.html'), { query: { theme, t, ...palettFraga() } }).catch(() => {});
   } else { try { ctx.win.contentView.addChildView(ctx.findView); } catch {} positionFind(ctx); }
   try { ctx.findView.webContents.focus(); ctx.findView.webContents.send('find-focus', text || ''); } catch {}
 }
@@ -277,14 +285,14 @@ const adblock = new AdrazeAdblock({
   isOn: () => adblockOn,
   inst: blockinst,
   // kat: 'ad' | 'tracker' | 'danger' – samma indelning som tilläggets ads/privacy/security
-  onBlocked: (url, kat, typ, wcId) => {
+  onBlocked: (url, kat, typ, wcId, sess) => {
     adblockCount++; broadcast('adblock:count', adblockCount);
     flikBlockerad(wcId);
     if (process.env.ADRAZE_DEBUG) console.log('[adraze] stoppad', kat, typ, url.slice(0, 140));
     if (kat === 'danger' && typ === 'main_frame') return;   // räknas av skalets varning (en gång per sida)
-    broadcast('adblock:hit', kat === 'ad' && hostCategory(url) === 'tracker' ? 'tracker' : kat);
+    traff(kat === 'ad' && hostCategory(url) === 'tracker' ? 'tracker' : kat, sess);
   },
-  onCount: (typ) => broadcast('adblock:hit', typ),
+  onCount: (typ, sess) => traff(typ, sess),
 });
 adblock.forhand = (d) => webb.upgradeUrl(d);   // endast HTTPS (webbinst.js)
 /* ── Familjespärren i huvudprocessen ──
@@ -834,7 +842,7 @@ function ensureView(ctx, tabId) {
       const lc = wc.__lastClick;
       if (!(lc && Date.now() - lc.t < 5000)) {
         e.preventDefault();
-        adblockCount++; broadcast('adblock:count', adblockCount); broadcast('adblock:hit', 'ad'); flikBlockerad(wc);
+        adblockCount++; broadcast('adblock:count', adblockCount); traff('ad', wc.session); flikBlockerad(wc);
         sendTo(ctx, 'toast', T('AdRaze stoppade en omdirigering till') + ' ' + (siteOf(url) || url));
         return;
       }

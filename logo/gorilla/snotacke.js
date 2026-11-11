@@ -21,18 +21,23 @@ const period = (P, dy) => [-1, 0, 1].flatMap((k) => P.map(([x, y]) => [x + k * B
 // (talen skrivs kort: 24 i stället för 24.0)
 const bana = (smooth(period(TOPP, 0)) + ' ' + smooth(period(KANT, TAK).reverse()).replace(/^M/, 'L') + 'Z').replace(/\.0(?![0-9])/g, '');
 
+// Underkanten för sig, som en öppen linje (ljust läge, se nedan)
+const kantlinje = smooth(period(KANT, TAK)).replace(/\.0(?![0-9])/g, '');
+
 // Skuggan är samma form en dryg pixel längre ned, under snön: en kant som blir tunnare där underkanten är brant.
-// kontur = en tunn linje runt snön (ljust läge, där fliken själv är vit). preserveAspectRatio='none': remsan trycks
-// ihop i höjdled på en kompakt flikrad och i sidled på smala flikar, och ska då fylla hela sin ruta.
-function bild({ sno, skugga, ned = 1.1, kontur, tjock = 0.9 }) {
+// linje = underkanten dragen med bläck, som luvans vita kant (ljust läge, där fliken själv är vit och en blek skugga
+// inte räcker: snön syntes bara som ett blekblått streck). preserveAspectRatio='none': remsan trycks ihop i höjdled på
+// en kompakt flikrad och i sidled på smala flikar, och ska då fylla hela sin ruta.
+function bild({ sno, skugga, ned = 1.1, linje, tjock = 1 }) {
   return `<svg xmlns='http://www.w3.org/2000/svg' width='${B}' height='${H}' viewBox='0 0 ${B} ${H}' preserveAspectRatio='none'><defs><path id='s' d='${bana}'/></defs>` +
-    `<use href='#s' y='${ned}' fill='${skugga}'/><use href='#s' fill='${sno}'${kontur ? ` stroke='${kontur}' stroke-width='${tjock}'` : ''}/></svg>`;
+    (skugga ? `<use href='#s' y='${ned}' fill='${skugga}'/>` : '') + `<use href='#s' fill='${sno}'/>` +
+    (linje ? `<path d='${kantlinje}' fill='none' stroke='${linje}' stroke-width='${tjock}' stroke-linecap='round'/>` : '') + `</svg>`;
 }
 const BILDER = {
   // Mörkt läge och temat Jul: snövitt (--jul-sno) med blågrå skuggkant
   '--jul-tacke': bild({ sno: '#fdfcf8', skugga: '#b4c2d1' }),
-  // Ljust läge (fliken är vit, flikraden nästan vit): vitt med tydligare blågrå skuggkant och en svag kontur upptill
-  '--jul-tacke-ljust': bild({ sno: '#ffffff', skugga: '#a3b8cf', ned: 1.7, kontur: '#c3cfdc', tjock: 0.7 }),
+  // Ljust läge (fliken är vit, flikraden nästan vit): snövitt med en bläcklinje längs underkanten, som luvans kant
+  '--jul-tacke-ljust': bild({ sno: '#fdfcf8', linje: '#1b1916' }),
 };
 const uri = (s) => 'url("data:image/svg+xml,' + s.replace(/#/g, '%23').replace(/</g, '%3C').replace(/>/g, '%3E') + '")';
 

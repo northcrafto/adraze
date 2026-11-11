@@ -36,7 +36,8 @@
     { id: 'skog', namn: 'Skog', v: { accent: '#2f9e67', lage: 'ljust', horn: 'rund', densitet: 'luftig' } },
     { id: 'natt', namn: 'Natt', v: { accent: '#3b6fe0', lage: 'morkt', horn: 'normal', densitet: 'normal' } },
     { id: 'sand', namn: 'Sand', v: { accent: '#e8a317', lage: 'ljust', horn: 'rund', densitet: 'normal' } },
-    // Jul: SAMMA värden som julfärgerna (TEMA i ../jul.js) – ändra på båda ställena. Går att välja året runt.
+    // Jul: SAMMA färger (accent, läge, färguppsättning) som julfärgerna (TEMA i ../jul.js) – ändra på båda ställena.
+    // Går att välja året runt. Kortet sätter också hörn och täthet, som de andra korten; julfärgerna gör det inte.
     { id: 'jul', namn: 'Jul', v: { accent: '#d9a441', lage: 'morkt', horn: 'normal', densitet: 'normal', palett: 'jul' } },
     { id: 'hav', namn: 'Hav', v: { accent: '#0b8a8f', lage: 'system', horn: 'normal', densitet: 'normal' } },
     { id: 'grafit', namn: 'Grafit', v: { accent: '#5f6b7a', lage: 'morkt', horn: 'kantig', densitet: 'kompakt' } },
@@ -197,12 +198,19 @@
   }
   const lagrat = (namn) => rent(namn, A.get('tema.' + namn, null));   // null = inte valt, standard gäller
   const varde = (namn) => lagrat(namn) || STANDARD[namn];
-  // Första starten med Anpassa: det gamla valet "Mörkt" (skoll-theme) gäller tills huvudprocessen flyttat in det
+  // Första starten med Anpassa: det gamla valet "Mörkt" (skoll-theme) gäller tills huvudprocessen flyttat in det.
+  // Flytten görs EN gång (märket adraze-tema-flyttat). skoll-theme skrivs om varje gång läget byts (setTheme) och
+  // står kvar på "dark" när huvudprocessen lägger tillbaka ett ljust tema utan att något fönster hinner visa det:
+  // julfärgerna efter trettondagen, en avbruten provning från galleriet, ett minimerat fönster. Utan märket togs det
+  // för ett gammalt val nästa gång AdRaze startade, och den som hade ljust läge blev kvar i mörkt.
   let gammalt = null;
   try {
-    if (A.get('tema.lage', null) === null && localStorage.getItem('skoll-theme') === 'dark') {
-      gammalt = 'morkt';
-      if (window.anpassaTema) window.anpassaTema.flyttaLage('morkt');
+    if (!localStorage.getItem('adraze-tema-flyttat')) {
+      localStorage.setItem('adraze-tema-flyttat', '1');
+      if (A.get('tema.lage', null) === null && localStorage.getItem('skoll-theme') === 'dark') {
+        gammalt = 'morkt';
+        if (window.anpassaTema) window.anpassaTema.flyttaLage('morkt');
+      }
     }
   } catch {}
   const lage = () => lagrat('lage') || gammalt || STANDARD.lage;

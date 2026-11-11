@@ -407,13 +407,24 @@ async function kor(rot, bilder) {
     await s4.kor(`Anpassa.set('tema.lage', undefined, 'test').then(() => 1)`);
     await H.sov(300);
     const histFore = await s4.kor(`Anpassa.historik().then((h) => JSON.stringify(h[0]))`);
-    await s4.kor(`localStorage.setItem('skoll-theme', 'dark'); location.reload(); 1`);
+    // (en profil från tiden före Anpassa har inget märke om att flytten är gjord)
+    await s4.kor(`localStorage.removeItem('adraze-tema-flyttat'); localStorage.setItem('skoll-theme', 'dark'); location.reload(); 1`);
     await H.sov(2500);
     await s4.kor('(' + sidHjalp.toString() + ')(); 1');
     const flytt = await jsonKor(s4, `(async () => { await __T.tills(() => Anpassa.get('tema.lage', null) === 'morkt'); return JSON.stringify({ lage: Anpassa.get('tema.lage', null), theme: document.documentElement.dataset.theme, hist: JSON.stringify((await Anpassa.historik())[0]) }); })()`);
     const lagrat = await app.M(`const r = process.mainModule.require; await new Promise((v) => setTimeout(v, 400)); return JSON.parse(r('fs').readFileSync(r('path').join(el.app.getPath('userData'), 'adraze-anpassa.json'), 'utf8')).varden['tema.lage'] || null;`);
     R.ok('gamla "Mörkt" flyttas in i tema.lage', flytt.lage === 'morkt' && flytt.theme === 'dark' && lagrat === 'morkt', { ...flytt, lagrat });
     R.ok('flytten hamnar inte i ångra-historiken', flytt.hist === histFore, { fore: histFore, efter: flytt.hist });
+    // 13b. Flytten görs en enda gång. skoll-theme skrivs om varje gång läget byts och kan stå kvar på "dark" när
+    // huvudprocessen lägger tillbaka ett ljust tema utan att fönstret hinner visa det (julfärgerna efter trettondagen,
+    // en avbruten provning från galleriet). Det får inte tas för ett gammalt val nästa gång fönstret startar.
+    await s4.kor(`Anpassa.set('tema.lage', undefined, 'test').then(() => 1)`);
+    await H.sov(300);
+    await s4.kor(`localStorage.setItem('skoll-theme', 'dark'); location.reload(); 1`);
+    await H.sov(2500);
+    await s4.kor('(' + sidHjalp.toString() + ')(); 1');
+    const kvar = await jsonKor(s4, `JSON.stringify({ lage: Anpassa.get('tema.lage', null), theme: document.documentElement.dataset.theme, ls: localStorage.getItem('skoll-theme'), marke: localStorage.getItem('adraze-tema-flyttat') })`);
+    R.ok('flytten görs en gång: ett kvarglömt "dark" i skoll-theme gör inte fönstret mörkt igen', kvar.lage === null && kvar.theme === 'light' && kvar.ls === 'light' && kvar.marke === '1', kvar);
     R.ok('inga JS-fel efter omstart', !fel(s4).length, fel(s4));
     const nekade = fs.readFileSync(logg, 'utf8').split('\n').filter((r) => r.includes('[ipc] nekad'));
     R.ok('inga IPC-kanaler nekade', !nekade.length, nekade.slice(0, 3));

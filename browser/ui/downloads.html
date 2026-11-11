@@ -60,12 +60,22 @@
   :root[data-theme="dark"] .bar { background: #2e2c29; }
   :root[data-theme="dark"] .spin { border-color: #2c3a4a; border-top-color: #2f8fd4; }
   :root[data-theme="dark"] .list { scrollbar-color: #3f3e3a transparent; }
+  /* Temat Jul (tema.palett, kommer med i adressen): samma gran som verktygsraden ovanför, se jul.css */
+  :root[data-theme="dark"][data-palett="jul"] .card { background: #132e21; border-color: #214a35; }
+  :root[data-theme="dark"][data-palett="jul"] .head h1, :root[data-theme="dark"][data-palett="jul"] .name { color: #f4ecd8; }
+  :root[data-theme="dark"][data-palett="jul"] .x, :root[data-theme="dark"][data-palett="jul"] .fbtn, :root[data-theme="dark"][data-palett="jul"] .empty, :root[data-theme="dark"][data-palett="jul"] .sub { color: #a9b8a6; }
+  :root[data-theme="dark"][data-palett="jul"] .x:hover, :root[data-theme="dark"][data-palett="jul"] .fbtn:hover, :root[data-theme="dark"][data-palett="jul"] .row.open:hover { background: rgba(244,236,216,.09); color: #f4ecd8; }
+  :root[data-theme="dark"][data-palett="jul"] .sub.done { color: #4cc38a; }
+  :root[data-theme="dark"][data-palett="jul"] .sub.warn { color: #ff8a7a; }
+  :root[data-theme="dark"][data-palett="jul"] .bar { background: #214a35; }
+  :root[data-theme="dark"][data-palett="jul"] .list { scrollbar-color: #214a35 transparent; }
 </style>
 <script>
   // Tema: skalet sparar skoll-theme i localStorage (samma file://-origin) → följ det, även om det byts medan rutan är öppen
   (function () {
     function tema() { try { document.documentElement.dataset.theme = localStorage.getItem('skoll-theme') === 'dark' ? 'dark' : 'light'; } catch (e) {} }
     tema(); window.addEventListener('storage', function (e) { if (!e.key || e.key === 'skoll-theme') tema(); });
+    try { if (new URLSearchParams(location.search).get('palett') === 'jul') document.documentElement.dataset.palett = 'jul'; } catch (e) {}
   })();
 </script>
 <script>

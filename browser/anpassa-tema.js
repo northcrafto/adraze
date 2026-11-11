@@ -35,8 +35,8 @@ if (process.platform === 'darwin') {
   anpassa.lyssna((nyckel) => { if (nyckel === 'tema.densitet') for (const w of BrowserWindow.getAllWindows()) trafikljus(w); });
 }
 
-// Fönstret skickar 'morkt' första gången det startar med den nya koden, om tema.lage aldrig satts.
-// Bara skalet når kanalen (IPC-vakten i main.js), och bara ett osatt värde skrivs.
+// Fönstret skickar 'morkt' första gången det startar med den nya koden, om tema.lage aldrig satts – en enda gång per
+// profil (ui/anpassa-tema.js sätter ett märke). Bara skalet når kanalen (IPC-vakten i main.js), och bara ett osatt värde skrivs.
 ipcMain.on('anpassa-tema:flytta-lage', (_e, lage) => {
   if (lage !== 'morkt' || anpassa.alla()['tema.lage'] !== undefined) return;
   anpassa.satt('tema.lage', 'morkt', { utanHistorik: true });

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """luva-a/-b.raw.svg (från luva.js) -> färdiga julbilder: texten "AD" blir konturer, stilar inline, egen viewBox.
 Källan sparas här (adraze-gorilla-luva.svg = loggan med AD-lapp, -enkel.svg = den enkla) och webbläsarens filer
-i browser/ui/jul: gorilla-luva.svg + -256/-512.png för nya fliken, mark-luva.png och mark-luva-dark.png (256 px,
-som ui/adraze-mark*.png) för blockerarknappen. PNG ritas av en osynlig Chrome/Brave som stänger sig själv."""
+i browser/ui/jul: gorilla-luva-512.png för nya fliken och delningsbilden, mark-luva.png (256 px, som
+ui/adraze-mark.png) för blockerarknappen och de andra små ikonerna. Bara de två filerna används av webbläsaren
+(BILDER i browser/jul.js). PNG ritas av en osynlig Chrome/Brave som stänger sig själv."""
 import os, re, sys, shutil, struct, pathlib, tempfile, subprocess
 UT = pathlib.Path(__file__).parent
 JUL = UT.parent.parent / 'browser/ui/jul'
@@ -40,10 +41,7 @@ def png(svg, ut, px):
 JUL.mkdir(parents=True, exist_ok=True)
 hel, enkel = UT / 'adraze-gorilla-luva.svg', UT / 'adraze-gorilla-luva-enkel.svg'
 hel.write_text(fardig('b')); enkel.write_text(fardig('a'))
-shutil.copyfile(hel, JUL / 'gorilla-luva.svg')
-for px in (256, 512): png(hel, JUL / f'gorilla-luva-{px}.png', px)
+png(hel, JUL / 'gorilla-luva-512.png', 512)
+# Samma märke i ljust och mörkt läge: luvans bläcklinje syns inte mot mörk botten, men det röda och det vita bär den.
 png(enkel, JUL / 'mark-luva.png', 256)
-# Mörkt läge: samma bild, precis som adraze-mark-dark.png är samma som adraze-mark.png. Luvans bläcklinje syns
-# inte mot mörk botten, men det röda och det vita bär den. Egen fil så att temabytet fungerar som för vanliga märket.
-shutil.copyfile(JUL / 'mark-luva.png', JUL / 'mark-luva-dark.png')
-print('ok', *(f'{n} {(JUL / n).stat().st_size} byte' for n in ('gorilla-luva.svg', 'gorilla-luva-256.png', 'gorilla-luva-512.png', 'mark-luva.png', 'mark-luva-dark.png')), sep='\n  ')
+print('ok', *(f'{n} {(JUL / n).stat().st_size} byte' for n in ('gorilla-luva-512.png', 'mark-luva.png')), sep='\n  ')
