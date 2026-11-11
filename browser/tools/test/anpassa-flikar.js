@@ -290,6 +290,11 @@ async function kor() {
     // Fäst flik + grupprubrik + fyra flikar får plats: raden scrollar inte och den fästa fliken syns
     const rad = await app.kor(`(() => { const h = document.getElementById('tabs'); const p = h.querySelector('.tab.pinned').getBoundingClientRect(); return { sw: h.scrollWidth, cw: h.clientWidth, sl: h.scrollLeft, px: Math.round(p.x - h.getBoundingClientRect().x) }; })()`);
     T.ok('upptill: fäst flik och grupp får plats utan att raden scrollar', rad.sw <= rad.cw + 1 && rad.sl === 0 && rad.px >= 0, rad);
+    // En fäst flik har inget kryss: är den aktiv bland smala flikar (bara ikoner) ska ikonen stå kvar, inte ge plats åt ett kryss som inte finns
+    const fastSmal = await app.kor(`(() => { const fore = active, h = document.getElementById('tabs'); switchTab(tabs.find((t) => t.pinned)); h.classList.add('narrow');
+      const e = h.querySelector('.tab.pinned.active'), ut = e ? [getComputedStyle(e.querySelector('.fav')).display, getComputedStyle(e.querySelector('.tclose')).display] : null;
+      h.classList.remove('narrow'); switchTab(fore); return ut; })()`); await sov(400);
+    T.ok('fäst flik: ikonen står kvar när fliken är aktiv bland smala flikar', !!fastSmal && fastSmal[0] !== 'none' && fastSmal[1] === 'none', fastSmal);
     r = await flik('Nyheter');
     await klick(r.cx, r.cy, 3); await sov(400);
     T.ok('fäst flik: inga gruppval i menyn', !etiketter(await meny()).some((l) => /grupp/i.test(l)), etiketter(await meny()));

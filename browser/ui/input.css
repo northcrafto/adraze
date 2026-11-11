@@ -99,7 +99,7 @@ svg { display: block; }
   #tabs.narrow .tab { gap: 0; padding-left: 0; padding-right: 0; justify-content: center; }
   #tabs.narrow .tab .ttl { display: none; }
   #tabs.narrow .tab:not(.active) .tclose { display: none; }
-  #tabs.narrow .tab.active .fav { display: none; }
+  #tabs.narrow .tab.active:not(.pinned) .fav { display: none; }   /* en fäst flik har inget kryss att ge plats åt: den behåller sin ikon */
   .tab.incognito .fav { color: #a87ee0; }
   .tab.incognito.active { background: #241442; color: #fff; box-shadow: 0 1px 4px rgb(0 0 0 / .3); }
   .tab.incognito.active .fav, .tab.incognito.active .tclose { color: #fff; }
