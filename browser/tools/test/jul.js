@@ -576,9 +576,9 @@ async function kor(rot, bilder, bara) {
       await __J.tills(() => document.documentElement.getAttribute('data-anp-palett') === 'jul' && document.documentElement.dataset.theme === 'dark');
       await new Promise((r) => setTimeout(r, 400));
       const K = (a, b) => window.AnpassaTema.kontrast(__J.rgb(a), __J.rgb(b));
-      const flikrad = __J.farg('#tabstrip'), aktiv = __J.farg('#tabs .tab.active'), rad = __J.farg('#toolbar'), falt = __J.farg('#omnibox'), inst = __J.farg('#settings');
+      const flikrad = __J.farg('#tabstrip'), aktiv = __J.farg('#tabs .tab.active'), rad = __J.farg('#toolbar'), falt = __J.farg('#omnibox'), inst = __J.farg('#settings'), login = __J.farg('#login');
       return JSON.stringify({ id: kort.map((k) => k.dataset.forval), rader: rader.size, valda: [...document.querySelectorAll('#anp-tema [data-forval].on')].map((k) => k.dataset.forval),
-        mini: document.querySelector('#anp-tema [data-forval=jul] .anp-tema-mini').classList.contains('jul'), varden: __J.tema(), flikrad, aktiv, rad, falt, inst,
+        mini: document.querySelector('#anp-tema [data-forval=jul] .anp-tema-mini').classList.contains('jul'), varden: __J.tema(), flikrad, aktiv, rad, falt, inst, login,
         flik: [getComputedStyle(document.querySelector('#tabs .tab.active')).borderTopWidth, getComputedStyle(document.querySelector('#tabs .tab.active'), '::before').content],
         kAktiv: K(__J.farg('#tabs .tab.active', 'color'), aktiv), kFalt: K(__J.farg('#address', 'color'), falt), kInst: K(__J.farg('#settings .set-title', 'color'), inst), kDim: K(__J.farg('#settings .set-desc', 'color'), inst),
         accent: getComputedStyle(document.documentElement).getPropertyValue('--color-terra').trim(), delar: __J.delar() });
@@ -587,6 +587,7 @@ async function kor(rot, bilder, bara) {
     R.ok('kortet Jul sätter guld, mörkt och färguppsättningen jul, och bara det kortet är markerat', lista.varden === '[["tema.accent","#d9a441"],["tema.lage","morkt"],["tema.palett","jul"]]' && lista.valda.join() === 'jul', { varden: lista.varden, valda: lista.valda });
     R.ok('temat Jul: mörkgrön flikrad och verktygsrad, djupröd aktiv flik, guldaccent', lista.flikrad === 'rgb(12, 33, 24)' && lista.rad === 'rgb(16, 41, 29)' && lista.aktiv === 'rgb(143, 37, 41)' && lista.falt === 'rgb(23, 54, 38)' && lista.accent.toLowerCase() === '#d9a441', lista);
     R.ok('temat Jul: texten är läsbar (aktiv flik, adressfält, inställningar minst 4,5:1)', lista.kAktiv >= 4.5 && lista.kFalt >= 4.5 && lista.kInst >= 4.5 && lista.kDim >= 4.5, [lista.kAktiv, lista.kFalt, lista.kInst, lista.kDim].map((v) => +v.toFixed(2)));
+    R.ok('temat Jul: inloggningssidan har samma gran som inställningarna', lista.login === lista.inst && lista.inst === 'rgb(14, 37, 26)', [lista.login, lista.inst]);
     R.ok('temat Jul utanför julen: bara färgerna, inget pynt (ingen snö på flikarna heller)', lista.delar === null && lista.flik.join() === '0px,none', [lista.delar, lista.flik]);
     await bild(s, '01-november-temat-jul');
     // Temat man har innan julen: Natt med egen färg och runda hörn (det ska komma tillbaka efter trettondagen)
