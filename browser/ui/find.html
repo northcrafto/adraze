@@ -7,6 +7,8 @@
   /* Sök på sidan: liten ruta uppe till höger över fliken (egen vy, som nedladdningsrutan) */
   :root { --bg: #ffffff; --ink: #1c1b19; --mut: #6e6c69; --line: #e5e3dc; --field: #f6f5f1; --hover: rgb(28 27 25 / .06); --accent: #ff4b1f; --none: #d0402f; }
   :root[data-theme="dark"] { --bg: #232220; --ink: #eeede8; --mut: #a2a097; --line: #2f2d2a; --field: #2c2b28; --hover: rgb(255 255 255 / .08); --none: #ff8a7a; }
+  /* Temat Jul (tema.palett, kommer med i adressen): samma gran som verktygsraden ovanför, se jul.css */
+  :root[data-theme="dark"][data-palett="jul"] { --bg: #132e21; --ink: #f4ecd8; --mut: #a9b8a6; --line: #214a35; --field: #173626; --hover: rgb(244 236 216 / .1); --accent: #d9a441; }
   html, body { margin: 0; background: transparent; overflow: hidden; font-family: Inter, -apple-system, "Segoe UI", system-ui, sans-serif; }
   .card { margin: 4px 10px 14px; height: 44px; display: flex; align-items: center; gap: 4px; padding: 0 6px 0 12px; background: var(--bg); color: var(--ink);
     border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 12px 32px rgb(0 0 0 / .18), 0 2px 6px rgb(0 0 0 / .08); }
@@ -47,6 +49,7 @@
   const q = document.getElementById('q'), n = document.getElementById('n');
   const p = new URLSearchParams(location.search);
   if (p.get('theme') === 'dark') document.documentElement.dataset.theme = 'dark';
+  if (p.get('palett') === 'jul') document.documentElement.dataset.palett = 'jul';
   const T = (k) => { try { const d = JSON.parse(p.get('t') || '{}'); return d[k] || k; } catch { return k; } };
   q.placeholder = T('Sök på sidan');
   let last = '';

@@ -37,14 +37,21 @@ egenskap('deviceMemory',8);
 }catch(e){}})();`;
 }
 
-function injektioner() {
+// handelse = namnet på händelsen som säger till preloaden att en injektion stoppats (slumpat per ram i
+// adblock-adraze.js). Den skickas med webbläsarens egna funktioner, undansparade innan sidans skript körs: sidan kan
+// varken skicka händelsen själv (den vet inte namnet) eller läsa av namnet genom att byta ut CustomEvent,
+// dispatchEvent eller Function.prototype.call.
+function injektioner(handelse) {
+  const namn = /^[a-z0-9]{8,80}$/.test(String(handelse || '')) ? String(handelse) : '';
   return `(function(){try{
 ${MASK}
+var CE=CustomEvent,skicka=EventTarget.prototype.dispatchEvent,anropa=Reflect.apply,dok=document;
+function rapportera(){${namn ? "try{anropa(skicka,dok,[new CE('" + namn + "')]);}catch(e){}" : ''}}
 function bas(h){var d=String(h||'').split('.');return d.length>2&&/^(co|com|org|net|gov|ac|edu)$/.test(d[d.length-2])&&d[d.length-1].length===2?d.slice(-3).join('.'):d.slice(-2).join('.');}
 var sajt=bas(location.hostname);
 // Vanliga, ofarliga källor som riktiga sajter laddar i efterhand (CDN:er, inloggning, betalning, captcha, video)
 var OK=/(^|\\.)(gstatic\\.com|googleapis\\.com|google\\.com|recaptcha\\.net|hcaptcha\\.com|cloudflare\\.com|jsdelivr\\.net|unpkg\\.com|cdnjs\\.com|jquery\\.com|bootstrapcdn\\.com|stripe\\.com|stripe\\.network|paypal\\.com|paypalobjects\\.com|klarna\\.com|klarnacdn\\.net|adyen\\.com|youtube\\.com|ytimg\\.com|vimeo\\.com|vimeocdn\\.com|jwplayer\\.com|jwpcdn\\.com|appleid\\.cdn-apple\\.com|apple\\.com|microsoft\\.com|live\\.com|msauth\\.net|github\\.com|githubassets\\.com|sentry-cdn\\.com|arkoselabs\\.com|funcaptcha\\.com|shopify\\.com|shopifycdn\\.com|cookiebot\\.com|onetrust\\.com|cookielaw\\.org|fontawesome\\.com|typekit\\.net|bankid\\.com|frejaeid\\.com)$/i;
-function stopp(n){try{if(!n||n.nodeType!==1||n.tagName!=='SCRIPT')return false;var s=n.getAttribute('src');if(!s)return false;var u=new URL(s,location.href);if(!/^https?:$/.test(u.protocol))return false;var h=u.hostname;if(bas(h)===sajt||OK.test(h))return false;try{document.dispatchEvent(new CustomEvent('adraze-injektion'));}catch(e){}return true;}catch(e){return false;}}
+function stopp(n){try{if(!n||n.nodeType!==1||n.tagName!=='SCRIPT')return false;var s=n.getAttribute('src');if(!s)return false;var u=new URL(s,location.href);if(!/^https?:$/.test(u.protocol))return false;var h=u.hostname;if(bas(h)===sajt||OK.test(h))return false;rapportera();return true;}catch(e){return false;}}
 function vakta(P,namn,ix){var f=P[namn];if(!f)return;var o={};o[namn]=function(){var a=arguments;for(var i=0;i<a.length;i++){if(ix!==undefined&&i!==ix)continue;if(stopp(a[i]))return a[i];}return f.apply(this,a);};P[namn]=m(o[namn],f);}
 vakta(Node.prototype,'appendChild',0);vakta(Node.prototype,'insertBefore',0);vakta(Node.prototype,'replaceChild',0);
 ['append','prepend','before','after','replaceWith'].forEach(function(m){vakta(Element.prototype,m);});

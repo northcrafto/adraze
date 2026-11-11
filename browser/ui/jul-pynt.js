@@ -62,11 +62,19 @@
   /* ── Snö på nya fliken ──
    * Ett lager med 22–40 flingor (efter fönstrets yta) före innehållskolumnen i #newtabpage, alltså bakom klocka,
    * sökruta och widgetar. Varje flinga får sin plats, storlek, fart och svajning som CSS-variabler en gång; sedan
-   * sköter CSS-animationerna allt. Lagret pausas när en ruta ligger över startsidan (inställningar, inloggning,
-   * bokmärken, bakgrundsväljaren, QR) eller fönstret inte syns. Visas en webbsida är hela startsidan dold och
-   * animationerna står still av sig själva. */
+   * sköter CSS-animationerna allt. Visas en webbsida är hela startsidan dold och animationerna står still av sig
+   * själva. Lagret pausas dessutom när ingen tittar:
+   *   • en ruta ligger över startsidan (inställningar, inloggning, bokmärken, bakgrundsväljaren, QR)
+   *   • fönstret syns inte, eller har inte fokus (ligger ett annat fönster över märker webbläsaren det inte själv
+   *     på Linux, men då har det andra fönstret fokus)
+   *   • ingen har rört mus eller tangentbord på en och en halv minut (en webbläsare som står kvar på nya fliken
+   *     över natten ska inte snöa hela natten). Snön faller igen så fort något rör sig. */
   const RUTOR = ['settings', 'login', 'bookmarks', 'bgpick', 'qr'];
-  let sno = null, snoVakt = null;
+  // Flingorna flyttas 30 gånger i sekunden, alla på samma klocka (stegade animationer, steps() i jul.css). Mellan
+  // stegen ritas ingenting om: det halverar arbetet mot att flytta dem i varje bildruta, och mer än så på en skärm
+  // med 120 eller 144 Hz. Så långsam snö ser likadan ut.
+  const HZ = 30, VILA_MS = 90000;
+  let sno = null, snoVakt = null, vilar = false, vilaTimer = 0, senastRort = 0;
   // Tre djup: små, långsamma och bleka långt bort; större och snabbare nära, de största är ritade flingor som snurrar sakta
   const DJUP = {
     fjarran: { storlek: [3, 5], syn: [0.4, 0.6], fall: [30, 44], svaj: [5, 9], takt: [5, 8], form: ['', 'jul-f2'] },
@@ -84,18 +92,33 @@
       const d = DJUP[i % 5 === 0 ? 'nara' : i % 5 < 3 ? 'mitt' : 'fjarran'];
       const el = document.createElement('i');
       el.className = ('jul-flinga ' + d.form[Math.floor(Math.random() * d.form.length)]).trim();
-      const fall = slump(...d.fall), takt = slump(...d.takt);
-      // Negativ fördröjning = flingan är redan på väg när sidan visas. --y är platsen när snön står still (Minska rörelse).
+      // Fallet och svajningen räknas i hela steg, så att alla flingor byter plats i samma ögonblick. Svajningen är
+      // åtta lika långa bitar (en mjuk båge, se jul-svaj i jul.css) med --nv steg i varje.
+      // Negativ fördröjning = flingan är redan på väg när sidan visas: ett helt antal steg plus ett kvarts steg, så
+      // att stegen hamnar mitt emellan två bildrutor på en vanlig skärm (60 Hz) och takten blir jämn.
+      const fall = Math.round(slump(...d.fall) * HZ), takt = 8 * Math.max(1, Math.round(slump(...d.takt) * HZ / 8));
+      const fore = (steg) => '-' + (Math.floor(Math.random() * steg) + 0.25) / HZ + 's';
+      // --y är platsen när snön står still (Minska rörelse)
       el.style.cssText = '--x:' + ((spalter[i] + Math.random()) / n * 100).toFixed(2) + '%;--s:' + slump(...d.storlek).toFixed(1) + 'px;--o:' + slump(...d.syn).toFixed(2) +
-        ';--t:' + fall.toFixed(1) + 's;--d:-' + (Math.random() * fall).toFixed(1) + 's;--v:' + slump(...d.svaj).toFixed(1) + 'px;--tv:' + takt.toFixed(1) + 's;--dv:-' + (Math.random() * takt).toFixed(1) +
-        's;--r:' + (d === DJUP.nara ? Math.round(slump(-160, 160)) : 0) + 'deg;--y:' + slump(2, 96).toFixed(1) + 'cqh';
+        ';--t:' + fall / HZ + 's;--n:' + fall + ';--d:' + fore(fall) + ';--v:' + slump(...d.svaj).toFixed(1) + 'px;--tv:' + takt / HZ + 's;--nv:' + takt / 8 + ';--dv:' + fore(takt) +
+        ';--r:' + (d === DJUP.nara ? Math.round(slump(-160, 160)) : 0) + 'deg;--y:' + slump(2, 96).toFixed(1) + 'cqh';
       frag.append(el);
     }
     return frag;
   }
   function snoPaus() {
-    if (sno) sno.classList.toggle('jul-paus', document.hidden || RUTOR.some((id) => { const el = $(id); return !!el && !el.classList.contains('hidden'); }));
+    if (sno) sno.classList.toggle('jul-paus', document.hidden || !document.hasFocus() || vilar || RUTOR.some((id) => { const el = $(id); return !!el && !el.classList.contains('hidden'); }));
   }
+  // Mus eller tangentbord rördes: snön faller (igen), och vilar om ingenting mer händer på en stund
+  function rort() {
+    const nu = Date.now();
+    if (!vilar && nu - senastRort < 5000) return;   // högst var femte sekund: musen rör sig hela tiden
+    senastRort = nu;
+    clearTimeout(vilaTimer);
+    vilaTimer = setTimeout(() => { vilar = true; snoPaus(); }, VILA_MS);
+    if (vilar) { vilar = false; snoPaus(); }
+  }
+  const RORELSER = ['pointermove', 'pointerdown', 'keydown', 'wheel'];
   function snoPa() {
     if (sno) return;
     sno = document.createElement('div');
@@ -105,11 +128,19 @@
     snoVakt = new MutationObserver(snoPaus);
     for (const id of RUTOR) { const el = $(id); if (el) snoVakt.observe(el, { attributes: true, attributeFilter: ['class'] }); }
     document.addEventListener('visibilitychange', snoPaus);
+    window.addEventListener('focus', snoPaus);
+    window.addEventListener('blur', snoPaus);
+    for (const h of RORELSER) document.addEventListener(h, rort, { capture: true, passive: true });
+    vilar = false; senastRort = 0; rort();
     snoPaus();
   }
   function snoAv() {
     if (snoVakt) { snoVakt.disconnect(); snoVakt = null; }
     document.removeEventListener('visibilitychange', snoPaus);
+    window.removeEventListener('focus', snoPaus);
+    window.removeEventListener('blur', snoPaus);
+    for (const h of RORELSER) document.removeEventListener(h, rort, { capture: true });
+    clearTimeout(vilaTimer); vilaTimer = 0; vilar = false;
     if (sno) { sno.remove(); sno = null; }
   }
   Jul.del('sno', { pa: snoPa, av: snoAv });

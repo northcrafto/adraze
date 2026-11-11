@@ -23,7 +23,8 @@ const medTid = (pr, ms = 12000) => Promise.race([pr, sov(ms).then(() => 'FEL: ti
 // Avbryts testet (Ctrl+C, timeout) städas Electron och Xvfb ändå bort
 const stadning = { p: null, x: null, profil: null, R: null };
 for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => {
-  try { if (stadning.p) process.kill(-stadning.p.pid, 'SIGKILL'); } catch {}
+  // (varje process för sig, via sin PID – aldrig som processgrupp)
+  if (stadning.p) for (const pid of [...H.allaUnder(stadning.p.pid), stadning.p.pid]) { try { process.kill(pid, 'SIGKILL'); } catch {} }
   try { if (stadning.x) stadning.x.stoppa(); } catch {}
   try { if (stadning.profil) fs.rmSync(stadning.profil, { recursive: true, force: true }); } catch {}
   if (stadning.R && !LIVE) console.log(stadning.R.text());

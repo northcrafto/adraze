@@ -4,7 +4,8 @@
 //   • datum och säsong (1 december–6 januari), med låtsat datum för test (ADRAZE_DATUM)
 //   • jul.*-nycklarna i Anpassa-butiken: huvudbrytaren jul.pa och en brytare per del
 //   • julfärgerna: byter till temat Jul under julen och tillbaka till det man hade innan efter trettondagen
-//   • räknaren för stoppad reklam per dag (alltid på, även utan jultema, så att december har siffror)
+//   • räknaren för stoppad reklam per dag i december (även utan jultema, så att siffrorna finns om man slår på det
+//     senare; bara antal per dag, aldrig inkognito, och allt slängs när julen är över)
 //   • luckorna i julkalendern och delningsbilden på julafton (spara som fil, kopiera)
 //
 // Tillstånd som inte är inställningar – frågan besvarad, temat innan julfärgerna, öppnade luckor, räknarna – ligger i
@@ -12,7 +13,8 @@
 // och hamnar i ångra-historiken. Bara huvudprocessen skriver filen.
 //
 // Inget slås på av sig självt. jul.pa är false tills användaren svarat "Ja tack" på frågan (eller slagit på Jultema
-// under Inställningar › Anpassa), och sätts tillbaka när säsongen är slut så att nästa december frågar igen.
+// under Inställningar › Anpassa). När säsongen är slut sätts jul.pa och delarnas brytare tillbaka, så att nästa
+// december frågar igen och "Ja tack" då ger allt som frågan lovar.
 // Temat "Jul" i temalistan (tema.palett = 'jul') går att välja året runt och har inget med säsongen att göra.
 'use strict';
 const fs = require('fs');
@@ -60,27 +62,31 @@ const NYCKLAR = [
 ];
 for (const n of NYCKLAR) anpassa.registrera({ ...n, barnLast: false, importBar: true });
 
-// Julfärgerna = temat Jul. SAMMA värden som kortet "Jul" i FORVAL i ui/anpassa-tema.js – ändra på båda ställena.
-const TEMA = { 'tema.accent': '#d9a441', 'tema.lage': 'morkt', 'tema.horn': 'normal', 'tema.densitet': 'normal', 'tema.palett': 'jul' };
+// Julfärgerna = färgerna i temat Jul. SAMMA färger som kortet "Jul" i FORVAL i ui/anpassa-tema.js – ändra på båda
+// ställena. Bara färger: hörn och täthet är användarens egna och rörs inte (kortet i temalistan sätter dem, som de
+// andra korten gör; brytaren heter Julfärger och ska inte byta form på något).
+const TEMA = { 'tema.accent': '#d9a441', 'tema.lage': 'morkt', 'tema.palett': 'jul' };
 const UTAN = { utanHistorik: true };
 
-// Bilderna i ui/jul/ (tecknarens filer). SAMMA namn som --jul-gorilla, --jul-gorilla-liten och -liten-mork i ui/jul.css.
+// Bilderna i ui/jul/ (tecknarens filer). SAMMA namn som --jul-gorilla och --jul-gorilla-liten i ui/jul.css.
 // stor = hela loggan med AD-lappen (nya fliken, delningsbilden), liten = märket för 16–30 px (blockerarknappen m.m.).
-const BILDER = { stor: 'gorilla-luva-512.png', liten: 'mark-luva.png', litenMork: 'mark-luva-dark.png', vektor: 'gorilla-luva.svg' };
+// Samma märke i ljust och mörkt läge (som ui/adraze-mark.png): luvans röda och vita bär den mot båda.
+const BILDER = { stor: 'gorilla-luva-512.png', liten: 'mark-luva.png' };
 
 /* ── Tillståndsfilen ── */
 // { v, borjan, sasong, fragad, visad, fore, luckor, dagar }
 //   borjan  dagen räknaren började ("2026-11-11") – statistiken säger "sedan den …" om det var efter 1 december
-//   sasong  säsongen som fragad/visad och jul.pa hör till (byts den nollställs de)
+//   sasong  säsongen som fragad/visad, jul.*-brytarna och fore hör till (är den slut nollställs de)
 //   fragad  säsongen då frågan "Vill du ha jultema?" fick svar
-//   visad   dagar frågan visats utan svar; efter tre olika dagar räknas det som nej
-//   fore    { sasong, varden }: julfärgerna är tillämpade den säsongen, varden = de tema-värden som gällde innan
+//   visad   dagen frågan visades utan att få svar (högst en per säsong): sedan ställs den inte igen
+//   fore    { sasong, varden, vilar }: julfärgerna är tillämpade den säsongen, varden = de tema-värden som gällde innan
 //           (en nyckel som saknas = standardvärdet). varden null = inget att gå tillbaka till (man hade redan temat Jul).
-//   luckor  { "2026": [1, 2, 3] } öppnade luckor per säsong
-//   dagar   { "2026-12-05": { a, s, k, p } } stoppat per dag: annonser, spårare, kakrutor, popup-fönster
+//           vilar = man har bytt tema själv under julen: julfärgerna är inte på, men temat innan är inte glömt än
+//   luckor  { "2026": [1, 2, 3] } öppnade luckor (bara den här julens sparas)
+//   dagar   { "2026-12-05": { a, s, k, p } } stoppat per dag i december: annonser, spårare, kakrutor, popup-fönster
+//           (bara den här julens december sparas)
 const FIL = () => path.join(app.getPath('userData'), 'adraze-jul.json');
 const SPAR_MS = 5000;        // räknarna skrivs högst så här ofta
-const DAGAR_MAX = 400;       // äldre dagar rensas
 let st = null, sparTimer = null, sparad = 0;
 
 const heltal = (v) => (Number.isFinite(v) && v > 0 ? Math.floor(v) : 0);
@@ -96,6 +102,7 @@ function rensa(j) {
     let varden = null;
     if (arObjekt(j.fore.varden)) { varden = {}; for (const k of Object.keys(TEMA)) if (Object.hasOwn(j.fore.varden, k) && typeof j.fore.varden[k] === 'string') varden[k] = j.fore.varden[k].slice(0, 40); }
     ut.fore = { sasong: j.fore.sasong, varden };
+    if (varden && j.fore.vilar === true) ut.fore.vilar = true;
   }
   if (arObjekt(j.luckor)) for (const [ar, l] of Object.entries(j.luckor)) {
     if (/^\d{4}$/.test(ar) && Array.isArray(l)) ut.luckor[ar] = [...new Set(l.filter((n) => Number.isInteger(n) && n >= 1 && n <= 24))].sort((a, b) => a - b);
@@ -124,20 +131,24 @@ function sparaSnart(ms) {
   sparTimer = setTimeout(sparaNu, Math.max(0, ms === undefined ? SPAR_MS - (Date.now() - sparad) : ms));
   if (sparTimer.unref) sparTimer.unref();
 }
-function rensaGamlaDagar() {
-  const d = las(); const grans = new Date(nu().getTime() - DAGAR_MAX * 86400000); const g = dagStr(grans);
+// Bara den här julens december och luckor sparas. Allt annat slängs: förra julen, och dagar utanför december.
+function rensaDagar() {
+  if (vantar()) return;
+  const d = las(), s = sasong();
   let n = 0;
-  for (const dag of Object.keys(d.dagar)) if (dag < g) { delete d.dagar[dag]; n++; }
+  for (const dag of Object.keys(d.dagar)) if (!s || !dag.startsWith(s + '-12-')) { delete d.dagar[dag]; n++; }
+  for (const ar of Object.keys(d.luckor)) if (ar !== String(s)) { delete d.luckor[ar]; n++; }
   if (n) sparaSnart();
 }
 
 /* ── Räknaren per dag ── */
-// main.js anropar raknaTraff för varje 'adblock:hit' som skickas till fönstren (en gång, oavsett antal fönster).
+// main.js anropar raknaTraff för varje stopp (en gång, oavsett antal fönster, och aldrig från en inkognitoflik).
+// Bara december räknas: det är decembers siffror som visas, och resten av året sparas inga dagar alls.
 // Typen kan komma från en webbsidas preload: bara de kända typerna räknas.
 const FALT = new Map([['ad', 'a'], ['tracker', 's'], ['kakor', 'k'], ['popups', 'p']]);
 function raknaTraff(typ) {
   const f = FALT.get(typ);
-  if (!f) return;
+  if (!f || nu().getMonth() !== 11) return;
   const d = las(), dag = dagStr(nu());
   const r = d.dagar[dag] || (d.dagar[dag] = { a: 0, s: 0, k: 0, p: 0 });
   r[f]++;
@@ -160,13 +171,14 @@ function stat() {
 }
 
 /* ── Frågan "Vill du ha jultema?" ── */
-// Besvarad i år, eller visad tre olika dagar utan svar (den tredje dagen visas den fortfarande, sedan aldrig mer)
+// Frågan ställs EN gång per jul, och bara i december. Den är färdigställd när den fått svar, eller när den har
+// visats utan att få svar (fönstret säger till när den har synts en stund, ui/jul.js): då kommer den inte igen, varken
+// i ett nytt fönster eller nästa gång AdRaze startas. Brytaren under Inställningar › Anpassa finns kvar hela julen.
+const visadISasong = (d, s) => d.visad.some((x) => sasongAvDag(x) === s);
 function fragadNu(s) {
-  if (!s) return true;
+  if (!s || nu().getMonth() !== 11) return true;   // 1–6 januari: julen är nästan slut, då frågas det inte
   const d = las();
-  if (d.fragad === s) return true;
-  const dagar = d.visad.filter((x) => sasongAvDag(x) === s);
-  return dagar.length >= 3 && !dagar.includes(dagStr(nu()));
+  return d.fragad === s || visadISasong(d, s);
 }
 
 /* ── Julfärgerna: på med temat Jul, och tillbaka till det man hade innan ── */
@@ -180,11 +192,23 @@ function tysta() { try { D.skicka('jul:tyst', 600); } catch {} }
 // Provas ett tema från galleriet just nu? Då ligger julfärgerna undan i galleriets egen "innan" (anpassa-galleri.js)
 function galleriProvar() { try { return !!require('./anpassa-galleri').provar(); } catch { return false; } }
 
+// Säsongen som tillståndet hör till (sasong i filen) är slut först när trettondagen året efter har passerat. Står
+// klockan FÖRE den säsongens 1 december har den gått bakåt (byte av tidszon runt midnatt, en dator som startar med fel
+// klocka): då rörs ingenting. Förr togs jultemat bort då, och det kom inte tillbaka när klockan blev rätt.
+function vantar() {
+  const d = las();
+  return d.sasong !== null && d.sasong !== sasong() && nu() < new Date(d.sasong, 11, 1);
+}
+
 function tillampaFarger() {
   const s = sasong(), d = las();
-  if (!s || d.fore) return;
-  if (anpassa.hamta('tema.palett') === 'jul') {   // användaren har själv valt temat Jul: inget "innan" att gå tillbaka till
-    d.fore = { sasong: s, varden: null }; sparaNu();
+  if (!s || (d.fore && !d.fore.vilar)) return;
+  const vilande = d.fore && d.fore.sasong === s && d.fore.varden ? d.fore.varden : null;   // temat innan, sparat tidigare i år
+  if (anpassa.hamta('tema.palett') === 'jul') {
+    // Färguppsättningen är redan julens. Finns ett "innan" från i år (man bytte tema eller återställde allt under
+    // julen, och ångrade sedan) är det fortfarande dit man ska tillbaka. Annars har man själv valt temat Jul: då
+    // finns inget att gå tillbaka till.
+    d.fore = { sasong: s, varden: vilande }; sparaNu();
     return;
   }
   const sparat = anpassa.alla(), varden = {};
@@ -194,14 +218,20 @@ function tillampaFarger() {
   for (const [k, v] of Object.entries(TEMA)) anpassa.satt(k, lika(v, std(k)) ? undefined : v, UTAN);   // standardvärden sparas som "inget värde"
   anpassa.sparaNu();
 }
-function aterstallFarger() {
+// slut = säsongen är över. Annars har Jultema eller Julfärger stängts av mitt i julen.
+function aterstallFarger(slut) {
   const d = las(), f = d.fore;
   if (!f) return;
   const klar = () => { d.fore = null; sparaNu(); };
-  if (!f.varden) { klar(); return; }
+  if (!f.varden) { klar(); return; }             // man hade redan temat Jul: inget att lägga tillbaka
+  if (f.vilar) { if (slut) klar(); return; }     // julfärgerna är inte på just nu (se nedan): det man har får vara
   if (anpassa.hamta('tema.palett') !== 'jul') {
     if (galleriProvar()) return;   // vänta tills temat är behållet eller ångrat, och titta igen (kolla() varje minut)
-    klar(); return;                // användaren har bytt tema själv under julen: det får vara
+    // Man har bytt tema själv under julen: det får vara. Men temat innan glöms först när julen är slut. Kommer
+    // julfärgerna tillbaka med Ångra (efter "Återställ allt", till exempel) är det fortfarande dit man ska tillbaka –
+    // annars låg temat Jul kvar för gott efter trettondagen.
+    if (slut) klar(); else { f.vilar = true; sparaNu(); }
+    return;
   }
   tysta();
   for (const k of Object.keys(TEMA)) {
@@ -211,21 +241,31 @@ function aterstallFarger() {
   anpassa.sparaNu();   // temat på disk FÖRST, sedan glöms "innan": dör vi emellan görs återställningen om nästa gång
   klar();
 }
+// Jultema och delarnas brytare tillbaka till standard, utan att det hamnar i ångra-historiken
+function nollstallBrytare() {
+  const sparat = anpassa.alla(), satta = NYCKLAR.map((n) => n.nyckel).filter((k) => sparat[k] !== undefined);
+  if (!satta.length) return;
+  tysta();
+  for (const k of satta) anpassa.satt(k, undefined, UTAN);
+}
 // Det som hör till en säsong som är slut
 function stada() {
   const s = sasong(), d = las();
-  if (d.fore && d.fore.sasong !== s) aterstallFarger();
-  const paSatt = anpassa.alla()['jul.pa'] !== undefined;
-  if (d.sasong !== s) {   // ny säsong eller ingen: det gamla svaret gäller inte längre, nästa december frågar igen
-    d.sasong = s; d.visad = []; sparaNu();
-    if (paSatt) { tysta(); anpassa.satt('jul.pa', undefined, UTAN); }
-  } else if (!s && paSatt) { tysta(); anpassa.satt('jul.pa', undefined, UTAN); }   // påslaget utanför julen (import, Falk): gäller inte
+  if (d.fore && d.fore.sasong !== s) aterstallFarger(true);
+  if (d.sasong !== s) {
+    // Julen är slut, eller en ny har börjat: svaret på frågan och förra julens brytare gäller inte längre. Nästa
+    // december frågar igen, och "Ja tack" ger då allt frågan lovar (också det man stängde av förra året).
+    // Svaret glöms också: hoppade klockan bara fram över trettondagen och tillbaka ställs frågan en gång till.
+    d.sasong = s; d.visad = []; d.fragad = null; sparaNu();
+    nollstallBrytare();
+  } else if (!s) nollstallBrytare();   // påslaget utanför julen (import, Falk): gäller inte
 }
 function synka() {
+  if (vantar()) return;
   stada();
   const s = sasong(), d = las();
   const pa = !!s && anpassa.hamta('jul.pa') === true && anpassa.hamta('jul.farger') !== false;
-  if (pa) { if (!d.fore) tillampaFarger(); } else if (d.fore) aterstallFarger();
+  if (pa) { if (!d.fore || d.fore.vilar) tillampaFarger(); } else if (d.fore) aterstallFarger(false);
 }
 let synkPlanerad = false;
 function synkaSnart() {   // efter att en hel "Återställ allt", import eller ångra-grupp hunnit klart
@@ -251,9 +291,11 @@ function bilder() {
   if (alla) bildCache = ut;   // saknas något tittar vi igen nästa gång
   return ut;
 }
+// fragad = ingen ny fråga ska visas (besvarad, redan visad, eller inte december). svarad = frågan har fått svar: ett
+// fönster som redan visar den tar bort den först då. bilder: bara under julen (resten av året läses inga filer).
 function lageUt() {
   const s = sasong(), d = las(), n = nu();
-  return { offset: OFFSET, test: !!LATSAT, sasong: s, dag: dagStr(n), fragad: fragadNu(s), luckor: s ? [...(d.luckor[s] || [])] : [], bilder: bilder() };
+  return { offset: OFFSET, test: !!LATSAT, sasong: s, dag: dagStr(n), fragad: fragadNu(s), svarad: !s || d.fragad === s, luckor: s ? [...(d.luckor[s] || [])] : [], bilder: s ? bilder() : {} };
 }
 function skickaLage() { try { D.skicka('jul:andrad', lageUt()); } catch {} }
 
@@ -265,7 +307,7 @@ function kolla() {
   const s = sasong(), dag = dagStr(nu());
   const andrat = senastDag !== undefined && (s !== senastSasong || dag !== senastDag);
   senastSasong = s; senastDag = dag;
-  if (andrat) { rensaGamlaDagar(); skickaLage(); }
+  if (andrat) { rensaDagar(); skickaLage(); }
 }
 // Minutkollen kan ligga upp till en minut efter: julen ska börja och sluta på slaget
 function vantaPaMidnatt() {
@@ -326,10 +368,13 @@ function init(deps) {
     skickaLage();   // frågan stängs i de andra fönstren
     return { ok: true };
   });
+  // Frågan har synts en stund i ett fönster utan att få svar: nu är den ställd. Fönster som redan visar den behåller
+  // den tills den får svar (svarad är fortfarande false); inga andra börjar visa den.
   ipcMain.on('jul:visad', () => {
-    const s = sasong(), d = las(), dag = dagStr(nu());
-    if (!s || d.fragad === s || d.visad.includes(dag)) return;
-    d.visad.push(dag); sparaNu();
+    const s = sasong(), d = las();
+    if (!s || d.fragad === s || visadISasong(d, s)) return;
+    d.visad = [dagStr(nu())]; sparaNu();
+    skickaLage();
   });
   // Bara dagens lucka eller tidigare (alla 24 efter julafton, till och med 6 januari)
   ipcMain.handle('jul:lucka', (_e, n) => {
@@ -356,7 +401,7 @@ function init(deps) {
   // Första kollen görs när hela main.js har laddat (galleriet ska ha hunnit lägga tillbaka en avbruten provning),
   // men alltid innan något fönster frågar efter läget (jul:lage ovan)
   process.nextTick(() => { if (!kollad) kolla(); });
-  app.whenReady().then(() => { if (!kollad) kolla(); rensaGamlaDagar(); });
+  app.whenReady().then(() => { if (!kollad) kolla(); rensaDagar(); });
   const timer = setInterval(kolla, 60 * 1000);
   if (timer.unref) timer.unref();
   vantaPaMidnatt();
@@ -366,4 +411,4 @@ function init(deps) {
 
 module.exports = { init, raknaTraff, nu, sasong, stat, lageUt };
 // För testerna (tools/test/jul.js): de rena funktionerna, och kolla() för att låta tiden gå utan att vänta en minut
-Object.assign(module.exports, { lasDatum, dagStr, sasongAvDag, tolkaPng, rensa, kolla, TEMA, NYCKLAR, BILDER });
+Object.assign(module.exports, { lasDatum, dagStr, sasongAvDag, tolkaPng, rensa, kolla, vantar, TEMA, NYCKLAR, BILDER });

@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 // Test av jultemat (jul.js, ui/jul.js, ui/jul-pynt.js, ui/jul.css) mot utvecklingsbygget, osynligt i Xvfb.
 // Datumet låtsas med ADRAZE_DATUM och webbläsaren startas om mellan dagarna med samma profil.
-// Går igenom: de rena funktionerna (datum, säsong, PNG-kontroll), november (inget syns, ingen fråga, temat Jul går
-// ändå att välja i temalistan), 1 december (frågan kommer en gång, i alla fönster), Ja tack (julfärger, snö och luva
-// utan att något flyttar sig och utan "Ändrat · Ångra"), snön på flikarna (i flikens egen ruta, på den aktiva fliken
-// och den man pekar på, utan att ta klick), snöns paus, inkognito, luckor, räknaren per dag,
+// Går igenom: de rena funktionerna (datum, säsong, PNG-kontroll), julfärgernas regler (klockan som går bakåt,
+// Återställ allt och Ångra, brytarna som nollställs), november (inget syns, ingen fråga, temat Jul går ändå att välja
+// i temalistan), 1 december (frågan kommer, och räknas som ställd när den synts i åtta sekunder), Ja tack (julfärger,
+// snö och luva utan att något flyttar sig och utan "Ändrat · Ångra"), snön på flikarna (i flikens egen ruta, på den
+// aktiva fliken och den man pekar på, utan att ta klick), snöns paus, inkognito, luckor, räknaren per dag,
 // brytarna i inställningarna, midnatt efter trettondagen (allt tillbaka som innan, det man själv ändrat behålls),
-// nästa jul (frågan igen, Nej tack), och att en fråga utan svar slutar komma efter tre dagar.
+// nästa jul (frågan igen, Nej tack), att en fråga utan svar ställs EN gång (inte efter omstart, inte i ett nytt
+// fönster, inte i januari), och att den som hade ljust läge har det igen när AdRaze startas efter trettondagen.
 // Sist julkalendern, statistiken i julspråk och julaftons sammanfattning (ui/jul-kalender.js) med egna profiler:
 // 1 december utan något stoppat, Lucia med siffror från den 3:e, midnatt, julafton (bilden sparas och kopieras),
 // 2 januari, och januari utan siffror för december.
@@ -16,6 +18,7 @@
 // Instanserna stängs via sina PID:ar, aldrig som processgrupp.
 const path = require('path');
 const fs = require('fs');
+const http = require('http');
 const H = require('./hjalp');
 
 const lever = (pid) => { try { process.kill(pid, 0); return true; } catch { return false; } };
@@ -37,6 +40,20 @@ async function stang(app, ms = 9000) {
   for (const p of pidar) if (lever(p) && mitt(p)) { try { process.kill(p, 'SIGKILL'); } catch {} }
   await H.sov(300);
   return snallt;
+}
+
+// Två lokala sidor. /fejk skickar själv den händelse som sidskyddet förr använde för att räkna en stoppad injektion.
+// /riktig skjuter in 300 skript från en annan sajt, som sidskyddet stoppar ett och ett.
+function sidServer() {
+  const sida = (skript) => '<!doctype html><meta charset="utf-8"><title>Julprov</title><body><p>Prov</p><script>' + skript + '</script></body>';
+  const SIDOR = {
+    '/fejk': sida(`for (var i = 0; i < 2000; i++) { document.dispatchEvent(new Event('adraze-injektion')); document.dispatchEvent(new CustomEvent('adraze-injektion')); }`),
+    '/riktig': sida(`for (var i = 0; i < 300; i++) { var s = document.createElement('script'); s.src = 'https://annan-sajt.example/reklam' + i + '.js'; document.body.appendChild(s); }`),
+  };
+  return new Promise((klar) => {
+    const srv = http.createServer((q, r) => { const b = SIDOR[q.url.split('?')[0]]; r.writeHead(b ? 200 : 404, { 'content-type': 'text/html; charset=utf-8' }); r.end(b || ''); });
+    srv.listen(0, '127.0.0.1', () => klar({ url: 'http://127.0.0.1:' + srv.address().port + '/', stang: () => srv.close() }));
+  });
 }
 
 async function oppna(rot, x, profil, logg, datum) {
@@ -103,6 +120,9 @@ function renaFunktioner(R, rot) {
     !jul.tolkaPng('https://exempel.se/bild.png') && !jul.tolkaPng(null) && !jul.tolkaPng('data:image/png;base64,' + 'A'.repeat(6 * 1024 * 1024)));
   const ren = jul.rensa({ fragad: 2026, visad: ['2026-12-01', 'x', 5], fore: { sasong: 2026, varden: { 'tema.accent': '#3b6fe0', 'annat': 'x', 'tema.lage': 5 } }, luckor: { 2026: [3, 1, 1, 99, 'a'], abc: [1] }, dagar: { '2026-12-01': { a: 5.7, s: -1, k: 'x' }, fel: { a: 1 } } });
   R.ok('tillståndsfilen tvättas när den läses', JSON.stringify(ren) === '{"v":1,"borjan":null,"sasong":null,"fragad":2026,"visad":["2026-12-01"],"fore":{"sasong":2026,"varden":{"tema.accent":"#3b6fe0"}},"luckor":{"2026":[1,3]},"dagar":{"2026-12-01":{"a":5,"s":0,"k":0,"p":0}}}', ren);
+  const vilar = jul.rensa({ fore: { sasong: 2026, varden: { 'tema.accent': '#3b6fe0', 'tema.horn': 'rund' }, vilar: true } }).fore;
+  R.ok('tillståndsfilen: ett vilande "innan" behålls, och bara färgerna hör dit (inte hörn)', JSON.stringify(vilar) === '{"sasong":2026,"varden":{"tema.accent":"#3b6fe0"},"vilar":true}', vilar);
+  R.ok('julfärgerna är bara färger: accent, läge och färguppsättning', Object.keys(jul.TEMA).join() === 'tema.accent,tema.lage,tema.palett' && Object.keys(jul.BILDER).join() === 'stor,liten', [jul.TEMA, jul.BILDER]);
 }
 
 // Julfärgernas regler mot en låtsad Electron (ingen app startas): huvudprocessens moduler laddas som i main.js,
@@ -111,11 +131,11 @@ function renaFunktioner(R, rot) {
 async function logik(R, rot) {
   const Module = require('module');
   const mapp = H.tempDir('jul-logik');
-  const hanterare = {}, skickat = [], vidAvslut = [], timrar = new Set();
+  const hanterare = {}, lyssnareIpc = {}, skickat = [], vidAvslut = [], timrar = new Set();
   const riktigTimeout = global.setTimeout, riktigtIntervall = global.setInterval;
   const latsad = {
     app: { getPath: () => mapp, on: (k, f) => { if (k === 'before-quit') vidAvslut.push(f); }, once() {}, whenReady: () => new Promise(() => {}), getVersion: () => 'test' },
-    ipcMain: { on() {}, handle: (k, f) => { hanterare[k] = f; } },
+    ipcMain: { on: (k, f) => { lyssnareIpc[k] = f; }, handle: (k, f) => { hanterare[k] = f; } },
     BrowserWindow: { getAllWindows: () => [], fromWebContents: () => null },
     dialog: {}, clipboard: {}, nativeImage: { createFromBuffer: () => ({ isEmpty: () => false }) },
   };
@@ -216,6 +236,93 @@ async function logik(R, rot) {
     const utanFarger = tema();
     A.angra(); await lugn();
     R.ok('logik: Julfärger av lägger tillbaka temat, Ångra slår på dem igen', utanFarger === NATT && tema() === JULEN && JSON.stringify(fil().fore.varden) === '{"tema.accent":"#3b6fe0","tema.lage":"morkt"}', [utanFarger, tema()]);
+
+    /* ── Frågan ställs en gång, och bara i december ── */
+    const sistaLage = () => (skickat.filter((a) => a[0] === 'jul:andrad').pop() || [])[1] || {};
+    await starta('2032-12-02');
+    R.ok('logik: 2 december: frågan ska ställas', jul.lageUt().fragad === false && jul.lageUt().svarad === false && A.alla()['jul.pa'] === undefined, jul.lageUt());
+    lyssnareIpc['jul:visad']({}); await lugn();
+    R.ok('logik: frågan har synts utan att få svar: den är ställd (inga fler fönster visar den) men inte besvarad (den som visar den behåller den)',
+      jul.lageUt().fragad === true && jul.lageUt().svarad === false && JSON.stringify(fil().visad) === '["2032-12-02"]' && sistaLage().fragad === true && sistaLage().svarad === false, { lage: jul.lageUt(), visad: fil().visad });
+    await starta('2032-12-02T18:00');
+    R.ok('logik: … den kommer inte igen efter omstart samma dag', jul.lageUt().fragad === true && A.alla()['jul.pa'] === undefined);
+    await starta('2032-12-09');
+    R.ok('logik: … och inte en vecka senare. Inget är påslaget, och brytaren går att slå på', jul.lageUt().fragad === true && A.alla()['jul.pa'] === undefined && tema() === NATT);
+    await starta('2034-01-03');
+    R.ok('logik: 1–6 januari ställs ingen fråga, fast ingen ställdes i december', jul.lageUt().sasong === 2033 && jul.lageUt().fragad === true && jul.lageUt().svarad === false && fil().visad.length === 0, jul.lageUt());
+    A.satt('jul.pa', true, {}); await lugn();
+    R.ok('logik: … men Jultema går att slå på för hand i januari', tema() === JULEN && jul.lageUt().svarad === true);
+
+    /* ── Klockan går bakåt över 1 december (tidszon, fel klocka): jultemat ska stå kvar ── */
+    await starta('2034-12-01T00:30');
+    await hanterare['jul:svara']({}, 'ja'); await lugn();
+    hopp -= 2 * 3600000; jul.kolla(); await lugn();   // 30 november 22:30
+    R.ok('logik: klockan går bakåt över 1 december: ingenting rörs', jul.sasong() === null && jul.vantar() === true && A.alla()['jul.pa'] === true && tema() === JULEN && !!fil().fore && fil().fragad === 2034, { pa: A.alla()['jul.pa'], tema: tema(), fil: fil() });
+    hopp += 3 * 3600000; jul.kolla(); await lugn();   // 1 december 01:30
+    R.ok('logik: … och när klockan är rätt igen är jultemat på som förut, utan ny fråga', jul.sasong() === 2034 && jul.vantar() === false && A.alla()['jul.pa'] === true && tema() === JULEN && jul.lageUt().fragad === true && jul.lageUt().svarad === true);
+    await starta('2034-03-01');
+    R.ok('logik: en start med klockan före säsongen (fel klocka mitt i julen): ingenting rörs', jul.vantar() === true && A.alla()['jul.pa'] === true && tema() === JULEN && !!fil().fore);
+    await starta('2034-12-10');
+    R.ok('logik: … och jultemat är kvar när klockan är rätt', A.alla()['jul.pa'] === true && tema() === JULEN && jul.lageUt().fragad === true && JSON.stringify(fil().fore.varden) === '{"tema.accent":"#3b6fe0","tema.lage":"morkt"}');
+    // Framåt går inte att skilja från att julen är slut: då städas den bort, men frågan ställs igen när klockan är rätt
+    await starta('2035-03-01');
+    R.ok('logik: klockan hoppar fram över trettondagen: julen städas bort och svaret glöms', A.alla()['jul.pa'] === undefined && tema() === NATT && fil().fore === null && fil().fragad === null && fil().sasong === null, fil());
+    await starta('2034-12-11');
+    R.ok('logik: … och frågan ställs en gång till när klockan är rätt igen', jul.lageUt().sasong === 2034 && jul.lageUt().fragad === false);
+
+    /* ── Julfärgerna är bara färger, och "Återställ allt" följt av Ångra glömmer inte temat innan ── */
+    A.satt('tema.accent', '#2f9e67', {}); A.satt('tema.lage', undefined, {}); A.satt('tema.horn', 'rund', {}); A.satt('tema.densitet', 'kompakt', {}); await lugn();
+    const INNAN = tema(), JUL_FORM = '[["tema.accent","#d9a441"],["tema.densitet","kompakt"],["tema.horn","rund"],["tema.lage","morkt"],["tema.palett","jul"]]';
+    await hanterare['jul:svara']({}, 'ja'); await lugn();
+    R.ok('logik: julfärgerna byter bara färger: runda hörn och kompakt täthet står kvar', tema() === JUL_FORM && JSON.stringify(fil().fore) === '{"sasong":2034,"varden":{"tema.accent":"#2f9e67"}}', { tema: tema(), fore: fil().fore });
+    const antal = A.aterstall().antal; await lugn();
+    R.ok('logik: Återställ allt under julen: standard överallt, men temat innan vilar (inte glömt)', tema() === '[]' && A.alla()['jul.pa'] === undefined && JSON.stringify(fil().fore) === '{"sasong":2034,"varden":{"tema.accent":"#2f9e67"},"vilar":true}', { tema: tema(), fore: fil().fore });
+    jul.kolla(); await lugn();
+    R.ok('logik: … och det ligger kvar så vid nästa koll (inget skrivs över)', tema() === '[]' && fil().fore.vilar === true);
+    for (let i = 0; i < antal; i++) A.angra();
+    await lugn();
+    R.ok('logik: Ångra efter Återställ allt: julfärgerna tillbaka, och temat innan gäller fortfarande', tema() === JUL_FORM && A.alla()['jul.pa'] === true && JSON.stringify(fil().fore) === '{"sasong":2034,"varden":{"tema.accent":"#2f9e67"}}', { tema: tema(), fore: fil().fore });
+    await starta('2035-01-08');
+    R.ok('logik: … så efter trettondagen kommer temat man hade innan julen tillbaka', tema() === INNAN && A.alla()['jul.pa'] === undefined && fil().fore === null, { tema: tema(), innan: INNAN });
+    // Väljer man själv temat Jul medan julfärgerna är avstängda får det vara (ett vilande "innan" läggs aldrig tillbaka över det)
+    await starta('2035-12-03');
+    await hanterare['jul:svara']({}, 'ja'); await lugn();
+    A.satt('tema.palett', undefined, {}); A.satt('tema.accent', '#e8a317', {}); A.satt('tema.lage', undefined, {});   // eget tema under julen
+    A.satt('jul.farger', false, {}); await lugn();
+    const vilande = fil().fore;
+    A.satt('tema.accent', '#d9a441', {}); A.satt('tema.lage', 'morkt', {}); A.satt('tema.palett', 'jul', {});   // kortet Jul, valt för hand
+    jul.kolla(); await lugn();
+    const JUL_SJALV = tema();
+    R.ok('logik: temat Jul valt för hand medan Julfärger är av: det rörs inte', !!vilande && vilande.vilar === true && /"tema.palett","jul"/.test(JUL_SJALV) && fil().fore.vilar === true, { vilande, tema: JUL_SJALV });
+    await starta('2036-01-08');
+    R.ok('logik: … och ligger kvar efter trettondagen', tema() === JUL_SJALV && fil().fore === null, tema());
+
+    /* ── Delarnas brytare nollställs med Jultema när julen är slut ── */
+    A.aterstall('tema.'); A.satt('tema.accent', '#3b6fe0', {}); A.satt('tema.lage', 'morkt', {});
+    await starta('2036-12-05');
+    await hanterare['jul:svara']({}, 'ja'); await lugn();
+    A.satt('jul.farger', false, {}); A.satt('jul.sno', false, {}); await lugn();
+    R.ok('logik: Julfärger och Snö avstängda under julen', tema() === NATT && A.hamta('jul.sno') === false && A.alla()['jul.pa'] === true);
+    await starta('2037-02-01');
+    const kvarJul = Object.keys(A.alla()).filter((k) => k.startsWith('jul.'));
+    R.ok('logik: efter julen är också delarnas brytare nollställda', kvarJul.length === 0, kvarJul);
+    await starta('2037-12-02');
+    await hanterare['jul:svara']({}, 'ja'); await lugn();
+    R.ok('logik: nästa jul ger Ja tack allt frågan lovar (julfärger och snö är på igen)', A.alla()['jul.pa'] === true && A.hamta('jul.farger') === true && A.hamta('jul.sno') === true && tema() === JULEN, { tema: tema(), alla: A.alla() });
+
+    /* ── Räknaren per dag: bara december, och bara den här julens dagar och luckor sparas ── */
+    jul.raknaTraff('ad'); jul.raknaTraff('ad'); jul.raknaTraff('tracker');
+    const lucka = await hanterare['jul:lucka']({}, 2);
+    R.ok('logik: i december räknas det som stoppas', JSON.stringify(jul.stat().idag) === '{"a":2,"s":1,"k":0,"p":0}' && lucka.ok && lucka.luckor.join() === '2', jul.stat().idag);
+    await starta('2038-01-03');
+    jul.raknaTraff('ad'); jul.raknaTraff('tracker');
+    R.ok('logik: i januari räknas ingenting; decembers siffror och luckorna står kvar till trettondagen', JSON.stringify(jul.stat().december) === '{"a":2,"s":1,"k":0,"p":0}' && JSON.stringify(jul.stat().idag) === '{"a":0,"s":0,"k":0,"p":0}' && jul.lageUt().luckor.join() === '2' && Object.keys(fil().dagar).join() === '2037-12-02', { stat: jul.stat(), dagar: fil().dagar });
+    await framat(5);   // 8 januari: julen är slut
+    jul.raknaTraff('ad');
+    await starta('2038-07-01');
+    jul.raknaTraff('ad'); jul.raknaTraff('kakor');
+    await starta('2038-07-02');
+    R.ok('logik: efter julen är dagarna och luckorna slängda, och resten av året sparas ingenting', JSON.stringify(fil().dagar) === '{}' && JSON.stringify(fil().luckor) === '{}', { dagar: fil().dagar, luckor: fil().luckor });
   } catch (e) {
     R.ok('logiktestet kördes klart', false, String((e && e.stack) || e));
   } finally {
@@ -293,6 +400,11 @@ async function kalender(R, T) {
     hist: (await Anpassa.historik()).length, andrat: !!document.querySelector('#anp-toast.pa'), fokus: document.activeElement && document.activeElement.dataset.n }))()`);
   R.ok('kalender: 24 luckor, dagens öppnas och visar sitt tips, de kommande är stängda', p1.rubrik === 'Julkalender' && p1.antal === 24 && p1.oppnade.join() === '1' && p1.vald.join() === '1' && p1.kommande === 23 && p1.datum === '1 december' && p1.titel === 'Kommandopaletten' && /^Tryck Ctrl\+K och skriv/.test(p1.text) && p1.kbd.join() === 'Ctrl+K' && p1.knapp === 'Öppna paletten' && !p1.rullar, p1);
   R.ok('kalender: raden längst ned säger hur många som är öppnade och när nästa öppnas', p1.fot.join('|') === '1 av 24 öppnade|Lucka 2 öppnas i morgon', p1.fot);
+  // Panelen ligger inte över något: kolumnen har flyttat åt sidan, som när lådan med widgetar är öppen
+  const PLATS = `JSON.stringify((() => { const r = (e) => { const b = e.getBoundingClientRect(); return [Math.round(b.left), Math.round(b.right)]; }, nt = document.getElementById('newtabpage'), remsa = document.querySelector('.nt-stats'), p = document.getElementById('jul-kalender');
+    return { klass: nt.className, panel: p && !p.hidden ? r(p) : null, sok: r(document.querySelector('.anp-st-sok')), genvagar: Math.round(Math.max(...[...document.querySelectorAll('#shortcuts .sc')].map((e) => e.getBoundingClientRect().right))), remsa: r(remsa), remsaSyns: getComputedStyle(remsa).visibility === 'visible' && remsa.offsetParent !== null, bredd: innerWidth }; })())`;
+  const plats1 = await J(s, PLATS);
+  R.ok('kalender: medan panelen är öppen flyttar kolumnen åt sidan – panelen ligger inte över sökrutan, genvägarna eller remsan', /jul-panel-oppen/.test(plats1.klass) && !!plats1.panel && plats1.sok[1] + 12 <= plats1.panel[0] && plats1.genvagar + 12 <= plats1.panel[0] && (!plats1.remsaSyns || plats1.remsa[1] + 12 <= plats1.panel[0]), plats1);
   R.ok('kalender: den öppnade luckans dörr står öppen, den stängda är hel, och skärmläsaren får veta läget', blad1.oppen < 20 && blad1.stangd > 36 && JSON.stringify(blad1.aria) === '[["Lucka 1, öppnad",null,0],["Lucka 2, öppnas den 2 december","true",-1]]' && blad1.fokus === '1', blad1);
   R.ok('kalender: öppnade luckor sparas i jultillståndet, inte i Anpassa (ingen "Ändrat · Ångra", inget i ångra-historiken)', JSON.stringify(tillstand(profil).luckor) === '{"2026":[1]}' && blad1.hist === hist1 && !blad1.andrat, { fil: tillstand(profil).luckor, hist: [hist1, blad1.hist] });
   const p2 = await valj(2);
@@ -305,6 +417,8 @@ async function kalender(R, T) {
   await tangent(s, 0, 'Home', 'Home', 36); const f3 = await s.kor(`document.activeElement.dataset.n`);
   await tangent(s, 0, 'Escape', 'Escape', 27); await H.sov(250);
   const esc = await J(s, `JSON.stringify({ panel: !document.getElementById('jul-kalender').hidden, fokus: document.activeElement && document.activeElement.id })`);
+  const plats1b = await J(s, PLATS);
+  R.ok('kalender: när panelen stängs står kolumnen mitt på sidan igen', !/jul-panel/.test(plats1b.klass) && Math.abs((plats1b.sok[0] + plats1b.sok[1]) / 2 - plats1b.bredd / 2) <= 1 && plats1b.remsaSyns, plats1b);
   R.ok('kalender: piltangenter flyttar mellan luckorna (en lucka i taget i tabbordningen), Escape stänger och lämnar tillbaka fokus', f1 === '2' && f2 === '8/1' && f3 === '1' && !esc.panel && esc.fokus === 'jul-lucka', { f1, f2, f3, esc });
   // Knappen i tipset leder till funktionen
   await oppnaKalender(s);
@@ -362,8 +476,9 @@ async function kalender(R, T) {
   R.ok('kalender: i barnläge visas ett reservtips i stället för snabborden', femBarn.titel === 'Sök på sidan' && /Tryck Ctrl\+F och skriv det\.$/.test(femBarn.text) && femBarn.knapp === null, femBarn);
   await valj(3); await valj(5);
   await klickaPa(s, '.jul-kal-blad > .jul-knapp'); await H.sov(400);
-  const adr = await J(s, `JSON.stringify({ varde: document.getElementById('address').value, fokus: document.activeElement === document.getElementById('address'), panel: !document.getElementById('jul-kalender').hidden })`);
-  R.ok('kalender: "Prova i adressfältet" skriver snabbordet i adressfältet och stänger panelen', adr.varde === 'yt ' && adr.fokus && !adr.panel, adr);
+  await H.sov(500);   // (sökförslag hade hämtats 120 ms efter en input-händelse)
+  const adr = await J(s, `JSON.stringify({ varde: document.getElementById('address').value, fokus: document.activeElement === document.getElementById('address'), panel: !document.getElementById('jul-kalender').hidden, forslag: document.getElementById('omni-suggest').classList.contains('on') })`);
+  R.ok('kalender: "Prova i adressfältet" skriver snabbordet i adressfältet och stänger panelen, utan att hämta sökförslag', adr.varde === 'yt ' && adr.fokus && !adr.panel && !adr.forslag, adr);
   await s.kor(`(() => { const a = document.getElementById('address'); a.value = ''; a.dispatchEvent(new Event('input', { bubbles: true })); a.blur(); return 1; })()`);
   // Minska rörelse: dörrarna glider inte, luckan på nya fliken knackar inte
   const stilla = await J(s, `(async () => { const tid = () => [getComputedStyle(${lucka(4)}.querySelector('.jul-dorr-blad path')).transitionDuration, getComputedStyle(document.getElementById('jul-lucka')).animationName];
@@ -379,6 +494,17 @@ async function kalender(R, T) {
     await Anpassa.set('jul.stat', undefined, 'Statistik i julspråk'); await v(900); ut.medStat = [__J.delar(), remsa().classList.contains('jul-stat-pa'), remsa().querySelectorAll('.jul-st').length > 0];
     return JSON.stringify(ut);
   })()`);
+  // Sökrutan avstängd: luckan sitter nere bredvid Anpassa-knappen, i höjd med den och fri från remsan ovanför
+  // (remsans plats mäts också när den är gömd för att innehållet kommit för nära: den har kvar sin ruta)
+  const nere = await J(s, `(async () => { const v = (ms = 700) => new Promise((r) => setTimeout(r, ms)), ruta = (q) => { const b = document.querySelector(q).getBoundingClientRect(); return { topp: b.top, botten: b.bottom, mitt: (b.top + b.bottom) / 2, vanster: b.left, hoger: b.right }; };
+    AnpassaAngra.tyst(6000);
+    await Anpassa.set('startsida.sokfalt', false, 'Sökfält'); await v();
+    const ut = { klass: document.getElementById('jul-lucka').className, sida: document.getElementById('newtabpage').className, lucka: ruta('#jul-lucka'), knapp: ruta('#anp-st-anpassa'), remsa: ruta('.nt-stats'), remsaSyns: getComputedStyle(document.querySelector('.nt-stats')).visibility === 'visible' };
+    await Anpassa.set('startsida.sokfalt', undefined, 'Sökfält'); await v();
+    ut.tillbaka = [document.getElementById('jul-lucka').className, document.getElementById('newtabpage').className];
+    return JSON.stringify(ut); })()`);
+  R.ok('kalender: utan sökruta sitter luckan bredvid Anpassa-knappen, i höjd med den och fri från remsan ovanför', /jul-nere/.test(nere.klass) && /jul-lucka-nere/.test(nere.sida) && Math.abs(nere.lucka.mitt - nere.knapp.mitt) <= 1.5 && nere.lucka.vanster >= nere.knapp.hoger + 4 &&
+    nere.lucka.topp >= nere.remsa.botten + 4 && nere.knapp.topp >= nere.remsa.botten + 4 && !/jul-nere/.test(nere.tillbaka[0]) && !/jul-lucka-nere/.test(nere.tillbaka[1]), nere);
   R.ok('Julkalender av: luckan och panelen tas bort helt, statistiken är kvar; på igen', !har(bryt.utanKalender[0], 'kalender') && har(bryt.utanKalender[0], 'stat') && JSON.stringify(bryt.utanKalender.slice(1)) === '[false,false,false,true]' && har(bryt.medKalender[0], 'kalender') && bryt.medKalender[1] === true && bryt.medKalender[2] === '13', bryt);
   R.ok('Statistik i julspråk av: remsan visar totalen igen och julens element är borta, kalendern är kvar; på igen', !har(bryt.utanStat[0], 'stat') && har(bryt.utanStat[0], 'kalender') && !/jul-/.test(bryt.utanStat[1]) && bryt.utanStat[2] === 0 && bryt.utanStat[3] === true && bryt.utanStat[4] === true && har(bryt.medStat[0], 'stat') && bryt.medStat[1] === true && bryt.medStat[2] === true, bryt);
   R.ok('kalender: inga JS-fel på Lucia', !fel(s).length, fel(s));
@@ -537,7 +663,7 @@ async function kor(rot, bilder, bara) {
   await logik(R, rot);
   if (bara === 'logik') return R;
   const x = await H.startaXvfb();
-  const profil = H.tempDir('jul'), profilB = H.tempDir('jul-b'), profilC = H.tempDir('jul-c');
+  const profil = H.tempDir('jul'), profilB = H.tempDir('jul-b'), profilC = H.tempDir('jul-c'), profilD = H.tempDir('jul-d'), profilE = H.tempDir('jul-e');
   const logg = path.join(profil, 'logg.txt');
   let app = null;
   const bild = async (s, namn) => {
@@ -599,6 +725,8 @@ async function kor(rot, bilder, bara) {
       return JSON.stringify({ tema: __J.tema(), palett: document.documentElement.getAttribute('data-anp-palett'), valda: [...document.querySelectorAll('#anp-tema [data-forval].on')].length, flikrad: __J.farg('#tabstrip') });
     })()`);
     const TEMA_INNAN = '[["tema.accent","#7354d6"],["tema.horn","rund"],["tema.lage","morkt"]]';
+    // Julfärgerna ovanpå det: bara färgerna byts, hörnen är användarens egna
+    const JULTEMA = '[["tema.accent","#d9a441"],["tema.horn","rund"],["tema.lage","morkt"],["tema.palett","jul"]]';
     R.ok('ett annat kort tar bort färguppsättningen jul (vanligt mörkt igen)', innan.tema === TEMA_INNAN && innan.palett === null && innan.flikrad !== 'rgb(12, 33, 24)', innan);
     await s.kor(`closeSettings(); 1`);
     R.ok('inga JS-fel i november', !fel(s).length, fel(s));
@@ -614,14 +742,33 @@ async function kor(rot, bilder, bara) {
     const frLage = kom === true ? JSON.parse(fr.lage) : {};
     R.ok('1 december: frågan "Vill du ha jultema?" visas på nya fliken', kom === true && fr.titel === 'Vill du ha jultema?' && fr.knappar.join() === 'Nej tack,Ja tack' && /trettondagen/.test(fr.under || ''), fr);
     R.ok('inget är påslaget innan man svarat', frLage.delar === null && frLage.pa === undefined && frLage.palett === null && !frLage.sno && !frLage.gorilla && fr.tema === TEMA_INNAN, frLage);
-    R.ok('att frågan visats är sparat', JSON.stringify(tillstand(profil).visad) === '["2026-12-01"]' && tillstand(profil).fragad === null, tillstand(profil));
+    R.ok('frågan räknas inte som ställd förrän den har synts en stund', JSON.stringify(tillstand(profil).visad) === '[]' && tillstand(profil).fragad === null, tillstand(profil));
     await bild(s, '02-fragan');
-    // Ett andra fönster får också frågan; svaret i det första stänger den där
+    // Ett andra fönster som är öppet innan frågan är färdigställd får den också; svaret i det första stänger den där.
+    // (Inställningarna öppnas en stund i det första fönstret: då syns inte nya fliken där och sekunderna räknas inte,
+    // så att det andra fönstret säkert hinner visa frågan först.)
+    await s.kor(`openSettings(); 1`);
     const forsta = app.t.id;
     await tangent(s, 2, 'n', 'KeyN', 78);
     const t2 = await H.mal(app.cdp, (m) => m.type === 'page' && m.url.includes('/ui/shell.html') && !m.url.includes('incognito') && m.id !== forsta, 15000);
     let s2 = null;
-    if (t2) { s2 = await anslutSkal(t2); R.ok('frågan visas också i ett andra fönster', (await fragan(s2, 14000)) === true); } else R.ok('Ctrl+N öppnade ett andra fönster', false);
+    if (t2) { s2 = await anslutSkal(t2); R.ok('frågan visas också i ett andra fönster som var öppet innan den var ställd', (await fragan(s2, 14000)) === true); } else R.ok('Ctrl+N öppnade ett andra fönster', false);
+    await s.kor(`closeSettings(); 1`);
+    // Åtta sekunder med frågan framme: nu är den ställd. Fönstren som visar den behåller den, nya fönster får den inte.
+    let stalld = false;
+    for (let i = 0; i < 80 && !stalld; i++) { stalld = (tillstand(profil).visad || []).length > 0; if (!stalld) await H.sov(250); }
+    R.ok('när frågan har synts i åtta sekunder är det sparat att den är ställd', stalld && JSON.stringify(tillstand(profil).visad) === '["2026-12-01"]' && tillstand(profil).fragad === null, tillstand(profil));
+    await H.sov(400);
+    R.ok('frågan står kvar i fönstren som redan visar den', (await fragan(s, 300)) === true && (!s2 || (await fragan(s2, 300)) === true));
+    await tangent(s, 2, 'n', 'KeyN', 78);
+    const t2b = await H.mal(app.cdp, (m) => m.type === 'page' && m.url.includes('/ui/shell.html') && !m.url.includes('incognito') && m.id !== forsta && (!t2 || m.id !== t2.id), 15000);
+    if (t2b) {
+      const s2b = await anslutSkal(t2b);
+      R.ok('ett fönster som öppnas när frågan redan är ställd får den inte', (await fragan(s2b, 9000)) === false && (await J(s2b, LAGE)).sasong === 2026);
+      await s2b.kor(`window.close(); 1`).catch(() => {});
+      s2b.stang();
+      await H.sov(600);
+    } else R.ok('Ctrl+N öppnade ett tredje fönster', false);
     // Måtten innan något pynt: ingenting får flytta sig när luvan kommer (hälsningens text slumpas, därför bara dess höjdläge)
     const MATT = `JSON.stringify({ knapp: __J.ruta('#adblock'), falt: __J.ruta('#omnibox'), flik: __J.ruta('#tabs .tab'), flikrad: __J.ruta('#tabstrip'), flikar: __J.ruta('#tabs'), ikon: __J.ruta('#tabs .tab .fav'), ny: __J.ruta('#newtab-btn'),
       sok: __J.ruta('.anp-st-sok'), halsning: __J.ruta('#nt-greet').filter((v, i) => i % 2), remsa: __J.ruta('.nt-stats'), rutnat: __J.ruta('#anp-st-grid') })`;
@@ -635,10 +782,10 @@ async function kor(rot, bilder, bara) {
       andratToast: !!document.querySelector('#anp-toast.pa'), flikrad: __J.farg('#tabstrip'), aktiv: __J.farg('#tabs .tab.active') }))()`);
     const jaLage = JSON.parse(ja.lage);
     R.ok('Ja tack: snö och luva slås på, frågan försvinner', paOk === true && har(jaLage.delar, 'sno', 'luva') && jaLage.pa === true && !jaLage.fraga && jaLage.sno && jaLage.gorilla, jaLage);
-    R.ok('Ja tack: julfärgerna slås på (temat Jul)', jaLage.palett === 'jul' && jaLage.theme === 'dark' && ja.tema === '[["tema.accent","#d9a441"],["tema.lage","morkt"],["tema.palett","jul"]]' && ja.flikrad === 'rgb(12, 33, 24)' && ja.aktiv === 'rgb(143, 37, 41)', ja);
+    R.ok('Ja tack: julfärgerna slås på (färgerna i temat Jul; de runda hörnen man hade står kvar)', jaLage.palett === 'jul' && jaLage.theme === 'dark' && ja.tema === JULTEMA && ja.flikrad === 'rgb(12, 33, 24)' && ja.aktiv === 'rgb(143, 37, 41)', ja);
     R.ok('Ja tack: beskedet var man stänger av visas, men ingen "Ändrat · Ångra" och inget i ångra-historiken', ja.toastSyns && /Inställningar › Anpassa/.test(ja.toast) && !ja.andratToast && ja.hist === histFore, { toast: ja.toast, andrat: ja.andratToast, hist: [histFore, ja.hist] });
     const st1 = tillstand(profil);
-    R.ok('temat innan julen är sparat på disk', st1.fragad === 2026 && st1.fore && st1.fore.sasong === 2026 && JSON.stringify(st1.fore.varden) === '{"tema.accent":"#7354d6","tema.lage":"morkt","tema.horn":"rund"}', st1);
+    R.ok('temat innan julen är sparat på disk', st1.fragad === 2026 && st1.fore && st1.fore.sasong === 2026 && JSON.stringify(st1.fore.varden) === '{"tema.accent":"#7354d6","tema.lage":"morkt"}', st1);
     if (s2) {
       const tva = await J(s2, `(async () => { await __J.tills(() => !document.getElementById('jul-fraga') && /luva/.test(__J.delar() || ''), 4000); return ${LAGE}; })()`);
       R.ok('svaret gäller i det andra fönstret direkt (frågan borta, pyntet på)', !tva.fraga && har(tva.delar, 'sno', 'luva') && tva.palett === 'jul', tva);
@@ -723,13 +870,37 @@ async function kor(rot, bilder, bara) {
       closeSettings(); await __J.tills(() => (__J.sno().running || 0) === 2 * n, 3000); const efterInst = __J.sno();
       document.body.classList.add('reduce-motion'); await new Promise((r) => setTimeout(r, 200)); const stilla = __J.sno(); const stillaSyns = [...lager.querySelectorAll('.jul-flinga')].filter((f) => { const b = f.getBoundingClientRect(); return b.top > nt.getBoundingClientRect().top && b.bottom < innerHeight; }).length;
       document.body.classList.remove('reduce-motion'); await new Promise((r) => setTimeout(r, 200));
+      const glas = () => [...nt.querySelectorAll('.anp-st-sok, .sc-tile, .nt-stats, #anp-st-anpassa')].map((e) => getComputedStyle(e).backdropFilter);
+      const oskarpa = glas();
+      document.body.classList.add('reduce-motion'); await new Promise((r) => setTimeout(r, 100)); const oskarpaStilla = glas(); document.body.classList.remove('reduce-motion'); await new Promise((r) => setTimeout(r, 100));
       return JSON.stringify({ n, igang, z: getComputedStyle(lager).zIndex, klick: getComputedStyle(lager).pointerEvents, foreKolumnen: lager.nextElementSibling === nt.querySelector('.anp-st-inre') || !!(lager.compareDocumentPosition(nt.querySelector('.anp-st-inre')) & 4),
-        overst: overst && (overst.id || overst.className), iInst, efterInst, stilla, stillaSyns });
+        overst: overst && (overst.id || overst.className), iInst, efterInst, stilla, stillaSyns, steg: getComputedStyle(lager.querySelector('.jul-flinga')).animationTimingFunction, oskarpa, oskarpaStilla });
     })()`);
     R.ok('snön: 22–40 flingor som alla faller och svajar', sno.n >= 22 && sno.n <= 40 && sno.igang.running === 2 * sno.n, sno);
     R.ok('snön ligger bakom sökrutan och tar inga klick', sno.z === '5' && sno.klick === 'none' && sno.foreKolumnen && sno.overst === 'nt-search', sno);
     R.ok('snön pausas när inställningarna ligger över och går igen efteråt', sno.iInst.paused === 2 * sno.n && !sno.iInst.running && sno.efterInst.running === 2 * sno.n, { iInst: sno.iInst, efter: sno.efterInst });
     R.ok('Minska rörelse: inga animationer, flingorna hänger stilla', Object.keys(sno.stilla).length === 0 && sno.stillaSyns >= sno.n - 2, { stilla: sno.stilla, syns: sno.stillaSyns });
+    R.ok('snön går i steg (alla flingor på samma klocka), inte i varje bildruta', /^steps\(\d+\), steps\(\d+\)$/.test(sno.steg), sno.steg);
+    R.ok('medan snön faller är oskärpan bakom glasrutorna av; med Minska rörelse (stilla snö) är den kvar', sno.oskarpa.length >= 3 && sno.oskarpa.every((f) => f === 'none') && sno.oskarpaStilla.some((f) => /blur/.test(f)), { faller: sno.oskarpa, stilla: sno.oskarpaStilla });
+    // Flingorna flyttas 30 gånger i sekunden och alla i samma bildruta (då ritas ingenting om däremellan)
+    const takt = await J(s, `(async () => { const fl = [...document.querySelectorAll('.jul-flinga')].slice(0, 6), rader = []; const t0 = performance.now();
+      await new Promise((klar) => { let n = 0; const steg = (t) => { rader.push(fl.map((f) => { const b = f.getBoundingClientRect(); return Math.round(b.top * 100) + '/' + Math.round(b.left * 100); })); if (++n < 120) requestAnimationFrame(steg); else klar(); }; requestAnimationFrame(steg); });
+      const ms = performance.now() - t0, bytte = rader.slice(1).map((r, i) => r.map((v, k) => v !== rader[i][k]));
+      return JSON.stringify({ perSek: Math.round(bytte.filter((b) => b.some(Boolean)).length / ms * 1000), osams: bytte.filter((b) => b.some(Boolean) && !b.every(Boolean)).length, fps: Math.round(rader.length / ms * 1000) }); })()`);
+    R.ok('snön flyttas högst 30 gånger i sekunden, alla flingor samtidigt', takt.perSek >= 20 && takt.perSek <= 32 && takt.osams <= 2, takt);
+    // Fönstret tappar fokus (ett annat fönster öppnas): snön pausas, och går igen när fokus är tillbaka
+    await s.skicka('Emulation.setFocusEmulationEnabled', { enabled: false });
+    await H.sov(400);
+    const fokusFore = await J(s, `JSON.stringify({ fokus: document.hasFocus(), sno: __J.sno() })`);
+    await tangent(s, 2, 'n', 'KeyN', 78);
+    const tf = await H.mal(app.cdp, (m) => m.type === 'page' && m.url.includes('/ui/shell.html') && !m.url.includes('incognito') && m.id !== app.t.id, 15000);
+    await H.sov(1500);
+    const utanFokus = await J(s, `JSON.stringify({ fokus: document.hasFocus(), sno: __J.sno() })`);
+    if (tf) { const sf = await H.anslut(tf.webSocketDebuggerUrl); await sf.kor(`window.close(); 1`).catch(() => {}); sf.stang(); }
+    await H.sov(1500);
+    const medFokus = await J(s, `JSON.stringify({ fokus: document.hasFocus(), sno: __J.sno() })`);
+    await s.skicka('Emulation.setFocusEmulationEnabled', { enabled: true });
+    R.ok('snön pausas när fönstret tappar fokus och faller igen när det har fokus', !!tf && fokusFore.fokus && fokusFore.sno.running > 0 && !utanFokus.fokus && !utanFokus.sno.running && utanFokus.sno.paused > 0 && medFokus.fokus && medFokus.sno.running > 0, { fokusFore, utanFokus, medFokus });
     // En sida i fliken (blockerarens egen sida, kräver inget nät): startsidan är dold och ingenting animeras
     const sida = await J(s, `(async () => { const hem = active; const t = createTab('adraze://adblock'); await __J.tills(() => document.getElementById('newtabpage').classList.contains('hidden'), 4000); await new Promise((r) => setTimeout(r, 300));
       const ut = { dold: document.getElementById('newtabpage').classList.contains('hidden'), sno: __J.sno(), knapp: getComputedStyle(document.querySelector('#adblock .ab-mark')).content };
@@ -742,13 +913,26 @@ async function kor(rot, bilder, bara) {
     const m1 = await matt(); await H.sov(5000); const m2 = await matt();
     const dm = { layout: m2.LayoutCount - m1.LayoutCount, stil: m2.RecalcStyleCount - m1.RecalcStyleCount, skriptMs: Math.round((m2.ScriptDuration - m1.ScriptDuration) * 1000), stilMs: Math.round((m2.RecalcStyleDuration - m1.RecalcStyleDuration) * 1000) };
     R.ok('snöfallet är billigt: under 5 s högst 2 layouter, högst 15 stilomräkningar, under 30 ms stil och skript', dm.layout <= 2 && dm.stil <= 15 && dm.skriptMs + dm.stilMs < 30, dm);
+    // Ingen rör mus eller tangentbord på en och en halv minut: snön vilar. Första rörelsen väcker den.
+    await s.skicka('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 640, y: 300 });
+    await H.sov(6000);
+    await s.skicka('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 642, y: 302 });
+    await H.sov(300);
+    const vaken = await J(s, `JSON.stringify(__J.sno())`);
+    await H.sov(92000);
+    const vilar = await J(s, `JSON.stringify({ sno: __J.sno(), paus: document.getElementById('jul-sno').classList.contains('jul-paus') })`);
+    await s.skicka('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 650, y: 310 });
+    await H.sov(400);
+    const vackt = await J(s, `JSON.stringify(__J.sno())`);
+    R.ok('snön vilar när ingen rört mus eller tangentbord på en och en halv minut, och faller igen vid första rörelsen', vaken.running > 0 && vilar.paus && !vilar.sno.running && vilar.sno.paused > 0 && vackt.running > 0, { vaken, vilar, vackt });
 
     /* ── 5. Inställningarna, inkognito, luckor, räknare, bild ── */
     await s.kor(`openSettings(); showSettingsCat('anpassa'); 1`);
     await H.sov(600);
     const inst = await J(s, `JSON.stringify({ rubrik: (document.querySelector('#anp-jul h3') || {}).textContent, rader: [...document.querySelectorAll('#anp-jul .set-row')].map((r) => [r.querySelector('.set-title').textContent, r.querySelector('input').checked]),
       fore: document.getElementById('anp-jul').compareDocumentPosition(document.getElementById('anp-tema')) & 4, julKort: document.querySelector('#anp-tema [data-forval=jul]').classList.contains('on') })`);
-    R.ok('Inställningar › Anpassa › Jul: Jultema och en brytare per byggd del, alla på', inst.rubrik === 'Jul' && JSON.stringify(inst.rader.slice(0, 4)) === '[["Jultema",true],["Julfärger",true],["Snö på nya fliken",true],["Gorillan i tomteluva",true]]' && inst.rader.every((r) => r[1] === true) && !!inst.fore && inst.julKort, inst);
+    R.ok('Inställningar › Anpassa › Jul: Jultema och en brytare per byggd del, alla på', inst.rubrik === 'Jul' && JSON.stringify(inst.rader.slice(0, 4)) === '[["Jultema",true],["Julfärger",true],["Snö på nya fliken",true],["Gorillan i tomteluva",true]]' && inst.rader.every((r) => r[1] === true) && !!inst.fore, inst);
+    R.ok('kortet Jul i temalistan är inte markerat: hörnen är användarens egna, inte kortets', inst.julKort === false, inst.julKort);
     R.ok('alla sex delarna har sin brytare, i ordning', inst.rader.map((r) => r[0]).join('|') === 'Jultema|Julfärger|Snö på nya fliken|Gorillan i tomteluva|Julkalender|Statistik i julspråk|Snö på flikarna', inst.rader.map((r) => r[0]));
     await bild(s, '04-installningar');
     await s.kor(`closeSettings(); 1`);
@@ -820,7 +1004,6 @@ async function kor(rot, bilder, bara) {
       await Anpassa.set('jul.pa', true, 'Jultema'); await v(700); ut.pa = [__J.delar(), document.documentElement.getAttribute('data-anp-palett'), __J.tema()];
       return JSON.stringify(ut);
     })()`);
-    const JULTEMA = '[["tema.accent","#d9a441"],["tema.lage","morkt"],["tema.palett","jul"]]';
     R.ok('Snö på nya fliken av: lagret tas bort helt; på igen', !har(bryt.utanSno[0], 'sno') && har(bryt.utanSno[0], 'luva') && bryt.utanSno[1] === false && bryt.utanSno[2] === 0 && har(bryt.medSno[0], 'sno', 'luva') && bryt.medSno[1] === true, bryt);
     R.ok('Gorillan i tomteluva av: vanliga loggan tillbaka i rätt storlek; på igen', har(bryt.utanLuva[0], 'sno') && !har(bryt.utanLuva[0], 'luva') && bryt.utanLuva[1] === false && !/mark-luva/.test(bryt.utanLuva[2]) && bryt.utanLuva[3][2] === 17 && har(bryt.medLuva[0], 'sno', 'luva') && bryt.medLuva[1] === true, bryt.utanLuva);
     R.ok('Snö på flikarna av: ingen snö, ingen överkant, innehållet och plusknappen 2 px upp igen; på igen', har(bryt.medFlikar0[0], 'flikar') && !har(bryt.utanFlikar[0], 'flikar') && har(bryt.utanFlikar[0], 'sno', 'luva') && bryt.utanFlikar[1] === '0px' && bryt.utanFlikar[2] === 'ingen' &&
@@ -831,6 +1014,28 @@ async function kor(rot, bilder, bara) {
     // Det man själv ändrar under julen ska vara kvar efteråt: en egen accentfärg
     await s.kor(`Anpassa.set('tema.accent', '#0b8a8f', 'Accentfärg').then(() => 1)`);
     await H.sov(500);
+    // En webbsida kan inte räkna upp statistiken. Den fasta händelsen sidskyddet förr använde räknas inte (sidan kunde
+    // skicka den själv), riktiga stopp från sidans värld har ett tak per flik, och inkognito räknas inte i julens räknare.
+    const sidor = await sidServer();
+    await M(`process.mainModule.require('./blockinst').satt('injektioner', true); return 1;`);
+    const idag = () => J(s, `Jul.stat().then((x) => JSON.stringify(x.idag))`);
+    const totalen = () => s.kor(`(JSON.parse(localStorage.getItem('skoll-stats') || '{}').ads || 0)`);
+    const hemflik = await s.kor(`active.id`);
+    const statFore = await idag();
+    await s.kor(`createTab(${JSON.stringify(sidor.url + 'fejk')}); 1`); await H.sov(2500);
+    const statFejk = await idag();
+    R.ok('räknaren: en sida som själv skickar händelsen 4 000 gånger räknar inte upp någonting', statFejk.a === statFore.a && statFejk.s === statFore.s, { statFore, statFejk });
+    await s.kor(`createTab(${JSON.stringify(sidor.url + 'riktig')}); 1`); await H.sov(2500);
+    const statRiktig = await idag();
+    R.ok('räknaren: riktiga stopp räknas, men en sida som försöker 300 gånger i rad får högst 30 räknade', statRiktig.a - statFejk.a >= 25 && statRiktig.a - statFejk.a <= 34, { statFejk, statRiktig });
+    const totalFore = await totalen();
+    await s.kor(`createTab(${JSON.stringify(sidor.url + 'riktig')}, true); 1`); await H.sov(3000);
+    const statInkognito = await idag(), totalEfter = await totalen();
+    R.ok('räknaren: det som stoppas i en inkognitoflik räknas inte i julens räknare per dag', statInkognito.a === statRiktig.a && totalEfter > totalFore, { statRiktig, statInkognito, totalen: [totalFore, totalEfter] });
+    await s.kor(`(() => { for (const t of tabs.slice()) if (t.url && t.url.startsWith(${JSON.stringify(sidor.url)})) closeTab(t); const hem = tabs.find((x) => x.id === ${JSON.stringify(hemflik)}); if (hem) switchTab(hem); return 1; })()`);
+    await M(`process.mainModule.require('./blockinst').satt('injektioner', false); return 1;`);
+    sidor.stang();
+    await H.sov(600);
     R.ok('inga JS-fel den 13 december', !fel(s).length, fel(s));
     await stangApp();
 
@@ -863,7 +1068,7 @@ async function kor(rot, bilder, bara) {
     await s.kor(`closeSettings(); 1`);
     await H.sov(1200);
     const st7 = tillstand(profil);
-    R.ok('på disk: inget "innan" kvar, ingen säsong', st7.fore === null && st7.sasong === null && st7.fragad === 2026, st7);
+    R.ok('på disk: inget "innan" kvar, ingen säsong, svaret glömt', st7.fore === null && st7.sasong === null && st7.fragad === null, st7);
     R.ok('inga JS-fel vid säsongens slut', !fel(s).length, fel(s));
     await stangApp();
     const anp7 = (lasFil(profil, 'adraze-anpassa.json') || {}).varden || {};
@@ -894,18 +1099,62 @@ async function kor(rot, bilder, bara) {
     R.ok('inga JS-fel nästa jul', !fel(s).length, fel(s));
     await stangApp();
 
-    /* ── 9. En fråga utan svar: kommer tre olika dagar, sedan inte mer. Och säsongen börjar på slaget. ── */
+    /* ── 9. En fråga utan svar ställs EN gång. Och säsongen börjar på slaget. ── */
     ({ s, M } = await starta('2026-11-30T23:59:50', profilB));
     const borjan = await s.kor(`__J.tills(() => Jul.sasong() === 2026, 30000)`);
     R.ok('midnatt 1 december: säsongen börjar medan AdRaze är igång, och frågan kommer', borjan === true && (await fragan(s, 14000)) === true && (await J(s, LAGE)).delar === null);
+    await stangApp();   // stängs direkt: frågan hann knappt synas
+    R.ok('AdRaze stängdes innan frågan hunnit synas i åtta sekunder: den räknas inte som ställd', (tillstand(profilB).visad || []).length === 0 && tillstand(profilB).fragad === null, tillstand(profilB));
+    ({ s, M } = await starta('2026-12-02', profilB));
+    R.ok('2 december: frågan kommer igen (den hann aldrig synas)', (await fragan(s, 14000)) === true);
+    let stalldB = false;
+    for (let i = 0; i < 80 && !stalldB; i++) { stalldB = (tillstand(profilB).visad || []).length > 0; if (!stalldB) await H.sov(250); }
+    R.ok('efter åtta sekunder framme är frågan ställd', stalldB && JSON.stringify(tillstand(profilB).visad) === '["2026-12-02"]', tillstand(profilB));
     await stangApp();
-    for (const [dag, vantat] of [['2026-12-02', true], ['2026-12-03', true], ['2026-12-04', false], ['2026-12-20', false]]) {
+    for (const dag of ['2026-12-02T18:00', '2026-12-03', '2026-12-20']) {
       ({ s, M } = await starta(dag, profilB));
-      const kom2 = await fragan(s, vantat ? 14000 : 9000);
-      R.ok(dag + ': frågan ' + (vantat ? 'visas igen (inget svar än)' : 'visas inte mer (tre dagar utan svar räknas som nej)'), kom2 === vantat, tillstand(profilB).visad);
-      if (!vantat) { const l = await J(s, LAGE); R.ok(dag + ': ingenting är påslaget', l.delar === null && l.pa === undefined && l.palett === null, l); }
+      R.ok(dag + ': frågan kommer inte igen (den ställs en gång per jul)', (await fragan(s, 9000)) === false, tillstand(profilB).visad);
+      const l = await J(s, LAGE);
+      R.ok(dag + ': ingenting är påslaget', l.delar === null && l.pa === undefined && l.palett === null, l);
+      if (dag === '2026-12-20') {
+        await s.kor(`openSettings(); showSettingsCat('anpassa'); 1`); await H.sov(500);
+        const rader = await J(s, `JSON.stringify([...document.querySelectorAll('#anp-jul .set-row')].map((r) => [r.querySelector('.set-title').textContent, r.querySelector('input').checked]))`);
+        R.ok('den som lät frågan stå hittar Jultema under Inställningar › Anpassa', JSON.stringify(rader) === '[["Jultema",false]]', rader);
+        R.ok('inga JS-fel utan svar på frågan', !fel(s).length, fel(s));
+      }
       await stangApp();
     }
+
+    /* ── 9b. Första starten är i januari: ingen fråga (julen är nästan slut), men brytaren finns ── */
+    ({ s, M } = await starta('2027-01-03', profilD));
+    R.ok('3 januari, ny profil: ingen fråga', (await fragan(s, 9500)) === false && (await J(s, LAGE)).sasong === 2026);
+    await s.kor(`openSettings(); showSettingsCat('anpassa'); 1`); await H.sov(500);
+    const janRader = await J(s, `JSON.stringify([...document.querySelectorAll('#anp-jul .set-row .set-title')].map((e) => e.textContent))`);
+    R.ok('3 januari: Jultema går att slå på i inställningarna', janRader.join() === 'Jultema', janRader);
+    await stangApp();
+
+    /* ── 9c. Den som hade ljust läge (standard) och sa Ja tack har ljust läge igen när AdRaze startas efter julen ──
+     * Huvudprocessen lägger tillbaka temat innan något fönster finns. Fönstrets egen anteckning om läget (skoll-theme)
+     * står då kvar på mörkt från julen, och togs förr för ett gammalt val: webbläsaren blev mörk för gott. */
+    ({ s, M } = await starta('2026-12-05', profilE));
+    const ljusFore = await J(s, `JSON.stringify({ theme: document.documentElement.dataset.theme, tema: __J.tema(), ls: localStorage.getItem('skoll-theme') })`);
+    const komE = await fragan(s, 14000);
+    if (komE === true) { const k = await J(s, `JSON.stringify(__J.ruta('#jul-fraga .notis-knapp'))`); await klicka(s, k[0] + k[2] / 2, k[1] + k[3] / 2); }
+    await s.kor(`__J.tills(() => document.documentElement.getAttribute('data-anp-palett') === 'jul' && document.documentElement.dataset.theme === 'dark', 5000)`);
+    await H.sov(600);
+    const ljusJul = await J(s, `JSON.stringify({ theme: document.documentElement.dataset.theme, tema: __J.tema(), ls: localStorage.getItem('skoll-theme') })`);
+    R.ok('ljust läge innan: Ja tack ger julfärgerna (mörkt), och inget "innan" utom standard finns att spara', ljusFore.theme === 'light' && ljusFore.tema === '[]' && komE === true && ljusJul.theme === 'dark' && ljusJul.ls === 'dark' &&
+      JSON.stringify(tillstand(profilE).fore) === '{"sasong":2026,"varden":{}}', { ljusFore, ljusJul, fore: tillstand(profilE).fore });
+    await stangApp();
+    ({ s, M } = await starta('2027-01-10', profilE));
+    await H.sov(600);
+    const ljusEfter = await J(s, `JSON.stringify({ theme: document.documentElement.dataset.theme, tema: __J.tema(), ls: localStorage.getItem('skoll-theme'), palett: document.documentElement.getAttribute('data-anp-palett'), pa: Anpassa.alla()['jul.pa'], delar: __J.delar() })`);
+    R.ok('start 10 januari: ljust läge igen, inga tema-värden kvar, inget pynt', ljusEfter.theme === 'light' && ljusEfter.tema === '[]' && ljusEfter.ls === 'light' && ljusEfter.palett === null && ljusEfter.pa === undefined && ljusEfter.delar === null, ljusEfter);
+    await H.sov(500);
+    const anpE = (lasFil(profilE, 'adraze-anpassa.json') || {}).varden || {};
+    R.ok('på disk i Anpassa: inget tema.lage (ljust är standard) och inget jul.pa', anpE['tema.lage'] === undefined && anpE['tema.palett'] === undefined && anpE['jul.pa'] === undefined, anpE);
+    R.ok('inga JS-fel efter julen med ljust läge', !fel(s).length, fel(s));
+    await stangApp();
 
     /* ── 10. Julkalendern, statistiken i julspråk och julaftons sammanfattning ── */
     await kalender(R, K);
@@ -915,7 +1164,7 @@ async function kor(rot, bilder, bara) {
   } finally {
     if (app) await stang(app);
     x.stoppa();
-    for (const p of [profil, profilB, profilC]) { try { fs.rmSync(p, { recursive: true, force: true }); } catch {} }
+    for (const p of [profil, profilB, profilC, profilD, profilE]) { try { fs.rmSync(p, { recursive: true, force: true }); } catch {} }
   }
   return R;
 }
