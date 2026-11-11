@@ -8,8 +8,8 @@
 
    Sektioner (varje del skriver bara i sin egen):
      0  Variabler            4  Snö på flikarna (del "flikar")
-     1  Temat Jul            5  Julkalendern (del "kalender")
-     2  Gorillan i luva      6  Statistik och sammanfattning (del "stat")
+     1  Temat Jul            5  Julkalendern (del "kalender") och panelen med luckorna och sammanfattningen
+     2  Gorillan i luva      6  Statistik i julspråk (del "stat")
      3  Snö på nya fliken    7  Frågan och inställningarna */
 
 
@@ -233,11 +233,185 @@
 
 
 /* ══ 5. Julkalendern (del "kalender", jul-kalender.js) ═════════════════════════════════════════════════════
-   Inte byggd än. Regler börjar med :root[data-jul~="kalender"] body:not(.incog) … */
+   En liten lucka med dagens datum bredvid sökrutan (#jul-lucka) öppnar en panel vid högerkanten (#jul-kalender)
+   med alla 24 luckor och den valda luckans innehåll. Panelen används också ensam för julaftons sammanfattning
+   (del "stat", sektion 6): därför gäller panelens regler båda delarna.
+
+   Luckorna är ritade dörrar av papper med bläcklinje, i loggans egna färger i alla teman (som gorillan): stängd =
+   papper, öppnad = tänt fönster i AD-lappens gula, dagens oöppnade = en orange klick i hörnet. Dörrbladets tre former
+   (stängd, på glänt, öppen) ligger som CSS-variabler på varje knapp (--jd-*, jul-kalender.js) och bladet glider
+   mellan dem. Panelen följer temat: papper i ljust läge, grafit i mörkt, gran i temat Jul. */
+#jul-lucka-plats, #jul-lucka, #jul-kalender { display: none; }
+:root:is([data-jul~="kalender"], [data-jul~="stat"]) body:not(.incog) #newtabpage {
+  --jk-papper: #f4efe6; --jk-skugga: #dcd2bf; --jk-ink: #1b1916; --jk-ljus: #ffd23e; --jk-klick: #ff4b1f;
+  --jk-bg: #fbf8f2; --jk-text: #1b1916; --jk-mut: rgb(27 25 22 / .64); --jk-linje: rgb(27 25 22 / .13); --jk-yta: rgb(27 25 22 / .06);
+  --jk-tal: #e2411a; --jk-knapp: #1b1916; --jk-knapp-text: #fbf8f2; --jk-fyll: linear-gradient(180deg, #ff6a43 0%, #ff4b1f 100%);
+}
+:root:is([data-jul~="kalender"], [data-jul~="stat"])[data-theme="dark"] body:not(.incog) #newtabpage {
+  --jk-bg: #1f1e1c; --jk-text: #eeede8; --jk-mut: #a2a097; --jk-linje: #363430; --jk-yta: rgb(255 255 255 / .07);
+  --jk-tal: #ff7a52; --jk-knapp: #eeede8; --jk-knapp-text: #1b1916;
+}
+:root:is([data-jul~="kalender"], [data-jul~="stat"])[data-anp-palett="jul"][data-theme="dark"] body:not(.incog) #newtabpage {
+  --jk-bg: var(--jul-gran-850); --jk-text: var(--jul-gradde); --jk-mut: var(--jul-dimgron); --jk-linje: var(--jul-gran-700); --jk-yta: rgb(244 236 216 / .08);
+  --jk-tal: var(--jul-guld); --jk-knapp: var(--jul-gradde); --jk-knapp-text: var(--jul-ink); --jk-fyll: linear-gradient(180deg, #ecc063 0%, #d9a441 100%);
+}
+
+:root[data-jul~="kalender"] body:not(.incog) {
+  /* Luckan (dörren): insidan (det tända fönstret) ligger under bladet, som glider mellan sina tre former */
+  & .jul-dorr { position: relative; display: block; flex: none; width: 46px; height: 46px; padding: 0; border: 0; background: none; color: var(--jk-ink); cursor: pointer; font-family: var(--font-display); }
+  & .jul-dorr > :is(span, i) { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+  & .jul-dorr svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  & .jul-dorr path { fill: var(--jk-papper); stroke: var(--jk-ink); stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
+  & .jul-dorr b { position: relative; font-size: 18px; font-weight: 600; line-height: 1; letter-spacing: -.02em; font-variation-settings: "opsz" 24; }
+  & .jul-dorr-inne { opacity: 0; }
+  & .jul-dorr-inne path { fill: var(--jk-ljus); }
+  & .jul-dorr-blad path { d: var(--jd-stangd); transition: d .55s cubic-bezier(.3, .8, .25, 1), fill .55s; }
+  & .jul-dorr-blad b { transition: opacity .16s; }
+  & .jul-dorr:not(.oppnad, .kommande):is(:hover, :focus-visible) .jul-dorr-inne { opacity: 1; }
+  & .jul-dorr:not(.oppnad, .kommande):is(:hover, :focus-visible) .jul-dorr-blad path { d: var(--jd-glant); transition-duration: .26s; }
+  & .jul-dorr.oppnad .jul-dorr-inne { opacity: 1; }
+  & .jul-dorr.oppnad .jul-dorr-inne b { translate: 5px 0; }
+  & .jul-dorr.oppnad .jul-dorr-blad path { d: var(--jd-oppen); fill: var(--jk-skugga); }
+  & .jul-dorr.oppnad .jul-dorr-blad b { opacity: 0; }
+  & .jul-dorr.kommande { opacity: .4; cursor: default; }
+  & .jul-dorr > i { display: none; }
+  & .jul-dorr.ny .jul-dorr-ny, & .jul-dorr.vald .jul-dorr-vald { display: block; }
+  & .jul-dorr-ny path { fill: var(--jk-klick); stroke-width: 1.9; }
+  & .jul-dorr-vald path { fill: none; stroke: var(--jk-klick); stroke-width: 3.2; }
+  & .jul-dorr:focus-visible { outline: 2px solid var(--jk-klick); outline-offset: 4px; border-radius: 9px; }
+
+  /* Luckan på nya fliken: till vänster om sökrutan, i en plats lika bred som sökrutan men utan höjd.
+     Är dagens lucka inte öppnad knackar den till en gång varje gång nya fliken visas. */
+  & #jul-lucka-plats { display: block; position: relative; flex: none; width: min(560px, 92%); height: 0; }
+  & #jul-lucka { display: block; position: absolute; inset-inline-end: calc(100% + 18px); bottom: 0; width: 52px; height: 52px; rotate: -3deg; filter: drop-shadow(0 5px 10px rgb(0 0 0 / .32)); }
+  & #jul-lucka b { font-size: 21px; }
+  & #jul-lucka.ny { animation: jul-knack .9s .6s 1 both; }
+  /* Får den inte rum bredvid sökrutan (smalt fönster, sökrutan avstängd): nere bredvid Anpassa-knappen */
+  & #jul-lucka.jul-nere { z-index: 12; inset-inline-end: auto; bottom: 10px; width: 40px; height: 40px; }
+  & #jul-lucka.jul-nere b { font-size: 16px; }
+  & #newtabpage.anp-redigerar #jul-lucka { opacity: .4; pointer-events: none; transition: opacity .2s; }
+  & #newtabpage.anp-tom #jul-lucka, & #newtabpage.anp-redigerar #jul-lucka.jul-nere { display: none; }
+  & .jul-kal-luckor .jul-dorr { width: 100%; height: auto; aspect-ratio: 1; }
+
+  /* Minska rörelse (inställningen eller systemet): dörren står öppen direkt, luckan knackar inte */
+  &.reduce-motion .jul-dorr-blad :is(path, b) { transition: none; }
+  &.reduce-motion #jul-lucka { animation: none; }
+  @media (prefers-reduced-motion: reduce) {
+    & .jul-dorr-blad :is(path, b) { transition: none; }
+    & #jul-lucka { animation: none; }
+  }
+  @media (max-height: 700px) { & .jul-kal-luckor .jul-dorr b { font-size: 15.5px; } }
+}
+@keyframes jul-knack { 0%, 100% { rotate: -3deg; } 18% { rotate: 4deg; } 38% { rotate: -8deg; } 58% { rotate: 1deg; } 78% { rotate: -5deg; } }
+/* På den ljusa sidan utan bild (ljust tema) räcker en lätt skugga */
+:root[data-jul~="kalender"]:not([data-theme="dark"]) body:not(.incog) #newtabpage.anp-utan-bild #jul-lucka { filter: drop-shadow(0 3px 6px rgb(31 30 27 / .16)); }
+
+/* Panelen: på samma plats som lådan med widgetar, men bara så hög som innehållet kräver */
+:root:is([data-jul~="kalender"], [data-jul~="stat"]) body:not(.incog) {
+  & #jul-kalender { display: flex; flex-direction: column; position: absolute; z-index: 25; top: 12px; inset-inline-end: 14px; width: 352px; max-width: calc(100% - 28px); max-height: calc(100% - 24px); overflow: hidden; text-align: start;
+    color: var(--jk-text); background: var(--jk-bg); border-radius: 16px; box-shadow: 0 24px 70px rgb(20 19 17 / .34), 0 0 0 1px rgb(31 30 27 / .08); animation: jul-kal-in .26s cubic-bezier(.2, .8, .2, 1); }
+  & #jul-kalender[hidden] { display: none; }
+  & .jul-kal-topp { flex: none; display: flex; align-items: flex-start; gap: 12px; padding: 18px 16px 10px 22px; }
+  & .jul-kal-topp > div { flex: 1; min-width: 0; }
+  & .jul-kal-topp h2 { font-family: var(--font-display); font-size: 25px; font-weight: 560; line-height: 1.1; letter-spacing: -.02em; font-variation-settings: "opsz" 28; }
+  /* Den ritade understrykningen under rubriken */
+  & .jul-kal-penna { display: block; width: 116px; height: 8px; margin-top: 2px; }
+  & .jul-kal-penna svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  & .jul-kal-penna path { fill: none; stroke: var(--jk-klick); stroke-width: 3.2; stroke-linecap: round; }
+  & .jul-kal-bak { display: inline-flex; align-items: center; gap: 5px; height: 28px; margin: 8px 0 0 -8px; padding: 0 10px 0 6px; border-radius: 8px; font-size: 12.5px; font-weight: 600; color: var(--jk-mut); cursor: pointer; }
+  & .jul-kal-bak[hidden] { display: none; }
+  & .jul-kal-x { width: 32px; height: 32px; flex: none; display: grid; place-items: center; border-radius: 9px; color: var(--jk-mut); cursor: pointer; }
+  & .jul-kal-bak svg { width: 16px; height: 16px; flex: none; }
+  & .jul-kal-x svg { width: 20px; height: 20px; }
+  & :is(.jul-kal-bak, .jul-kal-x) path { fill: none; stroke: currentColor; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
+  & :is(.jul-kal-bak, .jul-kal-x):hover { color: var(--jk-text); background: var(--jk-yta); }
+  & :is(.jul-kal-bak, .jul-kal-x, .jul-knapp):focus-visible { outline: 2px solid var(--jk-klick); outline-offset: 2px; }
+  & .jul-kal-luckor { flex: none; display: grid; grid-template-columns: repeat(6, minmax(0, 46px)); justify-content: space-between; gap: 10px 6px; padding: 8px 22px 18px; }
+  & .jul-kal-blad { flex: 0 1 auto; min-height: 190px; overflow-y: auto; padding: 14px 22px 16px; border-top: 1px solid var(--jk-linje); scrollbar-width: thin; scrollbar-color: var(--jk-linje) transparent; }
+  & .jul-kal-fot { flex: none; display: flex; justify-content: space-between; gap: 12px; padding: 9px 22px 11px; border-top: 1px solid var(--jk-linje); font-size: 12.5px; color: var(--jk-mut); white-space: nowrap; }
+  & .jul-kal-fot span:last-child { overflow: hidden; text-overflow: ellipsis; }
+  /* Sammanfattningen får hela panelen: inga luckor, ingen fot */
+  & #jul-kalender.jul-bara-summering :is(.jul-kal-luckor, .jul-kal-fot) { display: none; }
+  & #jul-kalender.jul-bara-summering .jul-kal-blad { min-height: 0; padding-top: 4px; border-top: 0; }
+
+  /* Luckans innehåll */
+  & :is(.jul-kal-datum, .jul-kal-etikett) { font-size: 12.5px; font-weight: 600; color: var(--jk-mut); }
+  & .jul-kal-etikett { margin-top: 12px; }
+  & .jul-kal-blad h3 { margin-top: 4px; font-family: var(--font-display); font-size: 22px; font-weight: 560; line-height: 1.15; letter-spacing: -.015em; font-variation-settings: "opsz" 24; text-wrap: balance; }
+  & .jul-kal-text { margin-top: 8px; font-size: 14px; line-height: 1.55; text-wrap: pretty; }
+  & .jul-kal-liten { margin-top: 6px; font-size: 12.5px; line-height: 1.5; color: var(--jk-mut); text-wrap: pretty; }
+  & .jul-kal-stat { margin-top: 6px; }
+  & .jul-kal-stat:empty { display: none; }
+  & .jul-kal-stat .jul-kal-liten { margin-top: 3px; }
+  & .jul-kal-tal { font-family: var(--font-display); font-size: 44px; font-weight: 560; line-height: 1; letter-spacing: -.03em; color: var(--jk-tal); font-variation-settings: "opsz" 60; }
+  & .jul-kal-tal + .jul-kal-text { margin-top: 4px; }
+  & .jul-kbd { display: inline-block; margin: 0 1px; padding: 1px 6px 2px; border-radius: 6px; font: 600 12px/1.4 var(--font-sans, system-ui), system-ui, sans-serif; white-space: nowrap; background: var(--jk-yta); box-shadow: inset 0 0 0 1px var(--jk-linje), 0 1px 0 var(--jk-linje); }
+  /* Knapparna: vätskefyllning (signaturkitet) – den orangea klicken stiger underifrån, guld i temat Jul */
+  & .jul-knapp { position: relative; isolation: isolate; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; height: 38px; margin-top: 14px; padding: 0 18px; border-radius: 999px;
+    font-size: 13.5px; font-weight: 600; white-space: nowrap; cursor: pointer; color: var(--jk-knapp-text); background: var(--jk-knapp); transition: color .6s ease, transform .2s ease, box-shadow .3s ease; }
+  & .jul-knapp::before { content: ""; position: absolute; z-index: -1; left: -15%; width: 130%; bottom: 0; height: 165%; transform: translateY(104%); border-radius: 46% 46% 0 0; background: var(--jk-fyll);
+    transition: transform .95s cubic-bezier(.2, .75, .25, 1); pointer-events: none; }
+  & .jul-knapp:is(:hover, :focus-visible)::before { transform: translateY(0); }
+  & .jul-knapp:is(:hover, :focus-visible) { color: #13110e; }
+  & .jul-knapp:active { transform: translateY(1px); }
+  & .jul-knapp-sek { color: var(--jk-text); background: transparent; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--jk-text) 26%, transparent); }
+  & .jul-knapp-sek:is(:hover, :focus-visible) { box-shadow: inset 0 0 0 1px transparent; }
+
+  /* Sammanfattningen: fakta, bilden som går att dela och knapparna */
+  & .jul-sum-fakta { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--jk-linje); font-size: 13px; line-height: 1.4; }
+  & .jul-sum-fakta dt { color: var(--jk-mut); }
+  & .jul-sum-fakta dd { font-weight: 600; text-align: end; }
+  & .jul-sum-bild { display: block; width: 100%; height: auto; margin-top: 16px; border-radius: 9px; box-shadow: 0 0 0 1px var(--jk-linje); background: #f4efe6; }
+  & .jul-sum-knappar { display: flex; flex-wrap: wrap; gap: 8px; }
+  & .jul-sum-knappar:empty { display: none; }
+  & .jul-sum-knappar.jul-vantar { opacity: .55; pointer-events: none; }
+  & .jul-sum-knappar + .jul-kal-liten { margin-top: 12px; }
+
+  /* Inställningarna som tipsens knappar leder till: rubriken ska inte hamna under sökrutan överst */
+  & #settings :is(.anp-del, #anp-kort-gester) { scroll-margin-top: 84px; }
+
+  &.reduce-motion #jul-kalender { animation: none; }
+  &.reduce-motion .jul-knapp::before { transition: none; }
+  @media (prefers-reduced-motion: reduce) {
+    & #jul-kalender { animation: none; }
+    & .jul-knapp::before { transition: none; }
+  }
+  /* Lågt fönster: tätare panel, så att luckans innehåll får plats under luckorna */
+  @media (max-height: 700px) {
+    & .jul-kal-topp { padding-top: 16px; padding-bottom: 6px; }
+    & .jul-kal-luckor { grid-template-columns: repeat(6, minmax(0, 38px)); gap: 8px 6px; padding: 8px 26px 14px; }
+    & .jul-kal-blad { min-height: 120px; }
+    & .jul-kal-fot { display: none; }
+    & .jul-sum-fakta { gap: 4px 14px; margin-top: 10px; padding-top: 10px; }
+    & .jul-sum-bild { width: 62%; margin-top: 12px; }
+  }
+}
+@keyframes jul-kal-in { from { opacity: 0; transform: translateX(18px); } }
+:root:is([data-jul~="kalender"], [data-jul~="stat"])[data-theme="dark"] body:not(.incog) #jul-kalender { box-shadow: 0 24px 70px rgb(0 0 0 / .55), 0 0 0 1px var(--jk-linje); }
 
 
-/* ══ 6. Statistik i julspråk och julaftons sammanfattning (del "stat", jul-kalender.js) ════════════════════
-   Inte byggd än. Regler börjar med :root[data-jul~="stat"] body:not(.incog) … */
+/* ══ 6. Statistik i julspråk (del "stat", jul-kalender.js) ═════════════════════════════════════════════════
+   Remsan längst ned på nya fliken: medan den har klassen jul-stat-pa göms skalets egna siffror (totalen) och julens
+   visas i stället – decembers summa, räknad per dag. Utan siffror för december, eller innan något stoppats i
+   december, ser remsan ut som vanligt. Från julafton får remsan en fjärde ruta, "Din december" (jul-stat-mer), som
+   öppnar sammanfattningen: den visas i panelen i sektion 5. */
+#newtabpage .nt-stats .jul-st { display: none; }
+:root[data-jul~="stat"] body:not(.incog) {
+  & #newtabpage .nt-stats.jul-stat-pa :is(#stat-blocked, #stat-band, #stat-band-u, #stat-time, #stat-time-u, .nt-st-main .nt-st-l:not(.jul-st)) { display: none; }
+  & #newtabpage .nt-stats.jul-stat-pa :is(span, small).jul-st { display: inline; }
+  & #newtabpage .nt-stats.jul-stat-pa div.jul-st { display: block; }
+  & #newtabpage.anp-smal .nt-stats.jul-stat-pa .nt-st-l { white-space: normal; }
+  & #newtabpage .nt-stats.jul-stat-mer #jul-st-mer { display: flex; align-items: flex-start; text-align: start; color: #fff; cursor: pointer; transition: background .15s; }
+  & #jul-st-mer:hover { background: rgb(255 255 255 / .08); }
+  & #jul-st-mer:focus-visible { outline: 2px solid #ff4b1f; outline-offset: -3px; border-radius: 0 14px 14px 0; }
+  & .jul-st-mer-t { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 650; line-height: 21px; white-space: nowrap; }
+  & .jul-st-mer-t svg { width: 17px; height: 17px; flex: none; transition: translate .2s; }
+  & .jul-st-mer-t path { fill: none; stroke: currentColor; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
+  & #jul-st-mer:hover .jul-st-mer-t svg { translate: 3px 0; }
+}
+/* Den ljusa sidan utan bild (ljust tema): remsan är vit där */
+:root[data-jul~="stat"]:not([data-theme="dark"]) body:not(.incog) #newtabpage.anp-utan-bild #jul-st-mer { color: #1f1e1b; }
+:root[data-jul~="stat"]:not([data-theme="dark"]) body:not(.incog) #newtabpage.anp-utan-bild #jul-st-mer:hover { background: rgb(31 30 27 / .05); }
 
 
 /* ══ 7. Frågan och inställningarna (jul.js) ════════════════════════════════════════════════════════════════ */
