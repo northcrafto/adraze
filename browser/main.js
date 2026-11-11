@@ -704,7 +704,7 @@ function buildContextMenu(ctx, wc, params) {
 
 /* Högerklicksmeny på skalet (startsida, verktygsrad, adressfält) – native-vyerna
  * har sin egen (buildContextMenu); skalets webContents hade ingen alls. */
-function buildShellMenu(ctx, wc, params) {
+async function buildShellMenu(ctx, wc, params) {
   const t = [];
   if (params.isEditable) {
     t.push({ label: T('Klipp ut'), role: 'cut', enabled: params.editFlags.canCut });
@@ -718,7 +718,9 @@ function buildShellMenu(ctx, wc, params) {
     t.push({ label: T('Ny flik'), click: () => sendTo(ctx, 'open-new-tab') });
     t.push({ label: T('Nytt fönster'), click: () => createWindow(false, ctx) });
     t.push({ label: T('Ny inkognitoflik'), click: () => sendTo(ctx, 'new-incognito') });
-    const clip = (clipboard.readText() || '').trim();
+    // Electron 45: clipboard.readText() ger ett löfte (förr en sträng). Utan await kastade .trim() här och menyn kom aldrig upp.
+    let clip = '';
+    try { clip = String((await clipboard.readText()) || '').trim(); } catch {}
     if (clip) {
       const short = clip.length > 32 ? clip.slice(0, 32) + '…' : clip;
       t.push({ type: 'separator' });
@@ -728,7 +730,7 @@ function buildShellMenu(ctx, wc, params) {
     t.push({ label: T('Historik'), click: () => sendTo(ctx, 'open-history') });
     t.push({ label: T('Inställningar'), click: () => sendTo(ctx, 'open-settings') });
   }
-  if (t.length) Menu.buildFromTemplate(t).popup({ window: ctx.win });
+  if (t.length && ctx.win && !ctx.win.isDestroyed()) Menu.buildFromTemplate(t).popup({ window: ctx.win });
 }
 
 function ensureView(ctx, tabId) {
@@ -2604,7 +2606,7 @@ function handleShortcut(wc, input) {
 app.on('web-contents-created', (_e, wc) => {
   wc.on('before-input-event', (ev, input) => { try { if (handleShortcut(wc, input)) ev.preventDefault(); } catch {} });
   // Context-meny: bara för skalets webContents (native flik-vyer har sin egen i ensureView).
-  wc.on('context-menu', (_ev, params) => { const ctx = wins.get(wc.id); if (ctx) { try { buildShellMenu(ctx, wc, params); } catch {} } });
+  wc.on('context-menu', (_ev, params) => { const ctx = wins.get(wc.id); if (ctx) buildShellMenu(ctx, wc, params).catch(() => {}); });
 });
 
 /* ────────── Fönster ────────── */
