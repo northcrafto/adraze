@@ -226,10 +226,52 @@
 }
 
 
-/* ══ 4. Snö på flikarna (del "flikar") ═════════════════════════════════════════════════════════════════════
-   Inte byggd än. Registrera delen med Jul.del('flikar', {}) (ett tomt objekt räcker för en del som bara är CSS),
-   så kommer "flikar" i data-jul och brytaren Snö på flikarna visas i inställningarna. Regler börjar med
-   :root[data-jul~="flikar"] body:not(.incog):not(.flik-vertikal) … (.tab::before är ledigt). */
+/* ══ 4. Snö på flikarna (del "flikar", registreras i jul-pynt.js) ══════════════════════════════════════════
+   Bara CSS. Ett tunt snötäcke ligger som en hög ovanpå den flik som har en kropp: den aktiva och den man pekar på.
+   De andra flikarna är bara text mot flikraden och har inget för snön att ligga på (där ser den ut att sväva).
+
+   Flikraden klipper allt ovanför fliken (#tabs har overflow-y: hidden), och flyttas klippkanten ändras också var
+   fönstret går att dra. Därför ryms snön i flikens egen ruta: varje flik får en genomskinlig överkant (--jul-tak,
+   4 px) som bakgrunden inte ritas i. Kroppen börjar alltså lite längre ned och snön ligger i luften ovanför och
+   hänger ned över kroppens kant. Flikens ruta är densamma som förut – klick, bredd och fönsterflytt ändras inte –
+   och innehållet hamnar 2 px lägre i alla flikar. I raden upptill följer grupprubrikerna, plusknappen och
+   arbetsytans väljare med ned, så att allt står på samma linje.
+
+   Snön är en ritad remsa på 240 × 12 px (ritkoden: logo/gorilla/snotacke.js) som upprepas i sidled och klipps av
+   flikens egen rundning. Varje flik börjar på sitt eget ställe i remsan, så att två flikar inte får samma snö.
+   Ingen animation, bara samma korta toning som flikens egen bakgrund. Aldrig på en inkognitoflik. */
+:root {
+  /* Snövitt med blågrå skuggkant (mörkt läge och temat Jul); i ljust läge vitt med tydligare skuggkant och en svag kontur */
+  --jul-tacke: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='12' viewBox='0 0 240 12' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cpath id='s' d='M-21 0.7 Q-9 1.4 -4.5 1.8 Q0 2.2 5 1.6 Q10 0.9 16 0.6 Q22 0.3 27 0.3 Q32 0.4 37.5 1 Q43 1.6 47.5 2.4 Q52 3.2 57 2.8 Q62 2.4 68 1.6 Q74 0.8 81 0.5 Q88 0.2 94 0.3 Q100 0.5 106 1.1 Q112 1.8 118 2.4 Q124 2.9 127.5 3.1 Q131 3.3 136 2.6 Q141 2 147.5 1.4 Q154 0.7 160 0.5 Q166 0.3 172 0.4 Q178 0.6 183 1.3 Q188 1.9 192.5 2.5 Q197 3.1 202 2.5 Q207 1.9 213 1.3 Q219 0.7 225 1 Q231 1.4 235.5 1.8 Q240 2.2 245 1.6 Q250 0.9 256 0.6 L262 0.3 L264 6.5 Q252 7.7 246 7.3 Q240 7 233 6.5 Q226 6.1 219 6.4 Q212 6.7 207.5 7.3 Q203 7.9 196.5 7.3 Q190 6.6 181 6.3 Q172 6 164.5 6.5 Q157 7.1 153.5 8.1 Q150 9 146 8.2 Q142 7.4 136 7.2 Q130 6.9 123 7 Q116 7.1 108 6.8 Q100 6.4 91 6.2 Q82 5.9 73.5 6.4 Q65 6.9 61.5 7.9 Q58 8.8 54.5 8 Q51 7.2 45 6.5 Q39 5.8 31.5 6.2 Q24 6.5 18 7.1 Q12 7.7 6 7.3 Q0 7 -7 6.5 Q-14 6.1 -21 6.4 L-28 6.7Z'/%3E%3C/defs%3E%3Cuse href='%23s' y='1.1' fill='%23b4c2d1'/%3E%3Cuse href='%23s' fill='%23fdfcf8'/%3E%3C/svg%3E");
+  --jul-tacke-ljust: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='12' viewBox='0 0 240 12' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cpath id='s' d='M-21 0.7 Q-9 1.4 -4.5 1.8 Q0 2.2 5 1.6 Q10 0.9 16 0.6 Q22 0.3 27 0.3 Q32 0.4 37.5 1 Q43 1.6 47.5 2.4 Q52 3.2 57 2.8 Q62 2.4 68 1.6 Q74 0.8 81 0.5 Q88 0.2 94 0.3 Q100 0.5 106 1.1 Q112 1.8 118 2.4 Q124 2.9 127.5 3.1 Q131 3.3 136 2.6 Q141 2 147.5 1.4 Q154 0.7 160 0.5 Q166 0.3 172 0.4 Q178 0.6 183 1.3 Q188 1.9 192.5 2.5 Q197 3.1 202 2.5 Q207 1.9 213 1.3 Q219 0.7 225 1 Q231 1.4 235.5 1.8 Q240 2.2 245 1.6 Q250 0.9 256 0.6 L262 0.3 L264 6.5 Q252 7.7 246 7.3 Q240 7 233 6.5 Q226 6.1 219 6.4 Q212 6.7 207.5 7.3 Q203 7.9 196.5 7.3 Q190 6.6 181 6.3 Q172 6 164.5 6.5 Q157 7.1 153.5 8.1 Q150 9 146 8.2 Q142 7.4 136 7.2 Q130 6.9 123 7 Q116 7.1 108 6.8 Q100 6.4 91 6.2 Q82 5.9 73.5 6.4 Q65 6.9 61.5 7.9 Q58 8.8 54.5 8 Q51 7.2 45 6.5 Q39 5.8 31.5 6.2 Q24 6.5 18 7.1 Q12 7.7 6 7.3 Q0 7 -7 6.5 Q-14 6.1 -21 6.4 L-28 6.7Z'/%3E%3C/defs%3E%3Cuse href='%23s' y='1.7' fill='%23a3b8cf'/%3E%3Cuse href='%23s' fill='%23ffffff' stroke='%23c3cfdc' stroke-width='0.7'/%3E%3C/svg%3E");
+}
+:root[data-jul~="flikar"] body:not(.incog) {
+  --jul-tak: 4px;
+  /* Hörnen är högre än de är breda upptill: då blir kroppens hörn runda som vanligt, fast --jul-tak längre ned */
+  & #tabs .tab { border-top: var(--jul-tak) solid transparent; background-clip: padding-box;
+    border-top-left-radius: var(--anp-r-flik, 7px) calc(var(--anp-r-flik, 7px) + var(--jul-tak)); border-top-right-radius: var(--anp-r-flik, 7px) calc(var(--anp-r-flik, 7px) + var(--jul-tak)); }
+  & #tabs .tab:not(.incognito)::before { content: ""; position: absolute; inset: calc(var(--jul-tak) * -1) 0 0; border-radius: inherit; pointer-events: none; opacity: 0;
+    background: var(--jul-tacke) var(--jul-tacke-x, 0px) 0 / 240px calc(var(--jul-tak) * 3) repeat-x; transition: opacity .12s; }
+  & #tabs .tab:is(.active, :hover)::before { opacity: 1; }
+  & #tabs > :nth-child(4n + 2)::before { --jul-tacke-x: -67px; }
+  & #tabs > :nth-child(4n + 3)::before { --jul-tacke-x: -141px; }
+  & #tabs > :nth-child(4n)::before { --jul-tacke-x: -103px; }
+  /* Smala och fästa flikar: remsan trycks ihop i sidled, så att även en 40 px bred flik får en kulle och inte bara ett vitt streck */
+  & :is(#tabs.narrow .tab, #tabs .tab.pinned)::before, &.flik-smal #tabs .tab::before { background-size: 144px calc(var(--jul-tak) * 3); }
+  /* Raden upptill: det som står bredvid flikarna följer med ned (i en rad som centrerar blir en marginal upptill halva flytten) */
+  &:not(.flik-vertikal) :is(#tabs .anp-grupp, #newtab-btn, #brandbar:not(.hidden)) { margin-top: var(--jul-tak); }
+  /* Panelen på sidan: en flik som öppnas eller stängs krymper till ingen höjd alls, och då får överkanten inte stå kvar */
+  &.flik-vertikal #tabs .tab:is(.entering, .closing) { border-top-width: 0; }
+  /* Påtvingade färger (högkontrast i Windows): bakgrundsbilder ritas inte och en genomskinlig kant blir synlig. Då ingen snö. */
+  @media (forced-colors: active) {
+    & #tabs .tab { border-top-width: 0; }
+    & #tabs .tab:not(.incognito)::before { content: none; }
+    &:not(.flik-vertikal) :is(#tabs .anp-grupp, #newtab-btn, #brandbar:not(.hidden)) { margin-top: 0; }
+  }
+}
+:root[data-jul~="flikar"]:not([data-theme="dark"]) body:not(.incog) #tabs .tab::before { background-image: var(--jul-tacke-ljust); }
+/* Kompakt flikrad (30 px höga flikar): tunnare täcke */
+:root[data-jul~="flikar"][data-anp-densitet="kompakt"] body:not(.incog) { --jul-tak: 3px; }
 
 
 /* ══ 5. Julkalendern (del "kalender", jul-kalender.js) ═════════════════════════════════════════════════════

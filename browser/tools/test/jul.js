@@ -3,7 +3,8 @@
 // Datumet låtsas med ADRAZE_DATUM och webbläsaren startas om mellan dagarna med samma profil.
 // Går igenom: de rena funktionerna (datum, säsong, PNG-kontroll), november (inget syns, ingen fråga, temat Jul går
 // ändå att välja i temalistan), 1 december (frågan kommer en gång, i alla fönster), Ja tack (julfärger, snö och luva
-// utan att något flyttar sig och utan "Ändrat · Ångra"), snöns paus, inkognito, luckor, räknaren per dag,
+// utan att något flyttar sig och utan "Ändrat · Ångra"), snön på flikarna (i flikens egen ruta, på den aktiva fliken
+// och den man pekar på, utan att ta klick), snöns paus, inkognito, luckor, räknaren per dag,
 // brytarna i inställningarna, midnatt efter trettondagen (allt tillbaka som innan, det man själv ändrat behålls),
 // nästa jul (frågan igen, Nej tack), och att en fråga utan svar slutar komma efter tre dagar.
 // Sist julkalendern, statistiken i julspråk och julaftons sammanfattning (ui/jul-kalender.js) med egna profiler:
@@ -578,6 +579,7 @@ async function kor(rot, bilder, bara) {
       const flikrad = __J.farg('#tabstrip'), aktiv = __J.farg('#tabs .tab.active'), rad = __J.farg('#toolbar'), falt = __J.farg('#omnibox'), inst = __J.farg('#settings');
       return JSON.stringify({ id: kort.map((k) => k.dataset.forval), rader: rader.size, valda: [...document.querySelectorAll('#anp-tema [data-forval].on')].map((k) => k.dataset.forval),
         mini: document.querySelector('#anp-tema [data-forval=jul] .anp-tema-mini').classList.contains('jul'), varden: __J.tema(), flikrad, aktiv, rad, falt, inst,
+        flik: [getComputedStyle(document.querySelector('#tabs .tab.active')).borderTopWidth, getComputedStyle(document.querySelector('#tabs .tab.active'), '::before').content],
         kAktiv: K(__J.farg('#tabs .tab.active', 'color'), aktiv), kFalt: K(__J.farg('#address', 'color'), falt), kInst: K(__J.farg('#settings .set-title', 'color'), inst), kDim: K(__J.farg('#settings .set-desc', 'color'), inst),
         accent: getComputedStyle(document.documentElement).getPropertyValue('--color-terra').trim(), delar: __J.delar() });
     })()`);
@@ -585,7 +587,7 @@ async function kor(rot, bilder, bara) {
     R.ok('kortet Jul sätter guld, mörkt och färguppsättningen jul, och bara det kortet är markerat', lista.varden === '[["tema.accent","#d9a441"],["tema.lage","morkt"],["tema.palett","jul"]]' && lista.valda.join() === 'jul', { varden: lista.varden, valda: lista.valda });
     R.ok('temat Jul: mörkgrön flikrad och verktygsrad, djupröd aktiv flik, guldaccent', lista.flikrad === 'rgb(12, 33, 24)' && lista.rad === 'rgb(16, 41, 29)' && lista.aktiv === 'rgb(143, 37, 41)' && lista.falt === 'rgb(23, 54, 38)' && lista.accent.toLowerCase() === '#d9a441', lista);
     R.ok('temat Jul: texten är läsbar (aktiv flik, adressfält, inställningar minst 4,5:1)', lista.kAktiv >= 4.5 && lista.kFalt >= 4.5 && lista.kInst >= 4.5 && lista.kDim >= 4.5, [lista.kAktiv, lista.kFalt, lista.kInst, lista.kDim].map((v) => +v.toFixed(2)));
-    R.ok('temat Jul utanför julen: bara färgerna, inget pynt', lista.delar === null);
+    R.ok('temat Jul utanför julen: bara färgerna, inget pynt (ingen snö på flikarna heller)', lista.delar === null && lista.flik.join() === '0px,none', [lista.delar, lista.flik]);
     await bild(s, '01-november-temat-jul');
     // Temat man har innan julen: Natt med egen färg och runda hörn (det ska komma tillbaka efter trettondagen)
     const innan = await J(s, `(async () => {
@@ -620,7 +622,8 @@ async function kor(rot, bilder, bara) {
     let s2 = null;
     if (t2) { s2 = await anslutSkal(t2); R.ok('frågan visas också i ett andra fönster', (await fragan(s2, 14000)) === true); } else R.ok('Ctrl+N öppnade ett andra fönster', false);
     // Måtten innan något pynt: ingenting får flytta sig när luvan kommer (hälsningens text slumpas, därför bara dess höjdläge)
-    const MATT = `JSON.stringify({ knapp: __J.ruta('#adblock'), falt: __J.ruta('#omnibox'), flik: __J.ruta('#tabs .tab'), ikon: __J.ruta('#tabs .tab .fav'), sok: __J.ruta('.anp-st-sok'), halsning: __J.ruta('#nt-greet').filter((v, i) => i % 2), remsa: __J.ruta('.nt-stats'), rutnat: __J.ruta('#anp-st-grid') })`;
+    const MATT = `JSON.stringify({ knapp: __J.ruta('#adblock'), falt: __J.ruta('#omnibox'), flik: __J.ruta('#tabs .tab'), flikrad: __J.ruta('#tabstrip'), flikar: __J.ruta('#tabs'), ikon: __J.ruta('#tabs .tab .fav'), ny: __J.ruta('#newtab-btn'),
+      sok: __J.ruta('.anp-st-sok'), halsning: __J.ruta('#nt-greet').filter((v, i) => i % 2), remsa: __J.ruta('.nt-stats'), rutnat: __J.ruta('#anp-st-grid') })`;
     const mattFore = await s.kor(MATT);
     // Ja tack, med ett riktigt musklick (så att toasten "Ändrat · Ångra" hade visats om den inte tystats)
     const knapp = await J(s, `JSON.stringify(__J.ruta('#jul-fraga .notis-knapp'))`);
@@ -645,8 +648,10 @@ async function kor(rot, bilder, bara) {
     }
 
     /* ── 3. Luvan: bilden byts, ingenting flyttar sig ── */
-    const mattEfter = await s.kor(MATT);
-    R.ok('luvan flyttar ingenting (knapp, adressfält, flik, ikon, sökruta, hälsning, remsa, rutnät)', mattEfter === mattFore, { fore: mattFore, efter: mattEfter });
+    // Snön på flikarna sänker det som står i flikraden 2 px (flikens ikon, plusknappen): det jämförs för sig längre ned
+    const mF = JSON.parse(mattFore), mE = JSON.parse(await s.kor(MATT));
+    const utan = (m) => JSON.stringify({ ...m, ikon: 0, ny: 0 });
+    R.ok('luvan och snön flyttar ingenting (knapp, adressfält, flikraden, flikens ruta, sökruta, hälsning, remsa, rutnät)', utan(mE) === utan(mF), { fore: mF, efter: mE });
     const luva = await J(s, `(async () => {
       const g = document.getElementById('jul-gorilla'), plats = document.getElementById('jul-gorilla-plats');
       await __J.tills(() => g.complete && g.naturalWidth > 0);
@@ -666,6 +671,46 @@ async function kor(rot, bilder, bara) {
       const f = getComputedStyle(document.querySelector('#adblock .ab-mark')).filter; document.getElementById('adblock').click(); await __J.tills(() => !document.getElementById('adblock').classList.contains('off')); return JSON.stringify({ f }); })()`);
     R.ok('avstängd blockerare: gorillan med luva blir grå som vanligt', /grayscale/.test(av.f), av.f);
     await bild(s, '03-efter-ja');
+
+    /* ── 3b. Snön på flikarna: i flikens egen ruta, på den aktiva fliken och den man pekar på ── */
+    const STIL = `(q) => { const e = typeof q === 'string' ? document.querySelector(q) : q, c = getComputedStyle(e), f = getComputedStyle(e, '::before');
+      return { tak: c.borderTopWidth, klipp: c.backgroundClip, sno: f.content === 'none' ? null : { syns: f.opacity, bild: /^url\\("data:image\\/svg/.test(f.backgroundImage), klick: f.pointerEvents, rorelse: f.animationName, takt: f.backgroundSize } }; }`;
+    const tacke = await J(s, `(async () => { const stil = ${STIL};
+      const forsta = active, andra = createTab(); await __J.tills(() => document.querySelectorAll('#tabs .tab').length === 2 && !document.querySelector('#tabs .tab.entering')); await new Promise((r) => setTimeout(r, 500));
+      const el = (t) => document.querySelector('#tabs [data-tabid="' + t.id + '"]');
+      return JSON.stringify({ delar: __J.delar(), aktiv: stil(el(andra)), vilande: stil(el(forsta)), vilandeRuta: __J.ruta(el(forsta)), forstaId: forsta.id, andraId: andra.id,
+        ikonNed: [${mF.ikon[1]}, __J.ruta(el(forsta).querySelector('.fav'))[1]], nyNed: [${mF.ny[1]}, ${mE.ny[1]}], traff: (() => { const b = el(forsta).getBoundingClientRect(), t = document.elementFromPoint(b.left + b.width / 2, b.top + 1); return !!t && t === el(forsta); })() }); })()`);
+    R.ok('snön på flikarna är på: den aktiva fliken har ett snötäcke, den andra inget förrän man pekar på den', har(tacke.delar, 'flikar') && tacke.aktiv.sno && tacke.aktiv.sno.syns === '1' && tacke.aktiv.sno.bild && tacke.vilande.sno && tacke.vilande.sno.syns === '0', tacke);
+    R.ok('snötäcket ryms i flikens egen ruta: genomskinlig överkant på 4 px, innehållet och plusknappen 2 px lägre, flikens ruta som förut', tacke.aktiv.tak === '4px' && tacke.vilande.tak === '4px' && tacke.aktiv.klipp === 'padding-box' &&
+      tacke.ikonNed[1] - tacke.ikonNed[0] === 2 && tacke.nyNed[1] - tacke.nyNed[0] === 2 && tacke.vilandeRuta[1] === mF.flik[1] && tacke.vilandeRuta[3] === mF.flik[3], tacke);
+    R.ok('snötäcket tar inga klick och rör sig inte', tacke.aktiv.sno && tacke.aktiv.sno.klick === 'none' && tacke.aktiv.sno.rorelse === 'none' && tacke.traff === true, tacke.aktiv);
+    // Riktig mus: peka på den vilande flikens överkant (mitt i snön) och klicka där
+    const vr = tacke.vilandeRuta;
+    await s.skicka('Input.dispatchMouseEvent', { type: 'mouseMoved', x: vr[0] + vr[2] / 2, y: vr[1] + 2 });
+    await H.sov(400);
+    const pekar = await J(s, `JSON.stringify((${STIL})('#tabs [data-tabid="${tacke.forstaId}"]'))`);
+    await klicka(s, vr[0] + vr[2] / 2, vr[1] + 2);
+    await H.sov(400);
+    const klickad = await J(s, `JSON.stringify({ aktiv: active.id, sno: (${STIL})('#tabs .tab.active').sno })`);
+    R.ok('pekar man på en flik får den sitt snötäcke, och ett klick i snön byter till fliken', pekar.sno && pekar.sno.syns === '1' && klickad.aktiv === tacke.forstaId && klickad.sno && klickad.sno.syns === '1', { pekar, klickad });
+    // Panelen på sidan har också snö (plusknappen står kvar där); smala flikar får en hoptryckt remsa; påtvingade färger: ingen snö
+    const lagen = await J(s, `(async () => { const stil = ${STIL}, v = (ms = 500) => new Promise((r) => setTimeout(r, ms)), ut = {};
+      AnpassaAngra.tyst(6000);   // testets egna ändringar ska inte ge toasten "Ändrat · Ångra" (den stör mätningen av snöfallet längre ned)
+      await Anpassa.set('flikar.lage', 'vertikal', 'Flikar: på sidan'); await v(700);
+      ut.sida = { klass: document.body.classList.contains('flik-vertikal'), aktiv: stil('#tabs .tab.active'), ny: getComputedStyle(document.getElementById('newtab-btn')).marginTop };
+      await Anpassa.set('flikar.lage', undefined, 'Flikar: upptill'); await v(700);
+      document.getElementById('tabs').classList.add('narrow'); ut.smal = stil('#tabs .tab.active').sno.takt; document.getElementById('tabs').classList.remove('narrow'); ut.bred = stil('#tabs .tab.active').sno.takt;
+      closeTab(tabs.find((t) => t.id === ${tacke.andraId})); await __J.tills(() => document.querySelectorAll('#tabs .tab').length === 1); await v(300);
+      ut.kvar = document.querySelectorAll('#tabs .tab').length; return JSON.stringify(ut); })()`);
+    R.ok('flikarna på sidan har också snö på den aktiva fliken, och plusknappen står kvar', lagen.sida.klass && lagen.sida.aktiv.tak === '4px' && lagen.sida.aktiv.sno && lagen.sida.aktiv.sno.syns === '1' && lagen.sida.ny === '0px', lagen.sida);
+    R.ok('smala flikar får remsan hoptryckt i sidled', /^144px/.test(lagen.smal) && /^240px/.test(lagen.bred) && lagen.kvar === 1, lagen);
+    await s.skicka('Emulation.setEmulatedMedia', { features: [{ name: 'forced-colors', value: 'active' }] });
+    await H.sov(300);
+    const tvingad = await J(s, `JSON.stringify({ pa: matchMedia('(forced-colors: active)').matches, flik: (${STIL})('#tabs .tab.active'), ny: getComputedStyle(document.getElementById('newtab-btn')).marginTop })`);
+    await s.skicka('Emulation.setEmulatedMedia', { features: [] });
+    await H.sov(300);
+    R.ok('påtvingade färger (högkontrast): ingen snö på flikarna och ingen synlig överkant', tvingad.pa && tvingad.flik.tak === '0px' && tvingad.flik.sno === null && tvingad.ny === '0px', tvingad);
+    await bild(s, '03b-sno-pa-flikarna');
 
     /* ── 4. Snön: bakom innehållet, pausad under rutor, borta över webbsidor ── */
     const sno = await J(s, `(async () => {
@@ -703,6 +748,7 @@ async function kor(rot, bilder, bara) {
     const inst = await J(s, `JSON.stringify({ rubrik: (document.querySelector('#anp-jul h3') || {}).textContent, rader: [...document.querySelectorAll('#anp-jul .set-row')].map((r) => [r.querySelector('.set-title').textContent, r.querySelector('input').checked]),
       fore: document.getElementById('anp-jul').compareDocumentPosition(document.getElementById('anp-tema')) & 4, julKort: document.querySelector('#anp-tema [data-forval=jul]').classList.contains('on') })`);
     R.ok('Inställningar › Anpassa › Jul: Jultema och en brytare per byggd del, alla på', inst.rubrik === 'Jul' && JSON.stringify(inst.rader.slice(0, 4)) === '[["Jultema",true],["Julfärger",true],["Snö på nya fliken",true],["Gorillan i tomteluva",true]]' && inst.rader.every((r) => r[1] === true) && !!inst.fore && inst.julKort, inst);
+    R.ok('alla sex delarna har sin brytare, i ordning', inst.rader.map((r) => r[0]).join('|') === 'Jultema|Julfärger|Snö på nya fliken|Gorillan i tomteluva|Julkalender|Statistik i julspråk|Snö på flikarna', inst.rader.map((r) => r[0]));
     await bild(s, '04-installningar');
     await s.kor(`closeSettings(); 1`);
     await tangent(s, 10, 'N', 'KeyN', 78);
@@ -712,8 +758,10 @@ async function kor(rot, bilder, bara) {
       const s3 = await anslutSkal(t3);
       const ink = await J(s3, `(async () => { openSettings(); showSettingsCat('anpassa'); await new Promise((r) => setTimeout(r, 500));
         return JSON.stringify({ aktiv: Jul.aktiv(), delar: __J.delar(), sno: !!document.getElementById('jul-sno'), gorilla: !!document.getElementById('jul-gorilla'), knapp: getComputedStyle(document.querySelector('#adblock .ab-mark')).content,
-          inst: document.getElementById('anp-jul').textContent, brytare: document.querySelectorAll('#anp-jul input').length, lila: __J.farg('#tabstrip') }); })()`);
+          inst: document.getElementById('anp-jul').textContent, brytare: document.querySelectorAll('#anp-jul input').length, lila: __J.farg('#tabstrip'),
+          flik: [getComputedStyle(document.querySelector('#tabs .tab')).borderTopWidth, getComputedStyle(document.querySelector('#tabs .tab'), '::before').content] }); })()`);
       R.ok('inkognitofönster: inget pynt, inga julfärger på ytorna, och inställningarna säger varför', !ink.aktiv && ink.delar === null && !ink.sno && !ink.gorilla && !/mark-luva/.test(ink.knapp) && /Jultemat visas inte i inkognitofönster\./.test(ink.inst) && ink.brytare === 0 && ink.lila !== 'rgb(12, 33, 24)', ink);
+      R.ok('inkognitofönster: ingen snö på flikarna', ink.flik.join() === '0px,none', ink.flik);
       R.ok('inga JS-fel i inkognitofönstret', !fel(s3).length, fel(s3));
       await s3.kor(`window.close(); 1`).catch(() => {});
       s3.stang();
@@ -759,6 +807,10 @@ async function kor(rot, bilder, bara) {
       await Anpassa.set('jul.sno', undefined, 'Snö på nya fliken'); await v(); ut.medSno = [__J.delar(), !!document.getElementById('jul-sno')];
       await Anpassa.set('jul.luva', false, 'Gorillan i tomteluva'); await v(); ut.utanLuva = [__J.delar(), !!document.getElementById('jul-gorilla'), getComputedStyle(document.querySelector('#adblock .ab-mark')).content, __J.ruta('#adblock .ab-mark')];
       await Anpassa.set('jul.luva', undefined, 'Gorillan i tomteluva'); await v(); ut.medLuva = [__J.delar(), !!document.getElementById('jul-gorilla')];
+      const flik = () => { const t = document.querySelector('#tabs .tab'); return [getComputedStyle(t).borderTopWidth, getComputedStyle(t, '::before').content === 'none' ? 'ingen' : 'sno', __J.ruta(t.querySelector('.fav'))[1], __J.ruta('#newtab-btn')[1]]; };
+      ut.medFlikar0 = [__J.delar(), ...flik()];
+      await Anpassa.set('jul.flikar', false, 'Snö på flikarna'); await v(); ut.utanFlikar = [__J.delar(), ...flik()];
+      await Anpassa.set('jul.flikar', undefined, 'Snö på flikarna'); await v(); ut.medFlikar = [__J.delar(), ...flik()];
       await Anpassa.set('jul.farger', false, 'Julfärger'); await v(700); ut.utanFarger = [__J.delar(), document.documentElement.getAttribute('data-anp-palett'), __J.tema()];
       await Anpassa.set('jul.farger', undefined, 'Julfärger'); await v(700); ut.medFarger = [document.documentElement.getAttribute('data-anp-palett'), __J.tema()];
       await Anpassa.set('jul.pa', undefined, 'Jultema'); await v(700); ut.av = [__J.delar(), document.documentElement.getAttribute('data-anp-palett'), __J.tema(), !!document.getElementById('jul-sno'), !!document.getElementById('jul-gorilla')];
@@ -770,6 +822,8 @@ async function kor(rot, bilder, bara) {
     const JULTEMA = '[["tema.accent","#d9a441"],["tema.lage","morkt"],["tema.palett","jul"]]';
     R.ok('Snö på nya fliken av: lagret tas bort helt; på igen', !har(bryt.utanSno[0], 'sno') && har(bryt.utanSno[0], 'luva') && bryt.utanSno[1] === false && bryt.utanSno[2] === 0 && har(bryt.medSno[0], 'sno', 'luva') && bryt.medSno[1] === true, bryt);
     R.ok('Gorillan i tomteluva av: vanliga loggan tillbaka i rätt storlek; på igen', har(bryt.utanLuva[0], 'sno') && !har(bryt.utanLuva[0], 'luva') && bryt.utanLuva[1] === false && !/mark-luva/.test(bryt.utanLuva[2]) && bryt.utanLuva[3][2] === 17 && har(bryt.medLuva[0], 'sno', 'luva') && bryt.medLuva[1] === true, bryt.utanLuva);
+    R.ok('Snö på flikarna av: ingen snö, ingen överkant, innehållet och plusknappen 2 px upp igen; på igen', har(bryt.medFlikar0[0], 'flikar') && !har(bryt.utanFlikar[0], 'flikar') && har(bryt.utanFlikar[0], 'sno', 'luva') && bryt.utanFlikar[1] === '0px' && bryt.utanFlikar[2] === 'ingen' &&
+      bryt.medFlikar0[3] - bryt.utanFlikar[3] === 2 && bryt.medFlikar0[4] - bryt.utanFlikar[4] === 2 && JSON.stringify(bryt.medFlikar) === JSON.stringify(bryt.medFlikar0) && bryt.medFlikar[1] === '4px' && bryt.medFlikar[2] === 'sno', [bryt.medFlikar0, bryt.utanFlikar, bryt.medFlikar]);
     R.ok('Julfärger av: temat man hade innan kommer tillbaka direkt, pyntet är kvar; på igen', har(bryt.utanFarger[0], 'sno', 'luva') && bryt.utanFarger[1] === null && bryt.utanFarger[2] === TEMA_INNAN && bryt.medFarger[0] === 'jul' && bryt.medFarger[1] === JULTEMA, [bryt.utanFarger, bryt.medFarger]);
     R.ok('Jultema av: allt bort och temat tillbaka, bara huvudbrytaren kvar i inställningarna, ingen ny fråga', bryt.av[0] === null && bryt.av[1] === null && bryt.av[2] === TEMA_INNAN && !bryt.av[3] && !bryt.av[4] && bryt.avRader.join() === 'Jultema' && !bryt.fraga, bryt);
     R.ok('Jultema på igen från inställningarna', har(bryt.pa[0], 'sno', 'luva') && bryt.pa[1] === 'jul' && bryt.pa[2] === JULTEMA, bryt.pa);
@@ -798,7 +852,9 @@ async function kor(rot, bilder, bara) {
     const efter = await J(s, `(async () => JSON.stringify({ lage: ${LAGE}, tema: __J.tema(), nu: Jul.nu().getDate(), andratToast: !!document.querySelector('#anp-toast.pa'), flikrad: __J.farg('#tabstrip') }))()`);
     const efLage = JSON.parse(efter.lage);
     R.ok('midnatt efter trettondagen: pyntet försvinner av sig självt, utan omstart', slut === true && efter.nu === 7 && efLage.sasong === null && efLage.delar === null && !efLage.sno && !efLage.gorilla && !/mark-luva/.test(efLage.knapp) && efLage.inst === 0, efLage);
-    const kvar = await J(s, `JSON.stringify({ lucka: !!document.getElementById('jul-lucka'), plats: !!document.getElementById('jul-lucka-plats'), panel: !!document.getElementById('jul-kalender'), remsa: document.querySelector('.nt-stats').className, jul: document.querySelectorAll('.nt-stats .jul-st').length })`);
+    const kvar = await J(s, `JSON.stringify({ lucka: !!document.getElementById('jul-lucka'), plats: !!document.getElementById('jul-lucka-plats'), panel: !!document.getElementById('jul-kalender'), remsa: document.querySelector('.nt-stats').className, jul: document.querySelectorAll('.nt-stats .jul-st').length,
+      flik: [getComputedStyle(document.querySelector('#tabs .tab')).borderTopWidth, getComputedStyle(document.querySelector('#tabs .tab'), '::before').content] })`);
+    R.ok('midnatt efter trettondagen: snön på flikarna är borta', kvar.flik.join() === '0px,none', kvar.flik);
     R.ok('midnatt efter trettondagen: kalendern och julstatistiken är också borta, remsan är som vanligt', kalFore.lucka === '24' && har(kalFore.delar, 'kalender', 'stat') && !kvar.lucka && !kvar.plats && !kvar.panel && !/jul-/.test(kvar.remsa) && kvar.jul === 0, { kalFore, kvar });
     R.ok('utseendet går tillbaka till det man hade innan (mörkt, runda hörn), den egna färgen från julen behålls', efter.tema === '[["tema.accent","#0b8a8f"],["tema.horn","rund"],["tema.lage","morkt"]]' && efLage.palett === null && efter.flikrad !== 'rgb(12, 33, 24)', efter);
     R.ok('Jultema är nollställt och ingen "Ändrat · Ångra" visades', efLage.pa === undefined && !efter.andratToast, efter);
