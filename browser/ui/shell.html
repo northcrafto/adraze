@@ -5,6 +5,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self';" />
   <title>AdRaze</title>
   <link rel="stylesheet" href="tailwind.css" />
+  <link rel="stylesheet" href="jul.css" /><!-- jultemat: temat Jul, snö, tomteluva (vanlig CSS, byggs inte av Tailwind) -->
 <style>#bm-star{color:var(--color-navy-900);opacity:.55;transition:all .15s;cursor:pointer}#bm-star:hover{opacity:1;background:rgba(28,43,58,.09)}#bm-star.on{opacity:1;color:var(--color-terra,#d9663f)}#bm-star.on svg{fill:currentColor}</style>
 <style>
 @keyframes dlpulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
@@ -655,6 +656,7 @@
           <div class="set-panel hidden" data-cat="anpassa">
             <h2 class="set-h">Anpassa</h2>
             <div id="anp-angra"></div>
+            <section class="anp-del" id="anp-jul" data-omrade="jul"></section><!-- bara under julen (ui/jul.js) -->
             <section class="anp-del" id="anp-tema" data-omrade="tema"></section>
             <section class="anp-del" id="anp-flikar" data-omrade="flikar"></section>
             <section class="anp-del" id="anp-verktyg" data-omrade="verktyg"></section>
@@ -1279,6 +1281,9 @@
   <script src="anpassa-angra.js"></script>
   <script src="anpassa-galleri.js"></script>
   <script src="anpassa-kortkommandon.js"></script>
+  <!-- Jultemat (1 december–6 januari): kärnan först, sedan delarna. Tema Jul i temalistan ligger i anpassa-tema.js. -->
+  <script src="jul.js"></script>
+  <script src="jul-pynt.js"></script>
   <!-- Inställningar › Falk: av/på och Falks utseende (falk.* i Anpassa-butiken) -->
   <script src="falk-inst.js"></script>
   <script src="i18n.js"></script>

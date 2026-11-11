@@ -44,12 +44,14 @@ async function startaXvfb() {
 
 // Miljön för en testinstans: Wayland bort (annars öppnas fönstret på riktiga skärmen trots Xvfb),
 // egen XDG_RUNTIME_DIR utan wayland-uttag, egen profil, inga uppdateringar under testet.
+// Datumet är låtsat till en sommardag (ADRAZE_DATUM, jul.js): annars dyker frågan "Vill du ha jultema?" upp i
+// alla tester som körs i december. Jultestet (jul.js) skickar sina egna datum i extra.
 function testMiljo(display, profil, extra = {}) {
   const env = { ...process.env };
   for (const k of ['WAYLAND_DISPLAY', 'XDG_SESSION_TYPE', 'ELECTRON_OZONE_PLATFORM_HINT', 'ELECTRON_RUN_AS_NODE', 'NODE_OPTIONS', 'APPIMAGE', 'APPDIR']) delete env[k];
   const rt = path.join(profil, 'xdgrt');
   fs.mkdirSync(rt, { recursive: true, mode: 0o700 });
-  return { ...env, DISPLAY: display, XDG_RUNTIME_DIR: rt, XDG_CONFIG_HOME: path.join(profil, 'config'), ADRAZE_NO_UPDATES: '1', ...extra };
+  return { ...env, DISPLAY: display, XDG_RUNTIME_DIR: rt, XDG_CONFIG_HOME: path.join(profil, 'config'), ADRAZE_NO_UPDATES: '1', ADRAZE_DATUM: '2026-07-01', ...extra };
 }
 
 // Startar ett program (dev-electron eller AppImage) i en egen processgrupp och loggar till fil

@@ -129,7 +129,7 @@ async function kor(rot, bilder) {
     const g = await J(`JSON.stringify({ tema: typeof window.AnpassaTema, reg: Object.entries(anpassaBro.alla().register).filter(([k]) => k.startsWith('tema.')).map(([k, v]) => [k, v.standard, v.barnLast, v.importBar]),
       attr: [...document.documentElement.attributes].map((a) => a.name).filter((n) => n.startsWith('data-anp')), terra: __T.rot('--color-terra'), theme: document.documentElement.dataset.theme, system: !!document.getElementById('seg-system') })`);
     R.ok('AnpassaTema laddat', g.tema === 'object', g.tema);
-    R.ok('sex tema-nycklar: barn får ändra, kan delas', g.reg.length === 6 && g.reg.every((r) => r[2] === false && r[3] === true), g.reg);
+    R.ok('sju tema-nycklar: barn får ändra, kan delas', g.reg.length === 7 && g.reg.every((r) => r[2] === false && r[3] === true), g.reg);
     R.ok('standard: inga data-anp-attribut', g.attr.length === 0, g.attr);
     R.ok('standard: accenten är AdRazes orange', g.terra.toLowerCase() === '#ff4b1f', g.terra);
     R.ok('standard: ljust läge', g.theme === 'light', g.theme);
@@ -159,7 +159,7 @@ async function kor(rot, bilder) {
     const ui = await J(`JSON.stringify({ h3: (document.querySelector('#anp-tema h3') || {}).textContent, h3n: document.querySelectorAll('#anp-tema h3').length, prov: document.querySelectorAll('#anp-tema .anp-tema-farger > [data-accent]').length,
       forval: document.querySelectorAll('#anp-tema [data-forval]').length, typsnitt: document.querySelectorAll('#anp-tema [data-namn=typsnitt]').length, seg: ['lage', 'densitet', 'horn', 'storlek'].map((n) => document.querySelectorAll('#anp-tema [data-namn=' + n + ']').length),
       knappar: ['[data-bgfarg]', '[data-kopiera]', '[data-anvand]', '[data-aterstall]', '[data-kod]', '[data-hex]', '[data-egen]'].every((q) => document.querySelector('#anp-tema ' + q)) })`);
-    R.ok('Tema-delen ritad (en rubrik, 8 färger, 6 färdiga teman, 5 typsnitt)', ui.h3 === 'Tema' && ui.h3n === 1 && ui.prov === 8 && ui.forval === 6 && ui.typsnitt === 5 && ui.knappar, ui);
+    R.ok('Tema-delen ritad (en rubrik, 8 färger, 7 färdiga teman, 5 typsnitt)', ui.h3 === 'Tema' && ui.h3n === 1 && ui.prov === 8 && ui.forval === 7 && ui.typsnitt === 5 && ui.knappar, ui);
     R.ok('valen ljust/mörkt, densitet, hörn och storlek har tre lägen var', ui.seg.every((n) => n === 3), ui.seg);
     await bild(s, '01-anpassa-ljust');
 

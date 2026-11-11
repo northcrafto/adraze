@@ -250,6 +250,7 @@
   }
   document.addEventListener('anpassa:visa', rita);
 
-  // För andra delar och test: ångra som Ångra-knappen, visa toasten
-  window.AnpassaAngra = { angra: angraSenaste, toast: visaToast, rita };
+  // För andra delar och test: ångra som Ångra-knappen, visa toasten. tyst(ms): ändringar den närmaste stunden ger ingen
+  // toast – för ändringar som inte är användarens egna val i Anpassa (jultemat slår på julfärgerna, ui/jul.js).
+  window.AnpassaAngra = { angra: angraSenaste, toast: visaToast, rita, tyst: (ms) => { tystTill = Math.max(tystTill, Date.now() + (ms > 0 ? Math.min(ms, 10000) : 2500)); } };
 })();

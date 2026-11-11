@@ -1,0 +1,248 @@
+/* Jultemat. Vanlig CSS som länkas efter tailwind.css i shell.html (byggs inte av Tailwind: inga Tailwind-klasser här).
+   Logiken: ../jul.js (huvudprocessen), jul.js (kärnan i fönstret), jul-pynt.js (luva, snö), jul-kalender.js.
+
+   Två saker styr reglerna, båda på <html>:
+     data-anp-palett="jul"   temat Jul (tema.palett). Går att välja året runt i temalistan. Gäller i mörkt läge.
+     data-jul="sno luva …"   pyntets aktiva delar, bara 1 december–6 januari och bara när Jultema är på.
+   Varje pyntregel börjar med :root[data-jul~="<del>"] och innehåller body:not(.incog): en inkognitoflik har aldrig pynt.
+
+   Sektioner (varje del skriver bara i sin egen):
+     0  Variabler            4  Snö på flikarna (del "flikar")
+     1  Temat Jul            5  Julkalendern (del "kalender")
+     2  Gorillan i luva      6  Statistik och sammanfattning (del "stat")
+     3  Snö på nya fliken    7  Frågan och inställningarna */
+
+
+/* ══ 0. Variabler ══════════════════════════════════════════════════════════════════════════════════════════ */
+:root {
+  /* Gran: mörkast i flikraden, ljusare ju närmare innehållet. Kontrast mot grädde 11–14:1. */
+  --jul-gran-950: #0c2118;   /* flikraden */
+  --jul-gran-925: #0e251a;   /* sidans botten (inställningar, startsida utan bild) */
+  --jul-gran-900: #10291d;   /* verktygsraden */
+  --jul-gran-850: #132e21;   /* kort och rutor */
+  --jul-gran-800: #173626;   /* fält */
+  --jul-gran-700: #214a35;   /* linjer runt fält, hover */
+  --jul-linje: #1b3e2d;      /* hårfina linjer mellan rader */
+  --jul-rod: #8f2529;        /* den aktiva fliken (grädde mot rött 7,2:1) */
+  --jul-rod-ljus: #a93237;
+  --jul-guld: #d9a441;       /* accenten (mot gran 5,9–7,5:1) */
+  --jul-gradde: #f4ecd8;     /* text */
+  --jul-dimgron: #a9b8a6;    /* dämpad text (mot gran 6,3–8,1:1) */
+  --jul-svag: #7f937f;       /* svag text, platshållare */
+  --jul-sno: #fdfcf8;
+  --jul-ink: #1b1916;
+  /* Bilderna (tecknarens filer i ui/jul/). SAMMA namn som BILDER i ../jul.js – byts de, byt på båda ställena.
+     Stor = hela loggan med AD-lappen och hög luva. Liten = märket med lägre luva och större tofs, gjord för 16–30 px:
+     i den är gorillan 91 % av sin vanliga storlek, så bilden visas lite större än platsen och sticker upp ovanför. */
+  --jul-gorilla: url(jul/gorilla-luva-512.png);
+  --jul-gorilla-liten: url(jul/mark-luva.png);
+  --jul-gorilla-liten-mork: url(jul/mark-luva-dark.png);
+}
+
+
+/* ══ 1. Temat Jul ══════════════════════════════════════════════════════════════════════════════════════════
+   Mörkgrönt och djuprött med varm guldaccent. Guldet är accentfärgen (tema.accent, räknas ut i anpassa-tema.js);
+   här byts bara ytornas färger, som i det vanliga mörka läget är hårdkodade i input.css. Varje regel har därför
+   attributet och body:not(.incog) för att vinna över dem (inkognito behåller sitt lila).
+   Falk, chatten och de små rutorna över sidan (nedladdningar, sök på sidan) är egna sidor och behåller vanligt mörkt. */
+:root[data-anp-palett="jul"][data-theme="dark"] body:not(.incog) {
+  background: var(--jul-gran-950); color: var(--jul-gradde);
+  --anp-linje: var(--jul-gran-700);
+
+  /* Flikraden */
+  & .chrome-top { background: var(--jul-gran-950); }
+  & .tab { color: var(--jul-dimgron); }
+  & .tab:hover { background: rgb(244 236 216 / .08); color: var(--jul-gradde); }
+  & .tab.active { background: var(--jul-rod); color: var(--jul-gradde); box-shadow: inset 0 1px 0 rgb(255 255 255 / .07); }
+  & .tab:not(.incognito) .fav { color: var(--jul-dimgron); }
+  & .tab.active:not(.incognito) .fav { color: var(--jul-gradde); }
+  & .tab .tclose:hover, & .tab .tsound:hover { background: rgb(0 0 0 / .22); }
+  & .tab.pinned .tsound { background: var(--jul-gran-800); }
+  & .tab.pinned.active .tsound { background: var(--jul-rod-ljus); }
+  &.flik-smal .tab .tsound { background: var(--jul-gran-950); }
+  & .newtab-btn, & .winctl button, & .ws-vaxlare { color: var(--jul-gradde); }
+  & .newtab-btn:hover, & .winctl button:hover, & .ws-vaxlare:hover, & .ws-vaxlare[aria-expanded="true"] { background: rgb(244 236 216 / .1); color: var(--jul-gradde); }
+  & .winctl button.close:hover { background: #e81123; color: #fff; }
+  &.flik-vertikal #tabstrip, &.flik-dolda #tabstrip, & #anp-vfot, &.flik-vertikal #brandbar:not(.hidden) { border-color: var(--jul-gran-700); }
+  &:is(.flik-vertikal, .flik-dolda) .winctl { background: var(--jul-gran-900); border-bottom-color: var(--jul-gran-700); }
+  &.flik-dolda.flik-zen-visad .winctl { background: transparent; border-bottom-color: transparent; }
+  &.flik-vertikal .anp-grupp:not(.anp-redigerar), & .anp-vknapp:hover { color: var(--jul-gradde); }
+
+  /* Verktygsraden, adressfältet och bokmärkesfältet */
+  & .chrome-bar, & #bmbar { background: var(--jul-gran-900); border-bottom-color: var(--jul-gran-700); }
+  & .chrome-bar.has-bmbar { border-bottom-color: transparent; }
+  & .icon-btn, & #bm-star:not(.on), & #toolbar .omni-ab, & .bmchip { color: var(--jul-gradde); }
+  & .icon-btn:hover, & #bm-star:hover, & #toolbar .omni-ab:hover, & .bmchip:hover { background: rgb(244 236 216 / .1); }
+  & #omnibox { background: var(--jul-gran-800) !important; --tw-ring-color: var(--jul-gran-700); }
+  & #omnibox:focus-within { --tw-ring-color: color-mix(in srgb, var(--jul-guld) 60%, transparent); }
+  & #address { color: var(--jul-gradde); }
+  & #address::placeholder, & #search-engine { color: rgb(244 236 216 / .45); }
+  & .shield-home, & .shield-off, & .shield-checking, & #reader-btn:not(.on) { color: var(--jul-dimgron); }
+  & .pill:not(.pill-accent) { background: var(--jul-gran-800); color: var(--jul-gradde); border-color: var(--jul-gran-700); }
+  & .pill:not(.pill-accent):hover { background: var(--jul-gran-700); }
+  & #omni-suggest, & #ws-meny { background: var(--jul-gran-900); border-color: var(--jul-gran-700); color: var(--jul-gradde); }
+  & .sug.sel, & .sug:hover { background: rgb(244 236 216 / .08); }
+  & .sug .sfav, & .sug .sdim { color: var(--jul-dimgron); }
+  & .sug .surl, & .sug .sline { color: var(--jul-gradde); }
+  & .sug .stitle { color: rgb(244 236 216 / .55); }
+  & .sug .slink { color: var(--jul-guld); }
+  & #ws-meny :is(.ws-meny-rubrik, .ws-rad-antal, .ws-flytta) { color: var(--jul-dimgron); }
+  & #ws-meny .ws-sep { background: var(--jul-gran-700); }
+  & #ws-meny .ws-ny-form input { background: var(--jul-gran-800); border-color: var(--jul-gran-700); }
+  & .permbar, & :is(#wsavebar, #wfillbar) { background: var(--jul-gran-900) !important; color: var(--jul-gradde); border-bottom-color: var(--jul-gran-700) !important; }
+
+  /* Ytan under sidan, rutor och notiser */
+  & #views { background-color: var(--jul-gran-925); }
+  & .notis, & #closeconf { background: var(--jul-gran-850); border-color: var(--jul-gran-700); color: var(--jul-gradde); }
+  & .notis-titel, & #closeconf h1, & #closeconf p b { color: var(--jul-gradde); }
+  & .notis-under, & #closeconf p, & #closeconf label span { color: var(--jul-dimgron); }
+  & .notis .notis-knapp, & .notis .notis-knapp:disabled { background: var(--jul-gradde); color: var(--jul-ink); }
+  & .notis .notis-sek { color: var(--jul-gradde); box-shadow: inset 0 0 0 1px rgb(244 236 216 / .28); }
+  & #closeconf #cc-cancel { color: var(--jul-gradde); border-color: var(--jul-gran-700); }
+  & #anp-palett { --p-bg: var(--jul-gran-850); --p-ink: var(--jul-gradde); --p-mut: var(--jul-dimgron); --p-faint: var(--jul-svag); --p-kant: rgb(244 236 216 / .12);
+    --p-linje: var(--jul-gran-700); --p-val: rgb(244 236 216 / .08); --p-accent: var(--jul-guld); --p-kbd: var(--jul-gran-800); --p-kbd-kant: var(--jul-gran-700); }
+  & #anp-vf-lage { --l-bg: var(--jul-gran-925); --l-kort: var(--jul-gran-850); --l-linje: var(--jul-gran-700); --l-ink: var(--jul-gradde); --l-mut: var(--jul-dimgron); --l-yta: var(--jul-gran-900); --l-streck: var(--jul-gran-700); }
+  & .anp-vf-spoke { background: var(--jul-gran-800); color: var(--jul-gradde); }
+
+  /* Sidopanelen med webbappar */
+  & #sp-list, & #sp-panel, & .sp-drag, & .sp-fraga { background: var(--jul-gran-900); border-color: var(--jul-gran-700); }
+  & .sp-huvud, & .sp-fraga { border-bottom-color: var(--jul-gran-700); }
+  & .sp-drag::after { background: var(--jul-gran-700); }
+  & :is(.sp-app, .sp-plus, .sp-hk), & .sp-falt { color: var(--jul-gradde); }
+  & .sp-app.oppen, & .sp-sorterar .sp-app.sp-drar { background: var(--jul-gran-700); }
+  & .sp-app.oppen::before { background: var(--jul-guld); }
+  & .sp-prick, & .sp-app.oppen .sp-prick { box-shadow: 0 0 0 2px var(--jul-gran-900); }
+  & .sp-ljud, & .sp-app.oppen .sp-ljud { background: var(--jul-gran-900); color: var(--jul-gradde); }
+  & :is(.sp-h-adr, .sp-f-txt small, .sp-f-kom, .sp-form-lead, .sp-kryss small, .sp-forslag-rubrik) { color: var(--jul-dimgron); }
+  & .sp-vy { background: var(--jul-gran-925); }
+  & .sp-falt input, & .sp-chip { background: var(--jul-gran-800); border-color: var(--jul-gran-700); color: var(--jul-gradde); }
+
+  /* Inställningarna: deras egna variabler (--s-*) */
+  & #settings {
+    --s-bg: var(--jul-gran-925); --s-surface: var(--jul-gran-850); --s-surface-2: var(--jul-gran-800); --s-ink: var(--jul-gradde); --s-mut: var(--jul-dimgron); --s-faint: var(--jul-svag);
+    --s-line: var(--jul-linje); --s-field: var(--jul-gran-800); --s-field-line: #2b5a41; --s-hover: rgb(244 236 216 / .06);
+    --color-navy-950: #fffaf0; --color-navy-800: #e7dfca; --color-navy-700: #cfc9b4; --color-navy-600: var(--jul-dimgron);
+    --sig-fill-top: var(--jul-gradde); --sig-fill-bottom: #ded5bd;
+    scrollbar-color: var(--jul-gran-700) transparent;
+  }
+  & #settings .set-tab.on, & #settings .set-search { background: rgb(244 236 216 / .07); }
+
+  /* Startsidan: solida widgetar, sidan utan bild och lådan med widgetar */
+  & #newtabpage.anp-solid {
+    --anp-ink: var(--jul-gradde); --anp-mut: var(--jul-dimgron); --anp-faint: var(--jul-svag);
+    --anp-bg: var(--jul-gran-850); --anp-line: var(--jul-gran-700); --anp-hover: rgb(244 236 216 / .07);
+    --anp-falt: var(--jul-gran-800); --anp-falt-line: #2b5a41; --anp-pa: var(--jul-gradde); --anp-pa-ink: var(--jul-ink); --anp-acc: var(--jul-guld);
+  }
+  & #newtabpage.anp-utan-bild { --anp-sida: var(--jul-gran-925); --anp-sida-ink: var(--jul-gradde); --anp-sida-mut: rgb(244 236 216 / .78); }
+  & #newtabpage.anp-utan-bild .anp-st-sok { background: var(--jul-gran-800); outline-color: var(--jul-gran-700); }
+  & #newtabpage.anp-utan-bild #nt-search { color: var(--jul-gradde); }
+  & #newtabpage.anp-utan-bild #nt-search::placeholder { color: rgb(244 236 216 / .45); }
+  & #newtabpage.anp-utan-bild #anp-st-anpassa { color: var(--jul-dimgron); background: var(--jul-gran-800); box-shadow: inset 0 0 0 1px var(--jul-gran-700); }
+  & #newtabpage.anp-utan-bild #anp-st-anpassa:hover { color: var(--jul-gradde); }
+  & #anp-st-lada { color: var(--jul-gradde); background: var(--jul-gran-850); box-shadow: 0 24px 70px rgb(0 0 0 / .55), 0 0 0 1px var(--jul-gran-700); }
+  & :is(.anp-lada-topp p, .anp-lada-txt small, .anp-lada-x, .anp-lada-angra, .anp-lada-mer) { color: var(--jul-dimgron); }
+  & .anp-lada-rubrik { color: var(--jul-svag); }
+  & :is(.anp-lada-x:hover, .anp-lada-angra:hover:not(:disabled), .anp-lada-mer:hover), & .anp-lada-ikon { color: var(--jul-gradde); background: var(--jul-gran-800); }
+  & .anp-lada-bort { color: var(--jul-gradde); box-shadow: inset 0 0 0 1px var(--jul-gran-700); }
+  & .anp-lada-fot { border-top-color: var(--jul-gran-700); }
+  & .anp-w-knappar button { color: var(--jul-gradde); background: var(--jul-gran-800); box-shadow: 0 2px 8px rgb(0 0 0 / .4), inset 0 0 0 1px var(--jul-gran-700); }
+}
+/* Kortet "Jul" bland de färdiga temana: förhandsbilden i temats färger, den aktiva fliken röd */
+#settings .anp-tema-mini.jul { --m-krom: var(--jul-gran-950); --m-rad: var(--jul-gran-900); --m-yta: var(--jul-gran-925); --m-falt: var(--jul-gran-800); --m-linje: var(--jul-gran-700); --m-text: #24503a; }
+#settings .anp-tema-mini.jul .m-flik { background: var(--jul-rod); }
+/* Sju färdiga teman på en rad i stället för sex och ett ensamt på nästa */
+#settings .anp-tema-forval { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); }
+
+
+/* ══ 2. Gorillan i tomteluva (del "luva", jul-pynt.js) ═════════════════════════════════════════════════════
+   De små ikonerna byter bara bild (content). Julmärket visas lite större än platsen och dras uppåt och åt höger
+   med negativa marginaler: gorillan hamnar där den brukar, luvan sticker upp ovanför och inget annat flyttar sig.
+   Namnet "luva" står i data-jul först när bilden bevisligen går att ladda (en saknad bild fastnar som trasig). */
+:root[data-jul~="luva"] body:not(.incog) :is(#toolbar .omni-ab .ab-mark, #tabs .tab .fav img[src="adraze-mark.png"], #newtabpage .nt-st-mark, #newtabpage .anp-blk-mark) { content: var(--jul-gorilla-liten); max-width: none; border-radius: 0; }
+:root[data-jul~="luva"][data-theme="dark"] body:not(.incog) :is(#toolbar .omni-ab .ab-mark, #tabs .tab .fav img[src="adraze-mark.png"], #newtabpage .nt-st-mark, #newtabpage .anp-blk-mark) { content: var(--jul-gorilla-liten-mork); }
+/* Blockerarknappen (platsen är 17 px): avstängd blockerare gör bilden grå som vanligt, luvan med */
+:root[data-jul~="luva"] body:not(.incog) #toolbar .omni-ab .ab-mark { width: 20px; height: 20px; margin: -3px -3px 0 0; }
+/* Flikens ikon på en ny flik och Blockerat-widgeten (16 px) */
+:root[data-jul~="luva"] body:not(.incog) :is(#tabs .tab .fav img[src="adraze-mark.png"], #newtabpage .anp-blk-mark) { width: 18px; height: 18px; margin: -2px -2px 0 0; }
+/* Statistikremsan (30 px) */
+:root[data-jul~="luva"] body:not(.incog) #newtabpage .nt-st-mark { width: 34px; height: 34px; margin: -4px -4px 0 0; }
+/* Loggan ovanför sökrutan (startsida.logga, 46 px): hela gorillan med AD-lappen. Då visas ingen egen stor gorilla. */
+:root[data-jul~="luva"] body:not(.incog) #anp-st-logga img { content: var(--jul-gorilla); width: 53px; height: 53px; max-width: none; margin: -7px -6px 0 -1px; }
+:root[data-jul~="luva"] body:not(.incog) #newtabpage.anp-med-logga #jul-gorilla-plats { display: none; }
+
+/* Den stora gorillan på nya fliken sitter på sökrutans överkant, till höger. Platsen är lika bred som sökrutan men
+   utan höjd, så inget i kolumnen flyttar sig. Klick går rakt igenom till sökrutan. */
+:root[data-jul~="luva"] body:not(.incog) #jul-gorilla-plats { position: relative; z-index: 2; flex: none; width: min(560px, 92%); height: 0; pointer-events: none; }
+:root[data-jul~="luva"] body:not(.incog) #jul-gorilla { position: absolute; inset-inline-end: 12px; bottom: -15px; width: 84px; height: 84px; max-width: none; user-select: none;
+  filter: drop-shadow(0 5px 10px rgb(0 0 0 / .3)); transform-origin: 46% 96%; animation: jul-gorilla-fram .5s cubic-bezier(.2, .9, .3, 1.2) both; }
+@keyframes jul-gorilla-fram { from { opacity: 0; transform: translateY(12px) rotate(-8deg) scale(.9); } 55% { opacity: 1; } to { opacity: 1; transform: none; } }
+:root[data-jul~="luva"] body.reduce-motion:not(.incog) #jul-gorilla { animation: none; }
+@media (prefers-reduced-motion: reduce) { :root[data-jul~="luva"] body:not(.incog) #jul-gorilla { animation: none; } }
+/* En lång hälsning (namn, andra språk) får aldrig hamna under gorillan: då flyttar den ut på hörnet, eller göms */
+:root[data-jul~="luva"] body:not(.incog) #jul-gorilla-plats.jul-ute #jul-gorilla { inset-inline-end: -46px; }
+:root[data-jul~="luva"] body:not(.incog) #jul-gorilla-plats.jul-gomd #jul-gorilla { display: none; }
+/* På den ljusa sidan utan bild (ljust tema) räcker en lätt skugga */
+:root[data-jul~="luva"]:not([data-theme="dark"]) body:not(.incog) #newtabpage.anp-utan-bild #jul-gorilla { filter: drop-shadow(0 3px 6px rgb(31 30 27 / .16)); }
+/* Sökrutan avstängd: gorillan står kvar för sig själv mitt i kolumnen */
+:root[data-jul~="luva"] body:not(.incog) #newtabpage.anp-utan-sok #jul-gorilla-plats { width: auto; height: auto; }
+:root[data-jul~="luva"] body:not(.incog) #newtabpage.anp-utan-sok #jul-gorilla { position: static; display: block; width: 96px; height: 96px; }
+:root[data-jul~="luva"] body:not(.incog) #newtabpage.anp-redigerar #jul-gorilla-plats { opacity: .4; transition: opacity .2s; }
+
+
+/* ══ 3. Snö på nya fliken (del "sno", jul-pynt.js) ═════════════════════════════════════════════════════════
+   Ett lager i #newtabpage, bakom kolumnen med klocka och sökruta (z 10) och framför bilden. Högst 40 flingor.
+   Varje flinga är en liten bild som faller med en transform-animation och svajar med en translate-animation: båda
+   körs av grafikprocessen, utan layout och utan skript per bildruta. Inga skuggor, ingen oskärpa, inga masker.
+   Avstånden är i lagrets egen höjd (cqh). Står still när fliken inte syns (#newtabpage är display: none då), pausas
+   när en ruta ligger över (klassen jul-paus, jul-pynt.js) och är helt stilla med Minska rörelse. */
+:root {
+  /* Handritade former i snövitt (--jul-sno): två ojämna prickar och två flingor */
+  --jul-flinga-1: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='%23fdfcf8'%3E%3Cpath d='M6.3.9C8.9.6 11.2 2.6 11.3 5.5 11.5 8.3 9.4 10.8 6.5 11.1 3.6 11.3 1 9.3.8 6.3.6 3.5 3 1.2 6.3.9Z'/%3E%3C/svg%3E");
+  --jul-flinga-2: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='%23fdfcf8'%3E%3Cpath d='M5.2 1.4C7.6.5 10.6 1.9 11 4.6 11.4 7.4 9.6 10.2 6.9 10.8 4.3 11.4 1.6 10 1.1 7.3.6 4.7 2.8 2.3 5.2 1.4Z'/%3E%3C/svg%3E");
+  --jul-flinga-3: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fdfcf8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12.2 2.8 11.8 21.3M4.1 7.4 20 16.8M19.9 7.1 4 16.9M9.9 5 12.1 7 14.2 4.9M9.8 19.2 11.9 17.2 14 19.1'/%3E%3C/svg%3E");
+  --jul-flinga-4: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fdfcf8' stroke-width='2.7' stroke-linecap='round'%3E%3Cpath d='M13.6 3.3 10.5 20.7M4.3 9.1 19.8 14.7M17.5 5.2 6.4 18.9'/%3E%3C/svg%3E");
+}
+#jul-sno { display: none; }
+:root[data-jul~="sno"] body:not(.incog) #jul-sno { display: block; position: absolute; inset: 0; z-index: 5; overflow: hidden; pointer-events: none; container-type: size; }
+:root[data-jul~="sno"] body:not(.incog) #newtabpage.anp-tom #jul-sno { display: none; }
+:root[data-jul~="sno"] body:not(.incog) #jul-sno .jul-flinga { position: absolute; top: 0; left: var(--x); width: var(--s); height: var(--s); opacity: var(--o);
+  background: var(--jul-flinga-1) center / contain no-repeat; will-change: transform;
+  animation: jul-fall var(--t) linear var(--d) infinite, jul-svaj var(--tv) ease-in-out var(--dv) infinite alternate; }
+:root[data-jul~="sno"] body:not(.incog) #jul-sno .jul-f2 { background-image: var(--jul-flinga-2); }
+:root[data-jul~="sno"] body:not(.incog) #jul-sno .jul-f3 { background-image: var(--jul-flinga-3); }
+:root[data-jul~="sno"] body:not(.incog) #jul-sno .jul-f4 { background-image: var(--jul-flinga-4); }
+@keyframes jul-fall { from { transform: translateY(calc(-2cqh - 20px)) rotate(0deg); } to { transform: translateY(102cqh) rotate(var(--r, 0deg)); } }
+@keyframes jul-svaj { from { translate: calc(var(--v) * -1) 0; } to { translate: var(--v) 0; } }
+:root[data-jul~="sno"] body:not(.incog) #jul-sno.jul-paus .jul-flinga { animation-play-state: paused; }
+/* Minska rörelse (inställningen eller systemet): flingorna hänger stilla där de är utspridda */
+:root[data-jul~="sno"] body.reduce-motion:not(.incog) #jul-sno .jul-flinga { animation: none; will-change: auto; transform: translateY(var(--y)); }
+@media (prefers-reduced-motion: reduce) { :root[data-jul~="sno"] body:not(.incog) #jul-sno .jul-flinga { animation: none; will-change: auto; transform: translateY(var(--y)); } }
+/* Ljus sida utan bild (ljust tema): vit snö syns inte mot nästan vitt, så den blir blågrå */
+:root[data-jul~="sno"]:not([data-theme="dark"]) body:not(.incog) #newtabpage.anp-utan-bild #jul-sno {
+  --jul-flinga-1: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='%238b9fb3'%3E%3Cpath d='M6.3.9C8.9.6 11.2 2.6 11.3 5.5 11.5 8.3 9.4 10.8 6.5 11.1 3.6 11.3 1 9.3.8 6.3.6 3.5 3 1.2 6.3.9Z'/%3E%3C/svg%3E");
+  --jul-flinga-2: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='%238b9fb3'%3E%3Cpath d='M5.2 1.4C7.6.5 10.6 1.9 11 4.6 11.4 7.4 9.6 10.2 6.9 10.8 4.3 11.4 1.6 10 1.1 7.3.6 4.7 2.8 2.3 5.2 1.4Z'/%3E%3C/svg%3E");
+  --jul-flinga-3: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b9fb3' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12.2 2.8 11.8 21.3M4.1 7.4 20 16.8M19.9 7.1 4 16.9M9.9 5 12.1 7 14.2 4.9M9.8 19.2 11.9 17.2 14 19.1'/%3E%3C/svg%3E");
+  --jul-flinga-4: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b9fb3' stroke-width='2.7' stroke-linecap='round'%3E%3Cpath d='M13.6 3.3 10.5 20.7M4.3 9.1 19.8 14.7M17.5 5.2 6.4 18.9'/%3E%3C/svg%3E");
+}
+
+
+/* ══ 4. Snö på flikarna (del "flikar") ═════════════════════════════════════════════════════════════════════
+   Inte byggd än. Registrera delen med Jul.del('flikar', {}) (ett tomt objekt räcker för en del som bara är CSS),
+   så kommer "flikar" i data-jul och brytaren Snö på flikarna visas i inställningarna. Regler börjar med
+   :root[data-jul~="flikar"] body:not(.incog):not(.flik-vertikal) … (.tab::before är ledigt). */
+
+
+/* ══ 5. Julkalendern (del "kalender", jul-kalender.js) ═════════════════════════════════════════════════════
+   Inte byggd än. Regler börjar med :root[data-jul~="kalender"] body:not(.incog) … */
+
+
+/* ══ 6. Statistik i julspråk och julaftons sammanfattning (del "stat", jul-kalender.js) ════════════════════
+   Inte byggd än. Regler börjar med :root[data-jul~="stat"] body:not(.incog) … */
+
+
+/* ══ 7. Frågan och inställningarna (jul.js) ════════════════════════════════════════════════════════════════ */
+/* Frågan "Vill du ha jultema?" är ett vanligt notiskort (visaNotis i shell.js). Gorillan i luva sitter uppe till
+   höger i kortet och texten flyter runt den. Saknas bilden blir det bara tomt där. */
+#jul-fraga::before { content: ""; float: inline-end; width: 60px; height: 60px; margin-block: -8px 0; margin-inline: 8px -6px; background: var(--jul-gorilla) center / contain no-repeat; }
+/* Inställningar › Anpassa › Jul: tom utanför julen */
+#settings #anp-jul:empty { display: none; }

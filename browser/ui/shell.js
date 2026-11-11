@@ -2466,7 +2466,7 @@ async function maybeShowDefaultBanner() {
     if (windowIncognito) return;
     const intro = $('hxintro');   // första start: vänta tills introt är borta, annars hamnar notisen ovanpå det
     if (intro && intro.style.display === 'flex') { setTimeout(maybeShowDefaultBanner, 2500); return; }
-    if (document.getElementById('flytt-banner')) { setTimeout(maybeShowDefaultBanner, 4000); return; }   // flytt-erbjudandet först
+    if (document.getElementById('flytt-banner') || document.getElementById('jul-fraga')) { setTimeout(maybeShowDefaultBanner, 4000); return; }   // flytt-erbjudandet först, och aldrig ovanpå julfrågan (ui/jul.js)
     const st = await window.defaultBrowser.state();
     if (st && st.default) return;                                   // redan standard → visa inte
     const snooze = parseInt(localStorage.getItem('skoll-defbrowser-snooze') || '0', 10);
@@ -3306,7 +3306,7 @@ async function maybeShowFlyttBanner() {
     if (localStorage.getItem('adraze-flytt-erbjuden')) return;
     const intro = $('hxintro');
     if (intro && intro.style.display === 'flex') { setTimeout(maybeShowFlyttBanner, 1000); return; }
-    if (document.getElementById('defbrowser-banner')) { setTimeout(maybeShowFlyttBanner, 3000); return; }   // inte två notiser på varandra
+    if (document.getElementById('defbrowser-banner') || document.getElementById('jul-fraga')) { setTimeout(maybeShowFlyttBanner, 3000); return; }   // inte två notiser på varandra
     let lista = []; try { lista = await window.view.importKallor(); } catch {}
     if (!Array.isArray(lista) || !lista.length) return;
     localStorage.setItem('adraze-flytt-erbjuden', '1');

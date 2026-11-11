@@ -81,6 +81,18 @@ contextBridge.exposeInMainWorld('anpassaBro', {
   importera: (kod, prefix) => ipcRenderer.invoke('anpassa:importera', { kod, prefix }),
   onAndrad: (fn) => ipcRenderer.on('anpassa:andrad', (_e, d) => fn(d)),
 });
+// Jultemat (ui/jul.js ↔ jul.js): läget (säsong, låtsat datum, frågan, luckor, bilder), svaret på frågan, julkalenderns
+// luckor, statistiken per dag och delningsbilden. Inställningarna själva (jul.*) går via anpassaBro.
+contextBridge.exposeInMainWorld('julBro', {
+  lage: () => { try { return ipcRenderer.sendSync('jul:lage'); } catch { return null; } },
+  svara: (svar) => ipcRenderer.invoke('jul:svara', svar === 'ja' ? 'ja' : 'nej'),
+  visad: () => ipcRenderer.send('jul:visad'),
+  lucka: (n) => ipcRenderer.invoke('jul:lucka', n),
+  stat: () => ipcRenderer.invoke('jul:stat'),
+  bild: (atgard, data) => ipcRenderer.invoke('jul:bild', { atgard, data }),
+  onAndrad: (fn) => ipcRenderer.on('jul:andrad', (_e, d) => fn(d)),
+  onTyst: (fn) => ipcRenderer.on('jul:tyst', (_e, ms) => fn(ms)),   // huvudprocessen ändrar tema på egen hand: ingen "Ändrat · Ångra"
+});
 // Anpassa-krok (tema): engångsflytt av det gamla ljust/mörkt-valet till tema.lage (ui/anpassa-tema.js, ../anpassa-tema.js)
 contextBridge.exposeInMainWorld('anpassaTema', {
   flyttaLage: (lage) => ipcRenderer.send('anpassa-tema:flytta-lage', lage),

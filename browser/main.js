@@ -85,6 +85,7 @@ const sok = require('./sok');                 // sök på sidan (markerar i sida
 registerAdblockScheme();   // före app.ready
 
 const falkInst = require('./falk-inst');   // Inställningar › Falk: av/på, panelens bredd, färg, svarslängd …
+const jul = require('./jul');             // jultemat: säsong, frågan, julfärger, räknare per dag, julkalenderns luckor
 const CHATT_W = 420;        // chattens sidopanel (helskärm = hela webbytan)
 const wins = new Map();                 // skalets webContents-id -> ctx
 /* Konto per fönster (standard): varje fönster har sitt eget AdRaze-konto, och varje konto sina egna kakor i en
@@ -138,7 +139,11 @@ function setFull(ctx, want) {
 }
 function toggleFull(ctx) { setFull(ctx, !ctx.win.isFullScreen()); }
 function sendTo(ctx, ...a) { if (ctx && ctx.win && !ctx.win.isDestroyed()) ctx.win.webContents.send(...a); }
-function broadcast(...a) { wins.forEach((ctx) => sendTo(ctx, ...a)); if (a[0] === 'download-update') pushDownloadPopups(); }
+function broadcast(...a) {
+  wins.forEach((ctx) => sendTo(ctx, ...a));
+  if (a[0] === 'download-update') pushDownloadPopups();
+  else if (a[0] === 'adblock:hit') jul.raknaTraff(a[1]);   // stoppat per dag (en gång, oavsett antal fönster)
+}
 /* Nedladdnings-popup = WebContentsView OVANPÅ fliken (ej separat fönster: Wayland kan ej
  * positionera fönster; ej DOM-overlay: flikens native-vy ritas ovanpå skalets HTML och skulle
  * dölja den). En child-vy positioneras med setBounds relativt fönstret → funkar på Wayland. */
@@ -301,6 +306,7 @@ function barnNagonRegel() { if (!KONTO_PER_FONSTER) return barnRegler; for (cons
 function barnNagonstans() { return !!barnNagonRegel(); }
 anpassa.init({ barnKoll: () => barnNagonstans() });
 require('./anpassa-tema');   // Anpassa-krok (tema): tema.*-nycklarna, Macens trafikljus följer flikradens höjd
+jul.init({ skicka: (...a) => broadcast(...a), nedladdningsmapp: () => webb.downloadDir(), T: (s) => T(s) });   // jultemat (efter tema.*: julfärgerna är temat Jul)
 anpFlikar.init({ ctxFor, antalFonster: () => wins.size, T: (s) => T(s), svep: () => sweepIdleTabs() });   // Anpassa → flikar
 // Anpassa › verktyg: verktyg.*-nycklarna, högerklicksmenyn på verktygsraden och raden längst ner (anpassa-verktyg.js)
 const anpVerktyg = require('./anpassa-verktyg');
