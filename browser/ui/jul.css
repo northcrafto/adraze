@@ -126,6 +126,8 @@
     scrollbar-color: var(--jul-gran-700) transparent;
   }
   & #settings .set-tab.on, & #settings .set-search { background: rgb(244 236 216 / .07); }
+  /* Inloggningen är en hel sida som inställningarna: samma gran, inte vanligt mörkt under den gröna verktygsraden */
+  & #login { --lg-bg: var(--jul-gran-925); --lg-ink: var(--jul-gradde); --lg-mut: var(--jul-dimgron); --lg-line: var(--jul-gran-700); --lg-field: var(--jul-gran-800); --lg-knapp: var(--jul-gradde); --lg-knapp-text: var(--jul-ink); }
 
   /* Startsidan: solida widgetar, sidan utan bild och lådan med widgetar */
   & #newtabpage.anp-solid {
@@ -342,7 +344,7 @@
     & .jul-dorr-blad :is(path, b) { transition: none; }
     & #jul-lucka { animation: none; }
   }
-  @media (max-height: 700px) { & .jul-kal-luckor .jul-dorr b { font-size: 15.5px; } }
+  @media (max-height: 800px) { & .jul-kal-luckor .jul-dorr b { font-size: 15.5px; } }
 }
 @keyframes jul-knack { 0%, 100% { rotate: -3deg; } 18% { rotate: 4deg; } 38% { rotate: -8deg; } 58% { rotate: 1deg; } 78% { rotate: -5deg; } }
 /* På den ljusa sidan utan bild (ljust tema) räcker en lätt skugga */
@@ -369,7 +371,9 @@
   & :is(.jul-kal-bak, .jul-kal-x):hover { color: var(--jk-text); background: var(--jk-yta); }
   & :is(.jul-kal-bak, .jul-kal-x, .jul-knapp):focus-visible { outline: 2px solid var(--jk-klick); outline-offset: 2px; }
   & .jul-kal-luckor { flex: none; display: grid; grid-template-columns: repeat(6, minmax(0, 46px)); justify-content: space-between; gap: 10px 6px; padding: 8px 22px 18px; }
-  & .jul-kal-blad { flex: 0 1 auto; min-height: 190px; overflow-y: auto; padding: 14px 22px 16px; border-top: 1px solid var(--jk-linje); scrollbar-width: thin; scrollbar-color: var(--jk-linje) transparent; }
+  /* Rullningslistens plats (10 px) är alltid reserverad: annars blir en list som en gång behövts sittande kvar och
+     gör texten smalare, så att samma lucka bryts olika från gång till gång. Marginalen till höger är lika mycket mindre. */
+  & .jul-kal-blad { flex: 0 1 auto; min-height: 190px; overflow-y: auto; scrollbar-gutter: stable; padding: 14px 22px 16px; padding-inline-end: 12px; border-top: 1px solid var(--jk-linje); scrollbar-width: thin; scrollbar-color: var(--jk-linje) transparent; }
   & .jul-kal-fot { flex: none; display: flex; justify-content: space-between; gap: 12px; padding: 9px 22px 11px; border-top: 1px solid var(--jk-linje); font-size: 12.5px; color: var(--jk-mut); white-space: nowrap; }
   & .jul-kal-fot span:last-child { overflow: hidden; text-overflow: ellipsis; }
   /* Sammanfattningen får hela panelen: inga luckor, ingen fot */
@@ -418,12 +422,16 @@
     & #jul-kalender { animation: none; }
     & .jul-knapp::before { transition: none; }
   }
-  /* Lågt fönster: tätare panel, så att luckans innehåll får plats under luckorna */
-  @media (max-height: 700px) {
+  /* Lågt fönster (under 800 px, till exempel maximerat på en skärm som är 768 px hög): tätare panel, så att också
+     statistikluckornas innehåll får plats under luckorna utan att rulla */
+  @media (max-height: 800px) {
     & .jul-kal-topp { padding-top: 16px; padding-bottom: 6px; }
-    & .jul-kal-luckor { grid-template-columns: repeat(6, minmax(0, 38px)); gap: 8px 6px; padding: 8px 26px 14px; }
-    & .jul-kal-blad { min-height: 120px; }
+    & .jul-kal-luckor { grid-template-columns: repeat(6, minmax(0, 38px)); gap: 8px 6px; padding: 8px 26px 12px; }
+    & .jul-kal-blad { min-height: 120px; padding-top: 12px; padding-bottom: 12px; }
     & .jul-kal-fot { display: none; }
+  }
+  /* Riktigt lågt fönster: också sammanfattningen tätare, med mindre bild */
+  @media (max-height: 720px) {
     & .jul-sum-fakta { gap: 4px 14px; margin-top: 10px; padding-top: 10px; }
     & .jul-sum-bild { width: 62%; margin-top: 12px; }
   }
