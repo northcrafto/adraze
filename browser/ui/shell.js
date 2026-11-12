@@ -1451,9 +1451,9 @@ async function enterChildMode(token, child) {
   updateAccountBtn();
   try { loadSocMe().then(() => updateAccountBtn()); } catch {}
   try { window.session.login(accountKey(account)); } catch {}   // barnets egen webbsession
-  let bl = [], al = [];
-  try { const me = await window.family.me(token); if (me && me.ok) { if (Array.isArray(me.blocklist)) bl = me.blocklist; if (Array.isArray(me.allows)) al = me.allows; } } catch {}
-  fam = { children: [{ id: child.id, name: child.name, age: child.age, blocklist: bl, allows: al, self: true }], activeChild: child.id };
+  let bl = [], al = [], snd = null;
+  try { const me = await window.family.me(token); if (me && me.ok) { if (Array.isArray(me.blocklist)) bl = me.blocklist; if (Array.isArray(me.allows)) al = me.allows; snd = me.sound || null; } } catch {}
+  fam = { children: [{ id: child.id, name: child.name, age: child.age, blocklist: bl, allows: al, sound: snd, self: true }], activeChild: child.id };
   famSave();
   if (typeof renderFam === 'function') renderFam();
   window.__kidShown = false;
@@ -1468,7 +1468,7 @@ async function syncChild() {
   if (!account || account.token !== tok) return;   // kontot byttes under tiden: svaret gäller inte det nya kontot
   if (me && me.ok && me.isChild) {
     const id = account.childId || 'self';
-    fam = { children: [{ id, name: me.name || account.name, age: me.age || 0, blocklist: Array.isArray(me.blocklist) ? me.blocklist : [], allows: Array.isArray(me.allows) ? me.allows : [], self: true }], activeChild: id };
+    fam = { children: [{ id, name: me.name || account.name, age: me.age || 0, blocklist: Array.isArray(me.blocklist) ? me.blocklist : [], allows: Array.isArray(me.allows) ? me.allows : [], sound: me.sound || null, self: true }], activeChild: id };
     famSave(); applyKidIndicator();
     if (typeof enforceActiveTab === 'function') enforceActiveTab();
     try { kbSvar(me.fragor); } catch {}
@@ -3543,6 +3543,7 @@ function showBlockScreen(url, lage) {
     q('#kidblock-back').onclick = () => kbStang(true);
     return;
   }
+  if (!lage) famLjudSpela(host);
   const fh = kbFragaHost(url);
   const kanFraga = !!(fh && account && account.isChild && account.token);
   if (_kbVantar && _kbVantar.host === fh && !lage) lage = 'vantar';
@@ -3650,6 +3651,7 @@ function renderFam() {
     if (se) se.addEventListener('click', () => famShowSessions(c.id, c.name));
     el.querySelectorAll('.fam-tag button[data-host]').forEach((b) => b.addEventListener('click', () => { const x = famChildById(c.id) || c; x.blocklist = (x.blocklist || []).filter((h) => h !== b.dataset.host); famSave(); famPushBlocklist(x); renderFam(); }));
     el.querySelectorAll('.fam-tag button[data-t]').forEach((b) => b.addEventListener('click', () => allowMenu(b.dataset.t, c.name, b)));  // tillåt tillfälligt
+    famLjudKoppla(el, c);
     const inp = el.querySelector('.fam-addsite input');
     // Barnet slås upp på nytt: synken byter ut objekten medan föräldern skriver
     const addSite = () => { const x = famChildById(c.id) || c; const h = famHost(inp.value); if (!h) { if (inp.value.trim()) showToast('Skriv hela adressen, till exempel facebook.com'); return; } if (!x.blocklist.includes(h)) { x.blocklist.push(h); famSave(); famPushBlocklist(x); renderFam(); } };
@@ -3905,9 +3907,77 @@ function famChildCard(c) {
     + famFragorHtml(c)
     + '<div class="fam-sub">Blockerade sidor</div>' + tags + allowsHtml
     + '<div class="fam-addsite"><input class="fam-in" placeholder="t.ex. exempel.se" spellcheck="false" /><button class="btn btn-safe flex-none" style="height:40px;padding:0 14px;">Blockera</button></div>'
+    + famLjudHtml(c)
     + '<div class="fam-krypto falk-bara">' + escapeHtml(tn('Säg till Falk: "blockera de här sidorna för {n}" — eller "tillåt X för {n} i en timme".', c.name)).replace('Falk', '<b>Falk</b>') + '</div>'
     + '<button class="fam-histbtn" data-a="hist" style="display:block;font-size:12.5px;font-weight:700;color:#2f8fd4;background:rgba(47,143,212,.08);border:1px solid rgba(47,143,212,.25);border-radius:9px;padding:8px 12px;cursor:pointer;margin-top:10px;">' + escapeHtml(tn('Se historik för {n}', c.name)) + '</button>'
     + '<button class="fam-del" data-a="del">' + escapeHtml(tn('Ta bort {n} ur familjen', c.name)) + '</button></div>';
+}
+/* ── Spärrljud: föräldern kan välja ett ljud som spelas när barnet hamnar på en spärrad sida ──
+ * Av från början. Ljuden låter trasiga med flit (inte högt): därför varning innan det slås på, volymtak 80 %,
+ * och ljudet spelas en gång per spärrad sida (inte igen om barnet laddar om samma sida direkt). */
+const FAM_LJUD = [
+  { id: 'hangd', namn: 'Hackar och fastnar' },
+  { id: 'summer', namn: 'Skaver' },
+  { id: 'stotar', namn: 'Stötar som hänger sig' },
+  { id: 'kort', namn: 'Kort och rått' },
+  { id: 'stotar-kort', namn: 'Stötar och kort häng' },
+];
+function famLjud(c) { const s = c && c.sound; return { id: (s && FAM_LJUD.some((x) => x.id === s.id)) ? s.id : '', volym: Math.min(80, Math.max(10, (s && s.volym) || 60)) }; }
+let _famProv = null;
+function famLjudProva(id, volym) {
+  try { if (_famProv) _famProv.pause(); } catch {}
+  if (!id) return null;
+  const a = new Audio('ljud/sparr-' + id + '.ogg'); a.volume = Math.min(0.8, Math.max(0.1, volym / 100));
+  _famProv = a; a.play().catch(() => {}); return a;
+}
+function famLjudHtml(c) {
+  const l = famLjud(c);
+  return '<div class="fam-sub">' + escapeHtml(tf('Ljud vid spärrad sida')) + '</div>'
+    + '<div class="fam-ljud" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 8px;">'
+    + '<select data-a="ljud" class="fam-in" style="height:38px;flex:1;min-width:170px;">'
+    + '<option value=""' + (l.id ? '' : ' selected') + '>' + escapeHtml(tf('Av')) + '</option>'
+    + FAM_LJUD.map((x) => '<option value="' + x.id + '"' + (l.id === x.id ? ' selected' : '') + '>' + escapeHtml(tf(x.namn)) + '</option>').join('')
+    + '</select>'
+    + '<button data-a="ljud-prova" style="font-size:12px;font-weight:700;color:#2f8fd4;background:rgba(47,143,212,.1);border:1px solid rgba(47,143,212,.25);border-radius:8px;padding:8px 12px;cursor:pointer;"' + (l.id ? '' : ' disabled') + '>' + escapeHtml(tf('Provlyssna')) + '</button>'
+    + '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--color-navy-600);' + (l.id ? '' : 'opacity:.45;') + '">' + escapeHtml(tf('Volym')) + ' <input data-a="ljud-vol" type="range" min="10" max="80" step="5" value="' + l.volym + '"' + (l.id ? '' : ' disabled') + ' style="width:110px;"></label>'
+    + '</div>';
+}
+async function famLjudSpara(c, id, volym) {
+  const x = famChildById(c.id) || c;
+  const fore = x.sound || null;
+  x.sound = { id, volym }; famSave();
+  if (c.local || !account || !account.token || account.isChild) return true;
+  const r = await window.family.setSound(account.token, x.id, id, volym).catch(() => ({ ok: false }));
+  if (r && r.ok) { if (r.sparrljud) { x.sound = r.sparrljud; famSave(); } return true; }
+  x.sound = fore; famSave();
+  showToast((r && r.message) || tf('Kunde inte spara ljudet just nu. Kontrollera din uppkoppling.'));
+  return false;
+}
+function famLjudKoppla(el, c) {
+  const sel = el.querySelector('[data-a=ljud]'), prova = el.querySelector('[data-a=ljud-prova]'), vol = el.querySelector('[data-a=ljud-vol]');
+  if (!sel) return;
+  sel.addEventListener('change', async () => {
+    const fore = famLjud(famChildById(c.id) || c), id = sel.value;
+    if (id && !fore.id) {
+      const ok = await famConfirm(tf('Slå på spärrljud?'), tn('Ljuden låter trasiga och obehagliga med flit, och de kan skrämma små barn. Ljudet spelas en gång varje gång {n} hamnar på en spärrad sida. Provlyssna först, gärna med låg volym.', c.name), tf('Slå på'));
+      if (!ok) { sel.value = ''; return; }
+    }
+    if (await famLjudSpara(c, id, fore.volym)) renderFam(); else sel.value = fore.id;
+  });
+  if (prova) prova.addEventListener('click', () => famLjudProva(sel.value, Number(vol && vol.value) || 60));
+  if (vol) vol.addEventListener('change', () => { const id = famLjud(famChildById(c.id) || c).id; if (id) { famLjudSpara(c, id, Number(vol.value)); famLjudProva(id, Number(vol.value)); } });
+}
+let _famLjudSenast = { host: '', t: 0 };
+function famLjudSpela(host) {
+  try {
+    if (famLocked && famLocked()) return;
+    const c = famActive(); const l = famLjud(c);
+    if (!l.id) return;
+    const nu = Date.now();
+    if (_famLjudSenast.host === host && nu - _famLjudSenast.t < 15000) return;   // inte igen vid omladdning av samma sida
+    _famLjudSenast = { host, t: nu };
+    const a = new Audio('ljud/sparr-' + l.id + '.ogg'); a.volume = l.volym / 100; a.play().catch(() => {});
+  } catch {}
 }
 function famAddChild() {
   if (document.getElementById('fam-modal')) return;
@@ -3997,7 +4067,7 @@ async function famSyncParent() {
   if (_famPushar) return;   // föräldern ändrade något under tiden: svaret är gammalt
   if (r && r.ok && Array.isArray(r.children)) {
     const prevActive = fam.activeChild;
-    fam.children = r.children.map((c) => ({ id: c.id, name: c.name, age: c.age, blocklist: Array.isArray(c.blocklist) ? c.blocklist : [], allows: Array.isArray(c.allows) ? c.allows : [], code: c.code, sessions: c.sessions || 0, last_seen: c.last_seen || 0, requests: Array.isArray(c.requests) ? c.requests : [] }));
+    fam.children = r.children.map((c) => ({ id: c.id, name: c.name, age: c.age, blocklist: Array.isArray(c.blocklist) ? c.blocklist : [], allows: Array.isArray(c.allows) ? c.allows : [], code: c.code, sessions: c.sessions || 0, last_seen: c.last_seen || 0, requests: Array.isArray(c.requests) ? c.requests : [], sound: c.sound || null }));
     famNyaFragor();
     fam.activeChild = fam.children.find((c) => c.id === prevActive) ? prevActive : fam.activeChild;
     famSave();

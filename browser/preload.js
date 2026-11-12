@@ -54,6 +54,7 @@ contextBridge.exposeInMainWorld('family', {
   children: (token) => ipcRenderer.invoke('family:children', { token }),
   removeChild: (token, child_id) => ipcRenderer.invoke('family:remove', { token, child_id }),
   setBlocklist: (token, child_id, blocklist) => ipcRenderer.invoke('family:blocklist', { token, child_id, blocklist }),
+  setSound: (token, child_id, sound, volume) => ipcRenderer.invoke('family:sound', { token, child_id, sound, volume }),
   allow: (token, child_id, host, minutes) => ipcRenderer.invoke('family:allow', { token, child_id, host, minutes }),
   notis: (title, body) => ipcRenderer.send('family:notis', { title, body }),
   onOppna: (fn) => ipcRenderer.on('family:oppna', () => fn()),

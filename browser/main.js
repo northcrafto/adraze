@@ -1145,7 +1145,7 @@ ipcMain.handle('profiler:ta-bort', async (_e, key) => {
 });
 /* AdRaze Familj (api.adraze.app): föräldern skapar barnkonton; barnet loggar in med sin barnkod
  * och en kod som mejlas till föräldern vid varje inloggning. Svaren översätts till skalets form. */
-const barnUt = (c) => ({ id: c.id, name: c.namn, age: c.alder, code: c.kod, blocklist: c.blocklista || [], allows: c.tillat || [], last_seen: c.senast || 0, sessions: c.inloggningar || 0, requests: Array.isArray(c.fragor) ? c.fragor : [] });
+const barnUt = (c) => ({ id: c.id, name: c.namn, age: c.alder, code: c.kod, blocklist: c.blocklista || [], allows: c.tillat || [], last_seen: c.senast || 0, sessions: c.inloggningar || 0, requests: Array.isArray(c.fragor) ? c.fragor : [], sound: c.sparrljud || null });
 ipcMain.handle('family:child', async (_e, d) => {
   const j = await adrazeApi('/familj/barn', { namn: d && d.name, alder: d && d.age }, d && d.token);
   return j.ok ? { ok: true, child: { id: j.barn.id, name: j.barn.namn, age: j.barn.alder }, code: j.kod } : j;
@@ -1169,8 +1169,9 @@ ipcMain.handle('family:enhet', (_e, d) => adrazeApi('/barn/enhet', {}, d && d.to
 ipcMain.handle('family:annat-konto', (_e, d) => adrazeApi('/barn/annat-konto', { enhet: d && d.enhet }, d && d.token));
 ipcMain.handle('family:me', async (_e, d) => {
   const j = await adrazeApi('/barn/jag', {}, d && d.token);
-  return j.ok ? { ok: true, isChild: true, name: j.namn, age: j.alder, blocklist: j.blocklista, allows: j.tillat, fragor: Array.isArray(j.fragor) ? j.fragor : [] } : j;
+  return j.ok ? { ok: true, isChild: true, name: j.namn, age: j.alder, blocklist: j.blocklista, allows: j.tillat, sound: j.sparrljud || null, fragor: Array.isArray(j.fragor) ? j.fragor : [] } : j;
 });
+ipcMain.handle('family:sound', (_e, d) => adrazeApi('/familj/sparrljud', { barn_id: d && d.child_id, ljud: d && d.sound, volym: d && d.volume }, d && d.token));
 ipcMain.handle('family:allow', (_e, d) => adrazeApi('/familj/tillat', { barn_id: d && d.child_id, host: d && d.host, minuter: d && d.minutes }, d && d.token));
 // Notis till föräldern när ett barn frågar om lov (systemnotis från huvudprocessen; klick öppnar Familj i fönstret)
 ipcMain.on('family:notis', (e, d) => {
