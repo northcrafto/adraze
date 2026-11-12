@@ -531,7 +531,14 @@ function applyBounds(ctx) {
   }
   if (ctx.chattView) {
     const vis = ctx.chattFull ? ctx.chattOpen : ctx.pC > 0;
-    ctx.chattView.setVisible(vis);
+    const mini = !vis && !ctx.chattOpen && ctx.chattMini;
+    ctx.chattView.setVisible(vis || !!mini);
+    // Den lilla rutan har rundade hörn: genomskinlig vy medan den visas (annars syns vita hörn)
+    if (ctx.chattView._mini !== !!mini) { ctx.chattView._mini = !!mini; try { ctx.chattView.setBackgroundColor(mini ? '#00000000' : '#ffffff'); } catch {} }
+    if (mini) {
+      const w = ctx.chattMini.lage === 'ring' ? 360 : 320, h = ctx.chattMini.h;
+      ctx.chattView.setBounds({ x: R(b.x + b.width - kw - w - 14), y: R(b.y + ctx.topInset + 12), width: w, height: h });
+    }
     if (vis) {
       if (ctx.chattFull) ctx.chattView.setBounds({ x: R(b.x + ctx.leftInset), y: R(b.y), width: Math.max(0, R(b.width - kw - ctx.leftInset)), height: R(b.height) });
       else ctx.chattView.setBounds({ x: R(b.x + b.width - (tK && tC ? falkInst.bredd() * eK : 0) - CHATT_W * eC), y: R(b.y), width: CHATT_W, height: R(b.height) });   // vid byte glider chatten rakt in under Falk som glider ut
@@ -1205,8 +1212,27 @@ function chattSession() {
   if (!chattSessionReady) {
     chattSessionReady = true;
     const ok = new Set(['notifications', 'clipboard-sanitized-write']);
-    try { s.setPermissionRequestHandler((_wc, perm, cb) => cb(ok.has(perm))); } catch {}
-    try { s.setPermissionCheckHandler((_wc, perm) => ok.has(perm)); } catch {}
+    // Mikrofonen till röstsamtal: bara ljud, bara chattpanelen själv (chatt.html), aldrig kamera här
+    const arChatt = (wc) => { try { return !!wc && /\/ui\/chatt\.html$/.test(new URL(wc.getURL()).pathname); } catch { return false; } };
+    const barnPanel = (wc) => { const c = wc && wc.__ctx; return !!(c && c.chattChild); };
+    const mik = (wc, d) => arChatt(wc) && Array.isArray(d && d.mediaTypes) && d.mediaTypes.length > 0 && d.mediaTypes.every((t) => t === 'audio');
+    // display-capture: frågan före setDisplayMediaRequestHandler nedan (som bestämmer VAD som delas: bara vald flik)
+    try { s.setPermissionRequestHandler((wc, perm, cb, d) => cb(ok.has(perm) || (perm === 'media' && mik(wc, d)) || (perm === 'display-capture' && arChatt(wc) && !barnPanel(wc)))); } catch {}
+    try { s.setPermissionCheckHandler((wc, perm, _o, d) => ok.has(perm) || (perm === 'media' && arChatt(wc) && (!d || !d.mediaType || d.mediaType === 'audio'))); } catch {}
+    // Skärmdelning: ALDRIG hela skärmen och aldrig systemets väljare. Bara fliken som användaren just valde i chattens
+    // flikväljare (chatt:valj-flik, gäller 15 s och en gång), i samma fönster. Barnkonton får inte dela.
+    try {
+      s.setDisplayMediaRequestHandler((req, cb) => {
+        try {
+          const ctx = [...wins.values()].find((c) => c.chattView && !c.chattView.webContents.isDestroyed() && req.frame && c.chattView.webContents.mainFrame === req.frame.top);
+          const val = ctx && ctx.chattDelaFlik; if (ctx) ctx.chattDelaFlik = null;
+          if (!ctx || ctx.chattChild || !val || Date.now() - val.t > 15000) return cb({});
+          const v = ctx.views.get(val.id);
+          if (!v || v.webContents.isDestroyed()) return cb({});
+          cb({ video: v.webContents.mainFrame });
+        } catch { try { cb({}); } catch {} }
+      }, { useSystemPicker: false });
+    } catch {}
     try { trackDownloads(s); } catch {}   // "Ladda ner bild" hamnar i webbläsarens nedladdningar
   }
   return s;
@@ -1225,6 +1251,7 @@ function chattCreate(ctx) {
   ctx.chattView = v;
   ctx.win.contentView.addChildView(v);
   const wc = v.webContents;
+    backgroundThrottling: false,   // samtal och ringsignaler ska fungera även när panelen är dold
   wc.__ctx = ctx;
   // Panelen får ALDRIG navigera bort från chatt.html: länkar (efter säkerhetsrutan) öppnas som ny flik.
   wc.setWindowOpenHandler(({ url }) => { if (/^https?:\/\//i.test(url)) sendTo(ctx, 'open-new-tab', url); return { action: 'deny' }; });
@@ -1245,26 +1272,63 @@ ipcMain.on('chatt:toggle', (e, open, o) => {
     chattDestroy(ctx);
     ctx.chattToken = token; ctx.chattChild = child; ctx.chattFull = false;
   }
-  ctx.chattBoot = { lang, theme, child };
+  ctx.chattBoot = { lang, theme, child, accent: chattAccent(o.accent) };
   ctx.chattOpen = !!open && !!token;   // barnkonton: familjechatt (servern släpper bara igenom familjen)
-  if (ctx.chattOpen && !ctx.chattView) chattCreate(ctx);
+  // bakgrund: panelen laddas dold direkt vid inloggning (ringsignaler, online-status, olästa) – i ett fönster åt gången
+  const bakgrund = !!o.bakgrund && !!token && !ctx.incognito && ![...wins.values()].some((c) => c !== ctx && c.chattView && c.chattToken === token);
+  if ((ctx.chattOpen || bakgrund) && !ctx.chattView) chattCreate(ctx);
+  if (ctx.chattOpen) ctx.chattMini = null;
   applyBounds(ctx);
   if (ctx.chattOpen) { raiseKrypto(ctx); try { ctx.chattView.webContents.focus(); } catch {} }
   if (ctx.chattView) { try { ctx.chattView.webContents.send('chatt-visible', ctx.chattOpen); ctx.chattView.webContents.send('chatt-theme', theme); } catch {} }
 });
-ipcMain.on('chatt:theme', (e, theme) => {
+function chattAccent(a) {
+  const ok = (v) => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v.trim());
+  if (!a || typeof a !== 'object' || !ok(a.l) || !ok(a.d)) return null;
+  const ut = {}; for (const k of ['l', 'd', 'onL', 'onD', 'inkL', 'inkD']) if (ok(a[k])) ut[k] = a[k].trim();
+  return ut;
+}
+ipcMain.on('chatt:theme', (e, theme, accent) => {
   senasteTema = theme === 'dark' ? 'dark' : 'light';
   blocksida.skickaTillSidor('blockinst:tema', senasteTema);
   const ctx = ctxFor(e); if (!ctx) return;
-  if (ctx.chattBoot) ctx.chattBoot.theme = theme === 'dark' ? 'dark' : 'light';
-  if (ctx.chattView) { try { ctx.chattView.webContents.send('chatt-theme', theme === 'dark' ? 'dark' : 'light'); } catch {} }
+  if (ctx.chattBoot) { ctx.chattBoot.theme = theme === 'dark' ? 'dark' : 'light'; if (accent !== undefined) ctx.chattBoot.accent = chattAccent(accent); }
+  if (ctx.chattView) { try { ctx.chattView.webContents.send('chatt-theme', theme === 'dark' ? 'dark' : 'light'); if (accent !== undefined) ctx.chattView.webContents.send('chatt-accent', chattAccent(accent)); } catch {} }
 });
 // Från chattsidan
 function chattCtx(e) {
   const ctx = e.sender.__ctx;
   return (ctx && ctx.chattView && ctx.chattView.webContents === e.sender) ? ctx : null;
 }
-ipcMain.on('chatt:boot', (e) => { const ctx = chattCtx(e); e.returnValue = ctx && ctx.chattBoot ? ctx.chattBoot : { lang: 'sv', theme: 'light' }; });
+ipcMain.on('chatt:boot', (e) => { const ctx = chattCtx(e); e.returnValue = ctx && ctx.chattBoot ? { ...ctx.chattBoot, open: !!ctx.chattOpen } : { lang: 'sv', theme: 'light' }; });
+// Samtal medan chatten är stängd: panelen visas som en liten ruta uppe till höger över webbsidan
+// ('ring' = inkommande samtal med Svara/Avböj, 'samtal' = pågående samtal). null = tillbaka till dold.
+ipcMain.on('chatt:mini', (e, lage, h) => {
+  const ctx = chattCtx(e); if (!ctx) return;
+  ctx.chattMini = lage === 'ring' || lage === 'samtal' ? { lage, h: Math.max(56, Math.min(140, parseInt(h, 10) || 72)) } : null;
+  applyBounds(ctx);
+  if (ctx.chattMini) raiseKrypto(ctx);
+});
+ipcMain.on('chatt:oppna', (e) => { const ctx = chattCtx(e); if (ctx) { sendTo(ctx, 'chatt-oppna'); try { ctx.win.show(); ctx.win.focus(); } catch {} } });
+// Flikväljaren för skärmdelning: flikarna i chattens eget fönster (inte kastade/sovande)
+ipcMain.handle('chatt:flikar', (e) => {
+  const ctx = chattCtx(e); if (!ctx || ctx.chattChild) return [];
+  const ut = [];
+  for (const [id, v] of ctx.views) {
+    try {
+      const wc = v.webContents; if (!wc || wc.isDestroyed()) continue;
+      const url = wc.getURL(); if (!/^https?:/i.test(url)) continue;
+      ut.push({ id, titel: String(wc.getTitle() || '').slice(0, 120), url: url.slice(0, 500), aktiv: id === ctx.visibleTab, ikon: null });
+    } catch {}
+  }
+  return ut.sort((a, b) => (b.aktiv ? 1 : 0) - (a.aktiv ? 1 : 0));
+});
+ipcMain.handle('chatt:valj-flik', (e, id) => {
+  const ctx = chattCtx(e); if (!ctx || ctx.chattChild) return false;
+  const v = ctx.views.get(id); if (!v || v.webContents.isDestroyed()) return false;
+  ctx.chattDelaFlik = { id, t: Date.now() };
+  return true;
+});
 ipcMain.on('chatt:expand', (e, full) => { const ctx = chattCtx(e); if (!ctx) return; ctx.chattFull = !!full; applyBounds(ctx); raiseKrypto(ctx); });
 ipcMain.on('chatt:close', (e) => { const ctx = chattCtx(e); if (!ctx) return; ctx.chattOpen = false; ctx.chattFull = false; applyBounds(ctx); sendTo(ctx, 'chatt-closed'); try { e.sender.send('chatt-visible', false); } catch {} });
 ipcMain.on('chatt:unread', (e, n) => { const ctx = chattCtx(e); if (ctx) sendTo(ctx, 'chatt-unread', Math.max(0, Math.min(9999, parseInt(n, 10) || 0))); });

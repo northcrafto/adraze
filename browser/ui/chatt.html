@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'none'; connect-src 'none'; font-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: mediastream:; connect-src 'none'; font-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Chatt</title>
 <link rel="stylesheet" href="chatt.css" />
 <script src="chatt-tema.js"></script>
@@ -91,11 +91,15 @@
         <div id="chat-active" class="chat-active" hidden>
           <div class="chat-head">
             <button class="back" id="chat-back" type="button" aria-label="Tillbaka" title="Tillbaka"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-            <span class="avatar" id="peer-avatar" translate="no">?</span>
-            <span class="peer-name" id="peer-name" translate="no">—</span>
+            <span class="av-wrap"><span class="avatar" id="peer-avatar" translate="no">?</span><i class="pres" id="peer-pres" hidden></i></span>
+            <span class="peer-txt"><span class="peer-name" id="peer-name" translate="no">—</span><span class="peer-sub" id="peer-sub" hidden></span></span>
             <span class="grow"></span>
+            <button class="head-btn" id="chat-call" type="button" title="Ring" aria-label="Ring" hidden><svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></button>
+            <button class="head-btn" id="chat-share" type="button" title="Visa min flik" aria-label="Visa min flik" hidden><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M9.5 10.5 12 8l2.5 2.5M12 8v5"/></svg></button>
             <button class="icon-btn" id="chat-info" type="button" hidden>Medlemmar <span id="grp-count" translate="no">0</span></button>
           </div>
+          <div class="share-bar" id="share-bar" hidden><span class="sb-dot"></span><span class="sb-txt"><b>Du visar:</b> <span id="share-bar-title" translate="no"></span></span><span class="sb-n" id="share-bar-n"></span><button type="button" id="share-stop">Sluta</button></div>
+          <div class="call-strip" id="call-strip" hidden><span class="cs-dot"></span><span class="cs-txt" id="call-strip-txt" translate="no"></span><button type="button" id="call-strip-open">Visa samtalet</button></div>
           <div class="chat-body" id="chat-body" translate="no"></div>
           <div class="chat-foot-wrap" id="chat-foot-wrap">
             <div class="reply-bar" id="reply-bar">
@@ -116,7 +120,7 @@
               <input type="file" id="chat-file" accept="image/*" hidden>
               <button class="attach-btn" id="chat-sticker" type="button" aria-label="Stickers" title="Stickers"><svg viewBox="0 0 24 24"><path d="M15.5 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"/><path d="M15 3v4a2 2 0 0 0 2 2h4"/><path d="M8 13h.01M16 13h.01"/><path d="M10 16.5s.8 1 2 1 2-1 2-1"/></svg></button>
               <input type="file" id="sticker-file" accept="image/*" hidden>
-              <textarea id="chat-input" rows="1" placeholder="Skriv ett meddelande…" maxlength="4000"></textarea>
+              <div class="input-wrap"><textarea id="chat-input" rows="1" placeholder="Skriv ett meddelande…" maxlength="4000"></textarea><button class="emoji-btn" id="chat-emoji" type="button" aria-label="Emoji" title="Emoji"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5s1.3 2 3.5 2 3.5-2 3.5-2"/><path d="M9 9.5h.01M15 9.5h.01"/></svg></button></div>
               <button class="btn send" id="chat-send" type="button">Skicka</button>
             </div>
           </div>
@@ -195,11 +199,14 @@
     <div class="set-title">Integritet</div>
     <label class="set-row"><span class="set-txt"><span class="set-h">Läskvitton</span><span class="set-d">Visa "Öppnat" när du har läst. Stänger du av ser du inte heller andras.</span></span><input type="checkbox" class="sw" data-priv="read_receipts"></label>
     <label class="set-row"><span class="set-txt"><span class="set-h">Visa när jag skriver</span><span class="set-d">Andra ser tre prickar medan du skriver.</span></span><input type="checkbox" class="sw" data-priv="typing"></label>
+    <label class="set-row"><span class="set-txt"><span class="set-h">Visa när jag är online</span><span class="set-d">Dina vänner ser en grön prick när du har AdRaze öppet. Stänger du av ser du inte heller andras.</span></span><input type="checkbox" class="sw" data-priv="presence"></label>
+    <label class="set-row"><span class="set-txt"><span class="set-h">Mejla mig om missade samtal</span><span class="set-d">Ett kort mejl om någon ringde och du inte svarade. Högst ett per person och halvtimme.</span></span><input type="checkbox" class="sw" data-priv="call_mail"></label>
     <label class="set-row"><span class="set-txt"><span class="set-h">Ta emot vänförfrågningar</span><span class="set-d">Av: ingen ny kan lägga till dig.</span></span><input type="checkbox" class="sw" id="priv-requests"></label>
     <p class="msg-error" id="priv-msg"></p>
     <div class="set-title">Den här datorn</div>
     <label class="set-row"><span class="set-txt"><span class="set-h">Enter skickar</span><span class="set-d">Av: Ctrl+Enter skickar och Enter ger ny rad.</span></span><input type="checkbox" class="sw" data-chat="enter"></label>
     <label class="set-row"><span class="set-txt"><span class="set-h">Ljud vid nytt meddelande</span><span class="set-d">Ett kort, mjukt pling.</span></span><input type="checkbox" class="sw" data-chat="sound"></label>
+    <label class="set-row"><span class="set-txt"><span class="set-h">Ringsignal</span><span class="set-d">Av: samtal syns men ringer tyst (stör ej).</span></span><input type="checkbox" class="sw" data-chat="ring"></label>
     <label class="set-row"><span class="set-txt"><span class="set-h">Skrivbordsnotiser</span><span class="set-d">När chatten är stängd. Innehållet visas aldrig i notisen.</span></span><input type="checkbox" class="sw" data-chat="notify"></label>
     <label class="set-row"><span class="set-txt"><span class="set-h">Sudda bilder</span><span class="set-d">Klicka på en bild för att visa den.</span></span><input type="checkbox" class="sw" data-chat="blur"></label>
     <label class="set-row"><span class="set-txt"><span class="set-h">Kompakt</span><span class="set-d">Tätare meddelanden.</span></span><input type="checkbox" class="sw" data-chat="compact"></label>
@@ -344,7 +351,51 @@
 </div>
 <div class="toast" id="toast"></div>
 
+<!-- Reaktioner: verktygsrad när man hovrar ett meddelande, och emoji-väljaren -->
+<div class="msg-tools" id="msg-tools" role="toolbar" aria-label="Reagera"></div>
+<div class="emoji-pick" id="emoji-pick" role="dialog" aria-label="Välj emoji">
+  <div class="ep-head"><input type="text" id="ep-search" placeholder="Sök emoji" autocomplete="off" spellcheck="false"></div>
+  <div class="ep-tabs" id="ep-tabs"></div>
+  <div class="ep-grid" id="ep-grid" translate="no"></div>
+  <div class="ep-foot"><span class="ep-prev" id="ep-prev" translate="no"></span><span class="ep-name" id="ep-name"></span></div>
+</div>
+
+<!-- Välj flik att visa -->
+<div class="modal-overlay" id="modal-tab">
+  <div class="modal">
+    <h3>Visa en flik</h3>
+    <p class="sub" id="tab-sub">Bara fliken du väljer syns, aldrig resten av datorn. Du kan sluta när du vill.</p>
+    <div class="tab-list" id="tab-list" translate="no"></div>
+    <div class="modal-actions"><button class="btn secondary" id="tab-cancel" type="button">Avbryt</button><button class="btn" id="tab-go" type="button" disabled>Visa fliken</button></div>
+  </div>
+</div>
+
+<!-- Någon annans flik -->
+<div class="share-view" id="share-view" hidden>
+  <div class="sv-head"><span class="sv-live">Live</span><span class="sv-title" id="sv-title" translate="no"></span><span class="grow"></span><button type="button" class="sv-btn" id="sv-full" title="Helskärm" aria-label="Helskärm"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button><button type="button" class="sv-btn" id="sv-close" title="Sluta titta" aria-label="Sluta titta"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+  <div class="sv-stage"><video id="sv-video" autoplay playsinline muted></video><div class="sv-wait" id="sv-wait"><span class="spin"></span><span id="sv-wait-txt">Ansluter…</span></div></div>
+</div>
+
+<!-- Samtal -->
+<div class="call-ov" id="call-ov" hidden>
+  <div class="co-bg" id="co-bg"></div>
+  <div class="co-top"><button type="button" class="co-min" id="co-min" title="Fortsätt chatta" aria-label="Fortsätt chatta"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><span class="co-lock"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Krypterat samtal</span></div>
+  <div class="co-mid">
+    <div class="co-av-wrap"><span class="co-ring"></span><span class="co-ring r2"></span><span class="co-av" id="co-av" translate="no"></span></div>
+    <div class="co-name" id="co-name" translate="no"></div>
+    <div class="co-status" id="co-status"></div>
+  </div>
+  <div class="co-actions" id="co-actions"></div>
+  <audio id="call-audio" autoplay></audio>
+</div>
+
+<!-- Liten ruta över webbsidan när chatten är stängd: inkommande samtal eller pågående samtal -->
+<div class="mini" id="mini" hidden translate="no"></div>
+
 <script src="i18n.js"></script>
 <script src="chatt.js"></script>
+<script src="chatt-emoji.js"></script>
+<script src="chatt-reaktion.js"></script>
+<script src="chatt-samtal.js"></script>
 </body>
 </html>

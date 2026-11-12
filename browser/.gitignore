@@ -5,3 +5,5 @@ dist-installer/
 native/adblock/build/
 # Skärmdumpar av jultemat att titta på (tas om vid behov)
 jul-bilder/
+# Skärmbilder av chatten (reaktioner, samtal, skärmdelning) att titta på
+chatt-bilder/

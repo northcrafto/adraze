@@ -10,7 +10,7 @@ function tf(s, v) { let o = T(s); for (const k in v) o = o.split('{' + k + '}').
 
 // ===== Val per dator =====
 const PREF_KEY = 'adraze-chatt-prefs';
-const CHAT_DEFAULTS = { enter: true, sound: false, notify: true, blur: false, compact: false };
+const CHAT_DEFAULTS = { enter: true, sound: false, notify: true, blur: false, compact: false, ring: true };
 function chatPrefs() { let o = {}; try { o = JSON.parse(localStorage.getItem(PREF_KEY) || '{}') || {}; } catch {} return Object.assign({}, CHAT_DEFAULTS, o); }
 function chatPref(k) { return chatPrefs()[k]; }
 function setChatPref(k, v) { const p = chatPrefs(); p[k] = v; try { localStorage.setItem(PREF_KEY, JSON.stringify(p)); } catch {} applyChatPrefs(); }
@@ -20,6 +20,19 @@ applyChatPrefs();
 // ===== Tema + panel =====
 function setTheme(th) { document.documentElement.dataset.theme = th === 'dark' ? 'dark' : 'light'; }
 try { setTheme(window.chatt.boot().theme); } catch {}
+// Accentfärgen från Anpassa (skalet räknar ut nyanserna; null = AdRazes orange)
+function setAccent(a) {
+  const r = document.documentElement.style;
+  const ok = (v) => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v);
+  if (a && ok(a.l) && ok(a.d)) {
+    r.setProperty('--acc-l', a.l); r.setProperty('--acc-d', a.d);
+    r.setProperty('--acc-on-l', ok(a.onL) ? a.onL : '#fff'); r.setProperty('--acc-on-d', ok(a.onD) ? a.onD : '#fff');
+    r.setProperty('--acc-ink-l', ok(a.inkL) ? a.inkL : a.l); r.setProperty('--acc-ink-d', ok(a.inkD) ? a.inkD : a.d);
+    document.documentElement.dataset.accent = '1';
+  } else { ['--acc-l', '--acc-d', '--acc-on-l', '--acc-on-d', '--acc-ink-l', '--acc-ink-d'].forEach((k) => r.removeProperty(k)); delete document.documentElement.dataset.accent; }
+}
+try { setAccent(window.chatt.boot().accent); } catch {}
+if (window.chatt.onAccent) window.chatt.onAccent(setAccent);
 // Barnkonto: familjechatt. Familjen blir kontakter av sig själv (servern), så rutan för att lägga till vänner försvinner.
 const BARN = (() => { try { return !!window.chatt.boot().child; } catch { return false; } })();
 if (BARN) {
@@ -31,7 +44,8 @@ if (BARN) {
   } catch {}
 }
 window.chatt.onTheme(setTheme);
-let panelVisible = true;
+// Panelen kan finnas dold i bakgrunden (för ringsignaler och online-status) innan den öppnas första gången
+let panelVisible = (() => { try { const b = window.chatt.boot(); return b.open !== false; } catch { return true; } })();
 let fullView = false;
 $('btn-close').addEventListener('click', () => window.chatt.close());
 $('btn-expand').addEventListener('click', () => setFull(!fullView));
@@ -47,6 +61,7 @@ window.chatt.onVisible((v) => {
   if (!state) return;
   if (v) { if (active) { pollMessages(false); startPolling(); } refreshContacts(); refreshGroups(); }
   else { stopPolling(); closeCtxMenu(); }
+  if (typeof samtalSynlig === 'function') samtalSynlig(v);
 });
 
 // ===== Krypto (samma som Säkerkoll, så formatet är kompatibelt) =====
@@ -174,6 +189,31 @@ const avatarMap = {};
 function rememberAvatar(username, avatar) { if (username) avatarMap[username.toLowerCase()] = safeImg(avatar); }
 function avatarFor(username) { return avatarMap[(username || '').toLowerCase()] || null; }
 function avatarInner(name) { const a = avatarFor(name); return a ? '<img class="av-img" alt="" src="' + esc(a) + '">' : esc(initials(name)); }
+// ===== Online-status (servern ger online/last_seen bara för kontakter, och null om någon av oss döljer sin) =====
+const presMap = {};
+function presDot(c) {
+  if (!c || (c.online !== true && c.online !== false)) return '';
+  return '<i class="pres' + (c.online ? ' on' : '') + '" aria-label="' + esc(c.online ? T('Online') : T('Inte online')) + '"></i>';
+}
+function presText(c) {
+  if (!c || (c.online !== true && c.online !== false)) return '';
+  if (c.online) return T('Online');
+  if (!c.last_seen) return '';
+  const min = Math.floor((Date.now() - c.last_seen) / 60000);
+  if (min < 60) return tf('Aktiv för {n} min sedan', { n: Math.max(5, min) });
+  if (min < 24 * 60) return tf('Aktiv för {n} tim sedan', { n: Math.floor(min / 60) });
+  const d = Math.floor(min / 1440);
+  return d === 1 ? T('Aktiv i går') : d < 30 ? tf('Aktiv för {n} dagar sedan', { n: d }) : '';
+}
+function avWrap(innerAvatarHtml, c, cls) { return '<span class="av-wrap">' + '<span class="avatar' + (cls ? ' ' + cls : '') + '">' + innerAvatarHtml + '</span>' + presDot(c) + '</span>'; }
+function setPeerPresence() {
+  const sub = $('peer-sub'), dot = $('peer-pres');
+  if (!active || active.kind !== 'contact') { sub.textContent = ''; sub.hidden = true; dot.hidden = true; return; }
+  const c = presMap[active.id];
+  const txt = presText(c);
+  sub.textContent = txt; sub.hidden = !txt; sub.classList.toggle('on', !!(c && c.online));
+  dot.hidden = !(c && (c.online === true || c.online === false)); dot.classList.toggle('on', !!(c && c.online));
+}
 function fmtTime(ts) {
   const d = new Date(ts), now = new Date();
   const t = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
@@ -378,6 +418,7 @@ async function refreshContacts() {
     let r; try { r = await GET('/contacts'); } catch { return; }
     if (!state) return;
     contactsCache = r.contacts || []; blockedCache = r.blocked || [];
+    for (const c of contactsCache) presMap[c.id] = { online: c.online, last_seen: c.last_seen };
     [...contactsCache, ...(r.incoming || []), ...(r.outgoing || [])].forEach((c) => rememberAvatar(c.username, c.avatar));
     contactsCache.forEach((c) => rememberBubble(c.username, c.bubble));
     const unread = {}; try { const o = await GET('/messages/overview'); for (const u of o.unread || []) unread[String(u.id)] = u.n; } catch {}
@@ -388,7 +429,8 @@ async function refreshContacts() {
     for (const c of contactsCache) {
       const isOpen = active && active.kind === 'contact' && active.id === c.id;
       const div = document.createElement('div'); div.className = 'contact' + (isOpen ? ' active' : '');
-      div.innerHTML = '<span class="avatar">' + avatarInner(c.username) + '</span><span class="cname">' + esc(c.username) + '</span>';
+      const pt = presText(c);
+      div.innerHTML = avWrap(avatarInner(c.username), c) + '<span class="cname-wrap"><span class="cname">' + esc(c.username) + '</span>' + (pt ? '<span class="csub' + (c.online ? ' on' : '') + '">' + esc(pt) + '</span>' : '') + '</span>';
       const n = unread[c.id] || 0;
       if (n && !(isOpen && panelVisible)) { unreadContacts += n; const b = document.createElement('span'); b.className = 'badge'; b.textContent = n; div.appendChild(b); }
       div.addEventListener('click', () => openContact(c));
@@ -405,6 +447,7 @@ async function refreshContacts() {
     for (const c of r.outgoing || []) out.appendChild(reqRow(c, [{ label: 'Avbryt', cls: 'link-btn', run: () => POST('/contacts/remove', { username: c.username }) }], 'väntar…'));
     // Vännen borttagen/blockerad medan chatten är öppen → stäng
     if (active && active.kind === 'contact' && !contactsCache.some((c) => c.id === active.id)) closeChat();
+    setPeerPresence();
     pushUnread();
   } finally { refreshingContacts = false; }
 }
@@ -639,7 +682,8 @@ function clearBubbleStyle(div) {
 }
 function makeSampleBubble(style, text) {
   const b = document.createElement('div'); b.className = 'bubble me';
-  b.innerHTML = esc(text) + '<span class="time">' + fmtTime(Date.now()) + '</span>';
+  const t = fmtTime(Date.now());
+  b.innerHTML = '<span class="txt">' + esc(text) + '</span><span class="meta-sp" aria-hidden="true">' + t + '</span><span class="time">' + t + '</span>';
   applyBubbleStyle(b, style, true); return b;
 }
 function renderBubblePicker() {
@@ -728,6 +772,8 @@ function showChatUI(name, isGroup, count, avatar) {
   else av.innerHTML = avatarInner(name);
   $('chat-info').hidden = !isGroup;
   if (isGroup) $('grp-count').textContent = count || '';
+  setPeerPresence();
+  if (typeof samtalKnappar === 'function') samtalKnappar();
   clearPendingImage();
   closeStickerPanel();
   setTyping([]);
@@ -811,14 +857,41 @@ async function pollMessages(scroll) {
     const body = $('chat-body');
     const nearBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 150;
     const typingRow = $('typing-row'); if (typingRow) typingRow.remove();
+    const conv = { kind, id, key };
     for (const m of r.messages || []) {
       if (m.created_at > (lastTs[id] || 0)) lastTs[id] = m.created_at;
-      if (body.querySelector('.bubble[data-id="' + Number(m.id) + '"]')) continue;
+      if (body.querySelector('[data-id="' + Number(m.id) + '"]')) continue;
+      const kand = (ctrlInfo[ctrlNyckel(conv)] || {})[m.id];
+      if (kand) {   // redan hanterad (t.ex. av sigPoll medan chatten var stängd): rita bara ev. rad
+        const row = kand.ax ? handleCtrl(conv, m, kand.ax) : null;
+        if (row && !body.querySelector('[data-id="' + Number(m.id) + '"]')) body.appendChild(row);
+        continue;
+      }
+      // Kontrollposter (reaktioner, samtal, skärmdelning) är vanliga krypterade meddelanden som inte visas som bubblor
+      let plain = null;
+      if (!m.deleted) { try { plain = await decryptMsg(key, m.ciphertext); } catch {} }
+      m._plain = plain;
+      const ax = ctrlAv(plain);
+      if (ax) {
+        const row = handleCtrl(conv, m, ax);
+        if (!active || active.id !== id) return;
+        if (row && !body.querySelector('[data-id="' + Number(m.id) + '"]')) body.appendChild(row);
+        continue;
+      }
+      if (ax === false) { markCtrl(conv, m.id); continue; }   // trasig kontrollpost: visas inte alls
       const div = await renderBubble(m, kind, key);
       if (!active || active.id !== id) return;
       body.appendChild(div);
+      if (typeof rxRita === 'function') rxRita(m.id);
     }
     for (const c of r.changes || []) {
+      if (ctrlKand(conv, c.id)) {
+        let plain = null;
+        if (!c.deleted) { try { plain = await decryptMsg(key, c.ciphertext); } catch {} }
+        const ax = ctrlAv(plain);
+        handleCtrl(conv, { id: c.id, mine: (ctrlInfo[ctrlNyckel(conv)] || {})[c.id]?.mine, deleted: c.deleted, edited: c.edited }, ax || null);
+        continue;
+      }
       const old = body.querySelector('.bubble[data-id="' + Number(c.id) + '"]');
       if (!old) continue;
       const meta = msgMeta[c.id] || {};
@@ -826,9 +899,10 @@ async function pollMessages(scroll) {
       if (c.deleted) { const nu = await renderBubble({ id: c.id, mine: meta.mine, deleted: true, created_at: meta.ts, sender_username: meta.sender, sender_bubble: meta.bubble }, kind, key); syncBubbleAvatar(old, nu, who); old.replaceWith(nu); }
       else if (c.edited && !old.classList.contains('unreadable')) { const nu = await renderBubble({ id: c.id, mine: meta.mine, ciphertext: c.ciphertext, edited: true, created_at: meta.ts, sender_username: meta.sender, sender_bubble: meta.bubble }, kind, key); syncBubbleAvatar(old, nu, who); old.replaceWith(nu); }
     }
+    regroup();
     if (typingRow) body.appendChild(typingRow);
-    if (!body.querySelector('.bubble') && !body.querySelector('.empty-hint')) body.innerHTML = '<div class="empty-hint center" translate="yes">' + esc(T('Inga meddelanden än. Säg hej!')) + '</div>';
-    else if (body.querySelector('.bubble')) { const h = body.querySelector(':scope > .empty-hint'); if (h) h.remove(); }
+    if (!body.querySelector('.bubble, .sys-row') && !body.querySelector('.empty-hint')) body.innerHTML = '<div class="empty-hint center" translate="yes">' + esc(T('Inga meddelanden än. Säg hej!')) + '</div>';
+    else if (body.querySelector('.bubble, .sys-row')) { const h = body.querySelector(':scope > .empty-hint'); if (h) h.remove(); }
     updateSeen(kind, r);
     setTyping(kind === 'contact' ? (r.typing ? [active.name] : []) : (Array.isArray(r.typing) ? r.typing : []));
     if (scroll || nearBottom) body.scrollTop = body.scrollHeight;
@@ -836,37 +910,45 @@ async function pollMessages(scroll) {
 }
 
 // Ritar en bubbla. msgMeta sparar dekrypterad text m.m. per meddelande-id.
+// Utseendet (följder, hörn, avatar i grupper, dagsavdelare) sätts av regroup() när bubblorna ligger på plats.
 const msgMeta = {};
+const JUMBO_RE = /^(?:\p{Extended_Pictographic}|\p{Regional_Indicator}|\p{Emoji_Modifier}|[‍️⃣\s])+$/u;
+const isJumbo = (t) => typeof t === 'string' && t.length <= 24 && JUMBO_RE.test(t) && /\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(t) && [...new Intl.Segmenter().segment(t.trim())].length <= 3;
 async function renderBubble(m, kind, key) {
   let text, unreadable = false;
-  if (m.deleted) { text = T('meddelandet togs bort'); unreadable = true; }
-  else { try { text = await decryptMsg(key, m.ciphertext); } catch { text = T('kan inte läsas'); unreadable = true; } }
+  if (m.deleted) { text = T('Meddelandet togs bort'); unreadable = true; }
+  else {
+    let plain = m._plain;
+    if (plain === undefined) { try { plain = await decryptMsg(key, m.ciphertext); } catch { plain = null; } }
+    if (plain == null) { text = T('Kan inte läsas'); unreadable = true; } else text = plain;
+  }
   const payload = unreadable ? { text, img: null, reply: null } : parsePayload(text);
   const img = payload.img, reply = payload.reply;
   if (!unreadable) text = payload.text;
+  const jumbo = !unreadable && !img && !reply && !payload.lp && isJumbo(text);
   const div = document.createElement('div');
-  div.className = 'bubble ' + (m.mine ? 'me' : 'them') + (unreadable ? ' unreadable' : '') + (img ? ' img' : '') + (img && img.st ? ' sticker' : '');
+  div.className = 'bubble ' + (m.mine ? 'me' : 'them') + (unreadable ? ' unreadable' : '') + (img ? ' img' : '') + (img && img.st ? ' sticker' : '') + (img && !img.c ? ' bare' : '') + (jumbo ? ' jumbo' : '');
   div.dataset.id = Number(m.id);
-  if (m.mine) div.dataset.ts = m.created_at;
+  div.dataset.ts = m.created_at;
   let inner = '';
-  if (kind === 'group' && !m.mine && m.sender_username) inner += '<span class="bub-sender">' + esc(m.sender_username) + '</span>';
   if (reply) inner += '<span class="quote" data-ref="' + esc(reply.id) + '" title="' + esc(T('Gå till meddelandet')) + '"><span class="q-who">' + esc(reply.u === state.username ? T('Du') : reply.u) + '</span><span class="q-text">' + esc(reply.t || (reply.img ? '' + T('Bild') : '')) + '</span></span>';
   if (img) {
     const ratio = (img.w > 0 && img.h > 0) ? (img.w + ' / ' + img.h) : '4 / 3';
     inner += '<span class="img-wrap loading" style="aspect-ratio:' + ratio + '"><img alt="" draggable="false"></span>';
     if (img.c) inner += '<span class="caption">' + linkifyHtml(img.c) + '</span>';
   } else {
-    inner += unreadable ? '<em>[' + esc(text) + ']</em>' : linkifyHtml(text);
+    inner += '<span class="txt">' + (unreadable ? esc(text) : linkifyHtml(text)) + '</span>';
     if (!unreadable && payload.lp) inner += previewCardHtml(payload.lp);
   }
-  inner += '<span class="time">' + fmtTime(m.created_at) + (m.edited && !unreadable ? ' <span class="edited">· ' + esc(T('redigerad')) + '</span>' : '') + '</span>';
+  // Tiden ligger i nedre högra hörnet; en osynlig kopia på sista raden håller plats åt den (så kort text + tid ryms på en rad)
+  const meta = (m.edited && !unreadable ? esc(T('redigerad')) + ' · ' : '') + fmtTime(m.created_at);
+  if (!(img && !img.c)) inner += '<span class="meta-sp" aria-hidden="true">' + meta + '</span>';
+  inner += '<span class="time" title="' + esc(new Date(m.created_at).toLocaleString('sv-SE')) + '">' + meta + '</span>';
   div.innerHTML = inner;
-  if (!unreadable && !(img && img.st)) applyBubbleStyle(div, m.mine ? myBubble : (kind === 'contact' ? bubbleFor(active.name) : m.sender_bubble), m.mine);
+  if (!unreadable && !(img && img.st) && !jumbo) applyBubbleStyle(div, m.mine ? myBubble : (kind === 'contact' ? bubbleFor(active.name) : m.sender_bubble), m.mine);
   const senderKey = m.mine ? 'me' : (m.sender_username || active.name || '?');
   div.dataset.sender = senderKey;
-  const bubbles = document.querySelectorAll('#chat-body .bubble');
-  const prev = bubbles[bubbles.length - 1];
-  if (!prev || prev.dataset.sender !== senderKey) addBubbleAvatar(div, m.mine ? state.username : (m.sender_username || active.name));
+  div.dataset.name = m.mine ? state.username : (m.sender_username || active.name || '');
   msgMeta[m.id] = { mine: !!m.mine, ts: m.created_at, text: unreadable ? '' : (img ? (img.c || '') : text), img, reply, lp: payload.lp || null, deleted: !!m.deleted, unreadable, sender: m.sender_username, bubble: m.sender_bubble };
   if (img) loadAttachment(img, key, div.querySelector('.img-wrap'), div);
   const q = div.querySelector('.quote');
@@ -879,10 +961,150 @@ function addBubbleAvatar(div, username) {
   av.innerHTML = avatarInner(username);
   div.classList.add('has-av'); div.appendChild(av);
 }
-function syncBubbleAvatar(oldDiv, newDiv, username) {
-  const had = !!oldDiv.querySelector(':scope > .bub-av'), has = !!newDiv.querySelector(':scope > .bub-av');
-  if (had && !has) addBubbleAvatar(newDiv, username);
-  if (!had && has) { newDiv.querySelector(':scope > .bub-av').remove(); newDiv.classList.remove('has-av'); }
+function syncBubbleAvatar() { /* regroup() sköter avatarerna */ }
+// Följder: samma avsändare inom 5 min = en följd (tätare, mindre hörn mot varandra). Grupper: namnet över
+// första bubblan och profilbilden vid den sista. En avdelare för varje ny dag.
+const GROUP_MS = 5 * 60000;
+function dayLabel(ts) {
+  const d = new Date(ts), now = new Date(), y = new Date(now); y.setDate(now.getDate() - 1);
+  if (d.toDateString() === now.toDateString()) return T('Idag');
+  if (d.toDateString() === y.toDateString()) return T('I går');
+  const o = { weekday: 'long', day: 'numeric', month: 'long' };
+  if (d.getFullYear() !== now.getFullYear()) o.year = 'numeric';
+  let t = d.toLocaleDateString((window.i18n && window.i18n.lang) || 'sv', o);
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+function regroup() {
+  const body = $('chat-body'); if (!body || !active) return;
+  const isGroup = active.kind === 'group';
+  body.classList.toggle('is-group', isGroup);
+  body.querySelectorAll(':scope > .day-sep, :scope > .grp-name').forEach((e) => e.remove());
+  const items = Array.from(body.querySelectorAll(':scope > .bubble, :scope > .sys-row'));
+  items.forEach((el) => el.classList.remove('g-cont', 'g-next'));
+  let prev = null, lastDay = null;
+  for (const el of items) {
+    const ts = +el.dataset.ts || 0;
+    const day = ts ? new Date(ts).toDateString() : lastDay;
+    if (ts && day !== lastDay) {
+      const sep = document.createElement('div'); sep.className = 'day-sep'; sep.setAttribute('role', 'separator');
+      sep.innerHTML = '<span>' + esc(dayLabel(ts)) + '</span>'; el.before(sep); lastDay = day; prev = null;
+    }
+    if (el.classList.contains('sys-row')) { prev = null; continue; }
+    const same = !!prev && prev.dataset.sender === el.dataset.sender && ts - (+prev.dataset.ts || 0) < GROUP_MS;
+    if (same) { el.classList.add('g-cont'); prev.classList.add('g-next'); }
+    else if (isGroup && el.classList.contains('them') && el.dataset.name) {
+      const n = document.createElement('div'); n.className = 'grp-name'; n.textContent = el.dataset.name; el.before(n);
+    }
+    prev = el;
+  }
+  for (const el of items) {
+    if (el.classList.contains('sys-row')) continue;
+    const want = isGroup && el.classList.contains('them') && !el.classList.contains('g-next');
+    const has = el.querySelector(':scope > .bub-av');
+    if (want && !has) addBubbleAvatar(el, el.dataset.name);
+    else if (!want && has) { has.remove(); el.classList.remove('has-av'); }
+  }
+  if (typeof rxPlacera === 'function') rxPlacera();
+}
+
+// ===== Kontrollposter: {"sk":"txt","c":<text för äldre AdRaze>,"r"?:citat,"ax":{t:...}} =====
+// Äldre versioner visar bara c (och citatet), så en reaktion syns där som "Reagerade med 👍" under ett citat.
+// Nya versioner döljer posten och låter rätt del (reaktioner, samtal, skärmdelning) ta hand om den.
+const CTRL = {};                  // typ → (conv, m, ax, fran) => DOM-rad eller null
+const ctrlInfo = {};              // konversation → { meddelande-id → { mine, from } }
+const ctrlNyckel = (conv) => conv.kind[0] + ':' + conv.id;
+function markCtrl(conv, id, info) { const k = ctrlNyckel(conv); (ctrlInfo[k] = ctrlInfo[k] || {})[id] = info || ctrlInfo[k][id] || {}; }
+const ctrlKand = (conv, id) => !!(ctrlInfo[ctrlNyckel(conv)] || {})[id];
+const SID_RE = /^[A-Za-z0-9_-]{12,40}$/;
+const EMOJI_OK = /^(?:\p{Extended_Pictographic}|\p{Regional_Indicator}|\p{Emoji_Modifier}|[‍️⃣#*0-9])+$/u;
+const cleanStr = (v, n) => String(v || '').replace(/[\u0000-\u001f\u007f‪-‮⁦-⁩]/g, ' ').trim().slice(0, n);
+const cleanSdp = (v) => (typeof v === 'string' && v.length <= 12000 && v.startsWith('v=0') ? v : null);
+// null = inte en kontrollpost, false = trasig (visas inte), annars den rensade posten
+function ctrlAv(plain) {
+  if (typeof plain !== 'string' || !plain.startsWith('{"sk":"txt"') || !plain.includes('"ax"')) return null;
+  let o; try { o = JSON.parse(plain); } catch { return null; }
+  if (!o || o.sk !== 'txt' || !o.ax || typeof o.ax !== 'object') return null;
+  const a = o.ax, t = a.t;
+  if (t === 'rx') {
+    const m = String(a.m || ''), e = String(a.e || '');
+    if (!/^\d{1,15}$/.test(m) || !e || e.length > 32 || !EMOJI_OK.test(e) || !/\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(e)) return false;
+    return { t, m, e, on: a.on !== false };
+  }
+  if (t === 'sk' || t === 'ring') {
+    const h = String(a.h || ''), s = String(a.s || '');
+    if (!SID_RE.test(s)) return false;
+    const ut = { t, h, s };
+    if (h === 'offer' || h === 'answer') { ut.sdp = cleanSdp(a.sdp); if (!ut.sdp) return false; }
+    else if (h === 'start') { if (t !== 'sk') return false; ut.n = cleanStr(a.n, 100); }
+    else if (h === 'slut') { ut.o = ['missat', 'avbojt', 'klart', 'avbrutet'].includes(a.o) ? a.o : 'klart'; ut.d = Math.max(0, Math.min(86400, parseInt(a.d, 10) || 0)); }
+    else return false;
+    if (a.till != null) { ut.till = String(a.till); if (!/^\d{1,15}$/.test(ut.till)) return false; }
+    if (a.v === 1) ut.v = 1;
+    return ut;
+  }
+  return false;
+}
+// fran = { id, name, mine } för avsändaren
+function ctrlFran(conv, m) {
+  if (m.mine) return { id: state.id, name: state.username, mine: true };
+  if (conv.kind === 'group') return { id: String(m.sender_id || ''), name: m.sender_username || '', mine: false };
+  const c = contactsCache.find((x) => x.id === conv.id);
+  return { id: conv.id, name: c ? c.username : (active && active.id === conv.id ? active.name : ''), mine: false };
+}
+function handleCtrl(conv, m, ax) {
+  const k = ctrlNyckel(conv);
+  const info = (ctrlInfo[k] || {})[m.id];
+  const fran = info && info.from ? info.from : ctrlFran(conv, m);
+  markCtrl(conv, m.id, { mine: !!m.mine || fran.mine, from: fran, t: ax ? ax.t : (info && info.t), ax: ax || null, ts: m.created_at || (info && info.ts) });
+  const typ = ax ? ax.t : (info && info.t);
+  const f = CTRL[typ];
+  if (!f) return null;
+  try { return f(conv, m, ax, fran) || null; } catch (e) { console.error(e); return null; }
+}
+async function sendCtrl(conv, ax, c, reply) {
+  const payload = JSON.stringify({ sk: 'txt', c, r: reply || undefined, ax });
+  if (enc.encode(payload).length > 11500) throw new Error(T('Det gick inte att skicka (för stort).'));
+  const ciphertext = await encryptMsg(conv.key, payload);
+  const r = conv.kind === 'contact' ? await POST('/messages/send', { to_id: conv.id, ciphertext }) : await POST('/groups/messages', { id: conv.id, ciphertext });
+  markCtrl(conv, r.id, { mine: true, from: { id: state.id, name: state.username, mine: true }, t: ax.t, ax, ts: r.created_at });
+  return r.id;
+}
+async function editCtrl(conv, msgId, ax, c, reply) {
+  const ciphertext = await encryptMsg(conv.key, JSON.stringify({ sk: 'txt', c, r: reply || undefined, ax }));
+  if (conv.kind === 'contact') await POST('/messages/edit', { id: Number(msgId), ciphertext });
+  else await POST('/groups/messages/edit', { gid: conv.id, id: Number(msgId), ciphertext });
+}
+// Nyckeln till en konversation som inte behöver vara öppen (samtal och skärmdelning pågår i bakgrunden)
+async function convFor(kind, id) {
+  if (active && active.kind === kind && active.id === id) return { kind, id, key: active.key };
+  if (kind === 'contact') {
+    if (!sharedCache[id]) sharedCache[id] = await deriveSharedKey(myPriv, await getPubKey(id));
+    return { kind, id, key: sharedCache[id] };
+  }
+  const g = groupsCache.find((x) => x.id === id); if (!g) throw new Error('not_member');
+  return { kind, id, key: await ensureGroupKey(g) };
+}
+// Snabb hämtning av bara kontrollposter i en konversation (under samtal/delning, oberoende av vilken chatt som är öppen)
+const sigCursor = {};
+let serverSkew = 0;
+async function sigPoll(conv, sinceMs) {
+  const k = ctrlNyckel(conv);
+  if (sinceMs != null) sigCursor[k] = Math.min(sigCursor[k] || Infinity, sinceMs);
+  const since = sigCursor[k] || (Date.now() + serverSkew - 30000);
+  const r = conv.kind === 'contact' ? await GET('/messages', { with: conv.id, since }) : await GET('/groups/messages', { id: conv.id, since });
+  if (r.server_time) serverSkew = r.server_time - Date.now();
+  for (const m of r.messages || []) {
+    if (m.created_at > (sigCursor[k] || 0)) sigCursor[k] = m.created_at;
+    if (ctrlKand(conv, m.id) || m.deleted) continue;
+    let plain = null; try { plain = await decryptMsg(conv.key, m.ciphertext); } catch {}
+    const ax = ctrlAv(plain);
+    if (!ax) continue;
+    // Är konversationen öppen ritar pollMessages raden; här räcker att posten hanteras (signalering)
+    const row = handleCtrl(conv, m, ax);
+    const body = $('chat-body');
+    if (row && active && active.kind === conv.kind && active.id === conv.id && !body.querySelector('[data-id="' + Number(m.id) + '"]')) { body.appendChild(row); regroup(); }
+  }
+  if (!sigCursor[k]) sigCursor[k] = since;
 }
 // Klartext-format: vanlig text, {"sk":"img",...} (bild/sticker) eller {"sk":"txt","c":text,"r":citat,"lp":förhandsvisning}
 function parsePayload(text) {
@@ -987,6 +1209,7 @@ async function hideMessage(id) {
     await msgCall(id, 'hide');
     const b = document.querySelector('#chat-body .bubble[data-id="' + Number(id) + '"]'); if (b) b.remove();
     delete msgMeta[id];
+    regroup();
     updateSeen(active.kind, {});
   } catch (e) { alertBox(e.message || T('Kunde inte ta bort.')); }
 }
@@ -997,7 +1220,7 @@ async function deleteMessage(id) {
     const b = document.querySelector('#chat-body .bubble[data-id="' + Number(id) + '"]');
     const meta = msgMeta[id] || {};
     if (meta.img && attachmentUrls[meta.img.a]) { try { URL.revokeObjectURL(attachmentUrls[meta.img.a]); } catch {} delete attachmentUrls[meta.img.a]; delete attachmentBytes[meta.img.a]; }
-    if (b && active) { const nu = await renderBubble({ id: Number(id), mine: true, deleted: true, created_at: meta.ts }, active.kind, active.key); syncBubbleAvatar(b, nu, state.username); b.replaceWith(nu); }
+    if (b && active) { const nu = await renderBubble({ id: Number(id), mine: true, deleted: true, created_at: meta.ts }, active.kind, active.key); b.replaceWith(nu); regroup(); }
   } catch (e) { alertBox(e.message || T('Kunde inte radera.')); }
 }
 async function editMessage(id) {
@@ -1011,7 +1234,7 @@ async function editMessage(id) {
     const ciphertext = await encryptMsg(active.key, payload);
     await msgCall(id, 'edit', { ciphertext });
     const b = document.querySelector('#chat-body .bubble[data-id="' + Number(id) + '"]');
-    if (b) { const nu = await renderBubble({ id: Number(id), mine: true, ciphertext, edited: true, created_at: meta.ts }, active.kind, active.key); syncBubbleAvatar(b, nu, state.username); b.replaceWith(nu); }
+    if (b) { const nu = await renderBubble({ id: Number(id), mine: true, ciphertext, edited: true, created_at: meta.ts }, active.kind, active.key); b.replaceWith(nu); regroup(); }
   } catch (e) { alertBox(e.message || T('Kunde inte redigera.')); }
 }
 function downloadImage(img) {
@@ -1141,7 +1364,8 @@ function updateSeen(kind, r) {
   if (!target) { if (label) label.remove(); return; }
   if (!label) { label = document.createElement('div'); label.id = 'seen-label'; label.className = 'seen'; }
   label.textContent = text;
-  if (target.nextSibling !== label) target.after(label);
+  const efter = (target.nextElementSibling && target.nextElementSibling.classList.contains('rx-row')) ? target.nextElementSibling : target;
+  if (efter.nextSibling !== label) efter.after(label);
 }
 
 // ===== Skriver… =====
@@ -1789,7 +2013,7 @@ async function openMembers() {
       if (isOwner) tags += '<span class="tag" translate="yes">' + esc(T('ägare')) + '</span>';
       else if (isAdm) tags += '<span class="tag" translate="yes">' + esc(T('admin')) + '</span>';
       if (m.id === state.id) tags += '<span class="tag" translate="yes">' + esc(T('du')) + '</span>';
-      row.innerHTML = '<span class="avatar sm">' + avatarInner(m.username) + '</span><span class="cname">' + esc(m.username) + '</span>' + tags;
+      row.innerHTML = avWrap(avatarInner(m.username), m.id === state.id ? null : m, 'sm') + '<span class="cname">' + esc(m.username) + '</span>' + tags;
       const btn = (label, run, danger) => {
         const b = document.createElement('button'); b.type = 'button'; b.className = 'mm-act' + (danger ? ' danger' : ''); b.textContent = T(label); b.setAttribute('translate', 'yes');
         b.addEventListener('click', async () => { b.disabled = true; try { await run(); } catch (e) { b.disabled = false; msg.textContent = e.message; } });
@@ -2011,4 +2235,4 @@ document.querySelectorAll('.modal-overlay').forEach((m) => {
   m.addEventListener('click', (e) => { if (e.target === m) { m.classList.remove('open'); if (m === lkModal) lkCurrent = null; if (m === rpModal) reportCtx = null; } });
 });
 
-start();
+// start() anropas sist i chatt-samtal.js, när alla delar av chatten har laddats
