@@ -398,7 +398,7 @@
     const idag = h('div', { class: 'anp-blk-n anp-blk-idag' }), totalt = h('div', { class: 'anp-blk-n' }), extra = h('div', { class: 'anp-blk-extra' });
     kropp.append(
       h('div', { class: 'anp-w-rubrik' }, h('img', { src: 'adraze-mark.png', alt: '', class: 'anp-blk-mark' }), 'Stoppat av AdRaze'),
-      h('div', { class: 'anp-blk-rad' }, h('div', null, idag, h('div', { class: 'anp-blk-l', text: 'idag' })), h('div', null, totalt, h('div', { class: 'anp-blk-l', text: 'totalt' }))),
+      h('div', { class: 'anp-blk-rad' }, h('div', null, idag, h('div', { class: 'anp-blk-l', text: tx('idag') })), h('div', null, totalt, h('div', { class: 'anp-blk-l', text: tx('totalt') }))),
       h('div', { class: 'anp-blk-under' }, h('span', { text: 'annonser och spårare' }), extra));
     function rita() {
       const s = blockSiffror();
