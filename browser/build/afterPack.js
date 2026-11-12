@@ -58,9 +58,10 @@ exports.default = async function afterPack(context) {
   const plat = context.electronPlatformName; // 'linux' | 'darwin' | 'win32'
   // macOS: castlabs VMP-signerar bara en oförändrad Electron Framework (säkringarna ligger i den),
   // och säkringar efter VMP gör signaturen ogiltig – testat 2026-11-01 ("Binary signature denied" /
-  // "InvalidSignature"). Netflix/Widevine valdes före säkringarna på Mac. Linux/Windows: säkringar som förut.
-  if (plat !== 'darwin') await brannSakringar(context);
-  else console.log('[säkringar] hoppas över på macOS (krockar med castlabs VMP-signering)');
+  // "InvalidSignature"). Netflix/Widevine valdes före säkringarna på Mac. Windows: samma krock ("Binary signature
+  // denied", testat 2026-11-12) – samma val. Linux (ingen VMP): säkringar som förut.
+  if (plat === 'linux') await brannSakringar(context);
+  else console.log('[säkringar] hoppas över på ' + plat + ' (krockar med castlabs VMP-signering)');
   if (plat === 'linux') startskript(context);
   if (plat === 'linux') {
     console.log('[VMP] Linux behöver ingen VMP-signering (Widevine L3 funkar utan) — hoppar över.');
