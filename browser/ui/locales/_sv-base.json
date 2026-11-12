@@ -2705,5 +2705,9 @@
  "Kunde inte spara ljudet just nu. Kontrollera din uppkoppling.",
  "Slå på spärrljud?",
  "Ljuden låter trasiga och obehagliga med flit, och de kan skrämma små barn. Ljudet spelas en gång varje gång {n} hamnar på en spärrad sida. Provlyssna först, gärna med låg volym.",
- "Slå på"
+ "Slå på",
+ "idag",
+ "totalt",
+ "mindre data",
+ "sparad tid"
 ]

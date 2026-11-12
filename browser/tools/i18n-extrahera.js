@@ -42,7 +42,7 @@ const STOPP = new Set(('Enter Escape Esc Tab Backspace Delete Del Space Spacebar
 const SVENSKA_ORD = new Set(('och att i på för med en ett som är av till den det de inte har kan du din ditt dina om eller när så från alla mer ny nya ' +
   'sidan sida flik flikar fönster ut in upp ner här där vad vill ska bara också redan sedan inga ingen inget nu igen hela varje sig man vi ' +
   'efter före under över mellan utan genom vid hos mot kvar fler färre minst högst dag dagar timme timmar minut minuter sekund sekunder vecka veckor ' +
-  'år månad månader kl idag igår imorgon visa dölj stäng öppna spara ta bort lägg till byt välj klar klart').split(/\s+/));
+  'år månad månader kl idag igår imorgon visa dölj stäng öppna spara ta bort lägg till byt välj klar klart mindre sparad tid totalt').split(/\s+/));
 
 function harSvensk(s) { return /[åäöÅÄÖ]/.test(s); }
 
