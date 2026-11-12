@@ -127,6 +127,9 @@ async function kor(rot) {
     R.ok('samtal: rad "Röstsamtal · …" i konversationen', await a.vanta(`[...document.querySelectorAll('#chat-body .call-row')].some((r) => /Röstsamtal ·/.test(r.textContent))`, 8000),
       await a.J(`[...document.querySelectorAll('#chat-body .call-row')].map((r) => r.textContent)`));
 
+    // Olästa-siffran i skalet (röda pricken på chattknappen) efter en omräkning i Bosses chatt
+    const bOlast = async (villkor, ms = 15000) => { for (let i = 0; i < ms / 600; i++) { await b.C(`refreshContacts().then(() => 1)`); if (await b.K(`(${villkor})(chattUnread)`) === true) return true; await H.sov(600); } return false; };
+    const bNotiser = () => b.J(`window.__notiser.slice()`);
     // ===== Missat samtal (chatten stängd hos Bosse) =====
     await H.sov(1500);
     await a.C(`ring(contactsCache[0]); 1`);
@@ -137,6 +140,11 @@ async function kor(rot) {
     R.ok('missat: Alvas klient ger upp efter ~30 s', await a.vanta(`!samtal`, 40000));
     R.ok('missat: ringningen slutar hos Bosse', await b.vanta(`!samtal`, 10000));
     R.ok('missat: mejlet loggat (inte skickat)', /\[mejl loggat\] bosse@example\.com Alva försökte ringa dig i AdRaze/.test(srv.logg()), srv.logg().split('\n').filter((r) => r.includes('mejl')).slice(-3));
+    // Samtalets signaler (svar, avslut, ringningen) räknas inte, det missade samtalet räknas som ett oläst och ger notis
+    R.ok('olästa: missat samtal = 1 oläst (signalerna räknas inte)', await bOlast('(n) => n === 1'), await b.K(`chattUnread`));
+    R.ok('olästa: notis om missat samtal', (await bNotiser()).some((t) => t === 'Missat samtal från Alva'), await bNotiser());
+    const ovB = await srv.api(KB, 'GET', '/chatt/messages/overview');
+    R.ok('olästa: inledande signalposter markerade som lästa på servern', ovB.j.unread[0] && ovB.j.unread[0].n === 1, ovB.j);
     await b.K(`openChatt(true); 1`); await H.sov(800);
     await b.C(`pollMessages(true); 1`);
     R.ok('missat: raden "Missat samtal" med Ring tillbaka', await b.vanta(`[...document.querySelectorAll('#chat-body .call-row.missat')].some((r) => r.querySelector('.sr-btn'))`, 10000),
@@ -172,6 +180,20 @@ async function kor(rot) {
     await bild(a, 'dela-sandare');
     await a.C(`stoppaDelning(); 1`);
     R.ok('dela: tittarvyn stängs när Alva slutar', await b.vanta(`document.getElementById('share-view').hidden`, 12000));
+
+    // ===== Reaktioner räknas inte som olästa =====
+    await b.K(`openChatt(false); 1`); await H.sov(1000);
+    R.ok('olästa: inget oläst efter skärmdelningen', await bOlast('(n) => n === 0'), await b.K(`chattUnread`));
+    await a.C(`rxToggle(${mid}, '🔥'); 1`); await H.sov(800);
+    R.ok('olästa: reaktion på mitt meddelande ger notis', await (async () => { for (let i = 0; i < 20; i++) { await b.C(`refreshContacts().then(() => 1)`); if ((await bNotiser()).some((t) => /^Alva reagerade 🔥 på "Jag tar med kaffe"$/.test(t))) return true; await H.sov(600); } return false; })(), await bNotiser());
+    R.ok('olästa: men räknas inte (0)', await b.K(`chattUnread`) === 0, await b.K(`chattUnread`));
+    const ovR = await srv.api(KB, 'GET', '/chatt/messages/overview');
+    R.ok('olästa: reaktionen markerad som läst på servern', !ovR.j.unread.length || ovR.j.unread[0].n === 0, ovR.j);
+    await a.C(`chatInput.value = 'Hörs vi i helgen?'; sendMessage(); 1`);
+    R.ok('olästa: ett vanligt meddelande räknas (1)', await bOlast('(n) => n === 1'), await b.K(`chattUnread`));
+    R.ok('olästa: notis om meddelandet', (await bNotiser()).includes('msg:1'), await bNotiser());
+    await b.K(`openChatt(true); 1`); await H.sov(1500);
+    R.ok('olästa: öppna chatten nollställer', await bOlast('(n) => n === 0'), await b.K(`chattUnread`));
 
     R.ok('inga JS-fel i chatten (Alva)', !a.fel().length, a.fel());
     R.ok('inga JS-fel i chatten (Bosse)', !b.fel().length, b.fel());

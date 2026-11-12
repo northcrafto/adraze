@@ -422,7 +422,12 @@ async function refreshContacts() {
     [...contactsCache, ...(r.incoming || []), ...(r.outgoing || [])].forEach((c) => rememberAvatar(c.username, c.avatar));
     contactsCache.forEach((c) => rememberBubble(c.username, c.bubble));
     const unread = {}; try { const o = await GET('/messages/overview'); for (const u of o.unread || []) unread[String(u.id)] = u.n; } catch {}
-    checkNotify('c:', contactsCache.map((c) => ({ id: c.id, unread: unread[c.id] || 0 })));
+    // Serverns siffra räknar alla poster; räkna om till riktiga meddelanden (reaktioner och samtalssignaler räknas inte)
+    for (const c of contactsCache) {
+      const oppen = active && active.kind === 'contact' && active.id === c.id && panelVisible;
+      unread[c.id] = oppen ? 0 : await riktigaOlasta('contact', c.id, unread[c.id] || 0, c.username);
+    }
+    if (!state) return;
     unreadContacts = 0;
     const cl = $('contacts-list'); cl.innerHTML = '';
     if (!contactsCache.length) cl.innerHTML = '<div class="empty-hint" translate="yes">' + esc(BARN ? T('Din familj syns här när de har öppnat chatten i AdRaze.') : T('Inga vänner än. Lägg till någon med användarnamnet ovan.')) + '</div>';
@@ -1926,7 +1931,8 @@ async function refreshGroups() {
       const isOpen = active && active.kind === 'group' && active.id === g.id;
       const div = document.createElement('div'); div.className = 'contact' + (isOpen ? ' active' : '');
       div.innerHTML = '<span class="avatar grp-avatar">' + (av ? '<img class="av-img" alt="" src="' + esc(av) + '">' : '#') + '</span><span class="cname">' + esc(name) + '</span>';
-      if (g.unread && !(isOpen && panelVisible)) { unreadGroups += g.unread; const b = document.createElement('span'); b.className = 'badge'; b.textContent = g.unread; div.appendChild(b); }
+      const gn = isOpen && panelVisible ? 0 : await riktigaOlasta('group', g.id, g.unread || 0, null);
+      if (gn) { unreadGroups += gn; const b = document.createElement('span'); b.className = 'badge'; b.textContent = gn; div.appendChild(b); }
       div.addEventListener('click', () => openGroup(g));
       rows.push(div);
       if (isOpen) {
@@ -1941,7 +1947,6 @@ async function refreshGroups() {
       const name = active.name; delete groupKeyCache[active.id]; closeChat();
       alertBox(tf('Du är inte längre med i gruppen "{g}".', { g: name }));
     }
-    checkNotify('g:', groupsCache.map((g) => ({ id: g.id, unread: g.unread })));
     pushUnread();
   } finally { refreshingGroups = false; }
 }
@@ -2198,14 +2203,69 @@ function maybeNotify(n) {
   if (panelVisible || !chatPref('notify') || !('Notification' in window) || Notification.permission !== 'granted') return;
   try { new Notification('AdRaze', { body: n === 1 ? T('Du har ett nytt meddelande i chatten') : tf('Du har {n} nya meddelanden i chatten', { n }), tag: 'adraze-chatt', silent: true }); } catch {}
 }
-function checkNotify(prefix, items) {
-  let fresh = 0;
-  for (const it of items) {
-    const key = prefix + it.id, had = key in prevUnread, prev = prevUnread[key] || 0;
-    if (had && (it.unread || 0) > prev) fresh += it.unread - prev;
-    prevUnread[key] = it.unread || 0;
+// ===== Olästa: bara riktiga meddelanden =====
+// Servern räknar alla poster som olästa, men reaktioner och samtalens/skärmdelningens signaler är krypterade
+// kontrollposter som servern inte kan skilja från meddelanden. Klienten tittar därför på de olästa utan att läsa dem
+// (/messages/unread), dekrypterar och räknar själv. Kontrollposter som ligger först bland de olästa markeras som lästa
+// direkt (/messages/read med until), så att serverns siffra inte växer av dem. Ett missat samtal räknas som oläst.
+const olastCache = {};          // 'c:id' / 'g:id' → { n (serverns), real }
+const notisSett = new Set();    // 'c:id:meddelande' som redan har klassats (notis högst en gång)
+window.__notiser = [];          // senaste notiserna (testerna läser dem)
+function klassaPost(plain) {
+  const ax = plain == null ? null : ctrlAv(plain);
+  if (!ax) return { typ: 'msg' };   // vanligt meddelande, oläsbart eller trasig kontrollpost (visas som text)
+  if (ax.t === 'rx') {
+    let r = null; try { r = JSON.parse(plain).r; } catch {}
+    return { typ: 'rx', e: ax.e, on: ax.on, mig: !!(r && state && r.u === state.username), text: r && typeof r.t === 'string' ? r.t : (r && r.img ? T('en bild') : '') };
   }
-  if (notifyPrimed) maybeNotify(fresh);
+  if (ax.t === 'ring' && ax.h === 'slut' && ax.o === 'missat') return { typ: 'missat' };
+  if (ax.t === 'sk' && ax.h === 'start') return { typ: 'msg' };   // "visar sin flik" är en rad man vill se
+  return { typ: 'ctrl' };
+}
+async function riktigaOlasta(kind, id, nServer, namn) {
+  const k = (kind === 'contact' ? 'c:' : 'g:') + id;
+  if (!nServer) { olastCache[k] = { n: 0, real: 0 }; return 0; }
+  const c = olastCache[k]; if (c && c.n === nServer) return c.real;
+  let r, key;
+  try {
+    r = kind === 'contact' ? await GET('/messages/unread', { with: id }) : await GET('/groups/messages/unread', { id });
+    key = (await convFor(kind, id)).key;
+  } catch { return nServer; }   // äldre server eller nätfel: serverns siffra
+  const lista = r.messages || [];
+  let real = Math.max(0, (r.total || 0) - lista.length);   // fler än servern skickade: räkna dem som meddelanden
+  let forst = real === 0, until = 0, lasta = 0;
+  const nya = [];
+  for (const m of lista) {
+    let plain = null; try { plain = await decryptMsg(key, m.ciphertext); } catch {}
+    const x = klassaPost(plain);
+    if (x.typ === 'msg' || x.typ === 'missat') { real++; forst = false; }
+    else if (forst) { until = m.created_at; lasta++; }
+    const nk = k + ':' + m.id;
+    if (!notisSett.has(nk)) { notisSett.add(nk); nya.push({ ...x, fran: m.sender_username || namn || '' }); }
+  }
+  if (until) (kind === 'contact' ? POST('/messages/read', { with: id, until }) : POST('/groups/read', { id, until })).catch(() => {});
+  olastCache[k] = { n: until ? nServer - lasta : nServer, real };
+  if (notifyPrimed) visaNotiser(nya);
+  return real;
+}
+function notis(text, ljud) {
+  window.__notiser.push(text); if (window.__notiser.length > 20) window.__notiser.shift();
+  if (ljud && chatPref('sound')) playPling();
+  if (panelVisible) { toast(text); return; }
+  if (!chatPref('notify') || !('Notification' in window) || Notification.permission !== 'granted') return;
+  try { new Notification('AdRaze', { body: text, tag: 'adraze-chatt', silent: true }); } catch {}
+}
+function visaNotiser(nya) {
+  const msg = nya.filter((x) => x.typ === 'msg').length;
+  if (msg) { window.__notiser.push('msg:' + msg); maybeNotify(msg); }
+  for (const x of nya) {
+    if (x.typ === 'missat') notis(tf('Missat samtal från {u}', { u: x.fran }), true);
+    // Reaktion på mitt meddelande: diskret (ingen ljud, ingen siffra)
+    else if (x.typ === 'rx' && x.on && x.mig) {
+      const kort = x.text.length > 40 ? x.text.slice(0, 40) + '…' : x.text;
+      notis(kort ? tf('{u} reagerade {e} på "{t}"', { u: x.fran, e: x.e, t: kort }) : tf('{u} reagerade {e} på ditt meddelande', { u: x.fran, e: x.e }), false);
+    }
+  }
 }
 
 // ===== Polling =====
