@@ -7,3 +7,5 @@ native/adblock/build/
 jul-bilder/
 # Skärmbilder av chatten (reaktioner, samtal, skärmdelning) att titta på
 chatt-bilder/
+# Skärmbilder från språktestet (tools/test/sprak.js --bilder), före och efter
+sprak-bilder/
