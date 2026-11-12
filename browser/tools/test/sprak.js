@@ -28,7 +28,7 @@ const SV_ORD = ('och att inte för är på eller inga ingen inget här från ock
   'logga användare lösenord nedladdningar historik bokmärken din ditt dina vill kan ska alla nya ny när så som med till av om du den det ett en har ' +
   'bara redan sedan igen mer fler annan andra webbläsaren sajt sajter konto dag dagar timmar minuter sekunder nej klar klart tryck skriv gäller ' +
   'mitt mina våra hur vad varför också utan genom').split(/\s+/);
-const BORT = { en: ['till', 'den', 'an'], de: ['den', 'du', 'konto', 'man', 'an', 'om'], ar: [], ja: [] };
+const BORT = { en: ['till', 'den', 'an'], de: ['den', 'du', 'konto', 'man', 'an', 'om', 'klar'], ar: [], ja: [] };
 const HAR_AAO = { de: /[å]/, fi: /[å]/, et: /[å]/, da: /[äö]/, no: /[äö]/, nb: /[äö]/, hu: /[åä]/, tr: /[åä]/, is: /[åä]/ };
 
 function svenskt(text, lang) {
