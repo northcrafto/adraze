@@ -2694,5 +2694,16 @@
  "{u} reagerade {e} på \"{t}\"",
  "{u} reagerade {e} på ditt meddelande",
  "+ Ny grupp",
- "+ Barn"
+ "+ Barn",
+ "Hackar och fastnar",
+ "Skaver",
+ "Stötar som hänger sig",
+ "Kort och rått",
+ "Stötar och kort häng",
+ "Ljud vid spärrad sida",
+ "Provlyssna",
+ "Kunde inte spara ljudet just nu. Kontrollera din uppkoppling.",
+ "Slå på spärrljud?",
+ "Ljuden låter trasiga och obehagliga med flit, och de kan skrämma små barn. Ljudet spelas en gång varje gång {n} hamnar på en spärrad sida. Provlyssna först, gärna med låg volym.",
+ "Slå på"
 ]
