@@ -100,7 +100,7 @@
     <div class="huvud">
       <div class="ikon" id="ikon" aria-hidden="true"></div>
       <div class="namn">
-        <h1 id="doman"></h1>
+        <h1 id="doman" translate="no"></h1>
         <div class="anslutning" id="anslutning"></div>
       </div>
       <button class="x" id="stang" title="Stäng" aria-label="Stäng"><svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
@@ -168,7 +168,8 @@
 
     const stang = () => ipc.send('sajt:panel-stang');
     const storlek = () => { try { ipc.send('sajt:panel-storlek', Math.ceil($('kort').getBoundingClientRect().bottom) + 22); } catch (e) {} };
-    const pct = (z) => Math.round(z * 100) + ' %';
+    const LANG = (window.i18n && window.i18n.lang) || 'sv';
+    const pct = (z) => { try { return new Intl.NumberFormat(LANG, { style: 'percent', maximumFractionDigits: 0 }).format(Math.round(z * 100) / 100).replace(/[\u00a0\u202f]/g, ' '); } catch (e) { return Math.round(z * 100) + ' %'; } };
 
     function rita() {
       if (!d) return;

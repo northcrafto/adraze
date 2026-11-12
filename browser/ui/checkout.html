@@ -71,7 +71,7 @@
 <body>
   <div class="top">
     <a class="back" href="https://krypto.local/back" title="Tillbaka"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></a>
-    <div class="brand"><img src="adraze-mark-dark.png" alt=""><span data-brand>AdRaze</span></div>
+    <div class="brand"><img src="adraze-mark-dark.png" alt=""><span data-brand translate="no">AdRaze</span></div>
   </div>
 
   <div class="checkout">
@@ -81,11 +81,11 @@
     <div id="plans">
       <div class="lbl">Välj period</div>
       <div class="plans">
-        <button type="button" class="plan on" data-plan="pro_month"><span class="dot"></span><span class="n">Varje månad</span><span class="p">79 kr <small>/ mån</small></span></button>
-        <button type="button" class="plan" data-plan="pro_year"><span class="dot"></span><span class="n">Varje år<span class="save">Spara 17 %</span></span><span class="p">1 090 kr <small>/ år</small></span></button>
+        <button type="button" class="plan on" data-plan="pro_month"><span class="dot"></span><span class="n">Varje månad</span><span class="p" data-pris="7900" data-per="man"></span></button>
+        <button type="button" class="plan" data-plan="pro_year"><span class="dot"></span><span class="n">Varje år<span class="save">Spara 17 %</span></span><span class="p" data-pris="109000" data-per="ar"></span></button>
       </div>
     </div>
-    <p class="credits-note" id="credits-note" style="display:none;">Extra credits fyller på Falk med <b style="color:var(--ink)">1 000 000 tokens</b> som gäller utöver månadstaket.</p>
+    <p class="credits-note" id="credits-note" style="display:none;"></p><!-- texten sätts i checkout.js (en hel mening med {antal}) -->
 
     <div class="lbl">Kort</div>
     <div class="box">
@@ -106,6 +106,7 @@
     <a class="pay" href="https://krypto.local/recheck">Öppna Falk</a>
   </div>
 
+  <script src="i18n.js"></script><!-- window.locale kommer från krypto-preload.js -->
   <script src="https://js.stripe.com/v3/"></script>
   <script src="checkout.js"></script>
 </body>

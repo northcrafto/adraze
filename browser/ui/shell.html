@@ -455,7 +455,7 @@
         <!-- Skapa konto 2: lösenord -->
         <div id="login-signup-pw" class="lg-view" style="display:none;">
           <h1 class="lg-h">Välj ett lösenord</h1>
-          <p class="lg-lead">Minst 8 tecken. Kontot kopplas till <span id="signup-email-shown" class="lg-strong"></span></p>
+          <p class="lg-lead">Minst 8 tecken. Kontot kopplas till <span id="signup-email-shown" class="lg-strong" translate="no"></span></p>
           <input id="signup-email" type="hidden" />
           <div class="lg-field"><input id="signup-pw" type="password" autocomplete="new-password" placeholder="Lösenord" class="lg-in" /><button type="button" class="pw-eye lg-eye" data-target="signup-pw" title="Visa lösenord"><svg class="ic ic-sm"><use href="#i-eye" /></svg></button></div>
           <div id="signup-error" class="lg-err" style="display:none;"></div>
@@ -466,7 +466,7 @@
         <!-- Verifiering (2FA-kod — både logga in och skapa konto) -->
         <div id="login-code" class="lg-view" style="display:none;">
           <h1 class="lg-h">Kolla din mejl</h1>
-          <p class="lg-lead">Vi skickade en 6-siffrig kod till <span id="code-email-shown" class="lg-strong"></span></p>
+          <p class="lg-lead">Vi skickade en 6-siffrig kod till <span id="code-email-shown" class="lg-strong" translate="no"></span></p>
           <input id="login-code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" class="lg-code" />
           <div id="code-error" class="lg-err" style="display:none;"></div>
           <button id="code-submit" class="lg-btn">Verifiera</button>
@@ -512,7 +512,7 @@
         <!-- Inloggad -->
         <div id="login-account-view" class="lg-view" style="display:none;">
           <h1 class="lg-h">Du är inloggad</h1>
-          <p class="lg-lead"><span id="login-email-shown" class="lg-strong"></span> <span id="login-pro-badge" class="lg-chip" style="display:none;">Pro</span></p>
+          <p class="lg-lead"><span id="login-email-shown" class="lg-strong" translate="no"></span> <span id="login-pro-badge" class="lg-chip" style="display:none;">Pro</span></p>
           <div class="lg-status"><i></i><span>Skydd aktivt på den här datorn</span></div>
           <button id="logout-btn" class="lg-btn ghost">Logga ut</button>
         </div>
@@ -690,7 +690,7 @@
             <div id="engine-list" class="flex flex-col gap-2"></div>
             <div class="mt-5 flex items-start gap-2.5 p-3.5 rounded-xl text-[12.5px]" style="background:var(--color-paper);">
               <svg class="ic ic-sm" style="color:var(--color-safe); flex:none;"><use href="#i-shield-check" /></svg>
-              <span style="color:rgb(28 43 58 / .72);">Inkognitoflikar söker alltid via <b>AdRaze Search</b>, vår egen sökmotor som inte loggar något.</span>
+              <span style="color:rgb(28 43 58 / .72);">Inkognitoflikar söker alltid via AdRaze Search, vår egen sökmotor som inte loggar något.</span>
             </div>
           </div>
 
