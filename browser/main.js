@@ -1073,15 +1073,35 @@ for (const n of ['session.dat', 'wallet.dat', 'wallet.key']) {
   try { const ud = app.getPath('userData'), o = path.join(ud, 'vaka-' + n), u = path.join(ud, 'adraze-' + n); if (fs.existsSync(o) && !fs.existsSync(u)) fs.renameSync(o, u); } catch {}
 }
 const SESSION_FILE = path.join(app.getPath('userData'), 'adraze-session.dat');
+function skrivSessionFil(acc) {
+  if (!acc || !acc.token) return false;
+  const str = JSON.stringify(acc);
+  const out = (safeStorage && safeStorage.isEncryptionAvailable()) ? safeStorage.encryptString(str) : Buffer.from(str, 'utf8');
+  fs.writeFileSync(SESSION_FILE, out, { mode: 0o600 });
+  return true;
+}
 ipcMain.handle('auth:remember', (_e, acc) => {
-  try {
-    if (!acc || !acc.token) return { ok: false };
-    const str = JSON.stringify(acc);
-    const out = (safeStorage && safeStorage.isEncryptionAvailable()) ? safeStorage.encryptString(str) : Buffer.from(str, 'utf8');
-    fs.writeFileSync(SESSION_FILE, out, { mode: 0o600 });
-    return { ok: true };
-  } catch { return { ok: false }; }
+  try { return { ok: skrivSessionFil(acc) }; } catch { return { ok: false }; }
 });
+/* Eget konto per fönster: vilket konto AdRaze startar med nästa gång (sessionsfilen ovan). Förr vann det konto som
+ * loggade in SENAST i något fönster – ett barnkonto som testades i ett andra fönster gjorde att huvudkontots fönster
+ * kom tillbaka som barnet efter omstart. Nu: det senast använda fönstrets konto, men är ett vuxenkonto öppet i
+ * något fönster vinner det (vuxenkontot är ju redan öppet på datorn – barnets dator med bara barnet inloggat
+ * startar som barnet precis som förut). Inga inloggade fönster: filen lämnas (utloggningen tar själv bort den). */
+function skrivStartkonto() {
+  if (!KONTO_PER_FONSTER) return;
+  try {
+    const prof = lasProfiler();
+    const oppna = [...wins.values()]
+      .filter((c) => c && !c.incognito && c.acctKey && c.win && !c.win.isDestroyed())
+      .map((c) => ({ c, p: prof.find((x) => x.key === c.acctKey) }))
+      .filter((x) => x.p)
+      .sort((a, b) => (b.c.fokusTid || 0) - (a.c.fokusTid || 0));
+    if (!oppna.length) return;
+    const val = oppna.find((x) => !x.p.account.isChild) || oppna[0];
+    skrivSessionFil(val.p.account);
+  } catch {}
+}
 ipcMain.handle('auth:recall', () => {
   try {
     if (!fs.existsSync(SESSION_FILE)) return { ok: false };
@@ -1644,6 +1664,7 @@ async function bytFonsterKonto(ctx, key) {
   try { await fyllKontoSession(key); } catch {}
   try { await kontoSession(ctx.acctKey === undefined ? senasteKonto : ctx.acctKey).cookies.flushStore(); } catch {}   // det gamla kontots kakor på disk
   ctx.acctKey = key;
+  skrivStartkonto();
   byggOmVyer(ctx);
   try { sidopanel.kontoBytt(ctx); } catch {}   // Anpassa: sidopanel – appen öppnas i det nya kontots lagring
   return { ok: true, byggdOm: true };
@@ -2702,6 +2723,8 @@ app.on('web-contents-created', (_e, wc) => {
 });
 
 /* ────────── Fönster ────────── */
+let stangerAppen = false;
+app.on('before-quit', () => { if (!stangerAppen) { stangerAppen = true; skrivStartkonto(); } });
 function createWindow(incognito, fran) {
   if (incognito && barnNagonstans()) {   // barnläge: inget inkognito (föräldern ska se historiken)
     try { const fw = BrowserWindow.getFocusedWindow(); const c = fw && wins.get(fw.webContents.id); if (c) sendTo(c, 'toast', T('Inkognito finns inte i barnläge.')); } catch {}
@@ -2845,7 +2868,9 @@ function createWindow(incognito, fran) {
     if (ctx.kryptoView) { try { ctx.kryptoView.webContents.close(); } catch {} ctx.kryptoView = null; }
     chattDestroy(ctx);
     wins.delete(id);
+    if (!stangerAppen) skrivStartkonto();   // ett fönster stängdes: startkontot räknas om bland de som är kvar
   });
+  win.on('focus', () => { ctx.fokusTid = Date.now(); skrivStartkonto(); });
   return win;
 }
 
