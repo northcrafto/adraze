@@ -61,7 +61,7 @@ function naturlig(s) {
   if (/[a-z]\(/.test(s) && !/\s/.test(s)) return false;
   if (/\{(?![a-z]\w*\})/.test(s.replace(/\{[a-z]\w*\}/g, ''))) return false;   // { } som inte är {platshållare}
   if (/^[\w-]+\s*:\s*[^\s]/.test(s) && /;|px|%|#[0-9a-f]{3}/i.test(s)) return false;   // CSS
-  if (/^[.#@[\]*>:~+]/.test(s) && !/^[.…]{3}/.test(s)) return false;        // selektorer, @media
+  if (/^[.#@[\]*>:~+]/.test(s) && !/^[.…]{3}/.test(s) && !/^\+ \p{L}/u.test(s)) return false;   // selektorer, @media ("+ Ny grupp" är text)
   if (/^-?\d/.test(s) && /^[-\d.\s%a-z/]*$/.test(s)) return false;          // 12px, 1.5em
   const ord = s.split(/\s+/);
   if (ord.length === 1) {

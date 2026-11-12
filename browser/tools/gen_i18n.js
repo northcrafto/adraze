@@ -64,7 +64,10 @@ function skydda(s) {
   t = t.replace(MARKMONSTER, byt);
   // Ledande/avslutande tecken som inte är ord
   const fore = (/^[\s·•→←↑↓–—\-+*#(\[“"'«¡¿]+/.exec(t) || [''])[0].replace(/⟦$/, '');
-  const efter = (/[\s:…→←↑↓·–—)\]”"'»]+$/.exec(t.slice(fore.length)) || [''])[0];
+  let efter = (/[\s:…→←↑↓·–—)\]”"'»]+$/.exec(t.slice(fore.length)) || [''])[0];
+  // Ett avslutande citattecken som stänger ett citat inne i texten hör till kärnan (annars lägger Google till ett eget)
+  const citat = (x) => (x.match(/["“”„'«»]/g) || []).length;
+  if (citat(t.slice(fore.length, t.length - efter.length)) % 2 === 1) efter = efter.replace(/^.*["”'»]/, '');
   const karna = t.slice(fore.length, t.length - efter.length);
   return { karna, fore, efter, bitar };
 }
