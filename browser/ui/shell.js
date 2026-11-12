@@ -1650,7 +1650,9 @@ function fitOmni() {
   const o = $('omnibox'); if (!o) return;
   o.style.maxWidth = '';
   const pw = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--pw'), 10) || 0;
-  if (pw > 0) {
+  // Bara en panel vid sidan (Falk/chatten som kolumn) trycker ihop fältet. I helskärm täcker panelen hela
+  // webbytan och --pw blir lika bred som fönstret: då ska adressfältet ha sin vanliga bredd.
+  if (pw > 0 && pw < innerWidth * 0.75) {
     const r = o.getBoundingClientRect(), lim = innerWidth - pw - 12;
     if (r.right > lim) o.style.maxWidth = Math.max(240, Math.floor(r.width - (r.right - lim))) + 'px';
   }
