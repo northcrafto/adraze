@@ -864,7 +864,7 @@ function setTheme(t) {
   theme = t === 'dark' ? 'dark' : 'light';
   document.documentElement.dataset.theme = theme;
   try { localStorage.setItem('skoll-theme', theme); } catch {}
-  try { window.view.chattTheme(theme); } catch {}
+  try { window.view.chattTheme(theme, typeof chattAccent === 'function' ? chattAccent() : null); } catch {}
   updateTitlebar();
   const l = $('seg-light'), d = $('seg-dark');
   if (l) l.classList.toggle('on', theme === 'light');
@@ -1595,7 +1595,16 @@ async function loadSocMe() {
 function closeMsgMenu() { const m = $('fr-msgmenu'); if (m) m.remove(); }   // tidsmenyn (Tillåt …) i Familj
 
 /* ── Chatt: E2E-chatten (vänner, DM, grupper) i en egen panel, se ui/chatt.html ── */
-function chattOpts() { return { token: (account && account.token) || null, child: !!(account && account.isChild), theme, lang: (window.i18n && window.i18n.lang) || 'sv' }; }
+// bakgrund: chattpanelen finns (dold) så länge man är inloggad, så att samtal ringer och online-statusen stämmer även när chatten är stängd
+function chattOpts() { return { token: (account && account.token) || null, child: !!(account && account.isChild), theme, lang: (window.i18n && window.i18n.lang) || 'sv', accent: chattAccent(), bakgrund: true }; }
+// Accentfärgen från Anpassa (anpassa-tema.js sätter nyanserna som variabler på roten; ingen = AdRazes orange)
+function chattAccent() {
+  const r = document.documentElement; if (!r.hasAttribute('data-anp-accent')) return null;
+  const v = (n) => r.style.getPropertyValue(n).trim();
+  return { l: v('--anp-accent-l'), d: v('--anp-accent-d'), onL: v('--anp-on-l'), onD: v('--anp-on-d'), inkL: v('--anp-ink-l'), inkD: v('--anp-ink-d') };
+}
+try { new MutationObserver(() => { try { window.view.chattTheme(theme, chattAccent()); } catch {} }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-anp-accent'] }); } catch {}
+window.view.onChattOppna && window.view.onChattOppna(() => { if (account && !chattOpen) openChatt(true); });
 function chattSync() { try { if (!account) chattOpen = false; window.view.chattToggle(chattOpen, chattOpts()); } catch {} renderChattBtn(); }
 function openChatt(open) {
   if (open && !account) { pendingChattAfterLogin = true; openLogin(); return; }
