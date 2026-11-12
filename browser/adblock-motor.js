@@ -15,7 +15,9 @@ const LISTOR = [
 
 function ladda() {
   // require av en .node funkar både i utveckling och i paketerad app (asarUnpack sköter uppackningen)
+  // Windows-motorn korskompileras separat (tools/win/bygg-native.sh) och ligger i en egen mapp
   const kandidater = [
+    ...(process.platform === 'win32' ? [path.join(__dirname, 'native', 'adblock', 'build', 'win32-' + process.arch, 'adblock_core.node')] : []),
     path.join(__dirname, 'native', 'adblock', 'build', 'Release', 'adblock_core.node'),
     path.join(__dirname, 'native', 'adblock', 'build', 'Debug', 'adblock_core.node'),
   ];

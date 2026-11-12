@@ -64,6 +64,13 @@ MAC_FILER=$(for f in $MAC_FILER; do [ -f "$f" ] && echo "$f"; done)
 if [ -n "$ADRAZE_TORR" ]; then git checkout -q package.json package-lock.json; echo "Torrkörning: $V byggd och testad, släpps inte"; exit 0; fi
 gh release create "v$V" -R northcrafto/adraze-dl --title "AdRaze $V" --notes "$NOTES" \
   dist-installer/AdRaze.AppImage dist-installer/latest-linux.yml $MAC_FILER
+# Windows: byggs och läggs till i släppet först när kodsigneringen är inställd (build/signera-win.js).
+# Misslyckas Windows-bygget släpps resten ändå – Windows-användarna får då ingen uppdatering just den här gången.
+if node -e "process.exit(require('./build/signera-win.js').konfig() ? 0 : 1)" || [ -n "$ADRAZE_WIN_OSIGNERAD" ]; then
+  tools/win/release.sh --publicera || echo "OBS: ingen Windows-version i $V (bygget eller signeringen föll)"
+else
+  echo "Windows: väntar på kodsigneringen (~/.config/adraze/winsign.json) – ingen Windows-fil i $V"
+fi
 git add package.json package-lock.json 2>/dev/null || git add package.json
 git -c user.name=Cetto -c user.email=cetoari9@gmail.com commit -qm "AdRaze $V: $NOTES"
 git push -q origin HEAD:main
