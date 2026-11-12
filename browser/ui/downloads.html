@@ -119,9 +119,13 @@
     const ICO_X = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
     const ICO_FOLDER = '<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
 
+    const LANG = (window.i18n && window.i18n.lang) || 'sv';
     function fmt(n) { if (!n) return '0 B'; const u = ['B','KB','MB','GB']; let i = 0;
-      while (n >= 1024 && i < 3) { n /= 1024; i++; } return n.toFixed(i ? 1 : 0).replace('.', ',') + ' ' + u[i]; }
-    const t = (s) => (window.t ? window.t(s) : s);   // dynamiska/interpolerade strängar: svenska = nyckel
+      while (n >= 1024 && i < 3) { n /= 1024; i++; }
+      let v; try { v = new Intl.NumberFormat(LANG, { minimumFractionDigits: i ? 1 : 0, maximumFractionDigits: i ? 1 : 0, useGrouping: false }).format(n); } catch (e) { v = n.toFixed(i ? 1 : 0); }
+      return v + ' ' + u[i]; }
+    // dynamiska strängar: svenska = nyckel; {platshållare} fylls i efter översättningen
+    const t = (s, v) => (window.t ? window.t(s, v) : (v ? s.replace(/\{([a-z]\w*)\}/g, (m, k) => (v[k] != null ? String(v[k]) : m)) : s));
     function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
 
     function render() {
@@ -139,11 +143,11 @@
         let icoCls = 'ico', ico = ICO_DL, sub = '', subCls = 'sub', pct = 0;
         if (prog) {
           pct = d.total > 0 ? Math.round(d.received / d.total * 100) : 0;
-          sub = d.total > 0 ? (fmt(d.received) + ' / ' + fmt(d.total) + ' · ' + pct + '%') : (fmt(d.received) + ' ' + t('hämtat…'));
+          sub = d.total > 0 ? (fmt(d.received) + ' / ' + fmt(d.total) + ' · ' + pct + '%') : t('{storlek} hämtat…', { storlek: fmt(d.received) });
           ico = paused ? ICO_PAUSE : '<div class="spin"></div>';
           if (paused) sub = t('Pausad') + ' · ' + sub;
         } else if (scan) { sub = t('Skannar efter virus…'); ico = '<div class="spin"></div>'; }
-        else if (infected) { icoCls = 'ico warn'; ico = ICO_WARN; subCls = 'sub warn'; sub = t('Blockerad') + ' — ' + (d.threat || t('hot')); }
+        else if (infected) { icoCls = 'ico warn'; ico = ICO_WARN; subCls = 'sub warn'; sub = t('Blockerad — {hot}', { hot: d.threat || t('hot') }); }
         else if (removed) { icoCls = 'ico warn'; ico = ICO_WARN; subCls = 'sub warn'; sub = t('Borttagen (virus)'); }
         else if (done) { icoCls = 'ico done'; ico = ICO_DOC; subCls = 'sub done';
           sub = (d.total > 0 ? fmt(d.total) + ' · ' : '') + (d.scan === 'overridden' ? t('Klar (behållen)') : (d.scan === 'clean' ? t('Säker') : t('Klar'))); }
@@ -151,7 +155,7 @@
 
         row.innerHTML =
           '<span class="' + icoCls + '">' + ico + '</span>' +
-          '<div class="meta"><div class="name">' + esc(d.filename) + '</div>' +
+          '<div class="meta"><div class="name" translate="no">' + esc(d.filename) + '</div>' +
           '<div class="' + subCls + '">' + esc(sub) + '</div>' +
           (prog ? '<div class="bar"><i style="width:' + pct + '%"></i></div>' : '') + '</div>' +
           (done ? '<button class="fbtn" title="' + esc(t('Visa i mapp')) + '" data-folder="' + d.id + '">' + ICO_FOLDER + '</button>' : '') +

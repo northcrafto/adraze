@@ -64,10 +64,10 @@
 </script>
 </head>
 <body class="nopro">
-  <div class="top"><img src="adraze-mark-dark.png" alt="">Falk</div>
+  <div class="top" translate="no"><img src="adraze-mark-dark.png" alt="">Falk</div>
 
   <div class="hero">
-    <span class="chip">AdRaze Pro</span>
+    <span class="chip" translate="no">AdRaze Pro</span>
     <h1 class="only-nopro">Falk ingår i Pro</h1>
     <h1 class="only-signedout">Logga in för att använda Falk</h1>
     <p class="sub only-nopro">Din egen AI-assistent för trygghet på nätet, inbyggd i AdRaze.</p>
@@ -82,7 +82,7 @@
     <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><div><b>Inga gränser</b><span>Fråga hur mycket du vill, dygnet runt.</span></div></div>
   </div>
 
-  <div class="price only-nopro"><span class="n">AdRaze Pro</span><span class="p">79 kr <small>/ mån</small></span></div>
+  <div class="price only-nopro"><span class="n" translate="no">AdRaze Pro</span><span class="p" id="pris-man"></span></div>
 
   <div class="actions">
     <a class="btn btn-primary only-nopro" href="https://krypto.local/checkout?plan=pro_month">Skaffa Pro</a>
@@ -94,7 +94,22 @@
   <p class="foot only-nopro">Du betalar säkert via Stripe här i panelen, och Pro gäller på ditt konto direkt.</p>
   <p class="foot only-signedout">Logga in via kontoknappen uppe till höger.</p>
 
+  <script src="i18n.js"></script><!-- window.locale kommer från krypto-preload.js -->
   <script>
+    // Priset: "{pris} / mån" är en hel nyckel (ordföljden kan skilja), beloppet i SEK formateras för språket.
+    // Det som står före/efter beloppet i översättningen blir den mindre texten, som "/ mån" här.
+    (function () {
+      var el = document.getElementById('pris-man'); if (!el) return;
+      var lang = (window.i18n && window.i18n.lang) || 'sv', pris;
+      try { pris = new Intl.NumberFormat(lang, { style: 'currency', currency: 'SEK', maximumFractionDigits: 0 }).format(79); } catch (e) { pris = '79 kr'; }
+      var mall = typeof window.t === 'function' ? window.t('{pris} / mån') : '{pris} / mån';
+      var i = mall.indexOf('{pris}'); if (i < 0) { el.textContent = pris; return; }
+      var fore = mall.slice(0, i).trim(), efter = mall.slice(i + 6).trim(), sm;
+      if (fore) { sm = document.createElement('small'); sm.textContent = fore; el.appendChild(sm); el.appendChild(document.createTextNode(' ')); }
+      el.appendChild(document.createTextNode(pris));
+      if (efter) { el.appendChild(document.createTextNode(' ')); sm = document.createElement('small'); sm.textContent = efter; el.appendChild(sm); }
+      el.translate = false;   // redan översatt
+    })();
     // Tillstånd sätts via hash: #signedout eller #nopro (standard nopro)
     function apply() {
       var s = (location.hash || '').replace('#', '') || 'nopro';

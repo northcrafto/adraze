@@ -4,8 +4,10 @@
   'use strict';
   const A = window.adraze;
   const $ = (id) => document.getElementById(id);
-  const t = (s) => (window.t ? window.t(s) : s);
-  if (!A) { document.body.textContent = 'Den här sidan fungerar bara i AdRaze.'; return; }
+  // svenska = nyckel; {platshållare} fylls i efter översättningen
+  const t = (s, v) => (window.t ? window.t(s, v) : (v ? s.replace(/\{([a-z]\w*)\}/g, (m, k) => (v[k] != null ? String(v[k]) : m)) : s));
+  const LANG = (window.i18n && window.i18n.lang) || 'sv';
+  if (!A) { document.body.textContent = t('Den här sidan fungerar bara i AdRaze.'); return; }
 
   const NIVA = {
     enkel: 'Blockerar reklam och spårare från andra sajter. Minst risk att någon sida går sönder.',
@@ -19,26 +21,41 @@
     $('mark').src = x === 'dark' ? 'adraze-mark-dark.png' : 'adraze-mark.png';
   }
   tema(A.boot().tema);
+  try { document.title = t('AdRaze – Blockering'); } catch {}
+
+  // "Ett filter per rad … Till exempel {a} eller {b}." – hela meningen är en nyckel, kodexemplen sätts in som <code>
+  (function () {
+    const p = $('egna-lead'); if (!p) return;
+    const kod = { a: '||reklam.exempel.se^', b: 'exempel.se##.banner' };
+    t('Ett filter per rad, samma format som uBlock och Brave. Till exempel {a} eller {b}.').split(/\{(a|b)\}/).forEach((del, i) => {
+      if (i % 2) { const c = document.createElement('code'); c.textContent = kod[del]; c.translate = false; p.appendChild(c); }
+      else if (del) p.appendChild(document.createTextNode(del));
+    });
+  })();
   A.onTema(tema);
 
-  const tal = (n) => (n || 0).toLocaleString(document.documentElement.lang || 'sv');
+  const tal = (n) => (n || 0).toLocaleString(LANG);
   function sedan(ms) {
     if (!ms) return t('aldrig');
     const m = Math.round((Date.now() - ms) / 60000);
     if (m < 1) return t('nyss');
-    if (m < 60) return m + ' ' + t('min sedan');
+    if (m < 60) return t('{n} min sedan', { n: m });
     const h = Math.round(m / 60);
-    if (h < 48) return h + ' ' + t('tim sedan');
-    return Math.round(h / 24) + ' ' + t('dagar sedan');
+    if (h < 48) return t('{n} tim sedan', { n: h });
+    return t('{n} dagar sedan', { n: Math.round(h / 24) });   // alltid minst 2
   }
-  function storlek(b) { return b >= 1048576 ? (b / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(b / 1024)) + ' kB'; }
+  function storlek(b) {
+    if (b < 1048576) return Math.max(1, Math.round(b / 1024)) + ' kB';
+    let v; try { v = new Intl.NumberFormat(LANG, { minimumFractionDigits: 1, maximumFractionDigits: 1, useGrouping: false }).format(b / 1048576); } catch { v = (b / 1048576).toFixed(1); }
+    return v + ' MB';
+  }
 
   function rita() {
     const p = st.prefs;
     document.body.classList.toggle('av', !st.pa);
     $('pa').checked = st.pa;
     $('status').textContent = st.pa
-      ? tal(st.antal) + ' ' + t('filter aktiva') + ' · ' + t('listorna uppdaterade') + ' ' + sedan(st.senast)
+      ? t('{n} filter aktiva', { n: tal(st.antal) }) + ' · ' + t('listorna uppdaterade {tid}', { tid: sedan(st.senast) })
       : t('AdRaze är avstängd. Ingenting blockeras.');
     for (const b of $('niva').children) { const on = b.dataset.v === p.niva; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); }
     $('niva-beskr').textContent = t(NIVA[p.niva] || '');
@@ -53,7 +70,7 @@
     $('https').checked = !!st.https;
     if (document.activeElement !== $('kontakt')) $('kontakt').value = p.kontakt || '';
     if (document.activeElement !== $('egna') && !$('egna').dataset.andrad) $('egna').value = p.egna || '';
-    $('listor-status').textContent = t('Senast uppdaterad') + ' ' + sedan(st.senast);
+    $('listor-status').textContent = t('Senast uppdaterad {tid}', { tid: sedan(st.senast) });
     ritaListor(); ritaElement();
   }
 
@@ -89,8 +106,8 @@
     for (const [host, sel] of rader) {
       const rad = document.createElement('div'); rad.className = 'rad';
       const txt = document.createElement('div'); txt.className = 'txt';
-      const ti = document.createElement('div'); ti.className = 'titel'; ti.textContent = host;
-      const s = document.createElement('div'); s.className = 'sel'; s.textContent = sel; s.title = sel;
+      const ti = document.createElement('div'); ti.className = 'titel'; ti.textContent = host; ti.translate = false;
+      const s = document.createElement('div'); s.className = 'sel'; s.textContent = sel; s.title = sel; s.translate = false;
       txt.append(ti, s);
       const x = document.createElement('button'); x.className = 'ta-bort'; x.textContent = '×'; x.title = t('Visa igen');
       x.addEventListener('click', () => A.taBortElement(host, sel).then(ladda));
@@ -116,7 +133,7 @@
     const b = $('uppdatera'); b.disabled = true; b.textContent = t('Uppdaterar…');
     try {
       const r = await A.uppdatera();
-      if (r) { st = r; rita(); $('listor-status').textContent = r.nya ? r.nya + ' ' + t('listor hade nya filter') : t('Alla listor är redan senaste versionen'); }
+      if (r) { st = r; rita(); $('listor-status').textContent = r.nya ? (r.nya === 1 ? t('{n} lista hade nya filter', { n: r.nya }) : t('{n} listor hade nya filter', { n: r.nya })) : t('Alla listor är redan senaste versionen'); }
     } finally { b.disabled = false; b.textContent = t('Uppdatera nu'); }
   });
 
@@ -134,12 +151,12 @@
     const b = $('rapport-skicka'); b.disabled = true; $('rapport-status').textContent = t('Skickar…');
     try {
       const r = await A.rapport({ url: $('rapport-url').value, text: $('rapport-text').value, mejl: $('kontakt').value });
-      if (r && r.ok) { $('rapport-status').textContent = t('Tack! Ärende') + ' ' + (r.nr || '') + ' ' + t('skickat. Vi mejlar dig.'); $('rapport-text').value = ''; ladda(); }
+      if (r && r.ok) { $('rapport-status').textContent = t('Tack! Ärende {nr} skickat. Vi mejlar dig.', { nr: r.nr || '' }); $('rapport-text').value = ''; ladda(); }
       else $('rapport-status').textContent = t((r && r.fel) || 'Det gick inte att skicka just nu.');
     } finally { b.disabled = false; }
   });
 
   A.onAndrat(ladda);
   ladda();
-  setInterval(() => { if (st) $('listor-status').textContent = t('Senast uppdaterad') + ' ' + sedan(st.senast); }, 60000);
+  setInterval(() => { if (st) $('listor-status').textContent = t('Senast uppdaterad {tid}', { tid: sedan(st.senast) }); }, 60000);
 })();

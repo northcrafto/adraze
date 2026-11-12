@@ -3,6 +3,11 @@
  * (WebContentsView); här styr vi flikar, adressfält, granskning och varning. */
 
 const $ = (id) => document.getElementById(id);
+// tf('Inloggad som {namn}', { namn }) – översätt och fyll i platshållare efteråt (ordföljden får skilja sig mellan språk)
+function tf(sv, v) { if (typeof window.t === 'function') return window.t(sv, v); return v ? sv.replace(/\{([a-z]\w*)\}/g, (m, n) => (v[n] != null ? String(v[n]) : m)) : sv; }
+// htmlTf('Ge koden till {namn}', { namn: '<b>' + escapeHtml(x) + '</b>' }) – översättningen escapas, värdena är färdig (escapad) HTML
+function htmlTf(sv, html) { return escapeHtml(tf(sv)).replace(/\{([a-z]\w*)\}/g, (m, n) => (html && Object.prototype.hasOwnProperty.call(html, n) ? String(html[n]) : m)); }
+const uiLang = () => (window.i18n && window.i18n.lang) || 'sv';
 const viewsEl = $('views');
 const newtabpage = $('newtabpage');
 const incogpage = $('incogpage');
@@ -332,7 +337,8 @@ function renderTabs() {
     // Bygg om innehållet bara när det ändrats (annars blinkar favicons)
     // Ljudikon när fliken spelar ljud eller är tystad; klick växlar ljud av/på
     const snd = (tab.audible || tab.muted) ? `<button class="tsound${tab.muted ? ' muted' : ''}" title="${tab.muted ? 'Slå på ljudet' : 'Stäng av ljudet'}"><svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/>${tab.muted ? '<path d="m23 9-6 6M17 9l6 6"/>' : '<path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/>'}</svg></button>` : '';
-    const html = `${favHtml(tab)}<span class="ttl">${escapeHtml(tab.title || 'Ny flik')}</span>${snd}<button class="tclose" title="Stäng flik"><svg class="ic" style="width:13px;height:13px"><use href="#i-close" /></svg></button>`;
+    const egenTitel = !tab.title || tab.title === 'Ny flik' || tab.isSettings;   // våra egna titlar översätts, sidornas inte
+    const html = `${favHtml(tab)}<span class="ttl"${egenTitel ? '' : ' translate="no"'}>${escapeHtml(tab.title || 'Ny flik')}</span>${snd}<button class="tclose" title="Stäng flik"><svg class="ic" style="width:13px;height:13px"><use href="#i-close" /></svg></button>`;
     if (el._html !== html) { el.innerHTML = html; el._html = html; }
     el.title = tab.title || '';
     const want = prev ? prev.nextSibling : host.firstChild;
@@ -612,12 +618,12 @@ let stats = { ads: 0, trackers: 0, dangers: 0 };
 try { const s = JSON.parse(localStorage.getItem('skoll-stats')); if (s) stats = { ads: s.ads | 0, trackers: s.trackers | 0, dangers: s.dangers | 0 }; } catch {}
 const countedDangers = new Set();
 function renderStats() {
-  const f = (n) => (n || 0).toLocaleString('sv-SE');
+  const f = (n) => (n || 0).toLocaleString(uiLang());
   // Uppskattning som Braves: ~30 kB och ~50 ms sparas per stoppad annons/spårare.
   const n = (stats.ads || 0) + (stats.trackers || 0);
   const mb = (n * 30) / 1024, sek = n * 0.05;
-  const [bv, bu] = mb >= 1024 ? [(mb / 1024).toLocaleString('sv-SE', { maximumFractionDigits: 1 }), 'GB'] : [f(Math.round(mb)), 'MB'];
-  const [tv, tu] = sek >= 3600 ? [(sek / 3600).toLocaleString('sv-SE', { maximumFractionDigits: 1 }), (window.t ? window.t('timmar') : 'timmar')] : sek >= 60 ? [f(Math.round(sek / 60)), (window.t ? window.t('minuter') : 'minuter')] : [f(Math.round(sek)), (window.t ? window.t('sekunder') : 'sekunder')];
+  const [bv, bu] = mb >= 1024 ? [(mb / 1024).toLocaleString(uiLang(), { maximumFractionDigits: 1 }), 'GB'] : [f(Math.round(mb)), 'MB'];
+  const [tv, tu] = sek >= 3600 ? [(sek / 3600).toLocaleString(uiLang(), { maximumFractionDigits: 1 }), (window.t ? window.t('timmar') : 'timmar')] : sek >= 60 ? [f(Math.round(sek / 60)), (window.t ? window.t('minuter') : 'minuter')] : [f(Math.round(sek)), (window.t ? window.t('sekunder') : 'sekunder')];
   if ($('stat-blocked')) $('stat-blocked').textContent = f(n);
   if ($('stat-band')) { $('stat-band').textContent = bv; $('stat-band-u').textContent = bu; }
   if ($('stat-time')) { $('stat-time').textContent = tv; $('stat-time-u').textContent = tu; }
@@ -739,10 +745,10 @@ function renderSetHero() {
     const b = $('set-hero-login'); if (b) b.addEventListener('click', () => { closeSettings(); openLogin(); });
     return;
   }
-  const name = account.name || (account.isChild ? 'Barnkonto' : (account.email ? account.email.split('@')[0] : 'Du'));
+  const name = account.name || (account.isChild ? tf('Barnkonto') : (account.email ? account.email.split('@')[0] : tf('Du')));
   const pic = (socMe && socMe.avatar) ? socMe.avatar : null;
   av.innerHTML = pic ? '<img src="' + pic + '" alt="">' : escapeHtml((name[0] || '?').toUpperCase());
-  nm.textContent = name;
+  nm.textContent = name; nm.setAttribute('translate', 'no');
   em.textContent = account.isChild ? 'Familjens regler gäller' : (account.email || '');
   side.innerHTML = account.isChild ? '<span class="set-chip">Barnkonto</span>' : '';
   av.classList.toggle('has-img', !!pic);
@@ -905,16 +911,16 @@ function applyKryptoSetting(a) {
   if (!a || !a.name) return;
   const name = ('' + a.name).toLowerCase().replace(/[åä]/g, 'a').replace(/ö/g, 'o');
   const val = a.value; let msg = '';
-  if (name === 'adblock' || name === 'annonsblockerare') { const on = kryptoOnOff(val); setAdblock(on); msg = 'AdRaze ' + (on ? 'på' : 'av'); }
-  else if (name === 'realtidsskydd' || name === 'skydd') { const on = kryptoOnOff(val); setProtection(on); msg = 'Realtidsskydd ' + (on ? 'på' : 'av'); }
-  else if (name === 'minska_rorelse' || name === 'reduce_motion' || name === 'rorelse') { const on = kryptoOnOff(val); setReduceMotion(on); msg = 'Minska rörelse ' + (on ? 'på' : 'av'); }
-  else if (name === 'sokmotor' || name === 'sok') { const k = matchEngine(val); if (k && setEngine(k)) msg = 'Sökmotor: ' + ENGINES[k].label; }
-  else if (name === 'nedladdningar' || name === 'downloads') { try { openDownloads(); } catch {} msg = 'Visar nedladdningar'; }
+  if (name === 'adblock' || name === 'annonsblockerare') { const on = kryptoOnOff(val); setAdblock(on); msg = on ? tf('AdRaze på') : tf('AdRaze av'); }
+  else if (name === 'realtidsskydd' || name === 'skydd') { const on = kryptoOnOff(val); setProtection(on); msg = on ? tf('Realtidsskydd på') : tf('Realtidsskydd av'); }
+  else if (name === 'minska_rorelse' || name === 'reduce_motion' || name === 'rorelse') { const on = kryptoOnOff(val); setReduceMotion(on); msg = on ? tf('Minska rörelse på') : tf('Minska rörelse av'); }
+  else if (name === 'sokmotor' || name === 'sok') { const k = matchEngine(val); if (k && setEngine(k)) msg = tf('Sökmotor: {namn}', { namn: tf(ENGINES[k].label) }); }
+  else if (name === 'nedladdningar' || name === 'downloads') { try { openDownloads(); } catch {} msg = tf('Visar nedladdningar'); }
   else if (name === 'blockera' || name === 'blocka') {
     const parts = ('' + val).split('|'); const child = (parts[0] || '').trim();
     const hosts = (parts[1] || '').split(',').map((s) => s.trim()).filter(Boolean);
     const n = (typeof window.famBlockFor === 'function') ? window.famBlockFor(child, hosts) : 0;
-    if (n) msg = 'Blockerade ' + n + ' sida' + (n > 1 ? 'r' : '') + (child ? ' för ' + child : '');
+    if (n) msg = child ? (n > 1 ? tf('Blockerade {n} sidor för {namn}', { n, namn: child }) : tf('Blockerade {n} sida för {namn}', { n, namn: child })) : (n > 1 ? tf('Blockerade {n} sidor', { n }) : tf('Blockerade {n} sida', { n }));
   }
   else if (name === 'tillat' || name === 'avblockera' || name === 'unblock') {
     const parts = ('' + val).split('|'); const child = (parts[0] || '').trim();
@@ -922,8 +928,8 @@ function applyKryptoSetting(a) {
     const minutes = parseInt(parts[2], 10);
     (async () => {
       if (typeof famSyncParent === 'function') await famSyncParent();
-      if (minutes && minutes > 0) { for (const h of hosts) { if (typeof famAllowFor === 'function') await famAllowFor(child, h, minutes); } if (typeof showToast === 'function') showToast('Tillät ' + (hosts[0] || '') + ' i ' + minutes + ' min' + (child ? ' för ' + child : '')); }
-      else { const n = (typeof window.famUnblockFor === 'function') ? window.famUnblockFor(child, hosts) : 0; if (n && typeof showToast === 'function') showToast('Tillät ' + n + ' sida' + (n > 1 ? 'r' : '') + (child ? ' för ' + child : '')); }
+      if (minutes && minutes > 0) { for (const h of hosts) { if (typeof famAllowFor === 'function') await famAllowFor(child, h, minutes); } if (typeof showToast === 'function') showToast(child ? tf('Tillät {sajt} i {n} min för {namn}', { sajt: hosts[0] || '', n: minutes, namn: child }) : tf('Tillät {sajt} i {n} min', { sajt: hosts[0] || '', n: minutes })); }
+      else { const n = (typeof window.famUnblockFor === 'function') ? window.famUnblockFor(child, hosts) : 0; if (n && typeof showToast === 'function') showToast(child ? (n > 1 ? tf('Tillät {n} sidor för {namn}', { n, namn: child }) : tf('Tillät {n} sida för {namn}', { n, namn: child })) : (n > 1 ? tf('Tillät {n} sidor', { n }) : tf('Tillät {n} sida', { n }))); }
     })();
   }
   if (msg && typeof showToast === 'function') showToast('' + msg);
@@ -1174,7 +1180,7 @@ async function valjProfil(p, el) {
     if (me && me.ok && me.isChild) {
       if (account) return;   // någon hann logga in under tiden
       await enterChildMode(a.token, { id: a.childId || me.id || 'self', name: me.name || a.name, age: me.age || 0 });
-      closeLogin(); showToast('Inloggad som ' + (me.name || a.name));
+      closeLogin(); showToast(tf('Inloggad som {namn}', { namn: me.name || a.name }));
       return;
     }
     if (me && me.error === 'no_session') {
@@ -1190,7 +1196,7 @@ async function valjProfil(p, el) {
   if (s && s.ok) {
     if (account) return;
     loginAs(a.token, s.email || a.email, s.pro, s.name || a.name);
-    closeLogin(); showToast('Inloggad som ' + (s.name || s.email || a.email));
+    closeLogin(); showToast(tf('Inloggad som {namn}', { namn: s.name || s.email || a.email }));
     return;
   }
   if (s && s.error === 'no_session') {
@@ -1327,7 +1333,7 @@ async function doSignup() {
   loginAs(r.token, r.email, r.pro, r.name); closeLogin();
 }
 function showCodeStep() {
-  $('code-email-shown').textContent = pendingEmail || '';
+  { const el = $('code-email-shown'); if (el && el.parentElement) el.parentElement.innerHTML = htmlTf('Vi skickade en 6-siffrig kod till {mejl}', { mejl: '<span id="code-email-shown" class="lg-strong" translate="no">' + escapeHtml(pendingEmail || '') + '</span>' }); }
   $('login-code-input').value = ''; $('code-error').style.display = 'none';
   setLoginView('code');
   setTimeout(() => $('login-code-input').focus(), 30);
@@ -1425,7 +1431,7 @@ async function doChildLogin() {
   childPendingCode = null;
   await enterChildMode(r.token, r.child);
   closeLogin();
-  showToast('Inloggad som ' + r.child.name);
+  showToast(tf('Inloggad som {namn}', { namn: r.child.name }));
 }
 async function doChildResend() {
   if (!childPendingCode) return;
@@ -1481,14 +1487,14 @@ async function renderKonto() {
   if (!si) return;
   if (!account) { si.style.display = 'none'; if (so) so.style.display = 'block'; return; }
   si.style.display = 'block'; if (so) so.style.display = 'none';
-  const nm = account.name || (account.isChild ? 'Barnkonto' : (account.email ? account.email.split('@')[0] : 'Du'));
+  const nm = account.name || (account.isChild ? tf('Barnkonto') : (account.email ? account.email.split('@')[0] : tf('Du')));
   $('kn-avatar').innerHTML = escapeHtml((nm[0] || '?').toUpperCase());
-  $('kn-name').textContent = nm;
+  $('kn-name').textContent = nm; $('kn-name').setAttribute('translate', 'no');
   $('kn-email').textContent = account.isChild ? 'Barnkonto (loggar in med kod)' : (account.email || '');
   $('kn-badge').style.display = account.pro ? 'inline-flex' : 'none';
   const rows = [['Typ', account.isChild ? 'Barnkonto' : 'Vuxenkonto'], ['Status', account.pro ? 'AdRaze Pro' : 'Gratis']];
-  if (account.email && !account.isChild) rows.push(['Mejl', account.email]);
-  $('kn-rows').innerHTML = rows.map((r) => '<div class="kn-row"><span class="k">' + r[0] + '</span><span class="v">' + escapeHtml(r[1]) + '</span></div>').join('');
+  if (account.email && !account.isChild) rows.push(['Mejl', account.email, true]);
+  $('kn-rows').innerHTML = rows.map((r) => '<div class="kn-row"><span class="k">' + r[0] + '</span><span class="v"' + (r[2] ? ' translate="no"' : '') + '>' + escapeHtml(r[1]) + '</span></div>').join('');
   const dz = $('kn-danger'); if (dz) dz.style.display = account.isChild ? 'none' : '';
   const sr = $('synk-row');
   if (sr) {
@@ -1502,11 +1508,12 @@ async function renderKonto() {
 }
 // ── AdRaze Pro i Konto: status, säga upp och ångra ──
 const tp = (k) => (typeof window.t === 'function') ? window.t(k) : k;
-function proDate(ms) { try { return new Date(ms).toLocaleDateString(document.documentElement.lang || 'sv', { day: 'numeric', month: 'long', year: 'numeric' }); } catch { return ''; } }
+function proDate(ms) { try { return new Date(ms).toLocaleDateString(uiLang(), { day: 'numeric', month: 'long', year: 'numeric' }); } catch { return ''; } }
 function proPrice(p) {
   if (!p || p.belopp == null) return '';
   const kr = Math.round(p.belopp / 100);
-  return kr + ' kr ' + (p.intervall === 'year' ? tp('per år') : tp('i månaden'));
+  let pris = kr + ' kr'; try { pris = new Intl.NumberFormat(uiLang(), { style: 'currency', currency: 'SEK', maximumFractionDigits: 0 }).format(kr); } catch {}
+  return p.intervall === 'year' ? tf('{pris} per år', { pris }) : tf('{pris} i månaden', { pris });
 }
 let proBusy = false;
 async function renderPro() {
@@ -1523,16 +1530,16 @@ async function renderPro() {
   if (st.pro && sub && (sub.status === 'active' || sub.status === 'trialing')) {
     if (sub.slutar) {
       $('pro-chip').textContent = tp('Uppsagd'); $('pro-chip').className = 'set-chip dim';
-      $('pro-desc').textContent = tp('Pro gäller till') + ' ' + proDate(sub.periodSlut) + ' ' + tp('och förnyas inte.');
+      $('pro-desc').textContent = tf('Pro gäller till {datum} och förnyas inte.', { datum: proDate(sub.periodSlut) });
       $('pro-resume').hidden = false;
     } else {
       $('pro-chip').textContent = tp('Aktiv'); $('pro-chip').className = 'set-chip';
-      $('pro-desc').textContent = [proPrice(sub), tp('Förnyas') + ' ' + proDate(sub.periodSlut) + '.'].filter(Boolean).join(' · ');
+      $('pro-desc').textContent = [proPrice(sub), tf('Förnyas {datum}.', { datum: proDate(sub.periodSlut) })].filter(Boolean).join(' · ');
       $('pro-cancel').hidden = false;
     }
   } else if (st.pro) {
     $('pro-chip').textContent = tp('Aktiv'); $('pro-chip').className = 'set-chip';
-    $('pro-desc').textContent = new Date(st.until).getFullYear() >= 2099 ? tp('Pro för alltid på det här kontot.') : tp('Pro gäller till') + ' ' + proDate(st.until) + '.';
+    $('pro-desc').textContent = new Date(st.until).getFullYear() >= 2099 ? tp('Pro för alltid på det här kontot.') : tf('Pro gäller till {datum}.', { datum: proDate(st.until) });
   } else {
     $('pro-chip').textContent = tp('Gratis'); $('pro-chip').className = 'set-chip dim';
     $('pro-desc').textContent = tp('Falk, din AI-assistent, ingår i Pro för 79 kr i månaden.');
@@ -1543,7 +1550,7 @@ function proError(msg) { const e = $('pro-err'); e.textContent = msg; e.hidden =
 $('pro-cancel').addEventListener('click', async () => {
   let st = null; try { st = await window.view.proStatus(account && account.token); } catch {}
   const end = st && st.prenumeration ? proDate(st.prenumeration.periodSlut) : '';
-  $('pro-confirm-txt').textContent = tp('Du behåller Pro till') + ' ' + end + '. ' + tp('Efter det förnyas den inte och du debiteras inte igen. Falk slutar då att fungera.');
+  $('pro-confirm-txt').textContent = tf('Du behåller Pro till {datum}.', { datum: end }) + ' ' + tp('Efter det förnyas den inte och du debiteras inte igen. Falk slutar då att fungera.');
   $('pro-confirm').hidden = false; $('pro-actions').hidden = true;
 });
 $('pro-keep').addEventListener('click', () => { $('pro-confirm').hidden = true; $('pro-actions').hidden = false; });
@@ -1552,7 +1559,7 @@ $('pro-cancel-go').addEventListener('click', async () => {
   const r = await window.view.proCancel(account && account.token).catch(() => null);
   proBusy = false; b.disabled = false;
   if (!r || !r.ok) { proError((r && r.message) || tp('Det gick inte att säga upp just nu. Försök igen.')); return; }
-  showToast(tp('Pro är uppsagd. Du har kvar den till') + ' ' + proDate(r.until) + '.');
+  showToast(tf('Pro är uppsagd. Du har kvar den till {datum}.', { datum: proDate(r.until) }));
   renderPro();
 });
 $('pro-resume').addEventListener('click', async () => {
@@ -1732,7 +1739,7 @@ $('login-submit').addEventListener('click', doLogin);
 $('login-google').addEventListener('click', () => doGoogle('start-error', 'login-google'));
 $('to-signup').addEventListener('click', () => {
   const email = $('login-email').value.trim().toLowerCase();
-  $('signup-email').value = email; $('signup-email-shown').textContent = email;
+  $('signup-email').value = email; { const el = $('signup-email-shown'); if (el && el.parentElement) el.parentElement.innerHTML = htmlTf('Minst 8 tecken. Kontot kopplas till {mejl}', { mejl: '<span id="signup-email-shown" class="lg-strong" translate="no">' + escapeHtml(email) + '</span>' }); }
   $('signup-name').value = ''; $('signup-pw').value = ''; $('name-error').style.display = 'none'; $('signup-error').style.display = 'none';
   setLoginView('signup'); setTimeout(() => $('signup-name').focus(), 20);
 });
@@ -1785,7 +1792,7 @@ updateAccountBtn();
 // (session-återställningen flyttad till filens SLUT — se nedan)
 
 /* ── Startsida ── */
-function tickClock() { $('nt-clock').textContent = new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' }); }
+function tickClock() { $('nt-clock').textContent = new Date().toLocaleTimeString(uiLang(), { hour: '2-digit', minute: '2-digit' }); }
 // Liten personlig hälsning på startsidan – läser användarnamnet + tiden.
 function greet() {
   const el = $('nt-greet'); if (!el) return;
@@ -1814,11 +1821,17 @@ async function loadDailyImage() {
     if (url) { const img = new Image(); img.onload = () => { $('nt-bg').style.backgroundImage = `url("${url}")`; }; img.src = url; if (credit) $('nt-credit').textContent = credit; }
   } catch {}
 }
-const DEFAULT_SHORTCUTS = [
+// Förvalda genvägar: svenska sajter för svenska, annars internationella (Wikipedia på användarens språk)
+const DEFAULT_SHORTCUTS = (uiLang() === 'sv') ? [
   { label: 'Google', url: 'https://www.google.com' }, { label: 'YouTube', url: 'https://www.youtube.com' },
   { label: 'Wikipedia', url: 'https://sv.wikipedia.org' },
   { label: 'SVT', url: 'https://www.svt.se' }, { label: 'Blocket', url: 'https://www.blocket.se' },
   { label: 'Aftonbladet', url: 'https://www.aftonbladet.se' },
+] : [
+  { label: 'Google', url: 'https://www.google.com' }, { label: 'YouTube', url: 'https://www.youtube.com' },
+  { label: 'Wikipedia', url: 'https://' + ({ nb: 'no', 'pt-PT': 'pt', 'zh-CN': 'zh', 'zh-TW': 'zh' }[uiLang()] || uiLang().slice(0, 2)) + '.wikipedia.org' },
+  { label: 'Reddit', url: 'https://www.reddit.com' }, { label: 'Amazon', url: 'https://www.amazon.com' },
+  { label: 'Netflix', url: 'https://www.netflix.com' },
 ];
 function getShortcuts() { try { const s = JSON.parse(localStorage.getItem('skoll-shortcuts')); if (Array.isArray(s)) return s; } catch {} return DEFAULT_SHORTCUTS.slice(); }
 function saveShortcuts(l) { localStorage.setItem('skoll-shortcuts', JSON.stringify(l)); }
@@ -1960,13 +1973,13 @@ function renderSug() {
     el.className = 'sug' + ((i === sug.sel || (sug.sel < 0 && i === 0)) ? ' sel' : '') + (it.search ? ' ssearch' : '');
     let txt;
     if (it.kind === 'snabbord' && window.AnpassaSok) txt = window.AnpassaSok.rad(it);   // Anpassa: "Sök på YouTube: katter"
-    else if (it.kind === 'typed') txt = `<span class="stext">${escapeHtml(it.q)}</span><span class="sdim"> - ${escapeHtml(sug.engineLabel || '')} ${escapeHtml(t('Sök'))}</span>`;
-    else if (it.search) txt = `<span class="stext">${boldRest(it.q, typed)}</span>`;
+    else if (it.kind === 'typed') txt = `<span class="stext" translate="no">${escapeHtml(it.q)}</span><span class="sdim"> - ${escapeHtml(tf('{motor} Sök', { motor: sug.engineLabel || '' }))}</span>`;
+    else if (it.search) txt = `<span class="stext" translate="no">${boldRest(it.q, typed)}</span>`;
     else {
       const adr = pretty(it.url).replace(/^www\./, '');
       const titel = it.title && it.title !== it.url && it.title !== it.host ? it.title : '';
-      txt = titel ? `<span class="stext">${boldWords(titel, typed)}</span><span class="sdim"> - </span><span class="slink">${boldWords(adr, typed)}</span>`
-                  : `<span class="stext">${boldWords(adr, typed)}</span>`;
+      txt = titel ? `<span class="stext" translate="no">${boldWords(titel, typed)}</span><span class="sdim"> - </span><span class="slink" translate="no">${boldWords(adr, typed)}</span>`
+                  : `<span class="stext" translate="no">${boldWords(adr, typed)}</span>`;
     }
     el.innerHTML = `<span class="sfav">${sugIcon(it)}</span><span class="sline">${txt}</span>`;
     el.addEventListener('mousedown', (ev) => { ev.preventDefault(); pickSug(it); });
@@ -2111,7 +2124,7 @@ function slumpaBg() {
   for (let i = 0; i < 20; i++) { p = bgLista[Math.floor(Math.random() * bgLista.length)]; if (!sett.includes(p[0])) break; }
   sett.push(p[0]); if (sett.length > 500) sett = sett.slice(-500);
   try { localStorage.setItem('adraze-bg-sett', JSON.stringify(sett)); } catch {}
-  const bg = { url: bgUrl(p), credit: 'Foto: ' + p[2] + ' · Pexels', farg: p[3] };
+  const bg = { url: bgUrl(p), credit: tf('Foto: {namn} · Pexels', { namn: p[2] }), farg: p[3] };
   const img = new Image(); img.onload = () => { bg.klar = true; }; img.src = bg.url;
   return bg;
 }
@@ -2289,10 +2302,11 @@ const permQ = [];
 let permCur = null;
 function permText(q) {
   const host = q.origin.replace(/^https?:\/\//, '');
-  if (q.kinds.length === 1 && q.kinds[0] === 'external') return host + ' ' + tw('vill öppna ett annat program på datorn');
-  const names = q.kinds.map((k) => tw(PERM_LABEL[k] || k).toLowerCase());
-  const what = names.length > 1 ? names.slice(0, -1).join(', ') + ' ' + tw('och') + ' ' + names[names.length - 1] : names[0];
-  return host + ' ' + tw('vill använda') + ' ' + what;
+  if (q.kinds.length === 1 && q.kinds[0] === 'external') return tf('{sajt} vill öppna ett annat program på datorn', { sajt: host });
+  const versal = /^de\b/.test(uiLang());   // tyska substantiv har stor bokstav
+  const names = q.kinds.map((k) => { const x = tw(PERM_LABEL[k] || k); return versal ? x : x.toLocaleLowerCase(uiLang()); });
+  let what; try { what = new Intl.ListFormat(uiLang(), { style: 'long', type: 'conjunction' }).format(names); } catch { what = names.length > 1 ? names.slice(0, -1).join(', ') + ' ' + tw('och') + ' ' + names[names.length - 1] : names[0]; }
+  return tf('{sajt} vill använda {vad}', { sajt: host, vad: what });
 }
 function permNext() {
   if (permCur) return;
@@ -2326,7 +2340,7 @@ window.view.onHttpsFailed((id, url) => {
   let host = ''; try { host = new URL(url).hostname; } catch {}
   t.url = url; if (t === active) addressInput.value = pretty(url);
   showDanger(t, url, { status: 'warn', title: tw('Sidan har ingen säker anslutning'), sub: tw('Sidan går bara att öppna utan kryptering.'), reasons: [
-    tw('Du har Endast HTTPS på, men') + ' ' + host + ' ' + tw('svarar inte säkert.'),
+    tf('Du har Endast HTTPS på, men {sajt} svarar inte säkert.', { sajt: host }),
     tw('Det du skickar till sidan, till exempel lösenord, kan läsas av andra på nätverket.')] });
   pending.httpHost = host;
 });
@@ -2410,28 +2424,28 @@ async function refreshUpdatePanel(force) {
   if (st.ready && st.readyVersion !== updSenare && !document.getElementById('update-banner')) showUpdateBanner(st.readyVersion);
   $('upd-cur').textContent = st.current; $('upd-latest').textContent = st.latest;
   $('upd-when').textContent = tt('Just nu');
-  const om = $('om-version'); if (om) om.textContent = tt('Version') + ' ' + st.current;
+  const om = $('om-version'); if (om) om.textContent = tf('Version {v}', { v: st.current });
   $('upd-dot').hidden = !st.available;
   const notes = $('upd-notes');
   $('upd-install').hidden = true; $('upd-download').hidden = true;
   if (st.available) {
     card.dataset.state = 'new';
-    $('upd-title').textContent = tt('En ny version finns') + ': AdRaze ' + st.latest;
+    $('upd-title').textContent = tf('En ny version finns: AdRaze {v}', { v: st.latest });
     if (st.ready) { $('upd-desc').textContent = tt('Den är redan hämtad. Starta om så är du klar.'); $('upd-install').hidden = false; }
     else if (st.auto) { $('upd-desc').textContent = tt('Den hämtas i bakgrunden. Starta om när den är klar.'); $('upd-install').hidden = false; }
     else { $('upd-desc').textContent = tt('Ladda ner den nya versionen och ersätt den du har.'); $('upd-download').hidden = false; }
-    if (st.notes) { notes.hidden = false; notes.innerHTML = '<b>' + escapeHtml(tt('Nytt i') + ' ' + st.latest) + '</b>' + escapeHtml(st.notes); } else notes.hidden = true;
+    if (st.notes) { notes.hidden = false; notes.innerHTML = '<b>' + escapeHtml(tf('Nytt i {v}', { v: st.latest })) + '</b>' + escapeHtml(st.notes); } else notes.hidden = true;
   } else {
     card.dataset.state = 'ok';
     $('upd-title').textContent = tt('AdRaze är uppdaterad');
-    $('upd-desc').textContent = tt('Du har den senaste versionen') + ' (' + st.current + ').';
+    $('upd-desc').textContent = tf('Du har den senaste versionen ({v}).', { v: st.current });
     notes.hidden = true;
   }
 }
 $('upd-download')?.addEventListener('click', () => { try { closeSettings(); } catch {} createTab('https://github.com/northcrafto/adraze-dl/releases/latest'); });
 $('upd-check')?.addEventListener('click', () => refreshUpdatePanel(true));
 $('upd-install')?.addEventListener('click', () => { const b = $('upd-install'); b.disabled = true; b.textContent = (typeof window.t === 'function' ? window.t('Startar om…') : 'Startar om…'); window.view.installUpdate(); });
-setInterval(() => { if (updWhen && $('upd-when')) { const m = Math.round((Date.now() - updWhen) / 60000); const tt = (k) => (typeof window.t === 'function') ? window.t(k) : k; $('upd-when').textContent = m < 1 ? tt('Just nu') : (m + ' ' + tt('min sedan')); } }, 30000);
+setInterval(() => { if (updWhen && $('upd-when')) { const m = Math.round((Date.now() - updWhen) / 60000); const tt = (k) => (typeof window.t === 'function') ? window.t(k) : k; $('upd-when').textContent = m < 1 ? tt('Just nu') : tf('{n} min sedan', { n: m }); } }, 30000);
 setTimeout(() => refreshUpdatePanel(false), 7000);
 setInterval(() => refreshUpdatePanel(false), 30 * 60 * 1000);
 /* Gemensamt notiskort längst ner. Returnerar elementet; .stang() tar bort det med en liten animation. */
@@ -2462,7 +2476,7 @@ function showUpdateBanner(version) {
   const bar = visaNotis({
     id: 'update-banner', ikon: 'i-update',
     titel: tt('Uppdatera AdRaze?'),
-    under: tt('Version') + (version ? ' ' + version : '') + ' ' + tt('är klar. Starta om, så kommer dina flikar tillbaka.'),
+    under: version ? tf('Version {v} är klar. Starta om, så kommer dina flikar tillbaka.', { v: version }) : tt('Den nya versionen är klar. Starta om, så kommer dina flikar tillbaka.'),
     knapp: tt('Starta om'), sek: tt('Senare'),
     onKnapp: (el) => { starta(el); try { window.view.installUpdate(); } catch {} },
     onSek: () => { updSenare = version || ''; },
@@ -2569,7 +2583,7 @@ function renderHistory() {
     const fav = e.favicon
       ? `<img class="hist-fav" src="${escapeHtml(e.favicon)}" data-glob="hist" alt="">`
       : `<span class="hist-fav" style="display:grid;place-items:center;color:#8ba3bf"><svg class="ic" style="width:13px;height:13px"><use href="#i-fav" /></svg></span>`;
-    row.innerHTML = `${fav}<div class="hist-txt"><div class="hist-title">${escapeHtml(e.title)}</div><div class="hist-url">${escapeHtml(e.url.replace(/^https?:\/\/(www\.)?/, ''))}</div></div>` + (locked ? '' : `<button class="row-btn" title="Ta bort från historiken"><svg class="ic ic-sm"><use href="#i-trash" /></svg></button>`);
+    row.innerHTML = `${fav}<div class="hist-txt"><div class="hist-title" translate="no">${escapeHtml(e.title)}</div><div class="hist-url" translate="no">${escapeHtml(e.url.replace(/^https?:\/\/(www\.)?/, ''))}</div></div>` + (locked ? '' : `<button class="row-btn" title="Ta bort från historiken"><svg class="ic ic-sm"><use href="#i-trash" /></svg></button>`);
     row.addEventListener('click', () => { closeHistory(); if (active) guardedNavigate(active, e.url); });
     if (!locked) row.querySelector('.row-btn').addEventListener('click', (ev) => { ev.stopPropagation(); removeHistory(e.url); renderHistory(); });
     list.appendChild(row);
@@ -2605,10 +2619,10 @@ function histFmtDate(t) {
   const d = new Date(t), nu = new Date();
   const sammaDag = d.toDateString() === nu.toDateString();
   const igar = new Date(nu); igar.setDate(nu.getDate() - 1);
-  const klock = d.toLocaleTimeString(document.documentElement.lang || 'sv', { hour: '2-digit', minute: '2-digit' });
-  if (sammaDag) return (window.t ? window.t('I dag') : 'I dag') + ' ' + klock;
-  if (d.toDateString() === igar.toDateString()) return (window.t ? window.t('I går') : 'I går') + ' ' + klock;
-  return d.toLocaleDateString(document.documentElement.lang || 'sv', { day: 'numeric', month: 'short' }) + ' ' + klock;
+  const klock = d.toLocaleTimeString(uiLang(), { hour: '2-digit', minute: '2-digit' });
+  if (sammaDag) return tf('I dag {tid}', { tid: klock });
+  if (d.toDateString() === igar.toDateString()) return tf('I går {tid}', { tid: klock });
+  return d.toLocaleDateString(uiLang(), { day: 'numeric', month: 'short' }) + ' ' + klock;
 }
 function renderHistPanel() {
   const list = $('hist-list'); if (!list) return;
@@ -2633,7 +2647,7 @@ function renderHistPanel() {
       ? `<img class="hist-fav" src="${escapeHtml(e.favicon)}" data-glob="hist" alt="">`
       : `<span class="hist-fav" style="display:grid;place-items:center;color:#8ba3bf"><svg class="ic" style="width:13px;height:13px"><use href="#i-fav" /></svg></span>`;
     row.innerHTML = fav
-      + `<div class="hist-txt"><div class="hist-title">${escapeHtml(e.title || e.url)}</div><div class="hist-url">${escapeHtml(e.url.replace(/^https?:\/\/(www\.)?/, ''))}</div></div>`
+      + `<div class="hist-txt"><div class="hist-title" translate="no">${escapeHtml(e.title || e.url)}</div><div class="hist-url" translate="no">${escapeHtml(e.url.replace(/^https?:\/\/(www\.)?/, ''))}</div></div>`
       + `<span style="flex:none;font-size:11.5px;color:#8ba3bf;margin-right:4px;white-space:nowrap">${escapeHtml(histFmtDate(e.t))}</span>`
       + (locked ? '' : `<button class="row-btn" title="Ta bort från historiken"><svg class="ic ic-sm"><use href="#i-trash" /></svg></button>`);
     row.addEventListener('click', () => {   // besök sidan igen
@@ -2751,7 +2765,7 @@ function renderBookmarkBar() {
     const fav = e.favicon
       ? '<img src="' + escapeHtml(e.favicon) + '" data-glob="bm" alt="">'
       : '<span class="bmglobe"><svg class="ic"><use href="#i-fav" /></svg></span>';
-    return '<div class="bmchip" data-url="' + escapeHtml(e.url) + '" title="' + escapeHtml(e.title || e.url) + '">'
+    return '<div class="bmchip" translate="no" data-url="' + escapeHtml(e.url) + '" title="' + escapeHtml(e.title || e.url) + '">'
       + fav + '<span>' + escapeHtml(bmShort(e)) + '</span></div>';
   }).join('');
   bar.querySelectorAll('.bmchip').forEach((c) => {
@@ -2780,7 +2794,7 @@ function openBookmarks() {
   if (!b.length) list.innerHTML = '<div style="padding:16px;color:#8ba3bf;font-size:13px">Inga bokmärken än.</div>';
   b.forEach((e) => {
     const row = document.createElement('div'); row.className = 'hist-row';
-    row.innerHTML = `${rowFav(e.favicon)}<div class="hist-txt"><div class="hist-title">${escapeHtml(e.title)}</div><div class="hist-url">${escapeHtml(e.url.replace(/^https?:\/\/(www\.)?/, ''))}</div></div><button class="row-btn" title="Ta bort"><svg class="ic ic-sm"><use href="#i-trash" /></svg></button>`;
+    row.innerHTML = `${rowFav(e.favicon)}<div class="hist-txt"><div class="hist-title" translate="no">${escapeHtml(e.title)}</div><div class="hist-url" translate="no">${escapeHtml(e.url.replace(/^https?:\/\/(www\.)?/, ''))}</div></div><button class="row-btn" title="Ta bort"><svg class="ic ic-sm"><use href="#i-trash" /></svg></button>`;
     row.addEventListener('click', () => { closeBookmarks(); if (active) guardedNavigate(active, e.url); });
     row.querySelector('.row-btn').addEventListener('click', (ev) => { ev.stopPropagation(); removeBookmark(e.url); openBookmarks(); updateStar(); renderBookmarkBar(); });
     list.appendChild(row);
@@ -2808,14 +2822,14 @@ function renderDownloads() {
     const scanning = d.state === 'scanning', infected = d.state === 'infected', removed = d.state === 'deleted';
     let status, col = '#8ba3bf';
     const paused = d.state === 'paused', prog = d.state === 'progressing' || paused;
-    if (prog) status = (paused ? (window.t ? window.t('Pausad') : 'Pausad') + ' · ' : '') + `${fmtBytes(d.received)} / ${fmtBytes(d.total)}`;
+    if (prog) { const mangd = `${fmtBytes(d.received)} / ${fmtBytes(d.total)}`; status = paused ? tf('Pausad · {mangd}', { mangd }) : mangd; }
     else if (scanning) { status = 'Skannar efter virus…'; col = 'var(--color-terra)'; }
-    else if (infected) { status = 'Blockerad — ' + (d.threat || 'hot'); col = 'var(--color-danger)'; }
+    else if (infected) { status = d.threat ? tf('Blockerad — {hot}', { hot: tf(d.threat) }) : tf('Blockerad — hot'); col = 'var(--color-danger)'; }
     else if (removed) { status = 'Borttagen (virus)'; col = 'var(--color-danger)'; }
     else if (done) { status = d.scan === 'overridden' ? 'Klar (behållen trots varning)' : (d.scan === 'clean' ? 'Säker' : 'Klar'); col = 'var(--color-safe)'; }
     else { status = d.state === 'cancelled' ? 'Avbruten' : 'Misslyckades'; }
     const useIco = infected || removed ? 'i-shield-x' : (scanning ? 'i-shield' : 'i-download');
-    row.innerHTML = `<span class="hist-fav" style="display:grid;place-items:center;color:${col}"><svg class="ic ic-sm"><use href="#${useIco}" /></svg></span><div class="hist-txt"><div class="hist-title">${escapeHtml(d.filename)}</div><div class="hist-url" style="color:${infected || removed ? 'var(--color-danger)' : ''}">${escapeHtml(status)}</div></div>` + (done ? `<button class="row-btn" title="Visa i mapp"><svg class="ic ic-sm"><use href="#i-folder" /></svg></button>` : '')
+    row.innerHTML = `<span class="hist-fav" style="display:grid;place-items:center;color:${col}"><svg class="ic ic-sm"><use href="#${useIco}" /></svg></span><div class="hist-txt"><div class="hist-title" translate="no">${escapeHtml(d.filename)}</div><div class="hist-url" style="color:${infected || removed ? 'var(--color-danger)' : ''}">${escapeHtml(status)}</div></div>` + (done ? `<button class="row-btn" title="Visa i mapp"><svg class="ic ic-sm"><use href="#i-folder" /></svg></button>` : '')
       + (prog ? `<button class="row-btn dl-toggle" title="${paused ? 'Fortsätt' : 'Pausa'}"><svg class="ic ic-sm" viewBox="0 0 24 24">${paused ? '<path d="M8 5v14l11-7z"/>' : '<path d="M9 5v14M15 5v14"/>'}</svg></button><button class="row-btn dl-cancel" title="Avbryt"><svg class="ic ic-sm" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>` : '');
     if (done) { const b = row.querySelector('.row-btn'); if (b) b.addEventListener('click', () => window.dl.folder(d.id)); }
     const tb = row.querySelector('.dl-toggle'); if (tb) tb.addEventListener('click', () => paused ? window.dl.resume(d.id) : window.dl.pause(d.id));
@@ -2840,7 +2854,8 @@ function updateDlButton() {
 let threatId = null;
 window.dl.onThreat((t) => {
   threatId = t.id;
-  $('dlthreat-msg').innerHTML = '<b>' + escapeHtml(t.filename) + '</b> kan innehålla <b>' + escapeHtml(t.threat) + '</b>. Vi flyttade den åt sidan så den inte kan skada din dator. Är du säker på att filen är trygg kan du behålla den ändå.';
+  $('dlthreat-msg').innerHTML = escapeHtml(tf('{fil} kan innehålla {hot}. Vi flyttade den åt sidan så den inte kan skada din dator. Är du säker på att filen är trygg kan du behålla den ändå.'))
+    .replace('{fil}', '<b translate="no">' + escapeHtml(t.filename) + '</b>').replace('{hot}', '<b>' + escapeHtml(tf(t.threat || '')) + '</b>');
   $('dlthreat').style.display = 'block';
   showToast('Farlig nedladdning stoppad');
 });
@@ -2865,7 +2880,7 @@ async function renderPasswords() {
   items.forEach((p) => {
     const row = document.createElement('div'); row.className = 'hist-row'; row.style.cursor = 'default';
     let host = p.origin; try { host = new URL(p.origin).hostname.replace(/^www\./, ''); } catch {}
-    row.innerHTML = `<span class="hist-fav" style="display:grid;place-items:center;color:#8ba3bf"><svg class="ic ic-sm"><use href="#i-key" /></svg></span><div class="hist-txt"><div class="hist-title">${escapeHtml(host)} · ${escapeHtml(p.username || '')}</div><div class="hist-url"><span class="pw-dots">••••••••</span></div></div><button class="row-btn" data-a="eye" title="Visa"><svg class="ic ic-sm"><use href="#i-eye" /></svg></button><button class="row-btn" data-a="del" title="Ta bort"><svg class="ic ic-sm"><use href="#i-trash" /></svg></button>`;
+    row.innerHTML = `<span class="hist-fav" style="display:grid;place-items:center;color:#8ba3bf"><svg class="ic ic-sm"><use href="#i-key" /></svg></span><div class="hist-txt"><div class="hist-title" translate="no">${escapeHtml(host)} · ${escapeHtml(p.username || '')}</div><div class="hist-url" translate="no"><span class="pw-dots">••••••••</span></div></div><button class="row-btn" data-a="eye" title="Visa"><svg class="ic ic-sm"><use href="#i-eye" /></svg></button><button class="row-btn" data-a="del" title="Ta bort"><svg class="ic ic-sm"><use href="#i-trash" /></svg></button>`;
     const dots = row.querySelector('.pw-dots');
     row.querySelector('[data-a=eye]').addEventListener('click', () => { dots.textContent = dots.textContent.startsWith('•') ? p.password : '••••••••'; });
     row.querySelector('[data-a=del]').addEventListener('click', async () => { await window.pw.del(p.id); renderPasswords(); });
@@ -2941,26 +2956,26 @@ async function tillampaUtseende(x, rad) {
   if (x.zoom && [90, 100, 110, 125].includes(x.zoom)) {
     defaultZoom = x.zoom; try { localStorage.setItem('skoll-zoom', String(x.zoom)); } catch {}
     try { window.view.defaultZoom(x.zoom / 100); applyZoomSeg(); } catch {}
-    rad(tw('Sidzoom') + ' ' + x.zoom + ' %');
+    rad(tf('Sidzoom {n} %', { n: x.zoom }));
   }
   if (x.fontSize) {
     const f = [9, 12, 16, 20, 24].reduce((a, b) => (Math.abs(b - x.fontSize) < Math.abs(a - x.fontSize) ? b : a));
     await window.view.webbSet('fontSize', f);
     const opt = $('sel-font') && [...$('sel-font').options].find((o) => o.value === String(f));
-    rad(tw('Teckenstorlek') + (opt ? ': ' + opt.textContent : ''));
+    rad(opt ? tf('Teckenstorlek: {x}', { x: opt.textContent }) : tw('Teckenstorlek'));
   }
 }
 // Inställningar: sökmotor, vid start, nedladdningar, säkerhet, webbplatsbehörigheter
 async function tillampaInstallningar(x, rad, miss) {
-  if (x.motor && setEngine(x.motor)) rad(tw('Sökmotor') + ': ' + ENGINES[x.motor].label);
-  else if (x.motorNamn) miss(tw('Sökmotorn') + ' ' + x.motorNamn + ' ' + tw('finns inte i AdRaze — välj en under Sökmotor.'));
+  if (x.motor && setEngine(x.motor)) rad(tf('Sökmotor: {namn}', { namn: tf(ENGINES[x.motor].label) }));
+  else if (x.motorNamn) miss(tf('Sökmotorn {namn} finns inte i AdRaze — välj en under Sökmotor.', { namn: x.motorNamn }));
   if (x.start && (x.start.mode !== 'sida' || x.start.url)) {
     startMode = x.start.mode; try { localStorage.setItem('adraze-start', startMode); } catch {}
     if (x.start.url) { startUrl = x.start.url; try { localStorage.setItem('adraze-start-url', startUrl); } catch {} }
-    rad(tw('Vid start') + ': ' + (startMode === 'tidigare' ? tw('fortsätt där du var') : startMode === 'ny' ? tw('ny flik') : startUrl));
+    rad(tf('Vid start: {x}', { x: startMode === 'tidigare' ? tw('fortsätt där du var') : startMode === 'ny' ? tw('ny flik') : startUrl }));
   }
   if (x.nedladdning) {
-    if (x.nedladdning.dir && await window.view.webbSet('downloadDirPath', x.nedladdning.dir)) rad(tw('Nedladdningsmapp') + ': ' + x.nedladdning.dir);
+    if (x.nedladdning.dir && await window.view.webbSet('downloadDirPath', x.nedladdning.dir)) rad(tf('Nedladdningsmapp: {x}', { x: x.nedladdning.dir }));
     if (typeof x.nedladdning.fraga === 'boolean') { await window.view.webbSet('askDownload', x.nedladdning.fraga); if (x.nedladdning.fraga) rad(tw('Fråga var filer ska sparas')); }
   }
   if (typeof x.httpsOnly === 'boolean') { await window.view.webbSet('httpsOnly', x.httpsOnly); if (x.httpsOnly) rad(tw('Endast HTTPS')); }
@@ -2975,11 +2990,11 @@ async function tillampaInstallningar(x, rad, miss) {
       if (await window.view.webbSet('perm', { origin: o, kind, value: v })) np++;
     }
   }
-  if (np) rad(np + ' ' + tw(np === 1 ? 'webbplatsbehörighet' : 'webbplatsbehörigheter'));
+  if (np) rad(np === 1 ? tf('{n} webbplatsbehörighet', { n: np }) : tf('{n} webbplatsbehörigheter', { n: np }));
   for (const [kind, v] of Object.entries(x.permDefaults || {})) {
     if (std[kind] || v !== 'block') continue;
     await window.view.webbSet('permDefault', { kind, value: 'block' });
-    rad(tw('Blockeras på alla sajter') + ': ' + tw(PERM_LABEL[kind] || kind));
+    rad(tf('Blockeras på alla sajter: {x}', { x: tw(PERM_LABEL[kind] || kind) }));
   }
 }
 function impVisaLista(ok, missar) {
@@ -3006,13 +3021,13 @@ if ($('imp-go')) $('imp-go').addEventListener('click', async () => {
   if (!r || !r.ok) { btn.disabled = false; impSettMsg(r && r.fel ? r.fel : tw('Kunde inte läsa webbläsaren.'), true); return; }
   const ok = [], missar = [];
   const rad = (t) => ok.push(t), miss = (t) => missar.push(t);
-  if (bokmarken) { const n = mergeBokmarken(r.bokmarken || []); if (n) rad(n + ' ' + tw('bokmärken')); else miss(tw('Inga nya bokmärken')); }
-  if (historik) { const n = mergeHistorik(r.historik || []); if (n) rad(n + ' ' + tw('sidor i historiken')); else miss(tw('Ingen ny historik')); }
+  if (bokmarken) { const n = mergeBokmarken(r.bokmarken || []); if (n) rad(n === 1 ? tf('{n} bokmärke', { n }) : tf('{n} bokmärken', { n })); else miss(tw('Inga nya bokmärken')); }
+  if (historik) { const n = mergeHistorik(r.historik || []); if (n) rad(n === 1 ? tf('{n} sida i historiken', { n }) : tf('{n} sidor i historiken', { n })); else miss(tw('Ingen ny historik')); }
   // Inloggningarna är redan satta av huvudprocessen (kakorna lämnar den aldrig) — före flikarna, så att de öppnas inloggade
   if (kakor && r.kakor) {
-    if (r.kakor.antal) rad(tw('Inloggad på') + ' ' + r.kakor.sajter + ' ' + tw(r.kakor.sajter === 1 ? 'sajt' : 'sajter'));
+    if (r.kakor.antal) rad(r.kakor.sajter === 1 ? tf('Inloggad på {n} sajt', { n: r.kakor.sajter }) : tf('Inloggad på {n} sajter', { n: r.kakor.sajter }));
     else if (!r.kakor.last) miss(tw('Inga inloggningar att ta med'));
-    if (r.kakor.last) miss(r.kakor.last + ' ' + tw('inloggningar gick inte att låsa upp'));
+    if (r.kakor.last) miss(r.kakor.last === 1 ? tf('{n} inloggning gick inte att låsa upp', { n: r.kakor.last }) : tf('{n} inloggningar gick inte att låsa upp', { n: r.kakor.last }));
   }
   if (flikar) {
     const redan = new Set(tabs.map((t) => t.url).filter(Boolean));
@@ -3021,7 +3036,7 @@ if ($('imp-go')) $('imp-go').addEventListener('click', async () => {
       const tillbaka = active;
       for (const t of nya) { const nt = createTab(t.url); if (t.pinned) try { setPinned(nt, true); } catch {} }
       try { if (tillbaka) switchTab(tillbaka); } catch {}
-      rad(nya.length + ' ' + tw(nya.length === 1 ? 'flik öppnad' : 'flikar öppnade'));
+      rad(nya.length === 1 ? tf('{n} flik öppnad', { n: nya.length }) : tf('{n} flikar öppnade', { n: nya.length }));
     } else miss(tw('Inga öppna flikar att ta med'));
   }
   const x = r.installningar;
@@ -3034,17 +3049,17 @@ if ($('imp-go')) $('imp-go').addEventListener('click', async () => {
     const lista = x.tillagg || [];
     if (!lista.length) miss(tw('Inga tillägg att ta med'));
     else {
-      impSettMsg(tw('Installerar tillägg…') + ' (' + lista.length + ')');
+      impSettMsg(tf('Installerar tillägg… ({n})', { n: lista.length }));
       let t = null; try { t = await window.view.importTillagg(lista.map((e) => e.id)); } catch {}
       const klara = new Set((t && t.klara) || []);
       const namn = (id) => (lista.find((e) => e.id === id) || {}).namn || id;
-      if (klara.size) rad(tw('Tillägg') + ': ' + [...klara].map(namn).join(', '));
-      for (const f of (t && t.fel) || []) miss(namn(f.id) + ' — ' + tw('gick inte att installera'));
+      if (klara.size) rad(tf('Tillägg: {lista}', { lista: [...klara].map(namn).join(', ') }));
+      for (const f of (t && t.fel) || []) miss(tf('{namn} — gick inte att installera', { namn: namn(f.id) }));
       try { renderExt(); } catch {}
     }
   }
   btn.disabled = false;
-  impSettMsg(tw('Klart! Det här togs med från') + ' ' + impVal.namn + ':', 'ok');
+  impSettMsg(tf('Klart! Det här togs med från {namn}:', { namn: impVal.namn }), 'ok');
   impVisaLista(ok, missar);
 });
 if ($('imp-csv')) $('imp-csv').addEventListener('click', async () => {
@@ -3053,7 +3068,7 @@ if ($('imp-csv')) $('imp-csv').addEventListener('click', async () => {
   btn.disabled = false;
   if (!r || (!r.ok && r.avbruten)) { impSettMsg(''); return; }
   if (!r.ok) { impSettMsg(r.fel || 'Kunde inte importera lösenorden.', true); return; }
-  impSettMsg('Klart — ' + r.antal + ' lösenord importerade.');
+  impSettMsg(r.antal === 1 ? tf('Klart — {n} lösenord importerat.', { n: r.antal }) : tf('Klart — {n} lösenord importerade.', { n: r.antal }));
   renderPasswords();
 });
 $('pw-add-btn').addEventListener('click', async () => {
@@ -3078,8 +3093,8 @@ async function renderExt() {
   for (const e of lista) {
     const row = document.createElement('div'); row.className = 'ext-item';
     row.innerHTML = `<span class="ext-ico"><svg class="ic ic-sm"><use href="#i-settings" /></svg></span>`
-      + `<div style="flex:1;min-width:0;"><div class="ext-nm">${escapeHtml(e.namn)}</div>`
-      + `<div class="ext-sub">${e.version ? 'v' + escapeHtml(e.version) + ' · ' : ''}${e.aktiv ? (e.kor ? 'På' : 'På (läses in vid omstart)') : 'Av'}</div></div>`
+      + `<div style="flex:1;min-width:0;"><div class="ext-nm" translate="no">${escapeHtml(e.namn)}</div>`
+      + `<div class="ext-sub">${e.version ? 'v' + escapeHtml(e.version) + ' · ' : ''}<span>${e.aktiv ? (e.kor ? 'På' : 'På (läses in vid omstart)') : 'Av'}</span></div></div>`
       + `<label class="switch" style="flex:none;"><input type="checkbox" ${e.aktiv ? 'checked' : ''}><span class="track"></span></label>`
       + `<button class="ext-del" title="Ta bort"><svg class="ic ic-sm"><use href="#i-trash" /></svg></button>`;
     row.querySelector('input').addEventListener('change', async (ev) => {
@@ -3102,7 +3117,7 @@ if ($('ext-add-btn')) {
     let r; try { r = await window.view.extAdd(text); } catch (e) { r = { ok: false, fel: String(e) }; }
     btn.disabled = false;
     if (!r || !r.ok) { extMsg((r && r.fel) || 'Kunde inte lägga till tillägget.', 'err'); return; }
-    inp.value = ''; extMsg('Klart — ' + r.tillagg.namn + ' installerat.', 'ok');
+    inp.value = ''; extMsg(tf('Klart — {namn} installerat.', { namn: r.tillagg.namn }), 'ok');
     renderExt();
   };
   $('ext-add-btn').addEventListener('click', add);
@@ -3169,7 +3184,7 @@ $('wl-buy-toggle') && $('wl-buy-toggle').addEventListener('change', (e) => { try
 
 /* ── Falk handlar åt användaren (tillstånd + säkerhetskoll + bekräftelse) ── */
 function kbuyAllowed() { try { return localStorage.getItem('adraze-krypto-buy') === '1'; } catch { return false; } }
-function cardLabel(c) { return (c.brand || 'Kort') + ' •• ' + (c.last4 || '····'); }
+function cardLabel(c) { return (c.brand || tf('Kort')) + ' •• ' + (c.last4 || '····'); }
 function kbuyOverlay(inner) {
   const ov = document.createElement('div'); ov.id = 'kbuy-modal';
   ov.style.cssText = 'position:fixed;inset:0;z-index:210;background:rgba(5,12,22,.55);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px);';
@@ -3181,7 +3196,7 @@ function kbuyOverlay(inner) {
 function startKryptoPurchase(val) {
   if (document.getElementById('kbuy-modal')) return;
   const p = ('' + val).split('|').map((s) => s.trim());
-  const order = { desc: p[0] || 'Köp', merchant: p[1] || 'Butik', amount: p[2] || '' };
+  const order = { desc: p[0] || tf('Köp'), merchant: p[1] || tf('Butik'), amount: p[2] || '' };
   if (!kbuyAllowed()) return showBuyConsent(order);
   showBuyConfirm(order);
 }
@@ -3189,7 +3204,7 @@ function showBuyConsent(order) {
   const ov = kbuyOverlay(
     ''
     + '<div style="font-size:18px;font-weight:800;text-align:center;color:var(--color-navy-900);margin-bottom:8px">Låta Falk handla åt dig?</div>'
-    + '<p style="font-size:13.5px;color:rgb(28 43 58 / .62);text-align:center;line-height:1.55;margin-bottom:18px">Falk vill kunna köpa saker åt dig med dina sparade kort. Du får alltid <b>godkänna varje köp</b> innan betalning – och kan stänga av det när som helst i AdRaze Wallet.</p>'
+    + '<p style="font-size:13.5px;color:rgb(28 43 58 / .62);text-align:center;line-height:1.55;margin-bottom:18px">' + htmlTf('Falk vill kunna köpa saker åt dig med dina sparade kort. Du får alltid {godkann} innan betalning – och kan stänga av det när som helst i AdRaze Wallet.', { godkann: '<b>' + escapeHtml(tf('godkänna varje köp')) + '</b>' }) + '</p>'
     + '<div style="display:flex;gap:9px"><button id="kbuy-no" class="btn btn-ghost" style="flex:1;height:44px">Nej tack</button><button id="kbuy-yes" class="btn btn-safe" style="flex:1;height:44px">Tillåt</button></div>');
   ov.querySelector('#kbuy-no').addEventListener('click', () => { ov.remove(); showToast('Falk handlar inte utan ditt tillstånd.'); });
   ov.querySelector('#kbuy-yes').addEventListener('click', () => { try { localStorage.setItem('adraze-krypto-buy', '1'); } catch {} const t = $('wl-buy-toggle'); if (t) t.checked = true; ov.remove(); showBuyConfirm(order); });
@@ -3211,7 +3226,7 @@ async function showBuyConfirm(order) {
     '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div style="font-size:16px;font-weight:800;color:var(--color-navy-900)">Falk vill göra ett köp åt dig</div></div>'
     + '<div style="background:var(--color-paper);border:1px solid var(--color-line);border-radius:14px;padding:14px 16px;margin-bottom:14px">'
     +   '<div style="font-size:15px;font-weight:700;color:var(--color-navy-900)">' + escapeHtml(order.desc) + '</div>'
-    +   '<div style="font-size:13px;color:rgb(28 43 58 / .6);margin-top:2px">från ' + escapeHtml(order.merchant) + '</div>'
+    +   '<div style="font-size:13px;color:rgb(28 43 58 / .6);margin-top:2px">' + escapeHtml(tf('från {butik}', { butik: order.merchant })) + '</div>'
     +   (order.amount ? '<div style="font-size:22px;font-weight:800;color:var(--color-navy-900);margin-top:8px">' + escapeHtml(order.amount) + '</div>' : '')
     + '</div>'
     + '<label style="display:block;font-size:12px;font-weight:700;color:rgb(28 43 58 / .7);margin-bottom:6px">Betala med</label>'
@@ -3224,9 +3239,11 @@ async function showBuyConfirm(order) {
   const renderScan = () => {
     const c = cards[+ov.querySelector('#kbuy-card').value] || cards[0];
     scan.innerHTML = '<div style="font-weight:700;margin-bottom:4px">Falks koll innan betalning</div>'
-      + 'Betalar med ' + escapeHtml(cardLabel(c)) + '<br>'
-      + 'Mottagare: ' + escapeHtml(order.merchant) + '<br>'
-      + 'Dubbelkolla: rätt vara (<b>' + escapeHtml(order.desc) + '</b>)' + (order.amount ? ' och rätt summa (<b>' + escapeHtml(order.amount) + '</b>)' : '') + '?';
+      + escapeHtml(tf('Betalar med {kort}', { kort: cardLabel(c) })) + '<br>'
+      + escapeHtml(tf('Mottagare: {butik}', { butik: order.merchant })) + '<br>'
+      + (order.amount
+        ? htmlTf('Dubbelkolla: rätt vara ({vara}) och rätt summa ({summa})?', { vara: '<b>' + escapeHtml(order.desc) + '</b>', summa: '<b>' + escapeHtml(order.amount) + '</b>' })
+        : htmlTf('Dubbelkolla: rätt vara ({vara})?', { vara: '<b>' + escapeHtml(order.desc) + '</b>' }));
   };
   renderScan();
   ov.querySelector('#kbuy-card').addEventListener('change', renderScan);
@@ -3238,7 +3255,9 @@ async function showBuyConfirm(order) {
       ov.firstElementChild.innerHTML = '<div style="text-align:center;padding:8px 4px">'
         + ''
         + '<div style="font-size:18px;font-weight:800;color:var(--color-navy-900);margin-bottom:6px">Beställning lagd!</div>'
-        + '<p style="font-size:13.5px;color:rgb(28 43 58 / .62);line-height:1.55;margin-bottom:6px">' + escapeHtml(order.desc) + ' från <b>' + escapeHtml(order.merchant) + '</b>' + (order.amount ? ' – ' + escapeHtml(order.amount) : '') + ' betalt med ' + escapeHtml(cardLabel(c)) + '.</p>'
+        + '<p style="font-size:13.5px;color:rgb(28 43 58 / .62);line-height:1.55;margin-bottom:6px">' + (order.amount
+          ? htmlTf('{vara} från {butik} – {summa} betalt med {kort}.', { vara: escapeHtml(order.desc), butik: '<b>' + escapeHtml(order.merchant) + '</b>', summa: escapeHtml(order.amount), kort: escapeHtml(cardLabel(c)) })
+          : htmlTf('{vara} från {butik} betalt med {kort}.', { vara: escapeHtml(order.desc), butik: '<b>' + escapeHtml(order.merchant) + '</b>', kort: escapeHtml(cardLabel(c)) })) + '</p>'
         + '<p style="font-size:12px;color:rgb(28 43 58 / .45);margin-bottom:16px">Demo – ingen riktig betalning gjordes.</p>'
         + '<button id="kbuy-done" class="btn btn-safe" style="height:44px;padding:0 26px">Klar</button></div>';
       ov.querySelector('#kbuy-done').addEventListener('click', () => ov.remove());
@@ -3252,7 +3271,7 @@ function showBar(id) { ['infobar', 'wsavebar', 'wfillbar'].forEach((b) => { if (
 let wlSaveOffer = null;
 window.wallet.onOffer((c) => {
   wlSaveOffer = c;
-  $('wsavebar-sub').textContent = `${c.brand || 'Kort'} •••• ${c.last4} · sparas krypterat på din dator`;
+  $('wsavebar-sub').textContent = tf('{kort} •••• {siffror} · sparas krypterat på din dator', { kort: c.brand || tf('Kort'), siffror: c.last4 });
   showBar('wsavebar');
 });
 $('wsavebar-save').addEventListener('click', async () => { if (wlSaveOffer) await window.wallet.save(wlSaveOffer); wlSaveOffer = null; hideBar('wsavebar'); showToast('Kort sparat i AdRaze Wallet.'); });
@@ -3261,7 +3280,7 @@ let wlFillId = null;
 window.wallet.onFillOffer((cards) => {
   if (!cards || !cards.length) return;
   const c = cards[0]; wlFillId = c.id;
-  $('wfillbar-sub').textContent = `${c.brand || 'Kort'} •••• ${c.last4}${c.holder ? ' · ' + c.holder : ''}`;
+  $('wfillbar-sub').textContent = `${c.brand || tf('Kort')} •••• ${c.last4}${c.holder ? ' · ' + c.holder : ''}`;
   showBar('wfillbar');
 });
 $('wfillbar-fill').addEventListener('click', () => { if (wlFillId) window.wallet.fillNow(wlFillId); hideBar('wfillbar'); });
@@ -3323,7 +3342,7 @@ async function maybeShowFlyttBanner() {
     const namn = lista.length === 1 ? forsta.namn : '';
     visaNotis({
       id: 'flytt-banner', ikon: 'i-flytt',
-      titel: namn ? tw('Kommer du från') + ' ' + namn + '?' : tw('Kommer du från en annan webbläsare?'),
+      titel: namn ? tf('Kommer du från {namn}?', { namn }) : tw('Kommer du från en annan webbläsare?'),
       under: tw('Ta med flikar, inloggningar, bokmärken och inställningar.'),
       knapp: tw('Ta med allt'), sek: tw('Nej tack'),
       onKnapp: async (el) => {
@@ -3440,19 +3459,19 @@ function allowLabel(minutes) { return minutes >= 60 ? (minutes % 60 === 0 ? (min
 async function doAllow(host, childName, minutes) {
   if (typeof famSyncParent === 'function') await famSyncParent();
   const ok = await famAllowFor(childName, host, minutes);
-  if (ok) { if (typeof showToast === 'function') showToast('Tillät ' + host + ' i ' + allowLabel(minutes)); }
+  if (ok) { if (typeof showToast === 'function') showToast(tf('Tillät {sajt} i {tid}', { sajt: host, tid: allowLabel(minutes) })); }
   else if (typeof showToast === 'function') showToast('Kunde inte tillåta.');
 }
 async function doAllowAlways(host, childName) {
   if (typeof famSyncParent === 'function') await famSyncParent();
   if (typeof window.famUnblockFor === 'function') window.famUnblockFor(childName, [host]);
-  if (typeof showToast === 'function') showToast('Tillät ' + host + ' för alltid');
+  if (typeof showToast === 'function') showToast(tf('Tillät {sajt} för alltid', { sajt: host }));
 }
 function allowMenu(host, childName, anchorEl) {
   if (typeof closeMsgMenu === 'function') closeMsgMenu();
   const menu = document.createElement('div'); menu.id = 'fr-msgmenu';
   menu.style.cssText = 'position:fixed;z-index:250;background:#fff;border:1px solid var(--color-line);border-radius:12px;box-shadow:0 12px 34px rgba(8,20,35,.22);padding:5px;min-width:186px;';
-  const head = document.createElement('div'); head.textContent = 'Tillåt ' + host + '…'; head.style.cssText = 'padding:8px 12px 6px;font-size:11.5px;font-weight:700;color:rgb(28 43 58 / .55);'; menu.appendChild(head);
+  const head = document.createElement('div'); head.textContent = tf('Tillåt {sajt}…', { sajt: host }); head.style.cssText = 'padding:8px 12px 6px;font-size:11.5px;font-weight:700;color:rgb(28 43 58 / .55);'; menu.appendChild(head);
   const item = (label, fn) => { const b = document.createElement('button'); b.textContent = label; b.style.cssText = 'display:block;width:100%;text-align:left;padding:9px 12px;border:0;background:none;border-radius:8px;font-size:13px;cursor:pointer;color:var(--color-navy-900);'; b.addEventListener('mouseenter', () => (b.style.background = 'var(--color-paper)')); b.addEventListener('mouseleave', () => (b.style.background = 'none')); b.addEventListener('click', (e) => { e.stopPropagation(); if (typeof closeMsgMenu === 'function') closeMsgMenu(); fn(); }); menu.appendChild(b); };
   item('i 15 minuter', () => doAllow(host, childName, 15));
   item('i 1 timme', () => doAllow(host, childName, 60));
@@ -3549,7 +3568,7 @@ function showBlockScreen(url, lage) {
     return;
   }
   if (lage === 'nej') {
-    kbRita(ov, { tecken: ':(', dom, rubrik: 'Svaret blev nej.', text: 'Din förälder vill inte att du går in på ' + escapeHtml(dom) + ' just nu. Prata gärna med hen om det.',
+    kbRita(ov, { tecken: ':(', dom, rubrik: 'Svaret blev nej.', text: escapeHtml(tf('Din förälder vill inte att du går in på {sajt} just nu. Prata gärna med hen om det.', { sajt: dom })),
       inne: '<div class="kb-knappar"><button class="liq" id="kidblock-back">Tillbaka</button></div>' });
     q('#kidblock-back').onclick = () => kbStang(true);
     return;
@@ -3571,7 +3590,7 @@ function kbSvar(fragor) {
   if (f.svar === 'nej') { showBlockScreen(u, 'nej'); return; }
   // ja: kort ":)" innan sidan öppnas (blocklistan/tillåtelsen är redan uppdaterad i fam)
   ov.classList.add('kb-ja');
-  kbRita(ov, { tecken: ':)', dom: visaDoman(famHost(u)), rubrik: 'Du fick lov!', text: f.minuter ? 'Du får vara där i ' + escapeHtml(allowLabel(f.minuter)) + '.' : 'Sidan är öppen för dig nu.' });
+  kbRita(ov, { tecken: ':)', dom: visaDoman(famHost(u)), rubrik: 'Du fick lov!', text: f.minuter ? escapeHtml(tf('Du får vara där i {tid}.', { tid: allowLabel(f.minuter) })) : 'Sidan är öppen för dig nu.' });
   setTimeout(() => { if (ov.style.display === 'none') return; ov.style.display = 'none'; ov.classList.remove('kb-ja'); try { if (active) guardedNavigate(active, u); } catch {} }, 1400);
 }
 function renderFam() {
@@ -3646,19 +3665,20 @@ function renderFamChild(host) {
   else html += '<div class="fam-none">Inga blockerade sidor just nu.</div>';
   const now = Date.now();
   const al = ((c && c.allows) || []).filter((a) => a && a.until > now);
-  if (al.length) html += '<div class="fam-sub">Öppet en stund till</div><div class="fam-bl">' + al.map((a) => '<span class="fam-tag" style="background:rgba(23,138,90,.08);border-color:rgba(23,138,90,.25);padding-right:12px;">' + escapeHtml(a.host) + ' <span style="opacity:.6">till ' + fmtTime(a.until) + '</span></span>').join('') + '</div>';
-  html += '<div class="fam-krypto">Vill du besöka en blockerad sida? Fråga dina föräldrar, så kan de tillåta den i <b>AdRaze Familj</b>.</div>';
+  if (al.length) html += '<div class="fam-sub">Öppet en stund till</div><div class="fam-bl">' + al.map((a) => '<span class="fam-tag" style="background:rgba(23,138,90,.08);border-color:rgba(23,138,90,.25);padding-right:12px;">' + escapeHtml(a.host) + ' <span style="opacity:.6">' + escapeHtml(tf('till {tid}', { tid: fmtTime(a.until) })) + '</span></span>').join('') + '</div>';
+  html += '<div class="fam-krypto">' + htmlTf('Vill du besöka en blockerad sida? Fråga dina föräldrar, så kan de tillåta den i {app}.', { app: '<b>' + escapeHtml(tf('AdRaze Familj')) + '</b>' }) + '</div>';
   html += '</div>';
   host.innerHTML = html;
 }
-function fmtTime(ts) { const d = new Date(ts); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
+function fmtTime(ts) { try { return new Date(ts).toLocaleTimeString(uiLang(), { hour: '2-digit', minute: '2-digit' }); } catch { const d = new Date(ts); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); } }
 function fmtHistTime(ts) {
   const d = new Date(ts), now = new Date();
-  const hh = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
-  if (d.toDateString() === now.toDateString()) return 'idag ' + hh;
+  const hh = fmtTime(ts);
+  if (d.toDateString() === now.toDateString()) return tf('idag {tid}', { tid: hh });
   const y = new Date(now); y.setDate(now.getDate() - 1);
-  if (d.toDateString() === y.toDateString()) return 'igår ' + hh;
-  return d.getDate() + '/' + (d.getMonth() + 1) + ' ' + hh;
+  if (d.toDateString() === y.toDateString()) return tf('igår {tid}', { tid: hh });
+  let dag; try { dag = d.toLocaleDateString(uiLang(), { day: 'numeric', month: 'numeric' }); } catch { dag = d.getDate() + '/' + (d.getMonth() + 1); }
+  return dag + ' ' + hh;
 }
 // Förälder ser barnets historik (öppen insyn)
 async function famShowHistory(childId, childName) {
@@ -3679,27 +3699,33 @@ async function famShowHistory(childId, childName) {
   let r; try { r = await window.family.history(account.token, cid); } catch { r = { ok: false }; }
   const list = ov.querySelector('#fh-list');
   if (!r || !r.ok) {
-    const msg = (r && r.error === 'not_your_child') ? escapeHtml(tn('Öppna det här från ditt förälder-konto för att se historik för {n}.', childName)).replace('förälder-konto', '<b>förälder-konto</b>') : 'Kunde inte hämta historiken just nu. Kontrollera din uppkoppling.';
+    const msg = (r && r.error === 'not_your_child') ? htmlTf('Öppna det här från ditt {konto} för att se historik för {namn}.', { konto: '<b>' + escapeHtml(tf('förälder-konto')) + '</b>', namn: escapeHtml(childName) }) : 'Kunde inte hämta historiken just nu. Kontrollera din uppkoppling.';
     list.innerHTML = '<div class="fam-none" style="padding:10px;line-height:1.5">' + msg + '</div>'; return;
   }
   const items = r.history || [];
-  if (!items.length) { list.innerHTML = '<div class="fam-none" style="padding:8px 10px">Ingen historik än — ' + escapeHtml(childName) + ' har inte surfat något (eller inte loggat in i appen).</div>'; return; }
+  if (!items.length) { list.innerHTML = '<div class="fam-none" style="padding:8px 10px">' + escapeHtml(tf('Ingen historik än — {namn} har inte surfat något (eller inte loggat in i appen).', { namn: childName })) + '</div>'; return; }
   list.innerHTML = items.map((e) => {
     let host = e.url; try { host = new URL(e.url).hostname.replace(/^www\./, ''); } catch {}
     return '<div style="display:flex;flex-direction:column;gap:1px;padding:9px 10px;border-bottom:1px solid var(--color-line)">'
       + '<span style="font-size:13.5px;font-weight:600;color:var(--color-navy-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escapeHtml(e.title || host) + '</span>'
-      + '<span style="font-size:11.5px;color:rgb(28 43 58 / .5)">' + escapeHtml(host) + ' · ' + fmtHistTime(e.ts) + '</span></div>';
+      + '<span style="font-size:11.5px;color:rgb(28 43 58 / .5)">' + escapeHtml(host) + ' · ' + escapeHtml(fmtHistTime(e.ts)) + '</span></div>';
   }).join('');
+}
+// Landets namn på användarens språk (från landskoden), annars det namn servern skickade
+function famLand(geo) {
+  if (geo && geo.cc && geo.cc.length === 2) { try { const n = new Intl.DisplayNames([uiLang()], { type: 'region' }).of(geo.cc.toUpperCase()); if (n && n !== geo.cc.toUpperCase()) return n; } catch {} }
+  return (geo && geo.country) || '';
 }
 function famFlag(cc) {
   return cc && cc.length === 2 ? cc.toUpperCase() : '';
 }
 function famRelTime(ts) {
   const s = Math.max(0, Date.now() - (ts || 0)) / 1000;
-  if (s < 90) return 'nyss';
-  const m = s / 60; if (m < 90) return Math.round(m) + ' min sedan';
-  const h = m / 60; if (h < 36) return Math.round(h) + ' tim sedan';
-  return Math.round(h / 24) + ' dagar sedan';
+  if (s < 90) return tf('nyss');
+  let rtf = null; try { rtf = new Intl.RelativeTimeFormat(uiLang(), { numeric: 'auto', style: 'short' }); } catch {}
+  const m = s / 60; if (m < 90) return rtf ? rtf.format(-Math.round(m), 'minute') : tf('{n} min sedan', { n: Math.round(m) });
+  const h = m / 60; if (h < 36) return rtf ? rtf.format(-Math.round(h), 'hour') : tf('{n} tim sedan', { n: Math.round(h) });
+  return rtf ? rtf.format(-Math.round(h / 24), 'day') : tf('{n} dagar sedan', { n: Math.round(h / 24) });
 }
 // Hur länge en enhet varit inloggad (varaktighet sedan inloggning).
 function famDuration(ts) {
@@ -3707,10 +3733,11 @@ function famDuration(ts) {
   const d = Math.floor(s / 86400); s -= d * 86400;
   const h = Math.floor(s / 3600); s -= h * 3600;
   const m = Math.floor(s / 60);
-  if (d > 0) return d + ' ' + (d === 1 ? 'dag' : 'dagar') + (h ? ' ' + h + ' tim' : '');
-  if (h > 0) return h + ' tim' + (m ? ' ' + m + ' min' : '');
-  if (m > 0) return m + ' min';
-  return 'mindre än en minut';
+  const dagar = (n) => (n === 1 ? tf('{n} dag', { n }) : tf('{n} dagar', { n }));
+  if (d > 0) return dagar(d) + (h ? ' ' + tf('{n} tim', { n: h }) : '');
+  if (h > 0) return tf('{n} tim', { n: h }) + (m ? ' ' + tf('{n} min', { n: m }) : '');
+  if (m > 0) return tf('{n} min', { n: m });
+  return tf('mindre än en minut');
 }
 // Karta + lista över ett barns aktiva inloggningar (IP -> plats), med per-enhet-utloggning.
 async function famShowSessions(childId, childName) {
@@ -3719,7 +3746,7 @@ async function famShowSessions(childId, childName) {
   ov.style.cssText = 'position:fixed;inset:0;z-index:220;background:rgba(5,12,22,.55);display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(4px);';
   ov.innerHTML = '<div style="width:min(700px,96vw);max-height:90vh;display:flex;flex-direction:column;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 30px 80px rgba(8,20,35,.45)">'
     + '<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:18px 20px 12px;gap:12px">'
-      + '<div><div style="font-size:17px;font-weight:800;color:var(--color-navy-900)">Var är ' + escapeHtml(childName) + ' inloggad?</div>'
+      + '<div><div style="font-size:17px;font-weight:800;color:var(--color-navy-900)">' + escapeHtml(tf('Var är {namn} inloggad?', { namn: childName })) + '</div>'
       + '<div style="font-size:12.5px;color:rgb(28 43 58 / .55);margin-top:2px">Varje pin är en enhet som är inloggad just nu. Logga ut den du inte känner igen.</div></div>'
       + '<button id="fs-close" style="border:0;background:none;font-size:24px;cursor:pointer;color:var(--color-navy-600);line-height:1;flex:none">×</button></div>'
     + '<div id="fs-map" style="margin:0 20px;border-radius:14px;overflow:hidden;background:linear-gradient(180deg,#dcecfb,#c9e0f4);border:1px solid var(--color-line);min-height:120px"></div>'
@@ -3755,24 +3782,25 @@ async function famShowSessions(childId, childName) {
       + '<path d="' + (window.__WORLD_PATH || '') + '" fill="#a9c9e8" stroke="#8bb2d8" stroke-width="0.4"/>' + pins + '</svg>';
     if (!sessions.length) { listEl.innerHTML = '<div style="text-align:center;color:rgb(28 43 58 / .5);padding:28px">Ingen är inloggad just nu.</div>'; }
     else listEl.innerHTML = items.map((x) => {
-      const place = x.geo ? ((x.geo.city ? x.geo.city + ', ' : '') + (x.geo.country || '')) : 'Okänd plats';
+      const land = x.geo ? famLand(x.geo) : '';
+      const place = x.geo ? ((x.geo.city ? x.geo.city + ', ' : '') + land) : tf('Okänd plats');
       const flag = x.geo ? famFlag(x.geo.cc) : '';
-      const country = x.geo ? (x.geo.country || 'Okänt land') : 'Okänd plats';
+      const country = x.geo ? (land || tf('Okänt land')) : tf('Okänd plats');
       return '<div class="fs-row" data-sid="' + escapeHtml(x.sid) + '" style="border:1px solid var(--color-line);border-radius:13px;margin-bottom:10px;overflow:hidden">'
         + '<div class="fs-head" style="display:flex;align-items:center;gap:12px;padding:12px 13px;cursor:pointer">'
           + '<div style="position:relative;width:34px;flex:none;text-align:center"><span style="font-size:25px">' + flag + '</span>'
             + '<span style="position:absolute;top:-5px;right:-3px;background:#e0492f;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;line-height:16px;border-radius:8px;text-align:center">' + x._n + '</span></div>'
           + '<div style="flex:1;min-width:0"><div style="font-size:14.5px;font-weight:700;color:var(--color-navy-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escapeHtml(place) + '</div>'
-          + '<div style="font-size:12px;color:rgb(28 43 58 / .55)">inloggad ' + famRelTime(x.created_at) + '</div></div>'
+          + '<div style="font-size:12px;color:rgb(28 43 58 / .55)">' + escapeHtml(tf('inloggad {tid}', { tid: famRelTime(x.created_at) })) + '</div></div>'
           + '<button class="fs-logout" data-sid="' + escapeHtml(x.sid) + '" style="flex:none;font-size:12.5px;font-weight:700;color:#fff;background:#e0492f;border:0;border-radius:9px;padding:9px 15px;cursor:pointer">Logga ut</button>'
           + '<span class="fs-arrow" style="flex:none;font-size:14px;color:var(--color-navy-600);transition:transform .2s;width:16px;text-align:center">▾</span></div>'
         + '<div class="fs-detail" style="display:none;padding:2px 15px 14px 59px;font-size:13px">'
           + '<div style="display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--color-line)"><span style="color:rgb(28 43 58 / .55)">Land</span><span style="font-weight:600;color:var(--color-navy-900);text-align:right">' + escapeHtml(country) + '</span></div>'
-          + '<div style="display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--color-line)"><span style="color:rgb(28 43 58 / .55)">Inloggad i</span><span style="font-weight:600;color:var(--color-navy-900);text-align:right">' + famDuration(x.created_at) + '</span></div>'
-          + '<div style="display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--color-line)"><span style="color:rgb(28 43 58 / .55)">IP-adress</span><span style="font-family:ui-monospace,monospace;font-weight:600;color:var(--color-navy-900)">' + escapeHtml(x.ip || 'okänd') + '</span></div>'
+          + '<div style="display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--color-line)"><span style="color:rgb(28 43 58 / .55)">Inloggad i</span><span style="font-weight:600;color:var(--color-navy-900);text-align:right">' + escapeHtml(famDuration(x.created_at)) + '</span></div>'
+          + '<div style="display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--color-line)"><span style="color:rgb(28 43 58 / .55)">IP-adress</span><span style="font-family:ui-monospace,monospace;font-weight:600;color:var(--color-navy-900)">' + escapeHtml(x.ip || tf('okänd')) + '</span></div>'
         + '</div></div>';
     }).join('');
-    footEl.innerHTML = '<span style="font-size:12.5px;color:rgb(28 43 58 / .55)">' + sessions.length + ' aktiva ' + (sessions.length === 1 ? 'inloggning' : 'inloggningar') + '</span>'
+    footEl.innerHTML = '<span style="font-size:12.5px;color:rgb(28 43 58 / .55)">' + escapeHtml(sessions.length === 1 ? tf('{n} aktiv inloggning', { n: 1 }) : tf('{n} aktiva inloggningar', { n: sessions.length })) + '</span>'
       + (sessions.length ? '<button id="fs-all" class="btn btn-ghost" style="height:40px;padding:0 16px;color:#e0492f">Logga ut alla</button>' : '');
     function openRow(sid, scroll) {
       let target = null;
@@ -3805,7 +3833,7 @@ async function famShowSessions(childId, childName) {
     if (all) all.addEventListener('click', async () => {
       all.disabled = true; all.textContent = '…';
       const rr = await window.family.logoutChild(account.token, childId).catch(() => ({ ok: false }));
-      if (rr && rr.ok) { sessions = []; showToast(childName + ' loggades ut på alla enheter.'); render(); syncCard(); }
+      if (rr && rr.ok) { sessions = []; showToast(tf('{namn} loggades ut på alla enheter.', { namn: childName })); render(); syncCard(); }
       else { all.disabled = false; all.textContent = 'Logga ut alla'; showToast('Kunde inte logga ut alla just nu.'); }
     });
   }
@@ -3854,7 +3882,7 @@ function famNyaFragor() {
     _famSettaFragor.add(f.id); ny = true;
     const titel = tn('{n} frågar om lov', c.name), text = visaDoman(f.host) + (f.text ? ' – ”' + f.text + '”' : '');
     try { window.family.notis(titel, text); } catch {}
-    showToast(titel + ': ' + visaDoman(f.host));
+    showToast(tf('{namn} frågar om lov: {sajt}', { namn: c.name, sajt: visaDoman(f.host) }));
   }
   if (ny) try { sessionStorage.setItem('adraze-fam-fragor', JSON.stringify([..._famSettaFragor].slice(-200))); } catch {}
 }
@@ -3865,10 +3893,10 @@ function famChildCard(c) {
     : '<div class="fam-none">Inga blockerade sidor än.</div>';
   const now = Date.now();
   const aca = (c.allows || []).filter((a) => a && a.until > now);
-  const allowsHtml = aca.length ? '<div class="fam-sub">Tillfälligt tillåtet nu</div><div class="fam-bl">' + aca.map((a) => '<span class="fam-tag" style="background:rgba(23,138,90,.08);border-color:rgba(23,138,90,.25);padding-right:12px;">' + escapeHtml(a.host) + ' <span style="opacity:.6">till ' + fmtTime(a.until) + '</span></span>').join('') + '</div>' : '';
+  const allowsHtml = aca.length ? '<div class="fam-sub">Tillfälligt tillåtet nu</div><div class="fam-bl">' + aca.map((a) => '<span class="fam-tag" style="background:rgba(23,138,90,.08);border-color:rgba(23,138,90,.25);padding-right:12px;">' + escapeHtml(a.host) + ' <span style="opacity:.6">' + escapeHtml(tf('till {tid}', { tid: fmtTime(a.until) })) + '</span></span>').join('') + '</div>' : '';
   return '<div class="fam-child" data-child="' + c.id + '">'
     + '<div class="fam-child-head"><span class="fam-avatar">' + escapeHtml((c.name[0] || '?').toUpperCase()) + '</span>'
-    + '<div class="grow"><div class="fam-name">' + escapeHtml(c.name) + '</div><div class="fam-age">' + escapeHtml(tn('{n} år', c.age)) + '</div></div>'
+    + '<div class="grow"><div class="fam-name" translate="no">' + escapeHtml(c.name) + '</div><div class="fam-age">' + escapeHtml(tn('{n} år', c.age)) + '</div></div>'
     + '<button class="fam-active' + (active ? ' on' : '') + '" data-a="active">' + (active ? 'Aktiv på denna enhet' : 'Aktivera här') + '</button></div>'
     + (c.code ? '<div class="fam-code"><span class="code">' + escapeHtml(c.code) + '</span><span style="font-size:11.5px;color:var(--color-navy-600)">inloggningskod</span><button data-a="copy">Kopiera</button></div>' : '')
     + (c.code ? '<div class="fam-loginrow" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 6px;">' + '<span style="font-size:12.5px;color:var(--color-navy-600);">' + escapeHtml(c.sessions ? tn('Inloggad nu', '') : tn('Inte inloggad', '')) + '</span>' + '<button data-a="rotate" style="font-size:12px;font-weight:700;color:#2f8fd4;background:rgba(47,143,212,.1);border:1px solid rgba(47,143,212,.25);border-radius:8px;padding:5px 11px;cursor:pointer;">Byt kod</button>' + (c.sessions ? '<button data-a="sessions" style="font-size:12px;font-weight:700;color:#2f8fd4;background:rgba(47,143,212,.12);border:1px solid rgba(47,143,212,.3);border-radius:8px;padding:5px 11px;cursor:pointer;">' + escapeHtml(tn('Visa enheter', '')) + '</button>' : '') + '</div>' : '')
@@ -3926,9 +3954,9 @@ function applyKidIndicator() {
   if (!isKid) { if (bar) bar.remove(); return; }
   if (window.__kidShown) return;                            // visa BARA en gång per session
   window.__kidShown = true;
-  const nm = (account && account.name) || 'Du';
+  const nm = (account && account.name) || tf('Du');
   if (!bar) { bar = document.createElement('div'); bar.id = 'kid-indicator'; document.body.appendChild(bar); }
-  bar.textContent = nm + ' – dina föräldrar kan se din historik';
+  bar.textContent = tf('{namn} – dina föräldrar kan se din historik', { namn: nm });
   bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:90;text-align:center;font-size:12.5px;font-weight:600;padding:7px 10px;background:#2f8fd4;color:#fff;transition:opacity .5s ease;opacity:1;';
   if (_kidHideTimer) clearTimeout(_kidHideTimer);
   _kidHideTimer = setTimeout(() => {
@@ -3982,9 +4010,9 @@ function showChildCode(name, code) {
   ov.style.cssText = 'position:fixed;inset:0;z-index:200;background:rgba(5,12,22,.5);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px);';
   ov.innerHTML = '<div style="width:min(420px,94vw);background:#fff;border-radius:18px;padding:24px;text-align:center;box-shadow:0 30px 70px rgba(8,20,35,.4)">'
     + ''
-    + '<div style="font-size:18px;font-weight:800;color:var(--color-navy-900);margin-bottom:6px">' + escapeHtml(name) + ' är tillagd!</div>'
-    + '<p style="font-size:13.5px;color:rgb(28 43 58 / .6);margin-bottom:16px">Ge den här koden till ' + escapeHtml(name) + '. På barnets dator: <b>Logga in → "Logga in med din kod"</b>.</p>'
-    + '<p style="font-size:12.5px;color:rgb(28 43 58 / .55);margin:-6px 0 16px">Varje gång ' + escapeHtml(name) + ' loggar in får du en sexsiffrig kod på mejlen som ' + escapeHtml(name) + ' måste skriva in. Barnkoden ensam räcker inte.</p>'
+    + '<div style="font-size:18px;font-weight:800;color:var(--color-navy-900);margin-bottom:6px">' + escapeHtml(tf('{namn} är tillagd!', { namn: name })) + '</div>'
+    + '<p style="font-size:13.5px;color:rgb(28 43 58 / .6);margin-bottom:16px">' + htmlTf('Ge den här koden till {namn}. På barnets dator: {steg}.', { namn: escapeHtml(name), steg: '<b>' + escapeHtml(tf('Logga in → "Logga in med din kod"')) + '</b>' }) + '</p>'
+    + '<p style="font-size:12.5px;color:rgb(28 43 58 / .55);margin:-6px 0 16px">' + escapeHtml(tf('Varje gång {namn} loggar in får du en sexsiffrig kod på mejlen som {namn} måste skriva in. Barnkoden ensam räcker inte.', { namn: name })) + '</p>'
     + '<div style="font-family:ui-monospace,monospace;font-size:26px;font-weight:800;letter-spacing:.14em;color:#1f6ea8;background:rgba(47,143,212,.08);border:1px solid rgba(47,143,212,.28);border-radius:12px;padding:14px">' + escapeHtml(code) + '</div>'
     + '<div style="display:flex;gap:9px;margin-top:18px"><button id="fam-code-copy" class="btn btn-safe" style="flex:1;height:42px">Kopiera kod</button><button id="fam-code-done" class="btn btn-ghost" style="height:42px;padding:0 16px">Klar</button></div></div>';
   document.body.appendChild(ov);

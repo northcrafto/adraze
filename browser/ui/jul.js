@@ -22,8 +22,9 @@
   const root = document.documentElement;
   const $ = (id) => document.getElementById(id);
   const INKOGNITO = new URLSearchParams(location.search).has('incognito');
-  const tx = (sv) => (typeof window.t === 'function' ? window.t(sv) : sv);
-  const tn = (sv, n) => tx(sv).split('{n}').join(String(n));
+  // tx('Lucka {n}', { n }) – platshållarna fylls i efter översättningen (reserv om window.t saknas)
+  const tx = (sv, v) => (typeof window.t === 'function' ? window.t(sv, v) : (v ? sv.replace(/\{([a-z]\w*)\}/g, (m, k) => (v[k] != null ? String(v[k]) : m)) : sv));
+  const tn = (sv, n) => tx(sv, { n });
   const forsok = (f, reserv) => { try { return f(); } catch { return reserv; } };
 
   /* ── Läget från huvudprocessen ── */

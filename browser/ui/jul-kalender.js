@@ -25,8 +25,9 @@
   const forsok = (f, reserv) => { try { return f(); } catch { return reserv; } };
   const tx = Jul.tx, tn = Jul.tn;
   // Flera platshållare i samma sträng: fyll('Flest på en dag: {n} ({d}).', { n: '412', d: '13 december' })
-  const fyll = (sv, v) => { let s = tx(sv); for (const [k, x] of Object.entries(v)) s = s.split('{' + k + '}').join(String(x)); return s; };
-  const fmt = (n) => (Number(n) || 0).toLocaleString('sv-SE');
+  const fyll = (sv, v) => tx(sv, v);
+  const LANG = (window.i18n && window.i18n.lang) || 'sv';   // tal och datum i användarens språk
+  const fmt = (n) => (Number(n) || 0).toLocaleString(LANG);
   const tal = (v) => (Number.isFinite(v) && v > 0 ? Math.floor(v) : 0);
   const toast = (sv) => forsok(() => showToast(tx(sv)));
   // Bygger DOM säkert: text sätts alltid som textContent
@@ -88,7 +89,8 @@
   }
   const julaftonVarit = () => { const d = Jul.nu(); return !!Jul.sasong() && (d.getMonth() === 0 || d.getDate() >= 24); };
   const januari = () => Jul.nu().getMonth() === 0;
-  const datumText = (dag) => tn('{n} december', dag);
+  // "13 december" (sv), "December 13" (en) …: månadsnamnet och ordningen från Intl, inte hårdkodat
+  const datumText = (dag) => forsok(() => new Intl.DateTimeFormat(LANG, { day: 'numeric', month: 'long' }).format(new Date(2000, 11, Number(dag) || 1)), null) || tn('{n} december', dag);
 
   /* ── Skalet: dit knapparna i tipsen leder ── */
   const delPa = { kalender: false, stat: false };
@@ -224,13 +226,14 @@
     const kb = n * 30;
     if (kb < 1024) return [fmt(Math.round(kb)), 'kB'];
     const mb = kb / 1024;
-    return mb >= 1024 ? [(mb / 1024).toLocaleString('sv-SE', { maximumFractionDigits: 1 }), 'GB'] : [fmt(Math.round(mb)), 'MB'];
+    return mb >= 1024 ? [(mb / 1024).toLocaleString(LANG, { maximumFractionDigits: 1 }), 'GB'] : [fmt(Math.round(mb)), 'MB'];
   }
   function tidDelar(n) {
     const sek = n * 0.05;
-    const [v, en, flera] = sek >= 3600 ? [(sek / 3600).toLocaleString('sv-SE', { maximumFractionDigits: 1 }), 'timme', 'timmar']
-      : sek >= 60 ? [fmt(Math.round(sek / 60)), 'minut', 'minuter'] : [fmt(Math.round(sek)), 'sekund', 'sekunder'];
-    return [v, tx(v === '1' ? en : flera)];
+    // singular avgörs på talet (inte på den formaterade texten, som kan ha andra siffror än 0–9)
+    const [x, en, flera] = sek >= 3600 ? [Math.round(sek / 360) / 10, 'timme', 'timmar']
+      : sek >= 60 ? [Math.round(sek / 60), 'minut', 'minuter'] : [Math.round(sek), 'sekund', 'sekunder'];
+    return [x.toLocaleString(LANG, { maximumFractionDigits: 1 }), tx(x === 1 ? en : flera)];
   }
   // December så här långt (remsan och statistikluckorna)
   function decemberSiffror(s) {
@@ -525,7 +528,7 @@
     const fakta = [
       d.basta ? ['Flest på en dag', fmt(d.basta.n) + ' (' + datumText(d.basta.dag) + ')'] : null,
       ['Mindre data', tn('ungefär {n}', data + ' ' + dataEnhet)],
-      tid !== '0' ? ['Sparad tid', tn('ungefär {n}', tid + ' ' + tidEnhet)] : null,   // "ungefär 0 sekunder" säger ingenting
+      tid !== (0).toLocaleString(LANG) ? ['Sparad tid', tn('ungefär {n}', tid + ' ' + tidEnhet)] : null,   // "ungefär 0 sekunder" säger ingenting
       delPa.kalender ? ['Öppnade luckor', tn('{n} av 24', d.luckor)] : null,
     ].filter(Boolean);
     const duk = h('canvas', { class: 'jul-sum-bild', width: BILD.b, height: BILD.h, role: 'img', 'aria-label': 'Bilden som sparas eller kopieras' });
