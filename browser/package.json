@@ -46,20 +46,27 @@
       "!angra-*.png",
       "!falk-*.png",
       "!jul-bilder/**",
+      "!chatt-bilder/**",
+      "!sprak-bilder/**",
       "!tools/**",
       "!meta_test.js",
       "!scan_test.js",
       "!**/*.map",
       "!**/.git/**",
       "native/adblock/build/Release/adblock_core.node",
-      "adraze/lists/**"
+      "adraze/lists/**",
+      "native/adblock/build/win32-x64/adblock_core.node"
     ],
     "win": {
       "target": [
         "nsis"
       ],
       "icon": "build/icon.ico",
-      "artifactName": "AdRaze-Setup.exe"
+      "artifactName": "AdRaze-Setup.exe",
+      "sign": "build/signera-win.js",
+      "signingHashAlgorithms": [
+        "sha256"
+      ]
     },
     "linux": {
       "target": [
@@ -88,9 +95,11 @@
       "uninstallerIcon": "build/icon.ico"
     },
     "afterPack": "build/afterPack.js",
+    "afterSign": "build/afterSign.js",
     "electronDist": "node_modules/electron/dist",
     "asarUnpack": [
-      "native/adblock/build/Release/*.node"
+      "native/adblock/build/Release/*.node",
+      "native/adblock/build/win32-x64/*.node"
     ],
     "mac": {
       "target": [

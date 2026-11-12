@@ -67,6 +67,7 @@ exports.default = async function afterPack(context) {
     console.log('[VMP] Linux behöver ingen VMP-signering (Widevine L3 funkar utan) — hoppar över.');
     return;
   }
+  if (plat === 'win32') { console.log('[VMP] Windows signeras i afterSign.js (efter kodsigneringen)'); return; }
   const appOutDir = context.appOutDir;
   // macOS universal: x64- och arm64-delarna (…-x64-temp/…-arm64-temp) slås ihop efteråt och VMP-signaturen
   // (Electron Framework.sig) skiljer sig per del → sammanslagningen vägrar. Signera bara den färdiga universella appen.
