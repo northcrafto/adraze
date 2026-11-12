@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>AdRaze sajtvideo: vikblad</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "News"; src: url("assets/fonts/Newsreader.ttf") format("truetype"); font-weight: 200 800; }
+      @font-face { font-family: "NewsI"; src: url("assets/fonts/Newsreader-Italic.ttf") format("truetype"); font-weight: 200 800; }
+      @font-face { font-family: "InterB"; src: url("assets/fonts/Inter-Bold.otf") format("opentype"); font-weight: 700; }
+      @font-face { font-family: "InterM"; src: url("assets/fonts/Inter-Medium.otf") format("opentype"); font-weight: 500; }
+      @font-face { font-family: "InterK"; src: url("assets/fonts/InterDisplay-Black.otf") format("opentype"); font-weight: 900; }
+      @font-face { font-family: "Caveat"; src: url("assets/fonts/Caveat-700-latin.woff2") format("woff2"); font-weight: 700; }
+      :root { --paper: #ede5d6; --paper2: #e3d9c6; --sheet: #fbf7ef; --ink: #1b1916; --light: #f4efe6; --or: #ff4b1f; --dov: #5a5146; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      /* Samma färg som bladen: när skaket flyttar #skak syns roten i bildkanten, och då ska den inte synas som ett band */
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--paper); }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--paper); color: var(--ink); font-family: "News", serif; }
+      .scene { position: absolute; inset: 0; overflow: hidden; }
+      .fill { position: absolute; inset: 0; }
+      svg.full { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+      .ink { stroke: var(--ink); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+      .draw { stroke-dasharray: 1 1; }
+      .grain { position: absolute; inset: 0; opacity: .42; mix-blend-mode: multiply; pointer-events: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='4'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .38  0 0 0 0 .3  0 0 0 .55 0'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>"); }
+      #bord { background: var(--paper2); }
+      #varld { perspective: 2400px; perspective-origin: 50% 50%; }
+      .blad { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; background: var(--paper); }
+      /* Berättarraden slutar vid x = 1610, precis framför gorillan: stångningen träffar radens sista ord */
+      .rad { position: absolute; right: 310px; top: 55px; white-space: nowrap; font-family: "News", serif; font-weight: 500; font-size: 104px; line-height: 1.04; letter-spacing: -0.02em; color: var(--ink); }
+      .rad em { font-family: "NewsI", serif; font-style: normal; font-weight: 500; }
+      .rad .w { display: inline-block; }
+      .ram { position: absolute; overflow: hidden; border-radius: 14px; background: var(--sheet); }
+      .ram img { position: absolute; left: 0; top: 0; display: block; }
+      .kam { position: absolute; left: 0; top: 0; }
+      .lager { position: absolute; inset: 0; }
+      svg.over { position: absolute; left: 0; top: 0; overflow: visible; }
+      .hand { position: absolute; white-space: nowrap; font-family: "Caveat", cursive; font-weight: 700; font-size: 96px; line-height: 1; color: var(--ink); }
+      .hand.ljus { color: var(--light); }
+      .hand .hw { display: inline-block; padding: 0 .05em; }
+      .hand .rd { display: block; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-width="1920" data-height="1080" data-duration="36">
+
+      <section id="scen" class="clip scene" data-start="0" data-duration="36" data-track-index="1">
+        <div id="skak" class="fill" data-layout-allow-overflow>
+          <div id="bord" class="fill"></div>
+          <div id="varld" class="fill">
+
+            <!-- Blad 1: startsidan och räknaren -->
+            <div class="blad" id="b1">
+              <div class="rad" id="r1"><span class="w">This</span> <span class="w">is</span> <span class="w"><em>AdRaze</em></span> <span class="w"><em>Browser.</em></span></div>
+              <div class="rad" id="r2"><span class="w">Ads</span> <span class="w">are</span> <span class="w">stopped</span> <span class="w"><em>before</em></span> <span class="w"><em>they</em></span> <span class="w"><em>load.</em></span></div>
+              <div class="ram" id="ram1" style="left:150px;top:205px;width:1620px;height:700px">
+                <div class="kam" id="kam1"><img id="k1" src="assets/skarm/k1.png" alt="" style="width:1620px;height:836px" /></div>
+                <svg class="over" width="1620" height="700" viewBox="0 0 1620 700"><path id="ring1" class="draw" pathLength="1" fill="none" style="stroke:var(--or);stroke-width:10;stroke-linecap:round;stroke-linejoin:round" /></svg>
+              </div>
+              <svg class="full" viewBox="0 0 1920 1080">
+                <path id="ram1k" class="ink" fill="none" />
+                <path id="pil1" class="ink draw" pathLength="1" fill="none" style="stroke-width:7" /><path id="pil1h" class="ink draw" pathLength="1" fill="none" style="stroke-width:7" />
+                <path class="kant ink" fill="none" />
+              </svg>
+              <div class="hand" id="h1" style="left:700px;top:928px"><div class="hb"><span class="hw">a</span> <span class="hw">real</span> <span class="hw">screenshot</span></div></div>
+            </div>
+
+            <!-- Blad 2: samma fönster, fem utseenden -->
+            <div class="blad" id="b2">
+              <svg class="full" viewBox="0 0 1920 1080"><path id="u3" class="draw" pathLength="1" fill="none" style="stroke:var(--or);stroke-width:24;stroke-linecap:round;opacity:.9" /></svg>
+              <div class="rad" id="r3"><span class="w">Same</span> <span class="w">browser.</span> <span class="w" id="r3five"><em>Five</em></span> <span class="w"><em>looks.</em></span></div>
+              <div class="ram" id="ram2" style="left:150px;top:205px;width:1620px;height:700px">
+                <img id="lk1" src="assets/skarm/k1t.png" alt="" style="width:1620px;height:700px" />
+                <img id="lk2" src="assets/skarm/k2t.png" alt="" style="width:1620px;height:700px" />
+                <img id="lk3" src="assets/skarm/k3t.png" alt="" style="width:1620px;height:700px" />
+                <img id="lk4" src="assets/skarm/k4n.png" alt="" style="width:1620px;height:700px" />
+                <img id="lk5" src="assets/skarm/k5n.png" alt="" style="width:1620px;height:700px" />
+              </div>
+              <svg class="full" viewBox="0 0 1920 1080">
+                <path id="mat2" fill="none" style="stroke:var(--light);stroke-width:12;stroke-linejoin:round;opacity:0" />
+                <path id="ram2k" class="ink" fill="none" />
+                <g id="pilar2"></g>
+                <path class="kant ink" fill="none" />
+              </svg>
+              <div class="hand" id="n1" style="left:236px;top:338px"><div class="hb"><span class="hw">1</span>&nbsp; <span class="hw">tabs</span> <span class="hw">on</span> <span class="hw">top</span></div></div>
+              <div class="hand" id="n2" style="left:486px;top:338px"><div class="hb"><span class="hw">2</span>&nbsp; <span class="hw">tabs</span> <span class="hw">on</span> <span class="hw">the</span> <span class="hw">side</span></div></div>
+              <div class="hand ljus" id="n3" style="left:236px;top:338px"><div class="hb"><span class="hw">3</span>&nbsp; <span class="hw">dark</span></div></div>
+              <div class="hand" id="n4" style="left:236px;top:338px"><div class="hb"><span class="hw">4</span>&nbsp; <span class="hw">hidden</span> <span class="hw">tabs</span></div></div>
+              <div class="hand ljus" id="n5" style="left:1290px;top:440px"><div class="hb"><span class="rd"><span class="hw">5</span>&nbsp; <span class="hw">bar</span> <span class="hw">at</span></span><span class="rd"><span class="hw">the</span> <span class="hw">bottom</span></span></div></div>
+            </div>
+
+            <!-- Blad 3: Falk byter utseendet på en mening -->
+            <div class="blad" id="b3">
+              <div class="rad" id="r4"><span class="w">Or</span> <span class="w">just</span> <span class="w"><em>ask</em></span> <span class="w"><em>Falk.</em></span></div>
+              <div class="rad" id="r5"><span class="w">One</span> <span class="w">sentence.</span> <span class="w"><em>New</em></span> <span class="w"><em>look.</em></span></div>
+              <!-- Fönstret i samma ram som på de andra bladen -->
+              <div class="fill" id="win3s">
+                <div class="ram" id="win3" style="left:150px;top:205px;width:1620px;height:700px">
+                  <img id="w1" src="assets/skarm/k1w.png" alt="" style="width:1620px;height:700px" />
+                  <img id="w7" src="assets/skarm/k7t.png" alt="" style="width:1620px;height:700px" />
+                </div>
+                <svg class="full" viewBox="0 0 1920 1080">
+                  <path id="mat3" fill="none" style="stroke:var(--light);stroke-width:12;stroke-linejoin:round;opacity:0" />
+                  <path id="win3k" class="ink" fill="none" />
+                </svg>
+              </div>
+              <!-- Falk-remsan: ett urklipp ur den riktiga panelen som läggs över fönstrets underkant (400 x 62 punkter) -->
+              <div class="fill" id="slip-s">
+                <div class="ram" id="slip" style="left:360px;top:770px;width:1200px;height:186px;background:#191816">
+                  <div class="lager" id="slip-in">
+                    <img id="f0" src="assets/skarm/fe0.png" alt="" style="width:1200px;height:186px" />
+                    <img id="f1" src="assets/skarm/fe1.png" alt="" style="width:1200px;height:186px" />
+                    <img id="f2" src="assets/skarm/fe2.png" alt="" style="width:1200px;height:186px" />
+                    <img id="f3" src="assets/skarm/fe3.png" alt="" style="width:1200px;height:186px" />
+                    <img id="f4" src="assets/skarm/fe4.png" alt="" style="width:1200px;height:186px" />
+                    <img id="f5" src="assets/skarm/fe5.png" alt="" style="width:1200px;height:186px" />
+                    <img id="f6" src="assets/skarm/fe6.png" alt="" style="width:1200px;height:186px" />
+                    <img id="f7" src="assets/skarm/fe7.png" alt="" style="width:1200px;height:186px" />
+                  </div>
+                  <div class="lager" id="slip-top">
+                    <img id="fb" src="assets/skarm/fb.png" alt="" style="width:1200px;height:186px" />
+                  </div>
+                </div>
+                <svg class="full" viewBox="0 0 1920 1080"><path id="slipk" class="ink" fill="none" /></svg>
+              </div>
+              <svg class="full" viewBox="0 0 1920 1080">
+                <path id="ring3" class="draw" pathLength="1" fill="none" style="stroke:var(--or);stroke-width:10;stroke-linecap:round;stroke-linejoin:round" />
+                <path id="pil3" class="ink draw" pathLength="1" fill="none" style="stroke-width:7;stroke:var(--light)" /><path id="pil3h" class="ink draw" pathLength="1" fill="none" style="stroke-width:7;stroke:var(--light)" />
+                <path class="kant ink" fill="none" />
+              </svg>
+            </div>
+
+            <!-- Blad 4: Familj -->
+            <div class="blad" id="b4">
+              <div class="rad" id="r6"><span class="w">Family:</span> <span class="w"><em>open,</em></span> <span class="w"><em>not</em></span> <span class="w"><em>spying.</em></span></div>
+              <div class="ram" id="ram4" style="left:150px;top:205px;width:1620px;height:700px">
+                <div class="kam" id="kam4"><img id="k8" src="assets/skarm/k8.png" alt="" style="width:1620px;height:700px" /></div>
+                <svg class="over" width="1620" height="700" viewBox="0 0 1620 700">
+                  <path id="u4" class="draw" pathLength="1" fill="none" style="stroke:var(--or);stroke-width:13;stroke-linecap:round;opacity:.9" />
+                  <path id="u4b" class="draw" pathLength="1" fill="none" style="stroke:var(--or);stroke-width:13;stroke-linecap:round;opacity:.9" />
+                  <path id="u4c" class="draw" pathLength="1" fill="none" style="stroke:var(--or);stroke-width:13;stroke-linecap:round;opacity:.9" />
+                </svg>
+              </div>
+              <svg class="full" viewBox="0 0 1920 1080">
+                <path id="ram4k" class="ink" fill="none" />
+                <path class="kant ink" fill="none" />
+              </svg>
+            </div>
+
+            <!-- Blad 0: omslaget = slutkortet. Texten är tryckt på omslaget, gorillan hör inte till papperet. -->
+            <div class="blad" id="b0" data-layout-allow-occlusion>
+              <svg class="full" viewBox="0 0 1920 1080">
+                <text id="e-ord" x="777" y="511" style="font: 900 240px 'InterK', sans-serif; letter-spacing: -0.035em; fill: #1b1916">AdRaze</text>
+                <rect x="781" y="568" width="440" height="124" rx="62" fill="#ff4b1f" />
+                <text id="e-url" x="1001" y="653" text-anchor="middle" style="font: 700 66px 'InterB', sans-serif; fill: #ffffff">adraze.app</text>
+                <text id="e-liten" x="963" y="836" text-anchor="middle" style="font: 500 40px 'InterM', sans-serif; letter-spacing: 0.14em; fill: #5a5146">CHROME EXTENSION · BROWSER FOR MAC AND LINUX</text>
+                <path class="kant ink" fill="none" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- Gorillan ligger utanför bladen och sitter kvar när papperet rör sig under den -->
+          <svg class="full" id="g-lager" viewBox="0 0 1920 1080" data-layout-allow-overlap data-layout-ignore>
+            <!-- streck ovanför huvudet när stångningen träffar (fem bildrutor). Under gorillan: den studsar upp framför dem -->
+            <g id="bang" style="display:none"><path class="ink" fill="none" style="stroke-width:7" /><path class="ink" fill="none" style="stroke-width:7" /><path class="ink" fill="none" style="stroke-width:7" /></g>
+            <g id="g-wrap"><g id="g-rig"></g></g>
+          </svg>
+        </div>
+        <div class="grain"></div>
+      </section>
+
+      <audio id="score" src="assets/score.wav" data-start="0" data-duration="36" data-track-index="9"></audio>
+    </div>
+
+    <script>
+      /* ===== Gemensamma ritfunktioner för sajtvideorna. Klistras in i index.html före scenkoden. ===== */
+      const FPS = 30, DROP = 3;                                   // koket: ny pose var tredje bildruta = 10 poser per sekund
+      const step = (t) => Math.floor((t * FPS) / DROP);
+      // seedad hash, -1..1. Aldrig Math.random.
+      const H = (n, s) => { const x = Math.sin(n * 127.1 + (s || 1) * 311.7) * 43758.5453; return (x - Math.floor(x)) * 2 - 1; };
+      // mjuk bana genom punkter (kvadratisk mittpunktskedja), öppen eller sluten
+      function smooth(p, closed) {
+        const n = p.length, f = (v) => v.toFixed(1);
+        if (!closed) {
+          let d = `M${f(p[0][0])} ${f(p[0][1])}`;
+          for (let i = 1; i < n - 1; i++) { const a = p[i], b = p[i + 1]; d += ` Q${f(a[0])} ${f(a[1])} ${f((a[0] + b[0]) / 2)} ${f((a[1] + b[1]) / 2)}`; }
+          return d + ` L${f(p[n - 1][0])} ${f(p[n - 1][1])}`;
+        }
+        let d = `M${f((p[0][0] + p[n - 1][0]) / 2)} ${f((p[0][1] + p[n - 1][1]) / 2)}`;
+        for (let i = 0; i < n; i++) { const a = p[i], b = p[(i + 1) % n]; d += ` Q${f(a[0])} ${f(a[1])} ${f((a[0] + b[0]) / 2)} ${f((a[1] + b[1]) / 2)}`; }
+        return d + 'Z';
+      }
+      // darr: flyttar varje punkt lite, olika för varje steg st
+      const jit = (p, seed, st, amp) => p.map((q, i) => [q[0] + H(st * 7 + i * 13, seed) * amp, q[1] + H(st * 7 + i * 13 + 5, seed + 3) * amp]);
+      // rektangel som punkter: hörnen dubblade så att kanterna håller sig raka
+      function rectPts(x, y, w, h, r) {
+        r = r || 10; const o = [], C = [[x, y], [x + w, y], [x + w, y + h], [x, y + h]];
+        const seg = (a, b, k) => { for (let i = 0; i < k; i++) o.push([a[0] + (b[0] - a[0]) * i / k, a[1] + (b[1] - a[1]) * i / k]); };
+        const k = (len) => Math.max(2, Math.round(len / 90));
+        for (let c = 0; c < 4; c++) { const a = C[c], b = C[(c + 1) % 4], len = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / len, uy = (b[1] - a[1]) / len;
+          o.push([a[0] + ux * r * .3, a[1] + uy * r * .3]); seg([a[0] + ux * r, a[1] + uy * r], [b[0] - ux * r, b[1] - uy * r], k(len)); o.push([b[0] - ux * r * .3, b[1] - uy * r * .3]); }
+        return o;
+      }
+      // klick: ojämn cirkel
+      const blobPts = (cx, cy, r, seed, n, irr) => Array.from({ length: n }, (_, i) => { const a = i / n * Math.PI * 2, rr = r * (1 + H(i * 3 + 1, seed) * irr); return [cx + Math.cos(a) * rr, cy + Math.sin(a) * rr]; });
+      const rot = (p, cx, cy, dg) => { const a = dg * Math.PI / 180, c = Math.cos(a), n = Math.sin(a); return p.map(([x, y]) => [cx + (x - cx) * c - (y - cy) * n, cy + (x - cx) * n + (y - cy) * c]); };
+      // loggans egen rektangel (tre punkter per kant). Bara till AD-lappen, så att den blir exakt som i loggan.
+      function tagRect(x, y, w, h, r) { const o = [], C = [[x, y], [x + w, y], [x + w, y + h], [x, y + h]]; for (let c = 0; c < 4; c++) { const a = C[c], b = C[(c + 1) % 4], L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uy = (b[1] - a[1]) / L; o.push([a[0] + ux * r * .3, a[1] + uy * r * .3]); for (let i = 0; i < 3; i++) { const t = i / 2; o.push([a[0] + ux * r + (b[0] - a[0] - 2 * ux * r) * t, a[1] + uy * r + (b[1] - a[1] - 2 * uy * r) * t]); } o.push([b[0] - ux * r * .3, b[1] - uy * r * .3]); } return o; }
+
+      /* ===== Gorillan: lager i en ruta på 200 x 200, samma punkter som loggan (logo/nya/gorilla.html) =====
+         pose: tag    true = gul AD-lapp i munnen (loggan), false = vanlig mun
+               look   [x, y], -1..1: vart pupillerna tittar
+               blink  0 eller 1
+               brow   -1 hungrig/bestämd, 0 neutral, 1 glad/förvånad
+               jaw    0..1 gap (bara utan lapp)
+               cheeks 0..1 fulla kinder
+               blob   false = utan orange klick
+         Neutral pose med st = 1 ger exakt loggans banor. */
+      function gorilla(pose) {
+        const P = Object.assign({ tag: true, look: [0, 0], blink: 0, brow: 0, jaw: 0, cheeks: 0, blob: true }, pose || {});
+        const F = '#3a332d', A = '#c9b8a0', I = '#1b1916', O = '#ff4b1f', Y = '#ffd23e';
+        const j = P.tag ? 0 : P.jaw, k = P.cheeks, up = Math.max(0, P.brow), dn = Math.max(0, -P.brow);
+        const ex = P.look[0] * 4, ey = P.look[1] * 3;
+        const L = [];
+        L.push({ id: 'blob', hide: !P.blob, p: blobPts(100, 104, 92, 9, 16, .06), c: 1, fill: O, amp: 2.2 });
+        L.push({ id: 'earL', p: blobPts(40, 106, 13, 2, 8, .06), c: 1, fill: F, w: 7, amp: 1 });
+        L.push({ id: 'earR', p: blobPts(160, 106, 13, 3, 8, .06), c: 1, fill: F, w: 7, amp: 1 });
+        L.push({ id: 'head', p: [[100, 30], [128, 38], [150, 60], [160, 92], [157, 126], [146, 152 + 5 * j], [124, 168 + 9 * j], [100, 173 + 10 * j], [76, 168 + 9 * j], [54, 152 + 5 * j], [43, 126], [40, 92], [50, 60], [72, 38]], c: 1, fill: F, w: 8, amp: 1.6 });
+        L.push({ id: 'face', p: [[100, 72], [120, 66], [138, 76], [142, 94], [136, 110], [148 + 5 * k, 128], [143 + 4 * k, 150 + 4 * j], [124, 162 + 9 * j], [100, 165 + 10 * j], [76, 162 + 9 * j], [57 - 4 * k, 150 + 4 * j], [52 - 5 * k, 128], [64, 110], [58, 94], [62, 76], [80, 66]], c: 1, fill: A, w: 6, amp: 1.4 });
+        L.push({ id: 'brow', p: [[62, 92 - 4 * up - 3 * dn], [80, 82 - 6 * up + 5 * dn], [100, 90 - 5 * up + 6 * dn], [120, 82 - 6 * up + 5 * dn], [138, 92 - 4 * up - 3 * dn]], w: 10, amp: 1 });
+        if (P.blink > .5) {
+          L.push({ id: 'eyeL', p: [[76, 103], [82, 104.5], [88, 103]], w: 5, amp: .6 });
+          L.push({ id: 'eyeR', p: [[112, 103], [118, 104.5], [124, 103]], w: 5, amp: .6 });
+        } else {
+          L.push({ id: 'eyeL', p: blobPts(82 + ex, 102 + ey, 6, 1, 8, .08), c: 1, fill: I, amp: .6 });
+          L.push({ id: 'eyeR', p: blobPts(118 + ex, 102 + ey, 6, 2, 8, .08), c: 1, fill: I, amp: .6 });
+        }
+        L.push({ id: 'nose', p: [[85, 128], [90, 114], [100, 111], [110, 114], [115, 128]], w: 6, amp: .8 });
+        L.push({ id: 'nosL', p: blobPts(93, 127, 3.5, 4, 8, .08), c: 1, fill: I, amp: .6 });
+        L.push({ id: 'nosR', p: blobPts(107, 127, 3.5, 5, 8, .08), c: 1, fill: I, amp: .6 });
+        if (P.tag) L.push({ id: 'tag', p: rot(tagRect(70, 138, 62, 26, 5), 101, 151, -8), c: 1, fill: Y, w: 5, amp: .9 });
+        else if (j < .08) L.push({ id: 'mouth', p: [[78, 147], [100, 152], [122, 147]], w: 6, amp: .8 });
+        else L.push({ id: 'gap', p: [[80, 143], [100, 140], [120, 143], [125, 148 + 7 * j], [112, 154 + 13 * j], [100, 156 + 14 * j], [88, 154 + 13 * j], [75, 148 + 7 * j]], c: 1, fill: I, w: 5, amp: .8 });
+        return L;
+      }
+      // Sätter upp gorillan i en <g> och ger tillbaka draw(pose, st). Anropa draw från en R-funktion varje bildruta.
+      function mountGorilla(g) {
+        const NS = 'http://www.w3.org/2000/svg', el = {}; let txt = null;
+        return function draw(pose, st) {
+          const seen = {};
+          gorilla(pose).forEach((l, idx) => {
+            let e = el[l.id];
+            if (!e) { e = el[l.id] = document.createElementNS(NS, 'path'); e.style.strokeLinecap = 'round'; e.style.strokeLinejoin = 'round'; g.appendChild(e); }
+            seen[l.id] = 1;
+            e.style.display = l.hide ? 'none' : '';
+            e.setAttribute('d', smooth(jit(l.p, idx * 17 + 3, st, l.amp || 1.5), l.c));
+            e.style.fill = l.fill || 'none';                     // stil, inte attribut: en CSS-regel kan annars vinna
+            e.style.stroke = l.w ? '#1b1916' : 'none';
+            e.style.strokeWidth = l.w || 0;
+          });
+          for (const id in el) if (!seen[id]) el[id].style.display = 'none';
+          if (!txt) { txt = document.createElementNS(NS, 'text'); txt.textContent = 'AD'; txt.setAttribute('x', 101); txt.setAttribute('y', 159); txt.setAttribute('transform', 'rotate(-8 101 159)'); txt.setAttribute('text-anchor', 'middle'); txt.setAttribute('style', "font: 900 20px 'InterK', sans-serif; fill: #1b1916"); }
+          if (seen.tag) g.appendChild(txt);                      // texten ska alltid ligga överst
+          txt.style.display = seen.tag ? '' : 'none';
+        };
+      }
+      /* ===== Mönster för färgade marker (1920 x 1080). Ger SVG-kod som läggs i en <g> med insertAdjacentHTML. =====
+         kind: 'net' | 'dots' | 'code' | 'stars'.  col: mönstrets färg (se tabellen över marker i STIL.md). */
+      function pattern(kind, col) {
+        let s = '';
+        if (kind === 'dots') for (let k = 0; k < 90; k++) s += `<circle cx="${40 + ((k * 151) % 1840)}" cy="${30 + ((k * 337) % 1020)}" r="${8 + (k % 3) * 5}" fill="${col}"/>`;
+        if (kind === 'net') { const n = []; for (let k = 0; k < 30; k++) n.push([60 + ((k * 263) % 1800), 60 + ((k * 409) % 960)]);
+          n.forEach((a, k) => { const m = n[(k * 7 + 3) % n.length]; s += `<line x1="${a[0]}" y1="${a[1]}" x2="${m[0]}" y2="${m[1]}" stroke="${col}" stroke-width="6"/><circle cx="${a[0]}" cy="${a[1]}" r="16" fill="${col}"/>`; }); }
+        if (kind === 'code') for (let k = 0; k < 70; k++) { const x = 30 + ((k * 173) % 1850), y = 30 + ((k * 311) % 1000), ty = k % 5;
+          s += ty === 0 ? `<path d="M${x + 30} ${y} L${x} ${y + 26} L${x + 30} ${y + 52}" fill="none" stroke="${col}" stroke-width="9" stroke-linecap="round"/>`
+            : ty === 1 ? `<path d="M${x + 30} ${y} L${x + 6} ${y + 52}" fill="none" stroke="${col}" stroke-width="9" stroke-linecap="round"/>`
+            : ty === 2 ? `<circle cx="${x + 24}" cy="${y + 26}" r="22" fill="${col}"/>`
+            : ty === 3 ? `<rect x="${x}" y="${y}" width="46" height="46" rx="6" fill="${col}"/>`
+            : `<path d="M${x + 24} ${y} L${x + 50} ${y + 46} L${x} ${y + 46}Z" fill="${col}"/>`; }
+        if (kind === 'stars') for (let k = 0; k < 110; k++) s += `<line x1="${(k * 211) % 1920}" y1="${(k * 433) % 1080}" x2="${((k * 211) % 1920) + 8}" y2="${((k * 433) % 1080) - 10}" stroke="${col}" stroke-width="4" stroke-linecap="round"/>`;
+        return s;
+      }
+      if (typeof module !== 'undefined') module.exports = { FPS, DROP, step, H, smooth, jit, rectPts, blobPts, rot, tagRect, gorilla, mountGorilla, pattern };
+    </script>
+
+    <script>
+      (function () {
+        const D = 36;                                              // videons längd i sekunder (1080 bildrutor, 80 slag per minut)
+        const NS = 'http://www.w3.org/2000/svg';
+        const $ = (s) => document.querySelector(s);
+        const FONTER = ['500 104px News', '500 104px NewsI', '700 96px Caveat', '900 240px InterK', '700 66px InterB', '500 40px InterM'];
+
+        Promise.all(FONTER.map((f) => document.fonts.load(f))).catch(() => {}).then(() => {
+          const tl = gsap.timeline({ paused: true });
+          const R = [];                                            // allt som ritas per bildruta: rena funktioner av tiden
+          const syns = { 0: true, 1: true, 2: false, 3: false, 4: false };   // vilka blad som är i bild just nu (sätts först i varje bildruta)
+
+          // ---------- hjälpare ----------
+          const boil = (el, ptsFn, closed, seed, amp, blad) => R.push((t) => { if (blad !== undefined && !syns[blad]) return; el.setAttribute('d', smooth(jit(ptsFn(t), seed, step(t), amp), closed)); });
+          const shapeBoil = (el, seed, amp, rotAmp, blad) => R.push((t) => { if (blad !== undefined && !syns[blad]) return; const st = step(t);
+            gsap.set(el, { x: H(st * 3, seed) * amp, y: H(st * 3 + 1, seed) * amp, rotation: H(st * 3 + 2, seed) * rotAmp }); });
+          // penndrag: banan har pathLength="1" och stroke-dasharray: 1 1
+          const draw = (el, at, dur, ease) => { tl.fromTo(el, { opacity: 0 }, { opacity: 1, duration: .02, immediateRender: true }, at);
+            tl.fromTo(el, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: dur, ease: ease || 'power2.inOut' }, at); };
+          // berättarrad: varje ord i <span class="w">
+          const words = (els, at, gap) => els.forEach((w, i) => tl.fromTo(w, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: .35, ease: 'back.out(2)' }, at + i * (gap || .08)));
+          const W$ = (sel) => Array.from(document.querySelectorAll(sel + ' .w'));
+          // handskrift: skrivs fram ord för ord (från vänster), kokar som grupp, lutar
+          function hand(sel, at, lut, seed, blad) {
+            const el = $(sel), hb = el.querySelector('.hb');
+            gsap.set(el, { rotation: lut, transformOrigin: '0% 100%' });
+            el.querySelectorAll('.hw').forEach((w, i) => tl.fromTo(w, { clipPath: 'inset(-30% 105% -30% -10%)' }, { clipPath: 'inset(-30% -10% -30% -10%)', duration: .16, ease: 'none' }, at + i * .085));
+            shapeBoil(hb, seed, 1.2, .35, blad);
+            return el;
+          }
+          const ut = (el, at, dur) => tl.to(el, { opacity: 0, duration: dur || .15, ease: 'power2.in' }, at);
+          // pil: skaft genom punkter, spets av två korta streck. Kokar. Ritas fram med penndrag.
+          function pil(skaft, spets, pts, seed, at, dur, blad) {
+            boil(skaft, () => pts, false, seed, 2, blad);
+            R.push((t) => { if (blad !== undefined && !syns[blad]) return; const st = step(t), n = pts.length, a = pts[n - 2], b = pts[n - 1], v = Math.atan2(b[1] - a[1], b[0] - a[0]), L = 34;
+              const p1 = [b[0] - Math.cos(v - .5) * L + H(st, seed + 7) * 2, b[1] - Math.sin(v - .5) * L + H(st + 1, seed + 7) * 2], p2 = [b[0] - Math.cos(v + .5) * L + H(st + 2, seed + 7) * 2, b[1] - Math.sin(v + .5) * L + H(st + 3, seed + 7) * 2];
+              spets.setAttribute('d', `M${p1[0].toFixed(1)} ${p1[1].toFixed(1)} L${b[0].toFixed(1)} ${b[1].toFixed(1)} L${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`); });
+            draw(skaft, at, dur, 'power2.inOut'); draw(spets, at + dur, .12, 'power2.out');
+          }
+          // handritad ring: en ellips som går lite förbi sin egen början
+          const ringPts = (cx, cy, rx, ry, seed) => Array.from({ length: 30 }, (_, i) => { const p = i / 29, a = (-205 + 395 * p) * Math.PI / 180, k = (1 + H(i * 3 + 1, seed) * .03) * (.97 + .07 * p); return [cx + Math.cos(a) * rx * k, cy + Math.sin(a) * ry * k]; });
+
+          // ---------- mått ----------
+          const FR = { x: 150, y: 205, w: 1620, h: 700 };          // ramen på alla fyra bladen
+          const SL = { x: 360, y: 770, w: 1200, h: 186 };          // Falk-remsan på blad 3: 400 x 62 punkter ur panelen, 3 bildpunkter per punkt
+          const PLATS = { a: [1614, 55, 220], slut: [283, 204, 440] };   // gorillans platser: [x, y, storlek]
+
+          // ---------- bladen: världen glider, bladen svänger upp ur högerkanten ----------
+          const V = { x: 0, a2: 90, a3: 90, a4: 90 };              // x = hur långt raden glidit, a = bladets vinkel mot oss (90 = på kant, 0 = plant)
+          // Bladet får fart direkt på träffen (power2.out) men först bildrutan efter, så att träffen syns en ruta.
+          const vik = (at, k) => { tl.to(V, { x: (k - 1) * 1920, duration: .6, ease: 'power2.out' }, at + 1 / FPS); tl.to(V, { ['a' + k]: 0, duration: .5, ease: 'power3.out' }, at + 1 / FPS); };
+          vik(6.75, 2); vik(16.5, 3); vik(24.0, 4);
+          // Ihopvikningen är EN glidning (4, 3, 2 i följd utan stopp). Vinkeln räknas ur gångjärnets läge: ett blad vars
+          // vänsterkant gått från 0 till 1920 står på kant. Blad 4 är på kant 29,77, blad 3 29,98 och blad 2 30,15.
+          const IHOP = 29.25, IHOP_D = .9;
+          tl.to(V, { x: 0, duration: IHOP_D, ease: 'power1.in' }, IHOP);
+          // Omslaget. Öppningen är EN rörelse över skarven: u = t i början av videon och u = t - D i slutet.
+          const lyft = (u) => { const p = Math.max(0, Math.min(1, (u + .4) / 1.0)); return 180 * (p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2); };
+          const omslag = (t) => { if (t < .5) return lyft(t); if (t >= 35.6) return lyft(t - D); if (t >= 30.75) return 0; if (t >= 30.15) { const q = (t - 30.15) / .6; return 70 * (1 - q * q); } return 180; };
+          const BL = [$('#b0'), $('#b1'), $('#b2'), $('#b3'), $('#b4')], KANT = BL.map((b) => b.querySelector('.kant'));
+          BL.forEach((b) => gsap.set(b, { transformOrigin: '0% 50%' }));
+          R.push((t) => {
+            const c = omslag(t);
+            syns[0] = c < 68;                                      // förbi 68 grader ligger omslaget utanför bild (bakom ögats linje mot gångjärnet)
+            gsap.set(BL[0], { x: -V.x, rotationY: -c }); BL[0].style.visibility = syns[0] ? 'visible' : 'hidden'; KANT[0].style.visibility = c > .5 ? 'inherit' : 'hidden';
+            for (let k = 1; k <= 4; k++) { const x = (k - 1) * 1920 - V.x;
+              let a = k === 1 ? 0 : V['a' + k];
+              if (k > 1 && t >= IHOP) a = Math.max(0, Math.min(90, 90 * x / 1920));
+              syns[k] = x > -1915 && x < 1915 && a < 89.5;
+              gsap.set(BL[k], { x: x, rotationY: -a }); BL[k].style.visibility = syns[k] ? 'visible' : 'hidden';
+              KANT[k].style.visibility = a > .5 ? 'inherit' : 'hidden'; }                // kanten syns bara när bladet står på snedden
+          });
+          // bladens högerkant (syns bara när bladet står på snedden)
+          document.querySelectorAll('.kant').forEach((p, i) => p.setAttribute('d', smooth(Array.from({ length: 14 }, (_, k) => [1925 + H(k, 40 + i) * 1.6, -30 + k * 88]), false)));
+
+          // skak när något slår ner: [tid, utslag i px, antal bildrutor]
+          const SKAK = [[.375, 5, 4], [6.75, 10, 5], [7.25, 5, 4], [16.5, 10, 5], [17.0, 5, 4], [17.6, 3, 3], [20.25, 7, 5], [24.0, 10, 5], [24.5, 5, 4], [30.75, 14, 8], [31.5, 10, 6]];
+          R.push((t) => { const f = Math.round(t * FPS); let x = 0, y = 0;
+            for (const [t0, amp, n] of SKAK) { const k = f - Math.round(t0 * FPS); if (k >= 0 && k < n) { const a = amp * (1 - k / n); x += H(f, 91) * a; y += H(f + 1, 92) * a; } }
+            gsap.set('#skak', { x, y }); });
+
+          // ramarnas bläckkontur (bilden själv kokar inte)
+          boil($('#ram1k'), () => rectPts(FR.x, FR.y, FR.w, FR.h, 16), true, 11, 2.5, 1);
+          boil($('#ram2k'), () => rectPts(FR.x, FR.y, FR.w, FR.h, 16), true, 12, 2.5, 2);
+          boil($('#slipk'), () => rectPts(SL.x, SL.y, SL.w, SL.h, 16), true, 13, 2.2, 3);
+          boil($('#win3k'), () => rectPts(FR.x, FR.y, FR.w, FR.h, 16), true, 14, 2.5, 3);
+          boil($('#ram4k'), () => rectPts(FR.x, FR.y, FR.w, FR.h, 16), true, 15, 2.5, 4);
+          // Ljus papperskant innanför bläcket när en mörk bild ligger i ramen (annars försvinner bläcket mot den svarta bilden)
+          boil($('#mat2'), () => rectPts(FR.x + 8, FR.y + 8, FR.w - 16, FR.h - 16, 10), true, 17, 1.4, 2);
+          boil($('#mat3'), () => rectPts(FR.x + 8, FR.y + 8, FR.w - 16, FR.h - 16, 10), true, 18, 1.4, 3);
+
+          // kamera i en ram: utsnittet [x, y, bredd] i bildens egna punkter. p går 0..1 längs en rak linje mellan två utsnitt.
+          function kamera(kam, st, v0, v1) {
+            R.push(() => { const s0 = FR.w / v0.w, s1 = FR.w / v1.w, s = s0 * Math.pow(s1 / s0, st.p), w = FR.w / s, q = (v0.w - w) / (v0.w - v1.w);
+              st.s = s; st.x = v0.x + (v1.x - v0.x) * q; st.y = v0.y + (v1.y - v0.y) * q;
+              gsap.set(kam, { x: -st.x * s, y: -st.y * s, scale: s, transformOrigin: '0px 0px' }); });
+          }
+
+          // ================= Blad 1: This is AdRaze Browser. / Ads are stopped before they load. =================
+          // Rad 1 bara kort: redan på slag 3 åker kameran ner till räknaren, där handskriften säger att det är en riktig bild.
+          words(W$('#r1'), .55);
+          ut('#r1', 1.9, .2);
+          // kameran åker ner till räknaren (bildens nedre vänstra hörn är bortskuret och kommer aldrig i bild: se manus.md)
+          const K1 = { p: 0 };
+          tl.to(K1, { p: 1, duration: .6, ease: 'power2.inOut' }, 2.25);
+          tl.to(K1, { p: 0, duration: .5, ease: 'power2.inOut' }, 6.0);
+          kamera($('#kam1'), K1, { x: 0, y: 0, w: 1620 }, { x: 576, y: 634, w: 467.5 });
+          words(W$('#r2'), 2.45);
+          // orange ring runt appens egen siffra och text (bildens punkter: märket, 47, ads and trackers blocked)
+          { const pts = ringPts(706, 755, 112, 36, 31);
+            R.push((t) => { if (!syns[1]) return; $('#ring1').setAttribute('d', smooth(jit(pts.map(([x, y]) => [(x - K1.x) * K1.s, (y - K1.y) * K1.s]), 32, step(t), 2.4), false)); });
+            draw($('#ring1'), 3.0, .55, 'power2.inOut'); }
+          // handskriften under ramen, pilen upp till 47
+          hand('#h1', 3.75, -3, 21, 1);
+          pil($('#pil1'), $('#pil1h'), [[688, 982], [632, 968], [598, 912], [602, 792]], 22, 4.3, .3, 1);
+          ut('#h1', 5.8, .15); ut('#pil1', 5.8, .15); ut('#pil1h', 5.8, .15);
+
+          tl.set('#r2', { opacity: 0 }, 31.0);                    // under omslaget: bladet är som i första bildrutan igen
+
+          // ================= Blad 2: Same browser. Five looks. =================
+          const r3 = W$('#r3');
+          // orange streck under Five (ordets plats mäts en gång, innan orden flyttas av sin ingång)
+          const fem = (() => { const b = $('#r3five').getBoundingClientRect(), o = $('#b2').getBoundingClientRect(); return { x0: b.left - o.left, x1: b.right - o.left, y: b.bottom - o.top - 15 }; })();
+          words(r3.slice(0, 2), 7.4);
+          const LK = [7.5, 9.0, 10.5, 12.0, 13.5];
+          for (let k = 2; k <= 5; k++) tl.fromTo('#lk' + k, { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 4 / FPS, ease: 'none' }, LK[k - 1]);
+          // handskrift och pil för varje utseende. Pilen pekar på det som ändrats i just den bilden.
+          const g2 = $('#pilar2');
+          const nyPil = (col) => { const a = document.createElementNS(NS, 'path'), b = document.createElementNS(NS, 'path'); [a, b].forEach((p) => { p.setAttribute('class', 'ink draw'); p.setAttribute('pathLength', '1'); p.setAttribute('fill', 'none'); p.style.strokeWidth = 7; p.style.stroke = col; g2.appendChild(p); }); return [a, b]; };
+          const INK = '#1b1916', LJUS = '#f4efe6';
+          const PILAR = [
+            [[[372, 342], [366, 312], [348, 284], [326, 258]], INK],            // 1: upp mot flikraden
+            [[[478, 400], [446, 396], [420, 378], [402, 352]], INK],            // 2: åt vänster mot flikpanelen
+            null,                                                               // 3: en måne i stället
+            [[[372, 342], [366, 316], [350, 292], [330, 270]], INK],            // 4: upp mot kanten där flikraden låg
+            [[[1420, 640], [1400, 720], [1370, 790], [1338, 846]], LJUS],       // 5: ner mot adressfältet
+          ];
+          PILAR.forEach((d, i) => {
+            const at = LK[i], slut = i < 4 ? LK[i + 1] - .1 : 14.9, n = hand('#n' + (i + 1), at + .04, i === 4 ? -2.5 : -3, 50 + i, 2);
+            ut(n, slut, .1);
+            if (d) { const [a, b] = nyPil(d[1]); pil(a, b, d[0], 60 + i, at + .36, .24, 2); ut(a, slut, .1); ut(b, slut, .1); }
+          });
+          { // månen bredvid ordet dark: en skära av två cirkelbågar som möts i spetsarna
+            const m = document.createElementNS(NS, 'path'); m.setAttribute('class', 'ink draw'); m.setAttribute('pathLength', '1'); m.setAttribute('fill', 'none'); m.style.strokeWidth = 7; m.style.stroke = LJUS; g2.appendChild(m);
+            const cx = 612, cy = 386, r = 42, G2 = Math.PI / 180, pts = [];
+            for (let i = 0; i <= 14; i++) { const a = (50 + 260 * i / 14) * G2; pts.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]); }                       // ytterbågen, runt vänstersidan
+            for (let i = 1; i < 9; i++) { const a = (276.9 - 193.8 * i / 9) * G2; pts.push([cx + r * .55 + Math.cos(a) * r * .772, cy + Math.sin(a) * r * .772]); }   // innerbågen tillbaka
+            const mane = rot(pts, cx, cy, -28);
+            boil(m, () => mane, true, 66, 1.4, 2); draw(m, LK[2] + .36, .34); ut(m, LK[3] - .1, .1);
+          }
+          boil($('#u3'), () => [[fem.x0 - 6, fem.y + 2], [(fem.x0 + fem.x1) / 2, fem.y - 3], [fem.x1 + 8, fem.y]], false, 71, 2.2, 2);
+          draw($('#u3'), 15.2, .4, 'power2.inOut');
+          words(r3.slice(2), 15.0);
+          // De fem utseendena bläddras förbi en gång till. Ordningen 1, 2, 4, 3, 5 ger bara ett byte till ljust och ett
+          // tillbaka till mörkt (1, 2 och 4 är ljusa, 3 och 5 mörka), inget blinkande.
+          const BLADDRA = [[15.72, 1], [15.86, 2], [15.99, 4], [16.12, 3], [16.26, 5]];
+          BLADDRA.forEach(([t0, n], i) => tl.set('#lk' + n, { zIndex: 10 + i }, t0));
+          // vilken bild som ligger överst i ramen just nu (för papperskanten)
+          const overst2 = (t) => { let n = 1; for (let i = 1; i < 5; i++) if (t >= LK[i] + 2 / FPS) n = i + 1; for (const [t0, m] of BLADDRA) if (t >= t0) n = m; return n; };
+          R.push((t) => { if (!syns[2]) return; $('#mat2').style.opacity = (overst2(t) === 3 || overst2(t) === 5) ? 1 : 0; });
+
+          // ================= Blad 3: Or just ask Falk. / One sentence. New look. =================
+          words(W$('#r4'), 17.15);
+          // remsan ur Falk-panelen läggs på fönstret som ett urklipp
+          gsap.set('#slip-s', { transformOrigin: (SL.x + SL.w / 2) + 'px ' + (SL.y + SL.h / 2) + 'px' });
+          tl.fromTo('#slip-s', { opacity: 0, scale: .8, rotation: -4 }, { opacity: 1, scale: 1, rotation: -1, duration: .32, ease: 'back.out(2.2)' }, 17.6);
+          // meningen skrivs i appens fält, ett ord per steg (riktiga bilder efter varje ord)
+          for (let i = 1; i <= 7; i++) { gsap.set('#f' + i, { opacity: 0 }); tl.set('#f' + i, { opacity: 1 }, 18.0 + (i - 1) * .2); }
+          // skickat: meningen ligger som bubbla överst i samtalet (remsan glider som när man tittar uppåt i panelen)
+          tl.fromTo('#slip-in', { y: 0 }, { y: SL.h, duration: .22, ease: 'power2.inOut', immediateRender: false }, 19.5);
+          tl.fromTo('#slip-top', { y: -SL.h }, { y: 0, duration: .22, ease: 'power2.inOut' }, 19.5);
+          // 20,25: fönstret byter utseende på riktigt (K7: mörkt, flikarna på sidan). Ramen studsar.
+          gsap.set('#w7', { opacity: 0 });
+          tl.set('#w7', { opacity: 1 }, 20.25);
+          tl.set('#mat3', { opacity: 1 }, 20.25);
+          gsap.set('#win3s', { transformOrigin: (FR.x + FR.w / 2) + 'px ' + (FR.y + FR.h / 2) + 'px' });
+          tl.fromTo('#win3s', { scale: 1 }, { scale: 1.03, duration: .07, ease: 'power2.out', immediateRender: false }, 20.25);
+          tl.to('#win3s', { scale: 1, duration: .28, ease: 'back.out(2.2)' }, 20.32);
+          ut('#r4', 20.8, .18);
+          words(W$('#r5'), 21.0);
+          // orange ring runt bubblan, ljus pil från bubblan till flikarna som nu ligger på sidan
+          { const pts = ringPts(1170, 863, 372, 86, 81);
+            boil($('#ring3'), () => pts, false, 82, 2.4, 3); draw($('#ring3'), 21.0, .5, 'power2.inOut');
+            pil($('#pil3'), $('#pil3h'), [[812, 812], [650, 768], [500, 612], [404, 398]], 83, 21.5, .4, 3); }
+
+          // ================= Blad 4: Family: open, not spying. =================
+          words(W$('#r6'), 24.65);
+          const K4 = { p: 0 };
+          tl.to(K4, { p: 1, duration: .45, ease: 'power2.inOut' }, 25.0);
+          tl.to(K4, { p: 0, duration: .5, ease: 'power2.inOut' }, 27.1);
+          // 1,10 gånger: allt i bilden ryms (kortets mening går till x 1464, knappen slutar på y 518)
+          kamera($('#kam4'), K4, { x: 0, y: 0, w: 1620 }, { x: 30, y: 4, w: 1470 });
+          // orange penna under appens egna ord (bildens punkter): Open, not spying. och sedan they know you can see the history.
+          const penna = (el, pts, seed) => R.push((t) => { if (!syns[4]) return; el.setAttribute('d', smooth(jit(pts.map(([x, y]) => [(x - K4.x) * K4.s, (y - K4.y) * K4.s]), seed, step(t), 1.6), false)); el.style.strokeWidth = 9 * K4.s; });
+          penna($('#u4'), [[107, 250.5], [224, 248.5], [342, 251]], 91);
+          penna($('#u4b'), [[1106, 385.5], [1286, 383.5], [1467, 386.5]], 92);
+          penna($('#u4c'), [[758, 427.5], [808, 426], [861, 428.5]], 93);
+          draw($('#u4'), 25.5, .6, 'power2.inOut');
+          draw($('#u4b'), 26.3, .42, 'power2.in');
+          draw($('#u4c'), 26.72, .2, 'power2.out');
+
+          // ================= Gorillan =================
+          const drawG = mountGorilla($('#g-rig')), gw = $('#g-wrap');
+          const G = { x: PLATS.a[0], y: PLATS.a[1], size: PLATS.a[2], dx: 0, dy: 0, sx: 1, sy: 1, rot: 0, lx: .9, ly: .2, blink: 0, brow: .6 };
+          // Hoppet över skarven, från slutkortets plats till ramens hörn: EN funktion av u (u = t i början, u = t - D i slutet)
+          const AVSTAMP = -.4, LANDNING = .375;
+          const flyg = (u) => { const p = (u - AVSTAMP) / (LANDNING - AVSTAMP), a = PLATS.slut, b = PLATS.a, s = Math.sin(Math.PI * p);
+            return { x: a[0] + (b[0] - a[0]) * p, y: a[1] + (b[1] - a[1]) * p - 120 * s, size: a[2] + (b[2] - a[2]) * p, rot: 10 * s, sx: 1 - .04 * s, sy: 1 + .06 * s }; };
+          R.push((t) => {
+            let x = G.x + G.dx, y = G.y + G.dy, size = G.size, r = G.rot, sx = G.sx, sy = G.sy, lx = G.lx, ly = G.ly, brow = G.brow, blink = G.blink;
+            const u = t < LANDNING ? t : (t >= D + AVSTAMP ? t - D : null);
+            if (u !== null) { const f = flyg(u); x = f.x; y = f.y; size = f.size; r = f.rot; sx = f.sx; sy = f.sy; lx = .9; ly = .2; brow = .6; blink = 0; }
+            drawG({ tag: true, look: [lx, ly], blink, brow }, step(t));
+            const k = size / 200;                                  // tillplattning och lutning utgår från underkanten (100, 196) i ritrutan
+            gw.setAttribute('transform', `translate(${(x + 100 * k).toFixed(2)} ${(y + 196 * k).toFixed(2)}) rotate(${r.toFixed(2)}) scale(${(k * sx).toFixed(4)} ${(k * sy).toFixed(4)}) translate(-100 -196)`);
+            gw.style.display = y < -size - 20 ? 'none' : '';
+          });
+          const titta = (at, lx, ly, dur) => tl.to(G, { lx, ly, duration: dur || .1, ease: 'power2.out' }, at);
+          const blinka = (at) => { tl.set(G, { blink: 1 }, at); tl.set(G, { blink: 0 }, at + .1); };
+          const bryn = (at, v) => { tl.to(G, { brow: v, duration: .12, ease: 'power2.out' }, at); tl.to(G, { sy: .93, sx: 1.05, duration: .06 }, at); tl.to(G, { sy: 1, sx: 1, duration: .24, ease: 'back.out(2.6)' }, at + .06); };
+          const nicka = (at) => { tl.to(G, { dy: 13, duration: .07, ease: 'power2.out' }, at); tl.to(G, { dy: 0, duration: .2, ease: 'back.out(2.4)' }, at + .07); };
+          const landa = (at) => { tl.to(G, { sx: 1.14, sy: .86, duration: .06, ease: 'power2.out' }, at); tl.to(G, { sx: 1, sy: 1, duration: .26, ease: 'back.out(2.4)' }, at + .06); };
+          // Stångning: blicken mot raden, bestämd min, sats bakåt åt höger (0,2 s) och så huvudet åt vänster in i radens
+          // sista ord. Ordet knuffas undan och fjädrar tillbaka, tre bläckstreck vid träffen, och bladet far iväg åt vänster
+          // (samma håll som raden glider) med full fart redan bildrutan efter träffen. Gorillan hoppar med och landar när bladet ligger plant.
+          const TRAFF = [];
+          function stanga(at, ord) {
+            titta(at - .44, -1, .15);
+            tl.to(G, { brow: -1, duration: .1, ease: 'power2.out' }, at - .4);
+            tl.to(G, { dx: 26, rot: 9, sx: .95, sy: 1.05, duration: .2, ease: 'power2.out' }, at - .3);
+            tl.to(G, { dx: -46, rot: -14, sx: 1, sy: 1, duration: .08, ease: 'power3.in' }, at - .08);
+            tl.to(G, { sx: .88, sy: 1.1, duration: .04, ease: 'power2.out' }, at);          // trycks ihop mot ordet
+            tl.to(G, { dx: 0, rot: 0, duration: .3, ease: 'power2.out' }, at + .04);
+            tl.to(G, { brow: 0, duration: .15 }, at + .5);
+            tl.to(G, { sy: 1.07, sx: .95, duration: .08 }, at + .04);
+            tl.fromTo(G, { y: PLATS.a[1] }, { y: PLATS.a[1] - 84, duration: .25, ease: 'power2.out', immediateRender: false }, at);
+            tl.to(G, { y: PLATS.a[1], duration: .25, ease: 'power2.in' }, at + .25);
+            landa(at + .5);
+            gsap.set(ord, { transformOrigin: '100% 80%' });
+            tl.to(ord, { x: -30, rotation: -12, duration: .05, ease: 'power2.out' }, at);
+            tl.to(ord, { x: 0, rotation: 0, duration: .5, ease: 'elastic.out(1.1, .35)' }, at + .05);
+            TRAFF.push(at);
+          }
+          // bläckstrecken vid träffen: tre korta streck som skjuts ut uppåt, ovanför punkten där huvudet möter ordet
+          { const B = Array.from($('#bang').children), C = [1590, 90], V3 = [-120, -92, -64], N = 5;      // uppåt, fritt från ordets uppstaplar (y 56) och gorillan
+            R.push((t) => { let k = -1; for (const t0 of TRAFF) { const f = Math.round((t - t0) * FPS); if (f >= 0 && f < N) k = f; }
+              $('#bang').style.display = k < 0 ? 'none' : '';
+              if (k < 0) return;
+              const q = k / N, r0 = 50 + 10 * q, r1 = 76 + 16 * q;
+              B.forEach((p, i) => { const a = V3[i] * Math.PI / 180, j = H(k * 5 + i, 77) * 3;
+                p.setAttribute('d', `M${(C[0] + Math.cos(a) * r0 + j).toFixed(1)} ${(C[1] + Math.sin(a) * r0).toFixed(1)} L${(C[0] + Math.cos(a) * r1).toFixed(1)} ${(C[1] + Math.sin(a) * r1 + j).toFixed(1)}`);
+                p.style.opacity = 1 - .5 * q; }); }); }
+
+          landa(LANDNING);
+          tl.to(G, { brow: 0, duration: .2 }, .7);
+          // blad 1: ner i bilden, med kameran ner till räknaren, ögonbrynen upp när ringen sluts runt 47, sedan oss
+          titta(1.0, -.7, .8, .14);
+          titta(2.2, -1, 1, .12);
+          bryn(3.58, 1);
+          titta(4.3, -.75, 1, .12);
+          blinka(4.95);
+          titta(5.3, 0, 0, .14); nicka(5.36);
+          titta(5.9, -.5, .5); tl.to(G, { brow: 0, duration: .15 }, 6.0);
+          stanga(6.75, $('#r2 .w:last-child'));
+          // blad 2
+          titta(7.42, -1, .7, .12);
+          LK.forEach((t0, i) => { if (i) nicka(t0); });
+          titta(13.55, -.6, 1, .12);
+          titta(15.15, -1, -.3, .12); bryn(15.62, .7); blinka(15.4);
+          stanga(16.5, $('#r3 .w:last-child'));
+          // blad 3: remsan, meningen, bytet
+          titta(17.2, -1, -.25, .12);
+          titta(17.62, -.8, 1, .1); blinka(17.75);
+          tl.fromTo(G, { lx: -.95 }, { lx: -.55, duration: 1.2, ease: 'none', immediateRender: false }, 18.0);          // ögonen följer orden
+          titta(19.52, -.4, 1, .1);
+          titta(20.27, -1, .5, .08); tl.to(G, { brow: 1, duration: .1, ease: 'power2.out' }, 20.27);
+          tl.to(G, { dy: -24, sy: 1.06, sx: .96, duration: .09, ease: 'power2.out' }, 20.27); tl.to(G, { dy: 0, duration: .14, ease: 'power2.in' }, 20.36); landa(20.5);   // hoppar till
+          titta(21.0, -.45, 1, .12); titta(21.55, -1, .45, .14); titta(22.5, -.5, 1, .14); titta(23.25, 0, 0, .14); tl.to(G, { brow: .3, duration: .15 }, 23.25); blinka(23.55);
+          stanga(24.0, $('#r5 .w:last-child'));
+          // blad 4
+          titta(24.7, -.8, .8, .12); titta(25.38, -1, .6, .1); tl.to(G, { lx: -.6, duration: .6, ease: 'none' }, 25.5); bryn(26.12, .7);
+          titta(26.3, -.45, 1, .12); nicka(26.95);
+          tl.to(G, { brow: 0, duration: .15 }, 27.2); titta(27.75, 0, 0, .14); blinka(28.4);
+          // 29,25: tar sats och hoppar rakt upp ur bild
+          titta(29.02, 0, -1); tl.to(G, { sy: .86, sx: 1.1, duration: .1, ease: 'power2.out' }, 29.15);
+          tl.to(G, { sy: 1.08, sx: .95, duration: .06 }, 29.25); tl.to(G, { y: -520, duration: .32, ease: 'power1.out' }, 29.25);
+          // 31,50: faller ner på sin plats på omslaget, 440 px, och är loggan punkt för punkt
+          tl.set(G, { x: PLATS.slut[0], size: PLATS.slut[2], sx: 1, sy: 1, lx: 0, ly: 0, brow: 0, dx: 0, dy: 0, rot: 0 }, 30.9);
+          tl.fromTo(G, { y: -560 }, { y: PLATS.slut[1], duration: .22, ease: 'power2.in', immediateRender: false }, 31.28);
+          landa(31.5);
+          blinka(33.5);
+          // 35,45: blicken först, hukar, skjuter ifrån 35,60 (därefter tar flyg(u) över)
+          titta(35.3, .9, .2, .1); tl.to(G, { brow: .6, duration: .1 }, 35.4);
+          tl.to(G, { sy: .88, sx: 1.08, duration: .12, ease: 'power2.out' }, 35.45);
+
+          // en enda uppdatering per bildruta, sist i skriptet
+          tl.eventCallback('onUpdate', () => { const t = tl.time(); for (const f of R) f(t); });
+          R.forEach((f) => f(0));
+          tl.set({}, {}, D);
+          window.__timelines = window.__timelines || {};
+          window.__timelines['main'] = tl;
+        });
+      })();
+    </script>
+  </body>
+</html>

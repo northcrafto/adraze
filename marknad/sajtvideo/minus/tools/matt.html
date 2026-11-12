@@ -1,0 +1,36 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  @font-face { font-family: "News"; src: url("../assets/fonts/Newsreader.ttf") format("truetype"); font-weight: 200 800; }
+  @font-face { font-family: "NewsI"; src: url("../assets/fonts/Newsreader-Italic.ttf") format("truetype"); font-weight: 200 800; }
+  @font-face { font-family: "InterB"; src: url("../assets/fonts/Inter-Bold.otf") format("opentype"); font-weight: 700; }
+  @font-face { font-family: "InterM"; src: url("../assets/fonts/Inter-Medium.otf") format("opentype"); font-weight: 500; }
+  @font-face { font-family: "InterK"; src: url("../assets/fonts/InterDisplay-Black.otf") format("opentype"); font-weight: 900; }
+  body { margin: 0; background: #ede5d6; }
+</style></head>
+<body>
+<svg id="s" width="1920" height="1080" viewBox="0 0 1920 1080"></svg>
+<script>
+  // Mäter text som SVG <text>: bredd (advance), bläckruta (bbox av glyfer via getBBox ger radruta, så vi mäter bläck med canvas).
+  window.matt = async function (jobs) {
+    await Promise.all([
+      document.fonts.load('500 100px News'), document.fonts.load('500 100px NewsI'), document.fonts.load('700 100px InterB'),
+      document.fonts.load('500 100px InterM'), document.fonts.load('900 100px InterK')]);
+    const NS = 'http://www.w3.org/2000/svg', s = document.getElementById('s'), out = [];
+    const cv = document.createElement('canvas').getContext('2d');
+    for (const j of jobs) {
+      const t = document.createElementNS(NS, 'text');
+      t.setAttribute('x', 0); t.setAttribute('y', 500);
+      t.setAttribute('style', `font: ${j.w} ${j.px}px '${j.f}'; letter-spacing: ${j.ls || 0}em; white-space: pre`);
+      t.textContent = j.t; s.appendChild(t);
+      const len = t.getComputedTextLength();
+      const pos = []; for (let i = 0; i < j.t.length; i++) pos.push(+t.getStartPositionOfChar(i).x.toFixed(2));
+      cv.font = `${j.w} ${j.px}px '${j.f}'`; cv.letterSpacing = (j.ls || 0) * j.px + 'px';
+      const m = cv.measureText(j.t);
+      out.push({ t: j.t, f: j.f, px: j.px, len: +len.toFixed(2), canvasW: +m.width.toFixed(2), inkL: +m.actualBoundingBoxLeft.toFixed(2), inkR: +m.actualBoundingBoxRight.toFixed(2), asc: +m.actualBoundingBoxAscent.toFixed(2), desc: +m.actualBoundingBoxDescent.toFixed(2), pos: j.pos ? pos : undefined });
+      t.remove();
+    }
+    return out;
+  };
+</script>
+</body></html>

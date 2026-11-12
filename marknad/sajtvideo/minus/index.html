@@ -1,0 +1,729 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>AdRaze: minus</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "News"; src: url("assets/fonts/Newsreader.ttf") format("truetype"); font-weight: 200 800; }
+      @font-face { font-family: "NewsI"; src: url("assets/fonts/Newsreader-Italic.ttf") format("truetype"); font-weight: 200 800; }
+      @font-face { font-family: "InterB"; src: url("assets/fonts/Inter-Bold.otf") format("opentype"); font-weight: 700; }
+      @font-face { font-family: "InterM"; src: url("assets/fonts/Inter-Medium.otf") format("opentype"); font-weight: 500; }
+      @font-face { font-family: "InterK"; src: url("assets/fonts/InterDisplay-Black.otf") format("opentype"); font-weight: 900; }
+      :root { --paper: #ede5d6; --ink: #1b1916; --or: #ff4b1f; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--paper); }
+      #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--paper); }
+      .scene { position: absolute; inset: 0; overflow: hidden; background: var(--paper); }
+      svg.full { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: visible; }
+      /* Kornet: samma brus som förebildens .grain (samma filter, samma 300 px ruta, opacity .42, multiply), men i SVG:n.
+         Multiply och opacity sitter på gruppen, klippet på rektangeln inuti. Med klipp och multiply på samma element
+         ritar Chrome med GPU inte kornet alls (bara i mjukvara), och med klippet på gruppen blir multiply verkningslöst. */
+      #grain { opacity: .42; mix-blend-mode: multiply; pointer-events: none; }
+      /* Satt text: allt står som SVG-text så att baslinjen hamnar exakt där den ska. Storleksbyten görs med skala. */
+      svg text { white-space: pre; }
+      .news  { font: 500 250px "News", serif; letter-spacing: -0.02em; }
+      .newsi { font: 500 250px "NewsI", serif; letter-spacing: -0.02em; }
+      .n104  { font: 500 104px "News", serif; letter-spacing: -0.02em; }
+      .n88   { font: 500 88px "News", serif; letter-spacing: -0.02em; }
+      .ni88  { font: 500 88px "NewsI", serif; letter-spacing: -0.02em; }
+      .k150  { font: 900 150px "InterK", sans-serif; letter-spacing: -0.035em; }
+      .k64   { font: 900 64px "InterK", sans-serif; }
+      .k56   { font: 900 56px "InterK", sans-serif; letter-spacing: -0.01em; }
+      .b66   { font: 700 66px "InterB", sans-serif; }
+      .m40   { font: 500 40px "InterM", sans-serif; letter-spacing: 0.14em; }
+      .m22   { font: 500 22px "InterM", sans-serif; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-width="1920" data-height="1080" data-duration="30">
+
+      <!-- En enda bild som bygger om sig på taktslagen: 0 till 30 s, 96 slag per minut -->
+      <section id="scen" class="clip scene" data-start="0" data-duration="30" data-track-index="1">
+        <svg id="v" class="full" viewBox="0 0 1920 1080">
+          <defs>
+            <clipPath id="kp1"><path id="kpp1" /></clipPath>
+            <clipPath id="kp2"><path id="kpp2" /></clipPath>
+            <clipPath id="kp3"><path id="kpp3" /></clipPath>
+            <clipPath id="kp4"><path id="kpp4" /></clipPath>
+            <clipPath id="kp5"><path id="kpp5" /></clipPath>
+            <clipPath id="kroll"><rect x="-40" y="-222" width="760" height="300" /></clipPath>
+            <clipPath id="kf1"><rect id="kfr1" x="230" y="320" width="0" height="150" /></clipPath>
+            <clipPath id="kf2"><rect id="kfr2" x="230" y="470" width="0" height="150" /></clipPath>
+            <clipPath id="kf3"><rect id="kfr3" x="230" y="620" width="0" height="150" /></clipPath>
+            <clipPath id="kf4"><rect id="kfr4" x="230" y="770" width="0" height="150" /></clipPath>
+            <!-- kornet: förebildens brus, en ruta på 300 x 300 som upprepas -->
+            <filter id="kornf" filterUnits="userSpaceOnUse" x="0" y="0" width="300" height="300"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4" /><feColorMatrix values="0 0 0 0 .45  0 0 0 0 .38  0 0 0 0 .3  0 0 0 .55 0" /></filter>
+            <pattern id="korn" patternUnits="userSpaceOnUse" x="0" y="0" width="300" height="300"><rect width="300" height="300" filter="url(#kornf)" /></pattern>
+            <clipPath id="kkorn"><path id="kkp" d="M-300 -300H2220V1380H-300Z" /></clipPath>
+          </defs>
+          <g id="world">
+            <rect x="-200" y="-200" width="2320" height="1480" fill="#ede5d6" />
+
+            <!-- remsan: din sida -->
+            <g id="title">
+              <g id="t-roll" clip-path="url(#kroll)">
+                <text id="t-your" class="news" fill="#1b1916">Your</text>
+                <text id="t-same" class="news" fill="#1b1916">Same</text>
+              </g>
+              <text id="t-page" class="news" fill="#1b1916">page</text>
+              <text id="t-dot" class="news" fill="#1b1916">.</text>
+            </g>
+
+            <!-- ordboksraden -->
+            <g id="dict">
+              <text class="n88" fill="#1b1916">Ad·Raze:</text>
+              <text class="ni88" fill="#1b1916">to</text>
+              <text class="ni88" fill="#1b1916">level</text>
+              <text class="ni88" fill="#1b1916">ads</text>
+              <text class="ni88" fill="#1b1916">to</text>
+              <text class="ni88" fill="#1b1916">the</text>
+              <text class="ni88" fill="#1b1916">ground.</text>
+            </g>
+
+            <!-- banden: skräpet som webben lägger till -->
+            <g id="bands">
+              <g id="b1"><path id="bp1" /><g clip-path="url(#kp1)"><g id="bm1"><g id="bmi1"></g></g></g><g id="bl1"></g></g>
+              <g id="b2"><path id="bp2" /><g clip-path="url(#kp2)"><g id="bm2"><g id="bmi2"></g></g></g><g id="bl2"></g></g>
+              <g id="b3"><path id="bp3" /><g clip-path="url(#kp3)"><g id="bm3"><g id="bmi3"></g></g></g><g id="bl3"></g></g>
+              <g id="b4"><path id="bp4" /><g clip-path="url(#kp4)"><g id="bm4"><g id="bmi4"></g></g></g><g id="bl4"></g></g>
+              <g id="b5"><path id="bp5" /><g clip-path="url(#kp5)"><g id="bm5"><g id="bmi5"></g></g></g><g id="bl5"></g></g>
+            </g>
+
+            <!-- tecken och ord: plus som blir minus -->
+            <g id="content" data-layout-allow-overflow>
+              <path id="sh1" /><path id="sv1" /><text id="w1" class="k150" data-layout-allow-overlap>ads</text>
+              <path id="sh2" /><path id="sv2" /><text id="w2" class="k150" data-layout-allow-overlap>trackers</text>
+              <path id="sh3" /><path id="sv3" /><text id="w3" class="k150" data-layout-allow-overlap>popups</text>
+              <path id="sh4" /><path id="sv4" /><text id="w4" class="k150" data-layout-allow-overlap>cookie banners</text>
+              <path id="sh5" /><path id="sv5" /><text id="w5" class="k150" data-layout-allow-overlap>scam redirects</text>
+            </g>
+
+            <!-- påståendets andra rad och det orange strecket -->
+            <g id="claim2">
+              <text class="newsi" fill="#1b1916">Minus</text>
+              <text class="newsi" fill="#1b1916">the</text>
+              <text class="newsi" fill="#1b1916">junk.</text>
+              <path id="ul" />
+            </g>
+
+            <!-- det AdRaze lägger till: fyra rader med orange plus -->
+            <g id="feat">
+              <g clip-path="url(#kf1)"><text id="ft1" class="n104" fill="#1b1916">a Chrome extension</text></g>
+              <g clip-path="url(#kf2)"><text id="ft2" class="n104" fill="#1b1916">a browser for Mac and Linux</text></g>
+              <g clip-path="url(#kf3)"><text id="ft3" class="n104" fill="#1b1916">layout and colors your way</text></g>
+              <g clip-path="url(#kf4)"><text id="ft4" class="n104" fill="#1b1916">Family to protect your kids</text></g>
+              <path id="fh1" /><path id="fv1" /><path id="fh2" /><path id="fv2" /><path id="fh3" /><path id="fv3" /><path id="fh4" /><path id="fv4" />
+            </g>
+
+            <!-- slutkortet -->
+            <g id="endcard">
+              <path id="pill" />
+              <text id="url" class="b66" fill="#ffffff" text-anchor="middle">adraze.app</text>
+              <text id="small" class="m40" fill="#5a5146" text-anchor="middle">CHROME EXTENSION · BROWSER FOR MAC AND LINUX</text>
+            </g>
+            <g id="lock">
+              <text class="k150" fill="#1b1916">A</text><text class="k150" fill="#1b1916">d</text><text class="k150" fill="#1b1916">R</text><text class="k150" fill="#1b1916">a</text><text class="k150" fill="#1b1916">z</text><text class="k150" fill="#1b1916">e</text>
+            </g>
+
+            <!-- gorillan -->
+            <g id="fart"></g>
+            <g id="g-wrap"><g id="g-rig"></g></g>
+            <g id="matt" visibility="hidden"></g>
+          </g>
+          <!-- kornet ligger överst, utanför kameran (det rör sig aldrig), och klipps bort från banden -->
+          <g id="grain"><rect x="0" y="0" width="1920" height="1080" fill="url(#korn)" clip-path="url(#kkorn)" /></g>
+        </svg>
+      </section>
+
+      <audio id="score" src="assets/score.wav" data-start="0" data-duration="30" data-track-index="9"></audio>
+    </div>
+
+    <script>
+/* ===== Gemensamma ritfunktioner för sajtvideorna. Klistras in i index.html före scenkoden. ===== */
+const FPS = 30, DROP = 3;                                   // koket: ny pose var tredje bildruta = 10 poser per sekund
+const step = (t) => Math.floor((t * FPS) / DROP);
+// seedad hash, -1..1. Aldrig Math.random.
+const H = (n, s) => { const x = Math.sin(n * 127.1 + (s || 1) * 311.7) * 43758.5453; return (x - Math.floor(x)) * 2 - 1; };
+// mjuk bana genom punkter (kvadratisk mittpunktskedja), öppen eller sluten
+function smooth(p, closed) {
+  const n = p.length, f = (v) => v.toFixed(1);
+  if (!closed) {
+    let d = `M${f(p[0][0])} ${f(p[0][1])}`;
+    for (let i = 1; i < n - 1; i++) { const a = p[i], b = p[i + 1]; d += ` Q${f(a[0])} ${f(a[1])} ${f((a[0] + b[0]) / 2)} ${f((a[1] + b[1]) / 2)}`; }
+    return d + ` L${f(p[n - 1][0])} ${f(p[n - 1][1])}`;
+  }
+  let d = `M${f((p[0][0] + p[n - 1][0]) / 2)} ${f((p[0][1] + p[n - 1][1]) / 2)}`;
+  for (let i = 0; i < n; i++) { const a = p[i], b = p[(i + 1) % n]; d += ` Q${f(a[0])} ${f(a[1])} ${f((a[0] + b[0]) / 2)} ${f((a[1] + b[1]) / 2)}`; }
+  return d + 'Z';
+}
+// darr: flyttar varje punkt lite, olika för varje steg st
+const jit = (p, seed, st, amp) => p.map((q, i) => [q[0] + H(st * 7 + i * 13, seed) * amp, q[1] + H(st * 7 + i * 13 + 5, seed + 3) * amp]);
+// rektangel som punkter: hörnen dubblade så att kanterna håller sig raka
+function rectPts(x, y, w, h, r) {
+  r = r || 10; const o = [], C = [[x, y], [x + w, y], [x + w, y + h], [x, y + h]];
+  const seg = (a, b, k) => { for (let i = 0; i < k; i++) o.push([a[0] + (b[0] - a[0]) * i / k, a[1] + (b[1] - a[1]) * i / k]); };
+  const k = (len) => Math.max(2, Math.round(len / 90));
+  for (let c = 0; c < 4; c++) { const a = C[c], b = C[(c + 1) % 4], len = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / len, uy = (b[1] - a[1]) / len;
+    o.push([a[0] + ux * r * .3, a[1] + uy * r * .3]); seg([a[0] + ux * r, a[1] + uy * r], [b[0] - ux * r, b[1] - uy * r], k(len)); o.push([b[0] - ux * r * .3, b[1] - uy * r * .3]); }
+  return o;
+}
+// klick: ojämn cirkel
+const blobPts = (cx, cy, r, seed, n, irr) => Array.from({ length: n }, (_, i) => { const a = i / n * Math.PI * 2, rr = r * (1 + H(i * 3 + 1, seed) * irr); return [cx + Math.cos(a) * rr, cy + Math.sin(a) * rr]; });
+const rot = (p, cx, cy, dg) => { const a = dg * Math.PI / 180, c = Math.cos(a), n = Math.sin(a); return p.map(([x, y]) => [cx + (x - cx) * c - (y - cy) * n, cy + (x - cx) * n + (y - cy) * c]); };
+// loggans egen rektangel (tre punkter per kant). Bara till AD-lappen, så att den blir exakt som i loggan.
+function tagRect(x, y, w, h, r) { const o = [], C = [[x, y], [x + w, y], [x + w, y + h], [x, y + h]]; for (let c = 0; c < 4; c++) { const a = C[c], b = C[(c + 1) % 4], L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uy = (b[1] - a[1]) / L; o.push([a[0] + ux * r * .3, a[1] + uy * r * .3]); for (let i = 0; i < 3; i++) { const t = i / 2; o.push([a[0] + ux * r + (b[0] - a[0] - 2 * ux * r) * t, a[1] + uy * r + (b[1] - a[1] - 2 * uy * r) * t]); } o.push([b[0] - ux * r * .3, b[1] - uy * r * .3]); } return o; }
+
+/* ===== Gorillan: lager i en ruta på 200 x 200, samma punkter som loggan (logo/nya/gorilla.html) =====
+   pose: tag    true = gul AD-lapp i munnen (loggan), false = vanlig mun
+         look   [x, y], -1..1: vart pupillerna tittar
+         blink  0 eller 1
+         brow   -1 hungrig/bestämd, 0 neutral, 1 glad/förvånad
+         jaw    0..1 gap (bara utan lapp)
+         cheeks 0..1 fulla kinder
+         blob   false = utan orange klick
+   Neutral pose med st = 1 ger exakt loggans banor. */
+function gorilla(pose) {
+  const P = Object.assign({ tag: true, look: [0, 0], blink: 0, brow: 0, jaw: 0, cheeks: 0, blob: true }, pose || {});
+  const F = '#3a332d', A = '#c9b8a0', I = '#1b1916', O = '#ff4b1f', Y = '#ffd23e';
+  const j = P.tag ? 0 : P.jaw, k = P.cheeks, up = Math.max(0, P.brow), dn = Math.max(0, -P.brow);
+  const ex = P.look[0] * 4, ey = P.look[1] * 3;
+  const L = [];
+  L.push({ id: 'blob', hide: !P.blob, p: blobPts(100, 104, 92, 9, 16, .06), c: 1, fill: O, amp: 2.2 });
+  L.push({ id: 'earL', p: blobPts(40, 106, 13, 2, 8, .06), c: 1, fill: F, w: 7, amp: 1 });
+  L.push({ id: 'earR', p: blobPts(160, 106, 13, 3, 8, .06), c: 1, fill: F, w: 7, amp: 1 });
+  L.push({ id: 'head', p: [[100, 30], [128, 38], [150, 60], [160, 92], [157, 126], [146, 152 + 5 * j], [124, 168 + 9 * j], [100, 173 + 10 * j], [76, 168 + 9 * j], [54, 152 + 5 * j], [43, 126], [40, 92], [50, 60], [72, 38]], c: 1, fill: F, w: 8, amp: 1.6 });
+  L.push({ id: 'face', p: [[100, 72], [120, 66], [138, 76], [142, 94], [136, 110], [148 + 5 * k, 128], [143 + 4 * k, 150 + 4 * j], [124, 162 + 9 * j], [100, 165 + 10 * j], [76, 162 + 9 * j], [57 - 4 * k, 150 + 4 * j], [52 - 5 * k, 128], [64, 110], [58, 94], [62, 76], [80, 66]], c: 1, fill: A, w: 6, amp: 1.4 });
+  L.push({ id: 'brow', p: [[62, 92 - 4 * up - 3 * dn], [80, 82 - 6 * up + 5 * dn], [100, 90 - 5 * up + 6 * dn], [120, 82 - 6 * up + 5 * dn], [138, 92 - 4 * up - 3 * dn]], w: 10, amp: 1 });
+  if (P.blink > .5) {
+    L.push({ id: 'eyeL', p: [[76, 103], [82, 104.5], [88, 103]], w: 5, amp: .6 });
+    L.push({ id: 'eyeR', p: [[112, 103], [118, 104.5], [124, 103]], w: 5, amp: .6 });
+  } else {
+    L.push({ id: 'eyeL', p: blobPts(82 + ex, 102 + ey, 6, 1, 8, .08), c: 1, fill: I, amp: .6 });
+    L.push({ id: 'eyeR', p: blobPts(118 + ex, 102 + ey, 6, 2, 8, .08), c: 1, fill: I, amp: .6 });
+  }
+  L.push({ id: 'nose', p: [[85, 128], [90, 114], [100, 111], [110, 114], [115, 128]], w: 6, amp: .8 });
+  L.push({ id: 'nosL', p: blobPts(93, 127, 3.5, 4, 8, .08), c: 1, fill: I, amp: .6 });
+  L.push({ id: 'nosR', p: blobPts(107, 127, 3.5, 5, 8, .08), c: 1, fill: I, amp: .6 });
+  if (P.tag) L.push({ id: 'tag', p: rot(tagRect(70, 138, 62, 26, 5), 101, 151, -8), c: 1, fill: Y, w: 5, amp: .9 });
+  else if (j < .08) L.push({ id: 'mouth', p: [[78, 147], [100, 152], [122, 147]], w: 6, amp: .8 });
+  else L.push({ id: 'gap', p: [[80, 143], [100, 140], [120, 143], [125, 148 + 7 * j], [112, 154 + 13 * j], [100, 156 + 14 * j], [88, 154 + 13 * j], [75, 148 + 7 * j]], c: 1, fill: I, w: 5, amp: .8 });
+  return L;
+}
+// Sätter upp gorillan i en <g> och ger tillbaka draw(pose, st). Anropa draw från en R-funktion varje bildruta.
+function mountGorilla(g) {
+  const NS = 'http://www.w3.org/2000/svg', el = {}; let txt = null;
+  return function draw(pose, st) {
+    const seen = {};
+    gorilla(pose).forEach((l, idx) => {
+      let e = el[l.id];
+      if (!e) { e = el[l.id] = document.createElementNS(NS, 'path'); e.style.strokeLinecap = 'round'; e.style.strokeLinejoin = 'round'; g.appendChild(e); }
+      seen[l.id] = 1;
+      e.style.display = l.hide ? 'none' : '';
+      e.setAttribute('d', smooth(jit(l.p, idx * 17 + 3, st, l.amp || 1.5), l.c));
+      e.style.fill = l.fill || 'none';                     // stil, inte attribut: en CSS-regel kan annars vinna
+      e.style.stroke = l.w ? '#1b1916' : 'none';
+      e.style.strokeWidth = l.w || 0;
+    });
+    for (const id in el) if (!seen[id]) el[id].style.display = 'none';
+    if (!txt) { txt = document.createElementNS(NS, 'text'); txt.textContent = 'AD'; txt.setAttribute('x', 101); txt.setAttribute('y', 159); txt.setAttribute('transform', 'rotate(-8 101 159)'); txt.setAttribute('text-anchor', 'middle'); txt.setAttribute('style', "font: 900 20px 'InterK', sans-serif; fill: #1b1916"); }
+    if (seen.tag) g.appendChild(txt);                      // texten ska alltid ligga överst
+    txt.style.display = seen.tag ? '' : 'none';
+  };
+}
+/* ===== Slut på de gemensamma ritfunktionerna (mönstren görs per band nedan) ===== */
+
+(function () {
+  const NS = 'http://www.w3.org/2000/svg';
+  const $ = (s) => document.querySelector(s);
+  const D = 30, BT = 0.625;                                  // 30,0 s, 96 slag per minut
+  const C = { paper: '#ede5d6', ink: '#1b1916', light: '#f4efe6', muted: '#8d8273', mutedT: '#7f7567', or: '#ff4b1f', sun: '#ffd23e', blue: '#5d7fa3', rose: '#f2a7b8', olive: '#5f6b45', night: '#151412', salmon: '#ff8e72', sheet: '#fbf7ef', mint: '#9fd3c7', lilac: '#c7b8f5' };
+
+  // Typsnitten måste vara inlästa innan något mäts. Tidslinjen registreras sist i build().
+  Promise.all(['500 250px News', '500 250px NewsI', '900 150px InterK', '700 66px InterB', '500 40px InterM'].map((f) => document.fonts.load(f, 'AdRaze Your page'))).then(build, build);
+
+  function build() {
+    /* ---------- små hjälpare ---------- */
+    const EZ = {}, ez = (n) => EZ[n] || (EZ[n] = gsap.parseEase(n));
+    const E = (n, p) => ez(n)(p);
+    const cl = (v) => Math.max(0, Math.min(1, v));
+    const seg = (t, a, d) => cl((t - a) / d);                // 0..1 över [a, a + d]
+    const lerp = (a, b, p) => a + (b - a) * p;
+    const bt = (k) => Math.floor(k * 18.75 + 0.49) / 30;     // slag k, avrundat till bildruta (halva rutor nedåt: bild före ljud)
+    const f2 = (v) => v.toFixed(2);
+    const hex = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+    const mix = (a, b, p) => { const A = hex(a), B = hex(b); return `rgb(${Math.round(lerp(A[0], B[0], p))},${Math.round(lerp(A[1], B[1], p))},${Math.round(lerp(A[2], B[2], p))})`; };
+    const mk = (tag, parent, attrs) => { const e = document.createElementNS(NS, tag); if (attrs) for (const a in attrs) e.setAttribute(a, attrs[a]); parent.appendChild(e); return e; };
+    const ink = (p, fill, stroke, w) => { p.style.fill = fill || 'none'; p.style.stroke = stroke || 'none'; p.style.strokeWidth = w || 0; p.style.strokeLinecap = 'round'; p.style.strokeLinejoin = 'round'; return p; };
+    const show = (e, on) => { e.style.display = on ? '' : 'none'; return on; };
+    const R = [];                                            // allt som ritas per bildruta: rena funktioner av tiden
+
+    // Spår: ett tal som funktion av tiden, byggt av segment. Ersätter tweens så att inget beror på i vilken ordning rutorna renderas.
+    class Tr {
+      constructor(v0) { this.v0 = v0; this.s = []; this.ok = false; }
+      to(t, d, v, e) { this.s.push({ t, d: Math.max(d, 1e-4), b: v, e: ez(e || 'power2.out') }); this.ok = false; return this; }
+      set(t, v) { return this.to(t, 1e-4, v, 'none'); }
+      build() { this.s.sort((p, q) => p.t - q.t); let prev = null; for (const s of this.s) { s.a = prev ? Tr.val(prev, s.t) : this.v0; prev = s; } this.ok = true; }
+      static val(s, t) { const p = cl((t - s.t) / s.d); return s.a + (s.b - s.a) * s.e(p); }
+      at(t) { if (!this.ok) this.build(); let lo = 0, hi = this.s.length - 1, k = -1; while (lo <= hi) { const m = (lo + hi) >> 1; if (this.s[m].t <= t + 1e-7) { k = m; lo = m + 1; } else hi = m - 1; } return k < 0 ? this.v0 : Tr.val(this.s[k], t); }
+    }
+
+    /* ---------- mått som mäts i webbläsaren ---------- */
+    const mz = $('#matt');
+    const mlen = (cls, str) => { const e = mk('text', mz, { class: cls }); e.textContent = str; const v = e.getComputedTextLength(); e.remove(); return v; };
+    const mpos = (cls, str, i) => { const e = mk('text', mz, { class: cls }); e.textContent = str; const v = e.getStartPositionOfChar(i).x; e.remove(); return v; };
+    const WORDS = ['ads', 'trackers', 'popups', 'cookie banners', 'scam redirects'];
+    const ROWTXT = [1, 2, 3, 4].map((i) => $('#ft' + i).textContent);
+    const M = {
+      yourpage: mlen('news', 'Your page'), page1: mpos('news', 'Your page', 5), page2: mpos('news', 'Same page.', 5), dot: mpos('news', 'Same page.', 9),
+      the: mpos('newsi', 'Minus the junk.', 6), junk: mpos('newsi', 'Minus the junk.', 10),
+      w: WORDS.map((w) => mlen('k150', w)),
+      ad: [0, 1, 2, 3, 4, 5].map((j) => mpos('k150', 'AdRaze', j)),
+      rows: ROWTXT.map((r) => mlen('n104', r)),
+      // ordboksraden på två rader, högerställd: "Ad·Raze: to level ads" / "to the ground."
+      dictR: mlen('n88', 'Ad·Raze: '), dictL1: mlen('ni88', 'to level ads'), dictL2: mlen('ni88', 'to the ground.'),
+      dictP1: [0, 3, 9].map((i) => mpos('ni88', 'to level ads', i)), dictP2: [0, 3, 7].map((i) => mpos('ni88', 'to the ground.', i)),
+    };
+
+    /* ---------- tider ---------- */
+    const TB = [bt(1), bt(3), bt(5), bt(6), bt(7)];          // banden slår in
+    const TS = [bt(12), bt(14), bt(16), bt(18), bt(20)];     // gorillan landar: plus blir minus
+    const RISE = 0.2;
+    const tPeek = bt(10), tLeap = bt(11);
+    const tDict = bt(13);
+    const tA = bt(21), tB = bt(22);                          // fotnoten bildas, gorillan landar på baslinjen
+    const tS = bt(24);                                       // Your byts mot Same
+    const tU = bt(25);                                       // minustecknen blir ett streck
+    const tHop = bt(28);
+    const tC = bt(30);                                       // gorillan och AdRaze uppe till vänster
+    const tF = tC - 0.36;                                    // gorillan tar sats från raden (tC - 0,42), och hela påståendet faller ut som ett block
+    const fallAt = (t, n) => 900 * E('power2.in', seg(t, tF + 0.012 * n, 0.34));  // n = liten fördröjning per ord, så att blocket ser löst ut
+    const ROWT = [31, 33, 35, 37].map(bt);                   // en rad vartannat slag
+    const LANDR = [32, 34, 36, 38].map(bt);                  // gorillan landar i slutet av raden, på slaget emellan
+    const tD = bt(40);                                       // gorillan tar sats från sista raden, raderna fälls ihop
+    const tE = bt(41);                                       // gorillan landar på slutkortet
+    const FOLD = [0, 1, 2, 3].map((i) => tD + (3 - i) * 0.1);
+    const ARR = FOLD.map((f) => f + 0.32).sort((a, b) => a - b);
+    const tGlide = tD + 0.15;                                // AdRaze glider till slutkortets mått (0,5 s)
+    const tLoop = 29.375;                                    // överlämningen börjar (u = -0,625)
+
+    /* ---------- loopen: en enda rörelse, funktion av u (u = t i början, u = t - 30 i slutet) ---------- */
+    // rr(u) = hur långt sidan har kvar att rulla. 1080 vid u = -0,625, 80 vid u = 0, 0 vid u = 0,35.
+    const rr = (u) => { const q = cl((u + 0.625) / 0.975); return 1080 * Math.pow(1 - Math.pow(q, 1.5), 3.62); };
+    const loopY = (t) => (t >= tLoop ? rr(t - 30) - 1080 : 0);   // slutkortet skjuts upp ur bild
+
+    /* ---------- uppbyggnaden: banden delar på höjden, remsan får resten ---------- */
+    const SN = [1080, 700, 480, 330, 220, 110];              // remsans höjd med n band
+    const FN = [250, 250, 190, 140, 100, 72];                // Your page
+    const WN = [250, 250, 220, 190, 165, 150];               // ordens storlek
+    const HN = [380, 380, 300, 250, 215, 194];               // bandens höjd
+    const PL = 110;                                          // plustecknens vänsterkant
+    const XT = PL + 1.3 * 150;                               // textspaltens vänsterkant i fullt läge (305)
+    const tab = (a, s) => { const n = Math.min(4, Math.floor(s)); return lerp(a[n], a[n + 1], Math.min(1, s - n)); };
+    const sigma = (t) => { let s = 0; for (let n = 0; n < 5; n++) { const p = seg(t, TB[n] - RISE, RISE); s += p * p; } return s; };
+    const bounce = (t) => { let o = 0; for (let n = 0; n < 5; n++) { const dt = t - TB[n]; if (dt >= 0 && dt < 0.4) o += 26 * Math.sin(Math.PI * dt / 0.12) * Math.exp(-dt / 0.08); } return o; };
+    const built = (t) => t >= TS[0] - 1e-6 && t < tLoop;
+
+    /* ---------- jämningen: ett band i taget sjunker ihop till en smal rad ---------- */
+    // En jämnad rad är 80 px hög (ord i 64 px) och remsan växer 114 px per stamp: 114 + 80 = 194, ett bands höjd.
+    const ROWH = 80, GROW = 194 - ROWH, LW = 64;
+    const JD = 0.15;                                         // skämten i banden kommer 0,15 s efter stampen, när blicken hunnit dit
+    const press = (k, t) => E('power2.out', seg(t, TS[k], k === 0 ? 0.1 : 0.067));     // stolpen plattas till
+    const coll = (k, t) => E('power2.in', seg(t, TS[k] + 0.35, 0.22));                 // bandet sjunker ihop
+    const grow = (k, t) => E('back.out(1.2)', seg(t, TS[k] + 0.47, 0.36));             // remsan växer (efter bandet, så att raderna aldrig hamnar i det)
+    const cont = (k, t) => E('power2.inOut', seg(t, TS[k] + 0.35, 0.28));              // tecken och ord blir en smal rad
+    const DF = [38, 35, 35, 35, 35];
+    const strip = (t) => { if (!built(t)) { const tt = t >= tLoop ? 0 : t; return tab(SN, sigma(tt)) - bounce(tt); } let s = 110; for (let k = 0; k < 5; k++) s += GROW * grow(k, t); return s; };
+    const fsize = (t) => { if (!built(t)) return tab(FN, sigma(t >= tLoop ? 0 : t)); let f = 72; for (let k = 0; k < 5; k++) f += DF[k] * grow(k, t); return f; };
+    const bandH = (t) => (built(t) ? 194 : tab(HN, sigma(t >= tLoop ? 0 : t)));
+    function bandTop(i, t) {                                 // bandets överkant, i = 1..5 (utan hopsjunkning)
+      if (built(t)) return 110 + 194 * (i - 1);
+      if (t >= tLoop) return 1500;
+      const sg = sigma(t), n = Math.min(4, Math.floor(sg)), p = Math.min(1, sg - n);
+      const st = (m) => (i <= m ? SN[m] + (i - 1) * HN[m] : 1100 + (i - m - 1) * 400);
+      return lerp(st(n), st(n + 1), p) - (i <= Math.ceil(sg - 1e-9) ? bounce(t) : 0);
+    }
+    const bandEdge = (k, t) => bandTop(k + 1, t) + (built(t) ? 194 * coll(k, t) : 0);   // synlig överkant, k = 0..4
+    const bandF = (k, t) => (built(t) ? 1 - coll(k, t) : 1);
+    const bandC = (k, t) => bandEdge(k, t) + (bandH(t) / 2) * bandF(k, t);              // bandets mittlinje
+
+    /* ---------- skak och knuff ---------- */
+    const SH = [];
+    TB.forEach((T) => SH.push([T, 7, 0.17])); TS.forEach((T) => SH.push([T, 11, 0.2]));
+    SH.push([tB, 4, 0.13], [tS, 5, 0.13], [tC, 6, 0.17]);
+    const shake = (t) => { let x = 0, y = 0; const f = Math.round(t * 30); for (const [T, a, d] of SH) { const dt = t - T; if (dt >= -1e-6 && dt < d) { const k = a * (1 - dt / d); x += H(f * 3 + 1, 91) * k; y += H(f * 3 + 2, 92) * k; } } return [x, y]; };
+    const NB = [8, 9, 10, 11, 13, 15, 17, 19].map(bt);       // scam redirects knuffar hela bilden i sidled
+    const nudge = (t) => { let x = 0; for (const T of NB) { const dt = t - T; if (dt >= -1e-6 && dt < 0.3) x += 12 * Math.exp(-dt / 0.05); } return x; };
+    // Kameran: en push på 1,25 gånger kring första stampen, förankrad i vänsterkanten och 100 px ner, så att gorillans huvud
+    // håller marginalen. In 0,45 s före slaget (medan skräpet tystnar), ut 0,46 s efter studsen. Båda power2.inOut.
+    const CAM = { a: TS[0] - 0.5, ad: 0.45, b: TS[0] + 0.16, bd: 0.46, s: 0.25, y: 100 };
+    const camP = (t) => (t < CAM.a || t > CAM.b + CAM.bd ? 0 : t < CAM.b ? E('power2.inOut', seg(t, CAM.a, CAM.ad)) : 1 - E('power2.inOut', seg(t, CAM.b, CAM.bd)));
+    const camTop = (t) => -CAM.y * camP(t);                  // världens y som ligger i bildens överkant
+    const world = $('#world'); let worldTr = '';
+    R.push((t) => { const [sx, sy] = shake(t), p = camP(t), s = 1 + CAM.s * p;
+      worldTr = `translate(${f2(sx + nudge(t))} ${f2(sy + s * CAM.y * p)}) scale(${s.toFixed(4)})`;
+      world.setAttribute('transform', worldTr); });
+
+    /* ================= GORILLAN: spår ================= */
+    const CX = PL + 60;                                      // plustecknens mitt (170)
+    const BAR = (i) => 110 + 194 * (i - 1) + 37;             // stolpens topp på band i
+    const FLAT = (i) => 110 + 194 * (i - 1) + 97 - 12.75;    // det liggande streckets översida
+    const FLOOR = 1062, PERCH_X = 1625, PERCH_Y = 470, LOCK_X = 210, LOCK_Y = 275.6;
+    const ROWY = [420, 570, 720, 870], RX = 250, PXC = 166, FARM = 38, FW = 20, PILL = [1001, 630];   // de fyra orange raderna och adressknappen
+    const G = { fx: new Tr(1680), fy: new Tr(-40), sz: new Tr(230), sx: new Tr(1), sy: new Tr(1), lx: new Tr(-0.9), ly: new Tr(0.8), bl: new Tr(0), br: new Tr(0), rot: new Tr(0) };
+    const squash = (t, a, b, rec) => { G.sx.to(t, 0.05, a, 'power1.out'); G.sy.to(t, 0.05, b, 'power1.out'); G.sx.to(t + 0.1, rec || 0.24, 1, 'back.out(2.2)'); G.sy.to(t + 0.1, rec || 0.24, 1, 'back.out(2.2)'); };
+    const look = (t, x, y) => { G.lx.to(t, 0.07, x, 'power2.out'); G.ly.to(t, 0.07, y, 'power2.out'); };
+    const brow = (t, v) => G.br.to(t, 0.12, v, 'back.out(2)');
+    const blink = (t) => { G.bl.set(t, 1); G.bl.set(t + 0.1, 0); };
+    const crouch = (t) => { G.sy.to(t, 0.1, 0.88, 'power1.out'); G.sx.to(t, 0.1, 1.09, 'power1.out'); };
+    const stretch = (t) => { G.sy.to(t, 0.08, 1.09, 'power1.out'); G.sx.to(t, 0.08, 0.94, 'power1.out'); };
+    // tittar fram uppe till höger
+    G.fy.to(tPeek, 0.3, 182, 'back.out(1.7)');
+    look(tPeek + 0.02, -1, 0.2); look(tPeek + 0.33, -0.55, 1);   // ser först den klämda raden, sedan högen
+    brow(tPeek + 0.42, -1); G.sy.to(tPeek + 0.42, 0.05, 0.94); G.sy.to(tPeek + 0.47, 0.18, 1, 'back.out(3)');
+    // hukar och hoppar: upp ur bild, och ner på första plustecknet
+    look(tLeap - 0.17, -0.5, -1);
+    crouch(tLeap - 0.1); G.fy.to(tLeap - 0.1, 0.1, 196, 'power1.out');
+    stretch(tLeap); G.fy.to(tLeap, 0.2, -340, 'power2.out'); G.fx.to(tLeap, 0.2, 1570, 'power1.out');
+    G.fx.set(tLeap + 0.24, CX); G.sz.set(tLeap + 0.24, 200); look(tLeap + 0.24, 0, 1);
+    G.fy.set(TS[0] - 0.175, -170); G.fy.to(TS[0] - 0.17, 0.17, BAR(1), 'power2.in');    // faller in ovanför kamerans överkant
+    // fem landningar
+    TS.forEach((T, i) => { const k = i + 1, next = k < 5 ? BAR(k + 1) : FLOOR, pd = k === 1 ? 0.1 : 0.067;
+      G.fy.to(T, pd, FLAT(k), 'power2.out');
+      G.sx.to(T, 0.05, 1.17, 'power1.out'); G.sy.to(T, 0.05, 0.83, 'power1.out');
+      G.sx.to(T + 0.1, 0.2, 1, 'back.out(2.4)'); G.sy.to(T + 0.1, 0.2, 1, 'back.out(2.4)');
+      look(T + 0.12, 0.25, 0.9);
+      G.fy.to(T + pd + 0.02, 0.16, FLAT(k) - (k === 1 ? 36 : 58), 'power2.out');          // studsar upp, så att det stora minuset syns fritt (första gången lägre: kameran är inne och huvudet ska hålla marginalen)
+      G.fy.to(T + 0.35, 0.2, next, 'power2.in');                                         // golvet ger vika: bandet sjunker ihop
+      G.sx.to(T + 0.55, 0.05, 1.08, 'power1.out'); G.sy.to(T + 0.55, 0.05, 0.92, 'power1.out');
+      G.sx.to(T + 0.61, 0.2, 1, 'back.out(2)'); G.sy.to(T + 0.61, 0.2, 1, 'back.out(2)');
+      look(T + 0.47, 0.7, -0.75); brow(T + 0.51, 0.8);                                   // ser Your page växa
+      if (k < 5) { const N = TS[i + 1];
+        look(N - 0.52, 0, 1); brow(N - 0.48, -1);                                        // blicken först: ner på nästa plus
+        crouch(N - 0.44);
+        stretch(N - 0.34); G.fy.to(N - 0.34, 0.18, next - 130, 'power2.out');
+        G.fy.to(N - 0.16, 0.16, next, 'power2.in'); }
+    });
+    // upp ur bild längs vänsterkanten, och ner på baslinjen till höger om raden
+    look(tA - 0.2, 0.2, -1); crouch(tA - 0.1);
+    stretch(tA); G.sy.to(tA + 0.08, 0.1, 1.16); G.fy.to(tA, 0.34, -460, 'sine.out');
+    G.fx.set(tA + 0.36, PERCH_X); G.sz.set(tA + 0.36, 250); look(tA + 0.36, -0.6, 0.8); brow(tA + 0.36, 0.3);
+    G.fy.set(tB - 0.165, -60); G.fy.to(tB - 0.16, 0.16, PERCH_Y, 'power2.in'); G.sy.set(tB - 0.165, 1.08); G.sx.set(tB - 0.165, 0.95);
+    squash(tB, 1.13, 0.87);
+    look(tB + 0.2, -1, 0.1); blink(tB + 0.62);
+    look(tS - 0.3, -0.8, -0.8);                               // ser Same komma uppifrån
+    look(tS - 0.02, -1, 0.15); brow(tS + 0.05, 0.9);
+    look(tU - 0.05, -0.75, 0.85); brow(tU, 0.2);              // minustecknen flyger upp
+    look(tU + 0.4, -0.9, 0.7);
+    look(tU + 0.95, 0, 0); brow(tU + 0.95, 1);                // tittar på oss, nöjd
+    // litet nöjt skutt på takten
+    crouch(tHop - 0.44); stretch(tHop - 0.34); G.fy.to(tHop - 0.34, 0.18, PERCH_Y - 86, 'power2.out'); G.fy.to(tHop - 0.16, 0.16, PERCH_Y, 'power2.in'); squash(tHop, 1.1, 0.9);
+    blink(tHop + 0.4);
+    // upp ur bild, och ner uppe till vänster
+    look(tC - 0.62, -0.4, -1); brow(tC - 0.62, 0); crouch(tC - 0.52);
+    stretch(tC - 0.42); G.fy.to(tC - 0.42, 0.16, -340, 'power2.out');
+    G.fx.set(tC - 0.15, LOCK_X); G.sz.set(tC - 0.15, 220); look(tC - 0.15, 0.6, 0.6);
+    G.fy.set(tC - 0.165, -40); G.fy.to(tC - 0.16, 0.16, LOCK_Y, 'power2.in');
+    squash(tC, 1.14, 0.86); brow(tC + 0.1, 0.6);
+    look(tC + 0.1, 1, 0);                                     // ser bokstäverna landa
+    // Bollen som studsar längs raderna: varje rad skrivs fram på sitt slag, och på slaget efter landar gorillan i slutet av den,
+    // på radens baslinje, som ett sista tecken. Raden gungar till och radens orange plus sväller: en bock i listan.
+    // Gorillan står alltid till höger om både sin rad och raden ovanför, så att den aldrig skymmer text.
+    const ROWEND = M.rows.map((w) => RX + w);
+    const GRX = ROWEND.map((e, i) => Math.max(e, i ? ROWEND[i - 1] : 0) + 132);
+    { let px = LOCK_X, py = LOCK_Y;
+      look(ROWT[0] - 0.07, 0.6, 0.9);                                                    // ser första raden skrivas
+      LANDR.forEach((L, i) => { const x = GRX[i], y = ROWY[i];
+        if (i === 0) {                                       // första gången: AdRaze står i vägen, så upp ur bild och ner i slutet av raden
+          look(L - 0.5, 0.2, -1); brow(L - 0.5, -0.4); crouch(L - 0.5);
+          stretch(L - 0.4); G.fy.to(L - 0.4, 0.16, -340, 'power2.out');
+          G.fx.set(L - 0.2, x); G.sz.set(L - 0.2, 200); look(L - 0.2, -0.2, 1);
+          G.fy.set(L - 0.175, -60); G.fy.to(L - 0.17, 0.17, y, 'power2.in'); G.sy.set(L - 0.175, 1.08); G.sx.set(L - 0.175, 0.95);
+        } else {                                             // sedan korta skutt nedåt längs raderna
+          const up = 0.18, dn = 0.16, t0 = L - up - dn, peak = Math.min(py, y) - 120;
+          look(t0 - 0.22, Math.max(-1, Math.min(1, (x - px) / 400)), Math.max(-1, Math.min(1, (y - py) / 150 + 0.3))); brow(t0 - 0.18, -0.4);
+          crouch(t0 - 0.1);
+          stretch(t0); G.fx.to(t0, up + dn, x, 'power1.inOut'); G.fy.to(t0, up, peak, 'power2.out'); G.fy.to(t0 + up, dn, y, 'power2.in'); }
+        squash(L, 1.13, 0.87);
+        look(L + 0.07, -1, 0.12); brow(L + 0.12, 0.8);                                   // läser raden den står på
+        px = x; py = y; }); }
+    look(bt(39), 0, 0); brow(bt(39), 1); blink(bt(39) + 0.28);                            // tittar på oss
+    // tar sats från sista raden, upp ur bild (raderna fälls ihop av avstampet), och ner på slutkortet på slag 41
+    look(tD - 0.24, 0.15, -1); brow(tD - 0.2, 0); crouch(tD - 0.1);
+    stretch(tD); G.fy.to(tD, 0.2, -420, 'power2.out');
+    G.fx.set(tD + 0.24, 283 + 220); G.sz.set(tD + 0.24, 440); look(tD + 0.24, 0, 0.6);
+    G.fy.set(tE - 0.175, -80); G.fy.to(tE - 0.17, 0.17, 204 + 431.2, 'power2.in'); G.sy.set(tE - 0.175, 1.08); G.sx.set(tE - 0.175, 0.95);
+    squash(tE, 1.1, 0.9, 0.3);
+    look(tE + 0.3, 0, 0); brow(tE + 0.3, 0);
+    blink(27.8);
+
+    /* ================= BANDEN ================= */
+    const BAND = [
+      { col: C.sun, word: C.ink, sign: C.ink, pat: 'dots', pc: '#f0bf1f' },
+      { col: C.blue, word: C.light, sign: C.light, pat: 'net', pc: 'rgba(244,239,230,.32)' },
+      { col: C.rose, word: C.ink, sign: C.ink, pat: 'dots', pc: '#e58fa3' },
+      { col: C.olive, word: C.light, sign: C.light, pat: 'code', pc: 'rgba(244,239,230,.2)' },
+      { col: C.night, word: C.salmon, sign: C.light, pat: 'stars', pc: 'rgba(244,239,230,.55)' },
+    ];
+    // Mönstret ritas kring bandets mittlinje (y = 0). Inget mönster bakom ordet eller bandets egna saker.
+    function bandPattern(k) {
+      const B = BAND[k], col = B.pc, x1 = XT + M.w[k] + 34; let s = '';
+      // sol och rosa: inget bakom ordet. oliv och natt: lågmält mönster över hela bandet, men inte i luckan efter ordet eller bakom knappen och pilen.
+      const free = (x, y, r) => (k >= 3 ? !(x + r > x1 - 60 && Math.abs(y) < (k === 3 ? 100 : 64)) : !(x + r > PL - 24 && x - r < x1 && Math.abs(y) < 92));
+      if (B.pat === 'dots') for (let q = 0; q < 54; q++) { const x = -40 + ((q * 151) % 2000), y = -200 + ((q * 89) % 400), r = 8 + (q % 3) * 5; if (free(x, y, r)) s += `<circle cx="${x}" cy="${y}" r="${r}" fill="${col}"/>`; }
+      if (B.pat === 'net') { const n = []; for (let q = 0; q < 13; q++) n.push([1250 + ((q * 263) % 700), -190 + ((q * 137) % 380)]);
+        n.forEach((a, q) => { const m = n[(q * 7 + 3) % n.length]; s += `<line x1="${a[0]}" y1="${a[1]}" x2="${m[0]}" y2="${m[1]}" stroke="${col}" stroke-width="6"/><circle cx="${a[0]}" cy="${a[1]}" r="15" fill="${col}"/>`; }); }
+      if (B.pat === 'code') for (let q = 0; q < 46; q++) { const x = -30 + ((q * 173) % 1950), y = -205 + ((q * 119) % 390), ty = q % 5; if (!free(x + 25, y + 25, 30)) continue;
+        s += ty === 0 ? `<path d="M${x + 30} ${y} L${x} ${y + 26} L${x + 30} ${y + 52}" fill="none" stroke="${col}" stroke-width="9" stroke-linecap="round"/>`
+          : ty === 1 ? `<path d="M${x + 30} ${y} L${x + 6} ${y + 52}" fill="none" stroke="${col}" stroke-width="9" stroke-linecap="round"/>`
+          : ty === 2 ? `<circle cx="${x + 24}" cy="${y + 26}" r="22" fill="${col}"/>`
+          : ty === 3 ? `<rect x="${x}" y="${y}" width="46" height="46" rx="6" fill="${col}"/>`
+          : `<path d="M${x + 24} ${y} L${x + 50} ${y + 46} L${x} ${y + 46}Z" fill="${col}"/>`; }
+      if (B.pat === 'stars') for (let q = 0; q < 70; q++) { const x = -20 + ((q * 211) % 1960), y = -200 + ((q * 97) % 400); if (free(x, y, 12)) s += `<line x1="${x}" y1="${y}" x2="${x + 8}" y2="${y - 10}" stroke="${col}" stroke-width="4" stroke-linecap="round"/>`; }
+      return s;
+    }
+    const bandEl = [1, 2, 3, 4, 5].map((i) => ({ g: $('#b' + i), p: $('#bp' + i), cp: $('#kpp' + i), m: $('#bm' + i), mi: $('#bmi' + i), l: $('#bl' + i) }));
+    BAND.forEach((B, k) => { bandEl[k].p.setAttribute('fill', B.col); bandEl[k].mi.insertAdjacentHTML('beforeend', bandPattern(k)); });
+    const edgePts = (y) => { const p = []; for (let x = -90; x <= 2010; x += 175) p.push([x, y]); return p; };
+    let paperEdge = null;                                    // överkanten på det översta bandet som syns: där slutar papperet (och kornet)
+    R.push((t) => { const st = step(t); paperEdge = null;
+      for (let k = 0; k < 5; k++) { const el = bandEl[k], top = bandEdge(k, t), f = bandF(k, t);
+        if (!show(el.g, top < 1090 && f > 0.002)) continue;
+        const kant = smooth(jit(edgePts(top), 300 + k * 11, st, 3), false), d = kant + ' L2010 1340 L-90 1340Z';
+        if (!paperEdge) paperEdge = kant;
+        el.p.setAttribute('d', d); el.cp.setAttribute('d', d);
+        const tr = `translate(0 ${f2(bandC(k, t))}) scale(1 ${f.toFixed(4)})`;
+        el.m.setAttribute('transform', tr); el.l.setAttribute('transform', tr);
+        el.mi.setAttribute('transform', `translate(${(H(st * 3, 400 + k) * 3).toFixed(1)} ${(H(st * 3 + 1, 400 + k) * 3).toFixed(1)})`);
+      } });
+
+    /* ---------- bandens eget liv ---------- */
+    // Tystnaden före första stampen: inget nytt poppar, blinkar eller rycker från 0,45 s före slaget tills första bandet är borta.
+    const hush = (a) => a > TS[0] - 0.45 && a < TS[0] + 0.62;
+    const popIn = (t, a, d) => E('back.out(2.6)', seg(t, a, d || 0.28));
+    const popOut = (t, a, d) => 1 - E('power3.in', seg(t, a, d || 0.16));
+    // 1. ads: stjärnor som poppar bredvid ordet
+    const starPts = (r1, r2, n, a0) => Array.from({ length: n * 2 }, (_, i) => { const a = (i / (n * 2)) * Math.PI * 2 + a0, r = i % 2 ? r2 : r1; return [Math.cos(a) * r, Math.sin(a) * r]; });
+    [{ x: 1010, y: -6, r: -10, fill: C.sheet, b0: 1.5 }, { x: 1260, y: 12, r: 8, fill: C.salmon, b0: 2.5 }, { x: 1490, y: -4, r: -5, fill: C.mint, b0: 3.5 }].forEach((S, j) => {
+      const g = mk('g', bandEl[0].l), p = ink(mk('path', g), S.fill, C.ink, 6), tx = mk('text', g, { class: 'k64', 'text-anchor': 'middle', y: 23, fill: C.ink }); tx.textContent = '!';
+      R.push((t) => { let s = 0; if (t < TS[0] + 0.6) for (let m = 0; m < 4; m++) { const a = bt(S.b0 + 3 * m), z = a + 2 * BT; if (hush(a)) continue; if (t >= a && t < z) s = popIn(t, a) * popOut(t, z - 0.16); }
+        if (!show(g, s > 0.01)) return;
+        g.setAttribute('transform', `translate(${S.x} ${S.y}) rotate(${f2(S.r + (1 - Math.min(1, s)) * 40)}) scale(${s.toFixed(3)})`);
+        p.setAttribute('d', smooth(jit(starPts(60, 42, 9, 0.2), 500 + j, step(t), 2.2), true)); }); });
+    // 2. trackers: tre ögon som följer det som rör sig
+    const ell = (x, y, rx, ry, n) => Array.from({ length: n }, (_, i) => { const a = (i / n) * Math.PI * 2; return [x + Math.cos(a) * rx, y + Math.sin(a) * ry]; });
+    const gPos = (t) => [G.fx.at(t), G.fy.at(t) - 98 * G.sz.at(t) / 200];
+    const eyeTarget = (t) => { if (t < tPeek + 0.1) return [XT + 0.5 * M.yourpage * fsize(t) / 250, strip(t) / 2];
+      if (t >= tLeap + 0.1 && t < TS[0] - 0.1) { const p = seg(t, tLeap + 0.1, TS[0] - tLeap - 0.2); return [lerp(1570, CX, p), -300]; }
+      return gPos(t); };
+    const DART = [bt(4.5), bt(9)];                            // flackar: en hastig blick rakt ut
+    const EBL = [bt(4) + 0.12, bt(7.5), bt(9.75)];
+    [{ x: 1340, y: 6 }, { x: 1480, y: -12 }, { x: 1620, y: 8 }].forEach((Ey, j) => {
+      const g = mk('g', bandEl[1].l), o = ink(mk('path', g), C.sheet, C.ink, 6), p = ink(mk('path', g), C.ink);
+      R.push((t) => { const open = E('back.out(3)', seg(t, TB[1] + 0.12 + j * 0.07, 0.22));
+        if (!show(g, open > 0 && t < TS[1] + 0.6)) return;
+        const st = step(t), cy = bandC(1, t) + Ey.y; let [tx, ty] = eyeTarget(t), dx = tx - Ey.x, dy = ty - cy; const L = Math.hypot(dx, dy) || 1; dx /= L; dy /= L;
+        for (const a of DART) if (t >= a && t < a + 0.28) { dx = 0; dy = 0; }
+        let bl = 0; for (const a of EBL) if (t >= a + j * 0.06 && t < a + j * 0.06 + 0.1) bl = 1;
+        if (t >= TS[1] + JD + j * 0.04) bl = 1;                                                         // gorillan har landat: ögonen knips ihop
+        const fear = E('back.out(3)', seg(t, TS[1] - 0.36, 0.14)), rx = 40 * (1 + 0.25 * fear), ry = 27 * (1 + 0.3 * fear) * open * (1 - 0.9 * bl);
+        o.setAttribute('d', smooth(jit(ell(Ey.x, Ey.y, rx, ry, 10), 520 + j, st, 1.6), true));
+        const pr = 11 * (1 - 0.28 * fear);
+        if (show(p, ry > 12)) p.setAttribute('d', smooth(jit(blobPts(Ey.x + dx * (rx - pr - 9), Ey.y + dy * (ry - pr - 7), pr, 530 + j, 8, 0.08), 540 + j, st, 0.7), true)); }); });
+    // 3. popups: en liten ruta poppar upp på varje slag och lägger sig över bandet ovanför
+    [{ x: 1790, r: 4 }, { x: 1090, r: -5 }].forEach((Sl, si) => {
+      const g = mk('g', bandEl[2].l), box = ink(mk('path', g), C.mint, C.ink, 6), bar = ink(mk('path', g), 'none', C.ink, 5), xm = ink(mk('path', g), 'none', C.ink, 5), l1 = ink(mk('path', g), 'none', C.muted, 8), l2 = ink(mk('path', g), 'none', C.muted, 8), btn = ink(mk('path', g), C.sun, C.ink, 4);
+      const FILL = [C.mint, C.lilac, C.sheet, C.salmon];
+      R.push((t) => { let s = 0, m = -1; if (t < TS[2] + 0.6) for (let q = si; q < 11; q += 2) { const a = bt(5.5 + q), z = a + 1.7 * BT; if (hush(a)) continue; if (t >= a && t < z) { m = q; s = popIn(t, a) * popOut(t, z - 0.16) * popOut(t, TS[2] + JD + si * 0.07); } }      // landningen stänger rutorna
+        if (!show(g, m >= 0 && s > 0.01)) return;
+        const st = step(t), sd = 600 + m * 7, yb = -bandH(t) / 2 + 42 + (((m * 37) % 3) - 1) * 8, xx = Sl.x + (((m * 53) % 5) - 2) * 12;
+        g.setAttribute('transform', `translate(${xx} ${f2(yb)}) rotate(${f2(Sl.r + ((m % 3) - 1) * 3 + (1 - Math.min(1, s)) * 30)}) scale(${s.toFixed(3)}) translate(0 -64)`);
+        box.style.fill = FILL[m % 4];
+        box.setAttribute('d', smooth(jit(rectPts(-88, -64, 176, 128, 12), sd, st, 2), true));
+        bar.setAttribute('d', smooth(jit([[-84, -34], [0, -35], [84, -34]], sd + 1, st, 1.5), false));
+        xm.setAttribute('d', smooth(jit([[57, -58], [66, -49], [75, -40]], sd + 2, st, 1), false) + ' ' + smooth(jit([[75, -58], [66, -49], [57, -40]], sd + 3, st, 1), false));
+        l1.setAttribute('d', smooth(jit([[-62, -8], [-10, -9], [44, -8]], sd + 4, st, 1.5), false));
+        l2.setAttribute('d', smooth(jit([[-62, 16], [-30, 15], [4, 16]], sd + 5, st, 1.5), false));
+        btn.setAttribute('d', smooth(jit(rectPts(18, 26, 54, 24, 6), sd + 6, st, 1.2), true)); }); });
+    // 4. cookie banners: knappen ACCEPT ALL blinkar på slagen, och en pytteliten reject. När gorillan landar byter de storlek.
+    { const g = mk('g', bandEl[3].l), gb = mk('g', g), box = ink(mk('path', gb), C.sun, C.ink, 6), tx = mk('text', gb, { class: 'k56', 'text-anchor': 'middle', x: 1634, y: 6, fill: C.ink, 'data-layout-allow-overlap': '' }), rj = mk('text', g, { class: 'm22', 'text-anchor': 'end', x: 1816, y: 66, fill: C.light, 'data-layout-allow-overlap': '' });   // reject växer över knappen när den försvinner: med flit
+      tx.textContent = 'ACCEPT ALL'; rj.textContent = 'reject';
+      const FL = []; for (let b = 8; b < 16.5; b += 1) if (!hush(bt(b))) FL.push(bt(b)); for (let b = 16.5; b < 18; b += 0.5) FL.push(bt(b));     // sist blinkar den dubbelt så fort
+      R.push((t) => { const s = popIn(t, TB[4] + 0.13); if (!show(g, s > 0 && t < TS[3] + 0.6)) return;
+        let fl = 0; for (const a of FL) if (t >= a - 1e-6 && t < a + 0.3) fl = Math.max(fl, 1 - (t - a) / 0.3);
+        const bs = s * (1 + 0.09 * fl * fl) * popOut(t, TS[3] + JD, 0.14), rs = s * (1 + 3.1 * E('back.out(2.6)', seg(t, TS[3] + JD + 0.04, 0.2)));
+        if (show(gb, bs > 0.01)) gb.setAttribute('transform', `translate(1634 -14) rotate(${f2((1 - Math.min(1, bs / s)) * 24)}) scale(${bs.toFixed(3)}) translate(-1634 14)`);
+        rj.setAttribute('transform', `translate(1816 66) scale(${rs.toFixed(3)}) translate(-1816 -66)`);
+        box.style.fill = fl > 0.62 ? C.sheet : C.sun;
+        box.setAttribute('d', smooth(jit(rectPts(1444, -62, 380, 96, 16), 700, step(t), 2), true)); }); }
+    // 5. scam redirects: en pil som rycker hela bilden i sidled. När gorillan landar tar det stopp: ett streck framför pilen.
+    { const g = mk('g', bandEl[4].l), a1 = ink(mk('path', g), 'none', C.salmon, 20), a2 = ink(mk('path', g), 'none', C.salmon, 20), wall = ink(mk('path', g), 'none', C.light, 20);
+      const PB = []; for (let b = 8; b < 20; b++) if (!hush(bt(b))) PB.push(bt(b));
+      R.push((t) => { const dr = E('power2.out', seg(t, TB[4] + 0.15, 0.22)); if (!show(g, dr > 0 && t < TS[4] + 0.6)) return;
+        let pu = 0; for (const a of PB) if (t >= a - 1e-6 && t < a + 0.3) pu += Math.exp(-(t - a) / 0.06);
+        const stop = E('back.out(3)', seg(t, TS[4] + JD, 0.16));
+        const st = step(t), lx = 2.6 * nudge(t) + 14 * pu - 46 * stop, x0 = 1490 + lx + 30 * stop, x1 = lerp(1500, 1750, dr) + lx;
+        a1.setAttribute('d', smooth(jit([[x0, 2], [(x0 + x1) / 2, -3], [x1, 0]], 720, st, 2), false));
+        if (show(a2, dr > 0.7)) a2.setAttribute('d', smooth(jit([[x1 - 62, -46], [x1 + 8, 0], [x1 - 62, 46]], 721, st, 2), false));
+        if (show(wall, stop > 0.02)) wall.setAttribute('d', smooth(jit([[1792, -56 * stop], [1794, 0], [1792, 56 * stop]], 722, st, 1.6), false)); }); }
+
+    /* ================= TECKEN OCH ORD ================= */
+    const ARM = 47.25, SW = 25.5;                            // plus: 120 långt och 25,5 tjockt vid ordstorlek 150 (runda ändar inräknade)
+    const sgn = [1, 2, 3, 4, 5].map((i) => ({ h: ink($('#sh' + i)), v: ink($('#sv' + i)), w: $('#w' + i) }));
+    // fotnotsraden: fem poster på en rad, baslinje 1010, 54 px
+    const FS = 54 / 150, FOOT = []; { let x = 120; for (let k = 0; k < 5; k++) { FOOT.push(x); x += 54 + 13 + M.w[k] * FS + 32; } }
+    // strecket under andra raden: fem minustecken blir ett
+    const UL0 = 124, UL1 = 1690, SEGL = (UL1 - UL0) / 5, ulY = (x) => 820 + 4 * (x - UL0) / (UL1 - UL0);   // 15 px under j:s nedstapel i junk.
+    const tUdone = tU + 0.12 + 0.45;
+    function drawSign(S, cx, cy, armH, armU, armD, w, col, seed, st, amp, op) {
+      S.h.style.stroke = col; S.h.style.strokeWidth = w; S.h.style.opacity = op == null ? 1 : op;
+      S.h.setAttribute('d', smooth(jit([[cx - armH, cy], [cx, cy], [cx + armH, cy]], seed, st, amp), false));
+      if (show(S.v, armU + armD > 0.5)) { S.v.style.stroke = col; S.v.style.strokeWidth = w; S.v.setAttribute('d', smooth(jit([[cx, cy - armU], [cx, cy + (armD - armU) / 2], [cx, cy + armD]], seed + 1, st, amp), false)); }
+    }
+    R.push((t) => { const st = step(t), lev = built(t);
+      for (let k = 0; k < 5; k++) { const S = sgn[k], B = BAND[k], seed = 800 + k * 5;
+        const arrived = lev || (t < tLoop && t >= TB[k] - RISE - 1e-6);
+        if (!arrived || t >= tUdone + 2.5) { show(S.h, false); show(S.v, false); show(S.w, false); continue; }
+        show(S.h, true); show(S.w, true);
+        if (!lev || t < TS[k]) {                             // i bandet: svart plus och fett ord
+          const kk = (lev ? 150 : tab(WN, sigma(t))) / 150, cy = bandC(k, t);
+          drawSign(S, PL + 60 * kk, cy, ARM * kk, ARM * kk, ARM * kk, SW * kk, B.sign, seed, st, 2.2);
+          S.w.setAttribute('transform', `translate(${f2(PL + 195 * kk)} ${f2(cy + 39 * kk)}) scale(${kk.toFixed(4)})`); S.w.setAttribute('fill', B.word); S.w.style.opacity = 1;
+          continue; }
+        // landningen: stolpen plattas ner i det liggande strecket, plus blir minus, minuset blir orange
+        const pr = press(k, t), c = cont(k, t), cy0 = 110 + 194 * k + 97, rowC = strip(t) + ROWH * k + ROWH / 2;
+        const dt = t - TS[k] - (k === 0 ? 0.1 : 0.067), bulge = dt >= 0 ? 0.34 * Math.exp(-dt / 0.06) * Math.cos(dt * 22) : 0;
+        // jämnad rad: ord i 64 px, minus 48 långt och 16 tjockt, ordet 57,6 px till höger om minusets mitt (samma förhållande som i bandet)
+        let cx = lerp(CX, XT + 32, c), cy = lerp(cy0, rowC, c), armH = lerp(ARM * (1 + bulge), 24, c), w = lerp(SW * (1 + 0.5 * Math.max(0, bulge)), 16, c), armV = ARM * (1 - pr), amp = lerp(2.2, 1.1, c);
+        let wx = lerp(XT, XT + 32 + 135 * LW / 150, c), wy = lerp(cy0 + 39, rowC + 39 * LW / 150, c), ws = lerp(1, LW / 150, c), wcol = mix(B.word, C.mutedT, c), wrot = 0, wop = 1, sop = 1;
+        // fotnoten: raderna glider ihop till en rad längst ner
+        const q = E('power2.inOut', seg(t, tA + 0.05, 0.3)), qy = E('back.out(1.5)', seg(t, tA + 0.3 + 0.035 * k, 0.24));
+        if (q > 0) { cx = lerp(cx, FOOT[k] + 27, q); cy = lerp(cy, 996, qy); armH = lerp(armH, 20.25, q); w = lerp(w, 13.5, q); wx = lerp(wx, FOOT[k] + 67, q); wy = lerp(wy, 1010, qy); ws = lerp(ws, FS, q); }
+        // orden faller ut, minustecknen glider ihop till ett enda streck
+        if (t >= tU) { const fall = E('power2.in', seg(t, tU + 0.03 * k, 0.24)); wy += 190 * fall; wrot = (k % 2 ? 7 : -7) * fall; if (fall >= 1) wop = 0;
+          const u = E('power2.inOut', seg(t, tU + 0.03 * k, 0.45)), ux = UL0 + SEGL * (k + 0.5);
+          cx = lerp(cx, ux, u); cy = lerp(cy, ulY(ux), u); armH = lerp(armH, SEGL / 2, u); w = lerp(w, 26, u); amp = lerp(amp, 0.4, u); sop = lerp(1, 0.9, u); }
+        if (t >= tUdone) { show(S.h, false); show(S.v, false); }
+        else drawSign(S, cx, cy, armH, armV, armV, pr >= 0.999 ? w : SW, pr >= 0.999 ? C.or : B.sign, seed, st, amp, sop);
+        if (show(S.w, wop > 0)) { S.w.setAttribute('transform', `translate(${f2(wx)} ${f2(wy)}) rotate(${f2(wrot)}) scale(${ws.toFixed(4)})`); S.w.setAttribute('fill', wcol); }
+      } });
+    /* ================= REMSAN: Your page ================= */
+    const titleG = $('#title'), tRoll = $('#t-roll'), tYour = $('#t-your'), tSame = $('#t-same'), tPage = $('#t-page'), tDot = $('#t-dot');
+    R.push((t) => { const lp = t >= tLoop;
+      if (!show(titleG, lp || t < tF + 0.4)) return;
+      let x, y, F, sx = 1, sy = 1;
+      if (lp || !built(t)) { const tt = lp ? 0 : t, o = Math.max(-5, bounce(tt)), u = lp ? t - 30 : t; F = fsize(tt); x = PL + 1.3 * tab(WN, sigma(tt)); y = strip(tt) / 2 + 0.245 * F; sy = 1 - 0.013 * o; sx = 1 + 0.005 * o; if (u < 0.35) y += rr(u); }
+      else { const g = E('power2.inOut', seg(t, tA + 0.1, 0.5)), F0 = fsize(t);              // glider från remsans mitt till raden x = 120, baslinje 470
+        F = lerp(F0, 250, g); x = lerp(XT, 120, g); y = lerp(strip(t) / 2 + 0.245 * F0, 470, g);
+        const d1 = t - tB; if (d1 >= 0 && d1 < 0.4) y += 8 * Math.sin(Math.PI * d1 / 0.1) * Math.exp(-d1 / 0.07); }      // gorillan landar på raden
+      const k = F / 250;
+      titleG.setAttribute('transform', `translate(${f2(x)} ${f2(y)}) scale(${(k * sx).toFixed(4)} ${(k * sy).toFixed(4)})`);
+      // Rullverk: Your rullar ut nedåt och Same rullar in uppifrån på samma valsvarv. page knuffas åt höger och får sin punkt.
+      const sw = !lp && t >= tS - 0.2, rolling = sw && t < tS + 0.5;
+      const d = sw ? 300 * E('back.out(1.4)', seg(t, tS - 0.17, 0.28)) : 0;
+      const fS = lp ? 0 : fallAt(t, 2), fP = lp ? 0 : fallAt(t, 1);                                                        // till sist faller orden ut
+      tRoll.setAttribute('clip-path', rolling ? 'url(#kroll)' : 'none');
+      if (show(tYour, !sw || rolling)) tYour.setAttribute('transform', `translate(0 ${f2(d)})`);
+      if (show(tSame, sw)) tSame.setAttribute('transform', `translate(0 ${f2(d - 300 + fS)}) rotate(${f2(-0.004 * fS)})`);
+      const px = lerp(M.page1, M.page2, sw ? E('back.out(1.8)', seg(t, tS - 0.21, 0.27)) : 0), pt = `translate(${f2(px)} ${f2(fP)}) rotate(${f2(0.004 * fP)})`;
+      tPage.setAttribute('transform', pt);
+      const ds = sw ? E('back.out(3)', seg(t, tS + 0.3, 0.22)) : 0;
+      if (show(tDot, ds > 0)) tDot.setAttribute('transform', `${pt} translate(${f2(M.dot - M.page2 + 27)} -14) scale(${ds.toFixed(3)}) translate(-27 14)`);
+    });
+
+    /* ================= ORDBOKSRADEN ================= */
+    // Två rader, högerställda mot x = 1824, baslinjer 118 och 210 (88 px, radavstånd 1,04). Så håller de sig fria från Your page
+    // i alla fem stegen: i 110 px står Your page högt men slutar vid x = 785, och när den växer åt höger har den redan sjunkit.
+    { const g = $('#dict'), ws = [...g.children], Y1 = 118, Y2 = 210, x1 = 1824 - (M.dictR + M.dictL1), x2 = 1824 - M.dictL2;
+      const POS = [[x1, Y1], ...M.dictP1.map((p) => [x1 + M.dictR + p, Y1]), ...M.dictP2.map((p) => [x2 + p, Y2])];
+      R.push((t) => { if (!show(g, t >= tDict - 0.01 && t < tA + 0.2)) return; const out = seg(t, tA - 0.04, 0.2);
+        ws.forEach((w, j) => { const p = seg(t, tDict + j * 0.08, 0.35); w.style.opacity = cl(p * 2.5) * (1 - out); w.setAttribute('transform', `translate(${f2(POS[j][0])} ${f2(POS[j][1] + 40 * (1 - E('back.out(2)', p)) - 30 * E('power2.in', out))})`); }); }); }
+
+    /* ================= PÅSTÅENDETS ANDRA RAD OCH STRECKET ================= */
+    { const g = $('#claim2'), ws = [...g.querySelectorAll('text')], ul = ink($('#ul'), 'none', C.or, 26), XS = [0, M.the, M.junk];
+      ul.style.opacity = 0.9;
+      R.push((t) => { if (!show(g, t >= tU && t < tF + 0.5)) return;
+        ws.forEach((w, j) => { const p = seg(t, tU + 0.14 + j * 0.11, 0.35), fl = fallAt(t, j % 2); w.style.opacity = cl(p * 2.5);
+          w.setAttribute('transform', `translate(${f2(120 + XS[j])} ${f2(740 + 44 * (1 - E('back.out(2)', p)) + fl)}) rotate(${f2((j % 2 ? -0.004 : 0.003) * fl)})`); });
+        if (show(ul, t >= tUdone)) { const fl = fallAt(t, 0), pts = []; for (let i = 0; i <= 8; i++) { const x = UL0 + (UL1 - UL0) * i / 8; pts.push([x, ulY(x) + fl + 0.00004 * fl * (x - UL0)]); } ul.setAttribute('d', smooth(jit(pts, 860, step(t), 2.4), false)); } }); }
+
+    /* ================= FYRA RADER MED ORANGE PLUS ================= */
+    // raden gungar till när gorillan landar på den (samma gung som Your page vid 13,73)
+    const rowDip = (i, t) => { const d1 = t - LANDR[i]; return d1 >= 0 && d1 < 0.4 ? 8 * Math.sin(Math.PI * d1 / 0.1) * Math.exp(-d1 / 0.07) : 0; };
+    { const g = $('#feat');
+      const rows = [1, 2, 3, 4].map((i) => ({ t: $('#ft' + i), r: $('#kfr' + i), h: ink($('#fh' + i), 'none', C.or, FW), v: ink($('#fv' + i), 'none', C.or, FW) }));
+      R.push((t) => { if (!show(g, t >= ROWT[0] - 0.15 && t < FOLD[0] + 0.6)) return; const st = step(t);
+        rows.forEach((Rw, i) => { const T = ROWT[i], by = ROWY[i] + rowDip(i, t), cy0 = by - 27;
+          const dr = E('power2.out', seg(t, T - 0.1, 0.1)), up = E('back.out(3.2)', seg(t, T, 0.2));
+          const fo = E('power2.in', seg(t, FOLD[i], 0.12)), fly = E('power2.inOut', seg(t, FOLD[i] + 0.06, 0.26));
+          const pu = Math.sin(Math.PI * seg(t, LANDR[i], 0.3));                                         // gorillan landar på raden: plustecknet sväller
+          // text: skrivs fram från plustecknet, fälls sedan ihop uppåt
+          const wp = E('power3.out', seg(t, T + 0.05, 0.34));
+          Rw.r.setAttribute('width', f2((M.rows[i] + 60) * wp));
+          Rw.t.setAttribute('transform', `translate(${f2(RX - 26 * (1 - wp))} ${f2(by - 80)}) scale(1 ${(1 - fo).toFixed(4)}) translate(0 80)`);
+          show(Rw.t, wp > 0 && fo < 1);
+          // tecknet: först ett liggande streck, sedan reser sig stolpen. Till sist flyger strecket till adressknappen.
+          if (!show(Rw.h, dr > 0 && fly < 1)) { show(Rw.v, false); return; }
+          const k = (1 + 0.22 * pu) * (1 - 0.35 * fly), arm = FARM * k, w = FW * k;
+          const cx = lerp(PXC, PILL[0], fly), cy = lerp(cy0, PILL[1], fly) - 90 * Math.sin(Math.PI * fly);
+          const xa = cx - arm, xb = lerp(cx - arm, cx + arm, dr), armV = arm * up * (1 - E('power2.in', seg(t, FOLD[i], 0.08)));
+          Rw.h.style.strokeWidth = w; Rw.h.setAttribute('d', smooth(jit([[xa, cy], [(xa + xb) / 2, cy], [xb, cy]], 900 + i * 3, st, 1.8), false));
+          if (show(Rw.v, armV > 0.5)) { Rw.v.style.strokeWidth = w; Rw.v.setAttribute('d', smooth(jit([[cx, cy - armV], [cx, cy], [cx, cy + armV]], 901 + i * 3, st, 1.8), false)); }
+        }); }); }
+
+    /* ================= SLUTKORTET ================= */
+    { const g = $('#endcard'), pill = ink($('#pill'), 'none', C.or, 124), url = $('#url'), small = $('#small');
+      const WS = [0, 64, 88, 108, 124];
+      R.push((t) => { if (!show(g, t >= ARR[0] + 0.02)) return; const ly = loopY(t);
+        let L = 0, W = 0; for (let j = 0; j < 4; j++) { const e = E('back.out(2.6)', seg(t, ARR[j], 0.22)); L += 110 * e; W += (WS[j + 1] - WS[j]) * e; }
+        const a = Math.max(0.5, (L - W) / 2), amp = 2 * (1 - seg(t, ARR[3], 0.3));
+        pill.style.strokeWidth = Math.max(1, W);
+        pill.setAttribute('d', smooth(jit([[PILL[0] - a, PILL[1] + ly], [PILL[0], PILL[1] + ly], [PILL[0] + a, PILL[1] + ly]], 950, step(t), amp), false));
+        const us = E('back.out(2.4)', seg(t, ARR[3] + 0.05, 0.3));
+        if (show(url, us > 0)) { url.style.opacity = cl(us * 3); url.setAttribute('transform', `translate(${PILL[0]} ${f2(PILL[1] + ly)}) scale(${lerp(0.6, 1, us).toFixed(3)}) translate(0 17)`); }
+        const sp = seg(t, ARR[3] + 0.28, 0.32);
+        if (show(small, sp > 0)) { small.style.opacity = cl(sp * 2); small.setAttribute('transform', `translate(962.8 ${f2(836 + 24 * (1 - E('power2.out', sp)) + ly)})`); } }); }
+    { const g = $('#lock'), ls = [...g.children];
+      R.push((t) => { if (!show(g, t >= tC - 0.02)) return; const p = E('power2.inOut', seg(t, tGlide, 0.5));
+        g.setAttribute('transform', `translate(${f2(lerp(345, 777, p))} ${f2(lerp(222, 511, p) + loopY(t))}) scale(${lerp(1, 1.6, p).toFixed(4)})`);
+        ls.forEach((L, j) => { const q = seg(t, tC - 0.02 + j * 0.05, 0.3); L.style.opacity = cl(q * 3); L.setAttribute('transform', `translate(${f2(M.ad[j])} ${f2(60 * (1 - E('back.out(2.4)', q)))})`); }); }); }
+
+    /* ================= FARTSTRECK: tre bläckstreck där gorillan nyss stod, när den far upp ur bild ================= */
+    { const g = $('#fart'), P = [0, 1, 2].map(() => ink(mk('path', g), 'none', C.ink, 7));
+      const LE = [[tLeap, 1672, 214], [tC - 0.42, PERCH_X, PERCH_Y], [LANDR[0] - 0.4, LOCK_X, LOCK_Y], [tD, GRX[3], ROWY[3]]];
+      R.push((t) => { let k = -1; LE.forEach(([T], i) => { if (t >= T + 0.033 && t < T + 0.2) k = i; });
+        if (!show(g, k >= 0)) return; const [T, x, y] = LE[k], p = (t - T - 0.033) / 0.167, st = step(t);
+        [-62, 0, 62].forEach((dx, j) => { const len = (j === 1 ? 150 : 100) * (1 - p), yb = y - 20 - (j === 1 ? 0 : 26) - 170 * p;
+          P[j].setAttribute('d', smooth(jit([[x + dx, yb], [x + dx * 0.96, yb - len / 2], [x + dx * 0.92, yb - len]], 980 + j, st, 2), false)); }); }); }
+
+    /* ================= GORILLAN: ritas ================= */
+    { const wrap = $('#g-wrap'), drawG = mountGorilla($('#g-rig'));
+      const dipG = (t) => { let d = 0; for (let i = 0; i < 4; i++) d += rowDip(i, t); return d; };   // står på raden: gungar med den
+      R.push((t) => { const k = G.sz.at(t) / 200, fx = G.fx.at(t), fy = G.fy.at(t) + loopY(t) + dipG(t);
+        if (!show(wrap, fy > camTop(t) - 4 && t >= tPeek - 0.05)) return;
+        drawG({ tag: true, look: [G.lx.at(t), G.ly.at(t)], blink: G.bl.at(t), brow: G.br.at(t) }, step(t));
+        // tillplattning utgår från underkanten (100, 196) i ritrutan
+        wrap.setAttribute('transform', `translate(${f2(fx)} ${f2(fy)}) rotate(${f2(G.rot.at(t))}) scale(${(k * G.sx.at(t)).toFixed(4)} ${(k * G.sy.at(t)).toFixed(4)}) translate(-100 -196)`); }); }
+
+    /* ================= KORNET: bara på papperet, aldrig på banden ================= */
+    // Klippet ritas i världens koordinater och får världens transform (skak, knuff och kamera), så att det följer bandets kant exakt.
+    // Själva kornet ligger utanför världen och står still.
+    { const kp = $('#kkp'); R.push(() => { kp.setAttribute('d', paperEdge ? `${paperEdge} L2010 -500 L-90 -500Z` : 'M-300 -500H2220V1380H-300Z'); kp.setAttribute('transform', worldTr); }); }
+
+    /* ---------- en enda uppdatering per bildruta ---------- */
+    gsap.config({ force3D: false });
+    const tl = gsap.timeline({ paused: true });
+    const klocka = { t: 0 };
+    tl.to(klocka, { t: D, duration: D, ease: 'none' }, 0);
+    const render = (t) => { for (const f of R) f(t); };
+    tl.eventCallback('onUpdate', () => render(tl.time()));
+    render(0);
+    window.__minus = { render, bt, M };
+    window.__timelines = window.__timelines || {};
+    window.__timelines['main'] = tl;
+  }
+})();
+    </script>
+  </body>
+</html>
