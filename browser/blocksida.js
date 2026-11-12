@@ -158,10 +158,13 @@ async function rapportera({ url, text, mejl }) {
   const email = String(mejl || inst.get().kontakt || '').trim();
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, fel: 'Skriv din mejladress så vi kan svara.' };
   const p = inst.get();
+  // Ärendet läses av AdRazes support (på svenska) – inte UI, översätts inte. Felen nedan visas på adraze://adblock och översätts där.
+  // i18n-hoppa-start
   const kropp = [String(text || '').trim() || 'Sidan fungerar inte med AdRaze påslagen.', '', 'Sida: ' + String(url || '').slice(0, 500),
     'Nivå: ' + p.niva + ' · Kakor: ' + p.kakor + ' · Skript: ' + (p.skript ? 'av' : 'på') + ' · Fingeravtryck: ' + (p.fingeravtryck ? 'skydd' : 'av') + ' · Injiceringar: ' + (p.injektioner ? 'blockeras' : 'tillåts')].join('\n');
   try {
     const r = await fetch(opts.apiBas + '/support/nytt', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, amne: 'Trasig sida: ' + (String(url || '').replace(/^https?:\/\//, '').slice(0, 80) || 'okänd'), text: kropp, kategori: 'webblasare', sprak: 'sv' }), signal: AbortSignal.timeout(15000) });
+    // i18n-hoppa-slut
     const j = await r.json().catch(() => ({}));
     if (!r.ok) return { ok: false, fel: j.error || j.message || 'Det gick inte att skicka just nu.' };
     if (p.kontakt !== email) inst.satt('kontakt', email);

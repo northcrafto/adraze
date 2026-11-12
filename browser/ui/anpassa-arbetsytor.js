@@ -17,7 +17,7 @@
   const LS = 'adraze-arbetsytor', SS = 'adraze-arbetsytor-fonster';
   const MAX_FLIKAR = 100, MAX_YTOR = 30;
   const $id = (id) => document.getElementById(id);
-  const tx = (x) => (typeof window.t === 'function' ? window.t(x) : x);
+  const tx = (x, v) => (typeof window.t === 'function' ? window.t(x, v) : (v ? String(x).replace(/\{([a-z]\w*)\}/g, (m, n) => (v[n] != null ? String(v[n]) : m)) : x));
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   const IKONER = {
@@ -229,7 +229,7 @@
     else renderTabs();
     spara(); ritaVaxlare();
     const y = ytor().find((x) => x.id === id);
-    try { if (typeof showToast === 'function') showToast(tx('Fliken flyttades till') + ' ' + (y ? y.namn : '')); } catch {}
+    try { if (typeof showToast === 'function') showToast(tx('Fliken flyttades till {namn}', { namn: y ? y.namn : '' })); } catch {}
     return true;
   }
   // Listan ändrades (här, i ett annat fönster, ångrad eller återställd): ingen flik får försvinna.
@@ -262,7 +262,7 @@
   async function skapa(namn, ikon, farg) {
     const lista = ytor(); if (lista.length >= MAX_YTOR) return null;
     const f = forslag(lista);
-    const y = { id: nyttId(), namn: String(namn || '').trim().slice(0, 40) || tx('Arbetsyta') + ' ' + (lista.length + 1), ikon: IKONER[ikon] ? ikon : (ikonFor(namn) || f.ikon), farg: /^#[0-9a-f]{6}$/i.test(farg || '') ? farg : f.farg };
+    const y = { id: nyttId(), namn: String(namn || '').trim().slice(0, 40) || tx('Arbetsyta {n}', { n: lista.length + 1 }), ikon: IKONER[ikon] ? ikon : (ikonFor(namn) || f.ikon), farg: /^#[0-9a-f]{6}$/i.test(farg || '') ? farg : f.farg };
     const ny = lista.concat([y]);
     const r = await A.set('arbetsytor.lista', ny, tx('Arbetsytor'));
     return r && r.ok ? { y, lista: ny } : null;
@@ -283,7 +283,7 @@
   }
   // Den öppna ytan: flikarna i flikraden (även nya, tomma flikar). De andra: det som är sparat.
   const antalFlikar = (id) => (id === st.aktiv ? skalFlikar().filter((t) => !t.isSettings && !t.incognito && !t._closing).length : ((st.ytor[id] && st.ytor[id].flikar.length) || 0));
-  const flikText = (n) => (n === 0 ? tx('Inga flikar') : n === 1 ? tx('1 flik') : n + ' ' + tx('flikar'));
+  const flikText = (n) => (n === 0 ? tx('Inga flikar') : n === 1 ? tx('1 flik') : tx('{n} flikar', { n }));
 
   /* ── Väljaren i flikraden ── */
   function ritaVaxlare() {
@@ -301,8 +301,8 @@
     }
     const y = lista.find((x) => x.id === st.aktiv) || lista[0];
     b.innerHTML = chip(y) + '<span class="ws-namn" translate="no">' + esc(y.namn) + '</span>' + PIL;
-    b.title = tx('Arbetsyta') + ': ' + y.namn;
-    b.setAttribute('aria-label', tx('Arbetsyta') + ': ' + y.namn + '. ' + tx('Byt arbetsyta'));
+    b.title = tx('Arbetsyta: {namn}', { namn: y.namn });
+    b.setAttribute('aria-label', tx('Arbetsyta: {namn}. Byt arbetsyta', { namn: y.namn }));
     host.classList.remove('hidden');
     try { layoutTabs(); } catch {}
   }
@@ -324,7 +324,7 @@
         const on = y.id === st.aktiv;
         return '<div class="ws-rad-wrap' + (on ? ' on' : '') + '"><button type="button" class="ws-rad" role="menuitemradio" aria-checked="' + on + '" data-id="' + esc(y.id) + '">' + chip(y) +
           '<span class="ws-rad-namn" translate="no">' + esc(y.namn) + '</span><span class="ws-rad-antal">' + esc(flikText(antalFlikar(y.id))) + '</span>' + (on ? BOCK : '') + '</button>' +
-          (!on && kanFlytta ? '<button type="button" class="ws-flytta" data-flytta="' + esc(y.id) + '" title="' + esc(tx('Flytta fliken hit')) + '" aria-label="' + esc(tx('Flytta fliken till') + ' ' + y.namn) + '">' + FLYTTA + '</button>' : '') + '</div>';
+          (!on && kanFlytta ? '<button type="button" class="ws-flytta" data-flytta="' + esc(y.id) + '" title="' + esc(tx('Flytta fliken hit')) + '" aria-label="' + esc(tx('Flytta fliken till {namn}', { namn: y.namn })) + '">' + FLYTTA + '</button>' : '') + '</div>';
       }).join('') +
       '<div class="ws-sep"></div>' +
       '<button type="button" class="ws-rad ws-ny" role="menuitem"><span class="ws-plus" aria-hidden="true">+</span><span class="ws-rad-namn">' + esc(tx('Ny arbetsyta')) + '</span></button>' +
@@ -397,12 +397,12 @@
         const desc = flikText(n) + (on ? ' · ' + tx('öppen i det här fönstret') : '');
         let extra = '';
         if (redigerar === y.id) extra = redigerare(y);
-        else if (tarBort === y.id) extra = '<div class="ws-bekrafta"><span>' + esc(tx('Ta bort') + ' ' + y.namn + '? ' + (n ? tx('Flikarna i den stängs.') : '')) + '</span><div class="ws-red-knappar"><button type="button" class="set-btn ws-tb-nej">' + esc(tx('Avbryt')) + '</button><button type="button" class="set-btn anp-risk ws-tb-ja">' + esc(tx('Ta bort')) + '</button></div></div>';
+        else if (tarBort === y.id) extra = '<div class="ws-bekrafta"><span>' + esc(tx('Ta bort {namn}?', { namn: y.namn }) + (n ? ' ' + tx('Flikarna i den stängs.') : '')) + '</span><div class="ws-red-knappar"><button type="button" class="set-btn ws-tb-nej">' + esc(tx('Avbryt')) + '</button><button type="button" class="set-btn anp-risk ws-tb-ja">' + esc(tx('Ta bort')) + '</button></div></div>';
         return '<div class="set-row ws-inst-rad' + (on ? ' on' : '') + '" data-id="' + esc(y.id) + '">' + chip(y, 'ws-chip-stor') +
           '<div class="set-txt"><div class="set-title" translate="no">' + esc(y.namn) + '</div><div class="set-desc">' + esc(desc) + '</div></div>' +
           '<div class="ws-inst-knappar">' + (on ? '' : '<button type="button" class="set-btn ws-oppna">' + esc(tx('Öppna')) + '</button>') +
-            '<button type="button" class="ws-ikonknapp ws-andra" title="' + esc(tx('Ändra')) + '" aria-label="' + esc(tx('Ändra') + ' ' + y.namn) + '">' + PENNA + '</button>' +
-            '<button type="button" class="ws-ikonknapp ws-tabort" title="' + esc(tx('Ta bort')) + '" aria-label="' + esc(tx('Ta bort') + ' ' + y.namn) + '"' + (lista.length < 2 ? ' disabled' : '') + '>' + SOPA + '</button></div>' +
+            '<button type="button" class="ws-ikonknapp ws-andra" title="' + esc(tx('Ändra')) + '" aria-label="' + esc(tx('Ändra {namn}', { namn: y.namn })) + '">' + PENNA + '</button>' +
+            '<button type="button" class="ws-ikonknapp ws-tabort" title="' + esc(tx('Ta bort')) + '" aria-label="' + esc(tx('Ta bort {namn}', { namn: y.namn })) + '"' + (lista.length < 2 ? ' disabled' : '') + '>' + SOPA + '</button></div>' +
           extra + '</div>';
       }).join('') +
       (redigerar === 'ny'

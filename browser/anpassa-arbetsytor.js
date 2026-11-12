@@ -11,14 +11,15 @@ anpassa.registrera({ nyckel: 'arbetsytor.lista', standard: [{ id: 'hem', namn: '
 anpassa.registrera({ nyckel: 'arbetsytor.vaxlare', standard: true, etikett: 'Väljaren för arbetsytor' });
 
 // Huvudmenyn (≡) › Arbetsytor: byt i det här fönstret, ny, hantera. Inte i inkognitofönster.
-function menyRader(ctx, T = (s) => s) {
+function menyRader(ctx, T = (s, v) => require('./i18n-fyll').fyll(s, v)) {
   if (!ctx || ctx.incognito || !ctx.win || ctx.win.isDestroyed()) return [];
   const l = anpassa.hamta('arbetsytor.lista');
   const ytor = (Array.isArray(l) ? l : []).filter((y) => y && typeof y === 'object' && y.id).slice(0, 30);
   const skicka = (v) => { try { if (!ctx.win.isDestroyed()) ctx.win.webContents.send('arbetsytor:byt', v); } catch {} };
   const aktiv = ctx.arbetsyta || (ytor[0] && ytor[0].id);
   return [{ label: T('Arbetsytor'), submenu: [
-    ...ytor.map((y) => ({ label: String(y.namn || '').slice(0, 40) || T('Arbetsyta'), type: 'radio', checked: String(y.id) === aktiv, click: () => skicka(String(y.id).slice(0, 40)) })),
+    // standardytan "Hem" på användarens språk (egna namn som de är)
+    ...ytor.map((y) => ({ label: (y.id === 'hem' && y.namn === 'Hem' ? T('Hem') : String(y.namn || '').slice(0, 40)) || T('Arbetsyta'), type: 'radio', checked: String(y.id) === aktiv, click: () => skicka(String(y.id).slice(0, 40)) })),
     { type: 'separator' },
     { label: T('Ny arbetsyta…'), click: () => skicka({ ny: true }) },
     { label: T('Hantera arbetsytor'), click: () => skicka({ hantera: true }) },

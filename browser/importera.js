@@ -634,8 +634,8 @@ function setup(hooks) {
   ipcMain.handle('import:losen-csv', async (e) => {
     const w = BrowserWindow.fromWebContents(e.sender);
     const r = await dialog.showOpenDialog(w, {
-      title: 'Välj en CSV-fil med lösenord', properties: ['openFile'],
-      filters: [{ name: 'CSV-fil', extensions: ['csv', 'txt'] }],
+      title: hooks && hooks.T ? hooks.T('Välj en CSV-fil med lösenord') : 'Välj en CSV-fil med lösenord', properties: ['openFile'],
+      filters: [{ name: hooks && hooks.T ? hooks.T('CSV-fil') : 'CSV-fil', extensions: ['csv', 'txt'] }],
     });
     if (r.canceled || !r.filePaths[0]) return { ok: false, avbruten: true };
     let text; try { text = fs.readFileSync(r.filePaths[0], 'utf8'); } catch { return { ok: false, fel: 'Kunde inte läsa filen.' }; }

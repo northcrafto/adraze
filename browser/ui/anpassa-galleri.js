@@ -30,10 +30,20 @@
   function arBarn() { try { if (A.barnlage()) return true; } catch {} const k = konto(); return !!(k && k.isChild); }
   const vuxen = () => { const k = konto(); return !!(k && !k.isChild) && !st.barn; };
   function toast(t) { try { if (typeof showToast === 'function') showToast(t); } catch {} }
-  const tal = (n) => Number(n || 0).toLocaleString('sv-SE');
+  const fyll = (x, v) => String(x).replace(/\{([a-z]\w*)\}/g, (m, n) => (v && v[n] != null ? String(v[n]) : m));
+  const tx = (x, v) => (typeof window.t === 'function' ? window.t(x, v) : fyll(x, v));
+  const sprak = () => (window.i18n && window.i18n.lang) || 'sv';
+  const tal = (n) => Number(n || 0).toLocaleString(sprak());
+  // "i dag", "i går", "för 3 dagar sedan", "förra veckan" – i språkets egen form (Intl), annars ett datum
   function sedan(ts) {
     const d = Math.floor((Date.now() - Number(ts || 0)) / 86_400_000);
-    return d <= 0 ? 'i dag' : d === 1 ? 'i går' : d < 7 ? d + ' dagar sedan' : d < 14 ? 'förra veckan' : new Date(ts).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
+    if (d >= 14) return new Date(ts).toLocaleDateString(sprak(), { day: 'numeric', month: 'short' });
+    try {
+      const rtf = new Intl.RelativeTimeFormat(sprak(), { numeric: 'auto' });
+      return d < 7 ? rtf.format(-Math.max(0, d), 'day') : rtf.format(-1, 'week');
+    } catch {
+      return d <= 0 ? tx('i dag') : d === 1 ? tx('i går') : d < 7 ? tx('{n} dagar sedan', { n: d }) : tx('förra veckan');
+    }
   }
 
   // ---------- förhandsvisning ----------
@@ -89,7 +99,7 @@
     const g = kort.querySelector('.gal-gilla'), o = kort.querySelector('.gal-ogilla');
     if (g) {
       g.classList.toggle('pa', t.min_rost === 1); g.setAttribute('aria-pressed', String(t.min_rost === 1));
-      g.title = t.min_rost === 1 ? 'Du gillar det här' : 'Gilla'; g.setAttribute('aria-label', g.title + ' (' + tal(t.gillar) + ')');
+      g.title = t.min_rost === 1 ? 'Du gillar det här' : 'Gilla'; g.setAttribute('aria-label', t.min_rost === 1 ? tx('Du gillar det här ({n})', { n: tal(t.gillar) }) : tx('Gilla ({n})', { n: tal(t.gillar) }));
       g.querySelector('.gal-antal').textContent = tal(t.gillar);
     }
     if (o) { o.classList.toggle('pa', t.min_rost === -1); o.setAttribute('aria-pressed', String(t.min_rost === -1)); }
@@ -102,15 +112,15 @@
     a.append(forhand(t.varden, t.plats));
     const info = el('div', 'gal-info');
     const rub = el('div', 'gal-rubrik');
-    rub.append(el('span', 'gal-namn', t.namn));
+    const namnEl = el('span', 'gal-namn', t.namn); namnEl.setAttribute('translate', 'no'); rub.append(namnEl);   // användarens text
     if (t.dold) rub.append(el('span', 'gal-chip dold', 'Dolt'));
     else if (t.egen) rub.append(el('span', 'gal-chip', 'Ditt'));
     info.append(rub);
-    const av = ['av ' + (t.skapare || 'Anonym')];
+    const av = [t.skapare ? tx('av {namn}', { namn: t.skapare }) : tx('av {namn}', { namn: tx('Anonym') })];
     if (st.flik === 'nya' || st.flik === 'mina') av.push(sedan(t.skapad));
-    if (t.nedladdningar > 0) av.push(tal(t.nedladdningar) + ' använder');
-    info.append(el('div', 'gal-av', av.join(' · ')));
-    if (t.beskrivning) info.append(el('p', 'gal-besk', t.beskrivning));
+    if (t.nedladdningar > 0) av.push(tx('{n} använder', { n: tal(t.nedladdningar) }));
+    const avEl = el('div', 'gal-av', av.join(' · ')); avEl.setAttribute('translate', 'no'); info.append(avEl);   // redan översatt, med användarnamnet
+    if (t.beskrivning) { const b = el('p', 'gal-besk', t.beskrivning); b.setAttribute('translate', 'no'); info.append(b); }
     if (t.dold) info.append(el('p', 'gal-besk gal-dold-text', 'Dolt efter anmälningar. Bara du ser det.'));
     a.append(info);
     const fot = el('div', 'gal-fot');
@@ -122,7 +132,7 @@
       fot.append(g, ikonknapp('gal-ogilla', 'tumme', 'Gillar inte', 'ogilla'), ikonknapp('gal-anmal', 'flagga', 'Anmäl', 'anmal'));
     } else {
       const g = el('span', 'gal-ikon gal-gilla-egen'); g.innerHTML = IKON.hjarta; g.append(el('span', 'gal-antal', tal(t.gillar)));
-      g.title = tal(t.gillar) + ' gillar ditt tema';
+      g.title = tx('{n} gillar ditt tema', { n: tal(t.gillar) });
       fot.append(g, ikonknapp('gal-bort', 'soptunna', 'Ta bort ditt tema', 'bort'));
     }
     a.append(fot);
@@ -152,7 +162,7 @@
     } else if (st.fel && !st.teman.length) {
       tom.hidden = false; tom.append(el('span', null, st.fel + ' '), knapp('gal-lank', 'Försök igen', 'igen'));
     } else if (!st.teman.length) {
-      tom.hidden = false; tom.textContent = TOMT[st.flik] + (st.flik !== 'vecka' && st.flik !== 'mina' && vuxen() ? ' Bli först att dela ditt!' : '');
+      tom.hidden = false; tom.textContent = tx(TOMT[st.flik]) + (st.flik !== 'vecka' && st.flik !== 'mina' && vuxen() ? ' ' + tx('Bli först att dela ditt!') : '');
     } else {
       for (const t of st.teman) grid.append(kort(t));
     }
@@ -247,7 +257,7 @@
       if (!mitt || !mitt.schema) om.textContent = 'Kunde inte nå galleriet just nu.';
       else if (mitt.provar) om.textContent = 'Du provar ett tema. Välj Behåll eller Ångra först.';
       else if (!mitt.antal) om.textContent = 'Ditt tema ser ut som standardtemat. Byt färg, läge, hörn eller densitet under Tema först.';
-      else { const d = beskriv(mitt.varden); om.textContent = d.length ? 'Delas: ' + d.join(', ') + '.' : (mitt.antal === 1 ? '1 inställning delas.' : mitt.antal + ' inställningar delas.'); }
+      else { const d = beskriv(mitt.varden); om.textContent = d.length ? tx('Delas: {x}.', { x: d.map((x) => tx(x)).join(', ') }) : (mitt.antal === 1 ? tx('1 inställning delas.') : tx('{n} inställningar delas.', { n: mitt.antal })); }
       vy.append(om);
       kolla();
     }).catch(() => {});
@@ -404,7 +414,11 @@
     if (st.prov) {
       radFarg.style.background = accentAv(st.prov.varden);
       radText.textContent = '';
-      radText.append('Du provar ', el('b', null, st.prov.namn || 'ett tema'), st.prov.skapare ? ' av ' + st.prov.skapare : '');
+      // En hel mening med namnet i fetstil: översätts här (translate="no" på raden), namn och skapare sätts in efteråt
+      radText.setAttribute('translate', 'no');
+      const namnB = el('b', null, st.prov.namn || tx('ett tema'));
+      const mall = st.prov.skapare ? tx('Du provar {namn} av {skapare}') : tx('Du provar {namn}');
+      radText.append(...mall.split(/(\{[a-z]\w*\})/).filter(Boolean).map((d) => (d === '{namn}' ? namnB : d === '{skapare}' ? String(st.prov.skapare) : d)));
     }
     const syns = !!st.prov;
     if (rad.hidden === syns) {
@@ -431,7 +445,7 @@
     radAngra.disabled = radBehall.disabled = true;
     const r = await G.behall({ token: token() }).catch(() => null);
     if (!r || !r.ok) { radAngra.disabled = radBehall.disabled = false; toast((r && r.message) || 'Det gick inte att spara temat.'); return; }
-    toast(namn ? 'Nu har du temat ' + namn + '.' : 'Temat är sparat.');
+    toast(namn ? tx('Nu har du temat {namn}.', { namn }) : tx('Temat är sparat.'));
   });
   G.onProv(visaProv);
   G.prov().then(visaProv).catch(() => {});

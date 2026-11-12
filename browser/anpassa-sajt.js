@@ -19,6 +19,7 @@
  * Privata flikar läser inställningarna men sparar aldrig något (sajten ska inte hamna på disken). */
 const path = require('path');
 const { ipcMain, WebContentsView } = require('electron');
+const { fyll } = require('./i18n-fyll');
 
 let A = null;     // anpassa.js
 let M = {};       // krokar från main.js (se init)
@@ -263,6 +264,8 @@ function nastaZoom(nu, steg) {
   return [...ZOOM_STEG].reverse().find((z) => z < nu - 0.001) || ZOOM_STEG[0];
 }
 const ETIKETT = { mork: 'Mörkt läge', ljud: 'Ljud', reklam: 'Reklamblockering', js: 'JavaScript', popup: 'Popup-fönster' };
+// Ångra-historikens etiketter: hela svenska mallar (översätts när de visas, se i18n-fyll.js)
+const ETIKETT_PA = { mork: 'Mörkt läge på {dom}', ljud: 'Ljud på {dom}', reklam: 'Reklamblockering på {dom}', js: 'JavaScript på {dom}', popup: 'Popup-fönster på {dom}' };
 
 function registreraIpc() {
   // Skalet: skölden klickad (bara från skalets egna fönster)
@@ -273,7 +276,7 @@ function registreraIpc() {
     const ctx = panelCtx(e); if (!ctx || !d || !ETIKETT[d.falt]) return null;
     const p = ctx.sajtPanel; const wc = flikWc(ctx, p.tabId);
     if (!wc || inkognito(wc.__sajt)) return { ok: false, error: 'inkognito', data: panelData(ctx) };
-    const etikett = ETIKETT[d.falt] + ' på ' + p.dom; const v = d.varde;
+    const etikett = fyll(ETIKETT_PA[d.falt], { dom: p.dom }); const v = d.varde;
     let r;
     if (d.falt === 'mork') r = satUtseende(p.dom, { mork: v ? true : undefined }, etikett);
     else if (d.falt === 'ljud') r = satUtseende(p.dom, { ljud: v ? undefined : false }, etikett);
@@ -289,14 +292,14 @@ function registreraIpc() {
     let nu = 1; try { nu = wc.getZoomFactor(); } catch {}
     const z = steg === 0 ? std : nastaZoom(nu, steg > 0 ? 1 : -1);
     try { wc.setZoomFactor(z); } catch {}
-    if (!inkognito(s)) satUtseende(p.dom, { zoom: Math.abs(z - std) < 0.001 ? undefined : z }, 'Zoom på ' + p.dom);
+    if (!inkognito(s)) satUtseende(p.dom, { zoom: Math.abs(z - std) < 0.001 ? undefined : z }, fyll('Zoom på {dom}', { dom: p.dom }));
     return panelData(ctx);
   });
   ipcMain.handle('sajt:panel-aterstall', (e) => {
     const ctx = panelCtx(e); if (!ctx) return null;
     const p = ctx.sajtPanel; const wc = flikWc(ctx, p.tabId); if (!wc) return null;
     if (inkognito(wc.__sajt)) return { ok: false, error: 'inkognito', data: panelData(ctx) };
-    const etikett = 'Återställ ' + p.dom;
+    const etikett = fyll('Återställ {x}', { x: p.dom });
     const r1 = A.satt('sajt.' + p.dom, undefined, { etikett });
     const r2 = tom(skyddSparat(p.dom)) ? { ok: true } : satSkydd(p.dom, { reklam: undefined, js: undefined, popup: undefined }, etikett);
     try { wc.setZoomFactor(standardZoom(wc.__sajt)); } catch {}
@@ -316,7 +319,7 @@ function registreraIpc() {
   ipcMain.on('view:zoom', (e, id, dir) => setImmediate(() => {
     const ctx = ctxAv(e); const wc = flikWc(ctx, id); const s = wc && wc.__sajt; if (!s || !s.dom || inkognito(s)) return;
     let z = 1; try { z = Math.round(wc.getZoomFactor() * 100) / 100; } catch {}
-    satUtseende(s.dom, { zoom: dir === 0 || Math.abs(z - standardZoom(s)) < 0.001 ? undefined : z }, 'Zoom på ' + s.dom);
+    satUtseende(s.dom, { zoom: dir === 0 || Math.abs(z - standardZoom(s)) < 0.001 ? undefined : z }, fyll('Zoom på {dom}', { dom: s.dom }));
   }));
   // Ny standardzoom (Utseende): main.js sätter den på alla flikar – sajterna med egen zoom behåller sin
   ipcMain.on('view:default-zoom', (e) => setImmediate(() => { const ctx = ctxAv(e); if (ctx) for (const v of ctx.views.values()) { try { zooma(v.webContents); } catch {} } }));

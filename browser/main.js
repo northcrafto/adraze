@@ -64,6 +64,7 @@ const QRCode = require('qrcode');
 
 const { SKOLL, EXTRACT_JS, analyzeContent, verdictFromReport, checkUrl } = require('./scanner');
 const auth = require('./auth');
+const { fyll } = require('./i18n-fyll');   // svenska mallar som översätts först när de visas
 
 // Auto-uppdatering
 let autoUpdater = null;
@@ -211,8 +212,8 @@ async function openFind(ctx, text) {
     ctx.findView = view;
     ctx.win.contentView.addChildView(view);
     positionFind(ctx);
-    const t = JSON.stringify({ 'Sök på sidan': T('Sök på sidan') });
-    await view.webContents.loadFile(path.join(__dirname, 'ui', 'find.html'), { query: { theme, t, ...palettFraga() } }).catch(() => {});
+    // Texterna översätts i sidan (ui/i18n.js, samma språk som skalet)
+    await view.webContents.loadFile(path.join(__dirname, 'ui', 'find.html'), { query: { theme, ...palettFraga() } }).catch(() => {});
   } else { try { ctx.win.contentView.addChildView(ctx.findView); } catch {} positionFind(ctx); }
   try { ctx.findView.webContents.focus(); ctx.findView.webContents.send('find-focus', text || ''); } catch {}
 }
@@ -314,11 +315,11 @@ function barnNagonRegel() { if (!KONTO_PER_FONSTER) return barnRegler; for (cons
 function barnNagonstans() { return !!barnNagonRegel(); }
 anpassa.init({ barnKoll: () => barnNagonstans() });
 require('./anpassa-tema');   // Anpassa-krok (tema): tema.*-nycklarna, Macens trafikljus följer flikradens höjd
-jul.init({ skicka: (...a) => broadcast(...a), nedladdningsmapp: () => webb.downloadDir(), T: (s) => T(s) });   // jultemat (efter tema.*: julfärgerna är temat Jul)
-anpFlikar.init({ ctxFor, antalFonster: () => wins.size, T: (s) => T(s), svep: () => sweepIdleTabs() });   // Anpassa → flikar
+jul.init({ skicka: (...a) => broadcast(...a), nedladdningsmapp: () => webb.downloadDir(), T: (s, v) => T(s, v) });   // jultemat (efter tema.*: julfärgerna är temat Jul)
+anpFlikar.init({ ctxFor, antalFonster: () => wins.size, T: (s, v) => T(s, v), svep: () => sweepIdleTabs() });   // Anpassa → flikar
 // Anpassa › verktyg: verktyg.*-nycklarna, högerklicksmenyn på verktygsraden och raden längst ner (anpassa-verktyg.js)
 const anpVerktyg = require('./anpassa-verktyg');
-anpVerktyg.init({ anpassa, wins, applyBounds, T: (s) => T(s) });
+anpVerktyg.init({ anpassa, wins, applyBounds, T: (s, v) => T(s, v) });
 // Anpassa: sidopanel – webbapparnas vyer får fönstrets kontosession och samma skydd som flikarna
 sidopanel.init({
   wins, ctxFor, sendTo, broadcast, T, barnNagonstans, visaFelsida, isBlockedTarget, sameSite, popupTrustedHost,
@@ -333,7 +334,7 @@ const anpassaSajt = require('./anpassa-sajt');
 anpassaSajt.init({ anpassa, adblock, wins, sendTo, barn: () => barnNagonstans(), barnFonster: (c) => !!reglerFor(c), adblockPa: () => adblockOn,
   blockerad: (u, f) => isBlockedTarget(u, f), sammaSajt: (a, b) => sameSite(a, b) });
 require('./anpassa-sokmotorer').init({ anpassa });
-avancerat.init({ anpassa, barn: () => barnNagonstans(), T: (s) => T(s) });   // av i barnläge (alla fönster) och inkognito
+avancerat.init({ anpassa, barn: () => barnNagonstans(), T: (s, v) => T(s, v) });   // av i barnläge (alla fönster) och inkognito
 function barnSparrad(url, regler) {
   const r = regler === undefined ? barnRegler : regler; if (!r) return false;
   let h = '';
@@ -436,9 +437,12 @@ function ensureIncognitoAdblock() {
 }
 
 /* Metadata-bedömning + checkUrl finns i scanner.js (delas med testriggen). */
+// Bings marknad för dagens bild (bildtexten kommer på marknadens språk): svenska som förut, annars användarens språk där Bing har en marknad
+const BING_MKT = { sv: 'sv-SE', en: 'en-US', de: 'de-DE', fr: 'fr-FR', es: 'es-ES', it: 'it-IT', nl: 'nl-NL', pt: 'pt-BR', 'pt-PT': 'pt-PT', da: 'da-DK', fi: 'fi-FI', no: 'nb-NO', nb: 'nb-NO',
+  pl: 'pl-PL', ru: 'ru-RU', tr: 'tr-TR', ja: 'ja-JP', ko: 'ko-KR', 'zh-CN': 'zh-CN', 'zh-TW': 'zh-TW', ar: 'ar-SA', he: 'he-IL', hi: 'hi-IN', id: 'id-ID', th: 'th-TH', vi: 'vi-VN', uk: 'uk-UA', cs: 'cs-CZ', el: 'el-GR', hu: 'hu-HU', ro: 'ro-RO' };
 async function dailyImage() {
   try {
-    const res = await fetch('https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=sv-SE',
+    const res = await fetch('https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=' + (BING_MKT[uiLang || 'sv'] || 'en-US'),
       { signal: AbortSignal.timeout(6000) });
     const j = await res.json(); const img = j?.images?.[0];
     if (img?.url) return { url: 'https://www.bing.com' + img.url, credit: img.copyright || '' };
@@ -452,18 +456,19 @@ async function dailyImage() {
 function felText(code, host) {
   const stavning = T('Kolla att adressen är rätt stavad'), dns = T('Kolla dina DNS-inställningar'), fel = T('Eller så är sidan bara fel eller nere just nu');
   if ([-21, -106, -109].includes(code)) return [T('Du är inte ansluten till internet'), T('AdRaze kommer inte ut på nätet just nu.'), [T('Kolla wifi eller nätverkskabeln'), T('Starta om routern'), dns]];
-  if ([-105, -137].includes(code)) return [T('Sidan kan inte nås'), T('Det gick inte att hitta servern för') + ' ' + host + '.', [stavning, dns, fel]];
-  if ([-7, -118].includes(code)) return [T('Sidan kan inte nås'), host + ' ' + T('tog för lång tid att svara.'), [T('Försök igen om en stund'), dns, fel]];
-  if (code === -102) return [T('Sidan kan inte nås'), host + ' ' + T('vägrade att ansluta.'), [stavning, fel]];
-  if (code <= -200 && code > -300) return [T('Anslutningen är inte säker'), T('Certifikatet för') + ' ' + host + ' ' + T('är ogiltigt. AdRaze stoppade sidan för att skydda dig.'), [T('Kolla att datorns datum och tid stämmer'), fel]];
-  return [T('Sidan kan inte nås'), T('Det gick inte att ladda') + ' ' + host + '.', [stavning, dns, fel]];
+  if ([-105, -137].includes(code)) return [T('Sidan kan inte nås'), T('Det gick inte att hitta servern för {host}.', { host }), [stavning, dns, fel]];
+  if ([-7, -118].includes(code)) return [T('Sidan kan inte nås'), T('{host} tog för lång tid att svara.', { host }), [T('Försök igen om en stund'), dns, fel]];
+  if (code === -102) return [T('Sidan kan inte nås'), T('{host} vägrade att ansluta.', { host }), [stavning, fel]];
+  if (code <= -200 && code > -300) return [T('Anslutningen är inte säker'), T('Certifikatet för {host} är ogiltigt. AdRaze stoppade sidan för att skydda dig.', { host }), [T('Kolla att datorns datum och tid stämmer'), fel]];
+  return [T('Sidan kan inte nås'), T('Det gick inte att ladda {host}.', { host }), [stavning, dns, fel]];
 }
 function visaFelsida(wc, code, desc, url) {
   let host = url; try { host = new URL(url).hostname; } catch {}
   const [rubrik, text, tips] = felText(code, host);
-  const d = { rubrik, text, tips, kod: String(desc || 'ERR_FAILED'), knapp: T('Försök igen'), url };
+  const d = { rubrik, text, tips, kod: String(desc || 'ERR_FAILED'), knapp: T('Försök igen'), url, lang: uiLang || 'sv', rtl: RTL_SPRAK.has(uiLang) };
   const kod = `(() => { const d = ${JSON.stringify(d)};
     document.title = d.rubrik;
+    try { document.documentElement.lang = d.lang; document.documentElement.dir = d.rtl ? 'rtl' : 'ltr'; } catch {}
     const s = document.createElement('style');
     s.textContent = \`html{background:#141414}body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;color:#ececec;background:radial-gradient(ellipse at 50% 30%,#1f1f1f 0,#141414 60%)}
       .b{max-width:480px;padding:32px 24px;text-align:center}
@@ -620,7 +625,7 @@ function sweepIdleTabs() {
 }
 /* ── Högerklicksmeny (Chromium-lik) ── */
 async function savePage(ctx, wc) {
-  const r = await dialog.showSaveDialog(ctx.win, { defaultPath: 'sida.html', filters: [{ name: 'Webbsida', extensions: ['html'] }] });
+  const r = await dialog.showSaveDialog(ctx.win, { defaultPath: 'sida.html', filters: [{ name: T('Webbsida'), extensions: ['html'] }] });
   if (!r.canceled && r.filePath) { try { await wc.savePage(r.filePath, 'HTMLComplete'); } catch {} }
 }
 // Gissa ett filnamn för en bild utifrån adressen (data:-URL → tillägg från typen)
@@ -658,8 +663,8 @@ async function makePdf(ctx, wc) {
     const file = path.join(app.getPath('downloads'), name + '-' + Date.now() + '.pdf');
     fs.writeFileSync(file, data);
     await shell.openPath(file);
-    sendTo(ctx, 'toast', 'Ingen skrivare hittades – sparade sidan som PDF och öppnade den.');
-  } catch { sendTo(ctx, 'toast', 'Kunde inte skriva ut sidan.'); }
+    sendTo(ctx, 'toast', T('Ingen skrivare hittades – sparade sidan som PDF och öppnade den.'));
+  } catch { sendTo(ctx, 'toast', T('Kunde inte skriva ut sidan.')); }
 }
 async function printPage(ctx, wc) {
   let printers = [];
@@ -698,7 +703,7 @@ function buildContextMenu(ctx, wc, params) {
     const sel = params.selectionText.trim();
     const short = sel.length > 24 ? sel.slice(0, 24) + '…' : sel;
     t.push({ label: T('Kopiera'), role: 'copy' });
-    t.push({ label: T('Sök med AdRaze Search efter') + ` "${short}"`, click: () => sendTo(ctx, 'open-new-tab', 'https://search.adraze.app/search?q=' + encodeURIComponent(sel)) });
+    t.push({ label: T('Sök med AdRaze Search efter "{x}"', { x: short }), click: () => sendTo(ctx, 'open-new-tab', 'https://search.adraze.app/search?q=' + encodeURIComponent(sel)) });
     t.push({ type: 'separator' });
   }
   if (/^https?:/i.test(url) && blocksida.kanBlockeraElement(wc)) {
@@ -710,7 +715,7 @@ function buildContextMenu(ctx, wc, params) {
   t.push({ label: T('Spara som…'), click: () => savePage(ctx, wc) });
   t.push({ label: T('Skriv ut…'), click: () => printPage(ctx, wc) });
   t.push({ label: T('Skapa QR-kod för sidan'), click: () => showQR(ctx, url) });
-  t.push({ label: T('Översätt till svenska'), click: () => sendTo(ctx, 'open-new-tab', 'https://translate.google.com/translate?sl=auto&tl=sv&u=' + encodeURIComponent(url)) });
+  { const o = oversattning(); t.push({ label: o.namn, click: () => sendTo(ctx, 'open-new-tab', 'https://translate.google.com/translate?sl=auto&tl=' + encodeURIComponent(o.tl) + '&u=' + encodeURIComponent(url)) }); }
   t.push({ type: 'separator' });
   t.push({ label: T('Visa sidans källa'), click: () => sendTo(ctx, 'open-tab-raw', 'view-source:' + url) });
   if (!barnNagonstans()) t.push({ label: T('Inspektera'), click: () => { try { if (!barnNagonstans()) wc.inspectElement(params.x, params.y); } catch {} } });
@@ -739,7 +744,7 @@ async function buildShellMenu(ctx, wc, params) {
     if (clip) {
       const short = clip.length > 32 ? clip.slice(0, 32) + '…' : clip;
       t.push({ type: 'separator' });
-      t.push({ label: T('Klistra in och gå till') + ` "${short}"`, click: () => sendTo(ctx, 'open-new-tab', clip) });
+      t.push({ label: T('Klistra in och gå till "{x}"', { x: short }), click: () => sendTo(ctx, 'open-new-tab', clip) });
     }
     t.push({ type: 'separator' });
     t.push({ label: T('Historik'), click: () => sendTo(ctx, 'open-history') });
@@ -850,7 +855,7 @@ function ensureView(ctx, tabId) {
       if (!(lc && Date.now() - lc.t < 5000)) {
         e.preventDefault();
         adblockCount++; broadcast('adblock:count', adblockCount); traff('ad', wc.session); flikBlockerad(wc);
-        sendTo(ctx, 'toast', T('AdRaze stoppade en omdirigering till') + ' ' + (siteOf(url) || url));
+        sendTo(ctx, 'toast', T('AdRaze stoppade en omdirigering till {x}', { x: siteOf(url) || url }));
         return;
       }
     }
@@ -1246,12 +1251,12 @@ function chattDestroy(ctx) {
 function chattCreate(ctx) {
   const v = new WebContentsView({ webPreferences: {
     preload: path.join(__dirname, 'chatt-preload.js'), contextIsolation: true, sandbox: true, partition: CHATT_PARTITION, spellcheck: true,
+    backgroundThrottling: false,   // samtal och ringsignaler ska fungera även när panelen är dold
   } });
   chattSession();
   ctx.chattView = v;
   ctx.win.contentView.addChildView(v);
   const wc = v.webContents;
-    backgroundThrottling: false,   // samtal och ringsignaler ska fungera även när panelen är dold
   wc.__ctx = ctx;
   // Panelen får ALDRIG navigera bort från chatt.html: länkar (efter säkerhetsrutan) öppnas som ny flik.
   wc.setWindowOpenHandler(({ url }) => { if (/^https?:\/\//i.test(url)) sendTo(ctx, 'open-new-tab', url); return { action: 'deny' }; });
@@ -1685,9 +1690,14 @@ ipcMain.on('konto:fonster', (e) => {
  * Skalet laddar sin ordlista via i18n:load – vi snappar upp språket där och
  * kan sedan översätta enstaka strängar här i huvudprocessen. Svenska = nyckeln. */
 let uiLang = 'sv';
+const RTL_SPRAK = new Set(['ar', 'he', 'fa', 'ur']);   // samma som ui/i18n.js
 const _dicts = new Map();
 /* Översätter en sträng i huvudprocessen till skalets språk. Svenska = nyckeln. */
-function T(sv) { const d = localeDict(uiLang); const v = d && d[sv]; return v == null ? sv : v; }
+// Med värden: T('Stäng {n} flikar', { n }) – platshållarna fylls i efter översättningen (samma mönster som t() i ui/i18n.js).
+function T(sv, varden) {
+  const d = localeDict(uiLang); const v = d && d[sv]; const s = v == null ? sv : v;
+  return varden ? s.replace(/\{([a-z]\w*)\}/g, (m, n) => (Object.prototype.hasOwnProperty.call(varden, n) && varden[n] != null ? String(varden[n]) : m)) : s;
+}
 function localeDict(code) {
   if (!code || code === 'sv') return {};
   if (_dicts.has(code)) return _dicts.get(code);
@@ -1697,6 +1707,14 @@ function localeDict(code) {
   return d;
 }
 function trUi(sv) { const v = localeDict(uiLang)[sv]; return v == null ? sv : v; }
+// "Översätt till …" i högerklicksmenyn och kortkommandot: användarens språk (uiLang), inte alltid svenska.
+// tl = Google Translates språkkod (nb → no; zh-CN/zh-TW och pt-PT som de är).
+function oversattning() {
+  const l = uiLang || 'sv';
+  if (l === 'sv') return { tl: 'sv', namn: T('Översätt till svenska') };
+  let sprak = l; try { sprak = new Intl.DisplayNames([l], { type: 'language' }).of(l) || l; } catch {}
+  return { tl: l === 'nb' ? 'no' : l, namn: T('Översätt till {sprak}', { sprak }) };
+}
 
 /* ── AdRaze Wallet (kort-plånbok, E2E-krypterad på enheten) ──
  * Zero-knowledge: korten lämnar ALDRIG datorn. På disk ligger bara chiffertext
@@ -1825,7 +1843,7 @@ ipcMain.handle('wallet:menu', (e) => {
   if (!ramUrl(e).startsWith(UI_URL) && !huvudram(e)) return { cards: [], labels: {} };
   return {
     cards: loadCards().map(cardPublic),
-    labels: { choose: trUi('Välj kort'), manage: trUi('Hantera kort'), exp: trUi('Giltigt till') },
+    labels: { choose: trUi('Välj kort'), manage: trUi('Hantera kort'), exp: trUi('Giltigt till'), expMall: T('Giltigt till {x}'), kort: T('Kort') },
   };
 });
 // Nyckeln på kortväljarens öppna/stäng-meddelanden mellan ramar (bär inget kort; ifyllningen går via 'wallet:valj')
@@ -2117,7 +2135,7 @@ ipcMain.on('view:reader', async (e, id, theme) => {
   const v = ctx.views.get(id); if (!v) return;
   const wc = v.webContents;
   if (wc.__reader) { wc.__reader = false; wc.reload(); return; }
-  const ok = await lasvy.visa(wc, theme, { title: T('Läsläge'), min: T('min läsning'), smaller: T('Mindre text'), bigger: T('Större text'), exit: T('Avsluta läsläget') });
+  const ok = await lasvy.visa(wc, theme, { title: T('Läsläge'), min: T('{n} min läsning'), smaller: T('Mindre text'), bigger: T('Större text'), exit: T('Avsluta läsläget') });
   if (ok) { wc.__reader = true; sendTo(ctx, 'reader-available', id, true, true); }
   else sendTo(ctx, 'toast', T('Hittade ingen artikel att visa i läsläge.'));
 });
@@ -2530,7 +2548,7 @@ ipcMain.handle('krypto:act', async (e, a) => {
       const skrivbar = tag === 'textarea' || tag === 'select' || el.isContentEditable || (tag === 'input' && /^(|text|search|email|tel|url|number|date|datetime-local|month|week|time)$/.test(typ));
       const etiketter = [el.getAttribute('aria-label'), el.innerText, el.value, el.title].filter(Boolean).join(' · ').replace(/\\s+/g, ' ').slice(0, 300);
       return { x: r.left + r.width / 2, y: r.top + r.height / 2, namn, tag, hemligt, submit, skrivbar, etiketter }; })()`);
-    if (!info) return { ok: false, fel: 'Hittade inte element ' + id + ' längre. Sidan kan ha ändrats.' };
+    if (!info) return { ok: false, fel: fyll('Hittade inte element {id} längre. Sidan kan ha ändrats.', { id }) };
     if (namn === 'klicka') {
       // Köp-/betalknappar OCH alla knappar som skickar ett formulär (publicera, skicka, beställa …) godkänns av användaren
       if (!a.godkant && FALK_KOP.test(info.etiketter || info.namn)) return { ok: false, godkann: true, vad: info.namn, slag: 'kop' };
@@ -2558,7 +2576,7 @@ ipcMain.handle('krypto:act', async (e, a) => {
       return { ok: true, vad: info.namn };
     }
     return { ok: false, fel: 'Okänd handling.' };
-  } catch (err) { return { ok: false, fel: 'Det gick inte: ' + String(err && err.message || err).slice(0, 120) }; }
+  } catch (err) { return { ok: false, fel: fyll('Det gick inte: {x}', { x: String(err && err.message || err).slice(0, 120) }) }; }
 });
 
 // Falk som agent: panelen skickar hit kommandon (t.ex. byt sökmotor, av/på skydd).
@@ -2595,16 +2613,17 @@ function falkSankning(name, a) {
   const v = String((a && a.value) || '').trim();
   if ((name === 'adblock' || name === 'annonsblockerare') && falkAv(v)) return T('Falk vill stänga av annonsblockeraren.');
   if ((name === 'realtidsskydd' || name === 'skydd') && falkAv(v)) return T('Falk vill stänga av realtidsskyddet (varningen för farliga sidor).');
-  if (name === 'sokmotor' || name === 'sok') return T('Falk vill byta sökmotor till') + ' "' + v.slice(0, 40) + '".';
+  if (name === 'sokmotor' || name === 'sok') return T('Falk vill byta sökmotor till "{x}".', { x: v.slice(0, 40) });
   if (name === 'tillat' || name === 'avblockera' || name === 'unblock') {
     const [barn, sidor, min] = v.split('|').map((x) => String(x || '').trim());
     const m = parseInt(min, 10);
-    return T('Falk vill tillåta') + ' ' + ((sidor || '?').slice(0, 200)) + ' ' + T('för') + ' ' + ((barn || '?').slice(0, 40)) + ' ' + (m > 0 ? T('i') + ' ' + m + ' ' + T('minuter') : T('för alltid')) + '.';
+    const v2 = { sidor: (sidor || '?').slice(0, 200), barn: (barn || '?').slice(0, 40), m };
+    return m > 0 ? T('Falk vill tillåta {sidor} för {barn} i {m} minuter.', v2) : T('Falk vill tillåta {sidor} för {barn} för alltid.', v2);
   }
   return '';
 }
 // Anpassa › Ångra (ångra en grupp, spara som fil) och Falk ändrar Anpassa-inställningar (anpassa-falk.js, ui/anpassa-falk.js)
-require('./anpassa-angra').init({ ctxFor, sendTo, POPUP_PREFS });   // + toasten "Ändrat · Ångra" ovanpå webbsidan
+require('./anpassa-angra').init({ ctxFor, sendTo, POPUP_PREFS, T });   // + toasten "Ändrat · Ångra" ovanpå webbsidan
 require('./anpassa-falk').init({ T });
 // Inställningar › Falk. Stängs Falk av rivs panelen i alla fönster direkt (samtalen ligger kvar på datorn).
 falkInst.init({ anpassa, wins, applyBounds, stang(ctx) {
@@ -2622,7 +2641,7 @@ function ctxForWc(wc) { return wins.get(wc.id) || wc.__ctx || null; }
 function activeView(ctx) { return ctx && ctx.visibleTab ? ctx.views.get(ctx.visibleTab) : null; }
 // Anpassa › kortkommandon, kommandopalett och musgester: egna kortkommandon, Ctrl+K och högerklicksgester (anpassa-kortkommandon.js)
 const anpKortkommandon = require('./anpassa-kortkommandon');
-anpKortkommandon.init({ anpassa, wins, sendTo, activeView, openFind, closeFind, openDlPopup, savePage, printPage, bildIBild, createWindow, toggleFull, barnNagonstans, showQR, T });
+anpKortkommandon.init({ anpassa, wins, sendTo, activeView, openFind, closeFind, openDlPopup, savePage, printPage, bildIBild, createWindow, toggleFull, barnNagonstans, showQR, T, oversattning });
 function handleShortcut(wc, input) {
   if (input.type !== 'keyDown') return false;
   const ctx = ctxForWc(wc);
@@ -2691,7 +2710,7 @@ function createWindow(incognito, fran) {
     icon: path.join(__dirname, 'build', 'icon.png'),
     width: 1280, height: 820, minWidth: 900, minHeight: 600,
     backgroundColor: incognito ? '#0a0512' : '#0e2a47',
-    title: incognito ? 'AdRaze – Inkognito' : 'AdRaze',
+    title: incognito ? T('AdRaze – Inkognito') : 'AdRaze',
     // Som Brave/Chrome: ingen egen titelrad – flikarna ligger i samma rad som fönsterknapparna.
     // macOS: trafikljusen ritas av systemet uppe till vänster (skalet lämnar plats). Windows/Linux:
     // Electrons Window Controls Overlay ritar minimera/maximera/stäng uppe till höger i flikraden.
@@ -3068,6 +3087,7 @@ app.whenReady().then(async () => {
   webb.setup({ arBarn: () => barnNagonstans() }); webb.applyDns();   // barnläge: inga behörigheter/skydd ändras via Integritet
   webb.extraSessioner = () => (KONTO_PER_FONSTER ? allaKontoSessioner().slice(1) : []);
   importera.setup({
+    T,
     kakSession: (e) => { if (!KONTO_PER_FONSTER) return null; try { const ctx = ctxFor(e); return kontoSession(ctx && ctx.acctKey !== undefined ? ctx.acctKey : senasteKonto); } catch { return null; } },
     installeraTillagg: (id) => tillagg.installera(id),
     // Spara importerade lösenord i det aktiva valvet (samma avdubbling som pw:save)
@@ -3133,7 +3153,7 @@ function checkMacUpdate() {
       const latest = ((j && j.tag_name) || '').replace(/^v/, '');
       if (latest && semverGt(latest, app.getVersion()) && latest !== toasted) {
         toasted = latest;
-        broadcast('toast', T('En ny version finns') + ' (' + latest + ') — ' + T('ladda ner på') + ' github.com/northcrafto/adraze-dl/releases');
+        broadcast('toast', T('En ny version finns ({v}) — ladda ner på {x}', { v: latest, x: 'github.com/northcrafto/adraze-dl/releases' }));
       }
     }).catch(() => {});
   setTimeout(ping, 6000);
@@ -3187,7 +3207,7 @@ ipcMain.on('update:install', async () => {
     const res = await Promise.race([runUpdateCheck(), new Promise((r) => setTimeout(() => r(null), 8000))]);
     const v = res && res.updateInfo && res.updateInfo.version;
     if (v && res.downloadPromise && (!updDownloaded || semverGt(v, updDownloaded))) {
-      if (updDownloaded) broadcast('toast', T('Hämtar nyaste versionen') + ' (' + v + ')…');
+      if (updDownloaded) broadcast('toast', T('Hämtar nyaste versionen ({v})…', { v }));
       await res.downloadPromise;                 // update-downloaded → updDownloaded = v
     }
   } catch {}

@@ -283,12 +283,13 @@
     if (namn === 'lage') return valjLage(v);
     return A.set('tema.' + namn, v === STANDARD[namn] ? undefined : v, etikett || ETIKETT[namn]);
   }
+  const fyll = (x, v) => String(x).replace(/\{([a-z]\w*)\}/g, (m, n) => (v && v[n] != null ? String(v[n]) : m));   // bara ifyllnad
   async function anvandForval(id) {
     const f = FORVAL.find((x) => x.id === id);
     if (!f) return;
     gammalt = null;
     // Färguppsättningen före läget: när fönstret blir mörkt är ytornas färger redan valda (teman utan egen får standard)
-    for (const namn of ['accent', 'horn', 'densitet', 'palett', 'lage']) await A.set('tema.' + namn, f.v[namn] === STANDARD[namn] ? undefined : f.v[namn], 'Tema ' + f.namn);
+    for (const namn of ['accent', 'horn', 'densitet', 'palett', 'lage']) await A.set('tema.' + namn, f.v[namn] === STANDARD[namn] ? undefined : f.v[namn], fyll('Tema {x}', { x: f.namn }));   // etiketten sparas på svenska ("Tema Skog") och översätts när den visas
   }
 
   /* ── Dela med en kod (samma format som Anpassa.exportera: ADRZ1.<base64url av JSON>) ── */

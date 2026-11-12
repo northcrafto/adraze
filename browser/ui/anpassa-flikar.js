@@ -13,7 +13,7 @@
   const A = window.Anpassa;
   const bro = window.anpassaFlikar || {};
   const $ = (id) => document.getElementById(id);
-  const tt = (s) => (typeof window.t === 'function' ? window.t(s) : s);
+  const tx = (x, v) => (typeof window.t === 'function' ? window.t(x, v) : (v ? String(x).replace(/\{([a-z]\w*)\}/g, (m, n) => (v[n] != null ? String(v[n]) : m)) : x));
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const INKOGNITO = new URLSearchParams(location.search).has('incognito');
   const TILLH_KEY = 'adraze-flikgrupper';
@@ -89,7 +89,7 @@
     const anv = new Set(grupperIFonstret().map((g) => g.farg));
     const farg = FARG_ORDNING.find((f) => !anv.has(f)) || FARG_ORDNING[defs.length % FARG_ORDNING.length];
     const g = { id: 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), namn: '', farg, hopfalld: false };
-    sparaDefs([...defs, g], tt('Ny flikgrupp'));
+    sparaDefs([...defs, g], tx('Ny flikgrupp'));
     t.grupp = g.id; egna.add(g.id);
     omrita(); sparaFlikar();
     bytNamn(g.id);
@@ -178,7 +178,7 @@
     const namnEl = el.querySelector('.anp-gnamn');
     const inp = document.createElement('input');
     inp.className = 'anp-gin'; inp.type = 'text'; inp.maxLength = 40; inp.spellcheck = false;
-    inp.value = g.namn || ''; inp.placeholder = tt('Namn på gruppen'); inp.setAttribute('aria-label', tt('Namn på gruppen'));
+    inp.value = g.namn || ''; inp.placeholder = tx('Namn på gruppen'); inp.setAttribute('aria-label', tx('Namn på gruppen'));
     namnEl.hidden = true; el.insertBefore(inp, namnEl);
     let klart = false;
     const avsluta = (spara) => {
@@ -186,7 +186,7 @@
       const v = inp.value.trim().slice(0, 40);
       inp.remove(); namnEl.hidden = false; el.classList.remove('anp-redigerar'); redigerar = null;
       const gg = def(id);
-      if (spara && gg && v !== (gg.namn || '')) andraGrupp(id, { namn: v }, tt('Flikgruppens namn'));
+      if (spara && gg && v !== (gg.namn || '')) andraGrupp(id, { namn: v }, tx('Flikgruppens namn'));
       else kor('renderTabs');
       if (tillfalligtBred) { tillfalligtBred = false; tillampa(); }
       if (lage() === 'dolda') { zenLast = false; if (!stripHover) zenGomSnart(700); }
@@ -225,9 +225,9 @@
     const cls = 'anp-grupp anp-g-' + g.farg + (g.hopfalld ? ' hopfalld' : '') + (namn ? '' : ' tom');
     if (el.className !== cls) el.className = cls;
     const n = el.querySelector('.anp-gnamn'); if (n.textContent !== namn) n.textContent = namn;
-    n.dataset.tom = tt('Namnlös grupp');   // visas i panelen när gruppen saknar namn (CSS attr())
+    n.dataset.tom = tx('Namnlös grupp');   // visas i panelen när gruppen saknar namn (CSS attr())
     const a = el.querySelector('.anp-gantal'); if (a.textContent !== String(antal)) a.textContent = String(antal);
-    el.title = (namn || tt('Namnlös grupp')) + ' · ' + (antal === 1 ? tt('1 flik') : antal + ' ' + tt('flikar')) + ' · ' + (g.hopfalld ? tt('klicka för att fälla ut') : tt('klicka för att fälla ihop'));
+    el.title = (namn || tx('Namnlös grupp')) + ' · ' + (antal === 1 ? tx('1 flik') : tx('{n} flikar', { n: antal })) + ' · ' + (g.hopfalld ? tx('klicka för att fälla ut') : tx('klicka för att fälla ihop'));
     el.setAttribute('aria-expanded', g.hopfalld ? 'false' : 'true');
   }
   function rubrik(t) {
@@ -353,12 +353,12 @@
     rot.style.setProperty('--vflik-w', (smal() ? BREDD_SMAL : bredd()) + 'px');
     if (l !== 'dolda') zenVisa(false);
     const k = $('anp-vsmal');
-    if (k) { const s = smal(); k.title = s ? tt('Visa flikarnas namn') : tt('Visa bara ikoner'); k.querySelector('span').textContent = tt('Visa bara ikoner'); k.setAttribute('aria-pressed', s ? 'true' : 'false'); }
+    if (k) { const s = smal(); k.title = s ? tx('Visa flikarnas namn') : tx('Visa bara ikoner'); k.querySelector('span').textContent = tx('Visa bara ikoner'); k.setAttribute('aria-pressed', s ? 'true' : 'false'); }
     uppdateraMatt();
     if (direkt) { kor('renderTabs'); kor('sendBounds'); }
     efterLayout();
   }
-  function satSmal(pa) { if (A) A.set('flikar.vertikalSmal', !!pa, pa ? tt('Flikpanelen: bara ikoner') : tt('Flikpanelen: med namn')); }
+  function satSmal(pa) { if (A) A.set('flikar.vertikalSmal', !!pa, pa ? tx('Flikpanelen: bara ikoner') : tx('Flikpanelen: med namn')); }
 
   /* ── Dolda flikar: raden glider fram över verktygsraden ── */
   let zenPa = false, zenLast = false, zenTimer = 0, stripHover = false, menyTid = 0;
@@ -406,10 +406,10 @@
       if (!start) return;
       start = null; document.body.classList.remove('anp-drar');
       kor('sendBounds');
-      if (ny && ny !== bredd() && A) A.set('flikar.vertikalBredd', ny, tt('Flikpanelens bredd'));
+      if (ny && ny !== bredd() && A) A.set('flikar.vertikalBredd', ny, tx('Flikpanelens bredd'));
     };
     drag.addEventListener('pointerup', slapp); drag.addEventListener('pointercancel', slapp); drag.addEventListener('lostpointercapture', slapp);
-    drag.addEventListener('dblclick', () => { if (A && bredd() !== BREDD_STD) A.set('flikar.vertikalBredd', BREDD_STD, tt('Flikpanelens bredd')); });
+    drag.addEventListener('dblclick', () => { if (A && bredd() !== BREDD_STD) A.set('flikar.vertikalBredd', BREDD_STD, tx('Flikpanelens bredd')); });
     // Överkanten (dolda flikar): musen dit → flikraden glider fram; lämnar du raden glider den undan igen
     const kant = document.createElement('div'); kant.id = 'anp-zenkant'; kant.setAttribute('aria-hidden', 'true');
     document.body.appendChild(kant);
@@ -431,14 +431,14 @@
     const l = lage(), ny = get('flikar.nyFlik', 'sist'), sista = get('flikar.sistaFlik', 'stang'), knapp = get('flikar.stangKnapp', 'alla');
     const sova = Number(get('flikar.sova', 15));
     const seg = (nyckel, val, alt) => '<div class="seg flex-none" role="group">' + alt.map(([v, txt]) =>
-      '<button type="button" class="seg-btn' + (String(v) === String(val) ? ' on' : '') + '" data-nyckel="' + nyckel + '" data-varde="' + esc(v) + '" aria-pressed="' + (String(v) === String(val)) + '">' + esc(tt(txt)) + '</button>').join('') + '</div>';
-    const rad = (titel, text, kontroll) => '<div class="set-row"><div class="set-txt"><div class="set-title">' + esc(tt(titel)) + '</div><div class="set-desc">' + esc(tt(text)) + '</div></div>' + kontroll + '</div>';
+      '<button type="button" class="seg-btn' + (String(v) === String(val) ? ' on' : '') + '" data-nyckel="' + nyckel + '" data-varde="' + esc(v) + '" aria-pressed="' + (String(v) === String(val)) + '">' + esc(tx(txt)) + '</button>').join('') + '</div>';
+    const rad = (titel, text, kontroll) => '<div class="set-row"><div class="set-txt"><div class="set-title">' + esc(tx(titel)) + '</div><div class="set-desc">' + esc(tx(text)) + '</div></div>' + kontroll + '</div>';
     const placering = { upptill: 'Flikarna ligger i en rad överst.', vertikal: 'Flikarna ligger i en panel till vänster. Dra i panelens kant för att ändra bredden.', dolda: 'Flikraden visas när du för musen till överkanten eller trycker Ctrl+Shift+A.' }[l];
     const grupper = grupperIFonstret();
     const chips = grupper.length
-      ? '<div class="anp-gchips" translate="no">' + grupper.map((g) => '<span class="anp-gchip anp-g-' + g.farg + (g.namn ? '' : ' tom') + '" title="' + esc(g.namn || tt('Namnlös grupp')) + '">' + esc(g.namn) + '</span>').join('') + '</div>'
-      : '<span class="anp-ingen">' + esc(tt('Inga grupper än')) + '</span>';
-    let h = '<h3 class="set-h3">' + esc(tt('Flikar')) + '</h3><p class="set-lead">' + esc(tt('Var flikarna ligger och hur de beter sig.')) + '</p>';
+      ? '<div class="anp-gchips" translate="no">' + grupper.map((g) => '<span class="anp-gchip anp-g-' + g.farg + (g.namn ? '' : ' tom') + '" title="' + esc(g.namn || tx('Namnlös grupp')) + '">' + esc(g.namn) + '</span>').join('') + '</div>'
+      : '<span class="anp-ingen">' + esc(tx('Inga grupper än')) + '</span>';
+    let h = '<h3 class="set-h3">' + esc(tx('Flikar')) + '</h3><p class="set-lead">' + esc(tx('Var flikarna ligger och hur de beter sig.')) + '</p>';
     h += '<div class="anp-fgrupp">';
     h += rad('Placering', placering, seg('flikar.lage', l, [['upptill', 'Upptill'], ['vertikal', 'På sidan'], ['dolda', 'Dolda']]));
     if (l === 'vertikal') h += rad('Bara ikoner', 'Panelen visar bara flikarnas ikoner. Du kan också trycka Ctrl+Shift+A.',
@@ -449,7 +449,7 @@
     h += rad('Stängknapp', 'Krysset på flikarna. Mittenklick stänger alltid.', seg('flikar.stangKnapp', knapp, [['alla', 'På alla flikar'], ['aktiv', 'Bara aktiv flik']]));
     h += '</div><div class="anp-fgrupp">';
     h += rad('Sovande flikar', 'Flikar du inte använt på ett tag släpper minnet och laddas om när du klickar på dem. Flikar som spelar ljud och fästa flikar sover aldrig.',
-      '<select class="set-select flex-none" data-nyckel="flikar.sova" aria-label="' + esc(tt('Sovande flikar')) + '">' + SOV.map(([v, txt]) => '<option value="' + v + '"' + (v === sova ? ' selected' : '') + '>' + esc(tt(txt)) + '</option>').join('') + '</select>');
+      '<select class="set-select flex-none" data-nyckel="flikar.sova" aria-label="' + esc(tx('Sovande flikar')) + '">' + SOV.map(([v, txt]) => '<option value="' + v + '"' + (v === sova ? ' selected' : '') + '>' + esc(tx(txt)) + '</option>').join('') + '</select>');
     h += rad('Flikgrupper', 'Högerklicka på en flik och välj Lägg i ny grupp. Klicka på gruppens namn för att fälla ihop den.', chips);
     h += '</div>';
     ruta.innerHTML = h;
@@ -463,9 +463,9 @@
   function satt(nyckel, varde) {
     if (!A || !/^flikar\./.test(nyckel)) return;
     let etikett = (ETIKETT[nyckel] || {})[varde];
-    if (nyckel === 'flikar.sova') { const s = SOV.find(([v]) => v === varde); etikett = 'Sovande flikar: ' + (s ? s[1].toLowerCase() : varde); }
+    if (nyckel === 'flikar.sova') { const s = SOV.find(([v]) => v === varde); etikett = tx('Sovande flikar: {x}', { x: s ? tx(s[1]) : varde }); }
     if (nyckel === 'flikar.vertikalSmal') etikett = varde ? 'Flikpanelen: bara ikoner' : 'Flikpanelen: med namn';
-    Promise.resolve(A.set(nyckel, varde, tt(etikett || nyckel))).then((r) => { if (r && r.ok === false && r.error === 'barnlast') { try { showToast(tt('Det här går inte att ändra i barnläge.')); } catch {} ritaInstallningar(); } }).catch(() => {});
+    Promise.resolve(A.set(nyckel, varde, tx(etikett || nyckel))).then((r) => { if (r && r.ok === false && r.error === 'barnlast') { try { showToast(tx('Det här går inte att ändra i barnläge.')); } catch {} ritaInstallningar(); } }).catch(() => {});
   }
   function kopplaInstallningar() {
     const ruta = $('anp-flikar'); if (!ruta) return;
@@ -537,7 +537,7 @@
     if (bro.onGruppVal) bro.onGruppVal((a, id) => {
       const g = def(id); if (!g || typeof a !== 'string') return;
       if (a === 'namn') bytNamn(id);
-      else if (a.startsWith('farg:')) { const f = a.slice(5); if (FARGNAMN[f]) andraGrupp(id, { farg: f }, tt('Flikgruppens färg')); }
+      else if (a.startsWith('farg:')) { const f = a.slice(5); if (FARGNAMN[f]) andraGrupp(id, { farg: f }, tx('Flikgruppens färg')); }
       else if (a === 'ny-flik') nyFlikIGrupp(id);
       else if (a === 'fall') satHopfalld(id, !g.hopfalld);
       else if (a === 'dela') delaUpp(id);

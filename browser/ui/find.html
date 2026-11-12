@@ -45,13 +45,18 @@
     <button id="close" title="Stäng (Esc)"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
   </div>
 <script>
+  // Översättning: samma ordlista som skalet (adraze-lang i localStorage delas, samma file://-origin).
+  // i18n.js översätter placeholder och title på knapparna (och följer ändringar).
+  window.locale = { load: (l) => { try { return window.adrazeIpc.sendSync('i18n:load', l) || {}; } catch (e) { return {}; } } };
+</script>
+<script src="i18n.js"></script>
+<script>
   const ipcRenderer = window.adrazeIpc;
   const q = document.getElementById('q'), n = document.getElementById('n');
   const p = new URLSearchParams(location.search);
   if (p.get('theme') === 'dark') document.documentElement.dataset.theme = 'dark';
   if (p.get('palett') === 'jul') document.documentElement.dataset.palett = 'jul';
-  const T = (k) => { try { const d = JSON.parse(p.get('t') || '{}'); return d[k] || k; } catch { return k; } };
-  q.placeholder = T('Sök på sidan');
+  n.setAttribute('translate', 'no');   // träffräknaren "3/12"
   let last = '';
   function search(forward, next) {
     const v = q.value;

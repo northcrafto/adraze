@@ -204,7 +204,8 @@ function pwShow(field, items) {
   (document.body || document.documentElement).appendChild(pwHost);
   pwPosition();
 }
-const tr = (s) => { try { return ipcRenderer.sendSync('i18n:t', s) || s; } catch { return s; } };
+// tr('Sparade lösenord för {host}', { host }) – platshållarna fylls i efter översättningen (sandlådan når inte i18n-fyll.js)
+const tr = (s, v) => { let x = s; try { x = ipcRenderer.sendSync('i18n:t', s) || s; } catch {} return v ? String(x).replace(/\{([a-z]\w*)\}/g, (m, n) => (Object.prototype.hasOwnProperty.call(v, n) && v[n] != null ? String(v[n]) : m)) : x; };
 function isLoginField(el) {
   if (!el || el.tagName !== 'INPUT' || el.readOnly || el.disabled) return false;
   const t = (el.type || 'text').toLowerCase();
@@ -237,7 +238,7 @@ async function pwOpenFor(field) {
   if (document.activeElement !== field) return;
   if (logins.length) {
     let host = location.hostname.replace(/^www\./, '');
-    items.push({ hd: tr('Sparade lösenord för') + ' ' + host });
+    items.push({ hd: tr('Sparade lösenord för {host}', { host }) });
     for (const l of logins) items.push({ t1: l.username || tr('(inget användarnamn)'), t2: '••••••••••', pick: () => pwFill(l, field) });
   }
   if (isNew || (field.type === 'password' && !logins.length && findFields(field) && findFields(field).isSignup)) {
@@ -580,11 +581,11 @@ function wlShow(menu, anchor, onPick, darkRef, isStatic) {
   wlRows = [];
   for (const c of menu.cards) {
     const row = document.createElement('div'); row.className = 'row'; row.dataset.id = c.id;
-    const b = document.createElement('div'); b.className = 'badge'; b.textContent = BRAND_TAG[c.brand] || 'KORT';
+    const b = document.createElement('div'); b.className = 'badge'; b.textContent = BRAND_TAG[c.brand] || (L.kort || 'Kort').toLocaleUpperCase();
     const t = document.createElement('div'); t.className = 't';
-    const t1 = document.createElement('div'); t1.className = 't1'; t1.textContent = (c.nick || c.brand || 'Kort') + ' •••• ' + (c.last4 || '');
+    const t1 = document.createElement('div'); t1.className = 't1'; t1.textContent = (c.nick || (c.brand && c.brand !== 'Kort' ? c.brand : (L.kort || 'Kort'))) + ' •••• ' + (c.last4 || '');
     const t2 = document.createElement('div'); t2.className = 't2';
-    t2.textContent = [c.holder, c.exp ? (L.exp || 'Giltigt till') + ' ' + c.exp : ''].filter(Boolean).join(' · ');
+    t2.textContent = [c.holder, c.exp ? (L.expMall ? L.expMall.replace('{x}', c.exp) : (L.exp || 'Giltigt till') + ' ' + c.exp) : ''].filter(Boolean).join(' · ');
     t.appendChild(t1); if (t2.textContent) t.appendChild(t2);
     row.appendChild(b); row.appendChild(t);
     box.appendChild(row); wlRows.push(row);

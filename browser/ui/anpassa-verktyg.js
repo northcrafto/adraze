@@ -14,7 +14,7 @@
   const $ = (id) => document.getElementById(id);
   const tb = $('toolbar');
   if (!A || !tb) return;
-  const tr = (s) => (typeof window.t === 'function' ? window.t(s) : s);
+  const tr = (x, v) => (typeof window.t === 'function' ? window.t(x, v) : (v ? String(x).replace(/\{([a-z]\w*)\}/g, (m, n) => (v[n] != null ? String(v[n]) : m)) : x));
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   // shell.js: funktioner hamnar på window, let/const nås bara med namn (och först när shell.js har körts)
   const fn = (namn) => { try { const f = window[namn]; return typeof f === 'function' ? f : null; } catch { return null; } };
@@ -152,7 +152,7 @@
     if (!kanTasBort(id)) return;
     const { ordning, dolda } = las(); if (dolda.has(id)) return;
     dolda.add(id);
-    spara(ordning, dolda, tr('Tog bort') + ' ' + tr(karta.get(id).namn));
+    spara(ordning, dolda, tr('Tog bort {x}', { x: tr(karta.get(id).namn) }));
   }
   function laggTillbaka(id, foreId) {   // foreId: synlig knapp att hamna före, null = sist bland de synliga
     const { ordning, dolda } = las();
@@ -167,25 +167,25 @@
     ny.splice(Math.max(0, Math.min(i, ny.length)), 0, id);
     const varDold = dolda.delete(id);
     if (!varDold && ny.join() === ordning.join()) return;
-    spara(ny, dolda, (varDold ? tr('La tillbaka') : tr('Flyttade')) + ' ' + tr(karta.get(id).namn));
+    spara(ny, dolda, tr(varDold ? 'La tillbaka {x}' : 'Flyttade {x}', { x: tr(karta.get(id).namn) }));
   }
   function flytta(id, steg) {   // listan i Inställningar: ett steg upp/ner (bland alla knappar, även dolda)
     const { ordning, dolda } = las();
     const i = ordning.indexOf(id), j = i + steg;
     if (i < 0 || j < 0 || j >= ordning.length) return;
     [ordning[i], ordning[j]] = [ordning[j], ordning[i]];
-    spara(ordning, dolda, tr('Flyttade') + ' ' + tr(karta.get(id).namn));
+    spara(ordning, dolda, tr('Flyttade {x}', { x: tr(karta.get(id).namn) }));
   }
   function vaxla(id, syns) {
     const { ordning, dolda } = las();
     if (!syns && !kanTasBort(id)) return;
     if (syns) dolda.delete(id); else dolda.add(id);
-    spara(ordning, dolda, (syns ? tr('Visa') : tr('Dölj')) + ' ' + tr(karta.get(id).namn));
+    spara(ordning, dolda, tr(syns ? 'Visa {x}' : 'Dölj {x}', { x: tr(karta.get(id).namn) }));
   }
   function aterstall() {
     try { localStorage.setItem('skoll-krypto-btn', '1'); } catch {}   // Falk syns i standardläget
     vantar = null;
-    const r = A.alla()['verktyg.knappar'] === undefined ? Promise.resolve({ ok: true }) : A.set('verktyg.knappar', null, tr('Återställ verktygsfältet'));
+    const r = A.alla()['verktyg.knappar'] === undefined ? Promise.resolve({ ok: true }) : A.set('verktyg.knappar', null, 'Återställ verktygsfältet');   // på svenska: etiketter som börjar med Återställ grupperas i ångra
     rita();
     return r;
   }
@@ -221,7 +221,7 @@
     const k = karta.get('lasvy'), rb = $('reader-btn'); if (!k || !k.el || !rb) return;
     k.el.disabled = !!rb.hidden;
     k.el.classList.toggle('on', rb.classList.contains('on'));
-    k.el.title = rb.hidden ? tr('Läsläge') + ' – ' + tr('finns inte för den här sidan') : (rb.title || tr('Läsläge'));
+    k.el.title = rb.hidden ? tr('Läsläget finns inte för den här sidan') : (rb.title || tr('Läsläge'));
   }
   // Startsidan: din valda startsida (Vid start › Öppna en viss sida), annars den nya flikens sida i samma flik
   function hem() {
@@ -539,9 +539,9 @@
       return '<div class="set-row anp-vf-rad' + (pa ? '' : ' av') + '" data-id="' + esc(id) + '">'
         + '<span class="anp-vf-ikon">' + ikonFor(k) + '</span>'
         + '<div class="set-txt"><div class="set-title">' + esc(namn) + '</div>' + (k.fast ? '<div class="set-desc">' + esc(tr('Finns alltid kvar')) + '</div>' : '') + '</div>'
-        + '<div class="anp-vf-pilar"><button type="button" class="anp-vf-pil" data-roll="upp" title="' + esc(tr('Flytta upp')) + '" aria-label="' + esc(tr('Flytta upp') + ': ' + namn) + '"' + (i === 0 ? ' disabled' : '') + '>' + PIL(true) + '</button>'
-        + '<button type="button" class="anp-vf-pil" data-roll="ner" title="' + esc(tr('Flytta ner')) + '" aria-label="' + esc(tr('Flytta ner') + ': ' + namn) + '"' + (i === ordning.length - 1 ? ' disabled' : '') + '>' + PIL(false) + '</button></div>'
-        + '<label class="switch" title="' + esc(k.fast ? tr('Finns alltid kvar') : pa ? tr('Syns i verktygsraden') : tr('Ligger i lådan')) + '"><input type="checkbox" data-roll="vaxla" aria-label="' + esc(tr('Visa') + ': ' + namn) + '"' + (pa ? ' checked' : '') + (k.fast ? ' disabled' : '') + '><span class="track"></span></label>'
+        + '<div class="anp-vf-pilar"><button type="button" class="anp-vf-pil" data-roll="upp" title="' + esc(tr('Flytta upp')) + '" aria-label="' + esc(tr('Flytta upp: {x}', { x: namn })) + '"' + (i === 0 ? ' disabled' : '') + '>' + PIL(true) + '</button>'
+        + '<button type="button" class="anp-vf-pil" data-roll="ner" title="' + esc(tr('Flytta ner')) + '" aria-label="' + esc(tr('Flytta ner: {x}', { x: namn })) + '"' + (i === ordning.length - 1 ? ' disabled' : '') + '>' + PIL(false) + '</button></div>'
+        + '<label class="switch" title="' + esc(k.fast ? tr('Finns alltid kvar') : pa ? tr('Syns i verktygsraden') : tr('Ligger i lådan')) + '"><input type="checkbox" data-roll="vaxla" aria-label="' + esc(tr('Visa: {x}', { x: namn })) + '"' + (pa ? ' checked' : '') + (k.fast ? ' disabled' : '') + '><span class="track"></span></label>'
         + '</div>';
     }).join('');
     box.innerHTML = '<h3 class="set-h3">' + esc(tr('Verktygsfältet')) + '</h3>'

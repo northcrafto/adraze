@@ -62,7 +62,7 @@ function visa(wc, theme, t) {
   \`;
   document.head.appendChild(css);
   if (dark) document.documentElement.classList.add('dark');
-  document.body.innerHTML = '<div class="bar"><b>' + esc(T.title) + '</b><span>· ' + min + ' ' + esc(T.min) + '</span><span class="sp"></span>'
+  document.body.innerHTML = '<div class="bar"><b>' + esc(T.title) + '</b><span>· ' + esc(String(T.min).indexOf('{n}') >= 0 ? String(T.min).replace('{n}', min) : min + ' ' + T.min) + '</span><span class="sp"></span>'
     + '<button id="ar-minus" title="' + esc(T.smaller) + '">A−</button><button id="ar-plus" title="' + esc(T.bigger) + '">A+</button><button id="ar-exit">' + esc(T.exit) + '</button></div>'
     + '<main>' + (art.siteName ? '<div class="site">' + esc(art.siteName) + '</div>' : '') + '<h1 class="title">' + esc(art.title) + '</h1>'
     + (art.byline ? '<div class="meta">' + esc(art.byline) + '</div>' : '<div class="meta"></div>') + '<article id="ar-body"></article></main>';

@@ -20,6 +20,7 @@ const fs = require('fs');
 const path = require('path');
 const { app, ipcMain, WebContentsView, Menu, net, session } = require('electron');
 const anpassa = require('./anpassa');
+const { fyll } = require('./i18n-fyll');
 const { privatVard } = require('./natskydd');
 
 const MAX_APPAR = 24;
@@ -566,7 +567,7 @@ function meny(ctx, id) {
     t.push({ label: T('Flytta upp'), enabled: i > 0, click: () => flytta(i, i - 1) });
     t.push({ label: T('Flytta ned'), enabled: i < lista.length - 1, click: () => flytta(i, i + 1) });
     if (p) t.push({ label: T('Avsluta appen'), click: () => avsluta(ctx, a.id) });
-    t.push({ label: T('Ta bort från sidopanelen'), click: () => { satt(lista.filter((x) => x.id !== a.id), 'Tog bort ' + namn); D.sendTo(ctx, 'sidopanel:atgard', 'borttagen', a.id, namn); } });
+    t.push({ label: T('Ta bort från sidopanelen'), click: () => { satt(lista.filter((x) => x.id !== a.id), fyll('Tog bort {x}', { x: namn })); D.sendTo(ctx, 'sidopanel:atgard', 'borttagen', a.id, namn); } });
   } else {
     t.push({ label: T('Lägg till app'), click: () => D.sendTo(ctx, 'sidopanel:atgard', 'lagg-till') });
   }
@@ -599,7 +600,7 @@ function laggTillApp(ctx, { namn, url }) {
   if (appar().length >= MAX_APPAR) return { ok: false };
   const ny = { id: nyttId(), namn: String(namn || vardnamn(ren)).slice(0, 60), url: ren, mobil: false, ljud: true };
   if (!visas()) { const r = anpassa.satt('sidopanel.visa', true, { etikett: 'Visa sidopanelen' }); if (!r.ok) return r; }
-  const r = anpassa.satt('sidopanel.appar', l.concat(ny), { etikett: 'La till ' + ny.namn });
+  const r = anpassa.satt('sidopanel.appar', l.concat(ny), { etikett: fyll('La till {x}', { x: ny.namn }) });
   if (r.ok) D.sendTo(ctx, 'sidopanel:atgard', 'tillagd', ny.id, ny.namn);
   return r;
 }

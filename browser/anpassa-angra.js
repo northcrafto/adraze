@@ -120,7 +120,7 @@ function visaToast(ctx, d) {
   if (!D.POPUP_PREFS) return false;
   const t = toastVy(ctx);
   t.synlig = false; t.knapp = null;
-  t.d = { id: ++toastNr, text: String(d.text || '').slice(0, 200), angra: d.angra ? String(d.angraText || 'Ångra').slice(0, 30) : '',
+  t.d = { id: ++toastNr, text: String(d.text || '').slice(0, 200), angra: d.angra ? String(d.angraText || (D.T ? D.T('Ångra') : 'Ångra')).slice(0, 30) : '',
     ms: tal(d.ms, 1000, 12000, 5000), tema: d.tema === 'dark' ? 'dark' : 'light', max: Math.max(140, Math.min(TOAST_MAX, sida.width - 40)) };
   if (t.klar) skickaToast(t);
   return true;
@@ -189,7 +189,7 @@ function init(deps) {
     if (!ctx || !d || typeof d !== 'object') return false;
     const text = String(d.text || '').slice(0, 200), ms = tal(d.ms, 1000, 12000, 5000);
     koppla(ctx);
-    senaste.set(ctx, { d: { text, angra: !!d.angra, angraText: String(d.angraText || 'Ångra').slice(0, 30), tema: d.tema }, slut: Date.now() + ms });
+    senaste.set(ctx, { d: { text, angra: !!d.angra, angraText: String(d.angraText || (D.T ? D.T('Ångra') : 'Ångra')).slice(0, 30), tema: d.tema }, slut: Date.now() + ms });
     return visaToast(ctx, { ...d, text, ms });
   });
   ipcMain.on('anpassa-angra:toast-gom', (e) => { const ctx = D.ctxFor && D.ctxFor(e); if (ctx) { senaste.delete(ctx); gomToast(ctx); } });
@@ -218,7 +218,7 @@ function init(deps) {
   ipcMain.handle('anpassa-angra:spara-fil', async (e) => {
     const kod = anpassa.exportera();
     const win = BrowserWindow.fromWebContents(e.sender) || undefined;
-    let r; try { r = await dialog.showSaveDialog(win, { title: 'Spara dina inställningar', defaultPath: 'adraze-anpassning.txt', filters: [{ name: 'Text', extensions: ['txt'] }] }); } catch { return { ok: false }; }
+    let r; try { r = await dialog.showSaveDialog(win, { title: D.T ? D.T('Spara dina inställningar') : 'Spara dina inställningar', defaultPath: 'adraze-anpassning.txt', filters: [{ name: D.T ? D.T('Text') : 'Text', extensions: ['txt'] }] }); } catch { return { ok: false }; }
     if (!r || r.canceled || !r.filePath) return { ok: false, avbrutet: true };
     try { fs.writeFileSync(r.filePath, kod + '\n'); } catch (err) { return { ok: false, fel: String(err && err.message || err).slice(0, 120) }; }
     return { ok: true, fil: path.basename(r.filePath) };

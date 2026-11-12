@@ -11,7 +11,7 @@ const BOKMARKEN = new Set(['alltid', 'nyflik', 'aldrig']);
 let anp = null;          // anpassa.js
 let wins = null;         // main.js: skalets webContents-id → ctx
 let tillamPa = null;     // main.js: applyBounds(ctx)
-let T = (s) => s;        // main.js: översättning
+let T = (s, v) => require('./i18n-fyll').fyll(s, v);        // main.js: översättning
 
 const nere = () => !!anp && anp.hamta('verktyg.placering') === 'nere';
 
@@ -55,7 +55,7 @@ function bygg(e, info) {
   if (i.anpassar) {
     t.push({ label: T('Klar med anpassningen'), click: val('klar') });
   } else {
-    if (i.knapp && i.kanTasBort && namn) t.push({ label: T('Ta bort från verktygsfältet') + ': ' + namn, click: val('ta-bort', String(i.knapp).slice(0, 40)) });
+    if (i.knapp && i.kanTasBort && namn) t.push({ label: T('Ta bort från verktygsfältet: {x}', { x: namn }), click: val('ta-bort', String(i.knapp).slice(0, 40)) });
     t.push({ label: T('Anpassa verktygsfältet…'), click: val('anpassa') });
   }
   t.push({ type: 'separator' });

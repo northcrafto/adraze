@@ -26,7 +26,7 @@ const MAX = { cssRegler: 200, css: 100000, skalcss: 100000, skript: 100, kod: 30
 
 let anpassa = null;
 let barn = () => false;          // barnläge någonstans (main.js: barnNagonstans)
-let T = (s) => s;                // översättning (main.js: T)
+let T = (s, v) => require('./i18n-fyll').fyll(s, v);                // översättning (main.js: T)
 let skalAvFlagga = false;        // nödutgången: skalets CSS av i den här körningen
 let flaggToast = false;          // startad med --utan-skal-css: berätta det när första fönstret laddat
 let varBarn = false;
@@ -157,6 +157,7 @@ function skriptFor(url, arTopp) {
 /* ── Skriptets omslag: egen funktionsomgivning per skript + några få GM_-funktioner (som Tampermonkey).
  * Inga GM_xmlhttpRequest/GM_setValue: de skulle kräva mer behörighet än sidan själv har. ── */
 const OMSLAG_RADER = 6;   // rader före skriptets egen kod (för radnummer i felmeddelanden)
+// i18n-hoppa-start (skriptkod som körs i sidan, inte UI)
 function omslag(kod, namn) {
   return '(function () {\n'
     + 'var GM_info = ' + JSON.stringify({ script: { name: namn || '' }, scriptHandler: 'AdRaze', version: '1' }) + ';\n'
@@ -168,6 +169,7 @@ function omslag(kod, namn) {
     + '}).call(window);\n'
     + '})();';
 }
+// i18n-hoppa-slut
 const paket = (s) => ({ id: s.id, tid: s.tid, url: 'adraze-skript:///' + encodeURIComponent(s.namn).slice(0, 80) + '.user.js', kod: omslag(s.kod, s.namn) });
 
 // Kontroll i inställningarna: kompilera (aldrig köra) skriptet och tolka mönstren

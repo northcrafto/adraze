@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="sv">
 <head>
 <meta charset="utf-8" />
 <style>
@@ -52,9 +52,23 @@
     </div>
   </div>
   <script>
+    // Översättning: samma ordlista som skalet (adraze-lang i localStorage delas, samma file://-origin).
+    window.locale = { load: (l) => { try { return window.adrazeIpc.sendSync('i18n:load', l) || {}; } catch (e) { return {}; } } };
+  </script>
+  <script src="i18n.js"></script>
+  <script>
     const ipcRenderer = window.adrazeIpc;
     const n = Number(new URLSearchParams(location.search).get('n') || 0);
-    document.getElementById('msg').innerHTML = 'Du har <b>' + n + ' flikar</b> öppna i webbläsarfönstret.';
+    // En hel mening med platshållare (ordföljden skiljer mellan språken); antalet i fetstil som förut.
+    {
+      const sv = 'Du har {n} flikar öppna i webbläsarfönstret.';
+      const mall = window.t ? window.t(sv) : sv;
+      const fet = mall.indexOf('{n} flikar') >= 0 ? '{n} flikar' : '{n}';
+      const msg = document.getElementById('msg'), delar = mall.split(fet), b = document.createElement('b');
+      b.textContent = fet.replace('{n}', String(n));
+      msg.setAttribute('translate', 'no');   // färdigöversatt – i18n.js ska inte röra bitarna
+      msg.replaceChildren(delar[0], b, delar.slice(1).join(fet));
+    }
     const done = (payload) => ipcRenderer.send('close-confirm-done', payload);
     document.getElementById('cancel').onclick = () => done({ ok: false });
     document.getElementById('yes').onclick = () => done({ ok: true, again: document.getElementById('again').checked });

@@ -1749,7 +1749,7 @@ body.sp-hoger-pa #closeconf { right: calc(12px + var(--sp-hb, 0px)); }
 .anp-w-plats { min-height: 80px; border-radius: 14px; border: 2px dashed var(--anp-ring); background: rgb(255 255 255 / .04); }
 .anp-w-plats.bred { grid-column: span 2; }
 #newtabpage.anp-redigerar #anp-st-grid:empty { display: flex; justify-content: center; margin-top: 36px; }
-#newtabpage.anp-redigerar #anp-st-grid:empty::before { content: "Inga widgetar än. Lägg till från listan."; display: grid; place-items: center; width: min(608px, 100%); height: 136px;
+#newtabpage.anp-redigerar #anp-st-grid:empty::before { content: attr(data-tom); display: grid; place-items: center; width: min(608px, 100%); height: 136px;
   border-radius: 14px; border: 2px dashed var(--anp-ring); font-size: 13.5px; font-weight: 500; color: var(--anp-sida-mut); }
 
 /* Lådan med widgetar (till höger i redigeringsläget) */
