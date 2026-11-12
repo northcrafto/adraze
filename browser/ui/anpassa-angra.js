@@ -8,7 +8,7 @@
   if (!A) return;
   const bro = window.anpassaAngra || {};
   const $id = (id) => document.getElementById(id);
-  const tx = (x) => (typeof window.t === 'function' ? window.t(x) : x);
+  const tx = (x, v) => (typeof window.t === 'function' ? window.t(x, v) : (v ? String(x).replace(/\{([a-z]\w*)\}/g, (m, n) => (v[n] != null ? String(v[n]) : m)) : x));
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const HEX = /^#[0-9a-f]{6}$/i;
   const VISNING = { morkt: 'mörkt', doman: 'domän', stang: 'stäng', nyflik: 'ny flik', vanster: 'vänster', hoger: 'höger' };   // värden som sparas utan å/ä/ö men visas med
@@ -24,7 +24,9 @@
     if (e.startsWith('Falk:')) e = e.slice(5).trim();
     return e;
   }
-  const lista = (l) => { l = [...new Set((l || []).filter(Boolean))]; return l.length > 3 ? l.length + ' ' + tx('inställningar') : l.join(', '); };
+  // Etiketterna är svenska (registret) – de översätts här, eftersom de sätts ihop med annan text
+  const lista = (l) => { l = [...new Set((l || []).filter(Boolean))]; return l.length > 3 ? tx('{n} inställningar', { n: l.length }) : l.map((e) => tx(e)).join(', '); };
+  const sprak = () => (window.i18n && window.i18n.lang) || 'sv';
 
   /* ── Toast: "Ändrat: X · Ångra" ──
    * Längst ner i mitten av innehållsytan (#views) – aldrig över flikraden eller verktygsraden, var de än ligger
@@ -74,7 +76,7 @@
   let ko = [], koT = 0;
   function koaToast(etiketter) {
     ko.push(...etiketter); clearTimeout(koT);
-    koT = setTimeout(() => { const l = ko; ko = []; if (l.length) visaToast(tx('Ändrat') + ': ' + lista(l), true); }, 160);
+    koT = setTimeout(() => { const l = ko; ko = []; if (l.length) visaToast(tx('Ändrat: {x}', { x: lista(l) }), true); }, 160);
   }
   A.on('*', (nyckel) => {
     if (synlig()) ritaSnart();
@@ -87,8 +89,8 @@
     if (!d) return;
     if (synlig()) ritaSnart();
     tystTill = Date.now() + 600;   // samma ändring kommer också som vanlig ändring – en toast räcker
-    if (d.angrat) visaToast(tx('Ångrade') + ': ' + lista(d.etiketter), false);
-    else if (d.aterstallt) visaToast(tx('Återställt') + ': ' + lista(d.etiketter), true);
+    if (d.angrat) visaToast(tx('Ångrade: {x}', { x: lista(d.etiketter) }), false);
+    else if (d.aterstallt) visaToast(tx('Återställt: {x}', { x: lista(d.etiketter) }), true);
     else koaToast(d.etiketter || []);
   });
 
@@ -97,7 +99,7 @@
     tystTill = Date.now() + 1500;
     let r = null;
     try { r = bro.angra ? await bro.angra() : await A.angra(); } catch {}
-    if (r && r.ok) visaToast(tx('Ångrade') + ': ' + lista(r.etiketter || [etikett(r.nyckel, r.etikett)]), false);
+    if (r && r.ok) visaToast(tx('Ångrade: {x}', { x: lista(r.etiketter || [etikett(r.nyckel, r.etikett)]) }), false);
     else visaToast(tx('Det finns inget att ångra.'), false);
     rita();
     return r;
@@ -126,11 +128,11 @@
   /* ── Panelen ── */
   const tid = (ts) => {
     const d = new Date(ts), nu = new Date();
-    const hm = d.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+    const hm = d.toLocaleTimeString(sprak(), { hour: '2-digit', minute: '2-digit' });
     if (d.toDateString() === nu.toDateString()) return hm;
     const ig = new Date(nu); ig.setDate(nu.getDate() - 1);
-    if (d.toDateString() === ig.toDateString()) return tx('i går') + ' ' + hm;
-    return d.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' }) + ' ' + hm;
+    if (d.toDateString() === ig.toDateString()) return tx('i går {tid}', { tid: hm });
+    return d.toLocaleDateString(sprak(), { day: 'numeric', month: 'short' }) + ' ' + hm;
   };
   function vardeHtml(nyckel, v) {
     const r = hitta(nyckel);
@@ -138,14 +140,17 @@
     if (v === undefined || v === null) return '';
     if (typeof v === 'string' && HEX.test(v)) return '<span class="anp-h-farg" style="background:' + v + '" title="' + v + '"></span>';
     if (v === true || v === false) return '<span class="anp-h-varde">' + (v ? tx('på') : tx('av')) + '</span>';
-    if ((typeof v === 'string' && v.length <= 18 && !/\n/.test(v)) || typeof v === 'number') return '<span class="anp-h-varde" translate="no">' + esc(VISNING[v] || v) + '</span>';
+    if ((typeof v === 'string' && v.length <= 18 && !/\n/.test(v)) || typeof v === 'number') return '<span class="anp-h-varde" translate="no">' + esc(VISNING[v] ? tx(VISNING[v]) : v) + '</span>';
     return '';
   }
   function radHtml(h) {
     const e = String(h.etikett || '');
     const falk = e.startsWith('Falk:');
-    const verb = e === 'Importerat' ? tx('importerades') : (e.startsWith('Återställ') || h.efter === undefined) ? tx('återställdes') : tx('ändrades');
-    return '<li class="anp-h"><span class="anp-h-txt"><span class="anp-h-namn">' + esc(etikett(h.nyckel, e)) + '</span> ' + esc(verb) + '</span>' +
+    // En hel mening per rad ("Hörn ändrades"), namnet sätts in efter översättningen; translate="no" så att DOM-översättningen
+    // inte rör delarna en gång till
+    const mall = e === 'Importerat' ? tx('{namn} importerades') : (e.startsWith('Återställ') || h.efter === undefined) ? tx('{namn} återställdes') : tx('{namn} ändrades');
+    const namn = '<span class="anp-h-namn">' + esc(tx(etikett(h.nyckel, e))) + '</span>';
+    return '<li class="anp-h"><span class="anp-h-txt" translate="no">' + esc(mall).replace('{namn}', () => namn) + '</span>' +
       vardeHtml(h.nyckel, h.efter) + (falk ? '<span class="anp-h-falk">Falk</span>' : '') + '<span class="anp-h-tid">· ' + esc(tid(h.ts)) + '</span></li>';
   }
   const SYNLIGA = 3;   // så många ändringar syns direkt – panelen ligger överst i Anpassa och ska inte skymma resten
@@ -185,7 +190,7 @@
       let kod = ''; try { kod = await A.exportera(); } catch {}
       $id('anp-exp-kod').value = kod;
       const n = Object.keys(A.alla() || {}).length;
-      $id('anp-exp-not').textContent = n ? n + ' ' + (n === 1 ? tx('inställning') : tx('inställningar')) : tx('Du har inte ändrat något än.');
+      $id('anp-exp-not').textContent = n ? (n === 1 ? tx('{n} inställning', { n }) : tx('{n} inställningar', { n })) : tx('Du har inte ändrat något än.');
     });
     $id('anp-exp-kopiera').addEventListener('click', async () => {
       const f = $id('anp-exp-kod'); let ok = false;
@@ -195,7 +200,7 @@
     $id('anp-exp-fil').addEventListener('click', async () => {
       if (!bro.sparaFil) return;
       let r = null; try { r = await bro.sparaFil(); } catch {}
-      if (r && r.ok) $id('anp-exp-not').textContent = tx('Sparad') + ': ' + (r.fil || '');
+      if (r && r.ok) $id('anp-exp-not').textContent = tx('Sparad: {fil}', { fil: r.fil || '' });
       else if (r && !r.avbrutet) $id('anp-exp-not').textContent = tx('Kunde inte spara filen.');
     });
     // Importera (kod eller fil)
@@ -208,9 +213,9 @@
       let r = null; try { r = await A.importera(kod); } catch {}
       if (!r || !r.ok) { not.textContent = tx('Koden ser inte rätt ut. Kolla att du fått med allt.'); return; }
       if (!r.antal) { not.textContent = tx('Inget nytt att importera.'); return; }
-      not.textContent = tx('Klart!') + ' ' + r.antal + ' ' + (r.antal === 1 ? tx('inställning importerades.') : tx('inställningar importerades.'));
+      not.textContent = r.antal === 1 ? tx('Klart! {n} inställning importerades.', { n: r.antal }) : tx('Klart! {n} inställningar importerades.', { n: r.antal });
       $id('anp-imp-kod').value = '';
-      visaToast(tx('Importerat') + ': ' + r.antal + ' ' + (r.antal === 1 ? tx('inställning') : tx('inställningar')), true);
+      visaToast(r.antal === 1 ? tx('Importerat: {n} inställning', { n: r.antal }) : tx('Importerat: {n} inställningar', { n: r.antal }), true);
       rita();
     };
     $id('anp-imp-kor').addEventListener('click', () => importera($id('anp-imp-kod').value));
@@ -245,7 +250,7 @@
     const visas = visaAlla ? h : h.slice(0, SYNLIGA);
     ol.innerHTML = visas.length ? visas.map(radHtml).join('') : '<li class="anp-h-tom">' + esc(tx('Inga ändringar än. Det du ändrar i Anpassa visas här.')) + '</li>';
     mer.hidden = h.length <= SYNLIGA;
-    mer.textContent = visaAlla ? tx('Visa färre') : tx('Visa alla') + ' (' + h.length + ')';
+    mer.textContent = visaAlla ? tx('Visa färre') : tx('Visa alla ({n})', { n: h.length });
     $id('anp-angra-senaste').disabled = !h.length;
   }
   document.addEventListener('anpassa:visa', rita);

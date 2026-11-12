@@ -33,6 +33,12 @@
     const u = document.createElementNS(ns, 'use'); u.setAttribute('href', '#' + namn); s.append(u);
     return s;
   }
+  // tx('… {x} …', { x }) översätter och fyller i; fyll() fyller bara i (för etiketter i ångra-historiken, som sparas på
+  // svenska och översätts när de visas)
+  const fyll = (x, v) => String(x).replace(/\{([a-z]\w*)\}/g, (m, n) => (v && v[n] != null ? String(v[n]) : m));
+  const tx = (x, v) => (typeof window.t === 'function' ? window.t(x, v) : fyll(x, v));
+  // En översatt mening med element på platshållarnas plats: mening(tx('Tryck {tangent}'), { tangent: nod })
+  const mening = (text, noder) => String(text).split(/(\{[a-z]\w*\})/).filter(Boolean).map((d) => { const m = /^\{([a-z]\w*)\}$/.exec(d); return m && noder[m[1]] ? noder[m[1]] : d; });
   const nyttId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   const radAntal = (t) => (String(t || '').match(/\n/g) || []).length + 1;
   function normVard(s) {
@@ -161,7 +167,7 @@
       if (c === '\n') { rad++; continue; }
       if (c === '/' && t[i + 1] === '*') {
         const e = t.indexOf('*/', i + 2);
-        if (e < 0) return 'Kommentaren som börjar på rad ' + rad + ' tar aldrig slut (*/ saknas).';
+        if (e < 0) return tx('Kommentaren som börjar på rad {rad} tar aldrig slut (*/ saknas).', { rad });
         rad += radAntal(t.slice(i, e)) - 1; i = e + 1; continue;
       }
       if (c === '"' || c === "'") {
@@ -170,9 +176,9 @@
         i = t[j] === '\n' ? j - 1 : j; continue;
       }
       if (c === '{') d++;
-      else if (c === '}' && --d < 0) return 'Rad ' + rad + ': en } för mycket.';
+      else if (c === '}' && --d < 0) return tx('Rad {rad}: en } för mycket.', { rad });
     }
-    return d > 0 ? (d === 1 ? 'En { stängs aldrig med }. Reglerna efter den kan sluta gälla.' : d + ' st { stängs aldrig med }. Reglerna efter dem kan sluta gälla.') : '';
+    return d > 0 ? (d === 1 ? tx('En { stängs aldrig med }. Reglerna efter den kan sluta gälla.') : tx('{n} st { stängs aldrig med }. Reglerna efter dem kan sluta gälla.', { n: d })) : '';
   }
 
   // // ==UserScript== … // ==/UserScript==  →  namn, sajter, när, ramar + varningar
@@ -251,9 +257,10 @@
       el('p', { class: 'set-lead', text: 'Ändra AdRazes eget utseende, som userChrome.css i Firefox.' }),
       el('div', { class: 'anp-varning', role: 'note' }, ikon('i-shield-alert'), el('div', null,
         el('b', { text: 'Det här kan göra AdRaze svåranvänt.' }), ' ',
-        el('span', { text: 'Går något sönder: tryck ' }), kbd('Ctrl'), '+', kbd('Shift'), '+', kbd('Alt'), '+', kbd('R'),
-        el('span', { text: ' eller starta AdRaze med ' }), el('code', { translate: 'no', text: '--utan-skal-css' }),
-        el('span', { text: '. Då stängs din CSS för AdRaze av.' }))),
+        el('span', { translate: 'no' }, ...mening(tx('Går något sönder: tryck {tangent} eller starta AdRaze med {flagga}. Då stängs din CSS för AdRaze av.'), {
+          tangent: el('span', null, kbd('Ctrl'), '+', kbd('Shift'), '+', kbd('Alt'), '+', kbd('R')),
+          flagga: el('code', { translate: 'no', text: '--utan-skal-css' }),
+        })))),
       el('div', { class: 'set-row' },
         el('div', { class: 'set-txt' }, el('div', { class: 'set-title', text: 'Använd egen CSS för AdRaze' }), el('div', { class: 'set-desc', text: 'Gäller i alla fönster utom inkognito.' })),
         skalBrytare),
@@ -285,25 +292,25 @@
     const pa = post.pa !== false;
     return el('div', { class: 'set-row anp-rad' + (vald ? ' anp-vald' : '') + (pa ? '' : ' anp-av'), 'data-id': post.id },
       el('div', { class: 'set-txt' },
-        el('div', { class: 'set-title', translate: titelNamn ? 'no' : null, text: titel }),
+        el('div', { class: 'set-title', translate: titelNamn ? 'no' : null, text: titelNamn ? titel : tx(titel) }),
         el('div', { class: 'set-desc', translate: 'no', text: beskrivning })),
       el('button', { type: 'button', class: 'pill flex-none', 'data-gor': 'redigera', text: 'Redigera', onclick: () => (typ === 'css' ? oppnaCss(post) : oppnaSkript(post)) }),
-      strombrytare(pa, (pa ? 'Stäng av ' : 'Slå på ') + titel, (nyPa, inp) => vaxla(typ, post.id, nyPa, inp, titel)));
+      strombrytare(pa, tx(pa ? 'Stäng av {namn}' : 'Slå på {namn}', { namn: titelNamn ? titel : tx(titel) }), (nyPa, inp) => vaxla(typ, post.id, nyPa, inp, titel)));
   }
   function cssRad(r) {
     const n = radAntal(r.css);
-    const omf = r.mal === '*' ? 'Varje sajt du besöker' : (r.under ? 'Med underdomäner' : 'Bara ' + r.mal);
-    return rad('css', r, r.mal === '*' ? 'Alla sajter' : r.mal, omf + ' · ' + n + (n === 1 ? ' rad' : ' rader'), oppen && oppen.typ === 'css' && oppen.id === r.id, r.mal !== '*');
+    const omf = r.mal === '*' ? tx('Varje sajt du besöker') : (r.under ? tx('Med underdomäner') : tx('Bara {sajt}', { sajt: r.mal }));
+    return rad('css', r, r.mal === '*' ? 'Alla sajter' : r.mal, omf + ' · ' + (n === 1 ? tx('{n} rad', { n }) : tx('{n} rader', { n })), oppen && oppen.typ === 'css' && oppen.id === r.id, r.mal !== '*');
   }
   function skriptRad(s) {
     const m = Array.isArray(s.match) ? s.match : [];
-    const sajter = m.length ? m[0] + (m.length > 1 ? ' och ' + (m.length - 1) + ' till' : '') : 'Inga sajter';
-    return rad('skript', s, s.namn || 'Namnlöst skript', sajter + ' · ' + (s.tid === 'document-start' ? 'Tidigt' : 'När sidan har laddats'), oppen && oppen.typ === 'skript' && oppen.id === s.id, true);
+    const sajter = m.length ? (m.length > 1 ? tx('{sajt} och {n} till', { sajt: m[0], n: m.length - 1 }) : m[0]) : tx('Inga sajter');
+    return rad('skript', s, s.namn || 'Namnlöst skript', sajter + ' · ' + (s.tid === 'document-start' ? tx('Tidigt') : tx('När sidan har laddats')), oppen && oppen.typ === 'skript' && oppen.id === s.id, !!s.namn);
   }
   async function vaxla(typ, id, pa, inp, titel) {
     const nyckel = typ === 'css' ? NYCKEL.css : NYCKEL.skript;
     const lista = A.get(nyckel, []).map((x) => (x && x.id === id ? { ...x, pa } : x));
-    const r = await A.set(nyckel, lista, (typ === 'css' ? 'Egen CSS ' : 'Användarskript ') + (pa ? 'på: ' : 'av: ') + titel);
+    const r = await A.set(nyckel, lista, fyll(typ === 'css' ? (pa ? 'Egen CSS på: {x}' : 'Egen CSS av: {x}') : (pa ? 'Användarskript på: {x}' : 'Användarskript av: {x}'), { x: titel }));
     if (!r || !r.ok) { inp.checked = !pa; kvittens(typ === 'css' ? delar.cssStatus : delar.skriptStatus, felText(r), 'fel'); return; }
     ritaListor();
   }
@@ -370,13 +377,13 @@
       const css = kod.get();
       if (css.length > MAX_CSS) { visaMedd(medd, 'CSS:en är för lång (högst 100 000 tecken).', 'fel'); return; }
       const lista = A.get(NYCKEL.css, []);
-      if (lista.some((x) => x && x.id !== r.id && x.mal === mal)) { visaMedd(medd, mal === '*' ? 'Det finns redan CSS för alla sajter. Redigera den i listan.' : 'Det finns redan CSS för ' + mal + '. Redigera den i listan.', 'fel'); return; }
+      if (lista.some((x) => x && x.id !== r.id && x.mal === mal)) { visaMedd(medd, mal === '*' ? tx('Det finns redan CSS för alla sajter. Redigera den i listan.') : tx('Det finns redan CSS för {sajt}. Redigera den i listan.', { sajt: mal }), 'fel'); return; }
       const gammal = lista.find((x) => x && x.id === r.id);
       const post = { id: r.id || nyttId(), mal, under: alla ? true : under.querySelector('input').checked, css, pa: gammal ? gammal.pa !== false : true };
-      const svar = await A.set(NYCKEL.css, gammal ? lista.map((x) => (x && x.id === r.id ? post : x)) : [...lista, post], 'Egen CSS: ' + (mal === '*' ? 'alla sajter' : mal));
+      const svar = await A.set(NYCKEL.css, gammal ? lista.map((x) => (x && x.id === r.id ? post : x)) : [...lista, post], fyll('Egen CSS: {x}', { x: mal === '*' ? 'alla sajter' : mal }));
       if (!svar || !svar.ok) { visaMedd(medd, felText(svar), 'fel'); return; }
       stangRedigerare(); ritaListor();
-      kvittens(delar.cssStatus, 'Sparat. ' + (post.pa ? 'Gäller direkt i öppna flikar.' : 'Regeln är avstängd.'));
+      kvittens(delar.cssStatus, post.pa ? tx('Sparat. Gäller direkt i öppna flikar.') : tx('Sparat. Regeln är avstängd.'));
     };
     const nod = el('div', { class: 'anp-red', 'data-red': 'css', role: 'group', 'aria-label': ny ? 'Ny CSS-regel' : 'Redigera CSS' },
       el('div', { class: 'anp-red-topp' }, el('b', { text: ny ? 'Ny CSS-regel' : 'Redigera CSS' }),
@@ -392,7 +399,7 @@
         el('button', { type: 'button', class: 'set-btn', text: 'Avbryt', onclick: avbryt }),
         el('span', { class: 'anp-fyll' }),
         ny ? null : tvaSteg('Ta bort', 'Klicka igen för att ta bort', async () => {
-          const svar = await A.set(NYCKEL.css, A.get(NYCKEL.css, []).filter((x) => x && x.id !== r.id), 'Tog bort egen CSS: ' + (r.mal === '*' ? 'alla sajter' : r.mal));
+          const svar = await A.set(NYCKEL.css, A.get(NYCKEL.css, []).filter((x) => x && x.id !== r.id), fyll('Tog bort egen CSS: {x}', { x: r.mal === '*' ? 'alla sajter' : r.mal }));
           if (!svar || !svar.ok) { visaMedd(medd, felText(svar), 'fel'); return; }
           stangRedigerare(); ritaListor(); kvittens(delar.cssStatus, 'Borttagen.');
         })));
@@ -422,7 +429,7 @@
     // Huvudet styr fälten när det ändras (t.ex. när man klistrar in ett skript)
     const lasIn = () => {
       const h = lasHuvud(kod.get());
-      visaMedd(varn, h && h.saknas.length ? 'Skriptet använder ' + h.saknas.join(', ') + ', som AdRaze inte har. Delar av det kanske inte fungerar.' : '', 'varning');
+      visaMedd(varn, h && h.saknas.length ? tx('Skriptet använder {x}, som AdRaze inte har. Delar av det kanske inte fungerar.', { x: h.saknas.join(', ') }) : '', 'varning');
       if (!h || h.text === senasteHuvud) return;
       senasteHuvud = h.text;
       if (h.namn) namn.value = h.namn.slice(0, 120);
@@ -437,8 +444,8 @@
       const { match, exclude } = delaSajter();
       let k = null; try { k = await bro.kolla({ kod: kod.get(), match, exclude }); } catch {}
       if (nr !== kontrollNr || !k) return k;
-      if (!k.ok) { visaMedd(medd, (k.rad ? 'Fel på rad ' + k.rad + ': ' : 'Fel: ') + k.fel, 'fel'); kod.markera(k.rad || 0); }
-      else if (k.ogiltiga && k.ogiltiga.length) { visaMedd(medd, 'Det här mönstret går inte att använda: ' + k.ogiltiga.join(', '), 'fel'); kod.markera(0); }
+      if (!k.ok) { visaMedd(medd, k.rad ? tx('Fel på rad {rad}: {fel}', { rad: k.rad, fel: k.fel }) : tx('Fel: {fel}', { fel: k.fel }), 'fel'); kod.markera(k.rad || 0); }
+      else if (k.ogiltiga && k.ogiltiga.length) { visaMedd(medd, tx('Det här mönstret går inte att använda: {x}', { x: k.ogiltiga.join(', ') }), 'fel'); kod.markera(0); }
       else { visaMedd(medd, ''); kod.markera(0); }
       return k;
     };
@@ -460,16 +467,16 @@
       const lista = A.get(NYCKEL.skript, []);
       const gammal = lista.find((x) => x && x.id === p.id);
       const post = { id: p.id || nyttId(), namn: namn.value.trim().slice(0, 120) || 'Namnlöst skript', match: match.slice(0, 50), exclude: exclude.slice(0, 50), tid, ramar: ramar.querySelector('input').checked, pa: gammal ? gammal.pa !== false : true, kod: text };
-      const svar = await A.set(NYCKEL.skript, gammal ? lista.map((x) => (x && x.id === p.id ? post : x)) : [...lista, post], 'Användarskript: ' + post.namn);
+      const svar = await A.set(NYCKEL.skript, gammal ? lista.map((x) => (x && x.id === p.id ? post : x)) : [...lista, post], fyll('Användarskript: {x}', { x: post.namn }));
       if (!svar || !svar.ok) { visaMedd(medd, felText(svar), 'fel'); return; }
       if (k && !k.ok) {   // sparat men trasigt: låt redigeraren stå kvar så man ser felet
         p.id = post.id; oppen.id = post.id; oppen.smutsig = false; ritaListor();
-        visaMedd(medd, 'Sparat, men ' + (k.rad ? 'rad ' + k.rad + ' har ett fel' : 'skriptet har ett fel') + ': ' + k.fel + ' Det körs inte förrän felet är rättat.', 'fel');
+        visaMedd(medd, k.rad ? tx('Sparat, men rad {rad} har ett fel: {fel} Det körs inte förrän felet är rättat.', { rad: k.rad, fel: k.fel }) : tx('Sparat, men skriptet har ett fel: {fel} Det körs inte förrän felet är rättat.', { fel: k.fel }), 'fel');
         if (k.rad) kod.gaTillRad(k.rad);
         return;
       }
       stangRedigerare(); ritaListor();
-      kvittens(delar.skriptStatus, 'Sparat. ' + (post.pa ? 'Gäller från nästa gång sidan laddas.' : 'Skriptet är avstängt.'));
+      kvittens(delar.skriptStatus, post.pa ? tx('Sparat. Gäller från nästa gång sidan laddas.') : tx('Sparat. Skriptet är avstängt.'));
     };
     const nod = el('div', { class: 'anp-red', 'data-red': 'skript', role: 'group', 'aria-label': ny ? 'Nytt skript' : 'Redigera skript' },
       el('div', { class: 'anp-red-topp' }, el('b', { text: ny ? 'Nytt skript' : 'Redigera skript' }),
@@ -485,7 +492,7 @@
         el('button', { type: 'button', class: 'set-btn', text: 'Avbryt', onclick: avbryt }),
         el('span', { class: 'anp-fyll' }),
         ny ? null : tvaSteg('Ta bort', 'Klicka igen för att ta bort', async () => {
-          const svar = await A.set(NYCKEL.skript, A.get(NYCKEL.skript, []).filter((x) => x && x.id !== p.id), 'Tog bort användarskript: ' + (p.namn || 'skript'));
+          const svar = await A.set(NYCKEL.skript, A.get(NYCKEL.skript, []).filter((x) => x && x.id !== p.id), fyll('Tog bort användarskript: {x}', { x: p.namn || 'skript' }));
           if (!svar || !svar.ok) { visaMedd(medd, felText(svar), 'fel'); return; }
           stangRedigerare(); ritaListor(); kvittens(delar.skriptStatus, 'Borttaget.');
         })));
@@ -509,7 +516,7 @@
     const svar = await A.set(NYCKEL.skal, { pa: !!pa, css }, pa ? 'Egen CSS för AdRaze på' : 'Egen CSS för AdRaze av');
     if (!svar || !svar.ok) { skalBrytare.querySelector('input').checked = !pa; kvittens(delar.skalStatus, felText(svar), 'fel'); return; }
     skalSmutsig = false;
-    kvittens(delar.skalStatus, f ? 'Sparat, men: ' + f : (pa ? 'Sparat och påslaget.' : 'Sparat. Din CSS för AdRaze är avstängd.'), f ? 'varning' : 'ok');
+    kvittens(delar.skalStatus, f ? tx('Sparat, men: {fel}', { fel: f }) : (pa ? 'Sparat och påslaget.' : 'Sparat. Din CSS för AdRaze är avstängd.'), f ? 'varning' : 'ok');
   }
 
   /* ── "Redigera CSS för den här sajten" (högerklicksmenyn på sidan, eller andra delar av skalet) ── */

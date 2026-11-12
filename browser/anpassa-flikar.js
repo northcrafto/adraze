@@ -29,7 +29,7 @@ const NYCKLAR = [
 ];
 for (const n of NYCKLAR) anpassa.registrera({ ...n, barnLast: false });
 
-let T = (s) => s;
+let T = (s, v) => require('./i18n-fyll').fyll(s, v);
 let ctxFor = () => null;
 let antalFonster = () => 1;
 let svep = null;
@@ -54,7 +54,7 @@ function farSova(ctx, tabId, wc) {
 
 // Gruppens namn i en meny: & är snabbtangent i Electrons menyer → dubbla
 const menyText = (s) => String(s || '').slice(0, 40).replace(/&/g, '&&');
-const gruppEtikett = (g) => menyText(g.namn) || T('Namnlös grupp') + ' (' + T(FARGNAMN[g.farg] || FARGNAMN.gra) + ')';
+const gruppEtikett = (g) => menyText(g.namn) || T('Namnlös grupp ({x})', { x: T(FARGNAMN[g.farg] || FARGNAMN.gra) });
 
 /* Flikens högerklicksmeny (main.js tab:menu): grupposterna läggs efter Fäst/Ljud.
  * info.grupp = flikens grupp, info.grupper = fönstrets grupper (från skalet). Fästa flikar grupperas inte. */

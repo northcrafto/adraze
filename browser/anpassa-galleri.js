@@ -14,6 +14,7 @@
 const fs = require('fs');
 const path = require('path');
 const { app, ipcMain } = require('electron');
+const { fyll } = require('./i18n-fyll');
 
 const PROV_FIL = () => path.join(app.getPath('userData'), 'adraze-galleri-prov.json');
 const ID_RE = /^t[0-9a-f]{20}$/;
@@ -146,7 +147,7 @@ function init({ anpassa: a, adrazeApi, barnNagonstans, skicka }) {
     if (!prov) return { ok: false, message: 'Inget tema provas just nu.' };
     const p = prov; prov = null; sparaProv();
     // Historiken: varje ändrad nyckel skrivs som fore → nu, så att Ångra under Anpassa kan backa temat
-    const nu = temaNu(), etikett = 'Tema från galleriet: ' + p.namn;
+    const nu = temaNu(), etikett = fyll('Tema från galleriet: {x}', { x: p.namn });
     for (const k of new Set([...Object.keys(p.fore), ...Object.keys(nu)])) {
       if (JSON.stringify(p.fore[k]) === JSON.stringify(nu[k])) continue;
       anpassa.satt(k, p.fore[k], { utanHistorik: true });

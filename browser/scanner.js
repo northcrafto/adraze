@@ -5,6 +5,8 @@
  * så det vi testar är precis det som körs skarpt.
  */
 const SKOLL = 'https://www.xn--skerkoll-0za.se';
+// Domarna visas i skalet och översätts där (svenska mallar med {platshållare}, se i18n-fyll.js)
+const { fyll } = require('./i18n-fyll');
 
 /* Kända, betrodda värdar som aldrig ska innehållsflaggas (varumärke på sin egen domän
  * eller stora legitima inloggningar). Fylls på när testet hittar falsklarm. */
@@ -35,7 +37,7 @@ function verdictFromReport(report) {
     const suspiciousSelf = young || t.hasPunycode || t.hasMixedScripts || certBad;
     if (near && suspiciousSelf) {
       bump('danger');
-      reasons.push(`Adressen liknar "${near.target}" och domänen är dessutom ny/oetablerad, vilket är ett klassiskt sätt att lura.`);
+      reasons.push(fyll('Adressen liknar "{x}" och domänen är dessutom ny/oetablerad, vilket är ett klassiskt sätt att lura.', { x: near.target }));
     }
   }
   if (certBad) { bump('danger'); reasons.push('Sidans säkerhetscertifikat är ogiltigt.'); }
@@ -83,6 +85,7 @@ async function checkUrl(target) {
 }
 
 /* ── Innehållsanalys: läs vad sidan FAKTISKT gör ── */
+// i18n-hoppa-start (varumärken och sökord i sidans text, inte UI)
 const BRAND_LIST = ['swedbank', 'nordea', 'handelsbanken', 'länsförsäkringar', 'seb', 'paypal', 'microsoft', 'apple', 'icloud', 'facebook', 'instagram', 'netflix', 'postnord', 'dhl', 'skatteverket', 'försäkringskassan', 'klarna', 'bankid', 'amazon', 'coinbase', 'binance', 'spotify'];
 
 const EXTRACT_JS = `(function(){
@@ -102,6 +105,7 @@ const EXTRACT_JS = `(function(){
     return { host: location.hostname.replace(/^www\\./,''), pw: pw, extAction: extAction, brands: brands, brandsInTitle: brandsInTitle, oauthCtx: oauthCtx, urgency: urgency };
   } catch(e){ return null; }
 })()`;
+// i18n-hoppa-slut
 
 function analyzeContent(feats) {
   if (!feats) return null;
@@ -113,7 +117,7 @@ function analyzeContent(feats) {
   const titleBrands = (feats.brandsInTitle || feats.brands || []);
   const impersonated = titleBrands.filter((b) => host.indexOf(b) === -1);
   if (feats.pw > 0 && impersonated.length && !feats.oauthCtx) {
-    score += 3; flags.push(`Sidan ber dig logga in och utger sig för att vara "${impersonated[0]}", men adressen (${host}) tillhör inte dem.`);
+    score += 3; flags.push(fyll('Sidan ber dig logga in och utger sig för att vara "{x}", men adressen ({host}) tillhör inte dem.', { x: impersonated[0], host }));
   }
   if (feats.pw > 0 && feats.extAction) {
     score += 3; flags.push('Ett inloggningsformulär skickar det du skriver vidare till en annan sajt.');

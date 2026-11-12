@@ -10,7 +10,7 @@
   const A = window.Anpassa; if (!A) return;
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const tt = (s) => (typeof window.t === 'function' ? window.t(s) : s);
+  const tx = (x, v) => (typeof window.t === 'function' ? window.t(x, v) : (v ? String(x).replace(/\{([a-z]\w*)\}/g, (m, n) => (v[n] != null ? String(v[n]) : m)) : x));
   const toast = (m) => { try { if (typeof showToast === 'function') showToast(m); } catch {} };
   const SNABB_RE = /^[\p{L}\p{N}@._+-]{1,20}$/u;
   const MAX = 60;
@@ -76,7 +76,7 @@
       const t = traff(query); if (!t) return null;
       return { search: true, kind: 'snabbord', q: String(query || '').trim(), motor: t.motor.namn, sokord: t.rest };
     },
-    rad(it) { return '<span class="sdim">' + esc(tt('Sök på') + ' ' + it.motor + ':') + '</span> <span class="stext">' + esc(it.sokord) + '</span>'; },
+    rad(it) { return '<span class="sdim">' + esc(tx('Sök på {motor}:', { motor: it.motor })) + '</span> <span class="stext">' + esc(it.sokord) + '</span>'; },
     // Sökförslagen från nätet (null = inga): inga för snabbord, och med en egen standardsökmotor bara från
     // samma tjänst – det du skriver skickas aldrig till någon annan än den du valt att söka hos
     forslagsMotor(query, inbyggd) {
@@ -89,7 +89,7 @@
     // Inställningar → Sökmotor: de egna sökmotorerna under de inbyggda (renderEngines anropar sist)
     motorlista: ritaMotorlista,
     // En inbyggd sökmotor valdes (listan, assistenten, Återställ): den egna slutar vara standard
-    inbyggd() { if (A.get('sok.standard')) A.set('sok.standard', undefined, tt('Standardsökmotor')); },
+    inbyggd() { if (A.get('sok.standard')) A.set('sok.standard', undefined, tx('Standardsökmotor')); },
   };
 
   /* ── Inställningar → Sökmotor (#engine-list) ── */
@@ -106,18 +106,18 @@
     try { inbyggda = new Set(Object.values(ENGINES).map((e) => varden(e.url + 'x'))); } catch {}
     const ms = motorer().filter((m) => (std && std.id === m.id) || !inbyggda.has(varden(m.url)));
     if (!ms.length) return;
-    const rubrik = document.createElement('div'); rubrik.className = 'anpk-motorrubrik'; rubrik.textContent = tt('Egna sökmotorer');
+    const rubrik = document.createElement('div'); rubrik.className = 'anpk-motorrubrik'; rubrik.textContent = tx('Egna sökmotorer');
     lista.appendChild(rubrik);
     for (const m of ms) {
       const el = document.createElement('div'); el.className = 'engine-opt' + (std && std.id === m.id ? ' on' : '');
-      el.innerHTML = '<span class="engine-radio"></span><span class="anpk-mnamn">' + esc(m.namn) + '</span>' + (m.snabbord ? '<span class="anpk-chip" title="' + esc(tt('Snabbord')) + '">' + esc(m.snabbord) + '</span>' : '');
+      el.innerHTML = '<span class="engine-radio"></span><span class="anpk-mnamn" translate="no">' + esc(m.namn) + '</span>' + (m.snabbord ? '<span class="anpk-chip" title="' + esc(tx('Snabbord')) + '">' + esc(m.snabbord) + '</span>' : '');
       el.addEventListener('click', () => valjStandard(m.id));
       lista.appendChild(el);
     }
   }
   async function valjStandard(id) {
-    const r = await A.set('sok.standard', id || undefined, tt('Standardsökmotor'));
-    if (r && r.error === 'barnlast') toast(tt('Låst i barnläge.'));
+    const r = await A.set('sok.standard', id || undefined, tx('Standardsökmotor'));
+    if (r && r.error === 'barnlast') toast(tx('Låst i barnläge.'));
   }
   // Etiketten i adressfältet och listorna följer butiken (även ändringar från ett annat fönster)
   function efterAndring() {
@@ -136,14 +136,14 @@
   }
   async function spara(lista, etikett) {
     const r = await A.set('sok.egna', lista, etikett);
-    if (r && r.error === 'barnlast') toast(tt('Låst i barnläge.'));
+    if (r && r.error === 'barnlast') toast(tx('Låst i barnläge.'));
     return !!(r && r.ok);
   }
   function kollaSnabbord(ord, utomId) {
     if (!ord) return '';
-    if (!SNABB_RE.test(ord)) return tt('Snabbordet får bara ha bokstäver, siffror och . _ - + @ (inga mellanslag).');
+    if (!SNABB_RE.test(ord)) return tx('Snabbordet får bara ha bokstäver, siffror och . _ - + @ (inga mellanslag).');
     const krock = motorer().find((m) => m.snabbord === ord && m.id !== utomId);
-    return krock ? tt('Snabbordet används redan av') + ' ' + krock.namn + '.' : '';
+    return krock ? tx('Snabbordet används redan av {namn}.', { namn: krock.namn }) : '';
   }
   const nyttId = () => 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
@@ -153,41 +153,41 @@
     const ms = motorer(); const std = standardMotor();
     const finns = new Set(ms.map((m) => m.url));
     const saknas = forslag().filter((f) => !ms.some((m) => m.id === f.id) && !finns.has(f.url));
-    host.innerHTML = '<h3 class="set-h3">' + esc(tt('Egna sökmotorer')) + '</h3>'
-      + '<p class="set-lead">' + esc(tt('Sök direkt på en sajt: skriv snabbordet först i adressfältet, till exempel')) + ' <b>yt katter</b> ' + esc(tt('eller')) + ' <b>w Stockholm</b>.</p>'
-      + (last ? '<p class="anp-not">' + esc(tt('Barnläge: egna sökmotorer och snabbord används inte. Sökningar går till den vanliga sökmotorn.')) + '</p>' : '')
+    host.innerHTML = '<h3 class="set-h3">' + esc(tx('Egna sökmotorer')) + '</h3>'
+      + '<p class="set-lead" translate="no">' + esc(tx('Sök direkt på en sajt: skriv snabbordet först i adressfältet, till exempel {a} eller {b}.')).replace('{a}', '<b>yt katter</b>').replace('{b}', '<b>w Stockholm</b>') + '</p>'
+      + (last ? '<p class="anp-not">' + esc(tx('Barnläge: egna sökmotorer och snabbord används inte. Sökningar går till den vanliga sökmotorn.')) + '</p>' : '')
       + '<div class="anpk-lista"></div>'
-      + '<div class="anpk-ny"><div class="anpk-ny-t">' + esc(tt('Lägg till en sökmotor')) + '</div>'
+      + '<div class="anpk-ny"><div class="anpk-ny-t">' + esc(tx('Lägg till en sökmotor')) + '</div>'
       + '<div class="anpk-falt">'
-      + '<label><span>' + esc(tt('Namn')) + '</span><input id="anpk-namn" type="text" maxlength="40" spellcheck="false" autocomplete="off" placeholder="' + esc(tt('t.ex. Tradera')) + '"></label>'
-      + '<label class="anpk-url"><span>' + esc(tt('Adress, med %s där sökorden ska stå')) + '</span><input id="anpk-url" type="text" spellcheck="false" autocomplete="off" placeholder="https://www.tradera.com/search?q=%s"></label>'
-      + '<label class="anpk-ordf"><span>' + esc(tt('Snabbord')) + '</span><input id="anpk-ord" type="text" maxlength="20" spellcheck="false" autocomplete="off" placeholder="tr"></label>'
-      + '</div><div class="anpk-ny-fot"><p class="anpk-fel" id="anpk-fel" role="alert"></p><button type="button" class="set-btn" id="anpk-lagg">' + esc(tt('Lägg till')) + '</button></div></div>'
-      + (saknas.length ? '<div class="anpk-forslag"><span>' + esc(tt('Förslag')) + '</span>' + saknas.map((f) => '<button type="button" class="anpk-fchip" data-id="' + esc(f.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>' + esc(f.namn) + '</button>').join('') + '</div>' : '');
+      + '<label><span>' + esc(tx('Namn')) + '</span><input id="anpk-namn" type="text" maxlength="40" spellcheck="false" autocomplete="off" placeholder="' + esc(tx('t.ex. Tradera')) + '"></label>'
+      + '<label class="anpk-url"><span>' + esc(tx('Adress, med %s där sökorden ska stå')) + '</span><input id="anpk-url" type="text" spellcheck="false" autocomplete="off" placeholder="https://www.tradera.com/search?q=%s"></label>'
+      + '<label class="anpk-ordf"><span>' + esc(tx('Snabbord')) + '</span><input id="anpk-ord" type="text" maxlength="20" spellcheck="false" autocomplete="off" placeholder="tr"></label>'
+      + '</div><div class="anpk-ny-fot"><p class="anpk-fel" id="anpk-fel" role="alert"></p><button type="button" class="set-btn" id="anpk-lagg">' + esc(tx('Lägg till')) + '</button></div></div>'
+      + (saknas.length ? '<div class="anpk-forslag"><span>' + esc(tx('Förslag')) + '</span>' + saknas.map((f) => '<button type="button" class="anpk-fchip" data-id="' + esc(f.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>' + esc(f.namn) + '</button>').join('') + '</div>' : '');
     const box = host.querySelector('.anpk-lista');
-    if (!ms.length) box.innerHTML = '<p class="anps-tom">' + esc(tt('Inga egna sökmotorer. Lägg till en nedan.')) + '</p>';
+    if (!ms.length) box.innerHTML = '<p class="anps-tom">' + esc(tx('Inga egna sökmotorer. Lägg till en nedan.')) + '</p>';
     for (const m of ms) {
       const arStd = !!(std && std.id === m.id);
       const rad = document.createElement('div'); rad.className = 'set-row anpk-rad'; rad.dataset.id = m.id;
       rad.innerHTML = '<span class="anps-ikon" aria-hidden="true">' + esc(m.namn.charAt(0)) + '</span>'
-        + '<div class="set-txt"><div class="set-title">' + esc(m.namn) + (arStd ? ' <span class="set-chip">' + esc(tt('Standard')) + '</span>' : '') + '</div>'
+        + '<div class="set-txt"><div class="set-title"><span translate="no">' + esc(m.namn) + '</span>' + (arStd ? ' <span class="set-chip">' + esc(tx('Standard')) + '</span>' : '') + '</div>'
         + '<div class="set-desc">' + esc(varden(m.url)) + '</div></div>'
-        + '<label class="anpk-snabb" title="' + esc(tt('Snabbord: skriv det först i adressfältet')) + '"><span>' + esc(tt('Snabbord')) + '</span>'
-        + '<input type="text" maxlength="20" spellcheck="false" autocomplete="off" value="' + esc(m.snabbord) + '" aria-label="' + esc(tt('Snabbord för') + ' ' + m.namn) + '"></label>'
-        + '<button type="button" class="anpk-std' + (arStd ? ' on' : '') + '" aria-pressed="' + arStd + '">' + esc(arStd ? tt('Standard') : tt('Gör till standard')) + '</button>'
-        + '<button type="button" class="anpk-bort" title="' + esc(tt('Ta bort')) + '" aria-label="' + esc(tt('Ta bort') + ' ' + m.namn) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>';
+        + '<label class="anpk-snabb" title="' + esc(tx('Snabbord: skriv det först i adressfältet')) + '"><span>' + esc(tx('Snabbord')) + '</span>'
+        + '<input type="text" maxlength="20" spellcheck="false" autocomplete="off" value="' + esc(m.snabbord) + '" aria-label="' + esc(tx('Snabbord för {namn}', { namn: m.namn })) + '"></label>'
+        + '<button type="button" class="anpk-std' + (arStd ? ' on' : '') + '" aria-pressed="' + arStd + '">' + esc(arStd ? tx('Standard') : tx('Gör till standard')) + '</button>'
+        + '<button type="button" class="anpk-bort" title="' + esc(tx('Ta bort')) + '" aria-label="' + esc(tx('Ta bort {namn}', { namn: m.namn })) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>';
       const inp = rad.querySelector('.anpk-snabb input');
       inp.addEventListener('change', async () => {
         const ord = inp.value.trim().toLowerCase(); const fel = kollaSnabbord(ord, m.id);
         if (fel) { inp.classList.add('fel'); toast(fel); inp.value = m.snabbord; return; }
         inp.classList.remove('fel');
-        await spara(motorer().map((x) => (x.id === m.id ? { ...x, snabbord: ord } : x)), tt('Snabbord för') + ' ' + m.namn);
+        await spara(motorer().map((x) => (x.id === m.id ? { ...x, snabbord: ord } : x)), tx('Snabbord för {namn}', { namn: m.namn }));
       });
       inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') inp.blur(); });
       rad.querySelector('.anpk-std').addEventListener('click', () => valjStandard(arStd ? undefined : m.id));
       rad.querySelector('.anpk-bort').addEventListener('click', async () => {
-        const ok = await spara(motorer().filter((x) => x.id !== m.id), tt('Ta bort') + ' ' + m.namn);
-        if (ok && A.get('sok.standard') === m.id) await A.set('sok.standard', undefined, tt('Standardsökmotor'));
+        const ok = await spara(motorer().filter((x) => x.id !== m.id), tx('Ta bort {namn}', { namn: m.namn }));
+        if (ok && A.get('sok.standard') === m.id) await A.set('sok.standard', undefined, tx('Standardsökmotor'));
       });
       box.appendChild(rad);
     }
@@ -195,20 +195,20 @@
     $('anpk-lagg').addEventListener('click', async () => {
       const namn = $('anpk-namn').value.trim(), url = $('anpk-url').value.trim(), ord = $('anpk-ord').value.trim().toLowerCase();
       let f = '';
-      if (!namn) f = tt('Skriv ett namn.');
-      else if (!/^https?:\/\//i.test(url)) f = tt('Adressen ska börja med https://');
-      else if (!url.includes('%s')) f = tt('Skriv %s där sökorden ska stå i adressen.');
-      else if (!giltigUrl(url)) f = tt('Adressen ser inte rätt ut.');
+      if (!namn) f = tx('Skriv ett namn.');
+      else if (!/^https?:\/\//i.test(url)) f = tx('Adressen ska börja med https://');
+      else if (!url.includes('%s')) f = tx('Skriv %s där sökorden ska stå i adressen.');
+      else if (!giltigUrl(url)) f = tx('Adressen ser inte rätt ut.');
       else f = kollaSnabbord(ord, null);
-      if (!f && motorer().length >= MAX) f = tt('Du har redan många sökmotorer. Ta bort någon först.');
+      if (!f && motorer().length >= MAX) f = tx('Du har redan många sökmotorer. Ta bort någon först.');
       fel.textContent = f;
       if (f) return;
-      if (await spara([...motorer(), { id: nyttId(), namn, url, snabbord: ord }], tt('Lägg till') + ' ' + namn)) toast(namn + ' ' + tt('tillagd'));
+      if (await spara([...motorer(), { id: nyttId(), namn, url, snabbord: ord }], tx('Lägg till {namn}', { namn }))) toast(tx('{namn} tillagd', { namn }));
     });
     host.querySelectorAll('.anpk-fchip').forEach((b) => b.addEventListener('click', async () => {
       const f = forslag().find((x) => x.id === b.dataset.id); if (!f) return;
       const ledigt = !kollaSnabbord(f.snabbord, null);
-      await spara([...motorer(), { ...f, snabbord: ledigt ? f.snabbord : '' }], tt('Lägg till') + ' ' + f.namn);
+      await spara([...motorer(), { ...f, snabbord: ledigt ? f.snabbord : '' }], tx('Lägg till {namn}', { namn: f.namn }));
     }));
     if (last) host.querySelectorAll('input, button').forEach((el) => { el.disabled = true; });
   }

@@ -24,7 +24,9 @@
   const kommandon = new Map(info.kommandon.map((k) => [k.id, k]));
   const extraKor = new Map();          // id → funktion, för kommandon som registrerats här i fönstret
 
-  const t = (s) => (typeof window.t === 'function' ? window.t(s) : s);
+  const t = (x, v) => (typeof window.t === 'function' ? window.t(x, v) : (v ? String(x).replace(/\{([a-z]\w*)\}/g, (m, n) => (v[n] != null ? String(v[n]) : m)) : x));
+  // Bara ifyllnad, ingen översättning: etiketter i ångra-historiken sparas på svenska och översätts när de visas
+  const fyll = (x, v) => String(x).replace(/\{([a-z]\w*)\}/g, (m, n) => (v && v[n] != null ? String(v[n]) : m));
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const el = (id) => document.getElementById(id);
   const tryck = (f) => { try { return f(); } catch { return undefined; } };
@@ -55,7 +57,7 @@
   async function spara(id, lista) {
     const k = kommandon.get(id); if (!k) return false;
     const lika = JSON.stringify(lista) === JSON.stringify(k.std || []);
-    let r; try { r = await A.set('kortkommandon.' + id, lika ? undefined : lista, 'Kortkommando: ' + k.namn); } catch {}
+    let r; try { r = await A.set('kortkommandon.' + id, lika ? undefined : lista, fyll('Kortkommando: {x}', { x: k.namn })); } catch {}
     if (r && r.ok === false) { toast(r.error === 'barnlast' ? 'Det här går inte att ändra i barnläge.' : 'Det gick inte att spara.'); return false; }
     return true;
   }
@@ -312,7 +314,7 @@
       const ra = p.inp.value.trim();
       if (ra.length <= 300) {
         const arAdress = /^\S+\.\S{2,}$/.test(ra) && !/\s/.test(ra);
-        grupper.get('webb').push({ x: { typ: 'webb', text: ra, namn: arAdress ? t('Gå till') + ' ' + ra : t('Sök på webben efter') + ' ”' + ra + '”', sub: '', anv: true, ikon: ikon(arAdress ? 'glob' : 'sok') }, s: 0.5 });
+        grupper.get('webb').push({ x: { typ: 'webb', text: ra, namn: arAdress ? t('Gå till {x}', { x: ra }) : t('Sök på webben efter ”{x}”', { x: ra }), sub: '', anv: true, ikon: ikon(arAdress ? 'glob' : 'sok') }, s: 0.5 });
       }
     }
     const ordning = GRUPPER.map(([typ, namn, max], i) => {
@@ -463,7 +465,7 @@
       let h = '<div class="anp-kort-kombos">';
       if (insp.konflikt) {
         h += '<span class="anp-kort-kombo anp-kort-ny">' + kbd(insp.konflikt.acc) + '</span></div>' +
-          '<div class="anp-kort-medd" role="alert"><span>' + esc(t('Används redan för')) + ' <b>' + esc(t(insp.konflikt.annan.namn)) + '</b>.</span>' +
+          '<div class="anp-kort-medd" role="alert"><span translate="no">' + esc(t('Används redan för {namn}.')).replace('{namn}', () => '<b>' + esc(t(insp.konflikt.annan.namn)) + '</b>') + '</span>' +
           '<button type="button" class="set-btn" data-gor="byt-anda">' + esc(t('Byt ändå')) + '</button><button type="button" class="pill" data-gor="avbryt">' + esc(t('Avbryt')) + '</button></div>';
         return h;
       }
@@ -478,9 +480,9 @@
     if (!b.length) h += '<span class="anp-kort-tom">' + esc(t('Inget')) + '</span>';
     b.forEach((a, i) => {
       h += '<span class="anp-kort-kombo"><button type="button" class="anp-kort-chip" data-gor="byt" data-i="' + i + '" title="' + esc(t('Byt')) + '">' + kbd(a) + '</button>' +
-        '<button type="button" class="anp-kort-x" data-gor="tabort" data-i="' + i + '" aria-label="' + esc(t('Ta bort') + ' ' + visaText(a)) + '" title="' + esc(t('Ta bort')) + '">' + ikon('stang') + '</button></span>';
+        '<button type="button" class="anp-kort-x" data-gor="tabort" data-i="' + i + '" aria-label="' + esc(t('Ta bort {x}', { x: visaText(a) })) + '" title="' + esc(t('Ta bort')) + '">' + ikon('stang') + '</button></span>';
     });
-    if (b.length < 4) h += '<button type="button" class="anp-kort-plus" data-gor="ny" aria-label="' + esc(t('Lägg till kortkommando för') + ' ' + t(k ? k.namn : '')) + '" title="' + esc(t('Lägg till')) + '">' + ikon('plus') + '</button>';
+    if (b.length < 4) h += '<button type="button" class="anp-kort-plus" data-gor="ny" aria-label="' + esc(t('Lägg till kortkommando för {x}', { x: t(k ? k.namn : '') })) + '" title="' + esc(t('Lägg till')) + '">' + ikon('plus') + '</button>';
     h += '</div>';
     if (andrad(id)) h += '<button type="button" class="anp-kort-lank anp-kort-std" data-gor="std" title="' + esc(t('Tillbaka till det som gällde från början')) + '">' + esc(t('Standard')) + '</button>';
     return h;
@@ -660,7 +662,7 @@
     for (const g of info.gester) {
       const nu = A.get('gester.' + g.m, g.std);
       h += '<div class="set-row anp-gest-rad">' + gestFigur(g.m) + '<div class="set-txt"><div class="set-title">' + esc(t(g.namn)) + '</div></div>' +
-        '<select class="set-select" data-gest="' + esc(g.m) + '" aria-label="' + esc(t('Musgest') + ': ' + t(g.namn)) + '">' + val(g.m, typeof nu === 'string' ? nu : '') + '</select></div>';
+        '<select class="set-select" data-gest="' + esc(g.m) + '" aria-label="' + esc(t('Musgest: {x}', { x: t(g.namn) })) + '">' + val(g.m, typeof nu === 'string' ? nu : '') + '</select></div>';
     }
     h += '</div></div>';
     return h;
@@ -672,7 +674,7 @@
     else if (x.id === 'anp-gest-spar') r = await A.set('gester.spar', x.checked ? undefined : false, x.checked ? 'Visa spåret för musgester' : 'Dölj spåret för musgester');
     else if (x.dataset.gest) {
       const g = info.gester.find((q) => q.m === x.dataset.gest); if (!g) return;
-      r = await A.set('gester.' + g.m, x.value === g.std ? undefined : x.value, 'Musgest: ' + g.namn);
+      r = await A.set('gester.' + g.m, x.value === g.std ? undefined : x.value, fyll('Musgest: {x}', { x: g.namn }));
     } else return;
     if (r && r.ok === false) { toast(r.error === 'barnlast' ? 'Det här går inte att ändra i barnläge.' : 'Det gick inte att spara.'); rita(); }
   });

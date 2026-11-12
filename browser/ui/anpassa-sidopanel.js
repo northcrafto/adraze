@@ -26,7 +26,9 @@
   }
   if (!bro || !A || !rad || !views) return;
   const INKOGNITO = new URLSearchParams(location.search).has('incognito');
-  const tt = (s) => (typeof window.t === 'function' ? window.t(s) : s);
+  // Bara ifyllnad: etiketter i ångra-historiken sparas på svenska och översätts när de visas
+  const fyll = (x, v) => String(x).replace(/\{([a-z]\w*)\}/g, (m, n) => (v && v[n] != null ? String(v[n]) : m));
+  const tx = (x, v) => (typeof window.t === 'function' ? window.t(x, v) : (v ? String(x).replace(/\{([a-z]\w*)\}/g, (m, n) => (v[n] != null ? String(v[n]) : m)) : x));
   const MIN_B = 280, MAX_B = 960, WEBB_MIN = 360, MAX_APPAR = 24;
   const FORSLAG = [
     { namn: 'Spotify', url: 'https://open.spotify.com/' },
@@ -236,7 +238,7 @@
       }
       const n = inf ? inf.olasta || 0 : 0, fragar = S.fragor.some((q) => q.id === a.id);
       b.title = namnAv(a) + (n ? ' (' + n + ')' : '');
-      b.setAttribute('aria-label', namnAv(a) + (n ? ', ' + n + ' ' + tt('olästa') : '') + (fragar ? ', ' + tt('väntar på svar') : ''));
+      b.setAttribute('aria-label', namnAv(a) + (n ? ', ' + tx('{n} olästa', { n }) : '') + (fragar ? ', ' + tx('väntar på svar') : ''));
       b.setAttribute('aria-pressed', S.oppen === a.id ? 'true' : 'false');
       b.classList.toggle('laddad', !!inf);
       b.classList.toggle('oppen', S.oppen === a.id);
@@ -315,7 +317,7 @@
   function ritaHuvud() {
     const ikon = panel.querySelector('.sp-h-ikon'), namn = panel.querySelector('.sp-h-namn'), adr = panel.querySelector('.sp-h-adr');
     ikon.textContent = '';
-    if (S.lagg && !S.oppen) { namn.textContent = tt('Lägg till app'); adr.textContent = ''; panel.classList.remove('sp-laddar-nu'); return; }
+    if (S.lagg && !S.oppen) { namn.textContent = tx('Lägg till app'); adr.textContent = ''; panel.classList.remove('sp-laddar-nu'); return; }
     const a = appAv(S.oppen); if (!a) return;
     const inf = S.laddade[a.id] || {};
     ikon.appendChild(ikonEl(a));
@@ -340,7 +342,7 @@
     if (!q) return;
     fragaEl.dataset.qid = q.qid;
     fragaEl.querySelector('b').textContent = vard(q.origin) || q.origin;
-    fragaEl.querySelector('small').textContent = tt('Vill använda') + ': ' + (q.kinds || []).map((k) => tt(BEHORIGHET[k] || k)).join(', ');
+    fragaEl.querySelector('small').textContent = tx('Vill använda: {x}', { x: (q.kinds || []).map((k) => tx(BEHORIGHET[k] || k)).join(', ') });
     fragaEl.querySelector('input').checked = false;
   }
   function svara(ja) {
@@ -395,14 +397,14 @@
   /* ── "Lägg till app": i panelen och i inställningarna ── */
   async function laggTill(ny, iPanel, felEl) {
     const l = lista();
-    if (l.length >= MAX_APPAR) { if (felEl) felEl.textContent = tt('Du kan ha högst 24 appar.'); return false; }
+    if (l.length >= MAX_APPAR) { if (felEl) felEl.textContent = tx('Du kan ha högst 24 appar.'); return false; }
     const app = { id: nyttId(), namn: (ny.namn || namnForslag(ny.url)).slice(0, 60), url: ny.url, mobil: !!ny.mobil, ljud: true };
-    const fel = (r) => { if (felEl) felEl.textContent = r && r.error === 'barnlast' ? tt('Det går inte i barnläge.') : tt('Det gick inte att spara.'); return false; };
+    const fel = (r) => { if (felEl) felEl.textContent = r && r.error === 'barnlast' ? tx('Det går inte i barnläge.') : tx('Det gick inte att spara.'); return false; };
     // Listen är av som standard: första appen (eller en app medan listen är dold) slår på den, annars syns inget
     if (!pa()) { const r0 = await A.set('sidopanel.visa', true, 'Visa sidopanelen'); if (!r0 || !r0.ok) return fel(r0); }
-    const r = await A.set('sidopanel.appar', l.concat(app), 'La till ' + app.namn);
+    const r = await A.set('sidopanel.appar', l.concat(app), fyll('La till {x}', { x: app.namn }));
     if (!r || !r.ok) return fel(r);
-    if (iPanel) oppna(app.id); else toast(tt('Appen finns nu i sidopanelen.'));
+    if (iPanel) oppna(app.id); else toast(tx('Appen finns nu i sidopanelen.'));
     return true;
   }
   function byggLagg(rot, iPanel) {
@@ -413,13 +415,13 @@
       + '<label class="sp-falt sp-f-namn"><span>Namn (valfritt)</span><input name="namn" type="text" autocomplete="off" spellcheck="false" maxlength="60"></label>'
       + '<label class="sp-kryss"><input name="mobil" type="checkbox"><span>Mobilvy</span><small>Sajtens mobilversion i en smal panel</small></label>'
       + '<div class="sp-fel" role="alert"></div>'
-      + '<div class="sp-knappar"><button type="submit" class="' + knapp + '">Lägg till</button>' + (iPanel ? '<button type="button" class="sp-avbryt">Avbryt</button>' : '') + '</div>'
+      + '<div class="sp-knappar"><button type="submit" class="' + knapp + '">' + tx('Lägg till') + '</button>' + (iPanel ? '<button type="button" class="sp-avbryt">Avbryt</button>' : '') + '</div>'
       + '</form><div class="sp-forslag-rubrik">Förslag</div><div class="sp-forslag"></div>';
     const form = rot.querySelector('form'), fel = rot.querySelector('.sp-fel');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const url = normUrl(form.elements.url.value);
-      if (!url) { fel.textContent = tt('Skriv en webbadress, till exempel web.whatsapp.com.'); form.elements.url.focus(); return; }
+      if (!url) { fel.textContent = tx('Skriv en webbadress, till exempel web.whatsapp.com.'); form.elements.url.focus(); return; }
       fel.textContent = '';
       if (await laggTill({ url, namn: form.elements.namn.value.trim(), mobil: form.elements.mobil.checked }, iPanel, fel)) form.reset();
     });
@@ -496,14 +498,14 @@
       r.querySelector('[data-g="upp"]').disabled = i === 0;
       r.querySelector('[data-g="ned"]').disabled = i === l.length - 1;
       nm.addEventListener('keydown', (e) => { if (e.key === 'Enter') nm.blur(); });
-      nm.addEventListener('change', () => { const v = nm.value.trim().slice(0, 60); if (v && v !== a.namn) spara(lista().map((x) => (x.id === a.id ? { ...x, namn: v } : x)), 'Bytte namn på ' + namnAv(a)); else nm.value = namnAv(a); });
+      nm.addEventListener('change', () => { const v = nm.value.trim().slice(0, 60); if (v && v !== a.namn) spara(lista().map((x) => (x.id === a.id ? { ...x, namn: v } : x)), fyll('Bytte namn på {x}', { x: namnAv(a) })); else nm.value = namnAv(a); });
       r.querySelectorAll('[data-f]').forEach((c) => c.addEventListener('change', () => {
         const f = c.dataset.f;
-        spara(lista().map((x) => (x.id === a.id ? { ...x, [f]: c.checked } : x)), (f === 'mobil' ? 'Mobilvy ' : 'Ljud ') + (c.checked ? 'på' : 'av'));
+        spara(lista().map((x) => (x.id === a.id ? { ...x, [f]: c.checked } : x)), f === 'mobil' ? (c.checked ? 'Mobilvy på' : 'Mobilvy av') : (c.checked ? 'Ljud på' : 'Ljud av'));
       }));
       r.querySelectorAll('[data-g]').forEach((k) => k.addEventListener('click', () => {
         const nu = lista(); const j = nu.findIndex((x) => x.id === a.id); if (j < 0) return;
-        if (k.dataset.g === 'bort') { nu.splice(j, 1); spara(nu, 'Tog bort ' + namnAv(a)); return; }
+        if (k.dataset.g === 'bort') { nu.splice(j, 1); spara(nu, fyll('Tog bort {x}', { x: namnAv(a) })); return; }
         const t = j + (k.dataset.g === 'upp' ? -1 : 1); if (t < 0 || t >= nu.length) return;
         const [x] = nu.splice(j, 1); nu.splice(t, 0, x); spara(nu, 'Ändrade ordningen i sidopanelen');
       }));
@@ -562,9 +564,9 @@
     else if (vad === 'stang') stang();
     else if (vad === 'lagg-till') visaLagg();
     else if (vad === 'installningar') visaInstallningar();
-    else if (vad === 'dold') toast(tt('Sidopanelen är dold. Du får tillbaka den under Inställningar › Anpassa.'));
-    else if (vad === 'borttagen') toast(tt('Appen togs bort. Ångra under Inställningar › Anpassa.'));
-    else if (vad === 'tillagd') toast(tt('Tillagd i sidopanelen') + ': ' + String(namn || '').slice(0, 60));   // från sidans högerklicksmeny
+    else if (vad === 'dold') toast(tx('Sidopanelen är dold. Du får tillbaka den under Inställningar › Anpassa.'));
+    else if (vad === 'borttagen') toast(tx('Appen togs bort. Ångra under Inställningar › Anpassa.'));
+    else if (vad === 'tillagd') toast(tx('Tillagd i sidopanelen: {namn}', { namn: String(namn || '').slice(0, 60) }));   // från sidans högerklicksmeny
   });
   A.on('sidopanel.', () => {
     allt();

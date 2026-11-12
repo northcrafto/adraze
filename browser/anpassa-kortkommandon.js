@@ -14,6 +14,7 @@
  */
 const path = require('path');
 const { app, ipcMain, Menu, WebContentsView } = require('electron');
+const { fyll } = require('./i18n-fyll');
 
 const MAC = process.platform === 'darwin';
 const WIN = process.platform === 'win32';
@@ -34,7 +35,7 @@ const vy = (ctx) => (api && ctx ? api.activeView(ctx) : null);
 const vyWc = (ctx) => { const v = vy(ctx); return v && !v.webContents.isDestroyed() ? v.webContents : null; };
 const sidUrl = (ctx) => { const w = vyWc(ctx); let u = ''; try { u = w ? w.getURL() : ''; } catch {} return /^https?:/i.test(u) ? u : ''; };
 const skicka = (ctx, ...a) => api.sendTo(ctx, ...a);
-const flikNr = (n) => ({ id: 'flik-' + n, namn: 'Flik ' + n, kat: 'Flikar', std: ['CmdOrCtrl+' + n], ikon: 'flik', lamnar: true, sok: 'gå till flik nummer', kor: (ctx) => skicka(ctx, 'shortcut', 'tab-index', n - 1) });
+const flikNr = (n) => ({ id: 'flik-' + n, namn: fyll('Flik {n}', { n }), get visaNamn() { return api && api.T ? api.T('Flik {n}', { n }) : this.namn; }, kat: 'Flikar', std: ['CmdOrCtrl+' + n], ikon: 'flik', lamnar: true, sok: 'gå till flik nummer', kor: (ctx) => skicka(ctx, 'shortcut', 'tab-index', n - 1) });
 
 const KOMMANDON = [
   // Flikar
@@ -80,7 +81,8 @@ const KOMMANDON = [
   { id: 'zoom-normal', namn: 'Återställ zoom', kat: 'Sidan', std: ['CmdOrCtrl+0'], ikon: 'zoom', sok: 'normal storlek', kor: (ctx) => skicka(ctx, 'menu-zoom', 0) },
   { id: 'kalla', namn: 'Visa sidans källa', kat: 'Sidan', std: [], ikon: 'kod', sok: 'källkod html', kor: (ctx) => { const u = sidUrl(ctx); if (u) skicka(ctx, 'open-tab-raw', 'view-source:' + u); } },
   { id: 'qr-kod', namn: 'Skapa QR-kod för sidan', kat: 'Sidan', std: [], ikon: 'qr', sok: 'telefon dela', kor: (ctx) => { const u = sidUrl(ctx); if (u) api.showQR(ctx, u); } },
-  { id: 'oversatt', namn: 'Översätt till svenska', kat: 'Sidan', std: [], ikon: 'oversatt', sok: 'översätt sidan språk', kor: (ctx) => { const u = sidUrl(ctx); if (u) skicka(ctx, 'open-new-tab', 'https://translate.google.com/translate?sl=auto&tl=sv&u=' + encodeURIComponent(u)); } },
+  // Namn och målspråk följer användarens språk (main.js oversattning()); på svenska "Översätt till svenska" som förut
+  { id: 'oversatt', namn: 'Översätt till svenska', get visaNamn() { return api && api.oversattning ? api.oversattning().namn : this.namn; }, kat: 'Sidan', std: [], ikon: 'oversatt', sok: 'översätt sidan språk', kor: (ctx) => { const u = sidUrl(ctx); const tl = api && api.oversattning ? api.oversattning().tl : 'sv'; if (u) skicka(ctx, 'open-new-tab', 'https://translate.google.com/translate?sl=auto&tl=' + encodeURIComponent(tl) + '&u=' + encodeURIComponent(u)); } },
   // AdRaze
   { id: 'palett', namn: 'Kommandopalett', kat: 'AdRaze', std: ['CmdOrCtrl+K'], ikon: 'palett', lamnar: true, sok: 'kommandon sök allt', var: 'skal' },   // skalet tar själv fokus (efter att ha valt sökrutan)
   { id: 'historik', namn: 'Historik', kat: 'AdRaze', std: ['CmdOrCtrl+H'], ikon: 'historik', lamnar: true, kor: (ctx) => skicka(ctx, 'open-history') },
@@ -383,7 +385,7 @@ function folj(ctx, g, x, y) {
   if (!sparPa || g.langd < SPAR_FRAN) return;
   if (!g.synlig) { g.synlig = true; visaSpar(ctx, g); }
   const id = g.riktn && gestKommando(g.riktn), k = id && kommando(id);
-  sparSkicka(ctx, 'anpassa-gest:punkt', { x, y, pilar: k ? g.riktn.split('').map((r) => ({ L: '←', R: '→', U: '↑', D: '↓' }[r])).join(' ') : '', namn: k ? (api.T ? api.T(k.namn) : k.namn) : '' });
+  sparSkicka(ctx, 'anpassa-gest:punkt', { x, y, pilar: k ? g.riktn.split('').map((r) => ({ L: '←', R: '→', U: '↑', D: '↓' }[r])).join(' ') : '', namn: k ? (k.visaNamn || (api.T ? api.T(k.namn) : k.namn)) : '' });
 }
 function slut(ctx, g) {
   ctx.anpDrag = null;
@@ -477,7 +479,7 @@ async function bild(ctx) {
 function listaForSkal() {
   return {
     mac: MAC, win: WIN, kategorier: KATEGORIER,
-    kommandon: allaKommandon().map((k) => ({ id: k.id, namn: k.namn, kat: k.kat, std: (k.std || []).slice(), var: k.var === 'skal' ? 'skal' : 'main', ikon: k.ikon || '', barn: !!k.barn, sok: k.sok || '', extra: !!k.extra, lamnar: !!k.lamnar })),
+    kommandon: allaKommandon().map((k) => ({ id: k.id, namn: k.visaNamn || k.namn, kat: k.kat, std: (k.std || []).slice(), var: k.var === 'skal' ? 'skal' : 'main', ikon: k.ikon || '', barn: !!k.barn, sok: k.sok || '', extra: !!k.extra, lamnar: !!k.lamnar })),
     gester: GESTER.map((g) => ({ m: g.m, namn: g.namn, std: g.std })),
   };
 }
@@ -490,7 +492,7 @@ function laggTillExtra(lista) {
     const std = (Array.isArray(d.std) ? d.std : []).filter((a) => !ogiltig(a)).slice(0, 2);
     const k = { id, namn: String(d.namn || id).slice(0, 60), kat: KATEGORIER.includes(d.kat) ? d.kat : 'AdRaze', std, var: 'skal', ikon: String(d.ikon || '').slice(0, 20), sok: String(d.sok || '').slice(0, 80), extra: true };
     extraKommandon.set(id, k);
-    anpassa.registrera({ nyckel: 'kortkommandon.' + id, standard: std.slice(), etikett: 'Kortkommando: ' + k.namn });
+    anpassa.registrera({ nyckel: 'kortkommandon.' + id, standard: std.slice(), etikett: fyll('Kortkommando: {x}', { x: k.namn }) });
     nytt = true;
   }
   if (nytt) bygg();
@@ -498,10 +500,10 @@ function laggTillExtra(lista) {
 
 function init(a) {
   api = a; anpassa = a.anpassa;
-  for (const k of KOMMANDON) anpassa.registrera({ nyckel: 'kortkommandon.' + k.id, standard: k.std.slice(), etikett: 'Kortkommando: ' + k.namn });
+  for (const k of KOMMANDON) anpassa.registrera({ nyckel: 'kortkommandon.' + k.id, standard: k.std.slice(), etikett: fyll('Kortkommando: {x}', { x: k.namn }) });
   anpassa.registrera({ nyckel: 'gester.pa', standard: false, etikett: 'Musgester' });
   anpassa.registrera({ nyckel: 'gester.spar', standard: true, etikett: 'Musgester: visa spåret' });
-  for (const g of GESTER) anpassa.registrera({ nyckel: 'gester.' + g.m, standard: g.std, etikett: 'Musgest: ' + g.namn });
+  for (const g of GESTER) anpassa.registrera({ nyckel: 'gester.' + g.m, standard: g.std, etikett: fyll('Musgest: {x}', { x: g.namn }) });
   bygg();
   patchaMenyer();
   anpassa.lyssna((nyckel) => {

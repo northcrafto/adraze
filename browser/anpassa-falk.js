@@ -10,10 +10,11 @@
 //  • allt som kan köra kod, ladda webbsidor eller ändra sökningen (avancerat.*, barnlåsta och icke importerbara nycklar)
 //    ändras först när du godkänt i en ruta, med "Avbryt" förvalt – Falks svar kan bygga på text från en webbsida
 const { ipcMain, dialog } = require('electron');
+const { fyll } = require('./i18n-fyll');
 const anpassa = require('./anpassa');
 const angra = require('./anpassa-angra');
 
-let T = (s) => s;
+let T = (s, v) => require('./i18n-fyll').fyll(s, v);
 
 const fold = (s) => String(s == null ? '' : s).toLowerCase().replace(/[åä]/g, 'a').replace(/ö/g, 'o').replace(/é/g, 'e').trim();
 const HEX = /^#[0-9a-f]{6}$/i;
@@ -135,11 +136,11 @@ function tolka(nyckel, def, text) {
     let v = val.find((x) => fold(String(x)) === f);
     if (v === undefined && Object.prototype.hasOwnProperty.call(syn, f) && val.includes(syn[f])) v = syn[f];
     if (v === undefined && val.every((x) => typeof x === 'number')) { const n = talAv(t); if (val.includes(n)) v = n; }
-    return v !== undefined ? { ok: true, varde: v } : { ok: false, fel: 'Tillåtna värden: ' + visaVal(val) + '.' };
+    return v !== undefined ? { ok: true, varde: v } : { ok: false, fel: fyll('Tillåtna värden: {x}.', { x: visaVal(val) }) };
   }
   if (s === 'tal') {
     const { min, max } = valFor(nyckel, def), n = talAv(t);
-    return Number.isFinite(n) && n >= min && n <= max ? { ok: true, varde: n } : { ok: false, fel: 'Skriv ett tal från ' + min + ' till ' + max + '.' };
+    return Number.isFinite(n) && n >= min && n <= max ? { ok: true, varde: n } : { ok: false, fel: fyll('Skriv ett tal från {min} till {max}.', { min, max }) };
   }
   if (s === 'text') return t.length <= 500 ? { ok: true, varde: t } : { ok: false, fel: 'Texten är för lång.' };
   if (s === 'pa-av') {
@@ -154,7 +155,7 @@ function tolka(nyckel, def, text) {
   if (s === 'css') {
     const c = cssTolka(t); if (!c.ok) return c;
     const lista = cssRegler(), fore = lista.find((r) => r.mal === c.mal);
-    if (!c.css && !fore) return { ok: false, fel: 'Det finns ingen egen CSS för ' + sajtNamn(c.mal) + '.' };
+    if (!c.css && !fore) return { ok: false, fel: fyll('Det finns ingen egen CSS för {x}.', { x: sajtNamn(c.mal) }) };
     if (fore && c.css && fore.css === c.css && fore.pa !== false) return { ok: true, varde: lista, css: c };   // redan så
     const varde = !c.css ? lista.filter((r) => r !== fore)
       : fore ? lista.map((r) => (r === fore ? { ...r, css: c.css, pa: true } : r))
@@ -180,6 +181,7 @@ function visaNu(nyckel, def) {
   }
   return visaVarde(v);
 }
+// i18n-hoppa-start (Falks instruktioner: värdeformat och listan över inställningar går till AI-modellen, inte UI)
 function valText(nyckel, def) {
   const s = slag(nyckel, def);
   if (s === 'val') return valFor(nyckel, def).map(String).join(' | ');
@@ -209,6 +211,7 @@ function lista() {
   }
   return ut.sort((a, b) => a.nyckel.localeCompare(b.nyckel));
 }
+// i18n-hoppa-slut
 
 async function fraga(ctx, text, detalj) {
   const win = ctx && ctx.win && !ctx.win.isDestroyed() ? ctx.win : null;
@@ -234,7 +237,7 @@ async function gor(ctx, a, opt = {}) {
     if (!n) return { ok: false, fel: 'Det finns inget att ångra.' };
     const senaste = anpassa.historik().filter((x) => x && !anpassa.last(x.nyckel)).slice(-n);
     const riskabla = senaste.filter((x) => { const h = hittaDef(x.nyckel, reg); return h && risk(h.nyckel, h.def); });
-    if (riskabla.length && !(await bekrafta(T('Falk vill ångra en ändring av') + ' "' + angra.etikettFor(riskabla[0].nyckel, riskabla[0].etikett) + '".', VARNING()))) return { ok: false, fel: 'Du stoppade ändringen.', stoppad: true };
+    if (riskabla.length && !(await bekrafta(T('Falk vill ångra en ändring av "{x}".', { x: T(angra.etikettFor(riskabla[0].nyckel, riskabla[0].etikett)) }), VARNING()))) return { ok: false, fel: 'Du stoppade ändringen.', stoppad: true };
     const r = angra.angraGrupp();
     if (!r.ok) return { ok: false, fel: 'Det finns inget att ångra.' };
     meddela({ angrat: true, etiketter: r.etiketter });
@@ -246,7 +249,7 @@ async function gor(ctx, a, opt = {}) {
     const allt = !o || /^(allt|alla|allting|hela|everything|all)$/.test(o);
     if (!allt) {
       o = OMRADEN[o] || o;
-      if (!Object.keys(reg).some((k) => fold(k).startsWith(o + '.'))) return { ok: false, fel: 'Det finns inget område som heter ' + text.slice(0, 40) + '.' };
+      if (!Object.keys(reg).some((k) => fold(k).startsWith(o + '.'))) return { ok: false, fel: fyll('Det finns inget område som heter {x}.', { x: text.slice(0, 40) }) };
       o = Object.keys(reg).find((k) => fold(k).startsWith(o + '.')).split('.')[0];   // stavningen i registret
     }
     const vad = allt ? 'allt' : o;
@@ -254,7 +257,7 @@ async function gor(ctx, a, opt = {}) {
     const berors = Object.keys(anpassa.alla() || {}).filter((k) => (allt || k.startsWith(o + '.')) && !anpassa.last(k));
     if (!berors.length) return { ok: true, vad, antal: 0, redan: true };
     const farlig = berors.some((k) => { const h = hittaDef(k, reg); return risk(k, h && h.def); });
-    const fragan = allt ? T('Falk vill återställa alla dina anpassningar till standard.') : T('Falk vill återställa') + ' "' + o + '" ' + T('till standard.');
+    const fragan = allt ? T('Falk vill återställa alla dina anpassningar till standard.') : T('Falk vill återställa "{x}" till standard.', { x: o });
     if ((allt || farlig) && !(await bekrafta(fragan, T('Det går att ångra efteråt.') + '\n\n' + VARNING()))) return { ok: false, fel: 'Du stoppade ändringen.', stoppad: true };
     const r = anpassa.aterstall(allt ? undefined : o + '.');
     if (r.antal) meddela({ aterstallt: true, etiketter: [allt ? 'Allt' : vad.charAt(0).toUpperCase() + vad.slice(1)] });
@@ -265,7 +268,7 @@ async function gor(ctx, a, opt = {}) {
   let i = text.indexOf('|'); if (i < 0) i = text.indexOf('=');
   if (i < 1) return { ok: false, fel: 'Skriv både inställning och värde.' };
   const hit = hittaDef(text.slice(0, i), reg);
-  if (!hit) return { ok: false, fel: 'Den inställningen finns inte: ' + text.slice(0, i).trim().slice(0, 60) };
+  if (!hit) return { ok: false, fel: fyll('Den inställningen finns inte: {x}', { x: text.slice(0, i).trim().slice(0, 60) }) };
   const { nyckel, def } = hit;
   const etikett = String((def && def.etikett) || nyckel);
   if (anpassa.last(nyckel)) return { ok: false, fel: 'Går inte att ändra i barnläge.', last: true, etikett };
@@ -277,11 +280,11 @@ async function gor(ctx, a, opt = {}) {
   const vad = etikett + ': ' + (t.css ? sajtNamn(t.css.mal) + (t.css.css ? '' : ' (borttagen)') : visaVarde(blir));
   if (JSON.stringify(nu) === JSON.stringify(blir)) return { ok: true, nyckel, etikett, varde: blir, redan: true, vad };
   if (risk(nyckel, def)) {
-    let fragan = T('Falk vill ändra') + ' "' + etikett + '".', detalj;
-    if (t.css && t.css.css) detalj = T('Sajt') + ': ' + sajtNamn(t.css.mal) + '\nCSS: ' + t.css.css.slice(0, 600) + (t.css.css.length > 600 ? '…' : '');
-    else if (t.css) { fragan = T('Falk vill ta bort din egna CSS för') + ' ' + sajtNamn(t.css.mal) + '.'; detalj = ''; }
-    else if (t.varde === undefined) detalj = T('Nytt värde') + ': ' + T('standard');
-    else detalj = T('Nytt värde') + ': ' + (typeof t.varde === 'string' ? t.varde.slice(0, 400) : visaVarde(t.varde));
+    let fragan = T('Falk vill ändra "{x}".', { x: T(etikett) }), detalj;
+    if (t.css && t.css.css) detalj = T('Sajt: {x}', { x: T(sajtNamn(t.css.mal)) }) + '\nCSS: ' + t.css.css.slice(0, 600) + (t.css.css.length > 600 ? '…' : '');
+    else if (t.css) { fragan = T('Falk vill ta bort din egna CSS för {x}.', { x: T(sajtNamn(t.css.mal)) }); detalj = ''; }
+    else if (t.varde === undefined) detalj = T('Nytt värde: {x}', { x: T('standard') });
+    else detalj = T('Nytt värde: {x}', { x: typeof t.varde === 'string' ? t.varde.slice(0, 400) : T(visaVarde(t.varde)) });
     const ja = await bekrafta(fragan, (detalj ? detalj + '\n\n' : '') + VARNING());
     if (!ja) return { ok: false, fel: 'Du stoppade ändringen.', stoppad: true, etikett };
   }

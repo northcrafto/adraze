@@ -8,7 +8,7 @@
   if (!A || !B) return;
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const tt = (s) => (typeof window.t === 'function' ? window.t(s) : s);
+  const tx = (x, v) => (typeof window.t === 'function' ? window.t(x, v) : (v ? String(x).replace(/\{([a-z]\w*)\}/g, (m, n) => (v[n] != null ? String(v[n]) : m)) : x));
   const aktiv = () => { try { return typeof active !== 'undefined' ? active : null; } catch { return null; } };
   const toast = (m) => { try { if (typeof showToast === 'function') showToast(m); } catch {} };
 
@@ -25,7 +25,7 @@
     const synka = () => {
       const pa = !sk.classList.contains('shield-home');
       sk.tabIndex = pa ? 0 : -1;
-      if (pa) { sk.setAttribute('role', 'button'); sk.title = tt('Inställningar för sajten'); sk.setAttribute('aria-label', tt('Inställningar för sajten')); }
+      if (pa) { sk.setAttribute('role', 'button'); sk.title = tx('Inställningar för sajten'); sk.setAttribute('aria-label', tx('Inställningar för sajten')); }
       else { sk.removeAttribute('role'); sk.removeAttribute('title'); sk.removeAttribute('aria-label'); }
     };
     synka();
@@ -64,7 +64,7 @@
   // Vad sajten har ändrat, i läsbar form. last = barnlåst del.
   function delar(p) {
     const ut = []; const z = Number(p.u.zoom);
-    if (z >= 0.25 && z <= 5) ut.push({ t: 'Zoom ' + Math.round(z * 100) + ' %' });
+    if (z >= 0.25 && z <= 5) ut.push({ t: 'Zoom {n} %', v: { n: Math.round(z * 100) } });
     if (p.u.mork === true) ut.push({ t: 'Mörkt läge' });
     if (p.u.ljud === false) ut.push({ t: 'Ljud av' });
     if (p.s.reklam === false) ut.push({ t: 'Reklamblockering av', last: true });
@@ -75,13 +75,13 @@
   }
   let filter = '';
   async function taBort(dom) {
-    const etikett = tt('Ta bort') + ' ' + dom;
+    const etikett = tx('Ta bort {x}', { x: dom });
     await A.set('sajt.' + dom, undefined, etikett);
     const sk2 = A.get('sajt.skydd');
     if (arObj(sk2) && sk2[dom]) {
       const ny = { ...sk2 }; delete ny[dom];
       const r = await A.set('sajt.skydd', Object.keys(ny).length ? ny : undefined, etikett);
-      if (r && r.error === 'barnlast') toast(tt('Reklam, JavaScript och popup-fönster är låsta i barnläge.'));
+      if (r && r.error === 'barnlast') toast(tx('Reklam, JavaScript och popup-fönster är låsta i barnläge.'));
     }
   }
   // Raderna ritas om vid varje sökning (dolda rader skulle bryta grupperingen av .set-row)
@@ -94,9 +94,9 @@
       const rad = document.createElement('div'); rad.className = 'set-row anps-rad'; rad.dataset.dom = p.dom;
       const baraLast = barn && p.delar.every((x) => x.last);
       rad.innerHTML = '<span class="anps-ikon" aria-hidden="true">' + esc(p.dom.charAt(0)) + '</span>'
-        + '<div class="set-txt"><div class="set-title">' + esc(p.dom) + '</div><div class="set-desc">'
-        + p.delar.map((x) => '<span class="anps-del' + (x.last && barn ? ' last' : '') + '"' + (x.last && barn ? ' title="' + esc(tt('Gäller inte i barnläge')) + '"' : '') + '>' + esc(tt(x.t)) + '</span>').join('') + '</div></div>'
-        + '<button type="button" class="anps-bort"' + (baraLast ? ' disabled title="' + esc(tt('Låst i barnläge')) + '"' : '') + ' aria-label="' + esc(tt('Ta bort') + ' ' + p.dom) + '">' + esc(tt('Ta bort')) + '</button>';
+        + '<div class="set-txt"><div class="set-title" translate="no">' + esc(p.dom) + '</div><div class="set-desc">'
+        + p.delar.map((x) => '<span class="anps-del' + (x.last && barn ? ' last' : '') + '"' + (x.last && barn ? ' title="' + esc(tx('Gäller inte i barnläge')) + '"' : '') + '>' + esc(tx(x.t, x.v)) + '</span>').join('') + '</div></div>'
+        + '<button type="button" class="anps-bort"' + (baraLast ? ' disabled title="' + esc(tx('Låst i barnläge')) + '"' : '') + ' aria-label="' + esc(tx('Ta bort {x}', { x: p.dom })) + '">' + esc(tx('Ta bort')) + '</button>';
       rad.querySelector('.anps-bort').addEventListener('click', () => taBort(p.dom));
       box.appendChild(rad);
     }
@@ -107,13 +107,13 @@
     const barn = A.barnlage();
     const lista = poster();
     const hadeFokus = document.activeElement && document.activeElement.id === 'anps-sok';
-    host.innerHTML = '<h3 class="set-h3">' + esc(tt('Inställningar per sajt')) + '</h3>'
-      + '<p class="set-lead">' + esc(tt('Zoom, mörkt läge, ljud, JavaScript, reklam och popup-fönster för en viss sajt. Ändra dem med skölden till vänster i adressfältet.')) + '</p>'
-      + (barn ? '<p class="anp-not">' + esc(tt('Barnläge: reklam, JavaScript och popup-fönster per sajt är låsta och gäller inte just nu.')) + '</p>' : '')
+    host.innerHTML = '<h3 class="set-h3">' + esc(tx('Inställningar per sajt')) + '</h3>'
+      + '<p class="set-lead">' + esc(tx('Zoom, mörkt läge, ljud, JavaScript, reklam och popup-fönster för en viss sajt. Ändra dem med skölden till vänster i adressfältet.')) + '</p>'
+      + (barn ? '<p class="anp-not">' + esc(tx('Barnläge: reklam, JavaScript och popup-fönster per sajt är låsta och gäller inte just nu.')) + '</p>' : '')
       + (lista.length ? '<label class="anps-sok"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>'
-        + '<input id="anps-sok" type="search" spellcheck="false" autocomplete="off" placeholder="' + esc(tt('Sök sajt')) + '" aria-label="' + esc(tt('Sök sajt')) + '"></label>' : '')
+        + '<input id="anps-sok" type="search" spellcheck="false" autocomplete="off" placeholder="' + esc(tx('Sök sajt')) + '" aria-label="' + esc(tx('Sök sajt')) + '"></label>' : '')
       + '<div class="anps-lista"></div>'
-      + (lista.length ? '<p class="anps-tom anps-ingen" hidden>' + esc(tt('Ingen sajt matchar.')) + '</p>' : '<p class="anps-tom">' + esc(tt('Inga sajter har egna inställningar än.')) + '</p>');
+      + (lista.length ? '<p class="anps-tom anps-ingen" hidden>' + esc(tx('Ingen sajt matchar.')) + '</p>' : '<p class="anps-tom">' + esc(tx('Inga sajter har egna inställningar än.')) + '</p>');
     const s = $('anps-sok');
     if (s) { s.value = filter; s.addEventListener('input', () => { filter = s.value; ritaRader(lista, barn); }); if (hadeFokus) s.focus(); }
     ritaRader(lista, barn);

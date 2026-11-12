@@ -42,7 +42,10 @@
   const lsLas = (k) => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
   const lsSkriv = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
   const rorelse = () => !(document.body.classList.contains('reduce-motion') || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches));
-  const fmt = (n) => (Number(n) || 0).toLocaleString('sv-SE');
+  const fyll = (x, v) => String(x).replace(/\{([a-z]\w*)\}/g, (m, n) => (v && v[n] != null ? String(v[n]) : m));
+  const tx = (x, v) => (typeof window.t === 'function' ? window.t(x, v) : fyll(x, v));
+  const sprak = () => (window.i18n && window.i18n.lang) || 'sv';   // för datum, tid och tal (dagNu nedan är en nyckel och står kvar på sv-SE)
+  const fmt = (n) => (Number(n) || 0).toLocaleString(sprak());
   const versal = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
   const dagNu = () => new Date().toLocaleDateString('sv-SE');   // "2026-11-07", lokal tid
 
@@ -192,9 +195,9 @@
     function rita() {
       const nu = new Date(), m = nu.getMinutes();
       box.classList.toggle('analog', klockStil() === 'analog'); val.satt(klockStil());
-      tid.textContent = nu.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
-      datum.textContent = versal(nu.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long' }));
-      vecka.textContent = 'Vecka ' + veckonummer(nu);
+      tid.textContent = nu.toLocaleTimeString(sprak(), { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+      datum.textContent = versal(nu.toLocaleDateString(sprak(), { weekday: 'long', day: 'numeric', month: 'long' }));
+      vecka.textContent = tx('Vecka {n}', { n: veckonummer(nu) });
       min.setAttribute('transform', 'rotate(' + m * 6 + ' 50 50)');
       tim.setAttribute('transform', 'rotate(' + ((nu.getHours() % 12) * 30 + m * 0.5) + ' 50 50)');
     }
@@ -222,7 +225,7 @@
       if (!o || sokar) { ritaSok(o); return; }
       const c = vaderCache(o);
       if (c) { ritaData(o, c.data); return; }
-      kropp.append(h('div', { class: 'anp-w-rubrik', text: o.namn }));
+      kropp.append(h('div', { class: 'anp-w-rubrik', translate: 'no', text: o.namn }));
       if (fel) {
         kropp.append(h('div', { class: 'anp-tomt', text: 'Kunde inte hämta vädret just nu.' }),
           h('div', { class: 'anp-rad-knappar' }, h('button', { type: 'button', class: 'anp-lank', text: 'Försök igen', onclick: () => { fel = false; rita(); hamta(true); } }),
@@ -236,12 +239,12 @@
           h('span', { class: 'anp-vader-ikon' }, ikon(VIK[ik])),
           h('div', { class: 'anp-vader-temp', text: grader(d.temp) }),
           h('div', { class: 'anp-vader-info' },
-            h('button', { type: 'button', class: 'anp-vader-ort', title: 'Byt ort', onclick: () => { sokar = true; rita(); } }, h('span', { text: o.namn })),
+            h('button', { type: 'button', class: 'anp-vader-ort', title: 'Byt ort', onclick: () => { sokar = true; rita(); } }, h('span', { translate: 'no', text: o.namn })),
             h('div', { class: 'anp-vader-txt', text: txt }))),
-        h('div', { class: 'anp-vader-extra', text: 'Känns som ' + grader(d.kanns) + (typeof d.vind === 'number' ? ' · Vind ' + Math.round(d.vind) + ' m/s' : '') }));
+        h('div', { class: 'anp-vader-extra', text: tx('Känns som {t}', { t: grader(d.kanns) }) + (typeof d.vind === 'number' ? ' · ' + tx('Vind {v} m/s', { v: Math.round(d.vind) }) : '') }));
       const dagar = h('div', { class: 'anp-vader-dagar' });
       for (const x of d.dagar.slice(1, inst.s === 'bred' ? 6 : 4)) {
-        const dag = new Date(x.datum + 'T12:00:00').toLocaleDateString('sv-SE', { weekday: 'short' }).replace('.', '');
+        const dag = new Date(x.datum + 'T12:00:00').toLocaleDateString(sprak(), { weekday: 'short' }).replace('.', '');
         dagar.append(h('div', { class: 'anp-vader-dag', title: vaderInfo(x.kod, true)[0] },
           h('span', { class: 'd', text: versal(dag) }), ikon(VIK[vaderInfo(x.kod, true)[1]]),
           h('span', { class: 't' }, h('b', { text: grader(x.max) }), ' ', h('span', { text: grader(x.min) }))));
@@ -282,7 +285,7 @@
       if (!r.length) { lista.append(h('div', { class: 'anp-vader-hjalp', text: 'Hittade ingen ort med det namnet.' })); return; }
       for (const x of r) {
         lista.append(h('button', { type: 'button', class: 'anp-vader-traff', role: 'option', onclick: () => valjOrt(x) },
-          h('b', { text: x.namn }), h('span', { text: [x.region, x.land].filter(Boolean).join(', ') })));
+          h('b', { translate: 'no', text: x.namn }), h('span', { translate: 'no', text: [x.region, x.land].filter(Boolean).join(', ') })));
       }
     }
     function valjOrt(x) {
@@ -344,7 +347,7 @@
         const egen = typeof e.favicon === 'string' && /^https:\/\//i.test(e.favicon) ? e.favicon : '';
         const fav = egen || ddg ? h('img', { class: 'anp-fav', alt: '', src: egen || ddg, 'data-fb': egen && ddg ? ddg : '', 'data-glob': 'sm' }) : ikon('<use href="#i-fav"/>', 'anp-fav');
         lista.append(h('button', { type: 'button', class: 'anp-stangd', title: c.url, onclick: () => oppnaStangd(c) },
-          fav, h('span', { class: 'anp-stangd-titel', text: titel }), inst.s === 'bred' && vard ? h('span', { class: 'anp-stangd-vard', text: vard }) : null));
+          fav, h('span', { class: 'anp-stangd-titel', translate: 'no', text: titel }), inst.s === 'bred' && vard ? h('span', { class: 'anp-stangd-vard', text: vard }) : null));
       }
     }
     // flikar(): flikraden ändrades (en flik stängdes eller öppnades igen) → rita om bara om listan ändrats
@@ -387,9 +390,9 @@
     return { idag: totalt - d.bas, totalt };
   }
   function tidText(sek) {
-    if (sek >= 3600) return (sek / 3600).toLocaleString('sv-SE', { maximumFractionDigits: 1 }) + ' tim';
-    if (sek >= 60) return fmt(Math.round(sek / 60)) + ' min';
-    return fmt(Math.round(sek)) + ' s';
+    if (sek >= 3600) return tx('{n} tim', { n: (sek / 3600).toLocaleString(sprak(), { maximumFractionDigits: 1 }) });
+    if (sek >= 60) return tx('{n} min', { n: fmt(Math.round(sek / 60)) });
+    return tx('{n} s', { n: fmt(Math.round(sek)) });
   }
   function byggBlockerat(kropp) {
     const idag = h('div', { class: 'anp-blk-n anp-blk-idag' }), totalt = h('div', { class: 'anp-blk-n' }), extra = h('div', { class: 'anp-blk-extra' });
@@ -401,7 +404,8 @@
       const s = blockSiffror();
       idag.textContent = fmt(s.idag); totalt.textContent = fmt(s.totalt);
       const mb = (s.totalt * 30) / 1024;   // samma uppskattning som statistiken längst ned: ~30 kB och ~50 ms per stopp
-      extra.textContent = ' · ≈ ' + (mb >= 1024 ? (mb / 1024).toLocaleString('sv-SE', { maximumFractionDigits: 1 }) + ' GB' : fmt(Math.round(mb)) + ' MB') + ' mindre data, ' + tidText(s.totalt * 0.05) + ' sparad tid';
+      const data = mb >= 1024 ? (mb / 1024).toLocaleString(sprak(), { maximumFractionDigits: 1 }) + ' GB' : fmt(Math.round(mb)) + ' MB';
+      extra.textContent = ' · ' + tx('≈ {data} mindre data, {tid} sparad tid', { data, tid: tidText(s.totalt * 0.05) });
     }
     rita();
     return { visas: rita, traff: rita };
@@ -416,7 +420,7 @@
     kropp.append(
       h('div', { class: 'anp-falk-topp' }, h('img', { src: 'krypto-owl.png', alt: '', class: 'anp-falk-bild' }),
         h('div', null, h('b', { text: 'Fråga Falk' }), h('span', { text: 'AdRazes AI-assistent' }))),
-      form, h('div', { class: 'anp-falk-forslag' }, FALK_FORSLAG.map((f) => h('button', { type: 'button', text: f, onclick: () => fraga(f) }))), notis);
+      form, h('div', { class: 'anp-falk-forslag' }, FALK_FORSLAG.map((f) => h('button', { type: 'button', text: tx(f), onclick: () => fraga(tx(f)) }))), notis);   // frågan går till Falk på ditt språk
     function fraga(q) {
       q = String(q || '').trim().slice(0, 500);
       if (!q) { inp.focus(); return; }
@@ -458,7 +462,7 @@
   if (sokRuta) sokRuta.classList.add('anp-st-sok');
   const logga = h('div', { id: 'anp-st-logga', 'aria-hidden': 'true' }, h('img', { src: 'adraze-mark.png', alt: '' }), h('span', { text: 'AdRaze' }));
   inre.insertBefore(logga, sokRuta || null);
-  const grid = h('div', { id: 'anp-st-grid', role: 'list', 'aria-label': 'Widgetar' });
+  const grid = h('div', { id: 'anp-st-grid', role: 'list', 'aria-label': 'Widgetar', 'data-tom': 'Inga widgetar än. Lägg till från listan.' });   // data-tom: texten när rutnätet är tomt (CSS ::before, översätts av i18n.js)
   const genvagarna = document.getElementById('shortcuts');
   inre.insertBefore(grid, genvagarna || null);
   inre.append(forvar);
@@ -482,7 +486,7 @@
     el.append(kropp,
       h('div', { class: 'anp-w-flik', 'aria-hidden': 'true' }, ikon(IK.grepp), h('span', { text: T.namn })),
       h('div', { class: 'anp-w-knappar' }, storlekKnapp,
-        h('button', { type: 'button', class: 'anp-w-bort', title: 'Ta bort', 'aria-label': 'Ta bort ' + T.namn, onclick: (e) => { e.stopPropagation(); taBort(w); } }, ikon(IK.kryss))));
+        h('button', { type: 'button', class: 'anp-w-bort', title: 'Ta bort', 'aria-label': tx('Ta bort {x}', { x: tx(T.namn) }), onclick: (e) => { e.stopPropagation(); taBort(w); } }, ikon(IK.kryss))));
     const i = { w, el, kropp, storlekKnapp, s: null, api: {} };
     try { i.api = T.bygg(kropp, i) || {}; } catch (e) { console.warn('[startsida]', w, e); }
     el.addEventListener('pointerdown', (e) => pekareNer(e, i));
@@ -507,7 +511,7 @@
       const tillBred = x.s !== 'bred';
       i.storlekKnapp.replaceChildren(ikon(tillBred ? IK.bred : IK.liten));
       i.storlekKnapp.title = tillBred ? 'Gör bred' : 'Gör liten';
-      i.storlekKnapp.setAttribute('aria-label', (tillBred ? 'Gör bred: ' : 'Gör liten: ') + TYPER[x.w].namn);
+      i.storlekKnapp.setAttribute('aria-label', tillBred ? tx('Gör bred: {x}', { x: tx(TYPER[x.w].namn) }) : tx('Gör liten: {x}', { x: tx(TYPER[x.w].namn) }));
       i.el.tabIndex = redigerar ? 0 : -1;
       if (ny && synlig) { try { i.api.visas && i.api.visas(); } catch {} }
       else if (bytt && !ny) { try { i.api.storlek && i.api.storlek(); } catch {} }
@@ -615,11 +619,12 @@
     if (e.target && e.target.closest && e.target.closest('input, textarea')) return;
     e.preventDefault(); avslutaRedigering();
   });
-  function namnLiten(w) { return TYPER[w].namn.toLowerCase(); }
+  // Widgetens namn mitt i en etikett ("La till klocka"): översatt, med liten bokstav – inte på tyska, där substantiv har stor
+  function namnLiten(w) { const n = tx(TYPER[w].namn); return /^(de|lb)$/.test(sprak()) ? n : n.toLowerCase(); }
   function laggTill(w) {
     const l = layout(); if (!TYPER[w] || l.some((x) => x.w === w)) return;
     if (bool('tom')) A.set('startsida.tom', false, 'Tom startsida');   // annars syns inte det man lägger till
-    sattLayout([...l, { w, s: TYPER[w].s }], 'La till ' + namnLiten(w));
+    sattLayout([...l, { w, s: TYPER[w].s }], tx('La till {x}', { x: namnLiten(w) }));
     const i = inst.get(w);
     if (i) {
       i.el.classList.remove('anp-ny'); void i.el.offsetWidth; i.el.classList.add('anp-ny');
@@ -629,16 +634,16 @@
   }
   function taBort(w) {
     const l = layout(); if (!l.some((x) => x.w === w)) return;
-    sattLayout(l.filter((x) => x.w !== w), 'Tog bort ' + namnLiten(w));
+    sattLayout(l.filter((x) => x.w !== w), tx('Tog bort {x}', { x: namnLiten(w) }));
   }
   function vaxlaStorlek(w) {
-    sattLayout(layout().map((x) => (x.w === w ? { w, s: x.s === 'bred' ? 'liten' : 'bred' } : x)), 'Ändrade storlek på ' + namnLiten(w));
+    sattLayout(layout().map((x) => (x.w === w ? { w, s: x.s === 'bred' ? 'liten' : 'bred' } : x)), tx('Ändrade storlek på {x}', { x: namnLiten(w) }));
   }
   function flytta(w, steg) {
     const l = layout(), k = l.findIndex((x) => x.w === w), ny = k + steg;
     if (k < 0 || ny < 0 || ny >= l.length) return false;
     const [x] = l.splice(k, 1); l.splice(ny, 0, x);
-    sattLayout(l, 'Flyttade ' + namnLiten(w));
+    sattLayout(l, tx('Flyttade {x}', { x: namnLiten(w) }));
     return true;
   }
   function tangent(e, i) {
@@ -687,7 +692,7 @@
       rad.classList.toggle('pa', har);
       knapp.className = har ? 'anp-lada-bort' : 'anp-lada-till';
       knapp.replaceChildren(har ? 'Ta bort' : 'Lägg till');
-      knapp.setAttribute('aria-label', (har ? 'Ta bort ' : 'Lägg till ') + TYPER[w].namn);
+      knapp.setAttribute('aria-label', har ? tx('Ta bort {x}', { x: tx(TYPER[w].namn) }) : tx('Lägg till {x}', { x: tx(TYPER[w].namn) }));
     }
     ladaNotis.hidden = !bool('tom');
     kollaAngra();
@@ -698,7 +703,7 @@
     let senaste = null; try { const hl = await A.historik(); senaste = Array.isArray(hl) ? hl[0] : null; } catch {}
     if (b !== ladaAngra) return;
     const ok = !!(senaste && typeof senaste.nyckel === 'string' && senaste.nyckel.startsWith('startsida.'));
-    b.disabled = !ok; b.title = ok ? 'Ångra: ' + String(senaste.etikett || '') : 'Inget att ångra';
+    b.disabled = !ok; b.title = ok ? tx('Ångra: {x}', { x: tx(String(senaste.etikett || '')) }) : 'Inget att ångra';
   }
   function oppnaInstallningar() {
     avslutaRedigering();
@@ -801,7 +806,7 @@
     }
     const storlek = new Map(layout().map((x) => [x.w, x.s]));
     const ny = [...grid.children].map((c) => c.dataset && c.dataset.w).filter((w) => TYPER[w]).map((w) => ({ w, s: storlek.get(w) || TYPER[w].s }));
-    if (JSON.stringify(ny) !== JSON.stringify(layout())) sattLayout(ny, 'Flyttade ' + namnLiten(d.i.w));
+    if (JSON.stringify(ny) !== JSON.stringify(layout())) sattLayout(ny, tx('Flyttade {x}', { x: namnLiten(d.i.w) }));
     else if (efter) ritaGrid();
   }
 

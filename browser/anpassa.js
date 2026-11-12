@@ -8,6 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 const { app, ipcMain, BrowserWindow } = require('electron');
+const { fyll } = require('./i18n-fyll');
 
 const FIL = () => path.join(app.getPath('userData'), 'adraze-anpassa.json');
 const HISTORIK_MAX = 200;
@@ -90,7 +91,7 @@ function angra() {
 function aterstall(prefix) {
   const d = las(); const p = prefix ? String(prefix) : '';
   const nycklar = Object.keys(d.varden).filter((k) => (!p || k === p || k.startsWith(p)) && !last(k));
-  for (const k of nycklar) satt(k, undefined, { etikett: 'Återställ ' + (p || 'allt') });
+  for (const k of nycklar) satt(k, undefined, { etikett: fyll('Återställ {x}', { x: p || 'allt' }) });
   return { ok: true, antal: nycklar.length };
 }
 // Dela: en kod med alla värden under ett prefix (t.ex. ett tema). Inget som rör konton eller säkerhet ska ligga här.
