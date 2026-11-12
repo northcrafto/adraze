@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>AdRaze: hungry</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "News"; src: url("assets/fonts/Newsreader.ttf") format("truetype"); font-weight: 200 800; }
+      @font-face { font-family: "NewsI"; src: url("assets/fonts/Newsreader-Italic.ttf") format("truetype"); font-weight: 200 800; }
+      @font-face { font-family: "InterB"; src: url("assets/fonts/Inter-Bold.otf") format("opentype"); font-weight: 700; }
+      @font-face { font-family: "InterM"; src: url("assets/fonts/Inter-Medium.otf") format("opentype"); font-weight: 500; }
+      @font-face { font-family: "InterK"; src: url("assets/fonts/InterDisplay-Black.otf") format("opentype"); font-weight: 900; }
+      :root {
+        --paper: #ede5d6; --paper2: #e3d9c6; --sheet: #fbf7ef; --ink: #1b1916; --night: #151412; --light: #f4efe6;
+        --or: #ff4b1f; --blue: #5d7fa3; --olive: #5f6b45; --net: #e8dfcc; --dov: #5a5146;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--paper); }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--paper); color: var(--ink); font-family: "News", serif; }
+      .scene { position: absolute; inset: 0; overflow: hidden; }
+      .fill { position: absolute; inset: 0; }
+      svg.full { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: visible; }
+      .grain { position: absolute; inset: 0; opacity: .42; mix-blend-mode: multiply; pointer-events: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='4'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .38  0 0 0 0 .3  0 0 0 .55 0'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>"); }
+      /* berättarraden: en papperslapp uppe till vänster */
+      .note { position: absolute; left: 96px; top: 68px; height: 160px; transform-origin: 50% 50%; }
+      .note svg { position: absolute; left: 0; top: 0; overflow: visible; }
+      .note .cap { position: absolute; left: 44px; top: 26px; white-space: nowrap; font-family: "News", serif; font-weight: 500; font-size: 104px; line-height: 1.04; letter-spacing: -0.02em; color: var(--ink); }
+      .note .cap em { font-family: "NewsI", serif; font-style: normal; font-weight: 500; }
+      .note .cap .w { display: inline-block; }
+      /* slutkortet */
+      #ec-word { position: absolute; left: 777px; top: 303.7px; width: 850px; height: 240px; font-family: "InterK", sans-serif; font-weight: 900; font-size: 240px; line-height: 1; letter-spacing: -0.035em; color: var(--ink); white-space: nowrap; }
+      #ec-word span { position: absolute; top: 0; display: block; }
+      #ec-url { position: absolute; left: 781px; top: 568px; width: 440px; height: 124px; border-radius: 62px; background: var(--or); display: flex; align-items: center; justify-content: center; font-family: "InterB", sans-serif; font-weight: 700; font-size: 66px; color: #fff; }
+      #ec-small { position: absolute; left: 0; width: 1920px; top: 801.5px; text-align: center; font-family: "InterM", sans-serif; font-weight: 500; font-size: 40px; line-height: 1; letter-spacing: .14em; padding-left: .14em; text-transform: uppercase; color: var(--dov); white-space: nowrap; }
+      #warm { position: absolute; left: 0; top: 0; opacity: 0; pointer-events: none; font-size: 20px; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-width="1920" data-height="1080" data-duration="32">
+
+      <!-- HEMMA 0–9,13 och 20,57–32: sidan, skräpet, uppvaknandet, den rena sidan, slutkortet och överlämningen.
+           Ligger kvar under rätterna (som täcker den) så att samma teckning är med i början och i slutet. -->
+      <section id="home" class="clip scene" data-start="0" data-duration="32" data-track-index="1" style="background: var(--paper); z-index: 1">
+        <div id="home-in" class="fill">
+          <svg class="full" viewBox="0 0 1920 1080">
+            <defs><clipPath id="h-clip-pl"><rect x="364" y="264" width="852" height="476" rx="12" /></clipPath></defs>
+            <g id="h-cam">
+              <g id="h-page"></g>
+              <g id="h-vid"></g>
+              <g id="h-pre"></g>
+              <g id="h-peek"></g>
+              <g id="h-junk"></g>
+              <g id="h-ptr"></g>
+            </g>
+            <g id="h-kik"></g>
+            <g id="h-walk"></g>
+            <g id="h-gor"></g>
+          </svg>
+          <div id="ec" class="fill" data-layout-allow-overflow>
+            <div id="ec-word"><span style="left:0px">A</span><span style="left:169.1px">d</span><span style="left:310.8px">R</span><span style="left:458.5px">a</span><span style="left:590.1px">z</span><span style="left:709.2px">e</span></div>
+            <div id="ec-url">adraze.app</div>
+            <div id="ec-small">Chrome extension · Browser for Mac and Linux</div>
+          </div>
+          <div id="h-notes" class="fill"></div>
+          <div id="warm" data-layout-ignore><span style="font-family:'News'">a</span><span style="font-family:'NewsI'">a</span><span style="font-family:'InterK';font-weight:900">a</span><span style="font-family:'InterB';font-weight:700">a</span><span style="font-family:'InterM';font-weight:500">a</span></div>
+          <div class="grain"></div>
+        </div>
+      </section>
+
+      <!-- RÄTT 1 9,13–11,43: blå mark med prickar. Banner ads: eaten. -->
+      <section id="d1" class="clip scene" data-start="9.1333" data-duration="2.3" data-track-index="2" style="background: var(--blue); z-index: 2">
+        <svg class="full" viewBox="0 0 1920 1080" id="d1-svg"></svg>
+        <div id="d1-notes" class="fill"></div>
+      </section>
+
+      <!-- RÄTT 2 11,43–13,70: olivgrön mark med kodformer. Cookie banner: rejected. -->
+      <section id="d2" class="clip scene" data-start="11.4333" data-duration="2.2667" data-track-index="2" style="background: var(--olive); z-index: 2">
+        <svg class="full" viewBox="0 0 1920 1080" id="d2-svg"></svg>
+        <div id="d2-notes" class="fill"></div>
+      </section>
+
+      <!-- RÄTT 3 13,70–16,00: ljus mark med nät. Video ad: skipped. -->
+      <section id="d3" class="clip scene" data-start="13.7" data-duration="2.3" data-track-index="2" style="background: var(--net); z-index: 2">
+        <svg class="full" viewBox="0 0 1920 1080" id="d3-svg"></svg>
+        <div id="d3-notes" class="fill"></div>
+      </section>
+
+      <!-- RÄTT 4 16,00–18,30: papper med korn. Trackers: picked off. -->
+      <section id="d4" class="clip scene" data-start="16" data-duration="2.3" data-track-index="2" style="background: var(--paper); z-index: 2">
+        <svg class="full" viewBox="0 0 1920 1080" id="d4-svg"></svg>
+        <div id="d4-notes" class="fill"></div>
+        <div class="grain"></div>
+      </section>
+
+      <!-- RÄTT 5 18,30–20,57: natt med stjärnor. Popups: gone. -->
+      <section id="d5" class="clip scene" data-start="18.3" data-duration="2.2667" data-track-index="2" style="background: var(--night); z-index: 2">
+        <svg class="full" viewBox="0 0 1920 1080" id="d5-svg"></svg>
+        <div id="d5-notes" class="fill"></div>
+      </section>
+
+      <audio id="score" src="assets/score.wav" data-start="0" data-duration="32" data-track-index="9"></audio>
+    </div>
+
+    <script>
+      (function () {
+        /* ===== Gemensamma ritfunktioner för sajtvideorna (STIL.md avsnitt 16, oförändrade) ===== */
+        const FPS = 30, DROP = 3;                                   // koket: ny pose var tredje bildruta = 10 poser per sekund
+        const step = (t) => Math.floor((t * FPS) / DROP);
+        // seedad hash, -1..1. Aldrig Math.random.
+        const H = (n, s) => { const x = Math.sin(n * 127.1 + (s || 1) * 311.7) * 43758.5453; return (x - Math.floor(x)) * 2 - 1; };
+        // mjuk bana genom punkter (kvadratisk mittpunktskedja), öppen eller sluten
+        function smooth(p, closed) {
+          const n = p.length, f = (v) => v.toFixed(1);
+          if (!closed) {
+            let d = `M${f(p[0][0])} ${f(p[0][1])}`;
+            for (let i = 1; i < n - 1; i++) { const a = p[i], b = p[i + 1]; d += ` Q${f(a[0])} ${f(a[1])} ${f((a[0] + b[0]) / 2)} ${f((a[1] + b[1]) / 2)}`; }
+            return d + ` L${f(p[n - 1][0])} ${f(p[n - 1][1])}`;
+          }
+          let d = `M${f((p[0][0] + p[n - 1][0]) / 2)} ${f((p[0][1] + p[n - 1][1]) / 2)}`;
+          for (let i = 0; i < n; i++) { const a = p[i], b = p[(i + 1) % n]; d += ` Q${f(a[0])} ${f(a[1])} ${f((a[0] + b[0]) / 2)} ${f((a[1] + b[1]) / 2)}`; }
+          return d + 'Z';
+        }
+        // darr: flyttar varje punkt lite, olika för varje steg st
+        const jit = (p, seed, st, amp) => p.map((q, i) => [q[0] + H(st * 7 + i * 13, seed) * amp, q[1] + H(st * 7 + i * 13 + 5, seed + 3) * amp]);
+        // rektangel som punkter: hörnen dubblade så att kanterna håller sig raka
+        function rectPts(x, y, w, h, r) {
+          r = r || 10; const o = [], C = [[x, y], [x + w, y], [x + w, y + h], [x, y + h]];
+          const seg = (a, b, k) => { for (let i = 0; i < k; i++) o.push([a[0] + (b[0] - a[0]) * i / k, a[1] + (b[1] - a[1]) * i / k]); };
+          const k = (len) => Math.max(2, Math.round(len / 90));
+          for (let c = 0; c < 4; c++) { const a = C[c], b = C[(c + 1) % 4], len = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / len, uy = (b[1] - a[1]) / len;
+            o.push([a[0] + ux * r * .3, a[1] + uy * r * .3]); seg([a[0] + ux * r, a[1] + uy * r], [b[0] - ux * r, b[1] - uy * r], k(len)); o.push([b[0] - ux * r * .3, b[1] - uy * r * .3]); }
+          return o;
+        }
+        // klick: ojämn cirkel
+        const blobPts = (cx, cy, r, seed, n, irr) => Array.from({ length: n }, (_, i) => { const a = i / n * Math.PI * 2, rr = r * (1 + H(i * 3 + 1, seed) * irr); return [cx + Math.cos(a) * rr, cy + Math.sin(a) * rr]; });
+        const rot = (p, cx, cy, dg) => { const a = dg * Math.PI / 180, c = Math.cos(a), n = Math.sin(a); return p.map(([x, y]) => [cx + (x - cx) * c - (y - cy) * n, cy + (x - cx) * n + (y - cy) * c]); };
+        // loggans egen rektangel (tre punkter per kant). Bara till AD-lappen, så att den blir exakt som i loggan.
+        function tagRect(x, y, w, h, r) { const o = [], C = [[x, y], [x + w, y], [x + w, y + h], [x, y + h]]; for (let c = 0; c < 4; c++) { const a = C[c], b = C[(c + 1) % 4], L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uy = (b[1] - a[1]) / L; o.push([a[0] + ux * r * .3, a[1] + uy * r * .3]); for (let i = 0; i < 3; i++) { const t = i / 2; o.push([a[0] + ux * r + (b[0] - a[0] - 2 * ux * r) * t, a[1] + uy * r + (b[1] - a[1] - 2 * uy * r) * t]); } o.push([b[0] - ux * r * .3, b[1] - uy * r * .3]); } return o; }
+
+        /* ===== Gorillan: lager i en ruta på 200 x 200, samma punkter som loggan (logo/nya/gorilla.html) =====
+           pose: tag    true = gul AD-lapp i munnen (loggan), false = vanlig mun
+                 look   [x, y], -1..1: vart pupillerna tittar
+                 blink  0 eller 1
+                 brow   -1 hungrig/bestämd, 0 neutral, 1 glad/förvånad
+                 jaw    0..1 gap (bara utan lapp)
+                 cheeks 0..1 fulla kinder
+                 blob   false = utan orange klick
+           Neutral pose med st = 1 ger exakt loggans banor. */
+        function gorilla(pose) {
+          const P = Object.assign({ tag: true, look: [0, 0], blink: 0, brow: 0, jaw: 0, cheeks: 0, blob: true }, pose || {});
+          const F = '#3a332d', A = '#c9b8a0', I = '#1b1916', O = '#ff4b1f', Y = '#ffd23e';
+          const j = P.tag ? 0 : P.jaw, k = P.cheeks, up = Math.max(0, P.brow), dn = Math.max(0, -P.brow);
+          const ex = P.look[0] * 4, ey = P.look[1] * 3;
+          const L = [];
+          L.push({ id: 'blob', hide: !P.blob, p: blobPts(100, 104, 92, 9, 16, .06), c: 1, fill: O, amp: 2.2 });
+          L.push({ id: 'earL', p: blobPts(40, 106, 13, 2, 8, .06), c: 1, fill: F, w: 7, amp: 1 });
+          L.push({ id: 'earR', p: blobPts(160, 106, 13, 3, 8, .06), c: 1, fill: F, w: 7, amp: 1 });
+          L.push({ id: 'head', p: [[100, 30], [128, 38], [150, 60], [160, 92], [157, 126], [146, 152 + 5 * j], [124, 168 + 9 * j], [100, 173 + 10 * j], [76, 168 + 9 * j], [54, 152 + 5 * j], [43, 126], [40, 92], [50, 60], [72, 38]], c: 1, fill: F, w: 8, amp: 1.6 });
+          L.push({ id: 'face', p: [[100, 72], [120, 66], [138, 76], [142, 94], [136, 110], [148 + 5 * k, 128], [143 + 4 * k, 150 + 4 * j], [124, 162 + 9 * j], [100, 165 + 10 * j], [76, 162 + 9 * j], [57 - 4 * k, 150 + 4 * j], [52 - 5 * k, 128], [64, 110], [58, 94], [62, 76], [80, 66]], c: 1, fill: A, w: 6, amp: 1.4 });
+          L.push({ id: 'brow', p: [[62, 92 - 4 * up - 3 * dn], [80, 82 - 6 * up + 5 * dn], [100, 90 - 5 * up + 6 * dn], [120, 82 - 6 * up + 5 * dn], [138, 92 - 4 * up - 3 * dn]], w: 10, amp: 1 });
+          if (P.blink > .5) {
+            L.push({ id: 'eyeL', p: [[76, 103], [82, 104.5], [88, 103]], w: 5, amp: .6 });
+            L.push({ id: 'eyeR', p: [[112, 103], [118, 104.5], [124, 103]], w: 5, amp: .6 });
+          } else {
+            L.push({ id: 'eyeL', p: blobPts(82 + ex, 102 + ey, 6, 1, 8, .08), c: 1, fill: I, amp: .6 });
+            L.push({ id: 'eyeR', p: blobPts(118 + ex, 102 + ey, 6, 2, 8, .08), c: 1, fill: I, amp: .6 });
+          }
+          L.push({ id: 'nose', p: [[85, 128], [90, 114], [100, 111], [110, 114], [115, 128]], w: 6, amp: .8 });
+          L.push({ id: 'nosL', p: blobPts(93, 127, 3.5, 4, 8, .08), c: 1, fill: I, amp: .6 });
+          L.push({ id: 'nosR', p: blobPts(107, 127, 3.5, 5, 8, .08), c: 1, fill: I, amp: .6 });
+          if (P.tag) L.push({ id: 'tag', p: rot(tagRect(70, 138, 62, 26, 5), 101, 151, -8), c: 1, fill: Y, w: 5, amp: .9 });
+          else if (j < .08) L.push({ id: 'mouth', p: [[78, 147], [100, 152], [122, 147]], w: 6, amp: .8 });
+          else L.push({ id: 'gap', p: [[80, 143], [100, 140], [120, 143], [125, 148 + 7 * j], [112, 154 + 13 * j], [100, 156 + 14 * j], [88, 154 + 13 * j], [75, 148 + 7 * j]], c: 1, fill: I, w: 5, amp: .8 });
+          return L;
+        }
+        // Sätter upp gorillan i en <g> och ger tillbaka draw(pose, st). Anropa draw från en R-funktion varje bildruta.
+        function mountGorilla(g) {
+          const NS = 'http://www.w3.org/2000/svg', el = {}; let txt = null;
+          return function draw(pose, st) {
+            const seen = {};
+            gorilla(pose).forEach((l, idx) => {
+              let e = el[l.id];
+              if (!e) { e = el[l.id] = document.createElementNS(NS, 'path'); e.style.strokeLinecap = 'round'; e.style.strokeLinejoin = 'round'; g.appendChild(e); }
+              seen[l.id] = 1;
+              e.style.display = l.hide ? 'none' : '';
+              e.setAttribute('d', smooth(jit(l.p, idx * 17 + 3, st, l.amp || 1.5), l.c));
+              e.style.fill = l.fill || 'none';                     // stil, inte attribut: en CSS-regel kan annars vinna
+              e.style.stroke = l.w ? '#1b1916' : 'none';
+              e.style.strokeWidth = l.w || 0;
+            });
+            for (const id in el) if (!seen[id]) el[id].style.display = 'none';
+            if (!txt) { txt = document.createElementNS(NS, 'text'); txt.textContent = 'AD'; txt.setAttribute('x', 101); txt.setAttribute('y', 159); txt.setAttribute('transform', 'rotate(-8 101 159)'); txt.setAttribute('text-anchor', 'middle'); txt.setAttribute('style', "font: 900 20px 'InterK', sans-serif; fill: #1b1916"); }
+            if (seen.tag) g.appendChild(txt);                      // texten ska alltid ligga överst
+            txt.style.display = seen.tag ? '' : 'none';
+          };
+        }
+        /* ===== Mönster för färgade marker (1920 x 1080). Ger SVG-kod som läggs i en <g> med insertAdjacentHTML. =====
+           kind: 'net' | 'dots' | 'code' | 'stars'.  col: mönstrets färg (se tabellen över marker i STIL.md). */
+        function pattern(kind, col) {
+          let s = '';
+          if (kind === 'dots') for (let k = 0; k < 90; k++) s += `<circle cx="${40 + ((k * 151) % 1840)}" cy="${30 + ((k * 337) % 1020)}" r="${8 + (k % 3) * 5}" fill="${col}"/>`;
+          if (kind === 'net') { const n = []; for (let k = 0; k < 30; k++) n.push([60 + ((k * 263) % 1800), 60 + ((k * 409) % 960)]);
+            n.forEach((a, k) => { const m = n[(k * 7 + 3) % n.length]; s += `<line x1="${a[0]}" y1="${a[1]}" x2="${m[0]}" y2="${m[1]}" stroke="${col}" stroke-width="6"/><circle cx="${a[0]}" cy="${a[1]}" r="16" fill="${col}"/>`; }); }
+          if (kind === 'code') for (let k = 0; k < 70; k++) { const x = 30 + ((k * 173) % 1850), y = 30 + ((k * 311) % 1000), ty = k % 5;
+            s += ty === 0 ? `<path d="M${x + 30} ${y} L${x} ${y + 26} L${x + 30} ${y + 52}" fill="none" stroke="${col}" stroke-width="9" stroke-linecap="round"/>`
+              : ty === 1 ? `<path d="M${x + 30} ${y} L${x + 6} ${y + 52}" fill="none" stroke="${col}" stroke-width="9" stroke-linecap="round"/>`
+              : ty === 2 ? `<circle cx="${x + 24}" cy="${y + 26}" r="22" fill="${col}"/>`
+              : ty === 3 ? `<rect x="${x}" y="${y}" width="46" height="46" rx="6" fill="${col}"/>`
+              : `<path d="M${x + 24} ${y} L${x + 50} ${y + 46} L${x} ${y + 46}Z" fill="${col}"/>`; }
+          if (kind === 'stars') for (let k = 0; k < 110; k++) s += `<line x1="${(k * 211) % 1920}" y1="${(k * 433) % 1080}" x2="${((k * 211) % 1920) + 8}" y2="${((k * 433) % 1080) - 10}" stroke="${col}" stroke-width="4" stroke-linecap="round"/>`;
+          return s;
+        }
+        if (typeof module !== 'undefined') module.exports = { FPS, DROP, step, H, smooth, jit, rectPts, blobPts, rot, tagRect, gorilla, mountGorilla, pattern };
+
+        /* ===================================================================================================
+           HUNGRIG. Allt i bild är en ren funktion av bildrutans nummer. GSAP är klockan och ger easing.
+           =================================================================================================== */
+        const D = 32, NS = 'http://www.w3.org/2000/svg';
+        const $ = (s) => document.querySelector(s);
+        const C = { paper: '#ede5d6', paper2: '#e3d9c6', sheet: '#fbf7ef', ink: '#1b1916', night: '#151412', light: '#f4efe6', or: '#ff4b1f', sun: '#ffd23e', rose: '#f2a7b8', mint: '#9fd3c7', lilac: '#c7b8f5', salmon: '#ff8e72', muted: '#8d8273', dov: '#5a5146' };
+        const F = (n) => n / FPS;                                  // bildruta → sekunder
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const lerp = (a, b, p) => a + (b - a) * p;
+        const EZ = {}; const ez = (n) => EZ[n] || (EZ[n] = gsap.parseEase(n));
+        const E = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); if (attrs) for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+
+        /* ----- Spår: varje tal har en lista av steg (start, längd, mål, ease). Värdet räknas ut ur tiden, oberoende av i vilken ordning bildrutorna hämtas. ----- */
+        const TRK = [];
+        function to(obj, t0, dur, props, ease) {
+          const e = ez(ease || 'power2.out');
+          for (const p in props) {
+            if (!obj.__t) Object.defineProperty(obj, '__t', { value: {}, enumerable: false });
+            let tr = obj.__t[p];
+            if (!tr) { if (typeof obj[p] !== 'number') throw new Error('spår utan startvärde: ' + p); tr = obj.__t[p] = { obj, p, init: obj[p], segs: [] }; TRK.push(tr); }
+            tr.segs.push({ t0, t1: t0 + dur, v: props[p], e });
+          }
+        }
+        const set = (obj, t0, props) => to(obj, t0, 0, props, 'none');
+        function finalizeTracks() {
+          for (const tr of TRK) { tr.segs.sort((a, b) => a.t0 - b.t0); let prev = tr.init, end = -1;
+            for (const s of tr.segs) { if (s.t0 < end - 1e-6) console.error('spår överlappar: ' + tr.p + ' vid ' + s.t0.toFixed(3)); s.from = prev; prev = s.v; end = s.t1; } }
+        }
+        function evalTracks(t) {
+          for (const tr of TRK) { const S = tr.segs; let lo = 0, hi = S.length - 1, k = -1;
+            while (lo <= hi) { const m = (lo + hi) >> 1; if (S[m].t0 <= t + 1e-7) { k = m; lo = m + 1; } else hi = m - 1; }
+            let v = tr.init; if (k >= 0) { const s = S[k]; v = t >= s.t1 - 1e-7 ? s.v : s.from + (s.v - s.from) * s.e((t - s.t0) / (s.t1 - s.t0)); }
+            tr.obj[tr.p] = v; }
+        }
+
+        /* ----- En bildruta i taget ----- */
+        const R = []; let FRM = -1, STP = 0;
+        function frame(traw) {
+          const f = Math.max(0, Math.round(traw * FPS)); if (f === FRM) return;
+          FRM = f; STP = Math.floor(f / DROP); const t = f / FPS;
+          evalTracks(t); for (const fn of R) fn(t);
+        }
+        // en scen: stat ritas om när koket byter steg, dyn varje bildruta. Körs bara medan scenen syns.
+        function mkScene(wins) {
+          const sc = { stat: [], dyn: [], last: -1 };
+          R.push((t) => { let on = false; for (const w of wins) if (FRM >= w[0] && FRM < w[1]) on = true; if (!on) { sc.last = -1; return; }
+            if (sc.last !== STP) { for (const f of sc.stat) f(); sc.last = STP; } for (const f of sc.dyn) f(t); });
+          return sc;
+        }
+        // skak: avtagande, ur hashen
+        const shk = (f0, n, amp, seed) => { const d = FRM - f0; if (d < 0 || d >= n) return [0, 0]; const k = 1 - d / n; return [H(FRM, seed) * amp * k, H(FRM + 5, seed + 1) * amp * k]; };
+
+        /* ----- Ritverktyg ----- */
+        const P = (parent, o) => { const e = E('path', null, parent); e.style.fill = o.fill || 'none'; e.style.stroke = o.stroke === null ? 'none' : (o.stroke || C.ink); e.style.strokeWidth = o.w === undefined ? 8 : o.w; e.style.strokeLinecap = 'round'; e.style.strokeLinejoin = 'round'; return e; };
+        const bp = (sc, parent, pts, o) => { const e = P(parent, o), amp = o.amp === undefined ? 2.5 : o.amp; sc.stat.push(() => e.setAttribute('d', smooth(jit(pts, o.seed, STP, amp), !!o.closed))); return e; };
+        const bpm = (sc, parent, list, o) => { const e = P(parent, o), amp = o.amp === undefined ? 2 : o.amp; sc.stat.push(() => e.setAttribute('d', list.map((pts, i) => smooth(jit(pts, o.seed + i * 7, STP, amp), !!o.closed)).join(' '))); return e; };
+        // månghörning som punkter, med rundade hörn (som rectPts men för vilken form som helst)
+        function polyPts(Cn, r) { const o = [], n = Cn.length; for (let c = 0; c < n; c++) { const a = Cn[c], b = Cn[(c + 1) % n], len = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / len, uy = (b[1] - a[1]) / len, k = Math.max(1, Math.round(len / 90));
+          o.push([a[0] + ux * r * .3, a[1] + uy * r * .3]); for (let i = 0; i <= k; i++) { const q = i / k; o.push([a[0] + ux * r + (b[0] - a[0] - 2 * ux * r) * q, a[1] + uy * r + (b[1] - a[1] - 2 * uy * r) * q]); } o.push([b[0] - ux * r * .3, b[1] - uy * r * .3]); } return o; }
+        const TX = (parent, str, x, y, size, o) => { o = o || {}; const e = E('text', { x, y, 'data-layout-allow-overlap': '', 'data-layout-allow-occlusion': '' }, parent); e.textContent = str;   // skräpet ligger i hög med flit
+          e.setAttribute('style', `font-family:'${o.font || 'InterK'}',sans-serif;font-weight:${o.weight || 900};font-size:${size}px;letter-spacing:${o.ls === undefined ? -0.03 : o.ls}em;fill:${o.fill || C.ink};text-anchor:${o.anchor || 'middle'};dominant-baseline:central`); return e; };
+        const ST = (o) => Object.assign({ x: 0, y: 0, r: 0, s: 1, sx: 1, sy: 1 }, o);
+        // grupp som följer ett tillstånd (läge, vridning, skala). extra() ger tillägg [dx, dy, dr].
+        function grp(sc, parent, st, extra) { const g = E('g', null, parent);
+          sc.dyn.push(() => { const vis = st.s > .004; g.style.display = vis ? '' : 'none'; if (!vis) return; const q = extra ? extra() : [0, 0, 0];
+            g.setAttribute('transform', `translate(${(st.x + q[0]).toFixed(2)} ${(st.y + q[1]).toFixed(2)}) rotate(${(st.r + (q[2] || 0)).toFixed(3)}) scale(${(st.s * st.sx).toFixed(4)} ${(st.s * st.sy).toFixed(4)})`); });
+          return g; }
+        // skylt: pastellruta med bläckkontur, text och ett litet kryss
+        function mkSign(sc, parent, o) {
+          const st = ST({ x: o.x, y: o.y, r: o.r || 0, s: o.s === undefined ? 1 : o.s }), g = grp(sc, parent, st, o.extra);
+          bp(sc, g, rectPts(-o.w / 2, -o.h / 2, o.w, o.h, 14), { fill: o.col, w: 7, seed: o.seed, amp: 2.6, closed: true });
+          TX(g, o.text, 0, 2, o.fs);
+          const cx = o.w / 2 - 26, cy = -o.h / 2 + 24, q = o.q || 9; bpm(sc, g, [[[cx - q, cy - q], [cx + q, cy + q]], [[cx + q, cy - q], [cx - q, cy + q]]], { w: 5, seed: o.seed + 50, amp: 1.2 });
+          return { g, st, o };
+        }
+        // nyhetsbrevet (samma teckning hemma och i rätt 5)
+        function buildNews(sc, g, seed) {
+          bp(sc, g, rectPts(-320, -165, 640, 330, 16), { fill: C.light, w: 8, seed, amp: 2.6, closed: true });
+          TX(g, 'WAIT! DON’T GO!', 0, -76, 60);                     // typografisk apostrof, och ett halvt em mellan raderna så att WAIT! står för sig
+          bp(sc, g, rectPts(-262, -6, 340, 78, 10), { fill: C.sheet, w: 5, seed: seed + 1, amp: 1.5, closed: true });
+          bp(sc, g, [[-236, 34], [-150, 32], [-70, 35]], { stroke: C.muted, w: 8, seed: seed + 2, amp: 1.2 });
+          bp(sc, g, rectPts(100, -6, 162, 78, 10), { fill: C.ink, w: 5, seed: seed + 3, amp: 1.5, closed: true });
+          TX(g, 'OK', 181, 34, 44, { fill: C.light });
+          const cx = 320 - 30, cy = -165 + 28, q = 10; bpm(sc, g, [[[cx - q, cy - q], [cx + q, cy + q]], [[cx + q, cy - q], [cx - q, cy + q]]], { w: 5, seed: seed + 4, amp: 1.2 });
+        }
+        // pekaren: en ritad pil. Punkterna ligger runt en vridpunkt mitt i pilen.
+        const ARROW = [[0, 0], [0, 62], [15, 49], [26, 74], [38, 69], [27, 44], [46, 44]];
+        function mkArrow(sc, parent, k, seed, w) { const pv = [20 * k, 40 * k]; bp(sc, parent, polyPts(ARROW.map(([x, y]) => [x * k - pv[0], y * k - pv[1]]), 4 * k), { fill: C.sheet, w: w || Math.max(6, 3.3 * k), seed, amp: Math.min(.8 * k, 2.6), closed: true }); return pv; }
+        // spårare: ett öga på två ben
+        function mkTracker(sc, parent, st, rad, seed) {
+          const g = E('g', null, parent), legs = P(g, { w: Math.max(4, rad * .2) }), eye = P(g, { fill: C.sheet, w: Math.max(4, rad * .24) }), pup = P(g, { fill: C.ink, stroke: null });
+          sc.dyn.push(() => { const vis = st.s > .01; g.style.display = vis ? '' : 'none'; if (!vis) return;
+            const w = st.tw || 0, a = Math.sin(FRM * 1.9 + seed) * (st.kick || 0);
+            g.setAttribute('transform', `translate(${(st.x + H(FRM, seed) * 1.6 * w).toFixed(2)} ${(st.y + H(FRM + 3, seed) * 1.6 * w).toFixed(2)}) rotate(${st.r.toFixed(2)}) scale(${st.s.toFixed(3)})`);
+            legs.setAttribute('d', smooth(jit([[-rad * .4, rad * .7], [-rad * .5 - a * rad * .4, rad * 1.2], [-rad * .8 - a * rad * .6, rad * 1.62]], seed + 1, STP, .8), false) + ' ' + smooth(jit([[rad * .4, rad * .7], [rad * .5 + a * rad * .4, rad * 1.2], [rad * .8 + a * rad * .6, rad * 1.62]], seed + 2, STP, .8), false));
+            eye.setAttribute('d', smooth(jit(blobPts(0, 0, rad, seed, 10, .05), seed + 3, STP, .9), true));
+            pup.setAttribute('d', smooth(blobPts(st.lx * rad * .42, st.ly * rad * .42, rad * .4, seed + 4, 8, .06), true)); });
+          return g;
+        }
+
+        /* ----- Gorillan som figur. Bygger på gorilla(pose) ovan, med ett öga i taget, tuggning, andning och lappens ben. -----
+           x, y är underkantens mitt (100, 196 i ritrutan): tillplattning och lutning utgår därifrån. */
+        function mkGor(sc, parent, init, blobParent) {
+          const bwrap = blobParent ? E('g', null, blobParent) : null, bEl = bwrap ? P(bwrap, { fill: C.or, stroke: null }) : null;
+          const wrap = E('g', null, parent), rig = E('g', null, wrap), legsEl = P(wrap, { w: 3.4 }), el = {}; let txt = null;
+          const G = Object.assign({ on: 1, x: 0, y: 0, size: 400, sx: 1, sy: 1, rot: 0, tag: 0, lx: 0, ly: 0, blink: 0, blinkL: 0, blinkR: 0, brow: 0, jaw: 0, cheeks: 0, blob: 1, chew: 0, breath: 0, legs: 0, kick: 0, shx: 0, shy: 0 }, init);
+          Object.defineProperty(G, '__el', { value: el }); Object.defineProperty(G, '__wrap', { value: wrap });   // för lager som ska ligga mellan ansiktet och nosen
+          sc.dyn.push((t) => {
+            if (G.on < .5) { wrap.style.display = 'none'; if (bwrap) bwrap.style.display = 'none'; return; } wrap.style.display = ''; if (bwrap) bwrap.style.display = '';
+            const cw = G.chew ? Math.sin(FRM * Math.PI / 3) : 0;
+            const pose = { tag: G.tag > .5, look: [G.lx, G.ly], blink: 0, brow: G.brow, jaw: clamp(G.jaw + G.chew * .17 * Math.max(0, cw), 0, 1), cheeks: G.cheeks, blob: G.blob > .5 && !bwrap };
+            const Lo = gorilla(pose), bl = G.blink > .5, bL = bl || G.blinkL > .5, bR = bl || G.blinkR > .5, Lc = (bL || bR) ? gorilla(Object.assign({}, pose, { blink: 1 })) : null, seen = {};
+            Lo.forEach((l0, idx) => { const l = (Lc && ((l0.id === 'eyeL' && bL) || (l0.id === 'eyeR' && bR))) ? Lc[idx] : l0; let e = el[l.id];
+              const ck = G.cheeks;                                    // fulla kinder: ansiktet och huvudet buktar ut vid munnen
+              if (ck > .01 && l.id === 'face') { l.p[5][0] += 8 * ck; l.p[6][0] += 10 * ck; l.p[6][1] += 2 * ck; l.p[10][0] -= 10 * ck; l.p[10][1] += 2 * ck; l.p[11][0] -= 8 * ck; }
+              if (ck > .01 && l.id === 'head') { l.p[4][0] += 8 * ck; l.p[5][0] += 11 * ck; l.p[9][0] -= 11 * ck; l.p[10][0] -= 8 * ck; }
+              if (!e) { e = el[l.id] = E('path', null, rig); e.style.strokeLinecap = 'round'; e.style.strokeLinejoin = 'round'; }
+              seen[l.id] = 1; e.style.display = l.hide ? 'none' : ''; e.setAttribute('d', smooth(jit(l.p, idx * 17 + 3, STP, l.amp || 1.5), l.c));
+              e.style.fill = l.fill || 'none'; e.style.stroke = l.w ? C.ink : 'none'; e.style.strokeWidth = l.w || 0; });
+            for (const id in el) if (!seen[id]) el[id].style.display = 'none';
+            if (!txt) { txt = E('text', { x: 101, y: 159, transform: 'rotate(-8 101 159)', 'text-anchor': 'middle' }); txt.textContent = 'AD'; txt.setAttribute('style', "font: 900 20px 'InterK', sans-serif; fill: #1b1916"); }
+            if (seen.tag && rig.lastChild !== txt) rig.appendChild(txt);
+            txt.style.display = seen.tag ? '' : 'none';
+            if (G.legs > .02 && seen.tag) { legsEl.style.display = ''; const L = 19 * G.legs, a = Math.sin(FRM * 2.4) * G.kick, b = Math.sin(FRM * 2.4 + 2.1) * G.kick;
+              legsEl.setAttribute('d', smooth([[86, 165], [84 + a * 6, 165 + L * .55], [86 + a * 11, 165 + L], [82 + a * 11, 166 + L]], false) + ' ' + smooth([[119, 161], [121 + b * 6, 161 + L * .55], [119 + b * 11, 161 + L], [115 + b * 11, 162 + L]], false)); } else legsEl.style.display = 'none';
+            const k = G.size / 200, br = 1 + G.breath * .024 * Math.sin(t * Math.PI * 2 / 1.7), cq = 1 + G.chew * .028 * cw;
+            const tf = `translate(${(G.x + G.shx).toFixed(2)} ${(G.y + G.shy).toFixed(2)}) rotate(${G.rot.toFixed(3)}) scale(${(k * G.sx / cq).toFixed(4)} ${(k * G.sy * br * cq).toFixed(4)}) translate(-100 -196)`;
+            wrap.setAttribute('transform', tf);
+            if (bwrap) { bwrap.setAttribute('transform', tf); bEl.setAttribute('d', smooth(jit(blobPts(100, 104, 92, 9, 16, .06), 3, STP, 2.2), true)); }
+          });
+          return G;
+        }
+        // var en punkt i ritrutan hamnar i bild, och var underkanten ska stå för att en punkt ska hamna på ett mål
+        const gpt = (G, rx, ry) => { const k = G.size / 200, a = G.rot * Math.PI / 180, px = (rx - 100) * k * G.sx, py = (ry - 196) * k * G.sy; return [G.x + px * Math.cos(a) - py * Math.sin(a), G.y + px * Math.sin(a) + py * Math.cos(a)]; };
+        const gAnchor = (size, rz, rx, ry, tx, ty) => { const k = size / 200, a = rz * Math.PI / 180, px = (rx - 100) * k, py = (ry - 196) * k; return { x: tx - (px * Math.cos(a) - py * Math.sin(a)), y: ty - (px * Math.sin(a) + py * Math.cos(a)) }; };
+
+        /* ----- Berättarraden på sin lapp. Första ordet följer med poppen, så att lappen aldrig blinkar tom.
+           Ett ord med en egen tid (tredje värdet) stämplas in med ett litet studs på bildrutan där handlingen sker.
+           Ut går lappen uppåt ur bild, så att den inte krymper till en prick mitt i bilden. ----- */
+        function mkNote(sc, host, words, tw, tin, tout, seed) {
+          const w = Math.round(tw + 88), pop = document.createElement('div'); pop.className = 'note'; pop.style.width = w + 'px';
+          pop.innerHTML = `<svg width="${w}" height="160" viewBox="0 0 ${w} 160"><path/></svg><div class="cap">${words.map(([s, it]) => `<span class="w">${it ? '<em>' + s + '</em>' : s}</span>`).join(' ')}</div>`;
+          host.appendChild(pop);
+          const path = pop.querySelector('path'); path.style.fill = C.sheet; path.style.stroke = C.ink; path.style.strokeWidth = 6; path.style.strokeLinejoin = 'round';
+          const st = { s: 0, y: 0, r: 0 }, pts = rectPts(0, 0, w, 160, 12); let n = 0;
+          const ws = [...pop.querySelectorAll('.w')].map((el, i) => { const late = words[i][2], o = { o: 0, y: 0, k: 1 };
+            if (late != null) { o.k = .45; el.style.transformOrigin = '20% 62%'; to(o, late, F(2), { o: 1 }, 'none'); to(o, late, .3, { k: 1 }, 'back.out(1.7)'); }   // slår över 10 %, växer mest åt höger: rör aldrig ordet före
+            else { const k = n++, at = tin + k * .08; o.y = 40; to(o, at, .32, { y: 0 }, 'back.out(2)'); if (k === 0) set(o, at, { o: 1 }); else to(o, at, F(3), { o: 1 }, 'none'); }   // första ordet syns redan i poppen
+            return { el, o }; });
+          set(st, tin, { s: .8 }); to(st, tin, .3, { s: 1 }, 'back.out(2.2)');
+          if (tout != null) { to(st, tout, .17, { y: -320, r: -5 }, 'power3.in'); set(st, tout + .17, { s: 0 }); }
+          sc.stat.push(() => path.setAttribute('d', smooth(jit(pts, seed, STP, 2), true)));
+          sc.dyn.push(() => { const vis = st.s > .01; pop.style.display = vis ? '' : 'none'; if (!vis) return;
+            pop.style.transform = `translateY(${st.y.toFixed(2)}px) rotate(${(-1.2 + st.r).toFixed(3)}deg) scale(${st.s.toFixed(4)})`;
+            for (const q of ws) { q.el.style.opacity = q.o.o.toFixed(3); q.el.style.transform = `translateY(${q.o.y.toFixed(2)}px) scale(${q.o.k.toFixed(4)})`; } });
+        }
+
+        /* =====================================================================================================
+           HEMMA: sidan, skräpet, uppvaknandet (0 till 9,13), den rena sidan, lappen, slutkortet (20,57 till 32)
+           ===================================================================================================== */
+        const HOME = mkScene([[0, 274], [617, 961]]);
+        { const homeIn = $('#home-in'); R.push(() => { homeIn.style.display = (FRM >= 274 && FRM < 617) ? 'none' : ''; }); }
+
+        // --- kameran: tätt, mellan, helbild. Överlämningen är en panorering som börjar före slutet och landar efter början. ---
+        const TIGHT = { s: 1.6, tx: 1100 - 1.6 * 790, ty: 600 - 1.6 * 502 }, MID = { s: 1.2, tx: -108, ty: -12 }, FULL = { s: 1, tx: 0, ty: 0 };
+        const PAN1 = .6, PAN2 = .45, PANF = 2 / 3;                 // skarven ligger där farten är högst: samma fart på båda sidor
+        const panS = (u) => u <= -PAN1 ? 0 : u >= PAN2 ? 1 : u < 0 ? PANF * Math.pow((u + PAN1) / PAN1, 2) : 1 - (1 - PANF) * Math.pow(1 - u / PAN2, 3);
+        const uOf = (t) => t > 16 ? t - D : t;
+        const mix = (a, b, p) => ({ s: lerp(a.s, b.s, p), tx: lerp(a.tx, b.tx, p), ty: lerp(a.ty, b.ty, p) });
+        function camAt(t) {
+          if (t < 1.8 || t >= D - PAN1) return { s: TIGHT.s, tx: TIGHT.tx + (1 - panS(uOf(t))) * 1920, ty: TIGHT.ty };
+          if (t < 2.35) return mix(TIGHT, MID, ez('power2.inOut')((t - 1.8) / .55));
+          if (t < 4) return MID;
+          if (t < 4.55) return mix(MID, FULL, ez('power2.inOut')((t - 4) / .55));
+          if (t < F(807)) return FULL;
+          if (t < F(822)) return { s: 1, tx: 1920 * ez('power2.in')((t - F(807)) / .5), ty: 0 };
+          return null;                                             // sidan är utanför bild
+        }
+        { const camG = $('#h-cam');
+          HOME.dyn.push((t) => { const c = camAt(t); if (!c) { camG.style.display = 'none'; return; } camG.style.display = '';
+            const a = shk(17, 8, 12, 1), b = shk(103, 7, 12, 2), d = shk(137, 5, 7, 3), e = shk(206, 6, 4, 4), g = shk(806, 5, 6, 5);
+            camG.setAttribute('transform', `translate(${(c.tx + a[0] + b[0] + d[0] + e[0] + g[0]).toFixed(2)} ${(c.ty + a[1] + b[1] + d[1] + e[1] + g[1]).toFixed(2)}) scale(${c.s.toFixed(4)})`); }); }
+
+        // --- sidan ---
+        { const pg = $('#h-page');
+          bp(HOME, pg, rectPts(300, 70, 1380, 930, 26), { fill: C.sheet, w: 8, seed: 11, amp: 3, closed: true });
+          bp(HOME, pg, [[306, 156], [990, 154], [1674, 157]], { w: 7, seed: 12, amp: 2.5 });
+          for (let i = 0; i < 3; i++) bp(HOME, pg, blobPts(352 + i * 46, 113, 13, 13 + i, 8, .05), { fill: C.paper2, w: 5, seed: 14 + i, amp: 1, closed: true });
+          bp(HOME, pg, rectPts(540, 90, 700, 46, 20), { fill: C.paper, w: 5, seed: 18, amp: 1.5, closed: true });
+          bp(HOME, pg, [[362, 206], [560, 203], [800, 207]], { w: 16, seed: 19, amp: 2 });
+          bp(HOME, pg, rectPts(360, 260, 860, 484, 18), { fill: C.paper2, w: 8, seed: 20, amp: 2.5, closed: true });
+          const TLN = [];
+          for (let i = 0; i < 4; i++) { const y = 262 + i * 124; bp(HOME, pg, rectPts(1270, y, 150, 96, 10), { fill: C.paper2, w: 6, seed: 30 + i, amp: 2, closed: true }); TLN.push([[1446, y + 30], [1540, y + 28], [1640, y + 31]], [[1446, y + 64], [1510, y + 65], [1580, y + 63]]); }
+          [[806, 1220], [852, 1150], [898, 1220], [944, 940]].forEach(([y, x2]) => TLN.push([[362, y], [(362 + x2) / 2, y - 2], [x2, y]]));
+          bpm(HOME, pg, TLN, { stroke: C.muted, w: 9, seed: 40, amp: 2 }); }
+
+        // --- spelaren: play, och videon som spelar (sol över två kullar, två fåglar, förloppslinje) ---
+        const VID = { on: 0, hy: 190, sun: 690, prog: 0 }, PLAY = ST({ x: 790, y: 502 });
+        { const vid = $('#h-vid'), vg = E('g', { 'clip-path': 'url(#h-clip-pl)' }, vid);
+          const sunEl = P(vg, { fill: C.sheet, w: 7 }), rays = P(vg, { w: 6 }), hillF = P(vg, { fill: C.sheet, stroke: null }), hillL = P(vg, { w: 7 }), birds = P(vg, { w: 5 });   // solen är vit med strålar: gult hör till skräpet
+          const RIDGE = [[352, 664], [450, 640], [540, 598], [620, 606], [700, 644], [780, 616], [870, 560], [960, 552], [1050, 594], [1130, 642], [1228, 672]];
+          bp(HOME, vid, [[392, 714], [790, 712], [1188, 714]], { stroke: C.muted, w: 9, seed: 41, amp: 1.5 });
+          const progEl = P(vid, { w: 9 }), knob = P(vid, { fill: C.ink, stroke: null });
+          const playG = grp(HOME, vid, PLAY);
+          bp(HOME, playG, blobPts(0, 0, 74, 21, 14, .03), { fill: C.sheet, w: 8, seed: 22, amp: 1.6, closed: true });
+          bp(HOME, playG, polyPts([[-22, -40], [44, 0], [-22, 40]], 7), { fill: C.ink, w: 4, seed: 23, amp: 1.2, closed: true });
+          HOME.dyn.push((t) => {
+            const on = VID.on > .5; vg.style.display = on ? '' : 'none'; progEl.style.display = knob.style.display = on ? '' : 'none'; if (!on) return;
+            const rd = jit(RIDGE.map(([x, y]) => [x, y + VID.hy]), 24, STP, 2);
+            hillL.setAttribute('d', smooth(rd, false)); hillF.setAttribute('d', smooth(rd, false) + ' L1228 760 L352 760 Z');
+            const scy = VID.sun + VID.hy; sunEl.setAttribute('d', smooth(jit(blobPts(1010, scy, 46, 25, 12, .04), 26, STP, 1.6), true));
+            let rd2 = ''; for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2 + .2; rd2 += smooth(jit([[1010 + Math.cos(a) * 64, scy + Math.sin(a) * 64], [1010 + Math.cos(a) * 88, scy + Math.sin(a) * 88]], 27 + i, STP, 1.4), false) + ' '; }
+            rays.setAttribute('d', rd2);
+            const bx = 380 + (t - 22.75) * 300, fl = Math.floor(FRM / 4) % 2 ? 9 : -7; let bd = '';
+            [[0, 352, 1], [-74, 318, .8]].forEach(([dx, y, k], i) => { const x = bx + dx, yy = y + Math.sin(t * 2.2 + i) * 9; bd += `M${(x - 20 * k).toFixed(1)} ${(yy - fl * k).toFixed(1)} Q${(x - 9 * k).toFixed(1)} ${(yy - 9 * k - fl * k).toFixed(1)} ${x.toFixed(1)} ${yy.toFixed(1)} Q${(x + 9 * k).toFixed(1)} ${(yy - 9 * k - fl * k).toFixed(1)} ${(x + 20 * k).toFixed(1)} ${(yy - fl * k).toFixed(1)} `; });
+            birds.setAttribute('d', bd);
+            const px = 392 + 796 * VID.prog; progEl.setAttribute('d', `M392 ${(714 + H(STP, 27)).toFixed(1)} L${px.toFixed(1)} ${(713 + H(STP + 1, 27)).toFixed(1)}`);
+            knob.setAttribute('d', smooth(blobPts(px, 713, 12, 28, 8, .06), true)); }); }
+
+        // --- förvideoreklamen: faller ner över spelaren ---
+        const PRE = { on: 0, y: -640, sx: 1, sy: 1 };
+        { const pre = $('#h-pre');
+          bp(HOME, pre, rectPts(360, 260, 860, 484, 18), { fill: C.night, w: 8, seed: 50, amp: 2.5, closed: true });
+          bp(HOME, pre, rectPts(392, 292, 104, 60, 10), { fill: C.sun, w: 5, seed: 51, amp: 1.5, closed: true }); TX(pre, 'Ad', 444, 323, 40);
+          bp(HOME, pre, [[392, 702], [640, 700], [890, 702]], { stroke: C.dov, w: 9, seed: 52, amp: 1.5 });
+          const prog = P(pre, { stroke: C.sun, w: 9 });
+          const pillG = E('g', null, pre);
+          bp(HOME, pillG, rectPts(-133, -36, 266, 72, 34), { fill: C.light, w: 5, seed: 53, amp: 1.5, closed: true }); TX(pillG, 'Skip in 5', 0, 1, 40, { font: 'InterB', weight: 700, ls: 0 });
+          HOME.dyn.push((t) => { const on = PRE.on > .5 && FRM < 274; pre.style.display = on ? '' : 'none'; if (!on) return;
+            pre.setAttribute('transform', `translate(790 ${(744 + PRE.y).toFixed(2)}) scale(${PRE.sx.toFixed(4)} ${PRE.sy.toFixed(4)}) translate(-790 -744)`);
+            const d = FRM - 118, wig = d >= 0 && d < 9 ? Math.sin(d * 2.1) * 8 * (1 - d / 9) : 0;      // pillen skakar på huvudet när pekaren trycker
+            pillG.setAttribute('transform', `translate(${(1055 + wig).toFixed(1)} 676)`);
+            prog.setAttribute('d', `M392 ${(701 + H(STP, 54)).toFixed(1)} L${(452 + Math.max(0, t - F(103)) * 16).toFixed(1)} ${(701 + H(STP + 1, 54)).toFixed(1)}`); });
+          set(PRE, F(97), { on: 1 }); to(PRE, F(97), F(6), { y: 0 }, 'power2.in'); set(PRE, F(103), { sy: .93, sx: 1.03 }); to(PRE, F(105), .22, { sx: 1, sy: 1 }, 'back.out(3)'); }
+
+        // --- uppvaknandet: klicken stiger som en sol bakom nyhetsbrevet, sedan ögonbryn och ögon ---
+        const PB = { x: 900, y: 650, r: 0 };
+        { const peek = $('#h-peek'), el = P(peek, { fill: C.or, stroke: null });
+          HOME.dyn.push(() => { const on = PB.r > 2 && FRM < 274; el.style.display = on ? '' : 'none'; if (on) el.setAttribute('d', smooth(jit(blobPts(PB.x, PB.y, PB.r, 9, 16, .07), 61, STP, 4), true)); }); }
+        const GP = mkGor(HOME, $('#h-peek'), { on: 0, x: 900, y: 815, size: 400, blob: 0 });
+        set(PB, F(206), { r: 96 }); to(PB, F(206), .74, { y: 439, r: 186 }, 'sine.out');
+        set(GP, F(206), { on: 1 }); set(GP, F(274), { on: 0 });
+        to(GP, F(223), .32, { y: 623 }, 'back.out(1.6)');                       // 7,43: ögonen stiger över kanten
+        to(GP, F(231), .1, { lx: -1, ly: -.1 });                                // 7,70: åt vänster
+        set(GP, F(239), { blink: 1 }); set(GP, F(240), { lx: 1 }); set(GP, F(242), { blink: 0 });   // 8,00: blink, åt höger
+        to(GP, F(249), .1, { lx: 0, ly: 1 });                                   // 8,30: ner på rutan
+        to(GP, F(254), .1, { brow: -1 }, 'power2.in'); to(GP, F(254), F(2), { sy: .95 }, 'power1.out'); to(GP, F(256), .2, { sy: 1 }, 'back.out(3)');
+        to(GP, F(264), F(4), { y: 706, sy: .9 }, 'power2.in'); to(PB, F(264), F(4), { y: 474 }, 'power2.in');       // duckar
+        to(GP, F(268), F(4), { y: 600, sy: 1.1 }, 'power3.out'); to(PB, F(268), F(4), { y: 424 }, 'power3.out');    // stöter till rutan underifrån
+
+        // --- en tidig kik (3,5 till 4,57): när videoreklamen dunsar ner sticker ögonen och klickens kant upp i hörnet nere till vänster,
+        //     utanför sidan (minst 18 px luft), tittar på skräpet och dyker när kakrutan smäller upp. Då blir 7,43 en återkomst. ---
+        const GK = mkGor(HOME, $('#h-kik'), { on: 0, x: 98, y: 1345, size: 280, lx: .5, ly: -.6, brow: .6 });
+        set(GK, F(104), { on: 1 }); set(GK, F(140), { on: 0 });
+        to(GK, F(105), .27, { y: 1137 }, 'back.out(1.7)');                                                          // 3,50: stiger upp
+        to(GK, F(110), .1, { lx: .9, ly: -.75 });                                                                   // ser upp på videoreklamen
+        set(GK, F(115), { blink: 1 }); set(GK, F(117), { blink: 0 });
+        to(GK, F(121), .1, { lx: 1, ly: -.15 });                                                                    // 4,03: DOWNLOAD NOW poppar
+        to(GK, F(124), .12, { brow: -.9 }, 'power2.in'); to(GK, F(124), F(2), { sy: .96 }, 'power1.out'); to(GK, F(126), .2, { sy: 1 }, 'back.out(3)');   // hungrig blick
+        to(GK, F(131), F(2), { brow: 1, lx: .7, ly: .5 }, 'power2.out');                                            // 4,37: kakrutan kommer underifrån
+        to(GK, F(133), F(4), { y: 1345, sy: 1.08 }, 'power2.in');                                                   // och den dyker
+
+        // --- skräpet ---
+        const junk = $('#h-junk');
+        const jsh = (i) => () => { const a = shk(206, 8, 6, 70 + i), b = shk(269, 5, 9, 80 + i); return [a[0] + b[0], a[1] + b[1], 0]; };
+        // kakrutan
+        const CK = ST({ y: 340, s: 0 });
+        { const g = grp(HOME, junk, CK, jsh(0));
+          bp(HOME, g, rectPts(288, 800, 1404, 212, 16), { fill: C.paper2, w: 8, seed: 71, amp: 2.5, closed: true });
+          TX(g, 'We value your privacy', 344, 906, 52, { font: 'InterB', weight: 700, ls: -.01, anchor: 'start' });
+          bp(HOME, g, rectPts(1010, 852, 400, 108, 12), { fill: C.sun, w: 7, seed: 72, amp: 2, closed: true }); TX(g, 'ACCEPT ALL', 1210, 908, 62);
+          bp(HOME, g, rectPts(1532, 956, 84, 34, 6), { w: 3, seed: 73, amp: .8, closed: true }); TX(g, 'reject', 1574, 973, 20, { font: 'InterB', weight: 700, ls: 0, fill: C.dov });
+          set(CK, F(131), { s: 1 }); to(CK, F(131), F(6), { y: 0 }, 'power2.in'); to(CK, F(137), F(2), { y: -14 }, 'power2.out'); to(CK, F(139), F(4), { y: 0 }, 'power2.in'); }
+        const burstEl = P(junk, { w: 6 });                       // smällen när SALE! spricker: bakom de nya skyltarna i ritordningen
+        // de tre skyltarna
+        const SPIN = mkSign(HOME, junk, { text: 'SPIN TO WIN', col: C.mint, w: 450, h: 150, fs: 68, seed: 121, x: 790, y: 502, r: 20, s: 0, extra: jsh(1) });
+        const ONLY = mkSign(HOME, junk, { text: 'ONLY 2 LEFT', col: C.rose, w: 470, h: 150, fs: 68, seed: 111, x: 790, y: 502, r: -20, s: 0, extra: jsh(2) });
+        const DL = mkSign(HOME, junk, { text: 'DOWNLOAD NOW', col: C.lilac, w: 570, h: 140, fs: 60, seed: 131, x: 1480, y: 650, r: -4, s: 0, extra: jsh(3) });
+        // nyhetsbrevet
+        const NW = ST({ x: 900, y: 640, s: 0 });
+        buildNews(HOME, grp(HOME, junk, NW, jsh(4)), 141);
+        // första skylten och smällen när den spricker
+        const SALE = mkSign(HOME, junk, { text: 'SALE!', col: C.sun, w: 340, h: 170, fs: 104, seed: 101, x: 790, y: 440, r: -4, s: 0, q: 11 });
+        { const burst = burstEl;
+          HOME.dyn.push(() => { const d = FRM - 54; if (d < 0 || d > 3) { burst.style.display = 'none'; return; } burst.style.display = ''; const r0 = 60 + d * 36, r1 = r0 + 50 - d * 9; let s = '';
+            for (let i = 0; i < 9; i++) { const a = i / 9 * Math.PI * 2 + .3; s += `M${(790 + Math.cos(a) * r0 * 1.5).toFixed(1)} ${(502 + Math.sin(a) * r0 * .85).toFixed(1)} L${(790 + Math.cos(a) * r1 * 1.5).toFixed(1)} ${(502 + Math.sin(a) * r1 * .85).toFixed(1)} `; } burst.setAttribute('d', s); }); }
+        set(SALE.st, F(14), { s: 2.3 }); to(SALE.st, F(14), F(3), { s: 1, y: 502 }, 'power3.in');                  // 0,57: smäller ner över play
+        set(SALE.st, F(17), { sx: 1.14, sy: .84 }); to(SALE.st, F(18), .25, { sx: 1, sy: 1 }, 'back.out(3)');
+        to(SALE.st, F(51), F(3), { sy: .14, sx: 1.28 }, 'power2.in'); set(SALE.st, F(54), { s: 0 });               // 1,70: krysset, plattas till
+        set(ONLY.st, F(54), { s: .3 }); to(ONLY.st, F(54), .28, { s: 1 }, 'back.out(2.6)'); to(ONLY.st, F(54), .5, { x: 1360, y: 320, r: 5 }, 'power3.out');
+        set(SPIN.st, F(55), { s: .3 }); to(SPIN.st, F(55), .28, { s: 1 }, 'back.out(2.6)'); to(SPIN.st, F(55), .5, { x: 410, y: 500, r: -5 }, 'power3.out');
+        to(DL.st, F(120), .28, { s: 1 }, 'back.out(2.6)');                                                          // 4,00
+        set(NW, F(154), { r: -7 }); to(NW, F(154), .28, { s: 1 }, 'back.out(2.6)'); to(NW, F(154), .3, { r: 0 }, 'back.out(2)');   // 5,13
+        to(NW, F(269), F(3), { y: 600, r: 7 }, 'power2.out');                                                       // gorillan stöter till den
+
+        [CK, SPIN.st, ONLY.st, DL.st, NW].forEach((st) => set(st, F(600), { s: 0 }));                              // uppätet: borta på den rena sidan
+
+        // --- pekaren (tittaren) och de tre spårarna ---
+        const PTR = { x: 850, y: 560, r: 0, s: 1, sx: 1, sy: 1, tr: 0 };
+        const TKS = [[-42, -22], [44, -8], [4, 64]].map(([x, y]) => Object.assign(ST({ x, y, s: 0 }), { lx: 0, ly: 0, tw: 0, kick: 0, sxx: x, syy: y }));
+        { const g = E('g', null, $('#h-ptr')), pv = mkArrow(HOME, g, 1.35, 91);
+          TKS.forEach((st, i) => mkTracker(HOME, g, st, 19, 160 + i * 6));
+          HOME.dyn.push((t) => { let x = PTR.x, y = PTR.y;
+            if (t < F(17) || t >= D - PAN1) { const p = ez('sine.inOut')(clamp((uOf(t) + .25) / .8, 0, 1)); x = lerp(1010, 850, p); y = lerp(690, 560, p); }   // glider mot play, tvärs över skarven
+            const tw = PTR.tr; x += H(FRM, 91) * 2.4 * tw; y += H(FRM + 4, 92) * 2.4 * tw;
+            g.setAttribute('transform', `translate(${(x + pv[0]).toFixed(2)} ${(y + pv[1]).toFixed(2)}) rotate(${(PTR.r + H(FRM + 8, 93) * 3 * tw).toFixed(2)}) scale(${(PTR.s * PTR.sx).toFixed(3)} ${(PTR.s * PTR.sy).toFixed(3)})`); }); }
+        to(PTR, F(17), F(2), { x: 905, y: 612 }, 'power2.out');                                                     // rycker bakåt
+        to(PTR, F(23), F(3), { r: -12 }, 'power1.inOut'); to(PTR, F(26), F(3), { r: 9 }, 'power1.inOut'); to(PTR, F(29), F(3), { r: 0 }, 'power1.inOut');
+        to(PTR, F(37), F(13), { x: 926, y: 437 }, 'power2.inOut');                                                  // till krysset
+        to(PTR, F(50), F(1), { s: .8 }, 'none'); to(PTR, F(51), .12, { s: 1 }, 'back.out(3)');                      // 1,70: trycker
+        to(PTR, F(54), .22, { x: 968, y: 628 }, 'power3.out');
+        to(PTR, F(72), F(27), { x: 852, y: 562 }, 'power2.inOut');                                                  // nytt försök mot play
+        to(PTR, F(103), F(4), { x: 896, y: 792 }, 'power2.out'); to(PTR, F(103), F(3), { r: 24 }, 'power2.out'); to(PTR, F(106), F(5), { r: 0 }, 'back.out(2)');   // studsar undan, ner till vänster om pillen
+        to(PTR, F(109), F(7), { x: 1036, y: 736 }, 'power2.inOut');                                                 // under pillen, minst 18 px luft: korsar aldrig Skip in 5
+        to(PTR, F(116), F(2), { y: 715 }, 'power2.in');                                                             // provar pillen underifrån med spetsen
+        to(PTR, F(118), F(1), { s: .82 }, 'none'); to(PTR, F(119), .1, { s: 1 }, 'back.out(3)');
+        to(PTR, F(122), F(4), { x: 1010, y: 752 }, 'power3.out');
+        to(PTR, F(137), F(3), { y: 724 }, 'power2.out'); to(PTR, F(140), F(4), { y: 752 }, 'power2.in');
+        to(PTR, F(154), .26, { x: 1560, y: 772 }, 'power3.out'); to(PTR, F(154), .2, { r: 22 }, 'power2.out');      // knuffas undan av nyhetsbrevet
+        to(PTR, F(189), .15, { tr: 1 }, 'none');                                                                    // 6,30: darrar
+        TKS.forEach((st, i) => { const f = 165 + i * 6, o = [[-270, -160], [270, -190], [80, 280]][i], n = Math.hypot(st.sxx, st.syy);
+          set(st, F(f), { s: 1, x: o[0], y: o[1], lx: -st.sxx / n, ly: -st.syy / n }); to(st, F(f), F(6), { x: st.sxx }, 'none');
+          to(st, F(f), F(3), { y: Math.min(o[1], st.syy) - 70 }, 'power2.out'); to(st, F(f + 3), F(3), { y: st.syy }, 'power2.in');
+          to(PTR, F(f + 6), F(2), { y: 780 }, 'power2.out'); to(PTR, F(f + 8), F(3), { y: 772 }, 'power2.in');
+          set(st, F(189), { tw: 1 }); to(st, F(226 + i * 2), .1, { lx: -.9, ly: -.45 }); set(st, F(600), { s: 0 }); });
+
+        // --- den rena sidan (20,57): pekaren kryper fram, går till play, ser sig om, trycker ---
+        set(PTR, F(600), { x: 1560, y: 772, r: 22, sx: 1.1, sy: .72, tr: 0, s: 1 });
+        to(PTR, F(619), F(5), { r: 0, sy: 1.3, sx: .86 }, 'power2.out'); to(PTR, F(624), .25, { sy: 1, sx: 1 }, 'back.out(2.5)');
+        to(PTR, F(634), F(17), { x: 812, y: 524 }, 'power2.inOut');
+        to(PTR, F(653), F(3), { r: -14 }, 'power2.out'); to(PTR, F(658), F(3), { r: 14 }, 'power2.inOut'); to(PTR, F(663), F(3), { r: 0 }, 'power2.inOut');
+        to(PTR, F(668), F(1), { s: .8 }, 'none'); to(PTR, F(669), .12, { s: 1 }, 'back.out(3)');                    // 22,30: trycker på play
+        to(PTR, F(676), F(14), { x: 1150, y: 806 }, 'power2.inOut');
+        [[703, 46, -9], [711, 30, 8]].forEach(([f, h, r]) => {                                                      // 23,43 (slag 41): två glada skutt medan videon spelar
+          to(PTR, F(f), F(3), { y: 806 - h, sy: 1.1, sx: .92, r }, 'power2.out'); to(PTR, F(f + 3), F(3), { y: 806, sy: 1, sx: 1, r: 0 }, 'power2.in'); });
+        set(PTR, F(717), { sx: 1.1, sy: .86 }); to(PTR, F(718), .2, { sx: 1, sy: 1 }, 'back.out(2.5)');
+        to(PLAY, F(669), F(2), { s: .84 }, 'none'); to(PLAY, F(671), .13, { s: 0 }, 'power3.in'); set(PLAY, F(840), { s: 1 });
+        set(VID, F(674), { on: 1 }); to(VID, F(674), .45, { hy: 0 }, 'power3.out'); to(VID, F(682), 2.5, { sun: 432 }, 'sine.out'); to(VID, F(674), F(822) - F(674), { prog: .5 }, 'none');
+        set(VID, F(840), { on: 0, hy: 190, sun: 690, prog: 0 });
+        // lappen kommer: pekaren backar och darrar. När den är fångad hoppar pekaren till av lättnad.
+        to(PTR, F(764), F(6), { r: 18 }, 'power2.out'); to(PTR, F(770), F(8), { x: 1085, y: 786 }, 'power2.out'); to(PTR, F(778), .1, { tr: 1 }, 'none');
+        to(PTR, F(806), .1, { tr: 0 }, 'none'); to(PTR, F(808), F(4), { y: 750, r: 0 }, 'power2.out'); to(PTR, F(812), F(5), { y: 786 }, 'power2.in');
+        set(PTR, F(840), { x: 850, y: 560, r: 0, s: 1, sx: 1, sy: 1, tr: 0 });                                      // utanför bild: ställs om inför överlämningen
+
+        // --- den sista: en liten gul AD-lapp på två ben ---
+        const WK = Object.assign(ST({ x: 2030, y: 886, s: 0 }), { ph: 0, tw: 0 });
+        const WKX = 1470;                                          // där den blir fångad
+        { const g = E('g', null, $('#h-walk')), legs = P(g, { w: 7 }), tag = P(g, { fill: C.sun, w: 6 }), tx = TX(g, 'AD', 0, -67, 56); tx.setAttribute('transform', 'rotate(-8 0 -68)');
+          HOME.dyn.push(() => { const vis = WK.s > .01; g.style.display = vis ? '' : 'none'; if (!vis) return;
+            const p = WK.ph, fp = p - Math.floor(p), even = Math.floor(p) % 2 === 0, bob = -12 * Math.sin(Math.PI * fp);
+            g.setAttribute('transform', `translate(${(WK.x + H(FRM, 95) * 2.2 * WK.tw).toFixed(2)} ${(WK.y + bob).toFixed(2)}) scale(${WK.s.toFixed(3)})`);
+            const sw = 28 * Math.cos(Math.PI * p), la = even ? 20 * Math.sin(Math.PI * fp) : 0, lb = even ? 0 : 20 * Math.sin(Math.PI * fp), fa = [-26 + sw, -bob - la], fb = [26 - sw, -bob - lb];
+            legs.setAttribute('d', smooth(jit([[-34, -34], [(-34 + fa[0]) / 2 - 6, (-34 + fa[1]) / 2], fa, [fa[0] - 15, fa[1] + 1]], 96, STP, .8), false) + ' ' + smooth(jit([[34, -39], [(34 + fb[0]) / 2 - 6, (-39 + fb[1]) / 2], fb, [fb[0] - 15, fb[1] + 1]], 97, STP, .8), false));
+            tag.setAttribute('d', smooth(jit(rot(tagRect(-90, -105, 180, 74, 14), 0, -68, -8), 98, STP, 1.4), true)); });
+          set(WK, F(752), { s: 1 });
+          [754, 763, 771, 780].forEach((f, i) => { to(WK, F(f), F(6), { x: 2030 - (i + 1) * 132, ph: i + 1 }, 'power2.inOut'); });      // tassar: 25,13, 25,43, 25,70, 26,00
+          to(WK, F(789), F(3), { x: 1456, ph: 4.42 }, 'power2.out');                                                   // 26,30: fryser mitt i steget
+          to(WK, F(790), .1, { tw: 1 }, 'none');
+          to(WK, F(799), F(7), { x: WKX, ph: 3.9 }, 'power2.in');                                                      // försöker backa
+          set(WK, F(806), { s: 0 }); }
+
+        // --- gorillan hemma: somnar mätt, vaknar på ett öga, fångar lappen, blir loggan ---
+        const hgor = $('#h-gor');
+        const GH = mkGor(HOME, hgor, { x: 503, y: 635.2, size: 440, tag: 1, lx: 1 });          // startvärdet är slutläget: 32,0 = 0,0
+        { const ec = $('#ec'), LET = [...$('#ec-word').children].map((el, i) => { const o = { o: 1, y: 0 }; set(o, F(15), { o: 0, y: 60 }); to(o, 27.5 + i * .05, .3, { y: 0 }, 'back.out(2.4)'); to(o, 27.5 + i * .05, .1, { o: 1 }, 'none'); return { el, o }; });
+          const UB = { s: 1 }, SM = { o: 1, y: 0 }, url = $('#ec-url'), sm = $('#ec-small');
+          set(UB, F(15), { s: 0 }); set(UB, 28, { s: .6 }); to(UB, 28, .35, { s: 1 }, 'back.out(2.4)');
+          set(SM, F(15), { o: 0, y: 24 }); to(SM, 28.3, .35, { o: 1, y: 0 }, 'power2.out');
+          HOME.dyn.push((t) => { const px = (t >= D - PAN1 || t < .5) ? -panS(uOf(t)) * 1920 : 0;                    // slutkortet glider ut åt vänster i överlämningen
+            hgor.setAttribute('transform', `translate(${px.toFixed(2)} 0)`);
+            const on = FRM >= 820 || FRM < 12; ec.style.display = on ? '' : 'none'; if (!on) return;
+            ec.style.transform = `translateX(${px.toFixed(2)}px)`;
+            for (const q of LET) { q.el.style.opacity = q.o.o.toFixed(3); q.el.style.transform = `translateY(${q.o.y.toFixed(2)}px)`; }
+            url.style.opacity = UB.s > .01 ? 1 : 0; url.style.transform = `scale(${UB.s.toFixed(4)})`;
+            sm.style.opacity = SM.o.toFixed(3); sm.style.transform = `translateY(${SM.y.toFixed(2)}px)`; }); }
+        set(GH, F(12), { on: 0 });
+        set(GH, F(600), { on: 1, tag: 0, x: 138, y: 884, size: 270, lx: .7, ly: .2, cheeks: 1, brow: .5, sy: 1.08, sx: .94 });   // utanför sidan: klicken har minst 18 px luft till fönstret
+        to(GH, F(617), F(4), { y: 950 }, 'power2.in'); set(GH, F(621), { sx: 1.13, sy: .87 }); to(GH, F(623), .25, { sx: 1, sy: 1 }, 'back.out(2)');   // dimper ner
+        to(GH, F(626), .15, { lx: 0, ly: 0 }); set(GH, F(633), { blink: 1 }); to(GH, F(633), .3, { brow: .2 }); to(GH, F(633), .2, { breath: 1 }, 'none');
+        to(GH, F(640), .6, { cheeks: .5 }, 'power1.inOut');
+        to(GH, F(737), F(2), { y: 936, sy: 1.14, sx: .93, cheeks: 1, brow: .9 }, 'power2.out');                    // 24,57 (slag 43): hickar i sömnen
+        to(GH, F(739), .24, { y: 950, sy: 1, sx: 1, brow: .2 }, 'back.out(2.5)'); to(GH, F(739), .3, { cheeks: .5 }, 'power1.inOut');
+        { const hk = P(hgor, { w: 7 });                                                                             // tre korta streck över huvudet när den hickar
+          HOME.dyn.push(() => { const d = FRM - 737; if (d < 0 || d > 3) { hk.style.display = 'none'; return; } hk.style.display = '';
+            const c = gpt(GH, 100, 60), r0 = 70 + d * 14, r1 = r0 + 34 - d * 8; let s = '';
+            for (const dg of [-128, -90, -52]) { const a = dg * Math.PI / 180; s += `M${(c[0] + Math.cos(a) * r0).toFixed(1)} ${(c[1] + Math.sin(a) * r0).toFixed(1)} L${(c[0] + Math.cos(a) * r1).toFixed(1)} ${(c[1] + Math.sin(a) * r1).toFixed(1)} `; }
+            hk.setAttribute('d', s); }); }
+        set(GH, F(777), { blink: 0, blinkL: 1, lx: 1, ly: .12 }); to(GH, F(777), .2, { cheeks: 0 }); to(GH, F(777), .1, { breath: 0 }, 'none');       // 25,90: ena ögat öppnas
+        to(GH, F(783), .2, { rot: 4 }, 'power2.out');
+        set(GH, F(792), { blinkL: 0 }); to(GH, F(792), .1, { brow: -1 }, 'power2.in');                               // båda ögonen, bestämd
+        to(GH, F(794), F(3), { sy: .82, sx: 1.12, rot: 0 }, 'power2.out');                                           // sats
+        { const ca = gAnchor(450, 10, 100, 151, WKX, 818);
+          to(GH, F(797), F(9), { x: ca.x, size: 450 }, 'power1.in'); to(GH, F(797), F(5), { y: 866 }, 'power2.out'); to(GH, F(802), F(4), { y: ca.y }, 'power2.in');   // språnget
+          to(GH, F(797), F(3), { sy: .9, sx: 1.2, rot: 10 }, 'power2.out'); to(GH, F(799), F(4), { jaw: 1 }, 'power2.out');
+          to(GH, F(805), F(1), { jaw: 0 }, 'none'); set(GH, F(806), { tag: 1, legs: 1, kick: 1, sx: 1.14, sy: .88, brow: 0 });      // 26,87: fångad. Sväljer inte.
+          to(GH, F(808), .1, { lx: 0, ly: 0 });
+          to(GH, F(809), F(14), { x: 503, size: 440 }, 'sine.inOut');                                                 // skuttet till sin plats
+          to(GH, F(809), F(7), { y: 520, sy: 1.07, sx: .95 }, 'power2.out'); to(GH, F(816), F(7), { y: 635.2, sy: 1, sx: 1 }, 'power2.in');
+          to(GH, F(809), F(6), { rot: -9 }, 'power2.out'); to(GH, F(816), F(7), { rot: 0 }, 'power2.inOut');
+          to(GH, F(815), F(7), { legs: 0 }, 'power2.in'); set(GH, F(823), { kick: 0 });
+          set(GH, F(823), { sx: 1.12, sy: .88 }); to(GH, F(826), .25, { sx: 1, sy: 1 }, 'back.out(2)'); }             // 27,43: landar. Nu är den loggan.
+        set(GH, F(900), { blink: 1 }); set(GH, F(903), { blink: 0 });                                                 // 30,00: en blinkning
+        to(GH, F(936), .1, { lx: 1 }, 'power2.out');                                                                  // 31,20: blicken far åt höger
+
+        // --- berättarraderna hemma ---
+        { const h = $('#h-notes');
+          mkNote(HOME, h, [['You'], ['came'], ['for'], ['one', 1], ['video.', 1]], 1040, .7, 2.9, 201);
+          mkNote(HOME, h, [['It'], ['came'], ['with'], ['extras.', 1, F(103)]], 872, 3.1, 6.4, 202);                 // extras. landar med videoreklamen
+          mkNote(HOME, h, [['Someone’s'], ['hungry.', 1]], 839, 7.5, 9.6, 203);
+          mkNote(HOME, h, [['Same'], ['page.'], ['Minus', 1], ['the', 1], ['junk.', 1]], 1205, 21, 24.9, 209); }
+
+        /* =====================================================================================================
+           RÄTT 1 (bildruta 274 till 342): blå mark med prickar. Tre skyltar i en stapel, ett bett per slag.
+           ===================================================================================================== */
+        { const sc = mkScene([[274, 343]]), svg = $('#d1-svg');
+          const pat = E('g', null, svg); pat.insertAdjacentHTML('beforeend', pattern('dots', 'rgba(244,239,230,.32)'));
+          sc.stat.push(() => pat.setAttribute('transform', `translate(${(H(STP * 3, 301) * 3).toFixed(1)} ${(H(STP * 3 + 1, 301) * 3).toFixed(1)})`));
+          const defs = E('defs', null, svg), world = E('g', null, svg), blobHost = E('g', null, world), signsG = E('g', null, world);
+          sc.dyn.push(() => { const a = shk(279, 7, 10, 302), b = shk(306, 4, 5, 303), c = shk(324, 4, 5, 304); world.setAttribute('transform', `translate(${(a[0] + b[0] + c[0]).toFixed(1)} ${(a[1] + b[1] + c[1]).toFixed(1)})`); });
+          // skylt som går att bita i: hålet skärs ut med en mask, och kanten ritas i bläck
+          function biteSign(i, o) {
+            const st = Object.assign(ST({ x: o.x, y: o.y, r: o.r }), { bite: 0 }), g = grp(sc, signsG, st), id = 'd1b' + i;
+            const mask = E('mask', { id: id + 'm', maskUnits: 'userSpaceOnUse', x: -700, y: -300, width: 1400, height: 600 }, defs);
+            E('rect', { x: -700, y: -300, width: 1400, height: 600, fill: '#fff' }, mask); const hole = E('path', { fill: '#000' }, mask);
+            const clipP = E('path', null, E('clipPath', { id: id + 'c' }, defs));
+            const inner = E('g', { mask: `url(#${id}m)` }, g), pts = rectPts(-o.w / 2, -o.h / 2, o.w, o.h, 14), body = P(inner, { fill: o.col, w: 7 });
+            TX(inner, o.text, 0, 2, o.fs);
+            const cx = o.w / 2 - 28, cy = -o.h / 2 + 26, q = 11; bpm(sc, inner, [[[cx - q, cy - q], [cx + q, cy + q]], [[cx + q, cy - q], [cx - q, cy + q]]], { w: 6, seed: o.seed + 50, amp: 1.2 });
+            const edge = P(g, { w: 7 }); edge.setAttribute('clip-path', `url(#${id}c)`);
+            const bitePts = Array.from({ length: 20 }, (_, k) => { const a = k / 20 * Math.PI * 2, rr = 106 * (k % 2 ? 1.07 : .93); return [-o.w / 2 + 14 + Math.cos(a) * rr, Math.sin(a) * rr]; });
+            sc.stat.push(() => { const d = smooth(jit(pts, o.seed, STP, 2.6), true); body.setAttribute('d', d); clipP.setAttribute('d', d); });
+            sc.dyn.push(() => { const hd = st.bite > .5 ? smooth(jit(bitePts, o.seed + 9, STP, 1.6), true) : ''; hole.setAttribute('d', hd); edge.setAttribute('d', hd); });
+            return { st, o };
+          }
+          const SA = biteSign(0, { text: 'ONLY 2 LEFT', col: C.rose, w: 660, h: 180, fs: 96, seed: 311, x: 1160, y: 800, r: 3 });
+          const SB = biteSign(1, { text: 'SPIN TO WIN', col: C.mint, w: 660, h: 180, fs: 96, seed: 321, x: 1195, y: 600, r: -4 });
+          const SC = biteSign(2, { text: 'DOWNLOAD NOW', col: C.lilac, w: 810, h: 180, fs: 88, seed: 331, x: 1270, y: 400, r: 3 });
+          const RX = 630, RY = 905, BX = 852;                       // gorillans plats, och var bettet tas
+          const G = mkGor(sc, world, { x: 370, y: 500, size: 440, brow: -1, lx: .8, ly: .6, rot: -12, sy: 1.1, sx: .92 }, blobHost);
+          to(G, F(274), F(5), { x: RX, y: RY, rot: 0 }, 'power2.in'); set(G, F(279), { sx: 1.14, sy: .86 }); to(G, F(281), .22, { sx: 1, sy: 1 }, 'back.out(2)');   // landar
+          [SA, SB, SC].forEach((S, i) => { to(S.st, F(279 + i), F(3), { y: S.o.y - 24 - i * 8 }, 'power2.out'); to(S.st, F(282 + i), F(4), { y: S.o.y }, 'power2.in'); });   // stapeln hoppar till
+          to(G, F(280), .1, { lx: 1, ly: .7 });
+          const lun = gAnchor(440, 7, 100, 150, BX, 800);
+          [[291, SA, 1160], [309, SB, 1160], [326, SC, 1235]].forEach(([fb, S, sx]) => {
+            to(G, F(fb - 5), F(4), { x: lun.x, y: lun.y, rot: 7 }, 'power2.in'); to(G, F(fb - 6), F(4), { jaw: 1 }, 'power2.out');      // gapar och kastar sig fram
+            to(G, F(fb - 1), F(1), { jaw: 0 }, 'none');                                                                   // hugget, på slaget
+            set(S.st, F(fb), { bite: 1 }); set(G, F(fb), { cheeks: 1, chew: 1 });
+            to(S.st, F(fb), F(1), { x: sx + 14 }, 'none'); to(S.st, F(fb + 1), F(3), { x: sx }, 'power2.out');
+            to(G, F(fb), F(5), { x: RX, y: RY, rot: 0 }, 'back.out(1.5)');
+            to(G, F(fb + 4), F(2), { jaw: .7 }, 'power2.out'); to(G, F(fb + 9), F(1), { jaw: 0 }, 'none');
+            to(S.st, F(fb + 5), F(5), { s: 0, x: RX + 70, y: 806 }, 'power2.in');                                          // resten slurpas in
+          });
+          to(SB.st, F(301), F(5), { y: 800, x: 1160, r: -2 }, 'power2.in'); set(SB.st, F(306), { sy: .86, sx: 1.05 }); to(SB.st, F(307), F(2), { sy: 1, sx: 1 }, 'power2.out');   // stapeln faller ett steg
+          to(SC.st, F(302), F(5), { y: 600, x: 1250, r: 4 }, 'power2.in');
+          to(SC.st, F(319), F(5), { y: 800, x: 1235, r: 2 }, 'power2.in'); set(SC.st, F(324), { sy: .86, sx: 1.05 }); to(SC.st, F(325), F(1), { sy: 1, sx: 1 }, 'none');
+          to(G, F(300), .12, { lx: 0, ly: 0 }); to(G, F(314), .1, { lx: 1, ly: .6 });                                       // andra bettet: ser på oss
+          set(G, F(322), { blink: 1 }); set(G, F(331), { blink: 0, lx: 0, ly: 0 }); to(G, F(331), .15, { brow: .7 });       // tredje: blundar och njuter
+          set(G, F(339), { chew: 0 }); to(G, F(339), F(2), { cheeks: 0, sy: 1.08 }, 'power2.out'); to(G, F(341), F(3), { sy: 1 }, 'power2.inOut');   // svälj
+          // slagstreck runt huvudet på varje bett
+          { const tk = P(world, { w: 8 });
+            sc.dyn.push(() => { let d = -1; for (const fb of [291, 309, 326]) if (FRM >= fb && FRM <= fb + 2) d = FRM - fb; if (d < 0) { tk.style.display = 'none'; return; } tk.style.display = '';
+              const r0 = 268 + d * 26, r1 = r0 + 62 - d * 16; let s = '';
+              for (const dg of [-158, -128, -98, 112, 142, 172]) { const a = dg * Math.PI / 180; s += `M${(BX - 60 + Math.cos(a) * r0).toFixed(1)} ${(712 + Math.sin(a) * r0).toFixed(1)} L${(BX - 60 + Math.cos(a) * r1).toFixed(1)} ${(712 + Math.sin(a) * r1).toFixed(1)} `; } tk.setAttribute('d', s); }); }
+          mkNote(sc, $('#d1-notes'), [['Banner'], ['ads:'], ['eaten.', 1, F(291)]], 816, 9.3, null, 204);              // eaten. på första bettet
+        }
+
+        /* =====================================================================================================
+           RÄTT 2 (343 till 410): olivgrön mark med kodformer. Nosen på lilla reject, rutan rullas ihop och slurpas.
+           ===================================================================================================== */
+        { const sc = mkScene([[343, 411]]), svg = $('#d2-svg');
+          const pat = E('g', null, svg); pat.insertAdjacentHTML('beforeend', pattern('code', 'rgba(244,239,230,.28)'));
+          sc.stat.push(() => pat.setAttribute('transform', `translate(${(H(STP * 3, 401) * 3).toFixed(1)} ${(H(STP * 3 + 1, 401) * 3).toFixed(1)})`));
+          const defs = E('defs', null, svg), world = E('g', null, svg);
+          sc.dyn.push(() => { const a = shk(348, 6, 9, 402); world.setAttribute('transform', `translate(${a[0].toFixed(1)} ${a[1].toFixed(1)})`); });
+          const clipR = E('rect', { x: 0, y: 300, width: 2100, height: 600 }, E('clipPath', { id: 'd2clip' }, defs));
+          const ban = E('g', { 'clip-path': 'url(#d2clip)' }, world);
+          bp(sc, ban, rectPts(110, 430, 1390, 340, 20), { fill: C.paper2, w: 8, seed: 411, amp: 2.5, closed: true });
+          TX(ban, 'We value your privacy', 172, 522, 76, { font: 'InterB', weight: 700, ls: -.01, anchor: 'start' });
+          const BTN = ST({ x: 437, y: 668 }), btnG = grp(sc, ban, BTN);
+          bp(sc, btnG, rectPts(-265, -62, 530, 124, 14), { fill: C.sun, w: 7, seed: 412, amp: 2, closed: true }); TX(btnG, 'ACCEPT ALL', 0, 2, 76);
+          const REJ = Object.assign(ST({ x: 1300, y: 716 }), { on: 0 }), rejG = grp(sc, ban, REJ);
+          const rejBox = bp(sc, rejG, rectPts(-58, -24, 116, 48, 8), { fill: C.paper2, w: 4, seed: 413, amp: .8, closed: true }), rejTx = TX(rejG, 'reject', 0, 1, 28, { font: 'InterB', weight: 700, ls: 0, fill: C.dov });
+          sc.dyn.push(() => { const on = REJ.on > .5; rejBox.style.fill = on ? C.ink : C.paper2; rejTx.style.fill = on ? C.light : C.dov; });
+          // orange ring runt den pyttelilla länken (bildens enda markering)
+          const RING = { p: 1, on: 0 }, ring = P(world, { stroke: C.or, w: 10 }); ring.setAttribute('pathLength', '1'); ring.style.strokeDasharray = '1 1';
+          const ringPts = Array.from({ length: 15 }, (_, k) => { const a = -2.3 + k / 13 * Math.PI * 2 * 1.05; return [1300 + Math.cos(a) * (98 + k * .9), 716 + Math.sin(a) * (52 + k * .6)]; });
+          sc.dyn.push(() => { const vis = RING.on > .5 && RING.p < .995; ring.style.display = vis ? '' : 'none'; if (vis) { ring.setAttribute('d', smooth(jit(ringPts, 414, STP, 1.6), false)); ring.style.strokeDashoffset = RING.p.toFixed(4); } });
+          // rullen
+          const ROLL = { x: 110, on: 0 }, TUBE = ST({ y: 600 }), rollG = E('g', null, world), rollBody = P(rollG, { fill: C.sheet, w: 7 }), rollLines = P(rollG, { w: 5 });
+          sc.dyn.push(() => { clipR.setAttribute('x', ROLL.on < .5 ? 0 : ROLL.x > 1451 ? 2100 : ROLL.x.toFixed(1));
+            if (ROLL.on < .5 || TUBE.s < .02) { rollG.style.display = 'none'; return; } rollG.style.display = '';
+            const pr = clamp((ROLL.x - 110) / 1342, 0, 1), rw = 34 + 62 * pr, hh = 186;
+            rollG.setAttribute('transform', `translate(${(ROLL.x + TUBE.x).toFixed(1)} ${TUBE.y.toFixed(1)}) rotate(${TUBE.r.toFixed(2)}) scale(${TUBE.s.toFixed(3)})`);
+            rollBody.setAttribute('d', smooth(jit(rectPts(-rw / 2, -hh, rw, hh * 2, rw * .45), 415, STP, 1.8), true));
+            const sp = []; for (let k = 0; k <= 10; k++) { const a = k / 10 * Math.PI * 2.6, r = rw * .36 * (1 - k / 13); sp.push([Math.cos(a) * r, -hh + 18 + Math.sin(a) * r * .55]); }
+            rollLines.setAttribute('d', smooth(jit(sp, 416, STP, .7), false) + ' ' + smooth(jit([[-rw * .16, -hh + 50], [-rw * .2, 0], [-rw * .16, hh - 22]], 417, STP, 1), false)); });
+          const G = mkGor(sc, world, { x: 1650, y: 400, size: 380, sy: 1.1, sx: .93, lx: -.6, ly: .4 });
+          to(G, F(343), F(5), { y: 836 }, 'power2.in'); set(G, F(348), { sx: 1.14, sy: .86 }); to(G, F(350), .22, { sx: 1, sy: 1 }, 'back.out(2)');   // landar
+          to(G, F(351), .1, { lx: -1, ly: 0 });                                                                       // 11,70: ser på ACCEPT ALL
+          to(BTN, F(351), F(2), { s: 1.1, r: -2 }, 'power2.out'); to(BTN, F(353), F(2), { s: 1, r: 0 }, 'power2.in'); to(BTN, F(356), F(2), { s: 1.12, r: 2 }, 'power2.out'); to(BTN, F(358), F(3), { s: 1, r: 0 }, 'power2.in');
+          to(G, F(360), .1, { lx: 0, ly: 0 }); to(G, F(361), .1, { brow: -.45 }, 'power2.in');                         // 12,00: ser på oss utan min
+          set(G, F(364), { blink: 1 }); set(G, F(367), { blink: 0 });
+          set(RING, F(365), { on: 1 }); to(RING, F(365), F(6), { p: 0 }, 'power2.inOut'); to(RING, F(377), F(4), { p: 1 }, 'power2.in');
+          to(G, F(368), .1, { lx: -1, ly: .55 });
+          const pr = gAnchor(380, -8, 100, 127, 1322, 708);                                                           // näsborrarna på länkens högra halva
+          to(G, F(371), F(6), { x: pr.x, rot: -8 }, 'power2.inOut'); to(G, F(371), F(3), { y: 790 }, 'power2.out'); to(G, F(374), F(3), { y: pr.y }, 'power2.in');
+          set(G, F(377), { sx: 1.07, sy: .93 }); to(REJ, F(377), F(1), { s: .8 }, 'none'); to(REJ, F(378), .16, { s: 1 }, 'back.out(3)'); set(REJ, F(379), { on: 1 });   // 12,57: nosen trycker. Länken blir svart när nosen släpper (bläck mot bläck syns inte)
+          to(BTN, F(377), .25, { sy: .88, r: -3 }, 'power2.out');                                                     // den stora knappen tappar sugen
+          to(G, F(379), F(2), { sx: 1, sy: 1 }, 'none');
+          to(G, F(379), F(5), { x: 1650, rot: 0 }, 'power3.out'); to(G, F(379), F(2), { y: 700 }, 'power2.out'); to(G, F(381), F(3), { y: 836 }, 'power2.in');   // studsar undan fort: den svarta länken syns
+          // i trycket ligger länken över ansiktet och nosen över länken, så att man ser vad nosen trycker på
+          { const ov = E('g', null, world), ovL = E('g', null, ov), ovBox = P(ovL, { fill: C.paper2, w: 4 }), ovTx = TX(ovL, 'reject', 0, 1, 28, { font: 'InterB', weight: 700, ls: 0, fill: C.dov });
+            const ovN = E('g', null, ov), ids = ['nose', 'nosL', 'nosR'], ovP = ids.map(() => P(ovN, {}));
+            sc.dyn.push(() => { const on = FRM >= 373 && FRM <= 381; ov.style.display = on ? '' : 'none'; if (!on) return;
+              ovL.setAttribute('transform', rejG.getAttribute('transform')); ovBox.setAttribute('d', rejBox.getAttribute('d')); ovBox.style.fill = rejBox.style.fill; ovTx.style.fill = rejTx.style.fill;
+              ovN.setAttribute('transform', G.__wrap.getAttribute('transform'));
+              ids.forEach((id, i) => { const s = G.__el[id], d = ovP[i]; if (!s) return; d.setAttribute('d', s.getAttribute('d')); d.style.fill = s.style.fill; d.style.stroke = s.style.stroke; d.style.strokeWidth = s.style.strokeWidth; }); }); }
+          // pip: slagstreck runt huvudet när nosen trycker (samma språk som betten i rätt 1)
+          { const tk = P(world, { w: 7 });
+            sc.dyn.push(() => { const d = FRM - 377; if (d < 0 || d > 2) { tk.style.display = 'none'; return; } tk.style.display = '';
+              const c = gpt(G, 100, 108), r0 = 200 + d * 22, r1 = r0 + 54 - d * 14; let s = '';
+              for (const dg of [-160, -128, -96, -64, 140, 172]) { const a = dg * Math.PI / 180; s += `M${(c[0] + Math.cos(a) * r0).toFixed(1)} ${(c[1] + Math.sin(a) * r0).toFixed(1)} L${(c[0] + Math.cos(a) * r1).toFixed(1)} ${(c[1] + Math.sin(a) * r1).toFixed(1)} `; }
+              tk.setAttribute('d', s); }); }
+          set(G, F(384), { sx: 1.1, sy: .9 }); to(G, F(385), .2, { sx: 1, sy: 1 }, 'back.out(2)');
+          to(G, F(380), .1, { brow: .3 }); to(G, F(381), .1, { lx: -1, ly: .3 });                                       // ser nöjt på den svarta länken
+          set(ROLL, F(386), { on: 1 }); to(ROLL, F(386), F(9), { x: 1452 }, 'power2.inOut');                          // 12,87 till 13,17: den svarta länken har stått i 5 bildrutor, sedan rullas rutan ihop
+          to(G, F(389), .1, { lx: -.5, ly: .15, brow: -.3 });
+          to(G, F(391), F(3), { jaw: .95 }, 'power2.out');
+          to(TUBE, F(395), F(4), { x: 176, y: 750, r: -84, s: .12 }, 'power2.in'); set(TUBE, F(399), { s: 0 });         // 13,17 till 13,30: slurp
+          to(G, F(398), F(1), { jaw: 0 }, 'none'); set(G, F(399), { cheeks: 1, chew: 1, lx: 0, ly: 0 });
+          set(G, F(405), { chew: 0 }); to(G, F(405), F(2), { cheeks: 0, sy: 1.08 }, 'power2.out'); to(G, F(407), F(3), { sy: 1 }, 'power2.inOut'); to(G, F(407), .12, { brow: .8 });
+          mkNote(sc, $('#d2-notes'), [['Cookie'], ['banner:'], ['rejected.', 1, F(377)]], 1073, 11.6, null, 205);           // rejected. när nosen trycker
+        }
+
+        /* =====================================================================================================
+           RÄTT 3 (411 till 479): ljus mark med nät. Skip in 5 blir Skip in 4, sedan dras reklamen av som en duk.
+           ===================================================================================================== */
+        { const sc = mkScene([[411, 480]]), svg = $('#d3-svg');
+          const pat = E('g', null, svg); pat.insertAdjacentHTML('beforeend', pattern('net', '#cbbd9f'));
+          sc.stat.push(() => pat.setAttribute('transform', `translate(${(H(STP * 3, 501) * 3).toFixed(1)} ${(H(STP * 3 + 1, 501) * 3).toFixed(1)})`));
+          const world = E('g', null, svg), plG = E('g', null, world);
+          sc.dyn.push(() => { const a = shk(452, 6, 8, 502); plG.setAttribute('transform', `translate(${a[0].toFixed(1)} ${a[1].toFixed(1)})`); });
+          bp(sc, plG, rectPts(400, 300, 1000, 562, 20), { fill: C.paper2, w: 8, seed: 511, amp: 2.5, closed: true });
+          bp(sc, plG, [[440, 826], [900, 824], [1360, 826]], { stroke: C.muted, w: 9, seed: 512, amp: 1.5 });
+          const PLY = ST({ x: 900, y: 570 }), plyG = grp(sc, plG, PLY);
+          bp(sc, plyG, blobPts(0, 0, 86, 21, 14, .03), { fill: C.sheet, w: 8, seed: 513, amp: 1.8, closed: true });
+          bp(sc, plyG, polyPts([[-26, -46], [50, 0], [-26, 46]], 8), { fill: C.ink, w: 4, seed: 514, amp: 1.3, closed: true });
+          // reklamen
+          const BR = [1400, 862], PULL = { x: 0, y: 0 }, STR = { k: 1 }, AD = { s: 1, r: 0, b: 0 }, PILL = ST({ x: 1219, y: 786 });
+          const adG = E('g', null, world), sheet = P(adG, { fill: C.night, w: 8 });
+          bp(sc, adG, rectPts(436, 334, 112, 64, 10), { fill: C.sun, w: 5, seed: 521, amp: 1.5, closed: true }); TX(adG, 'Ad', 492, 367, 46);
+          bp(sc, adG, [[436, 826], [740, 824], [1040, 826]], { stroke: C.dov, w: 9, seed: 522, amp: 1.5 });
+          const adProg = P(adG, { stroke: C.sun, w: 9 }), folds = P(adG, { stroke: C.dov, w: 6 }), pillG = E('g', null, adG);
+          bp(sc, pillG, rectPts(-145, -40, 290, 80, 38), { fill: C.light, w: 5, seed: 523, amp: 1.5, closed: true });
+          const pillTx = TX(pillG, 'Skip in 5', 0, 1, 48, { font: 'InterB', weight: 700, ls: 0 }); let pillNow = 5;
+          adG.querySelectorAll('path').forEach((e) => { e.style.vectorEffect = 'non-scaling-stroke'; });              // linjerna behåller sin tjocklek när duken trycks ihop
+          sc.dyn.push(() => { if (AD.s < .01) { adG.style.display = 'none'; return; } adG.style.display = '';
+            const sx = PULL.x * STR.k, sy = PULL.y * STR.k, b = AD.b, kx = 1 - .83 * b, ky = 1 - .35 * b;            // b: hur hopskrynklad duken är (0 slät, 1 en smal trasa)
+            sheet.setAttribute('d', smooth(jit(polyPts([[400, 300], [1400, 300], [BR[0] + sx, BR[1] + sy], [400, 862]], 18), 524, STP, 2.5), true));
+            adG.setAttribute('transform', `translate(${(BR[0] + PULL.x).toFixed(1)} ${(BR[1] + PULL.y).toFixed(1)}) rotate(${AD.r.toFixed(2)}) scale(${(AD.s * kx).toFixed(4)} ${(AD.s * ky).toFixed(4)}) translate(${(-BR[0] - sx).toFixed(1)} ${(-BR[1] - sy).toFixed(1)})`);
+            if (b > .05) { folds.style.display = ''; let d = ''; for (const fx of [560, 770, 990, 1210]) { const q = []; for (let j = 0; j <= 6; j++) q.push([fx + (j % 2 ? 1 : -1) * 30 * Math.min(1, b * 1.6) / kx, 306 + j * 92]); d += smooth(jit(q, 530 + fx, STP, 2), false) + ' '; } folds.setAttribute('d', d); }
+            else folds.style.display = 'none';
+            pillG.setAttribute('transform', `translate(${(PILL.x + sx * .8).toFixed(1)} ${(PILL.y + sy * .8).toFixed(1)}) scale(${PILL.s.toFixed(3)})`);
+            const n = FRM >= 429 ? 4 : 5; if (n !== pillNow) { pillNow = n; pillTx.textContent = 'Skip in ' + n; }
+            adProg.setAttribute('d', `M436 ${(825 + H(STP, 525)).toFixed(1)} L${(532 + Math.min(FRM - 411, 41) * 2.2).toFixed(1)} ${(825 + H(STP + 1, 525)).toFixed(1)}`); });
+          // gorillan skuttar in från höger och väntar vid pillen, med luft till reklamen. Den ligger framför: hörnet försvinner in i munnen, duken hänger bakom hakan.
+          const gorHost = E('g', null, world), RX3 = 1620, RY3 = 915;
+          const G = mkGor(sc, gorHost, { x: 2070, y: 700, size: 380, rot: 10, lx: -1, ly: -.3, sy: 1.06, sx: .95 });
+          to(G, F(411), F(8), { x: RX3, rot: 0 }, 'power2.out'); to(G, F(411), F(4), { y: 640 }, 'power2.out'); to(G, F(415), F(4), { y: RY3 }, 'power2.in');
+          set(G, F(419), { sx: 1.1, sy: .9 }); to(G, F(421), .22, { sx: 1, sy: 1 }, 'back.out(2)');                  // landar
+          set(G, F(425), { blink: 1 }); set(G, F(427), { blink: 0 });
+          to(PILL, F(429), F(2), { s: 1.14 }, 'power2.out'); to(PILL, F(431), F(4), { s: 1 }, 'power2.inOut');         // 14,30: Skip in 4
+          to(G, F(435), .1, { lx: 0, ly: 0 }); to(G, F(435), .1, { brow: -.5 }, 'power2.in');                          // 14,50: ser på oss
+          to(G, F(440), .08, { lx: -1, ly: .1, brow: -1 });
+          const ba = gAnchor(380, -6, 100, 150, 1392, 854);
+          to(G, F(441), F(5), { x: ba.x, y: ba.y, rot: -6 }, 'power2.in'); to(G, F(441), F(3), { jaw: 1 }, 'power2.out'); to(G, F(445), F(1), { jaw: 0 }, 'none');   // 14,87: biter tag i hörnet
+          const pull = (f, n, x, y, e) => { to(PULL, F(f), F(n), { x, y }, e); to(G, F(f), F(n), { x: ba.x + x, y: ba.y + y }, e); };
+          pull(446, 4, 38, -8, 'power2.out'); pull(450, 2, 16, -3, 'power1.inOut');                                    // ryck, slack
+          pull(452, 12, 1640 - ba.x, 930 - ba.y, 'power2.inOut');                                                      // 15,07 till 15,47: drar av duken, den skrynklas ihop mot munnen
+          to(STR, F(452), F(3), { k: 0 }, 'power2.out'); to(AD, F(452), F(12), { b: 1 }, 'power2.in'); to(AD, F(452), F(12), { r: -58 }, 'power1.in');
+          to(G, F(452), F(6), { rot: 6 }, 'power2.out'); to(G, F(458), F(6), { rot: 0 }, 'power2.inOut');
+          to(G, F(461), F(3), { jaw: .7 }, 'power2.out'); to(AD, F(464), F(4), { s: 0 }, 'power2.in'); to(G, F(467), F(1), { jaw: 0 }, 'none');   // 15,47: slurp
+          set(G, F(468), { cheeks: 1, chew: 1, lx: 0, ly: 0 }); set(G, F(474), { chew: 0 }); to(G, F(474), F(2), { cheeks: 0, sy: 1.08 }, 'power2.out'); to(G, F(476), F(3), { sy: 1 }, 'power2.inOut'); to(G, F(476), .12, { brow: .8 });
+          to(PLY, F(468), F(3), { s: 1.15 }, 'power2.out'); to(PLY, F(471), .2, { s: 1 }, 'back.out(3)');              // play studsar till, orörd
+          mkNote(sc, $('#d3-notes'), [['Video'], ['ad:'], ['skipped.', 1, F(452)]], 804, 13.9, null, 206);             // skipped. när reklamen dras av
+        }
+
+        /* =====================================================================================================
+           RÄTT 4 (480 till 548): papper med korn. Pekaren springer runt med tre spårare, gorillan plockar av dem.
+           ===================================================================================================== */
+        { const sc = mkScene([[480, 549]]), svg = $('#d4-svg'), world = E('g', null, svg), gorHost = E('g', null, world), ptG = E('g', null, world), carryG = E('g', null, world);
+          // pekaren springer med spårarna på ryggen och lägger sig på sidan, som en hund som vill bli putsad. Ryggen (pilens övre kant) ligger då vågrätt.
+          const K4 = 5.2, TR = 46, LIE = 720 - Math.atan2(44, 46) * 180 / Math.PI, R0 = 720 - LIE, CX = 1430, CY = 580, RR = 150, SX = 1180, SY = 820, GS = 400, GX = 590, GY = 960;
+          const lie = ([x, y]) => { const a = -R0 * Math.PI / 180, X = (x - 20) * K4, Y = (y - 40) * K4; return [X * Math.cos(a) - Y * Math.sin(a), X * Math.sin(a) + Y * Math.cos(a)]; };
+          const toLocal = ([x, y]) => { const a = R0 * Math.PI / 180; return [x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a)]; };
+          const TIP = lie(ARROW[0]), WING = lie(ARROW[6]), FY = TIP[1] - 10.1, LEG = 1.62 * TR;                        // fötterna står på pilens streck
+          const PT = { ang: -90, run: 1, rest: LIE, wig: 0, hop: 0, sy: 1 };
+          mkArrow(sc, ptG, K4, 611, 11);
+          // tre spårare på ryggen. lean: hur mycket de lutar sig bort från gorillan, runt fötterna
+          const XS = [TIP[0] + .8 * TR + 8, 0, WING[0] - .8 * TR - 8]; XS[1] = (XS[0] + XS[2]) / 2;
+          const TK = XS.map((x, i) => { const st = Object.assign(ST({}), { foot: toLocal([x, FY]), lean: 0, lx: .6, ly: -.3, tw: 0, kick: .3 }); mkTracker(sc, ptG, st, TR, 620 + i * 6); return st; });
+          sc.dyn.unshift(() => { for (const st of TK) { const a = (R0 + st.lean) * Math.PI / 180; st.x = st.foot[0] + Math.sin(a) * LEG; st.y = st.foot[1] - Math.cos(a) * LEG; st.r = R0 + st.lean; } });
+          let G = null;
+          sc.dyn.push(() => { const a = PT.ang * Math.PI / 180, bob = Math.abs(Math.sin((FRM - 480) * .5)) * 16 * PT.run;            // galopp medan den springer
+            const x = lerp(SX, CX + Math.cos(a) * RR, PT.run), y = lerp(SY, CY + Math.sin(a) * RR, PT.run) - PT.hop - bob;
+            const rz = lerp(PT.rest, PT.ang + 202, PT.run) + PT.wig * 17 * Math.sin((FRM - 541) * 2.2);
+            ptG.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(1 ${PT.sy.toFixed(3)}) rotate(${rz.toFixed(2)})`);
+            if (FRM < 506) { const dx = x - GX, dy = y - (GY - 188), d = Math.hypot(dx, dy); G.lx = dx / d; G.ly = clamp(dy / d * 2, -1, 1); } });   // pupillerna följer varven
+          G = mkGor(sc, gorHost, { x: GX, y: GY, size: GS, sy: 1.06, lx: .95, ly: -.5, brow: -.3 });
+          to(G, F(480), .2, { sy: 1 }, 'back.out(3)');
+          set(G, F(491), { blink: 1 }); set(G, F(493), { blink: 0 });
+          to(PT, F(480), F(26), { ang: 540 }, 'sine.out'); to(PT, F(506), F(6), { run: 0 }, 'power3.out');                   // ett och tre kvarts varv, sedan lägger den sig
+          to(PT, F(510), F(1), { sy: .9 }, 'none'); to(PT, F(511), F(3), { sy: 1 }, 'power2.out');
+          TK.forEach((st) => { to(st, F(506), .1, { lx: -.8, ly: -.6 }); set(st, F(506), { tw: 1 }); });                // de ser gorillan komma och darrar
+          // 16,77: sats och skutt upp över pekaren. Gorillan svävar med luft till spårarna, nyper en i taget ovanifrån.
+          const ROT = [-10, -10, 4], LIFT = 84, NIP = [514, 523, 531], GULP = [[519, 521], [527, 529], [538, 540]];
+          const B = XS.map((x, i) => gAnchor(GS, ROT[i], 100, 151, SX + x, SY + FY - LEG - TR + 6));                           // munnen sex px ner i ögats överkant
+          to(G, F(503), F(3), { sx: 1.1, sy: .86 }, 'power2.out'); to(G, F(503), .1, { brow: -.9 });
+          to(G, F(506), F(2), { sx: .95, sy: 1.06 }, 'power2.out'); to(G, F(508), F(3), { sx: 1, sy: 1 }, 'power2.inOut');
+          to(G, F(506), F(5), { x: B[0].x }, 'power1.inOut'); to(G, F(506), F(5), { y: B[0].y - LIFT }, 'power3.out');
+          to(G, F(506), F(3), { rot: 4 }, 'power2.out'); to(G, F(509), F(2), { rot: ROT[0] }, 'power2.inOut'); to(G, F(506), .1, { lx: .1, ly: 1 });
+          // de andra lutar sig bort medan grannen nyps, och rätar på sig precis innan det blir deras tur
+          [1, 2].forEach((i) => { to(TK[i], F(511), F(3), { lean: 18 }, 'power2.out'); to(TK[i], F(NIP[i] - 3), F(3), { lean: 0 }, 'power2.inOut'); });
+          // nyp 1 (17,13), nyp 2 (17,43), nyp 3 (17,70): ner med öppet gap, tag, upp. Spåraren hänger i munnen tills den sväljs.
+          to(G, F(510), F(3), { jaw: .85 }, 'power2.out'); to(G, F(513), F(1), { jaw: 0 }, 'none');
+          to(G, F(511), F(3), { y: B[0].y }, 'power2.in'); to(G, F(514), F(4), { x: B[0].x - 30, y: B[0].y - LIFT }, 'power2.out');      // upp och lite bakåt, bort från grannarna
+          to(G, F(519), F(2), { jaw: .8 }, 'power2.out'); to(G, F(522), F(1), { jaw: 0 }, 'none');
+          to(G, F(520), F(3), { x: B[1].x, y: B[1].y }, 'power2.in'); to(G, F(523), F(3), { x: B[1].x - 30, y: B[1].y - LIFT }, 'power2.out');
+          to(G, F(527), F(2), { jaw: .8 }, 'power2.out'); to(G, F(530), F(1), { jaw: 0 }, 'none');
+          to(G, F(528), F(3), { x: B[2].x, y: B[2].y, rot: ROT[2] }, 'power2.in');
+          to(G, F(515), .1, { lx: .55, ly: 1 });
+          // skuttar hem med den sista i munnen, landar och sväljer
+          to(G, F(531), F(8), { x: GX }, 'power1.inOut'); to(G, F(531), F(4), { y: 620 }, 'power2.out'); to(G, F(535), F(4), { y: GY }, 'power2.in');
+          to(G, F(531), F(3), { rot: -12 }, 'power2.out'); to(G, F(535), F(4), { rot: 0 }, 'power2.inOut'); to(G, F(531), .1, { lx: -.8, ly: .2 });
+          to(G, F(538), F(2), { jaw: .8 }, 'power2.out'); to(G, F(540), F(1), { jaw: 0 }, 'none');
+          set(G, F(539), { sx: 1.12, sy: .88 }); to(G, F(540), .2, { sx: 1, sy: 1 }, 'back.out(2)');
+          set(G, F(541), { cheeks: 1, chew: 1 }); to(G, F(541), .1, { lx: 0, ly: 0 }); to(G, F(541), .15, { brow: .8 });
+          set(G, F(546), { chew: 0 }); to(G, F(546), F(2), { cheeks: 0, sy: 1.06 }, 'power2.out'); to(G, F(548), F(3), { sy: 1 }, 'power2.inOut');
+          NIP.forEach((fn, n) => { set(TK[n], F(fn), { s: 0 }); to(PT, F(fn), F(1), { sy: .93 }, 'none'); to(PT, F(fn + 1), F(4), { sy: 1 }, 'power2.out');
+            const cs = Object.assign(ST({ s: 0 }), { lx: -.8, ly: -.6, tw: 1, kick: .3 }); mkTracker(sc, carryG, cs, TR, 620 + n * 6);   // samma öga och samma ben som på ryggen, så att bytet inte syns
+            set(cs, F(fn), { s: 1 }); set(cs, F(fn + 1), { tw: 0 }); to(cs, F(fn + 1), F(2), { kick: 1 }, 'power2.out'); to(cs, F(fn + 1), .1, { lx: -.1, ly: -1 });   // sprattlar och tittar upp
+            to(cs, F(GULP[n][0]), F(GULP[n][1] - GULP[n][0]), { s: 0 }, 'power2.in');
+            sc.dyn.unshift(() => { if (cs.s < .01) return; const m = gpt(G, 100, 151), r = 10 * Math.sin((FRM - fn) * 1.2), a = r * Math.PI / 180, L = TR * cs.s - 6;
+              cs.x = m[0] - Math.sin(a) * L; cs.y = m[1] + Math.cos(a) * L; cs.r = r; }); });                                 // hänger i munnen och dinglar
+          // 18,03: pekaren reser sig, ruskar på sig och skuttar
+          to(PT, F(541), F(8), { rest: 720 }, 'back.out(1.6)');
+          to(PT, F(541), F(1), { wig: 1 }, 'none'); to(PT, F(542), .32, { wig: 0 }, 'power1.in');
+          to(PT, F(545), F(2), { hop: 40 }, 'power2.out'); to(PT, F(547), F(2), { hop: 0 }, 'power2.in');
+          mkNote(sc, $('#d4-notes'), [['Trackers:'], ['picked off.', 1, F(514)]], 873, 16.2, null, 207);   // picked off. vid första nypet
+        }
+
+        /* =====================================================================================================
+           RÄTT 5 (549 till 616): natt med stjärnor. Nyhetsbrevet spricker i sex ungar, alla sju sugs in i gapet.
+           ===================================================================================================== */
+        { const sc = mkScene([[549, 617]]), svg = $('#d5-svg'), SUCK = { k: 0 }, M = [432, 814];
+          // kameran åker in mot gorillan medan den suger, och får en stöt när munnen slår igen (texten ligger utanför och står still)
+          const cam = E('g', null, svg), CAM = { z: 1 }, PIV = [560, 640];
+          sc.dyn.push(() => { const a = shk(597, 7, 12, 704); cam.setAttribute('transform', `translate(${(PIV[0] + a[0]).toFixed(1)} ${(PIV[1] + a[1]).toFixed(1)}) scale(${CAM.z.toFixed(4)}) translate(${-PIV[0]} ${-PIV[1]})`); });
+          to(CAM, F(566), F(31), { z: 1.16 }, 'power2.in'); to(CAM, F(597), F(3), { z: 1.22 }, 'power3.out'); to(CAM, F(600), F(16), { z: 1.1 }, 'power2.inOut');
+          const stars = E('g', null, cam); stars.insertAdjacentHTML('beforeend', pattern('stars', 'rgba(244,239,230,.55)'));
+          sc.dyn.push(() => stars.setAttribute('transform', `translate(${(H(STP * 3, 701) * 3 - SUCK.k * 30 + H(FRM, 702) * 4 * SUCK.k).toFixed(1)} ${(H(STP * 3 + 1, 701) * 3 + H(FRM + 9, 702) * 4 * SUCK.k).toFixed(1)})`));
+          // sugstreck: spiraler in mot gapet, med ett streck som löper inåt
+          const LN = [-80, -62, -44, -26, -8, 10, 28, 46, 64].map((dg, k) => { const e = P(cam, { stroke: C.light, w: 7 }); e.setAttribute('pathLength', '1'); const pts = [];
+            for (let j = 0; j <= 9; j++) { const p = j / 9, r = 1500 - 1370 * p, a = dg * Math.PI / 180 - 1.1 * (1 - p); pts.push([M[0] + Math.cos(a) * r, M[1] + Math.sin(a) * r]); } return { e, pts, k }; });
+          sc.dyn.push((t) => { for (const l of LN) { if (SUCK.k < .02) { l.e.style.display = 'none'; continue; } l.e.style.display = '';
+            l.e.setAttribute('d', smooth(jit(l.pts, 710 + l.k, STP, 3), false)); l.e.style.strokeWidth = (7 * SUCK.k).toFixed(2); l.e.style.strokeDasharray = '.17 .83';
+            l.e.style.strokeDashoffset = (-(((t - F(566)) * 2.3 + l.k * .37) % 1)).toFixed(4); } });
+          const gorHost = E('g', null, cam), boxG = E('g', null, cam);
+          const G = mkGor(sc, gorHost, { x: 430, y: 862, size: 460, lx: 1, ly: -.25, brow: -.6, sy: 1.06 });
+          sc.dyn.unshift(() => { G.shx = H(FRM, 703) * 3 * SUCK.k; G.shy = H(FRM + 7, 703) * 3 * SUCK.k; });
+          // en ruta som kan sugas in: bas (läge, vridning, skala) ur spår, insuget räknas ur bildrutans nummer
+          function suckBox(g, st, f0, trem) { sc.dyn.push(() => { const p = clamp((FRM - f0) / 12, 0, 1); if (st.s < .01 || p >= 1) { g.style.display = 'none'; return; } g.style.display = '';
+            const e = p * p, pre = clamp((FRM - 563) / 6, 0, 1), tq = trem && FRM < 555 ? clamp((FRM - 546) / 9, 0, 1) * 8 : 0;
+            const bx = st.x + H(FRM, 720 + f0) * tq, by = st.y + H(FRM + 3, 720 + f0) * tq, dx = bx - M[0], dy = by - M[1], r0 = Math.hypot(dx, dy), a0 = Math.atan2(dy, dx), a = a0 + (-.1 - a0) * e + .55 * Math.sin(Math.PI * e), rr = r0 * (1 - .05 * pre) * Math.pow(1 - e, 1.15);
+            const toM = (a + Math.PI) * 180 / Math.PI, dr = (((toM - st.r) % 180) + 270) % 180 - 90, q = Math.sin(Math.PI * Math.min(1, e * 1.3));
+            const s = st.s * (1 - .86 * e);
+            g.setAttribute('transform', `translate(${(M[0] + Math.cos(a) * rr).toFixed(1)} ${(M[1] + Math.sin(a) * rr).toFixed(1)}) rotate(${(st.r + dr * Math.min(1, e * 2.4)).toFixed(2)}) scale(${(s * (1 + .6 * q + .07 * pre)).toFixed(4)} ${(s * (1 - .32 * q)).toFixed(4)})`); }); }
+          const NW5 = ST({ x: 1190, y: 560 }), nwG = E('g', null, boxG); buildNews(sc, nwG, 731); suckBox(nwG, NW5, 574, true);
+          set(NW5, F(555), { s: 1.1 }); to(NW5, F(555), .2, { s: 1 }, 'back.out(3)');
+          // sex ungar. De som rör nyhetsbrevet ligger klart över det (en hög), de andra har minst 18 px luft.
+          [['NO WAIT!', C.sun, 330, 905, 345, -8, 572], ['PLEASE!', C.rose, 310, 1570, 378, 7, 585], ['LAST CHANCE', C.mint, 480, 1590, 640, -5, 582], ['RATE US', C.lilac, 310, 860, 884, 6, 569], ['ARE YOU SURE?', C.salmon, 520, 1370, 902, -4, 577], ['ALLOW NOTIFICATIONS?', C.light, 770, 1400, 166, 3, 580]].forEach(([text, col, w, x, y, r, f0], i) => {
+            const st = ST({ x: 1190, y: 560, r: r * -3, s: 0 }), g = E('g', null, boxG), win = text === 'LAST CHANCE' || text === 'ARE YOU SURE?';
+            if (win) {                                                                                                   // reklamfönster: titelrad med tre prickar
+              bp(sc, g, rectPts(-w / 2, -82, w, 164, 12), { fill: col, w: 7, seed: 740 + i * 9, amp: 2.4, closed: true });
+              bp(sc, g, [[-w / 2 + 4, -36], [0, -37], [w / 2 - 4, -36]], { w: 6, seed: 741 + i * 9, amp: 1.2 });
+              [0, 1, 2].forEach((d) => bp(sc, g, blobPts(-w / 2 + 30 + d * 27, -59, 8, 742 + i * 9 + d, 8, .06), { fill: C.sheet, w: 4, seed: 745 + i * 9 + d, amp: .8, closed: true }));
+              TX(g, text, 0, 22, 60);
+            } else { bp(sc, g, rectPts(-w / 2, -55, w, 110, 12), { fill: col, w: 7, seed: 740 + i * 9, amp: 2.4, closed: true }); TX(g, text, 0, 2, 60); }
+            suckBox(g, st, f0, false);
+            to(st, F(555 + i), .26, { s: 1 }, 'back.out(2.6)'); to(st, F(555 + i), .32, { x, y, r }, 'back.out(1.5)'); });      // 18,50: spricker i sex
+          to(G, F(549), F(3), { y: 905 }, 'power2.in'); set(G, F(552), { sx: 1.1, sy: .9 }); to(G, F(553), .2, { sx: 1, sy: 1 }, 'back.out(2)');
+          to(G, F(556), .08, { brow: 1 }); to(G, F(558), .1, { lx: .7, ly: -.7 }); to(G, F(562), .1, { lx: .9, ly: .5 });           // förvånad, ser sig om
+          to(G, F(565), F(3), { rot: -11, x: 396, sx: .95, sy: 1.07, brow: -1 }, 'power2.out'); to(G, F(565), .1, { lx: 1, ly: 0 });   // 18,87: drar huvudet bakåt
+          to(G, F(569), F(2), { jaw: 1 }, 'power2.out'); to(G, F(569), F(4), { rot: 5, x: 440, sx: 1.05, sy: 1 }, 'power2.out');      // insuget
+          to(SUCK, F(567), F(4), { k: 1 }, 'power2.out'); to(SUCK, F(594), F(3), { k: 0 }, 'power2.in');
+          to(G, F(596), F(1), { jaw: 0 }, 'none'); set(G, F(597), { cheeks: 1, sx: 1.17, sy: .95, rot: 0, brow: 1, lx: 0, ly: 0 });   // 19,90: smäller igen, kinderna buktar
+          to(G, F(597), F(3), { x: 430 }, 'power2.out');
+          to(G, F(600), F(2), { cheeks: 0, sy: 1.1, sx: .97 }, 'power2.in'); to(G, F(602), F(2), { sy: .93, sx: 1.05 }, 'power2.out'); to(G, F(604), .2, { sy: 1, sx: 1 }, 'back.out(2.5)');   // 20,00: svälj
+          to(G, F(604), .1, { brow: .9 }); set(G, F(609), { blink: 1 }); set(G, F(612), { blink: 0 });                                // 20,30: nöjd blinkning
+          mkNote(sc, $('#d5-notes'), [['Popups:'], ['gone.', 1, F(597)]], 611, 18.6, null, 208);                // gone. när gapet slår igen
+        }
+
+        /* ----- Klockan. En tween driver bildrutorna genom en egenskap, så att varje sökning ritar om, även utan händelser. ----- */
+        finalizeTracks();
+        const tl = gsap.timeline({ paused: true });
+        const clock = {}; let cv = 0;
+        Object.defineProperty(clock, 't', { get: () => cv, set: (v) => { cv = v; frame(v); } });
+        tl.to(clock, { t: D, duration: D, ease: 'none' }, 0);
+        tl.eventCallback('onUpdate', () => frame(tl.time()));
+        frame(0);
+        window.__timelines = window.__timelines || {};
+        window.__timelines['main'] = tl;
+      })();
+    </script>
+  </body>
+</html>

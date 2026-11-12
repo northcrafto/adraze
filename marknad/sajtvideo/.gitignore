@@ -1,0 +1,11 @@
+# Stora filer stannar lokalt: bara källan, den tysta webbversionen och omslaget versionshanteras
+/*.mp4
+*/renders/*
+!*/renders/webb.mp4
+!*/renders/omslag.jpg
+node_modules/
+*.log
+*.wav
+granska/
+ra/
+snapshots/
