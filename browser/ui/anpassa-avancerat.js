@@ -239,7 +239,7 @@
       skriptStatus: el('p', { class: 'anp-status', role: 'status', hidden: true }),
       skalStatus: el('p', { class: 'anp-status', role: 'status', hidden: true }),
     };
-    skalKod = kodRuta({ etikett: 'CSS för AdRaze', rader: 10, platshallare: '/* Exempel: smalare flikar */\n.tab { max-width: 180px; }' });
+    skalKod = kodRuta({ etikett: 'CSS för AdRaze', rader: 10, platshallare: '/* ' + tx('Exempel: smalare flikar') + ' */\n.tab { max-width: 180px; }' });
     skalKod.ta.addEventListener('input', () => { skalSmutsig = true; });
     skalBrytare = strombrytare(false, 'Använd egen CSS för AdRaze', (pa) => sparaSkal(pa));
     const kbd = (t) => el('kbd', { text: t });
@@ -364,7 +364,7 @@
     const sajtFalt = el('div', { class: 'anp-falt anp-sajtfalt', hidden: lage === 'alla' },
       el('span', { class: 'anp-etikett', text: 'Sajt' }), vard,
       el('label', { class: 'anp-val' }, under, el('span', { text: 'Även underdomäner' })));
-    const kod = kodRuta({ varde: r.css, etikett: 'CSS', rader: 14, platshallare: '/* Exempel */\nbody { font-size: 18px; }\n.annons { display: none !important; }' });
+    const kod = kodRuta({ varde: r.css, etikett: 'CSS', rader: 14, platshallare: '/* ' + tx('Exempel') + ' */\nbody { font-size: 18px; }\n.annons { display: none !important; }' });
     const medd = meddelande();
     let t = null;
     const koll = () => { const f = klamrar(kod.get()); visaMedd(medd, f, f ? 'varning' : ''); };
@@ -415,8 +415,8 @@
     const p = s || { id: null, namn: '', match: [], exclude: [], tid: 'document-end', ramar: true, pa: true, kod: '' };
     let tid = p.tid === 'document-start' ? 'document-start' : 'document-end';
     let senasteHuvud = (lasHuvud(p.kod) || {}).text || '';
-    const namn = el('input', { type: 'text', class: 'anp-in', placeholder: 'Mitt skript', spellcheck: 'false', autocomplete: 'off', translate: 'no', 'aria-label': 'Namn', value: p.namn || '', maxlength: '120' });
-    const sajter = el('textarea', { class: 'anp-in anp-sajter', rows: '3', spellcheck: 'false', autocomplete: 'off', wrap: 'off', translate: 'no', 'aria-label': 'Sajter', placeholder: '*.example.com/*\n!*.example.com/konto/*' });
+    const namn = el('input', { type: 'text', class: 'anp-in', placeholder: tx('Mitt skript'), spellcheck: 'false', autocomplete: 'off', translate: 'no', 'aria-label': 'Namn', value: p.namn || '', maxlength: '120' });
+    const sajter = el('textarea', { class: 'anp-in anp-sajter', rows: '3', spellcheck: 'false', autocomplete: 'off', wrap: 'off', translate: 'no', 'aria-label': 'Sajter', placeholder: '*.example.com/*\n!*.example.com/' + tx('konto') + '/*' });
     sajter.value = [...(p.match || []), ...(p.exclude || []).map((x) => '!' + x)].join('\n');
     const tidSeg = seg(tid, [['document-end', 'När sidan har laddats'], ['document-start', 'Tidigt']], (v) => { tid = v; oppen.smutsig = true; });
     const ramar = strombrytare(p.ramar !== false, 'Även i inbäddade ramar', () => { oppen.smutsig = true; });
