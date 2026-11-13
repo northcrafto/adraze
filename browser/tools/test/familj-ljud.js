@@ -55,6 +55,7 @@ async function kor() {
     await sov(500);
     const varning = await k(`(() => { const m = [...document.querySelectorAll('div')].find((d) => /Slå på spärrljud/.test(d.textContent) && getComputedStyle(d).position === 'fixed'); return !!m; })()`);
     T.ok('varning visas innan ljudet slås på', varning);
+    T.ok('varningen vid påslag har ingen emoji', !(await k(`/\\p{Extended_Pictographic}/u.test(document.getElementById('fam-confirm').textContent + document.getElementById('fam-confirm').innerHTML)`)));
     await bild('2-varning');
     const knappar = await k(`[...document.querySelectorAll('button')].filter((b) => b.offsetParent && /^(Slå på|Avbryt)$/.test(b.textContent.trim())).map((b) => b.textContent.trim())`);
     T.ok('varningen har Slå på och Avbryt', Array.isArray(knappar) && knappar.includes('Slå på') && knappar.includes('Avbryt'), knappar);
@@ -74,8 +75,24 @@ async function kor() {
 
     // Provlyssna och volym
     await k(`document.querySelector('[data-child=b1] [data-a=ljud-prova]').click()`);
+    await sov(400);
+    const provVarning = await k(`(() => { const m = document.getElementById('fam-confirm'); return m ? { text: m.textContent, emoji: /\\p{Extended_Pictographic}/u.test(m.textContent) } : null; })()`);
+    T.ok('provlyssna varnar först (sänk volymen), utan emoji', provVarning && /Sänk volymen/.test(provVarning.text) && !provVarning.emoji, provVarning);
+    T.ok('inget spelas innan varningen godkänts', (await k(`window.__spelat.length`)) === 0);
+    await bild('3b-provvarning');
+    await k(`document.getElementById('fam-c-yes').click()`);
+    await sov(300);
     let s = await k(`window.__spelat.slice(-1)[0]`);
     T.ok('provlyssna spelar valt ljud', s && /sparr-stotar\.ogg$/.test(s.src) && Math.abs(s.vol - 0.6) < 0.01, s);
+    T.ok('knappen blir Stoppa medan ljudet spelar', await k(`document.querySelector('[data-child=b1] [data-a=ljud-prova]').textContent.trim()`) === 'Stoppa');
+    await bild('3c-spelar');
+    await k(`document.querySelector('[data-child=b1] [data-a=ljud-prova]').click()`);
+    await sov(200);
+    T.ok('Stoppa avbryter ljudet direkt', await k(`(() => { const b = document.querySelector('[data-child=b1] [data-a=ljud-prova]'); return b.textContent.trim() === 'Provlyssna' && !b.classList.contains('spelar') && _famProv === null; })()`));
+    await k(`document.querySelector('[data-child=b1] [data-a=ljud-prova]').click()`);
+    await sov(300);
+    T.ok('andra provlyssningen varnar inte igen', !(await k(`!!document.getElementById('fam-confirm')`)) && (await k(`window.__spelat.length`)) === 2);
+    await k(`famLjudStoppa()`);
     await k(`(() => { const v = document.querySelector('[data-child=b1] [data-a=ljud-vol]'); v.value = '80'; v.dispatchEvent(new Event('change')); return 1; })()`);
     await sov(300);
     T.ok('volymen sparas (max 80)', await k(`famChildById('b1').sound.volym`) === 80);

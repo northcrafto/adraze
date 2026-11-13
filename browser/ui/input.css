@@ -550,6 +550,9 @@ body.incog #views, :root[data-theme="dark"] body.incog #views { background-color
 #settings .fr-open:hover { background: var(--s-hover); }
 #settings .fam-code { background: var(--s-accent-soft); border-color: rgb(255 75 31 / .3); }
 #settings .fam-code .code { color: var(--s-accent-ink); }
+#settings .fam-knapp { background: var(--s-field); color: var(--s-ink); border-color: var(--s-field-line); }
+#settings .fam-knapp:hover:not(:disabled), #settings .fam-code button:hover { background: var(--s-accent-soft); color: var(--s-accent-ink); border-color: color-mix(in srgb, var(--color-terra) 45%, transparent); }
+#settings .fam-knapp.spelar { background: var(--color-terra); color: #fff; border-color: var(--color-terra); }
 #settings .fr-edit-in { background: var(--s-hover); }
 
 /* Öppning: snabb intoning, inga studsar */
