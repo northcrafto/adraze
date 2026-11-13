@@ -2704,7 +2704,6 @@
  "Provlyssna",
  "Kunde inte spara ljudet just nu. Kontrollera din uppkoppling.",
  "Slå på spärrljud?",
- "Ljuden låter trasiga och obehagliga med flit, och de kan skrämma små barn. Ljudet spelas en gång varje gång {n} hamnar på en spärrad sida. Provlyssna först, gärna med låg volym.",
  "Slå på",
  "idag",
  "totalt",
@@ -2715,5 +2714,6 @@
  "konto",
  "Inloggningskod",
  "Sänk volymen först",
- "Ljudet är högt och obehagligt med flit. Sänk datorns volym och se till att inget barn sitter bredvid innan du provlyssnar. Du kan stoppa ljudet när du vill."
+ "Ljudet är högt och obehagligt med flit. Sänk datorns volym och se till att inget barn sitter bredvid innan du provlyssnar. Du kan stoppa ljudet när du vill.",
+ "Rekommenderas inte – det här är bara ett roligt/läskigt tillägg. Ljuden låter trasiga och obehagliga med flit och kan skrämma små barn. Använd det inte om {n} har autism, ångest eller trauma, är ljudkänslig (hyperakusis, misofoni, tinnitus) eller använder hörlurar. Ljudet spelas en gång varje gång {n} hamnar på en spärrad sida. Provlyssna först, gärna med låg volym."
 ]
