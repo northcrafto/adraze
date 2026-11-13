@@ -3971,7 +3971,7 @@ function famLjudKoppla(el, c) {
   sel.addEventListener('change', async () => {
     const fore = famLjud(famChildById(c.id) || c), id = sel.value;
     if (id && !fore.id) {
-      const ok = await famConfirm(tf('Slå på spärrljud?'), tn('Ljuden låter trasiga och obehagliga med flit, och de kan skrämma små barn. Ljudet spelas en gång varje gång {n} hamnar på en spärrad sida. Provlyssna först, gärna med låg volym.', c.name), tf('Slå på'), false);
+      const ok = await famConfirm(tf('Slå på spärrljud?'), tn('Rekommenderas inte – det här är bara ett roligt/läskigt tillägg. Ljuden låter trasiga och obehagliga med flit och kan skrämma små barn. Använd det inte om {n} har autism, ångest eller trauma, är ljudkänslig (hyperakusis, misofoni, tinnitus) eller använder hörlurar. Ljudet spelas en gång varje gång {n} hamnar på en spärrad sida. Provlyssna först, gärna med låg volym.', c.name), tf('Slå på'), false);
       if (!ok) { sel.value = ''; return; }
     }
     if (await famLjudSpara(c, id, fore.volym)) renderFam(); else sel.value = fore.id;
