@@ -754,6 +754,7 @@ function renderSetHero() {
   av.classList.toggle('has-img', !!pic);
 }
 function closeSettings() {
+  try { famLjudStoppa(); } catch {}
   $('settings').classList.add('hidden');
   const st = settingsTab;
   if (st && tabs.indexOf(st) >= 0) {
@@ -3597,6 +3598,7 @@ function kbSvar(fragor) {
   setTimeout(() => { if (ov.style.display === 'none') return; ov.style.display = 'none'; ov.classList.remove('kb-ja'); try { if (active) guardedNavigate(active, u); } catch {} }, 1400);
 }
 function renderFam() {
+  try { famLjudStoppa(); } catch {}
   const host = $('fam-body'); if (!host) return;
   if (!account) {
     const _fa = $('fam-add'); if (_fa) _fa.style.display = 'none';
@@ -3843,13 +3845,13 @@ async function famShowSessions(childId, childName) {
   }
   render();
 }
-function famConfirm(title, msg, okLabel) {
+function famConfirm(title, msg, okLabel, ikon) {
   return new Promise((resolve) => {
     if (document.getElementById('fam-confirm')) return resolve(false);
     const ov = document.createElement('div'); ov.id = 'fam-confirm';
     ov.style.cssText = 'position:fixed;inset:0;z-index:210;background:rgba(5,12,22,.5);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px);';
     ov.innerHTML = '<div style="width:min(420px,94vw);background:#fff;border-radius:18px;padding:24px;box-shadow:0 30px 70px rgba(8,20,35,.4)">'
-      + '<div style="font-size:34px;text-align:center;margin-bottom:8px">\ud83d\udd11</div>'
+      + (ikon === false ? '' : '<div style="font-size:34px;text-align:center;margin-bottom:8px">\ud83d\udd11</div>')
       + '<div style="font-size:18px;font-weight:800;color:var(--color-navy-900);text-align:center;margin-bottom:8px">' + escapeHtml(title) + '</div>'
       + '<p style="font-size:13.5px;color:rgb(28 43 58 / .6);text-align:center;margin-bottom:18px;line-height:1.5">' + escapeHtml(msg) + '</p>'
       + '<div style="display:flex;gap:9px"><button id="fam-c-no" class="btn btn-ghost" style="flex:1;height:44px">Avbryt</button><button id="fam-c-yes" class="btn btn-safe" style="flex:1;height:44px">' + escapeHtml(okLabel || 'OK') + '</button></div></div>';
@@ -3893,7 +3895,7 @@ function famNyaFragor() {
 function famChildCard(c) {
   const active = fam.activeChild === c.id;
   const tags = (c.blocklist && c.blocklist.length)
-    ? '<div class="fam-bl">' + c.blocklist.map((h) => '<span class="fam-tag">' + escapeHtml(h) + '<button data-t="' + escapeHtml(h) + '" title="Tillåt tillfälligt" style="background:rgba(47,143,212,.14);color:#2f8fd4;"><svg class="ic ic-sm"><use href="#i-history"/></svg></button><button data-host="' + escapeHtml(h) + '" title="Ta bort">×</button></span>').join('') + '</div>'
+    ? '<div class="fam-bl">' + c.blocklist.map((h) => '<span class="fam-tag">' + escapeHtml(h) + '<button data-t="' + escapeHtml(h) + '" title="Tillåt tillfälligt" style="background:color-mix(in srgb, var(--color-terra) 14%, transparent);color:var(--color-terra);"><svg class="ic ic-sm"><use href="#i-history"/></svg></button><button data-host="' + escapeHtml(h) + '" title="Ta bort">×</button></span>').join('') + '</div>'
     : '<div class="fam-none">Inga blockerade sidor än.</div>';
   const now = Date.now();
   const aca = (c.allows || []).filter((a) => a && a.until > now);
@@ -3902,14 +3904,14 @@ function famChildCard(c) {
     + '<div class="fam-child-head"><span class="fam-avatar">' + escapeHtml((c.name[0] || '?').toUpperCase()) + '</span>'
     + '<div class="grow"><div class="fam-name" translate="no">' + escapeHtml(c.name) + '</div><div class="fam-age">' + escapeHtml(tn('{n} år', c.age)) + '</div></div>'
     + '<button class="fam-active' + (active ? ' on' : '') + '" data-a="active">' + (active ? 'Aktiv på denna enhet' : 'Aktivera här') + '</button></div>'
-    + (c.code ? '<div class="fam-code"><span class="code">' + escapeHtml(c.code) + '</span><span style="font-size:11.5px;color:var(--color-navy-600)">inloggningskod</span><button data-a="copy">Kopiera</button></div>' : '')
-    + (c.code ? '<div class="fam-loginrow" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 6px;">' + '<span style="font-size:12.5px;color:var(--color-navy-600);">' + escapeHtml(c.sessions ? tn('Inloggad nu', '') : tn('Inte inloggad', '')) + '</span>' + '<button data-a="rotate" style="font-size:12px;font-weight:700;color:#2f8fd4;background:rgba(47,143,212,.1);border:1px solid rgba(47,143,212,.25);border-radius:8px;padding:5px 11px;cursor:pointer;">Byt kod</button>' + (c.sessions ? '<button data-a="sessions" style="font-size:12px;font-weight:700;color:#2f8fd4;background:rgba(47,143,212,.12);border:1px solid rgba(47,143,212,.3);border-radius:8px;padding:5px 11px;cursor:pointer;">' + escapeHtml(tn('Visa enheter', '')) + '</button>' : '') + '</div>' : '')
+    + (c.code ? '<div class="fam-code"><span class="code">' + escapeHtml(c.code) + '</span><span style="font-size:11.5px;color:var(--color-navy-600)">' + escapeHtml(tf('Inloggningskod')) + '</span><button data-a="copy">Kopiera</button></div>' : '')
+    + (c.code ? '<div class="fam-loginrow" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 6px;">' + '<span style="font-size:12.5px;color:var(--color-navy-600);">' + escapeHtml(c.sessions ? tn('Inloggad nu', '') : tn('Inte inloggad', '')) + '</span>' + '<button data-a="rotate" class="fam-knapp">Byt kod</button>' + (c.sessions ? '<button data-a="sessions" class="fam-knapp">' + escapeHtml(tn('Visa enheter', '')) + '</button>' : '') + '</div>' : '')
     + famFragorHtml(c)
     + '<div class="fam-sub">Blockerade sidor</div>' + tags + allowsHtml
     + '<div class="fam-addsite"><input class="fam-in" placeholder="t.ex. exempel.se" spellcheck="false" /><button class="btn btn-safe flex-none" style="height:40px;padding:0 14px;">Blockera</button></div>'
     + famLjudHtml(c)
     + '<div class="fam-krypto falk-bara">' + escapeHtml(tn('Säg till Falk: "blockera de här sidorna för {n}" — eller "tillåt X för {n} i en timme".', c.name)).replace('Falk', '<b>Falk</b>') + '</div>'
-    + '<button class="fam-histbtn" data-a="hist" style="display:block;font-size:12.5px;font-weight:700;color:#2f8fd4;background:rgba(47,143,212,.08);border:1px solid rgba(47,143,212,.25);border-radius:9px;padding:8px 12px;cursor:pointer;margin-top:10px;">' + escapeHtml(tn('Se historik för {n}', c.name)) + '</button>'
+    + '<button class="fam-histbtn fam-knapp" data-a="hist" style="display:block;font-size:12.5px;padding:8px 12px;margin-top:10px;">' + escapeHtml(tn('Se historik för {n}', c.name)) + '</button>'
     + '<button class="fam-del" data-a="del">' + escapeHtml(tn('Ta bort {n} ur familjen', c.name)) + '</button></div>';
 }
 /* ── Spärrljud: föräldern kan välja ett ljud som spelas när barnet hamnar på en spärrad sida ──
@@ -3923,12 +3925,22 @@ const FAM_LJUD = [
   { id: 'stotar-kort', namn: 'Stötar och kort häng' },
 ];
 function famLjud(c) { const s = c && c.sound; return { id: (s && FAM_LJUD.some((x) => x.id === s.id)) ? s.id : '', volym: Math.min(80, Math.max(10, (s && s.volym) || 60)) }; }
-let _famProv = null;
-function famLjudProva(id, volym) {
-  try { if (_famProv) _famProv.pause(); } catch {}
+let _famProv = null, _famProvKnapp = null, _famProvVarnad = false;
+function famLjudStoppa() {
+  try { if (_famProv) { _famProv.pause(); _famProv.currentTime = 0; } } catch {}
+  _famProv = null;
+  if (_famProvKnapp) { _famProvKnapp.classList.remove('spelar'); _famProvKnapp.textContent = tf('Provlyssna'); _famProvKnapp = null; }
+}
+// Provlyssna: spelar valt ljud och knappen blir "Stoppa", så att man kan avbryta när man vill
+function famLjudProva(id, volym, knapp) {
+  famLjudStoppa();
   if (!id) return null;
   const a = new Audio('ljud/sparr-' + id + '.ogg'); a.volume = Math.min(0.8, Math.max(0.1, volym / 100));
-  _famProv = a; a.play().catch(() => {}); return a;
+  _famProv = a;
+  if (knapp) { _famProvKnapp = knapp; knapp.classList.add('spelar'); knapp.textContent = tf('Stoppa'); }
+  a.addEventListener('ended', () => { if (_famProv === a) famLjudStoppa(); });
+  a.play().catch(() => { if (_famProv === a) famLjudStoppa(); });
+  return a;
 }
 function famLjudHtml(c) {
   const l = famLjud(c);
@@ -3938,8 +3950,8 @@ function famLjudHtml(c) {
     + '<option value=""' + (l.id ? '' : ' selected') + '>' + escapeHtml(tf('Av')) + '</option>'
     + FAM_LJUD.map((x) => '<option value="' + x.id + '"' + (l.id === x.id ? ' selected' : '') + '>' + escapeHtml(tf(x.namn)) + '</option>').join('')
     + '</select>'
-    + '<button data-a="ljud-prova" style="font-size:12px;font-weight:700;color:#2f8fd4;background:rgba(47,143,212,.1);border:1px solid rgba(47,143,212,.25);border-radius:8px;padding:8px 12px;cursor:pointer;"' + (l.id ? '' : ' disabled') + '>' + escapeHtml(tf('Provlyssna')) + '</button>'
-    + '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--color-navy-600);' + (l.id ? '' : 'opacity:.45;') + '">' + escapeHtml(tf('Volym')) + ' <input data-a="ljud-vol" type="range" min="10" max="80" step="5" value="' + l.volym + '"' + (l.id ? '' : ' disabled') + ' style="width:110px;"></label>'
+    + '<button data-a="ljud-prova" class="fam-knapp" style="padding:8px 12px;"' + (l.id ? '' : ' disabled') + '>' + escapeHtml(tf('Provlyssna')) + '</button>'
+    + '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--color-navy-600);' + (l.id ? '' : 'opacity:.45;') + '">' + escapeHtml(tf('Volym')) + ' <input data-a="ljud-vol" type="range" min="10" max="80" step="5" value="' + l.volym + '"' + (l.id ? '' : ' disabled') + ' style="width:110px;accent-color:var(--color-terra);"></label>'
     + '</div>';
 }
 async function famLjudSpara(c, id, volym) {
@@ -3959,13 +3971,21 @@ function famLjudKoppla(el, c) {
   sel.addEventListener('change', async () => {
     const fore = famLjud(famChildById(c.id) || c), id = sel.value;
     if (id && !fore.id) {
-      const ok = await famConfirm(tf('Slå på spärrljud?'), tn('Ljuden låter trasiga och obehagliga med flit, och de kan skrämma små barn. Ljudet spelas en gång varje gång {n} hamnar på en spärrad sida. Provlyssna först, gärna med låg volym.', c.name), tf('Slå på'));
+      const ok = await famConfirm(tf('Slå på spärrljud?'), tn('Ljuden låter trasiga och obehagliga med flit, och de kan skrämma små barn. Ljudet spelas en gång varje gång {n} hamnar på en spärrad sida. Provlyssna först, gärna med låg volym.', c.name), tf('Slå på'), false);
       if (!ok) { sel.value = ''; return; }
     }
     if (await famLjudSpara(c, id, fore.volym)) renderFam(); else sel.value = fore.id;
   });
-  if (prova) prova.addEventListener('click', () => famLjudProva(sel.value, Number(vol && vol.value) || 60));
-  if (vol) vol.addEventListener('change', () => { const id = famLjud(famChildById(c.id) || c).id; if (id) { famLjudSpara(c, id, Number(vol.value)); famLjudProva(id, Number(vol.value)); } });
+  if (prova) prova.addEventListener('click', async () => {
+    if (_famProvKnapp === prova) { famLjudStoppa(); return; }
+    if (!_famProvVarnad) {
+      const ok = await famConfirm(tf('Sänk volymen först'), tf('Ljudet är högt och obehagligt med flit. Sänk datorns volym och se till att inget barn sitter bredvid innan du provlyssnar. Du kan stoppa ljudet när du vill.'), tf('Provlyssna'), false);
+      if (!ok) return;
+      _famProvVarnad = true;
+    }
+    famLjudProva(sel.value, Number(vol && vol.value) || 60, prova);
+  });
+  if (vol) vol.addEventListener('change', () => { const id = famLjud(famChildById(c.id) || c).id; if (id) famLjudSpara(c, id, Number(vol.value)); });
 }
 let _famLjudSenast = { host: '', t: 0 };
 function famLjudSpela(host) {
