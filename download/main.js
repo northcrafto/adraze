@@ -1,5 +1,6 @@
 // Mac-besökare får Mac-knappen först
 if (/Macintosh/.test(navigator.userAgent)) document.documentElement.classList.add('ar-mac');
+else if (/Windows/.test(navigator.userAgent)) document.documentElement.classList.add('ar-win');
 
 // Hamburgarmenyn: cirkeln växer ut från knappens position
 const btn = document.getElementById('menu-btn'), menu = document.getElementById('menu');

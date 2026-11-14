@@ -187,6 +187,7 @@ section { padding: 120px 0; }
 .btn-jatte svg { width: 28px; height: 28px; }
 .btn-jatte img { width: 36px; height: 36px; flex: none; }
 .ar-mac .ladda-mac { order: -1; }
+.ar-win .ladda-win { order: -1; }
 @media (max-width: 1200px) {
   .ladda { padding: 40px 16px 48px; }
   .ladda-mitten { position: static; margin: 28px auto 0; max-width: 460px; }
