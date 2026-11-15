@@ -184,8 +184,8 @@
     <!-- Startsida -->
     <div id="newtabpage" class="absolute inset-0 hidden overflow-hidden">
       <div id="nt-bg" class="absolute inset-0 bg-cover bg-center transition-opacity duration-700"></div>
-      <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(20,19,17,.28), rgba(20,19,17,.72));"></div>
-      <div class="relative z-10 h-full flex flex-col items-center justify-center px-8 text-white">
+      <div id="nt-dim" class="absolute inset-0" style="background: linear-gradient(180deg, rgba(20,19,17,.28), rgba(20,19,17,.72));"></div>
+      <div id="nt-innehall" class="relative z-10 h-full flex flex-col items-center justify-center px-8 text-white">
         <div id="nt-clock"></div>
         <div id="nt-greet"></div>
         <div class="w-[min(560px,92%)] flex items-center gap-3 h-13 px-5 py-3.5 rounded-[10px] bg-white/95 shadow-2xl backdrop-blur">
@@ -246,32 +246,8 @@
       :root[data-theme="dark"] .notis .notis-sek { color: #f8f5f1; box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); }
       :root[data-theme="dark"] .notis .notis-sek:hover, :root[data-theme="dark"] .notis .notis-sek:focus-visible { color: #13110e; }
     </style>
-    <style>
-      #hxintro{position:absolute;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;
-        background:rgba(8,16,28,.42);backdrop-filter:blur(30px) saturate(1.15);-webkit-backdrop-filter:blur(30px) saturate(1.15);
-        font-family:ui-sans-serif,system-ui,sans-serif}
-      #hxintro.gone{opacity:0;pointer-events:none;transition:opacity .7s ease}
-      #hxintro::after{content:"";position:absolute;inset:0;pointer-events:none;
-        background:linear-gradient(180deg,rgba(8,16,28,.28),rgba(8,16,28,.6))}
-      .hxbox{position:relative;z-index:2;text-align:center;padding:24px;max-width:min(660px,92vw);
-        opacity:0;transform:translateY(16px);animation:hxin 1.1s cubic-bezier(.2,.7,.15,1) .2s forwards}
-      @keyframes hxin{to{opacity:1;transform:none}}
-      .hxwm{font-weight:800;letter-spacing:-.03em;font-size:clamp(44px,10vw,92px);line-height:1;color:#fff;text-shadow:0 2px 44px rgba(0,0,0,.45)}
-      .hxsub{margin:20px auto 0;font-size:clamp(14px,2.4vw,18px);color:rgba(255,255,255,.85);max-width:42ch;line-height:1.6;text-shadow:0 1px 18px rgba(0,0,0,.4);text-wrap:balance}
-      .hxhint{margin-top:42px;font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.62);
-        display:inline-flex;align-items:center;gap:9px;opacity:0;animation:hxfade 1s ease 1.1s forwards}
-      @keyframes hxfade{to{opacity:1}}
-      .hxhint .dot{width:6px;height:6px;border-radius:50%;background:#fff;opacity:.8;animation:hxpulse 1.7s ease infinite}
-      @keyframes hxpulse{50%{opacity:.15}}
-      body.reduce-motion #hxintro *{animation:none!important;opacity:1;transform:none}
-    </style>
-    <div id="hxintro" class="gone" style="display:none">
-      <div class="hxbox">
-        <div class="hxwm">AdRaze</div>
-        <div class="hxsub">Webbläsaren som stoppar reklamen innan den laddas.</div>
-        <div class="hxhint"><span class="dot"></span>Tryck var som helst för att börja</div>
-      </div>
-    </div>
+    <!-- Första-gången-introt: ui/intro.js bygger det här (stil i intro.css, ritkod i intro/). Laddas bara när introt ska visas. -->
+    <section id="hxintro" hidden></section>
 
     <!-- "Stäng alla flikar?" — ritas i sidan (DOM) och förankras uppe till höger vid stäng-krysset.
          Ett eget OS-fönster gick inte att positionera på Wayland (setPosition är no-op där). -->

@@ -127,6 +127,12 @@ function ffBokmarken(dir) {
     return rows.map((r) => ({ url: r.url, title: r.title || r.url }));
   } catch { return []; } finally { stangDb(db); }
 }
+// Antalet bokmärken (unika adresser) i en profil, utan att läsa in dem: introts Flytta hit visar det på korten
+function ffAntalBokmarken(dir) {
+  const db = oppnaDb(path.join(dir, 'places.sqlite')); if (!db) return 0;
+  try { return Number(db.prepare("SELECT COUNT(DISTINCT p.url) AS n FROM moz_bookmarks b JOIN moz_places p ON b.fk=p.id WHERE b.type=1 AND p.url LIKE 'http%'").get().n) || 0; }
+  catch { return 0; } finally { stangDb(db); }
+}
 function ffHistorik(dir) {
   const db = oppnaDb(path.join(dir, 'places.sqlite')); if (!db) return [];
   try {
@@ -591,6 +597,12 @@ function losenFranCsv(text) {
 // hooks: { sparaLosen(lista) -> antal, fonsterFor(sender) }
 function setup(hooks) {
   ipcMain.handle('import:kallor', () => kallor());
+  // Källorna med antalet bokmärken per profil (introts Flytta hit). Inget läses in eller sparas.
+  ipcMain.handle('import:antal', () => kallor().map((k) => ({ typ: k.typ, id: k.id, profiler: k.profiler.map((p) => {
+    let n = 0;
+    try { n = k.typ === 'firefox' ? ffAntalBokmarken(p.id) : new Set(chromeBokmarken(chromiumMapp(k.id, p.id)).map((b) => b.url)).size; } catch {}
+    return { id: p.id, namn: p.namn, bokmarken: n };
+  }) })));
 
   // Läs bokmärken + historik från en vald källa (ges tillbaka till skalet som lägger in i localStorage)
   ipcMain.handle('import:las', async (_e, { typ, id, profil, bokmarken, historik, installningar, flikar, kakor }) => {

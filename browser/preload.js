@@ -244,6 +244,7 @@ contextBridge.exposeInMainWorld('view', {
   webbPickDir: () => ipcRenderer.invoke('webb:pick-download-dir'),
   webbClear: (what) => ipcRenderer.invoke('webb:clear', what),
   importKallor: () => ipcRenderer.invoke('import:kallor'),
+  importAntal: () => ipcRenderer.invoke('import:antal'),
   importLas: (val) => ipcRenderer.invoke('import:las', val),
   importLosenCsv: () => ipcRenderer.invoke('import:losen-csv'),
   importTillagg: (ids) => ipcRenderer.invoke('import:tillagg', ids),

@@ -1,0 +1,434 @@
+/* Första-gången-introt (förslag E: A + B). Laddas bara när introt ska visas (ui/intro.js lägger in den).
+   Allt gäller inuti #hxintro, så att klassnamnen (.kort, .knapp, .steg …) aldrig krockar med skalets.
+   Ordningen i djupled: slöja 0 · lappar 1 · kortet 2 · gorillan 3 · lapp på väg in i käften 4 · smulor 5 · räknaren 6 · hoppa över 7.
+   Bara transform och opacity animeras. */
+
+/* Familjen Grotesk (OFL, fonts/OFL-Familjen-Grotesk.txt). Tre delar som i Google Fonts: latin laddas alltid,
+   latin-ext och vietnamesiska bara när ett tecken ur dem syns (unicode-range). */
+@font-face { font-family: "Familjen Grotesk"; src: url("fonts/familjen.woff2") format("woff2"); font-weight: 400 700; font-style: normal; font-display: block;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Familjen Grotesk"; src: url("fonts/familjen-latin-ext.woff2") format("woff2"); font-weight: 400 700; font-style: normal; font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Familjen Grotesk"; src: url("fonts/familjen-vi.woff2") format("woff2"); font-weight: 400 700; font-style: normal; font-display: swap;
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB; }
+
+/* ═════════ Ett system genom hela flödet: typsnitt, färger, rörelse ═════════ */
+#hxintro {
+  --f-disp: "AdRaze Display", Charter, "Iowan Old Style", Georgia, serif;   /* Fraunces (fonts/fraunces.woff2, tailwind.css) */
+  --f-ui: "Familjen Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ease: cubic-bezier(.2, .75, .25, 1);
+  --ease-ut: cubic-bezier(.16, 1, .3, 1);
+
+  /* Varumärket: loggan, AD-lappen och reklamen byter aldrig färg */
+  --o: #ff4b1f; --o2: #ff6a43; --blck: #1b1916;
+
+  /* Startsidans ton (Hoppa över-knappens papper) */
+  --sida: #f2f1ec;
+
+  /* Text och ytor i introt */
+  --ink: #13110e; --mut: #65615a; --faint: #9e998f; --line: #e6e1d8;
+  --kort: #fcfbf8; --kant: rgb(19 17 14 / .07); --yta: #f3f0ea; --yta-hover: #ece8e0;
+  --scen: #f1ece3; --scen-gorilla: #17150f;
+  --knapp: #13110e; --knapp-ink: #ffffff;
+  --kort-skugga: 0 2px 6px rgb(19 17 14 / .06), 0 46px 100px -34px rgb(19 17 14 / .42);
+  --sloja: rgb(236 234 227 / .5);
+
+  /* Accenten = webbläsarens (Inställningar › Anpassa › Tema). intro.js sätter -l/-d när färgen byts. */
+  --acc-l: #ff4b1f; --acc-d: #ff4b1f; --acc-ink-l: #c93b15; --acc-ink-d: #ff6a43; --acc-on-l: #13110e; --acc-on-d: #13110e;
+  --acc: var(--acc-l); --acc-ink: var(--acc-ink-l); --acc-on: var(--acc-on-l);
+  --acc-topp: color-mix(in oklab, var(--acc), #fff 20%);
+
+  /* Gubbarnas färger (site/illu, omfärgade med klasser) */
+  --il-a: var(--acc);
+  --il-l0: #f5f2ec; --il-l1: #e7e2d9; --il-l2: #d2ccc2; --il-l3: #b7b0a5;
+  --il-d0: #100e12; --il-d1: #2f2e41; --il-d2: #3f3d56; --il-w: #ffffff; --il-ws: #ffffff;
+  --m-ram: #e3e0d8;
+
+  /* Öppningen: lapparna skalar med fönstret */
+  --lapp-skugga: rgb(27 25 22 / .17); --halo: transparent; --smula-ink: #1b1916;
+  --u: clamp(10.5px, calc(1.2vmin + 4px), 21px);
+  --g: clamp(104px, 21vmin, 300px);
+  --statsplats: clamp(84px, 15vh, 132px);
+  /* Höjden på A:s gamla textblock under gorillan: platsen sparas så att gorillan står där han stod i A */
+  --textplats: min(calc(1.08 * clamp(50px, 10.2vmin, 140px) + 3.5 * clamp(15px, 2.15vmin, 24px) + clamp(18px, 3.4vmin, 42px) + clamp(46px, 6vmin, 64px) + 2.7 * clamp(12px, 1.45vmin, 15.5px)),
+                   calc(100cqh - var(--statsplats) - 2.1 * var(--g)));
+
+  position: absolute; inset: 0; z-index: 200; overflow: hidden; container: intro / size;
+  color: var(--ink); font-family: var(--f-ui); font-size: var(--u); line-height: 1.4; text-align: start;
+  cursor: pointer; -webkit-tap-highlight-color: transparent; -webkit-font-smoothing: antialiased;
+}
+:root[data-theme="dark"] #hxintro {
+  --sida: #191816;
+  --ink: #f3f1ec; --mut: #a7a39b; --faint: #77736b; --line: #322f2b;
+  --kort: #1d1c1a; --kant: rgb(255 255 255 / .07); --yta: #262522; --yta-hover: #2d2b28;
+  --scen: #2a2824; --scen-gorilla: #11100e;
+  --knapp: #f4f2ed; --knapp-ink: #13110e;
+  --kort-skugga: 0 2px 6px rgb(0 0 0 / .2), 0 50px 110px -34px rgb(0 0 0 / .7);
+  --sloja: rgb(12 11 10 / .45);
+  --acc: var(--acc-d); --acc-ink: var(--acc-ink-d); --acc-on: var(--acc-on-d);
+  --il-l0: #423e38; --il-l1: #4c4841; --il-l2: #5d584f; --il-l3: #6f695f;
+  --il-d0: #080706; --il-d1: #100f0d; --il-d2: #1b1917; --il-w: #e9e3d9; --il-ws: #36332e;
+  --m-ram: #34322e;
+}
+/* Mörk bakgrund bakom lapparna (mörkt läge, eller startsidans foto): lapparna får en vit stansad kant */
+:root[data-theme="dark"] #hxintro, #hxintro.pa-foto { --lapp-skugga: rgb(0 0 0 / .5); --halo: #efe8dc; --smula-ink: #efe8dc; }
+
+#hxintro[hidden] { display: none; }
+#hxintro.kortfas { cursor: default; }
+#hxintro.stanger { pointer-events: none; }
+#hxintro *, #hxintro *::before, #hxintro *::after { box-sizing: border-box; }
+#hxintro button { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; text-align: inherit; -webkit-tap-highlight-color: transparent; }
+#hxintro :focus { outline: none; }
+#hxintro :focus-visible { outline: 2px solid var(--acc); outline-offset: 3px; }
+#hxintro .ix-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+#hxintro .ik { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Slöjan bakom kortet: startsidan syns mjukt igenom */
+#hxintro .sloja { position: absolute; inset: 0; z-index: 0; pointer-events: none; background: var(--sloja); -webkit-backdrop-filter: blur(16px) saturate(1.04); backdrop-filter: blur(16px) saturate(1.04); }
+#hxintro:not(.kortfas) .sloja { opacity: 0; }
+#hxintro.kortfas .sloja { transition: opacity .35s ease; }
+#hxintro.stanger .sloja { opacity: 0; }
+
+/* ── Öppningen: reklamlapparna ── */
+#hxintro .lapp { position: absolute; z-index: 1; left: calc(var(--x) * 1%); top: calc(var(--y) * 1%); width: calc(var(--w) * 1em); padding: 1.05em 1.2em 1.2em; display: flex; flex-direction: column; align-items: flex-start; color: #1b1916; isolation: isolate;
+  transform: translate(-50%, -50%); opacity: 0; will-change: transform, opacity; overflow-wrap: break-word; --fyll: var(--f); --swk: .27; --ampk: .13; --rundk: .5; }
+#hxintro .lapp.flyger { z-index: 4; }
+#hxintro .ram { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; z-index: -1; pointer-events: none; }
+#hxintro .lapp > .ram { filter: drop-shadow(0 .45em .65em var(--lapp-skugga)); }
+#hxintro .lapp .ritad { position: relative; isolation: isolate; }
+#hxintro .ad-bricka { position: absolute; z-index: 2; width: 3.9em; top: -1.25em; left: -1.3em; line-height: 0; }
+#hxintro .ad-bricka.h { left: auto; right: -1.3em; }
+#hxintro .ad-bricka svg { width: 100%; height: auto; overflow: visible; }
+#hxintro .l-stor { font-weight: 700; font-size: 2.05em; line-height: .94; letter-spacing: -.03em; text-transform: uppercase; }
+#hxintro .l-mellan { font-weight: 700; font-size: 1.42em; line-height: 1.02; letter-spacing: -.02em; }
+#hxintro .l-sma { display: block; font-weight: 500; font-size: .9em; line-height: 1.25; margin-top: .45em; }
+#hxintro .l-serif { font-family: var(--f-disp); font-weight: 800; font-variation-settings: "opsz" 40; font-size: 1.5em; line-height: 1.02; letter-spacing: -.015em; }
+#hxintro :is(.l-stor, .l-mellan, .l-serif, .l-rea) { overflow-wrap: normal; }        /* långa ord krymper i stället för att brytas (passa()) */
+#hxintro .l-knapp { display: inline-flex; margin-top: .85em; padding: .55em 1.1em .6em; font-weight: 700; font-size: .82em; line-height: 1; color: #fffaf0; white-space: nowrap; --fyll: #1b1916; --swk: .17; --ampk: .06; }
+#hxintro .l-knapp.l-ljus { --fyll: #fffaf0; color: #1b1916; }
+#hxintro .l-lank { margin-top: .6em; font-weight: 700; font-size: .86em; text-decoration: underline; text-decoration-thickness: .12em; text-underline-offset: .2em; }
+#hxintro .lapp.rea { aspect-ratio: 1; justify-content: center; align-items: center; text-align: center; padding: 1.4em; }
+#hxintro .l-rea { font-family: var(--f-disp); font-weight: 900; font-variation-settings: "opsz" 72; font-size: 2.35em; line-height: .9; letter-spacing: -.035em; white-space: nowrap; }
+#hxintro .lapp.rea .l-sma { margin-top: .2em; font-weight: 700; }
+#hxintro .l-titel { display: flex; justify-content: space-between; align-items: center; gap: .5em; width: 100%; font-weight: 700; font-size: .9em; margin: -.25em 0 .5em; }
+#hxintro .l-kryss { display: block; flex: none; width: 1.75em; height: 1.75em; margin-inline-end: -.5em; }
+#hxintro .l-video { width: 100%; aspect-ratio: 16 / 9; display: grid; place-items: center; --fyll: #1b1916; --swk: .17; --ampk: .07; --rundk: .35; }
+#hxintro .l-play { display: block; width: 2.5em; height: 2.5em; }
+#hxintro .lapp.spar .l-text { font-weight: 500; font-size: .98em; line-height: 1.3; }
+#hxintro .l-rad { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 1.1em; }
+#hxintro .l-pil { display: block; width: 2.2em; height: 2.6em; margin: .35em 0 -.2em .1em; }
+#hxintro .lapp .l-prick { position: absolute; top: -.85em; right: -.75em; width: 2.2em; height: 2.2em; display: grid; place-items: center; font-weight: 700; font-size: 1em; line-height: 1; color: #fffaf0; --fyll: #ef4136; --swk: .17; --ampk: .05; }
+#hxintro .l-tid { font-weight: 700; font-size: 2.4em; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; margin-top: .1em; direction: ltr; }
+#hxintro .lapp.sticker { padding: 0; }
+#hxintro .lapp.sticker svg { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 .35em .5em var(--lapp-skugga)); }
+
+#hxintro .smulor { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+#hxintro .smula { position: absolute; left: 0; top: 0; width: .92em; height: .8em; opacity: 0; will-change: transform, opacity; }
+#hxintro .smula svg { display: block; width: 100%; height: 100%; overflow: visible; }
+
+#hxintro .mitten { position: absolute; z-index: 3; inset: 0 0 var(--statsplats); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 24px; pointer-events: none; }
+#hxintro .mitten::after { content: ""; flex: none; height: var(--textplats); }
+#hxintro .gorilla { position: relative; flex: none; width: var(--g); height: var(--g); }
+#hxintro .kropp { position: absolute; inset: 0; transform-origin: 50% 100%; will-change: transform; }
+#hxintro .kropp svg { display: block; width: 100%; height: 100%; overflow: visible; }
+#hxintro .gsvg .ruta, #hxintro .gsvg .lage, #hxintro .gsvg .klick { opacity: 0; }
+#hxintro .gsvg[data-r="0"] .ruta[data-r="0"], #hxintro .gsvg[data-r="1"] .ruta[data-r="1"], #hxintro .gsvg[data-r="2"] .ruta[data-r="2"], #hxintro .gsvg[data-r="3"] .ruta[data-r="3"],
+#hxintro .gsvg[data-lage="stangd"] .lage[data-lage="stangd"], #hxintro .gsvg[data-lage="gap"] .lage[data-lage="gap"],
+#hxintro .gsvg[data-lage="logo"] .lage[data-lage="logo"], #hxintro .gsvg[data-lage="blink"] .lage[data-lage="blink"] { opacity: 1; }
+
+/* ── Räknaren: svart piller med den levande gorillan. Ett exemplar flyger, ett väntar i kortet ── */
+#hxintro .rakna { position: absolute; left: 50%; bottom: clamp(16px, 4.2vh, 44px); z-index: 6; display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 20px 0 8px; border-radius: 999px;
+  background: #13110e; color: #fff; font: 500 15px/1 var(--f-ui); white-space: nowrap; opacity: 0; transform: translate(-50%, 26px); pointer-events: none; will-change: transform, opacity;
+  box-shadow: 0 16px 36px -12px rgb(0 0 0 / .5), inset 0 0 0 1px rgb(255 255 255 / .08); }
+#hxintro:is([dir="rtl"], :dir(rtl)) .rakna { padding: 0 8px 0 20px; }
+#hxintro .rakna img { width: 32px; height: 32px; flex: none; }
+#hxintro .rakna b { display: inline-block; font: 700 18px/1 var(--f-ui); color: var(--o2); font-variant-numeric: tabular-nums; }
+#hxintro .rakna b span { display: inline-block; }
+#hxintro .rakna.dockad { position: relative; left: auto; bottom: auto; z-index: 1; flex: none; opacity: 1; transform: none; will-change: auto; max-width: 92%; }
+#hxintro .rakna.dockad > span { overflow: hidden; text-overflow: ellipsis; }
+#hxintro:not(.kortfas) .rakna.dockad, #hxintro.utan-oppning .rakna.dockad { opacity: 0; }
+
+/* ── Kortet ── */
+#hxintro .kortlager { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; pointer-events: none; }
+#hxintro .kort { position: relative; isolation: isolate;
+  width: min(100cqw - 40px, 1180px, max(1040px, 46cqw));
+  height: min(100cqh - 40px, 700px, max(600px, 50cqh));
+  display: grid; grid-template-columns: minmax(0, 41%) minmax(0, 1fr); padding: 10px; border-radius: 26px;
+  container: kort / size; font: 400 15px/1.5 var(--f-ui); color: var(--ink); cursor: default; user-select: none;
+  transition: opacity .38s ease, transform .45s var(--ease-ut); }
+#hxintro.kortfas .kort { pointer-events: auto; }
+#hxintro:not(.kortfas) .kort { transition: none; }
+#hxintro.kortfas.stanger .kort { opacity: 0; transform: translateY(6px) scale(.985); transition-duration: .26s, .32s; }
+#hxintro .kort:focus, #hxintro .kort:focus-visible { outline: none; }   /* kortet får fokus när det tar över, ringen behövs bara på knapparna */
+#hxintro .kort-bak { position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--kort); box-shadow: 0 0 0 1px var(--kant), var(--kort-skugga); }
+#hxintro:not(.kortfas) :is(.kort-bak, .stage, .panel) { opacity: 0; }
+
+/* Scenen: gubbarna står i en lång rad och kameran panorerar ett steg i taget */
+#hxintro .scen { position: relative; overflow: hidden; border-radius: 18px; background: var(--scen); isolation: isolate; }
+#hxintro:not(.kortfas) .scen { background: transparent; }
+#hxintro .korn { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: .55; mix-blend-mode: multiply; transition: opacity .5s ease;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .32  0 0 0 0 .28  0 0 0 0 .22  0 0 0 .22 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
+:root[data-theme="dark"] #hxintro .korn { mix-blend-mode: screen; opacity: .22; }
+#hxintro:not(.kortfas) .korn { opacity: 0; transition: none; }
+#hxintro .bana { position: absolute; inset: 0; display: flex; direction: ltr; transform: translateX(calc(var(--i, 0) * -100%)); transition: transform .62s var(--ease); }
+#hxintro .bild { position: relative; flex: 0 0 100%; height: 100%; margin: 0; display: flex; align-items: flex-end; justify-content: center; padding: 0 7% 13%; opacity: 0; transition: opacity .42s ease; }
+#hxintro .bild.nu { opacity: 1; transition: opacity .5s ease .1s; }
+#hxintro .bild .illu { position: relative; z-index: 1; width: 100%; height: auto; max-height: 72%; overflow: visible; }
+#hxintro .bild .sol { position: absolute; left: 50%; top: 44%; width: 78%; aspect-ratio: 1; border-radius: 50%; transform: translate(-50%, -50%); background: color-mix(in srgb, var(--il-l1) 55%, var(--scen)); }
+:root[data-theme="dark"] #hxintro .bild .sol { background: color-mix(in srgb, var(--il-l0) 45%, var(--scen)); }
+
+/* Välkommen: gorillan och räknaren från öppningen har landat på en nästan svart scen */
+#hxintro .b-gorilla { flex-direction: column; align-items: center; justify-content: center; gap: clamp(12px, 3cqh, 22px); padding: 0; }
+#hxintro .b-gorilla .stage { position: absolute; inset: 0; background: var(--scen-gorilla); }
+#hxintro .b-gorilla .gor { position: relative; z-index: 1; width: min(60%, 52cqh); height: auto; overflow: visible; }
+#hxintro:not(.kortfas) .gor { opacity: 0; }
+#hxintro .gk { opacity: 0; animation: ix-koka .44s steps(1) infinite; }
+#hxintro .gk1 { opacity: 1; }
+#hxintro .gk2 { animation-delay: -.33s; } #hxintro .gk3 { animation-delay: -.22s; } #hxintro .gk4 { animation-delay: -.11s; }
+@keyframes ix-koka { 0% { opacity: 1; } 25%, 100% { opacity: 0; } }
+#hxintro .kg-blink { opacity: 0; animation: ix-blinka 4.2s steps(1) 1.2s infinite; }   /* blinkar då och då */
+@keyframes ix-blinka { 0% { opacity: 0; } 97% { opacity: 1; } 100% { opacity: 0; } }
+#hxintro .bild:not(.nu) :is(.gk, .kg-blink) { animation-play-state: paused; }
+
+#hxintro .k-a { fill: var(--il-a); }
+#hxintro .k-l0 { fill: var(--il-l0); } #hxintro .k-l1 { fill: var(--il-l1); } #hxintro .k-l2 { fill: var(--il-l2); } #hxintro .k-l3 { fill: var(--il-l3); }
+#hxintro .k-d0 { fill: var(--il-d0); } #hxintro .k-d1 { fill: var(--il-d1); } #hxintro .k-d2 { fill: var(--il-d2); } #hxintro .k-w { fill: var(--il-w); } #hxintro .k-ws { fill: var(--il-ws); }
+
+/* ── Panelen ── */
+#hxintro .panel { position: relative; display: flex; flex-direction: column; min-width: 0; min-height: 0;
+  padding-block: clamp(16px, 4.4cqh, 30px) clamp(10px, 2.6cqh, 18px); padding-inline: clamp(24px, 4.6cqw, 54px) clamp(18px, 3.4cqw, 40px); }
+#hxintro .panel-topp { display: flex; align-items: flex-start; gap: 18px; }
+
+/* Stegindikatorn: ett streck per steg med stegets namn. Strecket fylls (scaleX) när man kommer dit. */
+#hxintro .steg { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(var(--antal, 4), minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+#hxintro .steg button { display: grid; gap: 9px; width: 100%; padding: 2px 0 4px; cursor: default; }
+#hxintro .steg li.klar button { cursor: pointer; }
+#hxintro .steg i { display: block; height: 3px; border-radius: 3px; background: var(--line); overflow: hidden; }
+#hxintro .steg b { display: block; height: 100%; border-radius: inherit; background: var(--acc); transform: scaleX(0); transform-origin: left center; transition: transform .5s var(--ease); }
+#hxintro:is([dir="rtl"], :dir(rtl)) .steg b { transform-origin: right center; }
+#hxintro .steg li.nu b { transform: scaleX(1); }
+#hxintro .steg li.klar b { transform: scaleX(1); background: var(--ink); opacity: .8; }
+#hxintro .steg li { position: relative; min-width: 0; }
+#hxintro .steg span { min-width: 0; font-size: 12.5px; font-weight: 500; line-height: 1.25; color: var(--faint); white-space: nowrap; overflow: hidden; transition: color .2s, opacity .2s; }
+#hxintro .steg li.nu span { color: var(--ink); font-weight: 600; }
+#hxintro .steg li.klar span { color: var(--mut); }
+#hxintro .steg li.klar button:hover span { color: var(--ink); }
+#hxintro .steg.trang span { opacity: 0; }
+#hxintro .steg.trang li.nu span { opacity: 1; position: absolute; inset-inline-start: 0; bottom: 4px; overflow: visible; }
+#hxintro .steg.trang li.nu:last-child span { inset-inline-start: auto; inset-inline-end: 0; }
+
+#hxintro .stang { position: relative; width: 34px; height: 34px; margin-block-start: -7px; margin-inline-end: -8px; flex: none; display: grid; place-items: center; border-radius: 10px; color: var(--mut); }
+#hxintro .stang::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--yta-hover); opacity: 0; transition: opacity .15s; }
+#hxintro .stang:hover::before { opacity: 1; }
+#hxintro .stang:hover { color: var(--ink); }
+#hxintro .stang svg { position: relative; width: 18px; height: 18px; }
+
+#hxintro .sidor { position: relative; flex: 1; min-height: 0; display: grid; }
+#hxintro .sida { grid-area: 1 / 1; min-height: 0; display: flex; flex-direction: column; justify-content: safe center; padding: clamp(12px, 3cqh, 24px) 0 clamp(18px, 5cqh, 40px);
+  opacity: 0; transform: translateX(12px); visibility: hidden; transition: opacity .18s ease, transform .3s var(--ease), visibility 0s linear .3s; }
+#hxintro .sida.fore { transform: translateX(-12px); }
+#hxintro .sida.nu { opacity: 1; transform: none; visibility: visible; transition: opacity .34s ease .1s, transform .42s var(--ease-ut) .1s, visibility 0s; }
+
+#hxintro .rubrik { margin: 0; font-family: var(--f-disp); font-weight: 460; font-size: clamp(28px, 7.4cqh, 50px); line-height: 1.04; letter-spacing: -.024em;
+  font-variation-settings: "opsz" 72; color: var(--ink); text-wrap: balance; overflow-wrap: break-word; hyphens: auto; max-width: 15em; }
+#hxintro .text { margin: clamp(10px, 2.4cqh, 16px) 0 0; font-size: clamp(14.5px, 2.75cqh, 16.5px); line-height: 1.55; color: var(--mut); max-width: 44ch; text-wrap: pretty; hyphens: auto; overflow-wrap: break-word; }
+
+/* "reklamen" stryks över med ett handritat streck i accentfärgen (avslöjas med transform) */
+#hxintro .struken { position: relative; display: inline-block; white-space: nowrap; }
+#hxintro .streck { position: absolute; left: -4%; right: -3%; top: 38%; height: .5em; overflow: hidden; pointer-events: none; direction: ltr; }
+/* Fönstret (span) glider in från vänster medan strecket i det glider åt andra hållet, så strecket står still och ritas fram */
+#hxintro .streck > span { display: block; height: 100%; overflow: hidden; transform: translateX(-101%); transition: transform .42s cubic-bezier(.6, .05, .3, 1); }
+#hxintro .streck svg { display: block; width: 100%; height: 100%; overflow: visible; transform: translateX(101%); transition: transform .42s cubic-bezier(.6, .05, .3, 1); }
+#hxintro .stryk .streck > span, #hxintro .stryk .streck svg { transform: none; }
+#hxintro .streck path { fill: none; stroke: var(--acc); stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+#hxintro .streck .s1 { stroke-width: 4.5; }
+#hxintro .streck .s2 { stroke-width: 2; opacity: .55; }
+
+/* Välkommen */
+#hxintro .fakta { display: flex; flex-wrap: wrap; gap: 10px 22px; margin: clamp(16px, 4.6cqh, 30px) 0 0; padding: 0; list-style: none; font-size: 14px; font-weight: 500; color: var(--ink); }
+#hxintro .fakta li { display: flex; align-items: center; gap: 8px; }
+#hxintro .fakta .ik { width: 18px; height: 18px; color: var(--acc); stroke-width: 2.2; }
+
+/* Flytta hit: webbläsarna */
+#hxintro .wb-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: clamp(14px, 4.2cqh, 28px); }
+#hxintro .wb { position: relative; isolation: isolate; display: flex; align-items: center; gap: 12px; min-width: 0; padding: clamp(9px, 2cqh, 13px) 14px; border-radius: 14px; background: var(--yta); text-align: start; }
+#hxintro .wb::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--yta-hover); opacity: 0; transition: opacity .15s; }
+#hxintro .wb:hover::before { opacity: 1; }
+#hxintro .wb::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 0 0 1.5px var(--acc), 0 0 0 3px color-mix(in srgb, var(--acc) 14%, transparent); opacity: 0; transition: opacity .2s; }
+#hxintro .wb[aria-checked="true"]::after { opacity: 1; }
+#hxintro .wb img, #hxintro .wb .wb-ikon { width: clamp(26px, 5.4cqh, 32px); height: auto; flex: none; }
+#hxintro .wb .wb-ikon { aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: color-mix(in srgb, var(--ink) 8%, transparent); color: var(--mut); }
+#hxintro .wb .wb-ikon .ik { width: 62%; height: 62%; }
+#hxintro .wb-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+#hxintro .wb-namn { font-size: 14.5px; font-weight: 600; line-height: 1.25; color: var(--ink); overflow-wrap: anywhere; }
+#hxintro .wb-sub { font-size: 12.5px; line-height: 1.3; color: var(--mut); overflow-wrap: anywhere; min-height: 1.3em; }
+#hxintro .wb-bock { width: 20px; height: 20px; flex: none; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ink) 18%, transparent); position: relative; }
+#hxintro .wb-bock::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--acc); transform: scale(.4); opacity: 0; transition: transform .25s var(--ease-ut), opacity .15s; }
+#hxintro .wb-bock svg { position: relative; width: 12px; height: 12px; stroke: var(--acc-on); stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: 0; transform: scale(.6); transition: transform .25s var(--ease-ut), opacity .15s; }
+#hxintro .wb[aria-checked="true"] .wb-bock::before, #hxintro .wb[aria-checked="true"] .wb-bock svg { opacity: 1; transform: none; }
+
+#hxintro .tamed { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; margin-top: clamp(12px, 3.4cqh, 22px); }
+#hxintro .etikett { font-size: 12.5px; font-weight: 600; color: var(--mut); }
+#hxintro .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+#hxintro .chip { position: relative; isolation: isolate; display: inline-flex; align-items: center; gap: 6px; height: 32px; padding-inline: 10px 13px; border-radius: 999px; font-size: 13.5px; font-weight: 500; color: var(--mut); box-shadow: inset 0 0 0 1px var(--line); white-space: nowrap; }
+#hxintro .chip::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--yta); opacity: 0; transition: opacity .15s; }
+#hxintro .chip[aria-checked="true"] { color: var(--ink); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 16%, transparent); }
+#hxintro .chip[aria-checked="true"]::before { opacity: 1; }
+#hxintro .chip .ci { position: relative; width: 15px; height: 15px; flex: none; }
+#hxintro .chip .ci .ik { position: absolute; inset: 0; width: 15px; height: 15px; stroke-width: 2.4; transition: transform .22s var(--ease-ut), opacity .15s; }
+#hxintro .chip .ci .ja { color: var(--acc); transform: scale(.4); opacity: 0; }
+#hxintro .chip .ci .nej { color: var(--faint); stroke-width: 2; }
+#hxintro .chip[aria-checked="true"] .ci .ja { transform: none; opacity: 1; }
+#hxintro .chip[aria-checked="true"] .ci .nej { transform: scale(.4) rotate(45deg); opacity: 0; }
+#hxintro .resultat { display: flex; align-items: flex-start; gap: 8px; margin: 14px 0 0; min-height: 1.5em; font-size: 13.5px; font-weight: 500; line-height: 1.45; color: var(--ink); opacity: 0; transform: translateY(4px); transition: opacity .25s, transform .3s var(--ease-ut); }
+#hxintro .resultat.syns { opacity: 1; transform: none; }
+#hxintro .resultat .ik { width: 16px; height: 16px; margin-top: 2px; color: var(--acc); stroke-width: 2.4; }
+#hxintro .resultat.info { font-weight: 400; color: var(--mut); }
+#hxintro .resultat.info .ik { color: var(--mut); stroke-width: 2; }
+#hxintro .resultat.fel .ik { color: #d0402f; }
+:root[data-theme="dark"] #hxintro .resultat.fel .ik { color: #ff8a7a; }
+#hxintro .resultat > span { min-width: 0; overflow-wrap: break-word; }
+/* Lösenord kommer via en CSV-fil: en liten länkknapp i resultatraden */
+#hxintro .lank { display: inline; padding: 0; font-weight: 600; color: var(--ink); text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; text-decoration-color: var(--acc); cursor: pointer; }
+#hxintro .lank:hover { text-decoration-thickness: 2.5px; }
+
+/* Utseende: ljust/mörkt + färg */
+#hxintro .lagen { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: clamp(14px, 4.2cqh, 28px); }
+#hxintro .tema-val { display: grid; gap: 8px; min-width: 0; }
+#hxintro .tema-namn { font-size: 13.5px; font-weight: 500; color: var(--mut); text-align: center; overflow-wrap: anywhere; }
+#hxintro .tema-val[aria-checked="true"] .tema-namn { color: var(--ink); font-weight: 600; }
+#hxintro .mini { position: relative; display: block; aspect-ratio: 16 / 10; max-height: 15cqh; width: 100%; border-radius: 10px; }
+#hxintro .mini::after { content: ""; position: absolute; inset: -4px; border-radius: 13px; pointer-events: none; box-shadow: 0 0 0 2px var(--acc); opacity: 0; transform: scale(.98); transition: opacity .2s, transform .25s var(--ease-ut); }
+#hxintro .tema-val[aria-checked="true"] .mini::after { opacity: 1; transform: none; }
+#hxintro .tema-val:hover .mf { transform: translateY(-1px); }
+#hxintro .mf { position: absolute; inset: 0; overflow: hidden; border-radius: 10px; display: grid; grid-template-rows: 20% 19% 1fr; background: var(--mc); box-shadow: inset 0 0 0 1px var(--m-ram); transition: transform .2s var(--ease); direction: ltr; }
+#hxintro .mf.ljus { --mc: #eeede7; --mb: #f6f5f0; --mfl: #ffffff; --madr: #ffffff; --ms: #f2f1ec; --mt: #e4e0d8; --mt2: #efece6; --mx: var(--acc-l); }
+#hxintro .mf.mork { --mc: #151413; --mb: #1f1e1c; --mfl: #31302d; --madr: #2a2927; --ms: #191816; --mt: #34322e; --mt2: #2a2825; --mx: var(--acc-d); }
+#hxintro .mf.halv { clip-path: polygon(58% 0, 100% 0, 100% 100%, 42% 100%); }
+#hxintro .mf > i { display: block; position: relative; }
+#hxintro .mf-flikar::after { content: ""; position: absolute; left: 7%; bottom: 0; width: 34%; height: 76%; border-radius: 4px 4px 0 0; background: var(--mfl); }
+#hxintro .mf-rad { background: var(--mb); }
+#hxintro .mf-rad::after { content: ""; position: absolute; left: 22%; right: 22%; top: 22%; bottom: 22%; border-radius: 99px; background: var(--madr); box-shadow: 0 0 0 1px color-mix(in srgb, var(--mt) 70%, transparent); }
+#hxintro .mf-sida { background: var(--ms); }
+#hxintro .mf-sida::before { content: ""; position: absolute; left: 14%; top: 22%; width: 52%; height: 9%; border-radius: 99px; background: var(--mt); box-shadow: 0 calc(1.9 * 100%) 0 0 var(--mt2); }
+#hxintro .mf-sida::after { content: ""; position: absolute; left: 14%; bottom: 20%; width: 26%; height: 17%; border-radius: 99px; background: var(--mx); }
+#hxintro .farg { margin-top: clamp(14px, 4cqh, 26px); }
+#hxintro .farg-topp { display: flex; align-items: baseline; gap: 8px; }
+#hxintro .farg-namn { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+#hxintro .farger { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+#hxintro .prick { position: relative; width: clamp(26px, 5.2cqh, 32px); aspect-ratio: 1; border-radius: 50%; background: var(--c); display: grid; place-items: center; }
+#hxintro .prick::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; box-shadow: 0 0 0 2px var(--c); opacity: 0; transform: scale(.85); transition: opacity .2s, transform .25s var(--ease-ut); }
+#hxintro .prick[aria-checked="true"]::after { opacity: 1; transform: none; }
+#hxintro .prick svg { width: 14px; height: 14px; fill: none; stroke: var(--pa, #fff); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: 0; transform: scale(.5); transition: opacity .15s, transform .25s var(--ease-ut); }
+#hxintro .prick[aria-checked="true"] svg { opacity: 1; transform: none; }
+
+/* Huvudwebbläsare */
+#hxintro .flode { display: flex; align-items: center; gap: 10px; margin-top: clamp(16px, 4.6cqh, 30px); direction: ltr; }
+#hxintro .app { width: clamp(38px, 7.6cqh, 46px); aspect-ratio: 1; border-radius: 12px; display: grid; place-items: center; background: var(--yta); color: var(--mut); }
+#hxintro .app .ik { width: 21px; height: 21px; }
+#hxintro .pil { flex: 0 1 64px; min-width: 28px; height: 2px; position: relative; background: repeating-linear-gradient(90deg, var(--faint) 0 4px, transparent 4px 9px); opacity: .9; }
+#hxintro .pil::after { content: ""; position: absolute; right: -1px; top: -4px; width: 9px; height: 9px; border-top: 2px solid var(--faint); border-right: 2px solid var(--faint); transform: rotate(45deg); }
+#hxintro .mal { display: flex; align-items: center; gap: 10px; height: clamp(38px, 7.6cqh, 46px); padding: 0 16px 0 8px; border-radius: 12px; background: var(--yta); box-shadow: inset 0 0 0 1.5px var(--acc); }
+#hxintro .mal img { width: 30px; height: 30px; }
+#hxintro .mal span { font-size: 14px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+#hxintro .tips { display: flex; gap: 12px; align-items: flex-start; margin-top: clamp(14px, 3.8cqh, 24px); max-width: 46ch; font-size: 13.5px; line-height: 1.5; color: var(--mut); }
+#hxintro .tips[hidden] { display: none; }
+#hxintro .tips p { margin: 0; }
+#hxintro .win { flex: none; display: grid; grid-template-columns: 7px 7px; gap: 1.5px; margin-top: 3px; }
+#hxintro .win[hidden] { display: none; }
+#hxintro .win i { width: 7px; height: 7px; background: #0078d4; }
+
+/* Klart */
+#hxintro .summa { display: grid; gap: clamp(8px, 2.2cqh, 14px); margin: clamp(16px, 4.6cqh, 30px) 0 0; padding: 0; list-style: none; }
+#hxintro .summa li { display: flex; align-items: center; gap: 12px; font-size: 14.5px; font-weight: 500; color: var(--ink); }
+#hxintro .summa li > span:last-child { min-width: 0; overflow-wrap: break-word; }
+#hxintro .summa li.av { color: var(--mut); font-weight: 400; }
+#hxintro .summa .bock { width: 24px; height: 24px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--acc); }
+#hxintro .summa .bock svg { width: 13px; height: 13px; stroke: var(--acc-on); stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+#hxintro .summa li.av .bock { background: var(--yta); box-shadow: inset 0 0 0 1px var(--line); }
+#hxintro .summa li.av .bock svg { display: none; }
+
+/* ═════════ Knapparna: EN familj genom hela flödet (signaturkitets vätskefyllning i accentfärgen) ═════════ */
+#hxintro .panel-fot { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; padding-top: 14px; }
+#hxintro .tillbaka { margin-inline-end: auto; display: inline-flex; align-items: center; gap: 7px; height: 42px; padding: 0 2px; font-size: 14.5px; font-weight: 500; color: var(--mut); transition: color .2s, opacity .2s; }
+#hxintro .tillbaka .ik { width: 17px; height: 17px; transition: transform .25s var(--ease); }
+#hxintro:is([dir="rtl"], :dir(rtl)) .tillbaka .ik, #hxintro:is([dir="rtl"], :dir(rtl)) .knapp .pi { scale: -1 1; }
+#hxintro .tillbaka:hover { color: var(--ink); }
+#hxintro .tillbaka:hover .ik { transform: translateX(-2px); }
+#hxintro .tillbaka span { position: relative; }
+#hxintro .tillbaka span::after { content: ""; position: absolute; left: 0; right: 0; bottom: -4px; height: 2px; border-radius: 2px; background: var(--acc); transform: scaleX(0); transform-origin: left center; transition: transform .3s cubic-bezier(.4, 0, .2, 1); }
+#hxintro .tillbaka:hover span::after, #hxintro .tillbaka:focus-visible span::after { transform: scaleX(1); }
+#hxintro .tillbaka.dold { visibility: hidden; opacity: 0; }
+
+#hxintro .knapp { --liq-r: 999px; position: relative; isolation: isolate; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  min-height: 46px; padding: 8px 22px; border-radius: var(--liq-r); clip-path: inset(0 round var(--liq-r));
+  font-family: var(--f-ui); font-size: 15px; font-weight: 600; line-height: 1.2; letter-spacing: -.005em; text-align: center; text-wrap: balance;
+  transition: color .6s ease, transform .2s ease; }
+#hxintro .knapp::after { content: ""; position: absolute; inset: 0; z-index: -2; border-radius: inherit; pointer-events: none; transition: opacity 0s; }
+#hxintro .knapp::before { content: ""; position: absolute; z-index: -1; left: -15%; width: 130%; bottom: -2px; height: 170%; transform: translateY(100%);
+  background: linear-gradient(180deg, var(--acc-topp) 0%, var(--acc) 100%); border-radius: 46% 46% 0 0; transition: transform .95s cubic-bezier(.2, .75, .25, 1); pointer-events: none; }
+#hxintro .knapp:hover, #hxintro .knapp:focus-visible { color: var(--acc-on); }
+#hxintro .knapp:hover::before, #hxintro .knapp:focus-visible::before { transform: translateY(0); }
+#hxintro .knapp:hover::after, #hxintro .knapp:focus-visible::after { opacity: 0; transition: opacity 0s .95s; }
+#hxintro .knapp:active { transform: translateY(1px); }
+#hxintro .knapp:focus-visible { outline: none; }
+#hxintro .knapp .ik { width: 18px; height: 18px; stroke-width: 2; transition: transform .3s var(--ease); }
+#hxintro .knapp:hover .pi { transform: translateX(2px); }
+#hxintro .prim { color: var(--knapp-ink); }
+#hxintro .prim::after { background: var(--knapp); }
+#hxintro .sek { color: var(--ink); }
+#hxintro .sek::after { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 18%, transparent); }
+#hxintro .sek[hidden] { display: none; }
+/* Huvudknappen som förloppsmätare: vätskan stiger medan vi flyttar eller väntar på systemet */
+#hxintro .prim.jobbar { cursor: default; color: var(--knapp-ink); }
+#hxintro .prim.jobbar::after { opacity: 1; transition: none; }
+#hxintro .prim.jobbar::before { opacity: 0; transition: none; }
+#hxintro .vatska { position: absolute; z-index: 1; left: -15%; width: 130%; bottom: -2px; height: 170%; border-radius: 46% 46% 0 0; overflow: hidden; pointer-events: none;
+  background: linear-gradient(180deg, var(--acc-topp) 0%, var(--acc) 100%); opacity: 0; transform: translateY(calc(var(--p, 1) * 100%)); transition: transform .55s var(--ease); }
+#hxintro .vatska-inne { position: absolute; left: 11.538%; width: 76.923%; top: calc(41.176% - 2px); height: 58.824%; display: flex; align-items: center; justify-content: center; gap: 9px;
+  padding: 8px 22px; color: var(--acc-on); white-space: nowrap; transform: translateY(calc(var(--p, 1) * -170%)); transition: transform .55s var(--ease); }
+#hxintro .prim.jobbar .vatska { opacity: 1; }
+#hxintro .prim .pk { display: none; }
+#hxintro .prim.fylld .pk { display: block; }
+#hxintro .prim.fylld .pi, #hxintro .prim.jobbar .pi { display: none; }
+
+/* Hoppa över i öppningen: samma knapp, med en tunn papperston så att den går att läsa ovanpå lapparna */
+#hxintro .hoppa { position: absolute; z-index: 7; inset-inline-end: clamp(14px, 1.8vw, 28px); bottom: clamp(14px, 2.4vh, 26px); min-height: 38px; padding-block: 0; padding-inline: 16px 7px; gap: 10px; font-size: 13.5px; opacity: 0; }
+#hxintro .hoppa::after { background: color-mix(in srgb, var(--sida) 86%, transparent); }
+#hxintro .hoppa kbd { font: 600 11px/1 var(--f-ui); padding: 5px 7px; border-radius: 7px; background: color-mix(in srgb, var(--ink) 8%, transparent); color: var(--mut); transition: background-color .6s, color .6s; }
+#hxintro .hoppa:hover kbd, #hxintro .hoppa:focus-visible kbd { background: rgb(19 17 14 / .12); color: #13110e; }
+#hxintro.kortfas :is(.lappar, .mitten, .smulor, .rakna:not(.dockad), .hoppa) { visibility: hidden; }
+
+/* Byte av ljust/mörkt eller färg i Utseende: hela webbläsaren tonar över (intro.js sätter klassen under bytet) */
+:root.ix-vt::view-transition-old(root), :root.ix-vt::view-transition-new(root) { animation-duration: .32s; animation-timing-function: ease; }
+:root.ix-vt::view-transition { pointer-events: none; }   /* klick under övergången når knapparna (annars fastnar de i övergångens lager) */
+
+/* ═════════ Minskade rörelser (systemet eller AdRazes egen body.reduce-motion) ═════════ */
+@media (prefers-reduced-motion: reduce) {
+  #hxintro *, #hxintro *::before, #hxintro *::after { transition-duration: .01s !important; transition-delay: 0s !important; }
+  #hxintro :is(.gk, .kg-blink) { animation: none !important; }
+  #hxintro .knapp::before { border-radius: 0; bottom: 0; height: 100%; }
+}
+body.reduce-motion #hxintro *, body.reduce-motion #hxintro *::before, body.reduce-motion #hxintro *::after { transition-duration: .01s !important; transition-delay: 0s !important; }
+body.reduce-motion #hxintro :is(.gk, .kg-blink) { animation: none !important; }
+body.reduce-motion #hxintro .knapp::before { border-radius: 0; bottom: 0; height: 100%; }
+/* Frusen bildruta (test och skärmbilder): inga övergångar vid första ritningen */
+#hxintro.frys *, #hxintro.frys *::before, #hxintro.frys *::after { transition: none !important; }
+
+/* ═════════ Små fönster (900×600) och långa ord ═════════ */
+@container kort (max-height: 520px) {
+  #hxintro .fakta { font-size: 13.5px; }
+  #hxintro .wb-sub { display: none; }
+  #hxintro .wb { padding-block: 8px; }
+  #hxintro .lagen { gap: 10px; }
+  #hxintro .mini { max-height: 13cqh; }
+  #hxintro .tips { font-size: 13px; }
+  #hxintro .flode { margin-top: 12px; }
+  #hxintro .tamed .etikett { display: none; }
+  #hxintro .chip { height: 30px; padding-inline: 9px 11px; font-size: 13px; }
+  #hxintro .resultat { margin-top: 10px; }
+}
+@container kort (max-width: 940px) {
+  #hxintro .tillbaka span { display: none; }
+  #hxintro .steg span { font-size: 12px; }
+}

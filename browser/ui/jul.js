@@ -114,8 +114,8 @@
     const nt = $('newtabpage');
     if (!nt || nt.classList.contains('hidden') || document.visibilityState !== 'visible') return false;
     if (RUTOR.some((id) => { const el = $(id); return el && !el.classList.contains('hidden'); })) return false;
-    const intro = $('hxintro');
-    if (intro && intro.style.display === 'flex') return false;
+    const intro = $('hxintro');   // första-gången-introt (ui/intro.js)
+    if ((typeof window.introAktivt === 'function' && window.introAktivt()) || (intro && intro.isConnected && !intro.hidden)) return false;
     // Inget annat får ligga över startsidan heller (spärrsidan i barnläge, en varning, kommandopaletten …)
     const r = nt.getBoundingClientRect(), overst = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
     return !!overst && nt.contains(overst);

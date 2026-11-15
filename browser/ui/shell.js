@@ -23,6 +23,10 @@ const byId = (id) => tabs.find((t) => t.id === id);
 // Inkognitofönster: alla dess flikar körs som inkognito och skalet får det mörka temat.
 const windowIncognito = new URLSearchParams(location.search).has('incognito');
 if (windowIncognito) document.body.classList.add('incog');
+// Första-gången-introt (se "Första-gången-introt" längre ned): pågår det, och vilka av dess steg har visats?
+// Deklareras tidigt så att notiserna kan fråga även om något under uppstarten skulle gå fel.
+const introLage = { aktivt: false, sett: { flytt: false, standard: false } };
+window.introAktivt = () => introLage.aktivt;
 document.body.classList.add('plat-' + ((window.view && window.view.platform) || 'linux'));
 /* Fönsterknapparna (Windows/Linux-overlay) följer flikradens färg: ljust, mörkt eller inkognito. */
 /* Egna fönsterknappar (Windows/Linux). Dubbelklick på tom flikrad maximerar, som i alla webbläsare. */
@@ -2490,8 +2494,8 @@ function showUpdateBanner(version) {
 async function maybeShowDefaultBanner() {
   try {
     if (windowIncognito) return;
-    const intro = $('hxintro');   // första start: vänta tills introt är borta, annars hamnar notisen ovanpå det
-    if (intro && intro.style.display === 'flex') { setTimeout(maybeShowDefaultBanner, 2500); return; }
+    if (introLage.aktivt) { setTimeout(maybeShowDefaultBanner, 2500); return; }   // första start: vänta tills introt är borta
+    if (introLage.sett.standard) return;                            // introt frågade redan (steget Huvudwebbläsare)
     if (document.getElementById('flytt-banner') || document.getElementById('jul-fraga')) { setTimeout(maybeShowDefaultBanner, 4000); return; }   // flytt-erbjudandet först, och aldrig ovanpå julfrågan (ui/jul.js)
     const st = await window.defaultBrowser.state();
     if (st && st.default) return;                                   // redan standard → visa inte
@@ -2937,7 +2941,7 @@ function mergeBokmarken(nya) {
   return n;
 }
 function mergeHistorik(nya) {
-  const h = getHistory(); const vid = new Map(h.map((e, i) => [e.url, i]));
+  const h = getHistory(); const vid = new Map(h.map((e, i) => [e.url, i])); const fore = new Set(vid.keys());
   let n = 0;
   for (const x of nya) {
     if (!x.url) continue;
@@ -2945,7 +2949,8 @@ function mergeHistorik(nya) {
     if (i == null) { h.push({ url: x.url, title: x.title || x.url, favicon: '', t: x.t || Date.now(), n: x.n || 1 }); vid.set(x.url, h.length - 1); n++; }
     else if ((x.t || 0) > (h[i].t || 0)) { h[i].t = x.t; if (x.title) h[i].title = x.title; }
   }
-  if (n) { h.sort((a, b) => (b.t || 0) - (a.t || 0)); saveHistory(h.slice(0, 500)); }
+  // Historiken sparar de 500 senaste sidorna: räkna bara de nya som fick plats
+  if (n) { h.sort((a, b) => (b.t || 0) - (a.t || 0)); const kvar = h.slice(0, 500); saveHistory(kvar); n = kvar.filter((e) => !fore.has(e.url)).length; }
   return n;
 }
 // Utseende: tema, bokmärkesfält, sidzoom, teckenstorlek
@@ -3310,33 +3315,80 @@ renderBookmarkBar();
 setTimeout(maybeShowDefaultBanner, 2500);
 setTimeout(sendBounds, 300);
 
-/* ── Hacker-intro (enkel välkomst, första gången) ── */
-function runHackerIntro(force) {
-  try { if (!force && localStorage.getItem('adraze-hacker-intro-v3')) return; } catch {}
-  const ov = $('hxintro'); if (!ov) return;
-  ov.style.display = 'flex'; void ov.offsetWidth; ov.classList.remove('gone');
-  let done = false;
-  function finish() {
-    if (done) return; done = true;
-    try { localStorage.setItem('adraze-hacker-intro-v3', '1'); } catch {}
-    ov.classList.add('gone');
-    setTimeout(() => { ov.style.display = 'none'; }, 550);
-    const s = $('nt-search'); if (s) try { s.focus(); } catch {}
+/* ── Första-gången-introt (ui/intro.js laddas bara när det ska visas) ──
+   Visas en gång för nya användare (inte för den som redan sett det förra introt, v3). Stegen i det gör det riktiga:
+   flytten från en annan webbläsare (samma import som Inställningar › Lösenord), temat och huvudwebbläsaren.
+   Har man varit på ett av de stegen visas inte notisen om samma sak efteråt. Hoppar man över allt kommer notiserna som vanligt. */
+let introNr = 0, introSkript = null;
+function laddaIntroSkript() {
+  if (window.AdrazeIntro) return Promise.resolve();
+  if (!introSkript) {
+    introSkript = new Promise((res, rej) => {
+      const s = document.createElement('script'); s.src = 'intro.js';
+      s.onload = () => res(); s.onerror = () => { introSkript = null; rej(new Error('intro.js')); };
+      document.head.appendChild(s);
+    });
   }
-  ov.addEventListener('click', finish);
-  document.addEventListener('keydown', (e) => { if (ov.style.display !== 'none' && (e.key === 'Enter' || e.key === 'Escape' || e.key === ' ')) finish(); });
+  return introSkript;
 }
-
-window.__hackerIntro = () => runHackerIntro(true);
-runHackerIntro(false);
+// Flytta hit: läs från den valda webbläsaren och lägg in bokmärken och historik som importen i Inställningar gör.
+// Flikarna öppnas först när introt stängs (introKlar), så att inga sidor dyker upp ovanpå det.
+async function introImportera({ typ, id, profil, bokmarken, historik, flikar }) {
+  let r; try { r = await window.view.importLas({ typ, id, profil, bokmarken: !!bokmarken, historik: !!historik, installningar: false, flikar: !!flikar, kakor: false }); } catch (e) { r = { ok: false, fel: String(e) }; }
+  if (!r || !r.ok) return { ok: false, fel: (r && r.fel) || '' };
+  const ut = { ok: true, bokmarken: 0, historik: 0, flikar: [] };
+  if (bokmarken) ut.bokmarken = mergeBokmarken(r.bokmarken || []);
+  if (historik) ut.historik = mergeHistorik(r.historik || []);
+  if (flikar) {
+    const redan = new Set(tabs.map((t) => t.url).filter(Boolean)), sedda = new Set();
+    ut.flikar = (r.flikar || []).filter((t) => t && t.url && !redan.has(t.url) && !sedda.has(t.url) && sedda.add(t.url)).map((t) => ({ url: t.url, pinned: !!t.pinned }));
+  }
+  return ut;
+}
+function introKlar(info, nr) {
+  if (nr === introNr) introLage.aktivt = false;
+  const sett = (info && info.sett) || {};
+  if (sett.flytt) introLage.sett.flytt = true;
+  if (sett.standard) {
+    introLage.sett.standard = true;
+    // Steget Huvudwebbläsare visades: notisen om samma sak väntar en vecka (som när man svarar Senare i den)
+    try { const nu = parseInt(localStorage.getItem('skoll-defbrowser-snooze') || '0', 10); if (nu < Date.now() + 7 * 24 * 3600 * 1000) localStorage.setItem('skoll-defbrowser-snooze', String(Date.now() + 7 * 24 * 3600 * 1000)); } catch {}
+  }
+  const nya = (info && info.flikar) || [];
+  if (nya.length) {
+    const redan = new Set(tabs.map((t) => t.url).filter(Boolean)), tillbaka = active;
+    for (const t of nya) { if (redan.has(t.url)) continue; redan.add(t.url); const ny = createTab(t.url); if (t.pinned) try { setPinned(ny, true); } catch {} }
+    try { if (tillbaka) switchTab(tillbaka); } catch {}
+    showToast(nya.length === 1 ? tf('{n} flik öppnad', { n: nya.length }) : tf('{n} flikar öppnade', { n: nya.length }));
+  }
+}
+// test: { t } fryser öppningen vid t sekunder, { steg: 'utseende' } öppnar kortet på ett steg (skärmbilder och tester)
+async function startaIntro(test) {
+  const nr = ++introNr;
+  introLage.aktivt = true;
+  let ok = false;
+  try {
+    await laddaIntroSkript();
+    ok = await window.AdrazeIntro.starta({ test: test || null, bro: { importera: introImportera }, klar: (info) => introKlar(info, nr) });
+  } catch (e) { console.warn('[intro]', e && e.message || e); }
+  if (!ok && nr === introNr) introLage.aktivt = false;
+  return ok;
+}
+function visaIntroForstaGangen() {
+  if (windowIncognito) return;
+  try { if (localStorage.getItem('adraze-intro-v4') || localStorage.getItem('adraze-hacker-intro-v3')) return; } catch { return; }
+  startaIntro(null);
+}
+window.__intro = (test) => startaIntro(test);
+window.__hackerIntro = () => startaIntro(null);   // det gamla namnet (äldre tester)
+visaIntroForstaGangen();
 
 /* ── Byter du från en annan webbläsare? Erbjud flytten en gång, efter introt ── */
 async function maybeShowFlyttBanner() {
   try {
     if (windowIncognito) return;
-    if (localStorage.getItem('adraze-flytt-erbjuden')) return;
-    const intro = $('hxintro');
-    if (intro && intro.style.display === 'flex') { setTimeout(maybeShowFlyttBanner, 1000); return; }
+    if (localStorage.getItem('adraze-flytt-erbjuden') || introLage.sett.flytt) return;   // introts Flytta hit räknas som erbjudandet
+    if (introLage.aktivt) { setTimeout(maybeShowFlyttBanner, 1000); return; }
     if (document.getElementById('defbrowser-banner') || document.getElementById('jul-fraga')) { setTimeout(maybeShowFlyttBanner, 3000); return; }   // inte två notiser på varandra
     let lista = []; try { lista = await window.view.importKallor(); } catch {}
     if (!Array.isArray(lista) || !lista.length) return;
