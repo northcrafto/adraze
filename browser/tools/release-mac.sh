@@ -9,7 +9,7 @@ V=$(node -p "require('./package.json').version")
 
 # MacBooken avstängd → bygg på GitHubs Mac-datorer i stället (.github/workflows/mac.yml)
 github_bygge() {
-  echo "MacBooken svarar inte – bygger Mac-versionen på GitHub"
+  echo "Bygger Mac-versionen på GitHub"
   local R=northcrafto/adraze SHA
   git push -q origin HEAD:main
   SHA=$(git rev-parse HEAD)
