@@ -138,7 +138,7 @@ AdRaze would not exist without the people who maintain the filter lists:
 - [AdGuard Popups filter](https://github.com/AdguardTeam/AdguardFilters) (GPL-3.0)
 - [Peter Lowe's ad server list](https://pgl.yoyo.org/adservers/)
 
-Website illustrations from [unDraw](https://undraw.co), photos from [Pexels](https://www.pexels.com), globe by [cobe](https://github.com/shuding/cobe). Built with help from [Claude](https://claude.ai).
+Website illustrations from [unDraw](https://undraw.co), photos from [Pexels](https://www.pexels.com), globe by [cobe](https://github.com/shuding/cobe).
 
 ## License
 
