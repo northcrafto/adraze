@@ -71,8 +71,9 @@ Works in Chrome, Brave, Edge, Opera and other Chromium browsers (version 121 or 
 
 There is also a full desktop browser with AdRaze built in, in [`browser/`](browser). It uses the same rules as the extension, stops dangerous pages before they load, never blocks sign-in or 2FA pages, and has a password manager that only fills in when you ask.
 
+- **Windows:** [get it from the Microsoft Store](https://apps.microsoft.com/detail/9NXWW5QDZV98).
+- **Mac:** [download AdRaze.dmg](https://github.com/northcrafto/adraze-dl/releases/latest/download/AdRaze.dmg). It updates itself.
 - **Linux:** [download AdRaze.AppImage](https://github.com/northcrafto/adraze-dl/releases/latest/download/AdRaze.AppImage). It updates itself.
-- **Windows:** coming to the Microsoft Store.
 
 See [browser/README.md](browser/README.md) for running it from source.
 
