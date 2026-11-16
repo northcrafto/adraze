@@ -1,5 +1,6 @@
 #!/bin/bash
-# Bygger Mac-versionen på MacBooken (ssh mac, Intel, Xcode + Developer ID-certifikatet i nyckelringen)
+# Bygger Mac-versionen på GitHubs Mac-datorer (.github/workflows/mac.yml), med MacBooken som reserv
+# (ssh mac, Intel, Xcode + Developer ID-certifikatet i nyckelringen),
 # från exakt samma källkod och version som Linux-bygget, och hämtar hem filerna till dist-installer/.
 # Själva bygget: tools/mac/bygg.sh (körs i Mac:ens skrivbordssession via tools/mac/kor.sh).
 set -e
@@ -33,7 +34,13 @@ github_bygge() {
   grep -q "^version: $V$" dist-installer/latest-mac.yml
   echo "Mac: $(ls -la dist-installer/AdRaze.dmg | awk '{print $5}') byte dmg, notariserad (GitHub)"
 }
-if [ -n "$ADRAZE_MAC_GITHUB" ] || ! ssh -o ConnectTimeout=8 -o BatchMode=yes mac true 2>/dev/null; then github_bygge; exit $?; fi
+# GitHubs Mac-datorer först (Cetto 2026-11-16: MacBooken ska inte behöva vara på eller inloggad).
+# MacBooken är reserv om GitHub-bygget faller. ADRAZE_MAC_LOKALT=1 tvingar MacBooken.
+if [ -z "$ADRAZE_MAC_LOKALT" ]; then
+  if github_bygge; then exit 0; fi
+  ssh -o ConnectTimeout=8 -o BatchMode=yes mac true 2>/dev/null || { echo "MacBooken svarar inte heller"; exit 1; }
+  echo "GitHub-bygget föll – provar MacBooken"
+fi
 X=(--exclude node_modules --exclude .git --exclude dist --exclude dist-installer --exclude /adraze --exclude native/adblock/build)
 rsync -az --delete "${X[@]}" ./ mac:adraze-src/browser/
 rsync -az --delete ../extension/ mac:adraze-src/extension/
