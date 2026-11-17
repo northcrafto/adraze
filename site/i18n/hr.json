@@ -101,7 +101,7 @@
   "privacy.meta_description": "Bez računa AdRaze ne prikuplja nikakve podatke. Evo kako rade proširenje, račun i dopuštenja.",
   "privacy.back": "Natrag na početnu",
   "privacy.title": "Pravila privatnosti",
-  "privacy.updated": "Zadnje ažuriranje: 21. listopada 2026.",
+  "privacy.updated": "Zadnje ažuriranje: 17. studenoga 2026.",
   "privacy.h_short": "Ukratko",
   "privacy.p_short": "Bez računa AdRaze ne prikuplja, ne sprema i ne šalje nikakve podatke o tebi ni o tome što radiš na internetu. Sve se odvija lokalno u tvom pregledniku. Ako izradiš račun, što je dobrovoljno, spremamo samo tvoju adresu e-pošte i koliko je stvari zaustavljeno po danu. Nikad koje stranice posjećuješ.",
   "privacy.h_local": "Što se sprema na tvom računalu",
@@ -556,5 +556,18 @@
   "err404.text": "Adresa je krivo napisana ili je stranica premještena. Provjerite adresu ili se vratite.",
   "err404.home": "Na početnu",
   "err404.back": "Natrag",
-  "dl.windows_btn": "Preuzmi iz Microsoft Storea"
+  "dl.windows_btn": "Preuzmi iz Microsoft Storea",
+  "welcome.meta_title": "Dobro došli – AdRaze",
+  "welcome.title": "AdRaze radi.",
+  "welcome.lead": "Oglasi, pratitelji i skočni prozori već se zaustavljaju. Ne morate ništa podešavati.",
+  "welcome.s1_title": "Prikvačite AdRaze",
+  "welcome.s1_text": "Kliknite na dio slagalice gore desno, a zatim na pribadaču pokraj AdRazea. Tada je ikona uvijek vidljiva.",
+  "welcome.s2_title": "Surfajte kao i obično",
+  "welcome.s2_text": "Broj na ikoni pokazuje koliko je toga zaustavljeno na stranici na kojoj se nalazite.",
+  "welcome.s3_title": "Pauzirajte kad zatreba",
+  "welcome.s3_text": "Neka stranica više ne radi? Otvorite AdRaze i pauzirajte zaštitu samo za tu stranicu.",
+  "welcome.browser_title": "Želite cijeli preglednik?",
+  "welcome.browser_text": "AdRaze Browser ima ugrađeno blokiranje i dostupan je za Linux, Windows i Mac.",
+  "privacy.h_site": "Posjeti adraze.app",
+  "privacy.p_site": "Kada posjetite adraze.app, brojimo prikaze stranica i klikove na gumbe za preuzimanje kako bismo vidjeli što funkcionira. To se odvija na našem vlastitom poslužitelju, bez kolačića i bez spremanja vaše IP adrese. Pri instalaciji proširenja jednom se otvara stranica dobrodošlice na adraze.app."
 }

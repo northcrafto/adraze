@@ -101,7 +101,7 @@
   "privacy.meta_description": "Uten konto samler AdRaze ingen data. Slik fungerer utvidelsen, kontoen og tillatelsene.",
   "privacy.back": "Til forsiden",
   "privacy.title": "Personvernerklæring",
-  "privacy.updated": "Sist oppdatert 21. oktober 2026",
+  "privacy.updated": "Sist oppdatert 17. november 2026",
   "privacy.h_short": "Kort fortalt",
   "privacy.p_short": "Uten konto samler AdRaze ikke inn, lagrer ikke og sender ikke noen informasjon om deg eller hva du gjør på nettet. Alt skjer lokalt i nettleseren din. Oppretter du en konto, noe som er frivillig, lagrer vi bare e-postadressen din og hvor mange ting som er stoppet per dag. Aldri hvilke nettsteder du besøker.",
   "privacy.h_local": "Hva som lagres på datamaskinen din",
@@ -556,5 +556,18 @@
   "err404.text": "Adressen er feilstavet, eller så har siden flyttet. Sjekk stavingen eller gå tilbake.",
   "err404.home": "Til forsiden",
   "err404.back": "Tilbake",
-  "dl.windows_btn": "Hent i Microsoft Store"
+  "dl.windows_btn": "Hent i Microsoft Store",
+  "welcome.meta_title": "Velkommen – AdRaze",
+  "welcome.title": "AdRaze er i gang.",
+  "welcome.lead": "Reklame, sporere og popups stoppes allerede. Du trenger ikke å stille inn noe.",
+  "welcome.s1_title": "Fest AdRaze",
+  "welcome.s1_text": "Klikk på puslespillbrikken oppe til høyre og deretter på nålen ved siden av AdRaze. Da vises ikonet alltid.",
+  "welcome.s2_title": "Surf som vanlig",
+  "welcome.s2_text": "Tallet på ikonet viser hvor mye som er stoppet på siden du er på.",
+  "welcome.s3_title": "Sett på pause ved behov",
+  "welcome.s3_text": "Slutter en side å fungere? Åpne AdRaze og sett beskyttelsen på pause for akkurat den siden.",
+  "welcome.browser_title": "Vil du ha hele nettleseren?",
+  "welcome.browser_text": "AdRaze Browser har blokkeringen innebygd og finnes for Linux, Windows og Mac.",
+  "privacy.h_site": "Besøk på adraze.app",
+  "privacy.p_site": "Når du besøker adraze.app, teller vi sidevisninger og klikk på nedlastingsknappene for å se hva som fungerer. Det skjer på vår egen server, uten informasjonskapsler og uten at IP-adressen din lagres. Når utvidelsen installeres, åpnes en velkomstside på adraze.app én gang."
 }

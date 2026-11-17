@@ -101,7 +101,7 @@
   "privacy.meta_description": "Zonder account verzamelt AdRaze geen data. Zo werken de extensie, het account en de rechten.",
   "privacy.back": "Naar de startpagina",
   "privacy.title": "Privacybeleid",
-  "privacy.updated": "Laatst bijgewerkt op 21 oktober 2026",
+  "privacy.updated": "Laatst bijgewerkt op 17 november 2026",
   "privacy.h_short": "In het kort",
   "privacy.p_short": "Zonder account verzamelt, bewaart en verstuurt AdRaze geen informatie over jou of wat je online doet. Alles gebeurt lokaal in je browser. Maak je een account aan, wat vrijwillig is, dan bewaren we alleen je e-mailadres en hoeveel er per dag is tegengehouden. Nooit welke sites je bezoekt.",
   "privacy.h_local": "Wat er op je computer wordt opgeslagen",
@@ -556,5 +556,18 @@
   "err404.text": "Het adres is verkeerd gespeld of de pagina is verhuisd. Controleer de spelling of ga terug.",
   "err404.home": "Naar de startpagina",
   "err404.back": "Terug",
-  "dl.windows_btn": "Download in de Microsoft Store"
+  "dl.windows_btn": "Download in de Microsoft Store",
+  "welcome.meta_title": "Welkom – AdRaze",
+  "welcome.title": "AdRaze staat aan.",
+  "welcome.lead": "Advertenties, trackers en pop-ups worden al tegengehouden. Je hoeft niets in te stellen.",
+  "welcome.s1_title": "Zet AdRaze vast",
+  "welcome.s1_text": "Klik rechtsboven op het puzzelstukje en daarna op de punaise naast AdRaze. Dan blijft het pictogram altijd zichtbaar.",
+  "welcome.s2_title": "Surf zoals altijd",
+  "welcome.s2_text": "Het getal op het pictogram laat zien hoeveel er is tegengehouden op de pagina waar je bent.",
+  "welcome.s3_title": "Pauzeer wanneer nodig",
+  "welcome.s3_text": "Werkt een site niet meer? Open AdRaze en pauzeer de bescherming alleen voor die site.",
+  "welcome.browser_title": "Liever de hele browser?",
+  "welcome.browser_text": "AdRaze Browser heeft de blokkering ingebouwd en is er voor Linux, Windows en Mac.",
+  "privacy.h_site": "Bezoeken aan adraze.app",
+  "privacy.p_site": "Wanneer je adraze.app bezoekt, tellen we paginaweergaven en klikken op de downloadknoppen om te zien wat werkt. Dat gebeurt op onze eigen server, zonder cookies en zonder je IP-adres op te slaan. Bij het installeren van de extensie wordt één keer een welkomstpagina op adraze.app geopend."
 }

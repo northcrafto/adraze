@@ -101,7 +101,7 @@
   "privacy.meta_description": "Ilman tiliä AdRaze ei kerää mitään tietoja. Näin laajennus, tili ja käyttöoikeudet toimivat.",
   "privacy.back": "Etusivulle",
   "privacy.title": "Tietosuojakäytäntö",
-  "privacy.updated": "Päivitetty viimeksi 21.10.2026",
+  "privacy.updated": "Päivitetty viimeksi 17.11.2026",
   "privacy.h_short": "Lyhyesti",
   "privacy.p_short": "Ilman tiliä AdRaze ei kerää, tallenna eikä lähetä mitään tietoja sinusta tai siitä, mitä teet verkossa. Kaikki tapahtuu paikallisesti selaimessasi. Jos luot tilin, mikä on vapaaehtoista, tallennamme vain sähköpostiosoitteesi ja sen, kuinka paljon on estetty päivittäin. Emme koskaan sitä, millä sivustoilla käyt.",
   "privacy.h_local": "Mitä tietokoneellesi tallennetaan",
@@ -556,5 +556,18 @@
   "err404.text": "Osoite on kirjoitettu väärin, tai sivu on siirtynyt. Tarkista kirjoitusasu tai palaa takaisin.",
   "err404.home": "Etusivulle",
   "err404.back": "Takaisin",
-  "dl.windows_btn": "Hae Microsoft Storesta"
+  "dl.windows_btn": "Hae Microsoft Storesta",
+  "welcome.meta_title": "Tervetuloa – AdRaze",
+  "welcome.title": "AdRaze on käynnissä.",
+  "welcome.lead": "Mainokset, seuraimet ja ponnahdusikkunat pysäytetään jo. Sinun ei tarvitse säätää mitään.",
+  "welcome.s1_title": "Kiinnitä AdRaze",
+  "welcome.s1_text": "Napsauta oikean yläkulman palapelin palaa ja sitten AdRazen vieressä olevaa nastaa. Kuvake pysyy silloin aina näkyvissä.",
+  "welcome.s2_title": "Selaa tavalliseen tapaan",
+  "welcome.s2_text": "Kuvakkeen numero kertoo, kuinka paljon nykyisellä sivulla on pysäytetty.",
+  "welcome.s3_title": "Keskeytä tarvittaessa",
+  "welcome.s3_text": "Lakkasiko jokin sivusto toimimasta? Avaa AdRaze ja keskeytä suojaus vain sillä sivustolla.",
+  "welcome.browser_title": "Haluatko koko selaimen?",
+  "welcome.browser_text": "AdRaze Browserissa esto on sisäänrakennettu, ja se on saatavilla Linuxille, Windowsille ja Macille.",
+  "privacy.h_site": "Käynnit adraze.app-sivustolla",
+  "privacy.p_site": "Kun käyt adraze.app-sivustolla, laskemme sivujen katselut ja latauspainikkeiden napsautukset nähdäksemme, mikä toimii. Tämä tapahtuu omalla palvelimellamme ilman evästeitä ja tallentamatta IP-osoitettasi. Kun laajennus asennetaan, adraze.app-sivuston tervetulosivu avautuu kerran."
 }

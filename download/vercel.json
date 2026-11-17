@@ -18,12 +18,12 @@
     },
     {
       "source": "/extension",
-      "destination": "https://adraze.app/#installera",
+      "destination": "https://chromewebstore.google.com/detail/cgdjdjgdoklomdphknggkhfghlglcppd",
       "permanent": false
     },
     {
       "source": "/chrome",
-      "destination": "https://adraze.app/#installera",
+      "destination": "https://chromewebstore.google.com/detail/cgdjdjgdoklomdphknggkhfghlglcppd",
       "permanent": false
     },
     {

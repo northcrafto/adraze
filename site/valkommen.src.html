@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{t:welcome.meta_title}}</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.png">
+{{alternates}}
+<link rel="stylesheet" href="/style.css">
+<style>
+  /* Välkomstsidan öppnas en gång när tillägget installerats */
+  .valk { background: var(--accent); color: var(--accent-ink); overflow: clip; }
+  .valk-grid { display: grid; grid-template-columns: 1.1fr .9fr; align-items: end; gap: 40px; padding: 88px 0 0; }
+  .valk-text { padding-bottom: 88px; }
+  .valk h1 { font-size: clamp(52px, 8.4vw, 124px); line-height: .92; letter-spacing: -0.06em; }
+  .valk p { font-size: clamp(19px, 2vw, 24px); max-width: 30ch; margin-top: 28px; line-height: 1.35; }
+  .valk img { width: 100%; max-height: 420px; object-fit: contain; object-position: center bottom; }
+  .valk-steg { padding: 104px 0 96px; }
+  .valk-steg .steg-lista img { height: 170px; }
+  .valk-mer { background: var(--mork); color: #fff; padding: 88px 0; --sig-btn: #ffffff; --sig-btn-ink: var(--ink); }
+  .valk-mer-grid { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 40px; }
+  .valk-mer p { color: #b9b9c0; font-size: 19px; margin-top: 16px; max-width: 44ch; }
+  .valk-knappar { display: flex; flex-wrap: wrap; gap: 14px; }
+  .valk-knappar .liq-ghost { color: #fff; }
+  @media (max-width: 860px) {
+    .valk-grid { grid-template-columns: 1fr; padding-top: 56px; gap: 8px; }
+    .valk-text { padding-bottom: 24px; }
+    .valk img { max-height: 260px; }
+    .valk-steg { padding: 64px 0; }
+    .valk-steg .steg-lista { grid-template-columns: 1fr; gap: 40px; }
+    .valk-mer { padding: 64px 0; }
+    .valk-mer-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+{{topp}}
+<main>
+  <section class="valk">
+    <div class="wrap valk-grid">
+      <div class="valk-text">
+        <h1>{{t:welcome.title}}</h1>
+        <p>{{t:welcome.lead}}</p>
+      </div>
+      <img src="/illu/happy.svg" alt="" width="520" height="420">
+    </div>
+  </section>
+
+  <section class="wrap valk-steg steg">
+    <ol class="steg-lista">
+      <li>
+        <img src="/illu/personal-settings.svg" alt="" loading="lazy">
+        <h3><span>1</span>{{t:welcome.s1_title}}</h3>
+        <p>{{t:welcome.s1_text}}</p>
+      </li>
+      <li>
+        <img src="/illu/casual-browsing.svg" alt="" loading="lazy">
+        <h3><span>2</span>{{t:welcome.s2_title}}</h3>
+        <p>{{t:welcome.s2_text}}</p>
+      </li>
+      <li>
+        <img src="/illu/cancel.svg" alt="" loading="lazy">
+        <h3><span>3</span>{{t:welcome.s3_title}}</h3>
+        <p>{{t:welcome.s3_text}}</p>
+      </li>
+    </ol>
+  </section>
+
+  <section class="valk-mer">
+    <div class="wrap valk-mer-grid">
+      <div>
+        <h2>{{t:welcome.browser_title}}</h2>
+        <p>{{t:welcome.browser_text}}</p>
+      </div>
+      <div class="valk-knappar">
+        <a href="{{ladda}}" class="btn btn-stor liq">{{download-simple}}{{t:nav.download}}</a>
+        <a href="{{pre}}/kolla" class="btn btn-stor liq-ghost">{{t:nav.check}}</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="fot">
+  <div class="wrap fot-grid">
+    <div><a href="{{hem}}" class="logo"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a><p>{{t:footer.tagline}}</p></div>
+    <ul>
+      <li><a class="nav-link" href="{{hem}}">{{t:privacy.back}}</a></li>
+      <li><a class="nav-link" href="{{pre}}/statistik">{{t:footer.stats}}</a></li>
+      <li><a class="nav-link" href="{{ladda}}">{{t:nav.download}}</a></li>
+      <li><a class="nav-link" href="{{hjalp}}">{{t:nav.help}}</a></li>
+      <li><a class="nav-link" href="{{pre}}/integritet">{{t:footer.privacy}}</a></li>
+    </ul>
+  </div>
+</footer>
+<script src="/main.js"></script>
+</body>
+</html>

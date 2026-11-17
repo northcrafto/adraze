@@ -89,7 +89,7 @@
   "privacy.meta_description": "Utan konto samlar AdRaze ingen data. Så här fungerar tillägget, kontot och behörigheterna.",
   "privacy.back": "Till startsidan",
   "privacy.title": "Integritetspolicy",
-  "privacy.updated": "Senast uppdaterad 21 oktober 2026",
+  "privacy.updated": "Senast uppdaterad 17 november 2026",
   "privacy.h_short": "Kort sagt",
   "privacy.p_short": "Utan konto samlar AdRaze inte in, sparar inte och skickar inte någon information om dig eller vad du gör på nätet. Allt sker lokalt i din webbläsare. Skapar du ett konto, vilket är frivilligt, sparar vi bara din mejladress och hur många saker som stoppats per dag. Aldrig vilka sajter du besöker.",
   "privacy.h_local": "Vad som sparas på din dator",
@@ -556,5 +556,18 @@
   "err404.text": "Adressen är felstavad, eller så har sidan flyttat. Kolla stavningen eller gå tillbaka.",
   "err404.home": "Till startsidan",
   "err404.back": "Tillbaka",
-  "dl.windows_btn": "Hämta i Microsoft Store"
+  "dl.windows_btn": "Hämta i Microsoft Store",
+  "welcome.meta_title": "Välkommen – AdRaze",
+  "welcome.title": "AdRaze är igång.",
+  "welcome.lead": "Reklam, spårare och popups stoppas redan. Du behöver inte ställa in något.",
+  "welcome.s1_title": "Fäst AdRaze",
+  "welcome.s1_text": "Klicka på pusselbiten uppe till höger och sedan på nålen bredvid AdRaze. Då syns ikonen alltid.",
+  "welcome.s2_title": "Surfa som vanligt",
+  "welcome.s2_text": "Siffran på ikonen visar hur mycket som stoppats på sidan du är på.",
+  "welcome.s3_title": "Pausa när det behövs",
+  "welcome.s3_text": "Slutar en sajt fungera? Öppna AdRaze och pausa skyddet för just den sajten.",
+  "welcome.browser_title": "Vill du ha hela webbläsaren?",
+  "welcome.browser_text": "AdRaze Browser har blockeringen inbyggd och finns för Linux, Windows och Mac.",
+  "privacy.h_site": "Besök på adraze.app",
+  "privacy.p_site": "När du besöker adraze.app räknar vi sidvisningar och klick på nedladdningsknapparna, för att se vad som fungerar. Det sker på vår egen server, utan kakor och utan att din IP-adress sparas. När tillägget installeras öppnas en välkomstsida på adraze.app en gång."
 }

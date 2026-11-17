@@ -160,3 +160,24 @@ document.querySelectorAll('.sf-test').forEach((el) => new IntersectionObserver((
     });
   }, 0.3);
 })();
+
+// Räknar klick på nedladdnings- och butiksknappar (bara vilken knapp, inget om besökaren). Se /integritet.
+(() => {
+  if (!/^(download\.)?adraze\.app$/.test(location.hostname) || !navigator.sendBeacon) return;
+  const mal = (a) => {
+    const h = a.href || '';
+    if (/chromewebstore\.google\.com/.test(h)) return 'chrome';
+    if (/apps\.microsoft\.com/.test(h)) return 'windows';
+    if (/\.dmg$/.test(h)) return 'mac';
+    if (/\.AppImage$|install\.sh$/.test(h)) return 'linux';
+    if (/github\.com\/northcrafto\/adraze-dl/.test(h)) return 'github';
+    if (/github\.com\/northcrafto\/adraze\b/.test(h)) return 'kalla';
+    return null;
+  };
+  addEventListener('click', (e) => {
+    const t = e.target.closest?.('a[href], #dl-kopiera');
+    if (!t) return;
+    const m = t.id === 'dl-kopiera' ? 'linux' : mal(t);
+    if (m) navigator.sendBeacon('/m', JSON.stringify({ mal: m, p: location.pathname }));
+  }, true);
+})();

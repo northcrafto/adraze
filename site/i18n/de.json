@@ -101,7 +101,7 @@
   "privacy.meta_description": "Ohne Konto sammelt AdRaze keine Daten. So funktionieren die Erweiterung, das Konto und die Berechtigungen.",
   "privacy.back": "Zur Startseite",
   "privacy.title": "Datenschutzerklärung",
-  "privacy.updated": "Zuletzt aktualisiert am 21. Oktober 2026",
+  "privacy.updated": "Zuletzt aktualisiert am 17. November 2026",
   "privacy.h_short": "Kurz gesagt",
   "privacy.p_short": "Ohne Konto sammelt, speichert und versendet AdRaze keine Informationen über dich oder das, was du im Netz tust. Alles passiert lokal in deinem Browser. Wenn du ein Konto erstellst, was freiwillig ist, speichern wir nur deine E-Mail-Adresse und wie viel pro Tag gestoppt wurde. Niemals, welche Seiten du besuchst.",
   "privacy.h_local": "Was auf deinem Rechner gespeichert wird",
@@ -556,5 +556,18 @@
   "err404.text": "Die Adresse ist falsch geschrieben oder die Seite ist umgezogen. Prüf die Schreibweise oder geh zurück.",
   "err404.home": "Zur Startseite",
   "err404.back": "Zurück",
-  "dl.windows_btn": "Im Microsoft Store holen"
+  "dl.windows_btn": "Im Microsoft Store holen",
+  "welcome.meta_title": "Willkommen – AdRaze",
+  "welcome.title": "AdRaze läuft.",
+  "welcome.lead": "Werbung, Tracker und Pop-ups werden bereits gestoppt. Du musst nichts einstellen.",
+  "welcome.s1_title": "AdRaze anheften",
+  "welcome.s1_text": "Klicke oben rechts auf das Puzzleteil und dann auf die Stecknadel neben AdRaze. So bleibt das Symbol immer sichtbar.",
+  "welcome.s2_title": "Surfe wie gewohnt",
+  "welcome.s2_text": "Die Zahl auf dem Symbol zeigt, wie viel auf der aktuellen Seite gestoppt wurde.",
+  "welcome.s3_title": "Bei Bedarf pausieren",
+  "welcome.s3_text": "Funktioniert eine Seite nicht mehr? Öffne AdRaze und pausiere den Schutz nur für diese Seite.",
+  "welcome.browser_title": "Lieber den ganzen Browser?",
+  "welcome.browser_text": "Im AdRaze Browser ist der Blocker eingebaut. Es gibt ihn für Linux, Windows und Mac.",
+  "privacy.h_site": "Besuche auf adraze.app",
+  "privacy.p_site": "Wenn du adraze.app besuchst, zählen wir Seitenaufrufe und Klicks auf die Download-Schaltflächen, um zu sehen, was funktioniert. Das geschieht auf unserem eigenen Server, ohne Cookies und ohne deine IP-Adresse zu speichern. Bei der Installation der Erweiterung wird einmalig eine Willkommensseite auf adraze.app geöffnet."
 }

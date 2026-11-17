@@ -101,7 +101,7 @@
   "privacy.meta_description": "Ilma kontota ei kogu AdRaze mingeid andmeid. Nii töötavad laiendus, konto ja õigused.",
   "privacy.back": "Avalehele",
   "privacy.title": "Privaatsuspoliitika",
-  "privacy.updated": "Viimati uuendatud 21. oktoobril 2026",
+  "privacy.updated": "Viimati uuendatud 17. novembril 2026",
   "privacy.h_short": "Lühidalt",
   "privacy.p_short": "Ilma kontota ei kogu, ei salvesta ega saada AdRaze mingit teavet sinu ega sinu tegemiste kohta internetis. Kõik toimub kohapeal sinu brauseris. Kui lood konto, mis on vabatahtlik, salvestame ainult sinu e-posti aadressi ja selle, kui palju päevas peatati. Mitte kunagi seda, milliseid saite külastad.",
   "privacy.h_local": "Mida sinu arvutisse salvestatakse",
@@ -556,5 +556,18 @@
   "err404.text": "Aadress on valesti kirjutatud või leht on kolinud. Kontrolli aadressi või mine tagasi.",
   "err404.home": "Avalehele",
   "err404.back": "Tagasi",
-  "dl.windows_btn": "Hangi Microsoft Store’ist"
+  "dl.windows_btn": "Hangi Microsoft Store’ist",
+  "welcome.meta_title": "Tere tulemast – AdRaze",
+  "welcome.title": "AdRaze töötab.",
+  "welcome.lead": "Reklaamid, jälgijad ja hüpikaknad peatatakse juba. Sa ei pea midagi seadistama.",
+  "welcome.s1_title": "Kinnita AdRaze",
+  "welcome.s1_text": "Klõpsa üleval paremal pusletükil ja seejärel AdRaze kõrval oleval nööpnõelal. Siis on ikoon alati nähtav.",
+  "welcome.s2_title": "Surfa nagu tavaliselt",
+  "welcome.s2_text": "Ikoonil olev number näitab, kui palju sellel lehel peatati.",
+  "welcome.s3_title": "Peata vajadusel",
+  "welcome.s3_text": "Kas mõni sait lakkas töötamast? Ava AdRaze ja peata kaitse ainult sellel saidil.",
+  "welcome.browser_title": "Soovid tervet brauserit?",
+  "welcome.browser_text": "AdRaze Browseris on blokeerimine sisse ehitatud ning see on saadaval Linuxile, Windowsile ja Macile.",
+  "privacy.h_site": "Külastused saidil adraze.app",
+  "privacy.p_site": "Kui külastad saiti adraze.app, loendame lehevaatamisi ja klõpse allalaadimisnuppudel, et näha, mis toimib. See toimub meie enda serveris, ilma küpsisteta ja sinu IP-aadressi salvestamata. Laienduse paigaldamisel avaneb üks kord tervitusleht saidil adraze.app."
 }

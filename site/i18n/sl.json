@@ -101,7 +101,7 @@
   "privacy.meta_description": "Brez računa AdRaze ne zbira nobenih podatkov. Tako delujejo razširitev, račun in dovoljenja.",
   "privacy.back": "Nazaj na domačo stran",
   "privacy.title": "Politika zasebnosti",
-  "privacy.updated": "Zadnja posodobitev: 21. oktobra 2026",
+  "privacy.updated": "Zadnja posodobitev: 17. novembra 2026",
   "privacy.h_short": "Na kratko",
   "privacy.p_short": "Brez računa AdRaze ne zbira, ne shranjuje in ne pošilja nobenih informacij o tebi ali o tem, kaj počneš na spletu. Vse poteka lokalno v tvojem brskalniku. Če ustvariš račun, kar je prostovoljno, shranimo samo tvoj e-poštni naslov in koliko stvari je bilo ustavljenih na dan. Nikoli ne shranimo, katere strani obiskuješ.",
   "privacy.h_local": "Kaj se shrani na tvojem računalniku",
@@ -556,5 +556,18 @@
   "err404.text": "Naslov je napačno zapisan ali pa je bila stran premaknjena. Preverite naslov ali se vrnite.",
   "err404.home": "Na začetno stran",
   "err404.back": "Nazaj",
-  "dl.windows_btn": "Prenesi iz trgovine Microsoft Store"
+  "dl.windows_btn": "Prenesi iz trgovine Microsoft Store",
+  "welcome.meta_title": "Dobrodošli – AdRaze",
+  "welcome.title": "AdRaze deluje.",
+  "welcome.lead": "Oglasi, sledilniki in pojavna okna se že ustavljajo. Ničesar vam ni treba nastavljati.",
+  "welcome.s1_title": "Pripnite AdRaze",
+  "welcome.s1_text": "Kliknite košček sestavljanke zgoraj desno in nato buciko poleg AdRaze. Ikona bo potem vedno vidna.",
+  "welcome.s2_title": "Brskajte kot običajno",
+  "welcome.s2_text": "Številka na ikoni kaže, koliko je bilo ustavljenega na strani, na kateri ste.",
+  "welcome.s3_title": "Začasno ustavite, ko je treba",
+  "welcome.s3_text": "Je spletno mesto nehalo delovati? Odprite AdRaze in začasno ustavite zaščito samo za to mesto.",
+  "welcome.browser_title": "Želite cel brskalnik?",
+  "welcome.browser_text": "AdRaze Browser ima blokiranje vgrajeno in je na voljo za Linux, Windows in Mac.",
+  "privacy.h_site": "Obiski adraze.app",
+  "privacy.p_site": "Ko obiščete adraze.app, štejemo oglede strani in klike na gumbe za prenos, da vidimo, kaj deluje. To poteka na našem lastnem strežniku, brez piškotkov in brez shranjevanja vašega naslova IP. Ob namestitvi razširitve se enkrat odpre pozdravna stran na adraze.app."
 }

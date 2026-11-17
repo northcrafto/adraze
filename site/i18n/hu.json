@@ -101,7 +101,7 @@
   "privacy.meta_description": "Fiók nélkül az AdRaze semmilyen adatot nem gyűjt. Így működik a bővítmény, a fiók és az engedélyek.",
   "privacy.back": "Vissza a kezdőlapra",
   "privacy.title": "Adatvédelmi tájékoztató",
-  "privacy.updated": "Utoljára frissítve: 2026. október 21.",
+  "privacy.updated": "Utoljára frissítve: 2026. november 17.",
   "privacy.h_short": "Röviden",
   "privacy.p_short": "Fiók nélkül az AdRaze nem gyűjt, nem tárol és nem küld semmilyen információt rólad vagy arról, mit csinálsz a neten. Minden helyben, a böngésződben történik. Ha fiókot hozol létre, ami nem kötelező, csak az e-mail-címedet tároljuk, és azt, hogy naponta mennyi mindent állított meg. Azt soha, hogy milyen oldalakat látogatsz.",
   "privacy.h_local": "Mi tárolódik a gépeden",
@@ -556,5 +556,18 @@
   "err404.text": "A cím el van gépelve, vagy az oldal elköltözött. Ellenőrizd a címet, vagy menj vissza.",
   "err404.home": "A kezdőlapra",
   "err404.back": "Vissza",
-  "dl.windows_btn": "Letöltés a Microsoft Store-ból"
+  "dl.windows_btn": "Letöltés a Microsoft Store-ból",
+  "welcome.meta_title": "Üdvözlünk – AdRaze",
+  "welcome.title": "Az AdRaze működik.",
+  "welcome.lead": "A reklámokat, követőket és felugró ablakokat már blokkolja. Semmit sem kell beállítanod.",
+  "welcome.s1_title": "Rögzítsd az AdRaze-t",
+  "welcome.s1_text": "Kattints a jobb felső sarokban a kirakódarabra, majd az AdRaze melletti gombostűre. Így az ikon mindig látható marad.",
+  "welcome.s2_title": "Böngéssz a megszokott módon",
+  "welcome.s2_text": "Az ikonon lévő szám mutatja, mennyi mindent állított meg az aktuális oldalon.",
+  "welcome.s3_title": "Szüneteltesd, ha kell",
+  "welcome.s3_text": "Nem működik egy oldal? Nyisd meg az AdRaze-t, és szüneteltesd a védelmet csak azon az oldalon.",
+  "welcome.browser_title": "A teljes böngészőt szeretnéd?",
+  "welcome.browser_text": "Az AdRaze Browserbe be van építve a blokkolás, és elérhető Linuxra, Windowsra és Macre.",
+  "privacy.h_site": "Látogatások az adraze.app oldalon",
+  "privacy.p_site": "Amikor felkeresed az adraze.app oldalt, megszámoljuk az oldalmegtekintéseket és a letöltőgombokra leadott kattintásokat, hogy lássuk, mi működik. Ez a saját szerverünkön történik, sütik nélkül és az IP-címed tárolása nélkül. A bővítmény telepítésekor egyszer megnyílik egy üdvözlőoldal az adraze.app oldalon."
 }

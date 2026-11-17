@@ -101,7 +101,7 @@
   "privacy.meta_description": "Án aðgangs safnar AdRaze engum gögnum. Svona virka viðbótin, aðgangurinn og heimildirnar.",
   "privacy.back": "Á forsíðu",
   "privacy.title": "Persónuverndarstefna",
-  "privacy.updated": "Síðast uppfært 21. október 2026",
+  "privacy.updated": "Síðast uppfært 17. nóvember 2026",
   "privacy.h_short": "Í stuttu máli",
   "privacy.p_short": "Án aðgangs safnar AdRaze ekki, vistar ekki og sendir ekki neinar upplýsingar um þig eða það sem þú gerir á netinu. Allt fer fram staðbundið í vafranum þínum. Ef þú stofnar aðgang, sem er valfrjálst, vistum við aðeins netfangið þitt og hve margt var stöðvað á dag. Aldrei hvaða síður þú heimsækir.",
   "privacy.h_local": "Hvað er vistað á tölvunni þinni",
@@ -556,5 +556,18 @@
   "err404.text": "Slóðin er rangt stafsett eða síðan hefur verið færð. Athugaðu stafsetninguna eða farðu til baka.",
   "err404.home": "Á forsíðuna",
   "err404.back": "Til baka",
-  "dl.windows_btn": "Sækja í Microsoft Store"
+  "dl.windows_btn": "Sækja í Microsoft Store",
+  "welcome.meta_title": "Velkomin – AdRaze",
+  "welcome.title": "AdRaze er komið í gang.",
+  "welcome.lead": "Auglýsingar, rekjarar og sprettigluggar eru þegar stöðvaðir. Þú þarft ekki að stilla neitt.",
+  "welcome.s1_title": "Festu AdRaze",
+  "welcome.s1_text": "Smelltu á púslbitann efst til hægri og síðan á pinnann við hliðina á AdRaze. Þá sést táknið alltaf.",
+  "welcome.s2_title": "Vafraðu eins og venjulega",
+  "welcome.s2_text": "Talan á tákninu sýnir hversu mikið var stöðvað á síðunni sem þú ert á.",
+  "welcome.s3_title": "Gerðu hlé þegar þarf",
+  "welcome.s3_text": "Hætti síða að virka? Opnaðu AdRaze og gerðu hlé á vörninni fyrir þá síðu eingöngu.",
+  "welcome.browser_title": "Viltu allan vafrann?",
+  "welcome.browser_text": "AdRaze Browser er með lokunina innbyggða og er til fyrir Linux, Windows og Mac.",
+  "privacy.h_site": "Heimsóknir á adraze.app",
+  "privacy.p_site": "Þegar þú heimsækir adraze.app teljum við síðuflettingar og smelli á niðurhalshnappana til að sjá hvað virkar. Það gerist á okkar eigin þjóni, án vafrakaka og án þess að IP-talan þín sé vistuð. Þegar viðbótin er sett upp opnast kynningarsíða á adraze.app einu sinni."
 }

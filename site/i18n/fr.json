@@ -101,7 +101,7 @@
   "privacy.meta_description": "Sans compte, AdRaze ne collecte aucune donnée. Voici comment fonctionnent l’extension, le compte et les autorisations.",
   "privacy.back": "Retour à l’accueil",
   "privacy.title": "Politique de confidentialité",
-  "privacy.updated": "Dernière mise à jour : 21 octobre 2026",
+  "privacy.updated": "Dernière mise à jour : 17 novembre 2026",
   "privacy.h_short": "En bref",
   "privacy.p_short": "Sans compte, AdRaze ne collecte, ne conserve et n’envoie aucune information sur vous ou sur ce que vous faites en ligne. Tout se passe localement dans votre navigateur. Si vous créez un compte, ce qui est facultatif, nous enregistrons uniquement votre adresse e-mail et le nombre d’éléments bloqués par jour. Jamais les sites que vous visitez.",
   "privacy.h_local": "Ce qui est enregistré sur votre ordinateur",
@@ -556,5 +556,18 @@
   "err404.text": "L’adresse est mal orthographiée ou la page a été déplacée. Vérifiez l’orthographe ou revenez en arrière.",
   "err404.home": "Aller à l’accueil",
   "err404.back": "Retour",
-  "dl.windows_btn": "Obtenir sur le Microsoft Store"
+  "dl.windows_btn": "Obtenir sur le Microsoft Store",
+  "welcome.meta_title": "Bienvenue – AdRaze",
+  "welcome.title": "AdRaze est en marche.",
+  "welcome.lead": "Les publicités, les traqueurs et les pop-ups sont déjà bloqués. Il n’y a rien à régler.",
+  "welcome.s1_title": "Épinglez AdRaze",
+  "welcome.s1_text": "Cliquez sur la pièce de puzzle en haut à droite, puis sur l’épingle à côté d’AdRaze. L’icône reste alors toujours visible.",
+  "welcome.s2_title": "Naviguez comme d’habitude",
+  "welcome.s2_text": "Le chiffre sur l’icône indique ce qui a été bloqué sur la page où vous êtes.",
+  "welcome.s3_title": "Mettez en pause si besoin",
+  "welcome.s3_text": "Un site ne fonctionne plus ? Ouvrez AdRaze et mettez la protection en pause pour ce site uniquement.",
+  "welcome.browser_title": "Envie du navigateur complet ?",
+  "welcome.browser_text": "AdRaze Browser intègre le blocage et existe pour Linux, Windows et Mac.",
+  "privacy.h_site": "Visites sur adraze.app",
+  "privacy.p_site": "Lorsque vous visitez adraze.app, nous comptons les pages vues et les clics sur les boutons de téléchargement, pour voir ce qui fonctionne. Cela se fait sur notre propre serveur, sans cookies et sans enregistrer votre adresse IP. À l’installation de l’extension, une page de bienvenue sur adraze.app s’ouvre une seule fois."
 }

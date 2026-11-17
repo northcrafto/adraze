@@ -101,7 +101,7 @@
   "privacy.meta_description": "Hesap olmadan AdRaze hiçbir veri toplamaz. Eklentinin, hesabın ve izinlerin nasıl çalıştığı burada.",
   "privacy.back": "Ana sayfaya dön",
   "privacy.title": "Gizlilik politikası",
-  "privacy.updated": "Son güncelleme: 21 Ekim 2026",
+  "privacy.updated": "Son güncelleme: 17 Kasım 2026",
   "privacy.h_short": "Kısaca",
   "privacy.p_short": "Hesap olmadan AdRaze senin veya internette ne yaptığın hakkında hiçbir bilgi toplamaz, saklamaz ya da göndermez. Her şey tarayıcında, yerel olarak gerçekleşir. İsteğe bağlı olarak bir hesap oluşturursan yalnızca e-posta adresini ve günde kaç şeyin durdurulduğunu saklarız. Hangi siteleri ziyaret ettiğini asla saklamayız.",
   "privacy.h_local": "Bilgisayarında neler saklanır",
@@ -556,5 +556,18 @@
   "err404.text": "Adres yanlış yazılmış ya da sayfa taşınmış. Yazımı kontrol et veya geri dön.",
   "err404.home": "Ana sayfaya git",
   "err404.back": "Geri",
-  "dl.windows_btn": "Microsoft Store’dan alın"
+  "dl.windows_btn": "Microsoft Store’dan alın",
+  "welcome.meta_title": "Hoş geldin – AdRaze",
+  "welcome.title": "AdRaze çalışıyor.",
+  "welcome.lead": "Reklamlar, izleyiciler ve açılır pencereler şimdiden engelleniyor. Hiçbir şey ayarlaman gerekmiyor.",
+  "welcome.s1_title": "AdRaze’i sabitle",
+  "welcome.s1_text": "Sağ üstteki yapboz parçasına, ardından AdRaze’in yanındaki raptiyeye tıkla. Böylece simge her zaman görünür.",
+  "welcome.s2_title": "Her zamanki gibi gez",
+  "welcome.s2_text": "Simgedeki sayı, bulunduğun sayfada ne kadar şeyin engellendiğini gösterir.",
+  "welcome.s3_title": "Gerektiğinde duraklat",
+  "welcome.s3_text": "Bir site çalışmayı mı bıraktı? AdRaze’i aç ve korumayı yalnızca o site için duraklat.",
+  "welcome.browser_title": "Tarayıcının tamamını ister misin?",
+  "welcome.browser_text": "AdRaze Browser’da engelleme yerleşiktir; Linux, Windows ve Mac için mevcuttur.",
+  "privacy.h_site": "adraze.app ziyaretleri",
+  "privacy.p_site": "adraze.app’i ziyaret ettiğinde, neyin işe yaradığını görmek için sayfa görüntülemelerini ve indirme düğmelerine yapılan tıklamaları sayarız. Bu, kendi sunucumuzda, çerez kullanmadan ve IP adresin kaydedilmeden yapılır. Uzantı yüklendiğinde adraze.app’te bir karşılama sayfası bir kez açılır."
 }

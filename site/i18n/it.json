@@ -101,7 +101,7 @@
   "privacy.meta_description": "Senza account, AdRaze non raccoglie alcun dato. Ecco come funzionano l'estensione, l'account e i permessi.",
   "privacy.back": "Torna alla home",
   "privacy.title": "Informativa sulla privacy",
-  "privacy.updated": "Ultimo aggiornamento: 21 ottobre 2026",
+  "privacy.updated": "Ultimo aggiornamento: 17 novembre 2026",
   "privacy.h_short": "In breve",
   "privacy.p_short": "Senza account, AdRaze non raccoglie, non salva e non invia alcuna informazione su di te o su quello che fai online. Tutto avviene in locale nel tuo browser. Se crei un account, cosa facoltativa, salviamo solo il tuo indirizzo email e quante cose sono state bloccate ogni giorno. Mai quali siti visiti.",
   "privacy.h_local": "Cosa viene salvato sul tuo computer",
@@ -556,5 +556,18 @@
   "err404.text": "L’indirizzo è scritto male oppure la pagina è stata spostata. Controlla l’ortografia o torna indietro.",
   "err404.home": "Vai alla home",
   "err404.back": "Indietro",
-  "dl.windows_btn": "Scarica da Microsoft Store"
+  "dl.windows_btn": "Scarica da Microsoft Store",
+  "welcome.meta_title": "Benvenuto – AdRaze",
+  "welcome.title": "AdRaze è attivo.",
+  "welcome.lead": "Pubblicità, tracker e popup vengono già bloccati. Non devi impostare nulla.",
+  "welcome.s1_title": "Fissa AdRaze",
+  "welcome.s1_text": "Clicca sul pezzo di puzzle in alto a destra e poi sulla puntina accanto ad AdRaze. Così l’icona resta sempre visibile.",
+  "welcome.s2_title": "Naviga come sempre",
+  "welcome.s2_text": "Il numero sull’icona mostra quanto è stato bloccato nella pagina in cui ti trovi.",
+  "welcome.s3_title": "Metti in pausa quando serve",
+  "welcome.s3_text": "Un sito ha smesso di funzionare? Apri AdRaze e metti in pausa la protezione solo per quel sito.",
+  "welcome.browser_title": "Vuoi il browser completo?",
+  "welcome.browser_text": "AdRaze Browser ha il blocco integrato ed è disponibile per Linux, Windows e Mac.",
+  "privacy.h_site": "Visite ad adraze.app",
+  "privacy.p_site": "Quando visiti adraze.app contiamo le pagine viste e i clic sui pulsanti di download, per capire cosa funziona. Avviene sul nostro server, senza cookie e senza salvare il tuo indirizzo IP. Quando l’estensione viene installata, si apre una sola volta una pagina di benvenuto su adraze.app."
 }

@@ -25,11 +25,12 @@ SPRAK = [
 # Källa → (sajt, sökväg på sajten)
 SIDOR = {'index.src.html': (SAJT, ''), 'integritet.src.html': (SAJT, 'integritet'), 'chattregler.src.html': (SAJT, 'chattregler'), 'integritet-webblasaren.src.html': (SAJT, 'integritet-webblasaren'), 'statistik.src.html': (SAJT, 'statistik'),
          'kolla.src.html': (SAJT, 'kolla'),
+         'valkommen.src.html': (SAJT, 'valkommen'),  # öppnas av tillägget efter installation
          'konto.src.html': (KONTO, ''), 'download.src.html': (LADDA, ''),
          'support.src.html': (HJALP, ''), 'arende.src.html': (HJALP, 'arende'), 'team.src.html': (HJALP, 'team'),
          'proxy.src.html': (PROXY, '')}
 MAPP = {SAJT: rot, KONTO: rot.parent / 'accounts', LADDA: rot.parent / 'download', HJALP: rot.parent / 'support', PROXY: rot.parent / 'proxy'}
-UTAN_SITEMAP = {(KONTO, ''), (HJALP, 'arende'), (HJALP, 'team')}  # inloggning, ärenden och teampanelen ska inte indexeras
+UTAN_SITEMAP = {(KONTO, ''), (HJALP, 'arende'), (HJALP, 'team'), (SAJT, 'valkommen')}  # inloggning, ärenden och teampanelen ska inte indexeras
 BARA_SV = {'team.src.html'}  # teamets panel finns bara på svenska
 # Filer som subdomänerna serverar själva (kopieras från site/ vid varje bygge)
 TILLGANGAR = {

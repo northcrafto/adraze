@@ -101,7 +101,7 @@
   "privacy.meta_description": "Be paskyros AdRaze nerenka jokių duomenų. Štai kaip veikia plėtinys, paskyra ir leidimai.",
   "privacy.back": "Į pradžią",
   "privacy.title": "Privatumo politika",
-  "privacy.updated": "Paskutinį kartą atnaujinta 2026 m. spalio 21 d.",
+  "privacy.updated": "Paskutinį kartą atnaujinta 2026 m. lapkričio 17 d.",
   "privacy.h_short": "Trumpai",
   "privacy.p_short": "Be paskyros AdRaze nerenka, nesaugo ir nesiunčia jokios informacijos apie jus ar tai, ką veikiate internete. Viskas vyksta vietoje, jūsų naršyklėje. Jei susikuriate paskyrą, o tai neprivaloma, saugome tik jūsų el. pašto adresą ir tai, kiek dalykų sustabdyta per dieną. Niekada nesaugome, kokias svetaines lankote.",
   "privacy.h_local": "Kas saugoma jūsų kompiuteryje",
@@ -556,5 +556,18 @@
   "err404.text": "Adresas parašytas su klaida arba puslapis perkeltas. Patikrinkite adresą arba grįžkite atgal.",
   "err404.home": "Į pradžią",
   "err404.back": "Atgal",
-  "dl.windows_btn": "Gauti Microsoft Store"
+  "dl.windows_btn": "Gauti Microsoft Store",
+  "welcome.meta_title": "Sveiki – AdRaze",
+  "welcome.title": "AdRaze veikia.",
+  "welcome.lead": "Reklamos, sekikliai ir iššokantieji langai jau stabdomi. Nieko nustatyti nereikia.",
+  "welcome.s1_title": "Prisekite AdRaze",
+  "welcome.s1_text": "Spustelėkite dėlionės detalę viršuje dešinėje, tada smeigtuką šalia AdRaze. Tuomet piktograma visada bus matoma.",
+  "welcome.s2_title": "Naršykite kaip įprastai",
+  "welcome.s2_text": "Skaičius ant piktogramos rodo, kiek sustabdyta puslapyje, kuriame esate.",
+  "welcome.s3_title": "Pristabdykite, kai reikia",
+  "welcome.s3_text": "Svetainė nustojo veikti? Atidarykite AdRaze ir pristabdykite apsaugą tik tai svetainei.",
+  "welcome.browser_title": "Norite visos naršyklės?",
+  "welcome.browser_text": "AdRaze Browser turi įtaisytą blokavimą ir yra skirta Linux, Windows ir Mac.",
+  "privacy.h_site": "Apsilankymai adraze.app",
+  "privacy.p_site": "Kai lankotės adraze.app, skaičiuojame puslapių peržiūras ir atsisiuntimo mygtukų paspaudimus, kad matytume, kas veikia. Tai vyksta mūsų pačių serveryje, be slapukų ir nesaugant jūsų IP adreso. Įdiegus plėtinį, vieną kartą atidaromas pasisveikinimo puslapis adraze.app."
 }

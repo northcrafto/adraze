@@ -19,5 +19,5 @@ const ut = resolve(rot, "dist", `adraze-${v}.zip`);
 if (existsSync(ut)) rmSync(ut);
 execFileSync("zip", ["-qr9", "-X", ut, ".", "-x", "_metadata/*", "*.DS_Store", "*~"], { cwd: ext, stdio: "inherit" });
 const lista = execFileSync("unzip", ["-Z1", ut], { encoding: "utf8" });
-if (/(^|\/)_/m.test(lista)) throw new Error("zip:en innehåller filer som börjar med _");
+if (/(^|\/)_(?!locales\/)/m.test(lista)) throw new Error("zip:en innehåller filer som börjar med _ (bara _locales/ är tillåten)");
 console.log(`${ut} (${lista.trim().split("\n").length} filer)`);

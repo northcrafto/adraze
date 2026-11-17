@@ -101,7 +101,7 @@
   "privacy.meta_description": "Bez účtu AdRaze nesbírá žádná data. Takhle funguje rozšíření, účet a oprávnění.",
   "privacy.back": "Zpět na úvod",
   "privacy.title": "Zásady ochrany soukromí",
-  "privacy.updated": "Naposledy aktualizováno 21. října 2026",
+  "privacy.updated": "Naposledy aktualizováno 17. listopadu 2026",
   "privacy.h_short": "Ve zkratce",
   "privacy.p_short": "Bez účtu AdRaze nesbírá, neukládá ani neodesílá žádné informace o vás ani o tom, co děláte na internetu. Všechno probíhá lokálně ve vašem prohlížeči. Pokud si vytvoříte účet, což je dobrovolné, ukládáme jen vaši e-mailovou adresu a kolik věcí bylo každý den zastaveno. Nikdy neukládáme, jaké weby navštěvujete.",
   "privacy.h_local": "Co se ukládá ve vašem počítači",
@@ -556,5 +556,18 @@
   "err404.text": "Adresa je napsaná špatně, nebo se stránka přesunula. Zkontrolujte ji, nebo se vraťte zpět.",
   "err404.home": "Na úvodní stránku",
   "err404.back": "Zpět",
-  "dl.windows_btn": "Získat v Microsoft Storu"
+  "dl.windows_btn": "Získat v Microsoft Storu",
+  "welcome.meta_title": "Vítejte – AdRaze",
+  "welcome.title": "AdRaze běží.",
+  "welcome.lead": "Reklamy, sledovací prvky a vyskakovací okna se už blokují. Nemusíte nic nastavovat.",
+  "welcome.s1_title": "Připněte si AdRaze",
+  "welcome.s1_text": "Klikněte na dílek skládačky vpravo nahoře a potom na špendlík vedle AdRaze. Ikona pak bude vždy vidět.",
+  "welcome.s2_title": "Surfujte jako obvykle",
+  "welcome.s2_text": "Číslo na ikoně ukazuje, kolik se toho zablokovalo na stránce, kde právě jste.",
+  "welcome.s3_title": "Pozastavte, když je potřeba",
+  "welcome.s3_text": "Přestal nějaký web fungovat? Otevřete AdRaze a pozastavte ochranu jen pro tento web.",
+  "welcome.browser_title": "Chcete celý prohlížeč?",
+  "welcome.browser_text": "AdRaze Browser má blokování vestavěné a je k dispozici pro Linux, Windows a Mac.",
+  "privacy.h_site": "Návštěvy adraze.app",
+  "privacy.p_site": "Když navštívíte adraze.app, počítáme zobrazení stránek a kliknutí na tlačítka ke stažení, abychom viděli, co funguje. Děje se to na našem vlastním serveru, bez cookies a bez ukládání vaší IP adresy. Při instalaci rozšíření se jednou otevře uvítací stránka na adraze.app."
 }

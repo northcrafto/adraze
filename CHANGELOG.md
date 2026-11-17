@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.4 (2026-11-17)
+
+- Store name says what AdRaze is ("AdRaze – Ad Blocker"), and name and short description are translated to 26 languages.
+- A welcome page (adraze.app/valkommen) opens once after installation: how to pin the icon, what the number means and how to pause a site.
+- Fresh filter lists.
+
 ## 0.2.3 (2026-11-08)
 
 - YouTube: the "Ad blockers are not allowed" box is closed automatically (always the dismiss button, never "Allow ads") and the video starts again.

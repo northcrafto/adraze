@@ -24,6 +24,11 @@
       "permanent": true
     },
     {
+      "source": "/tack",
+      "destination": "/valkommen",
+      "permanent": false
+    },
+    {
       "source": "/stod",
       "destination": "https://download.adraze.app/",
       "permanent": true

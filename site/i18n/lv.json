@@ -101,7 +101,7 @@
   "privacy.meta_description": "Bez konta AdRaze nevāc nekādus datus. Lūk, kā darbojas paplašinājums, konts un atļaujas.",
   "privacy.back": "Uz sākumlapu",
   "privacy.title": "Privātuma politika",
-  "privacy.updated": "Pēdējoreiz atjaunināts 2026. gada 21. oktobrī",
+  "privacy.updated": "Pēdējoreiz atjaunināts 2026. gada 17. novembrī",
   "privacy.h_short": "Īsumā",
   "privacy.p_short": "Bez konta AdRaze nevāc, neglabā un nesūta nekādu informāciju par tevi vai to, ko tu dari internetā. Viss notiek lokāli tavā pārlūkā. Ja izveido kontu, kas ir brīvprātīgi, mēs glabājam tikai tavu e-pasta adresi un to, cik daudz katru dienu apturēts. Nekad to, kuras vietnes tu apmeklē.",
   "privacy.h_local": "Kas tiek saglabāts tavā datorā",
@@ -556,5 +556,18 @@
   "err404.text": "Adrese ir uzrakstīta nepareizi, vai lapa ir pārvietota. Pārbaudi adresi vai atgriezies.",
   "err404.home": "Uz sākumlapu",
   "err404.back": "Atpakaļ",
-  "dl.windows_btn": "Iegūt Microsoft Store"
+  "dl.windows_btn": "Iegūt Microsoft Store",
+  "welcome.meta_title": "Laipni lūdzam – AdRaze",
+  "welcome.title": "AdRaze darbojas.",
+  "welcome.lead": "Reklāmas, izsekotāji un uznirstošie logi jau tiek apturēti. Tev nekas nav jāiestata.",
+  "welcome.s1_title": "Piesprausd AdRaze",
+  "welcome.s1_text": "Noklikšķini uz puzles gabaliņa augšā pa labi un pēc tam uz spraudītes blakus AdRaze. Tad ikona vienmēr būs redzama.",
+  "welcome.s2_title": "Pārlūko kā parasti",
+  "welcome.s2_text": "Skaitlis uz ikonas rāda, cik daudz apturēts lapā, kurā atrodies.",
+  "welcome.s3_title": "Apturi, kad vajag",
+  "welcome.s3_text": "Vai kāda vietne pārstāja darboties? Atver AdRaze un apturi aizsardzību tikai šai vietnei.",
+  "welcome.browser_title": "Vēlies visu pārlūku?",
+  "welcome.browser_text": "AdRaze Browser ir iebūvēta bloķēšana, un tas ir pieejams Linux, Windows un Mac.",
+  "privacy.h_site": "Apmeklējumi vietnē adraze.app",
+  "privacy.p_site": "Kad apmeklē adraze.app, mēs saskaitām lapu skatījumus un klikšķus uz lejupielādes pogām, lai redzētu, kas darbojas. Tas notiek mūsu pašu serverī, bez sīkdatnēm un nesaglabājot tavu IP adresi. Kad paplašinājums tiek instalēts, vienu reizi tiek atvērta sveiciena lapa vietnē adraze.app."
 }

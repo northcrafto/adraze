@@ -101,7 +101,7 @@
   "privacy.meta_description": "Sin cuenta, AdRaze no recopila ningún dato. Así funcionan la extensión, la cuenta y los permisos.",
   "privacy.back": "Volver al inicio",
   "privacy.title": "Política de privacidad",
-  "privacy.updated": "Última actualización: 21 de octubre de 2026",
+  "privacy.updated": "Última actualización: 17 de noviembre de 2026",
   "privacy.h_short": "En resumen",
   "privacy.p_short": "Sin cuenta, AdRaze no recopila, guarda ni envía ninguna información sobre ti ni sobre lo que haces en internet. Todo ocurre en local, en tu navegador. Si creas una cuenta, que es opcional, solo guardamos tu correo electrónico y cuántas cosas se han bloqueado al día. Nunca qué webs visitas.",
   "privacy.h_local": "Qué se guarda en tu ordenador",
@@ -556,5 +556,18 @@
   "err404.text": "La dirección está mal escrita o la página se ha movido. Revisa la ortografía o vuelve atrás.",
   "err404.home": "Ir al inicio",
   "err404.back": "Volver",
-  "dl.windows_btn": "Obtener en Microsoft Store"
+  "dl.windows_btn": "Obtener en Microsoft Store",
+  "welcome.meta_title": "Bienvenida – AdRaze",
+  "welcome.title": "AdRaze ya está en marcha.",
+  "welcome.lead": "Los anuncios, rastreadores y ventanas emergentes ya se están bloqueando. No hay que configurar nada.",
+  "welcome.s1_title": "Fija AdRaze",
+  "welcome.s1_text": "Haz clic en la pieza de puzle de arriba a la derecha y luego en la chincheta junto a AdRaze. Así el icono siempre está visible.",
+  "welcome.s2_title": "Navega como siempre",
+  "welcome.s2_text": "El número del icono muestra cuánto se ha bloqueado en la página en la que estás.",
+  "welcome.s3_title": "Pausa cuando haga falta",
+  "welcome.s3_text": "¿Una web ha dejado de funcionar? Abre AdRaze y pausa la protección solo para esa web.",
+  "welcome.browser_title": "¿Quieres el navegador completo?",
+  "welcome.browser_text": "AdRaze Browser lleva el bloqueo integrado y está disponible para Linux, Windows y Mac.",
+  "privacy.h_site": "Visitas a adraze.app",
+  "privacy.p_site": "Cuando visitas adraze.app contamos las páginas vistas y los clics en los botones de descarga, para ver qué funciona. Se hace en nuestro propio servidor, sin cookies y sin guardar tu dirección IP. Al instalar la extensión se abre una vez una página de bienvenida en adraze.app."
 }

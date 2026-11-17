@@ -356,6 +356,15 @@ chrome.runtime.onMessage.addListener((msg, sender, svara) => {
 });
 
 // ---------- Start ----------
+// Välkomstsidan visas en gång, direkt efter installationen: hur ikonen fästs och hur skyddet pausas.
+// Adressen säger bara att det är tillägget som öppnade sidan, inget om vem som installerade.
+const SAJTSPRAK = ["en", "nb", "da", "fi", "is", "de", "nl", "fr", "es", "pt", "it", "pl", "cs", "sk", "hu", "ro", "bg", "el", "hr", "sl", "et", "lv", "lt", "uk", "tr"];
+function valkommen() {
+  let kod = (chrome.i18n.getUILanguage() || "en").toLowerCase().split(/[-_]/)[0];
+  if (kod === "no" || kod === "nn") kod = "nb";
+  const pre = kod === "sv" ? "" : `/${SAJTSPRAK.includes(kod) ? kod : "en"}`;
+  chrome.tabs.create({ url: `https://adraze.app${pre}/valkommen?k=tillagg` }).catch(() => {});
+}
 async function start() {
   await chrome.declarativeNetRequest.setExtensionActionOptions({ displayActionCountAsBadgeText: true });
   await chrome.action.setBadgeBackgroundColor({ color: "#ff4b1f" });
@@ -364,5 +373,8 @@ async function start() {
   chrome.alarms.create("stoppade", { periodInMinutes: 2 }); // getMatchedRules tål 20 anrop per 10 min
   chrome.alarms.create("synka", { periodInMinutes: 15 });
 }
-chrome.runtime.onInstalled.addListener(start);
+chrome.runtime.onInstalled.addListener((d) => {
+  start();
+  if (d.reason === "install") valkommen();
+});
 chrome.runtime.onStartup.addListener(start);

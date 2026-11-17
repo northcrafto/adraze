@@ -89,7 +89,7 @@
   "privacy.meta_description": "Without an account, AdRaze collects no data. How the extension, the account and the permissions work.",
   "privacy.back": "Back to home",
   "privacy.title": "Privacy policy",
-  "privacy.updated": "Last updated 21 October 2026",
+  "privacy.updated": "Last updated 17 November 2026",
   "privacy.h_short": "In short",
   "privacy.p_short": "Without an account, AdRaze doesn't collect, store or send any information about you or what you do online. Everything happens locally in your browser. If you create an account, which is optional, we only store your email address and how many things were stopped per day. Never which sites you visit.",
   "privacy.h_local": "What's stored on your computer",
@@ -556,5 +556,18 @@
   "err404.text": "The address is misspelled, or the page has moved. Check the spelling or go back.",
   "err404.home": "Go to the homepage",
   "err404.back": "Go back",
-  "dl.windows_btn": "Get it from Microsoft Store"
+  "dl.windows_btn": "Get it from Microsoft Store",
+  "welcome.meta_title": "Welcome – AdRaze",
+  "welcome.title": "AdRaze is running.",
+  "welcome.lead": "Ads, trackers and popups are already being stopped. There is nothing to set up.",
+  "welcome.s1_title": "Pin AdRaze",
+  "welcome.s1_text": "Click the puzzle piece in the top right, then the pin next to AdRaze. The icon then stays visible.",
+  "welcome.s2_title": "Browse as usual",
+  "welcome.s2_text": "The number on the icon shows how much was stopped on the page you are on.",
+  "welcome.s3_title": "Pause when you need to",
+  "welcome.s3_text": "Did a site stop working? Open AdRaze and pause protection for that site only.",
+  "welcome.browser_title": "Want the whole browser?",
+  "welcome.browser_text": "AdRaze Browser has the blocking built in and is available for Linux, Windows and Mac.",
+  "privacy.h_site": "Visits to adraze.app",
+  "privacy.p_site": "When you visit adraze.app we count page views and clicks on the download buttons, to see what works. This happens on our own server, without cookies and without storing your IP address. When the extension is installed, a welcome page on adraze.app opens once."
 }

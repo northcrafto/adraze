@@ -101,7 +101,7 @@
   "privacy.meta_description": "Bez konta AdRaze nie zbiera żadnych danych. Zobacz, jak działają rozszerzenie, konto i uprawnienia.",
   "privacy.back": "Wróć na stronę główną",
   "privacy.title": "Polityka prywatności",
-  "privacy.updated": "Ostatnia aktualizacja: 21 października 2026 r.",
+  "privacy.updated": "Ostatnia aktualizacja: 17 listopada 2026 r.",
   "privacy.h_short": "W skrócie",
   "privacy.p_short": "Bez konta AdRaze nie zbiera, nie przechowuje i nie wysyła żadnych informacji o tobie ani o tym, co robisz w sieci. Wszystko dzieje się lokalnie w twojej przeglądarce. Jeśli założysz konto, co jest dobrowolne, zapisujemy tylko twój adres e-mail i to, ile rzeczy zablokowano każdego dnia. Nigdy nie zapisujemy, jakie strony odwiedzasz.",
   "privacy.h_local": "Co jest zapisywane na twoim komputerze",
@@ -556,5 +556,18 @@
   "err404.text": "Adres jest błędnie wpisany albo strona została przeniesiona. Sprawdź pisownię lub wróć.",
   "err404.home": "Na stronę główną",
   "err404.back": "Wstecz",
-  "dl.windows_btn": "Pobierz z Microsoft Store"
+  "dl.windows_btn": "Pobierz z Microsoft Store",
+  "welcome.meta_title": "Witamy – AdRaze",
+  "welcome.title": "AdRaze działa.",
+  "welcome.lead": "Reklamy, moduły śledzące i wyskakujące okna są już blokowane. Nie musisz niczego ustawiać.",
+  "welcome.s1_title": "Przypnij AdRaze",
+  "welcome.s1_text": "Kliknij element układanki w prawym górnym rogu, a potem pinezkę obok AdRaze. Ikona będzie wtedy zawsze widoczna.",
+  "welcome.s2_title": "Przeglądaj jak zwykle",
+  "welcome.s2_text": "Liczba na ikonie pokazuje, ile zablokowano na stronie, na której jesteś.",
+  "welcome.s3_title": "Wstrzymaj, gdy trzeba",
+  "welcome.s3_text": "Strona przestała działać? Otwórz AdRaze i wstrzymaj ochronę tylko dla tej strony.",
+  "welcome.browser_title": "Chcesz całą przeglądarkę?",
+  "welcome.browser_text": "AdRaze Browser ma wbudowane blokowanie i jest dostępna na Linuksa, Windowsa i Maca.",
+  "privacy.h_site": "Wizyty na adraze.app",
+  "privacy.p_site": "Gdy odwiedzasz adraze.app, liczymy wyświetlenia stron i kliknięcia przycisków pobierania, żeby zobaczyć, co działa. Dzieje się to na naszym własnym serwerze, bez plików cookie i bez zapisywania Twojego adresu IP. Po zainstalowaniu rozszerzenia jeden raz otwiera się strona powitalna na adraze.app."
 }

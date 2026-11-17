@@ -101,7 +101,7 @@
   "privacy.meta_description": "Fără cont, AdRaze nu colectează nicio dată. Iată cum funcționează extensia, contul și permisiunile.",
   "privacy.back": "Înapoi la pagina principală",
   "privacy.title": "Politica de confidențialitate",
-  "privacy.updated": "Ultima actualizare: 21 octombrie 2026",
+  "privacy.updated": "Ultima actualizare: 17 noiembrie 2026",
   "privacy.h_short": "Pe scurt",
   "privacy.p_short": "Fără cont, AdRaze nu colectează, nu stochează și nu trimite nicio informație despre tine sau despre ce faci online. Totul se întâmplă local, în browserul tău. Dacă îți creezi un cont, ceea ce este opțional, păstrăm doar adresa ta de e-mail și câte lucruri au fost oprite pe zi. Niciodată ce site-uri vizitezi.",
   "privacy.h_local": "Ce se salvează pe calculatorul tău",
@@ -556,5 +556,18 @@
   "err404.text": "Adresa e scrisă greșit sau pagina s-a mutat. Verifică adresa sau întoarce-te.",
   "err404.home": "La pagina principală",
   "err404.back": "Înapoi",
-  "dl.windows_btn": "Obține din Microsoft Store"
+  "dl.windows_btn": "Obține din Microsoft Store",
+  "welcome.meta_title": "Bun venit – AdRaze",
+  "welcome.title": "AdRaze funcționează.",
+  "welcome.lead": "Reclamele, trackerele și pop-up-urile sunt deja blocate. Nu trebuie să configurezi nimic.",
+  "welcome.s1_title": "Fixează AdRaze",
+  "welcome.s1_text": "Apasă pe piesa de puzzle din dreapta sus, apoi pe pioneza de lângă AdRaze. Astfel pictograma rămâne mereu vizibilă.",
+  "welcome.s2_title": "Navighează ca de obicei",
+  "welcome.s2_text": "Numărul de pe pictogramă arată cât s-a blocat pe pagina pe care te afli.",
+  "welcome.s3_title": "Pune pauză când e nevoie",
+  "welcome.s3_text": "Un site nu mai funcționează? Deschide AdRaze și pune protecția pe pauză doar pentru acel site.",
+  "welcome.browser_title": "Vrei tot browserul?",
+  "welcome.browser_text": "AdRaze Browser are blocarea integrată și este disponibil pentru Linux, Windows și Mac.",
+  "privacy.h_site": "Vizite pe adraze.app",
+  "privacy.p_site": "Când vizitezi adraze.app, numărăm afișările de pagină și clicurile pe butoanele de descărcare, ca să vedem ce funcționează. Totul se întâmplă pe propriul nostru server, fără cookie-uri și fără a-ți salva adresa IP. La instalarea extensiei se deschide o singură dată o pagină de bun venit pe adraze.app."
 }
