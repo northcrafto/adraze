@@ -33,6 +33,70 @@
     };
   }
   A.on('sprak:andrat', (d) => { if (!byterSprak && d && d.kod && window.i18n && d.kod !== window.i18n.lang) location.reload(); });
+  /* Datorns ord på iPhone: "den här datorn" → "den här iPhonen", "Chromium (Electron)" → "WebKit". Datorns texter
+     (och språkfilernas översättningar av dem) ändras inte; här byts orden i det som visas, på svenska och engelska.
+     Andra språk behåller sin översättning, utom motorns namn. Först hela sidan, sedan det som läggs till eller
+     ändras. Användarens egna texter (translate="no") och fält rörs inte. */
+  (function iphoneOrd() {
+    const pad = (A.sync('ios:miljo') || {}).liten === false;
+    const enhet = pad ? ['iPad', 'iPaden', 'iPadens'] : ['iPhone', 'iPhonen', 'iPhonens'];
+    const ORD = {
+      sv: [
+        ['Den används av datorn.', 'Den används av systemet.'],
+        ['AdRaze kör Chromium, så de flesta tillägg fungerar. Enstaka som kräver Googles egna funktioner kanske inte gör det fullt ut.',
+          'Tillägg finns inte i AdRaze för ' + enhet[0] + ' än.'],
+        ['knappen, panelen och kortkommandot försvinner', 'knappen och panelen försvinner'],
+        ['alla datorer', 'alla enheter'], ['alla dina datorer', 'alla dina enheter'],
+        ['resten av datorn', 'resten av skärmen'],
+        ['Den här datorn', 'Den här ' + enhet[1]], ['den här datorn', 'den här ' + enhet[1]],
+        ['Din dator', 'Din ' + enhet[0]], ['din dator', 'din ' + enhet[0]],
+        ['datorns', enhet[2]], ['datorn', enhet[1]], ['datorer', 'enheter'],
+      ],
+      en: [
+        ['the button, panel, and keyboard shortcut disappear', 'the button and panel disappear'],
+        ["AdRaze runs Chromium, so most extensions work. A few that require Google's own features may not work fully.",
+          'Extensions are not available in AdRaze for ' + enhet[0] + ' yet.'],
+        ['all your computers', 'all your devices'], ['the rest of your computer', 'the rest of your screen'],
+        ['This computer', 'This ' + enhet[0]], ['this computer', 'this ' + enhet[0]],
+        ['Your computer', 'Your ' + enhet[0]], ['your computer', 'your ' + enhet[0]],
+        ["the child's computer", "the child's " + enhet[0]], ['computers', 'devices'], ['computer', enhet[0]],
+      ],
+    };
+    const lang = () => String((window.i18n && window.i18n.lang) || html.lang || 'sv').split('-')[0];
+    const lista = () => [['Chromium (Electron)', 'WebKit'], ...(ORD[lang()] || [])];
+    const RE = /dator|computer|Chromium/;
+    const ATTR = ['placeholder', 'title', 'aria-label'];
+    const byt = (t) => { let u = t; for (const [a, b] of lista()) if (u.indexOf(a) >= 0) u = u.split(a).join(b); return u; };
+    const egen = (el) => !!(el && el.closest && el.closest('[translate="no"], input, textarea, [contenteditable="true"], script, style'));
+    function text(n) {
+      const v = n.nodeValue;
+      if (!v || !RE.test(v) || egen(n.parentElement)) return;
+      const u = byt(v);
+      if (u !== v) n.nodeValue = u;
+    }
+    function attr(el) {
+      if (egen(el)) return;
+      for (const a of ATTR) { const v = el.getAttribute && el.getAttribute(a); if (v && RE.test(v)) { const u = byt(v); if (u !== v) el.setAttribute(a, u); } }
+    }
+    function trad(rot) {
+      if (!rot) return;
+      if (rot.nodeType === 3) { text(rot); return; }
+      if (rot.nodeType !== 1) return;
+      attr(rot);
+      const w = document.createTreeWalker(rot, NodeFilter.SHOW_TEXT, null);
+      let n; while ((n = w.nextNode())) text(n);
+      if (rot.querySelectorAll) rot.querySelectorAll('[placeholder], [title], [aria-label]').forEach(attr);
+    }
+    trad(document.body);
+    new MutationObserver((ms) => {
+      for (const m of ms) {
+        if (m.type === 'characterData') text(m.target);
+        else if (m.type === 'attributes') attr(m.target);
+        else m.addedNodes.forEach(trad);
+      }
+    }).observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ATTR });
+  })();
+
   // Sökmotorn kan ändras native (skalet): startsidans sökfält ska använda samma
   A.on('anpassa:andrad', (d) => {
     if (d && d.nyckel === 'sok.motor') { try { if (typeof ENGINES === 'object' && ENGINES[d.varde]) searchEngine = d.varde; } catch {} }
@@ -117,7 +181,7 @@
     const hero = $('set-hero'); if (hero && !A.har('auth:session')) hero.classList.add('ios-dold');
     // Dolda rader flyttas ut ur korten, så att hörnen och avdelarna räknas på de rader som syns
     for (const r of main.querySelectorAll('.set-row.ios-dold')) gom.appendChild(r);
-    // Om: appens version och motorn (datorn skriver "byggd på Chromium (Electron)")
+    // Om: appens version och motorn (datorn skriver "byggd på Chromium (Electron)"; iphoneOrd tar resten)
     const omRad = $('om-version') && $('om-version').parentElement;
     if (omRad) omRad.textContent = tx('Version {v}', { v: (A.sync('ios:miljo') || {}).version || '' }) + ' · WebKit';
     // Temagalleriet hämtar från servern via huvudprocessen; utan kanalen blir det bara ett felmeddelande
@@ -254,6 +318,24 @@
       else if (harRedigerat && franInstallningar) { harRedigerat = franInstallningar = false; A.invoke('sida:stang', { yta: 'startsida' }).catch(() => {}); }
     }).observe(nt, { attributes: true, attributeFilter: ['class'] });
     A.on('sida:kategori', (d) => { if (d && d.kat === 'redigera') redigera(); });
+
+    // Statistiken skriver alltid plural ("1 sekunder"): ental när talet är 1 (svenska och engelska)
+    const ENTAL = { sekunder: 'sekund', minuter: 'minut', timmar: 'timme', seconds: 'second', minutes: 'minute', hours: 'hour' };
+    const tal = $('stat-time'), enhetEl = $('stat-time-u');
+    if (tal && enhetEl) {
+      let plural = enhetEl.textContent;
+      const ratta = () => {
+        const u = enhetEl.textContent.trim();
+        if (ENTAL[u]) plural = u;
+        const ett = /^1([.,]0)?$/.test(tal.textContent.trim());
+        const ska = ett && ENTAL[plural] ? ENTAL[plural] : plural;
+        if (u !== ska) enhetEl.textContent = ska;
+      };
+      ratta();
+      const mo = new MutationObserver(ratta);
+      mo.observe(tal, { childList: true, characterData: true, subtree: true });
+      mo.observe(enhetEl, { childList: true, characterData: true, subtree: true });
+    }
     if (decodeURIComponent((location.hash || '').slice(1)) === 'redigera') {
       history.replaceState(null, '', location.pathname);
       redigera();
