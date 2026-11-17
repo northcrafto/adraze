@@ -247,6 +247,15 @@ enum RokProv {
             return
         }
         let flik = app.flikar.aktiv ?? app.flikar.nyFlik(nil)
+        // I skalet visar en tom flik datorns startsida (Brygga), som laddas första gången den visas. Till dess syns
+        // bara dess mörka bakgrund; vänta in den (och mät hur länge en kall start visar den mörka ytan).
+        if flik.url == nil, app.sidor.finns("startsida"), app.leverantorer["huvudvy"] == "Skal" {
+            let t0 = Date()
+            while HelhetProv.synligSida("startsida") == nil, Date().timeIntervalSince(t0) < 8 { try await k.vanta(0.1) }
+            let synlig = HelhetProv.synligSida("startsida") != nil
+            k.kolla("startsidan syns i den tomma fliken", synlig)
+            if synlig { k.notera("startsidan_synlig_efter_appstart_s", .tal((Date().timeIntervalSince(app.starttid) * 100).rounded() / 100)) }
+        }
         await k.skarmbild("start")
 
         var laddad = false
