@@ -289,6 +289,12 @@ struct SkalVy: View {
 
     private func notislager(uppe: Bool, enRad: Bool) -> some View {
         let botten: CGFloat = {
+            // Menyn täcker raderna. Notisen (cirka 36 pt hög) läggs därför i verktygsradens höjd, bredvid krysset
+            // där hamburgaren satt. Annars hamnar den ovanpå menyns rutor (Anpassa, Falk, Chatt).
+            if skal.menyOppen {
+                if enRad { return uppe ? 20 : max(8, (matt.enRad - 36) / 2) }
+                return max(8, (matt.verktyg - 36) / 2)
+            }
             if enRad { return uppe ? 20 : matt.enRad + 14 }
             if uppe { return (skal.kompakt ? 0 : matt.verktyg) + 14 }
             return (skal.kompakt ? matt.kompakt : matt.full) + 14
