@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1d4f91">
+<title>Vädret i Göteborg – tio dagar</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #eef3f9; color: #13233a; font: 17px/1.5 -apple-system, system-ui, sans-serif; }
+  .nu { padding: 26px 22px 30px; background: linear-gradient(180deg, #1d4f91, #3a78c2); color: #fff; }
+  .ort { font-size: 15px; font-weight: 600; opacity: .85; }
+  .grader { margin: 4px 0 2px; font: 300 76px/1 -apple-system, system-ui, sans-serif; letter-spacing: -.04em; }
+  .text { font-size: 17px; opacity: .92; }
+  .dagar { margin: 16px; border-radius: 18px; background: #fff; overflow: hidden; box-shadow: 0 1px 2px rgb(19 35 58 / .06); }
+  .dag { display: grid; grid-template-columns: 70px 1fr 90px; align-items: center; padding: 13px 18px; border-bottom: 1px solid #e8eef6; }
+  .dag:last-child { border-bottom: 0; }
+  .dag span:nth-child(2) { color: #5a6b82; font-size: 15px; }
+  .dag b { text-align: right; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="nu"><div class="ort">Göteborg</div><div class="grader">7°</div><div class="text">Mest molnigt, uppehåll i kväll</div></div>
+<div class="dagar">
+  <div class="dag"><span>Idag</span><span>Molnigt</span><b>9° / 4°</b></div>
+  <div class="dag"><span>Tis</span><span>Regn på eftermiddagen</span><b>8° / 5°</b></div>
+  <div class="dag"><span>Ons</span><span>Blåsigt</span><b>7° / 3°</b></div>
+  <div class="dag"><span>Tor</span><span>Sol och moln</span><b>6° / 1°</b></div>
+  <div class="dag"><span>Fre</span><span>Klart</span><b>5° / −1°</b></div>
+</div>
+</body>
+</html>

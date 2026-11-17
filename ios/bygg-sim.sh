@@ -234,13 +234,21 @@ while :; do
     [ "${2:-0}" -gt "$APPTOPP" ] && APPTOPP=$2
   fi
   l=$(ledigt); [ -n "$l" ] && [ "$l" -lt "$LAGST" ] && LAGST=$l
+  # Labbkorning.systembild: appen ber om simulatorns egen skärmbild (med statusraden) och väntar på den
+  if [ -n "$LABB" ]; then
+    for v in "$DATA/Documents/Labb/$LABB/"*.vill; do
+      [ -e "$v" ] || continue
+      xcrun simctl io "$UDID" screenshot --type=png "${v%.vill}.png" > /dev/null 2>&1 || rapport "systembilden ${v##*/} misslyckades"
+      rm -f "$v"
+    done
+  fi
   if [ -n "$VANTA" ]; then
     [ -s "$DATA/Documents/$VANTA" ] && break
   else
     [ $(( $(tid) - T0 )) -ge "$DROJ" ] && break
   fi
   [ $(( $(tid) - T0 )) -ge "$MAXSEK" ] && { rapport "VARNING: $VANTA kom inte inom $MAXSEK s"; break; }
-  sleep 1
+  sleep 0.5
 done
 T1=$(tid)
 [ -n "$VANTA" ] && sleep "$DROJ"

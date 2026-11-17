@@ -212,6 +212,29 @@ final class Labbkorning {
         return bild
     }
 
+    /// Simulatorns egen skärmbild, med statusraden, tangentbordet och systemets dialoger (som `skarmbild` inte får
+    /// med). Appen lägger `<namn>.vill` i testets mapp och väntar; `bygg-sim.sh` tar bilden med `simctl io
+    /// screenshot` till `<namn>.png` i samma mapp och tar bort `.vill`. Högst 10 s; utan `bygg-sim.sh` (en riktig
+    /// telefon, ett eget skript) blir det ingen bild, bara en varning i loggen.
+    func systembild(_ namn: String) async {
+        try? await Task.sleep(nanoseconds: 500_000_000)
+        let vill = mapp.appendingPathComponent("\(namn).vill")
+        let bild = mapp.appendingPathComponent("\(namn).png")
+        try? FileManager.default.removeItem(at: bild)
+        FileManager.default.createFile(atPath: vill.path, contents: Data())
+        let t0 = Date()
+        while FileManager.default.fileExists(atPath: vill.path), Date().timeIntervalSince(t0) < 10 {
+            try? await Task.sleep(nanoseconds: 150_000_000)
+        }
+        try? FileManager.default.removeItem(at: vill)
+        if FileManager.default.fileExists(atPath: bild.path) {
+            bilder.append("\(namn).png")
+            logg.info("systembild \(namn).png")
+        } else {
+            logg.varning("systembild \(namn): ingen bild (körs testet utan bygg-sim.sh?)")
+        }
+    }
+
     /// Synliga webbvyer i modaler (ark, helskärm), i den ordning de visas.
     static func webbvyerIModaler(_ fonster: UIWindow) -> [WKWebView] {
         var ut: [WKWebView] = []
