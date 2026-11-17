@@ -291,11 +291,14 @@ final class ChattLage {
     // MARK: Skicka och ändra
 
     func skicka(_ k: KonvId, _ u: ChattUtkast) async -> Bool {
+        // Det som skickas ligger sist medan det skickas, också om telefonens klocka går efter serverns (listan sorteras
+        // på tiden när den hämtas, och en hämtning mitt i en sändning lade annars svaret före videon som just skickats)
+        let nu = max(Int64(Date().timeIntervalSince1970 * 1000), (meddelanden[k]?.last?.ms ?? 0) + 1)
         let tmp = ChattMeddelande(id: "tmp-\(UUID().uuidString)", fran: jag?.id ?? "", franNamn: jag?.anvandarnamn ?? "", mitt: true, tid: Date(),
                              innehall: u.bild.map { _ in .bild(ChattBildinfo(bilaga: "", mime: "", bredd: u.bild?.bredd ?? 1, hojd: u.bild?.hojd ?? 1, klistermarke: false), text: u.text) }
                                 ?? u.video.map { v in .video(ChattVideoinfo(bilagor: [], mime: v.mime, bredd: v.bredd, hojd: v.hojd, langd: v.langd, tumnagel: v.tumnagel), text: u.text) }
                                 ?? .text(u.text),
-                             svar: u.svar, redigerad: false, ms: Int64(Date().timeIntervalSince1970 * 1000))
+                             svar: u.svar, redigerad: false, ms: nu)
         if let b = u.bild, let ui = UIImage(data: b.data) { bildminne.setObject(ui, forKey: tmp.id as NSString) }
         meddelanden[k, default: []].append(tmp)
         do {
@@ -305,6 +308,8 @@ final class ChattLage {
             }
             if let i = meddelanden[k]?.firstIndex(where: { $0.id == tmp.id }) {
                 if meddelanden[k]!.contains(where: { $0.id == m.id }) { meddelanden[k]!.remove(at: i) } else { meddelanden[k]![i] = m }
+                // Serverns tid gäller nu, som i `hamta`
+                if let l = meddelanden[k], !zip(l, l.dropFirst()).allSatisfy({ $0.ms <= $1.ms }) { meddelanden[k]!.sort { $0.ms < $1.ms } }
             }
             if var s = sammanfattningar[k] { s.senaste = m; sammanfattningar[k] = s } else {
                 sammanfattningar[k] = ChattSammanfattning(senaste: m, olasta: 0, lastTill: nil, skriver: [])
