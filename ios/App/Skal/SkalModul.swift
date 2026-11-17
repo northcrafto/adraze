@@ -4,7 +4,7 @@ import SwiftUI
 /// Skal-modulen: allt synligt runt webbsidan. Byter grundens enkla skal mot `SkalVy` och registrerar
 /// självtestet `-mode skal`.
 ///
-/// Startargument: `-sprak <kod>` väljer språk för skalets texter (standard `sv`).
+/// Språket följer `sprak.val` (Gemensamt/Sprak.swift); `-sprak <kod>` väljer ett annat vid start.
 ///
 /// Ägare: Skal.
 final class SkalModul: NSObject, AppModul {
@@ -16,10 +16,7 @@ final class SkalModul: NSObject, AppModul {
     private static var prenumerationer: [Prenumeration] = []
 
     static func registrera(i app: AppMiljo) {
-        if let kod = app.startargument.text("sprak") { Sprak.delad.byt(till: kod) }
-        // I självtesterna hamnar historik och bokmärken bara i minnet.
-        let bibliotek = Bibliotek(fil: app.startargument.lage == nil ? Bibliotek.standardfil : nil)
-        let skal = SkalLage(app: app, bibliotek: bibliotek)
+        let skal = SkalLage(app: app)
         lage = skal
         app.ersatt(huvudvy: "Skal") { SkalVy(skal: skal) }
 

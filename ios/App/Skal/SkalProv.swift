@@ -44,7 +44,7 @@ enum SkalProv {
         skal.provVy = nil
         skal.provTextstorlek = nil
         skal.provBlockerade = nil
-        Sprak.delad.byt(till: app.startargument.text("sprak") ?? "sv")
+        Sprak.delad.byt(till: app.startargument.text("sprak") ?? Sprak.aktivt(inst))
         for n in nycklar { inst.satt(n, fore[n] ?? nil, utanHistorik: true) }
         for f in app.flikar.flikar where !flikarFore.contains(f.id) && f.id != app.flikar.aktivId {
             app.flikar.stang(f.id)
@@ -261,13 +261,13 @@ enum SkalProv {
 
         // MARK: Felsidan
         let fel = app.flikar.nyFlik(URL(string: bas + "/trasig")!, privat: false, aktivera: true)
-        let felKom = await k.vantaPa("felsidan visas", max: 15) { fel.fel != nil && !fel.laddar }
+        let felKom = await k.vantaPa("felsidan visas", max: 15) { fel.fel != nil && fel.visarFelsida && !fel.laddar }
         if felKom {
             try await k.vanta(0.9)
             k.lika("adressfältet visar adressen som inte gick att öppna", visadAdress(fel)?.path, "/trasig")
             if let f = fel.fel {
-                k.kolla("felet med appens egna ord", Felvy.beskrivning(f) != f.text,
-                        ["kod": .tal(Double(f.kod)), "text": .text(Felvy.beskrivning(f))])
+                k.kolla("fliken visar sin egen felsida (skalet lägger ingen ovanpå)", fel.visarFelsida,
+                        ["kod": .tal(Double(f.kod)), "text": .text(f.text)])
             }
             await k.skarmbild("fel")
         }

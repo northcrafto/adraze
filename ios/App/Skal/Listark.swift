@@ -87,19 +87,20 @@ struct Tomvy: View {
 struct Sajtrad: View {
     let url: String
     let titel: String
+    var favikon: UIImage?
     var hoger: String?
     let farger: Skalfarger
 
     var body: some View {
         let u = URL(string: url)
         HStack(spacing: 12) {
-            Monogram(doman: domanFor(u), storlek: 30)
+            Sajtikon(bild: favikon, doman: domanFor(u), storlek: 30)
             VStack(alignment: .leading, spacing: 2) {
                 Text(titel.isEmpty ? domanFor(u) : titel)
                     .grotesk(15, vikt: 580, tak: 22)
                     .foregroundStyle(farger.text)
                     .lineLimit(1)
-                Text(Bibliotek.utanSchema(url))
+                Text(utanSchema(url))
                     .grotesk(12.5, tak: 18)
                     .foregroundStyle(farger.dampad)
                     .lineLimit(1)
@@ -133,13 +134,13 @@ struct Bokmarkesark: View {
                 List {
                     ForEach(skal.bibliotek.bokmarken) { b in
                         Button { if let u = URL(string: b.url) { skal.ga(till: u) } } label: {
-                            Sajtrad(url: b.url, titel: b.titel, farger: farger)
+                            Sajtrad(url: b.url, titel: b.titel, favikon: skal.bibliotek.favikon(b.favikon), farger: farger)
                         }
                         .buttonStyle(.plain)
                         .listRowBackground(Color.clear)
                         .listRowSeparatorTint(farger.linje)
                         .swipeActions {
-                            Button(role: .destructive) { skal.bibliotek.taBort(b) } label: { Text(tr("Ta bort")) }
+                            Button(role: .destructive) { skal.bibliotek.taBortBokmarke(b.url) } label: { Text(tr("Ta bort")) }
                         }
                     }
                 }
@@ -163,7 +164,7 @@ struct Historikark: View {
         let grupper = Self.gruppera(lista)
         VStack(spacing: 0) {
             Arkhuvud(titel: tr("Historik"), farger: farger,
-                     hoger: alla.isEmpty ? nil : AnyView(rensaKnapp)) { skal.ark = nil }
+                     hoger: alla.isEmpty || !skal.bibliotek.kanRensaHistorik ? nil : AnyView(rensaKnapp)) { skal.ark = nil }
             if alla.isEmpty {
                 ScrollView {
                     Tomvy(illustration: "Historik", titel: tr("Ingen historik än"),
@@ -177,13 +178,13 @@ struct Historikark: View {
                         Section {
                             ForEach(grupp.poster) { b in
                                 Button { if let u = URL(string: b.url) { skal.ga(till: u) } } label: {
-                                    Sajtrad(url: b.url, titel: b.titel, hoger: b.senast.formatted(.dateTime.hour().minute().locale(Locale(identifier: Sprak.delad.kod))), farger: farger)
+                                    Sajtrad(url: b.url, titel: b.titel, favikon: skal.bibliotek.favikon(b.favikon), hoger: b.senast.formatted(.dateTime.hour().minute().locale(Locale(identifier: Sprak.delad.kod))), farger: farger)
                                 }
                                 .buttonStyle(.plain)
                                 .listRowBackground(Color.clear)
                                 .listRowSeparatorTint(farger.linje)
                                 .swipeActions {
-                                    Button(role: .destructive) { skal.bibliotek.taBort(b) } label: { Text(tr("Ta bort")) }
+                                    Button(role: .destructive) { skal.bibliotek.taBortHistorik(b.url) } label: { Text(tr("Ta bort")) }
                                 }
                             }
                         } header: {
@@ -234,15 +235,15 @@ struct Historikark: View {
 
     struct Dagsgrupp: Identifiable {
         let id: String
-        let poster: [Bibliotek.Besok]
+        let poster: [Sidpost]
     }
 
     /// Idag, igår, sedan veckodag och datum.
     @MainActor
-    static func gruppera(_ poster: [Bibliotek.Besok]) -> [Dagsgrupp] {
+    static func gruppera(_ poster: [Sidpost]) -> [Dagsgrupp] {
         let kal = Calendar.current
         var ordning: [String] = []
-        var grupper: [String: [Bibliotek.Besok]] = [:]
+        var grupper: [String: [Sidpost]] = [:]
         let sprak = Locale(identifier: Sprak.delad.kod)
         for b in poster {
             let namn: String
@@ -261,21 +262,52 @@ struct Nedladdningsark: View {
     let farger: Skalfarger
 
     var body: some View {
+        let poster = skal.bibliotek.nedladdningar
         VStack(spacing: 0) {
             Arkhuvud(titel: tr("Nedladdningar"), farger: farger) { skal.ark = nil }
-            ScrollView {
-                VStack(spacing: 4) {
-                    Tomvy(illustration: "Nedladdningar", titel: tr("Inga nedladdningar än"),
-                          text: tr("Filer du laddar ner hamnar här och i appen Filer."), farger: farger)
-                    Button { Self.oppnaFiler() } label: {
-                        Vatsketext(text: tr("Visa i Filer"), ikon: .nedladdning, vikt: 600)
+            if poster.isEmpty {
+                ScrollView {
+                    VStack(spacing: 4) {
+                        Tomvy(illustration: "Nedladdningar", titel: tr("Inga nedladdningar än"),
+                              text: tr("Filer du laddar ner hamnar här och i appen Filer."), farger: farger)
+                        filknapp
                     }
-                    .buttonStyle(Vatskeknapp(.sekundar, privat: farger.privat))
+                    .padding(.bottom, 30)
                 }
-                .padding(.bottom, 30)
+                .scrollBounceBehavior(.basedOnSize)
+            } else {
+                List {
+                    ForEach(poster) { p in
+                        Nedladdningsrad(post: p, skal: skal, farger: farger)
+                            .listRowBackground(Color.clear)
+                            .listRowSeparatorTint(farger.linje)
+                            .swipeActions {
+                                Button(role: .destructive) { skal.bibliotek.taBortNedladdning(p.id) } label: { Text(tr("Ta bort")) }
+                            }
+                            .swipeActions(edge: .leading) {
+                                if p.lage == .klar {
+                                    Button { skal.bibliotek.delaNedladdning(p.id) } label: { Text(tr("Dela")) }
+                                        .tint(farger.accent)
+                                }
+                            }
+                    }
+                    filknapp
+                        .frame(maxWidth: .infinity)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .padding(.top, 10)
+                }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
             }
-            .scrollBounceBehavior(.basedOnSize)
         }
+    }
+
+    private var filknapp: some View {
+        Button { Self.oppnaFiler() } label: {
+            Vatsketext(text: tr("Visa i Filer"), ikon: .nedladdning, vikt: 600)
+        }
+        .buttonStyle(Vatskeknapp(.sekundar, privat: farger.privat))
     }
 
     /// Öppnar appens mapp i Filer (otestat i simulatorn).
@@ -283,6 +315,81 @@ struct Nedladdningsark: View {
         let dok = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         guard let u = URL(string: "shareddocuments://" + dok.path) else { return }
         UIApplication.shared.open(u)
+    }
+}
+
+/// En nedladdning: filnamnet, storleken eller förloppet, och en knapp för att pausa, fortsätta eller öppna.
+struct Nedladdningsrad: View {
+    let post: Nedladdningspost
+    let skal: SkalLage
+    let farger: Skalfarger
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 9, style: .continuous).fill(farger.accentMjuk)
+                Ikonvy(.nedladdning, storlek: 17, streck: 2).foregroundStyle(farger.accentText)
+            }
+            .frame(width: 34, height: 34)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(post.filnamn)
+                    .grotesk(15, vikt: 580, tak: 22)
+                    .foregroundStyle(farger.text)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                if post.lage == .pagar {
+                    GeometryReader { g in
+                        Capsule().fill(farger.linje)
+                            .overlay(alignment: .leading) {
+                                Capsule().fill(farger.accent).frame(width: max(6, g.size.width * (post.andel ?? 0.08)))
+                            }
+                    }
+                    .frame(height: 4)
+                }
+                Text(detalj)
+                    .font(Font(Typsnitt.familjen(12.5, vikt: 480)).monospacedDigit())
+                    .foregroundStyle(post.lage == .misslyckad ? Color.hex("#d64b45") : farger.dampad)
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 4)
+            knapp
+        }
+        .padding(.vertical, 6)
+        .contentShape(Rectangle())
+        .onTapGesture { if post.lage == .klar { skal.bibliotek.oppnaNedladdning(post.id) } }
+    }
+
+    private var detalj: String {
+        let f = ByteCountFormatter()
+        f.countStyle = .file
+        switch post.lage {
+        case .pagar:
+            let m = f.string(fromByteCount: post.mottaget)
+            return post.totalt > 0 ? tr("{a} av {b}", ["a": m, "b": f.string(fromByteCount: post.totalt)]) : m
+        case .pausad: return tr("Pausad")
+        case .klar: return f.string(fromByteCount: max(post.mottaget, post.totalt))
+        case .avbruten: return tr("Avbruten")
+        case .misslyckad: return post.fel ?? tr("Misslyckades")
+        }
+    }
+
+    @ViewBuilder private var knapp: some View {
+        switch post.lage {
+        case .pagar:
+            Button { skal.bibliotek.avbrytNedladdning(post.id) } label: {
+                Ikonvy(.stang, storlek: 15, streck: 2.2).frame(width: 36, height: 36)
+            }
+            .buttonStyle(Vatskeknapp(.lank, radie: 10, privat: farger.privat))
+            .accessibilityLabel(tr("Avbryt"))
+        case .pausad, .misslyckad:
+            Button { skal.bibliotek.fortsattNedladdning(post.id) } label: {
+                Ikonvy(.laddaOm, storlek: 16, streck: 2).frame(width: 36, height: 36)
+            }
+            .buttonStyle(Vatskeknapp(.lank, radie: 10, privat: farger.privat))
+            .accessibilityLabel(tr("Fortsätt"))
+        case .klar, .avbruten:
+            EmptyView()
+        }
     }
 }
 
@@ -353,12 +460,13 @@ struct Platsvy: View {
     let plats: Platsark
     let skal: SkalLage
     @Environment(Tema.self) private var tema
+    @Environment(AppMiljo.self) private var app
 
     var body: some View {
         let f = Skalfarger(tema, privat: false)
         Group {
-            if let p = Skalplatser.delad.platser[plats.id] {
-                p.vy()
+            if let vy = app.platser[plats.id]?.vy {
+                vy()
             } else {
                 EmptyView()
             }

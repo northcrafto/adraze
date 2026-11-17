@@ -163,7 +163,7 @@ struct Menyvy: View {
         let antal = skal.provBlockerade ?? app.skydd.antalBlockerade(i: flik.id)
         return VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
-                Monogram(doman: domanFor(flik.url), storlek: 36)
+                Sajtikon(bild: flik.favikon, doman: domanFor(flik.url), storlek: 36)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(flik.titel.isEmpty ? domanFor(flik.url) : flik.titel)
                         .grotesk(15.5, vikt: 620, tak: 22)
@@ -210,9 +210,9 @@ struct Menyvy: View {
 
     private func platser(accent: Color) -> some View {
         let alla: [(String, String, Ikon?, String?)] = [
-            (Skalplatser.anpassa, tr("Anpassa"), .palett, nil),
-            (Skalplatser.falk, tr("Falk"), nil, "SkalFalk"),
-            (Skalplatser.chatt, tr("Chatt"), .chatt, nil),
+            (Platser.anpassa, tr("Anpassa"), .palett, nil),
+            (Platser.falk, tr("Falk"), nil, "SkalFalk"),
+            (Platser.chatt, tr("Chatt"), .chatt, nil),
         ]
         return HStack(spacing: 10) {
             ForEach(alla.indices, id: \.self) { i in
@@ -313,27 +313,18 @@ extension View {
 
 // MARK: - Platser
 
-/// Platser i menyn som andra delar av appen fyller: Anpassa, Falk och chatten. Tills det finns ett gemensamt
-/// sätt i `Gemensamt/` (önskemål i slutrapporten) registreras vyerna här:
-///
-///     Skalplatser.delad.ersatt(plats: Skalplatser.anpassa, titel: "Anpassa") { AnpassaVy() }
+/// Den äldre vägen till menyns platser, från innan `app.ersatt(plats:titel:vy:)` fanns i Gemensamt. Skickar
+/// vidare dit, så att kod som redan använder den fortsätter att fungera.
 ///
 /// Ägare: Skal.
 @MainActor
 final class Skalplatser {
     static let delad = Skalplatser()
-    static let anpassa = "anpassa"
-    static let falk = "falk"
-    static let chatt = "chatt"
-
-    struct Plats {
-        let titel: String
-        let vy: @MainActor () -> AnyView
-    }
-
-    private(set) var platser: [String: Plats] = [:]
+    static let anpassa = Platser.anpassa
+    static let falk = Platser.falk
+    static let chatt = Platser.chatt
 
     func ersatt<V: View>(plats: String, titel: String, @ViewBuilder _ vy: @escaping @MainActor () -> V) {
-        platser[plats] = Plats(titel: titel) { AnyView(vy()) }
+        AppMiljo.delad?.ersatt(plats: plats, titel: titel, vy: vy)
     }
 }

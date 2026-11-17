@@ -187,6 +187,36 @@ struct Monogram: View {
     }
 }
 
+/// Sajtens ikon (favikonen från Flikar) i en rundad ruta, eller monogrammet medan den saknas.
+struct Sajtikon: View {
+    let bild: UIImage?
+    let doman: String
+    var storlek: CGFloat = 22
+    @Environment(\.colorScheme) private var schema
+
+    var body: some View {
+        if let bild {
+            let inre = storlek >= 28 ? storlek * 0.62 : storlek
+            Image(uiImage: bild)
+                .resizable()
+                .interpolation(.high)
+                .scaledToFit()
+                .frame(width: inre, height: inre)
+                .clipShape(RoundedRectangle(cornerRadius: inre * 0.22, style: .continuous))
+                .frame(width: storlek, height: storlek)
+                .background {
+                    if storlek >= 28 {
+                        RoundedRectangle(cornerRadius: storlek * 0.3, style: .continuous)
+                            .fill(schema == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.045))
+                    }
+                }
+                .accessibilityHidden(true)
+        } else {
+            Monogram(doman: doman, storlek: storlek)
+        }
+    }
+}
+
 /// Domänen utan `www.` för en adress.
 func domanFor(_ url: URL?) -> String {
     guard let v = url?.host(percentEncoded: false), !v.isEmpty else { return "" }

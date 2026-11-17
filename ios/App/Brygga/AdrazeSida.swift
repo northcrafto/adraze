@@ -262,13 +262,7 @@ final class AdrazeSida: UIView, WKNavigationDelegate, WKUIDelegate {
 
 // MARK: - Visa som ark eller helskärm
 
-/// Hur en AdRaze-sida visas med `sida:visa`.
-enum Sidlage: String, Sendable {
-    /// Ark som täcker nästan hela skärmen (Anpassa, inställningar).
-    case ark
-    /// Hela skärmen (startsidan, introt).
-    case helskarm
-}
+// `Sidlage` (ark eller helskärm) ligger i Gemensamt/Sidor.swift.
 
 /// Kontrollern som håller en AdRaze-sida när den visas modalt.
 @MainActor
@@ -363,7 +357,7 @@ enum AdrazeSidor {
 
 // MARK: - SwiftUI
 
-/// En AdRaze-sida i en SwiftUI-vy (för Bryggans egna vyer och den Gemensamt-tjänst som föreslås i rapporten).
+/// En AdRaze-sida i en SwiftUI-vy (`app.sidor.vy`, skalets startsida i en ny flik).
 struct AdrazeSidaVy: UIViewRepresentable {
     let yta: String
     var fragment: String?
@@ -375,5 +369,29 @@ struct AdrazeSidaVy: UIViewRepresentable {
     func updateUIView(_ vy: AdrazeSida, context: Context) {
         vy.nedre = nedre
         vy.navigera = navigera
+    }
+}
+
+/// `SidTjanst` (Gemensamt/Sidor.swift): andra moduler visar AdRaze-sidorna härifrån.
+@MainActor
+final class Bryggsidor: SidTjanst {
+    private let transport: BryggTransport
+
+    init(transport: BryggTransport) { self.transport = transport }
+
+    func finns(_ yta: String) -> Bool {
+        BryggTransport.preloads[yta] != nil && transport.schema.fil(for: "/\(yta).html") != nil
+    }
+
+    @discardableResult
+    func visa(_ yta: String, fragment: String?, som lage: Sidlage) -> Bool {
+        guard finns(yta) else { return false }
+        return AdrazeSidor.visa(yta, fragment: fragment, som: lage) != nil
+    }
+
+    func stang(_ yta: String?) { AdrazeSidor.stang(yta) }
+
+    func vy(_ yta: String, fragment: String?, nedre: CGFloat, navigera: (@MainActor (URL) -> Void)?) -> AnyView {
+        AnyView(AdrazeSidaVy(yta: yta, fragment: fragment, nedre: nedre, navigera: navigera))
     }
 }

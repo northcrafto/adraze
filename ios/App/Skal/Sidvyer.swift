@@ -1,9 +1,10 @@
 import SwiftUI
 import UIKit
 
-/// Den tomma fliken: gorillan som äter reklam, en hälsning i Fraunces, skyddets läge och de mest besökta
-/// sajterna. I en privat flik datorns "Du surfar privat" med sajtens figur. (Brygga kan senare ersätta den
-/// med AdRazes webbstartsida; önskemål i slutrapporten.)
+/// Den tomma fliken när AdRazes webbstartsida inte finns (`-utan Brygga`), och alltid i en privat flik:
+/// gorillan som äter reklam, en hälsning i Fraunces, skyddets läge och de mest besökta sajterna. I en privat
+/// flik datorns "Du surfar privat" med sajtens figur. Vanliga flikar visar annars datorns startsida
+/// (`app.sidor.vy("startsida")`, se `SkalVy`).
 ///
 /// Ägare: Skal.
 struct Startvy: View {
@@ -17,7 +18,7 @@ struct Startvy: View {
 
     var body: some View {
         let f = Skalfarger(tema, privat: privat)
-        let tomt = privat || skal.bibliotek.toppsajter(8).isEmpty
+        let tomt = privat || skal.bibliotek.toppsajter(max: 8).isEmpty
         GeometryReader { g in
             ScrollView {
                 Group {
@@ -47,7 +48,7 @@ struct Startvy: View {
     // MARK: - Vanlig flik
 
     private func vanligt(_ f: Skalfarger) -> some View {
-        let sajter = skal.bibliotek.toppsajter(8)
+        let sajter = skal.bibliotek.toppsajter(max: 8)
         return VStack(spacing: 0) {
             Image("SkalGorillaAd")
                 .resizable()
@@ -80,7 +81,7 @@ struct Startvy: View {
                     ForEach(sajter) { b in
                         Button { if let u = URL(string: b.url) { skal.ga(till: u) } } label: {
                             VStack(spacing: 7) {
-                                Monogram(doman: domanFor(URL(string: b.url)), storlek: 52)
+                                Sajtikon(bild: skal.bibliotek.favikon(b.favikon), doman: domanFor(URL(string: b.url)), storlek: 52)
                                 Text(domanFor(URL(string: b.url)))
                                     .grotesk(11.5, vikt: 560, tak: 16)
                                     .foregroundStyle(f.text)
@@ -220,82 +221,3 @@ struct Flodeslayout: Layout {
     }
 }
 
-/// När sidan inte gick att öppna: sajtens figur, en rubrik, vad som hände och "Försök igen".
-struct Felvy: View {
-    let flik: any Flik
-    let fel: Sidfel
-
-    @Environment(Tema.self) private var tema
-
-    var body: some View {
-        let f = Skalfarger(tema, privat: flik.privat)
-        let url = fel.url ?? flik.url
-        ScrollView {
-            VStack(spacing: 0) {
-                Illustration(namn: "Fel", accent: f.accent)
-                    .frame(maxWidth: 190)
-                    .padding(.top, 48)
-                Text(fel.blockeradAvSkyddet ? tr("AdRaze stoppade sidan") : tr("Sidan gick inte att öppna"))
-                    .rubrik(30, vikt: 600, tak: 44)
-                    .foregroundStyle(f.text)
-                    .multilineTextAlignment(.center)
-                    .padding(.top, 24)
-                if !domanFor(url).isEmpty {
-                    Text(domanFor(url))
-                        .grotesk(15, vikt: 650, tak: 22)
-                        .foregroundStyle(f.text)
-                        .padding(.top, 10)
-                }
-                Text(Self.beskrivning(fel))
-                    .grotesk(14.5, tak: 22)
-                    .foregroundStyle(f.dampad)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(2)
-                    .padding(.top, 6)
-                Button {
-                    if let url { flik.ladda(url) } else { flik.laddaOm() }
-                } label: {
-                    Vatsketext(text: tr("Försök igen"), ikon: .laddaOm)
-                }
-                .buttonStyle(Vatskeknapp(.primar, privat: f.privat))
-                .padding(.top, 26)
-            }
-            .padding(.horizontal, 30)
-            .frame(maxWidth: 520)
-            .frame(maxWidth: .infinity)
-            .padding(.bottom, 40)
-        }
-        .scrollBounceBehavior(.basedOnSize)
-        .background { f.sida.ignoresSafeArea() }
-        .onAppear { Haptik.fel() }
-    }
-
-    /// Vad som hände, med appens egna ord för de vanliga felen (systemets text följer telefonens språk och
-    /// inte appens). Annars systemets text.
-    static func beskrivning(_ fel: Sidfel) -> String {
-        if fel.blockeradAvSkyddet { return tr("Skyddet blockerar den här sidan.") }
-        guard fel.doman == NSURLErrorDomain else { return fel.text }
-        switch fel.kod {
-        case NSURLErrorNotConnectedToInternet, NSURLErrorDataNotAllowed, NSURLErrorInternationalRoamingOff:
-            return tr("Du verkar inte vara ansluten till internet.")
-        case NSURLErrorTimedOut:
-            return tr("Sidan svarade inte i tid.")
-        case NSURLErrorCannotFindHost, NSURLErrorDNSLookupFailed:
-            return tr("Det finns ingen sajt på den adressen.")
-        case NSURLErrorCannotConnectToHost:
-            return tr("Servern tog inte emot anslutningen.")
-        case NSURLErrorNetworkConnectionLost:
-            return tr("Anslutningen bröts.")
-        case NSURLErrorSecureConnectionFailed, NSURLErrorServerCertificateHasBadDate, NSURLErrorServerCertificateUntrusted,
-             NSURLErrorServerCertificateHasUnknownRoot, NSURLErrorServerCertificateNotYetValid,
-             NSURLErrorClientCertificateRejected, NSURLErrorClientCertificateRequired:
-            return tr("Det gick inte att ansluta säkert till sajten.")
-        case NSURLErrorAppTransportSecurityRequiresSecureConnection:
-            return tr("Sajten saknar en säker anslutning.")
-        case NSURLErrorBadURL, NSURLErrorUnsupportedURL:
-            return tr("Adressen går inte att öppna.")
-        default:
-            return fel.text
-        }
-    }
-}

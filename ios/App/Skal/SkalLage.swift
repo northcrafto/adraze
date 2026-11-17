@@ -63,15 +63,16 @@ struct Hjalte: Equatable {
 @Observable
 final class SkalLage {
     @ObservationIgnored unowned let app: AppMiljo
-    let bibliotek: Bibliotek
     let forslag: Sokforslag
     @ObservationIgnored private let logg = Logg("Skal")
 
-    init(app: AppMiljo, bibliotek: Bibliotek) {
+    init(app: AppMiljo) {
         self.app = app
-        self.bibliotek = bibliotek
-        self.forslag = Sokforslag(app: app, bibliotek: bibliotek)
+        self.forslag = Sokforslag(app: app)
     }
+
+    /// Historiken, bokmärkena och nedladdningarna (Flikars, `app.bibliotek`).
+    var bibliotek: any Bibliotekstjanst { app.bibliotek }
 
     // MARK: - Läget
 
@@ -117,10 +118,15 @@ final class SkalLage {
         if f != sidfarg { sidfarg = f }
     }
 
-    /// Flikarnas miniatyrer (bara den aktiva flikens webbvy kan fotograferas).
+    /// Bilder av den aktiva flikens sida, tagna precis när flikväxlaren öppnas (färskare än flikens egen
+    /// miniatyr, som Flikar tar när fliken lämnas och efter laddning). Övriga flikar visar `flik.miniatyr`.
     private(set) var miniatyrer: [UUID: UIImage] = [:]
-    /// Flikar som visas i skrivbordsversion.
-    private(set) var skrivbord: Set<UUID> = []
+
+    /// Bilden som flikväxlaren visar för en flik.
+    func miniatyr(_ f: any Flik) -> UIImage? {
+        if f.id == app.flikar.aktivId, let b = miniatyrer[f.id] { return b }
+        return f.miniatyr ?? miniatyrer[f.id]
+    }
 
     // Ramar i fönstret (rapporteras av vyerna, läses bara när något öppnas).
     @ObservationIgnored var webbram: CGRect = .zero
@@ -193,7 +199,6 @@ final class SkalLage {
         let privat = app.flikar.flik(id)?.privat ?? false
         app.flikar.stang(id)
         miniatyrer[id] = nil
-        skrivbord.remove(id)
         // Stängdes den aktiva fliken: välj en annan i samma grupp om det finns.
         if varAktiv, let annan = flikar(privat: privat).last, app.flikar.aktivId != annan.id {
             app.flikar.aktivera(annan.id)
@@ -345,7 +350,7 @@ final class SkalLage {
         guard vaxlareOppen else { return }
         if let id, id != app.flikar.aktivId { Haptik.latt(); app.flikar.aktivera(id) }
         let mal = id ?? app.flikar.aktivId
-        if let mal, let kort = kortramar[mal], let bild = miniatyrer[mal], !Rorelse.minskad, webbram.width > 10,
+        if let mal, let kort = kortramar[mal], let f = app.flikar.flik(mal), let bild = miniatyr(f), !Rorelse.minskad, webbram.width > 10,
            Self.sammaForm(kort, webbram) {
             hjalte = Hjalte(flik: mal, bild: bild, fran: kort, till: webbram, mot: .sida)
             withAnimation(Rorelse.fjader) { hjalte?.framme = true }
@@ -376,11 +381,19 @@ final class SkalLage {
     }
 
     /// Öppnar en plats som en annan del av appen har fyllt, annars en notis om att den kommer.
+    /// En plats ur menyn (Anpassa, Falk, Chatt): modulen visar den själv, eller skalet visar dess vy i ett ark.
     func oppnaPlats(_ namn: String) {
-        if Skalplatser.delad.platser[namn] != nil {
-            plats = Platsark(id: namn)
-        } else {
+        guard let p = app.platser[namn] else {
             notis(tr("Kommer snart"), ikon: .gnista)
+            return
+        }
+        if let oppna = p.oppna {
+            // Menyn stängs först, så att arket inte visas ovanpå cirkeln.
+            let varOppen = menyOppen
+            if varOppen { stangMeny() }
+            efter(varOppen ? 0.3 : 0) { oppna() }
+        } else {
+            plats = Platsark(id: namn)
         }
     }
 
@@ -420,37 +433,26 @@ final class SkalLage {
 
     // MARK: - Sidan
 
-    var arSkrivbord: Bool { aktiv.map { skrivbord.contains($0.id) } ?? false }
+    var arSkrivbord: Bool { aktiv?.skrivbordslage ?? false }
 
-    /// Skrivbordsversion av sidan: datorns Safari-användaragent och en ny laddning.
+    /// Skrivbordsversion av sidan (Flikar byter användaragent och innehållsläge och laddar om).
     func vaxlaSkrivbord() {
         guard let f = aktiv else { return }
-        let pa = !skrivbord.contains(f.id)
-        if pa { skrivbord.insert(f.id) } else { skrivbord.remove(f.id) }
-        f.webbvy.customUserAgent = pa ? Self.skrivbordsagent : nil
-        if !arTomAdress(f.url) { f.laddaOm() }
+        let pa = !f.skrivbordslage
+        f.sattSkrivbordslage(pa)
         stangMeny()
         notis(pa ? tr("Skrivbordsversion") : tr("Mobilversion"), ikon: .skrivbord)
-    }
-
-    static var skrivbordsagent: String {
-        let v = ProcessInfo.processInfo.operatingSystemVersion
-        return "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/\(v.majorVersion).\(v.minorVersion) Safari/605.1.15"
     }
 
     func hittaPaSidan() {
         guard let f = aktiv, !arTomAdress(f.url) else { return }
         stangMeny()
-        let vy = f.webbvy
-        vy.isFindInteractionEnabled = true
-        efter(0.35) {
-            vy.findInteraction?.presentFindNavigator(showingReplace: false)
-        }
+        efter(0.35) { f.visaSokfalt(nil) }
     }
 
     func vaxlaBokmarke() {
         guard let f = aktiv, let u = f.url, !arTomAdress(u) else { return }
-        let nu = bibliotek.vaxlaBokmarke(url: u, titel: f.titel)
+        let nu = bibliotek.vaxlaBokmarke(u, titel: f.titel)
         if nu { Haptik.klart() }
         notis(nu ? tr("Bokmärke sparat") : tr("Bokmärket borttaget"), ikon: .stjarna)
     }
@@ -513,20 +515,8 @@ final class SkalLage {
 
     // MARK: - Händelser
 
-    /// En sida laddades: historik och miniatyr.
+    /// En sida laddades: en färsk bild för flikväxlaren (historiken sköter Flikar).
     func sidaLaddad(_ h: SidaLaddad) {
-        if !h.privat {
-            bibliotek.besok(url: h.url, titel: h.titel)
-            // WebKit kan ge titeln först efter didFinish: fyll i den när den kommer.
-            if h.titel.isEmpty {
-                for v in [0.4, 1.2, 3.0] {
-                    efter(v) { [weak self] in
-                        guard let self, let f = self.app.flikar.flik(h.flik), f.url == h.url, !f.titel.isEmpty else { return }
-                        self.bibliotek.sattTitel(url: h.url, titel: f.titel)
-                    }
-                }
-            }
-        }
         guard h.flik == app.flikar.aktivId else { return }
         efter(0.6) { [weak self] in
             guard let self, self.app.flikar.aktivId == h.flik, !self.vaxlareOppen else { return }

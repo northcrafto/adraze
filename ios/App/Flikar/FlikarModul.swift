@@ -21,6 +21,7 @@ final class FlikarModul: NSObject, AppModul {
         let motor = Flikmotor(app: app, lagring: lagring)
         motor.aterstall()
         app.ersatt(flikar: motor)
+        app.ersatt(bibliotek: Flikbibliotek(motor: motor))
         Flikkanaler.registrera(motor, i: app)
         app.labb.registrera("flikar", beskrivning: "Tre flikar mot lokala sidor, byte, bakåt/framåt, privat flik, nedladdning, "
                             + "historik, dialoger, felsida, zoom, sovande flikar och återställning efter omstart") { k in

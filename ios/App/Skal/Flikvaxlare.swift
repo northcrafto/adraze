@@ -292,7 +292,7 @@ struct Flikkort: View {
     }
 
     @ViewBuilder private var miniatyr: some View {
-        if let bild = skal.miniatyrer[flik.id], !arTomAdress(flik.url) {
+        if let bild = skal.miniatyr(flik), !arTomAdress(flik.url) {
             // Bilden ligger i ett överlägg så att den aldrig gör kortet bredare (t.ex. liggande bilder).
             Color.clear
                 .overlay(alignment: .topLeading) {
@@ -309,7 +309,7 @@ struct Flikkort: View {
                         .opacity(0.9)
                 } else {
                     VStack(spacing: 8) {
-                        Monogram(doman: domanFor(flik.url), storlek: 40)
+                        Sajtikon(bild: flik.favikon, doman: domanFor(flik.url), storlek: 40)
                         Text(domanFor(flik.url))
                             .grotesk(12, vikt: 560, tak: 16)
                             .foregroundStyle(farger.dampad)
@@ -326,7 +326,7 @@ struct Flikkort: View {
             if arTomAdress(flik.url) {
                 Ikonvy(flik.privat ? .privat : .plus, storlek: 14, streck: 2).foregroundStyle(farger.dampad)
             } else {
-                Monogram(doman: domanFor(flik.url), storlek: 16)
+                Sajtikon(bild: flik.favikon, doman: domanFor(flik.url), storlek: 16)
             }
             Text(titel)
                 .grotesk(12.5, vikt: aktiv ? 650 : 560, tak: 18)

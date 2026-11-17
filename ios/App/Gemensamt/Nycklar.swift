@@ -108,6 +108,7 @@ extension Nycklar {
         webbDns, webbHttpsOnly, webbFontSize, webbDownloadDir, webbAskDownload, webbPermDefaults, webbPerms, webbFalkSamtycke, webbFalkSida,
         blockNiva, blockRaknare, blockSkript, blockInjektioner, blockFingeravtryck, blockNatskydd, blockKakor, blockGlom, blockKontakt,
         blockElementPrivat, blockSocial, blockListor, blockEgna, blockElement,
+        sprakVal,
     ]
 }
 

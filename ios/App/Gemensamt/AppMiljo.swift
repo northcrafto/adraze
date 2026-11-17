@@ -15,7 +15,10 @@ import UIKit
 /// | `skydd` | `SkyddTjanst` | `IngetSkydd` | Skydd |
 /// | `konto` | `KontoTjanst` | `EnkeltKonto` (läser token ur Keychain) | Konto |
 /// | `huvudvy` | – | `EnkeltSkal` (en webbvy och adressfältet nere) | Skal |
+/// | `bibliotek` | `Bibliotekstjanst` | `TomtBibliotek` (bara i minnet) | Flikar |
+/// | `sidor` | `SidTjanst` | `IngaSidor` | Brygga |
 ///
+/// `platser` (menyns Anpassa, Falk och Chatt) fylls av modulerna med `ersatt(plats:titel:vy:)`.
 /// `installningar`, `tema`, `handelser`, `brygga` och `labb` är färdiga och byts inte.
 ///
 /// Ägare: Grund (Gemensamt).
@@ -37,6 +40,10 @@ final class AppMiljo {
     private(set) var skydd: any SkyddTjanst
     private(set) var konto: any KontoTjanst
     private(set) var huvudvy: Huvudvy
+    private(set) var bibliotek: any Bibliotekstjanst
+    private(set) var sidor: any SidTjanst
+    /// Menyplatserna (`Platser.anpassa`, `.falk`, `.chatt`) som någon modul har fyllt.
+    private(set) var platser: [String: Plats] = [:]
 
     /// Vilken modul som levererar varje tjänst, till exempel `["flikar": "Flikar", "skydd": "Grund"]`.
     private(set) var leverantorer: [String: String]
@@ -68,13 +75,16 @@ final class AppMiljo {
         skydd = IngetSkydd()
         konto = EnkeltKonto()
         huvudvy = Huvudvy(namn: "EnkeltSkal") { AnyView(EnkeltSkal()) }
-        leverantorer = ["flikar": "Grund", "skydd": "Grund", "konto": "Grund", "huvudvy": "Grund"]
+        bibliotek = TomtBibliotek(handelser: handelser)
+        sidor = IngaSidor()
+        leverantorer = ["flikar": "Grund", "skydd": "Grund", "konto": "Grund", "huvudvy": "Grund", "bibliotek": "Grund", "sidor": "Grund"]
         stubbflikar.app = self
         AppMiljo.delad = self
 
         let info = Bundle.main.infoDictionary ?? [:]
         logg.info("AdRaze \(info["CFBundleShortVersionString"] ?? "?") (\(info["CFBundleVersion"] ?? "?")), iOS \(UIDevice.current.systemVersion)"
                   + (argument.lage.map { ", självtest \($0)" } ?? ""))
+        Sprak.delad.folj(self)
         registreraModuler()
         if flikar === stubbflikar, stubbflikar.flikar.isEmpty { stubbflikar.nyFlik(nil, privat: false, aktivera: true) }
     }
@@ -94,6 +104,28 @@ final class AppMiljo {
     func ersatt(konto ny: any KontoTjanst) {
         konto = ny
         noteraLeverantor("konto", ny)
+    }
+
+    func ersatt(bibliotek ny: any Bibliotekstjanst) {
+        bibliotek = ny
+        noteraLeverantor("bibliotek", ny)
+    }
+
+    func ersatt(sidor ny: any SidTjanst) {
+        sidor = ny
+        noteraLeverantor("sidor", ny)
+    }
+
+    /// En plats i skalets meny som visas som en SwiftUI-vy i ett ark (Falk, Chatt).
+    func ersatt<V: View>(plats: String, titel: String, @ViewBuilder vy: @escaping @MainActor () -> V) {
+        platser[plats] = Plats(id: plats, titel: titel, vy: { AnyView(vy()) }, oppna: nil)
+        noteraLeverantor("plats." + plats, titel)
+    }
+
+    /// En plats i skalets meny som modulen visar själv (Brygga visar Anpassa som sitt eget ark).
+    func ersatt(plats: String, titel: String, oppna: @escaping @MainActor () -> Void) {
+        platser[plats] = Plats(id: plats, titel: titel, vy: nil, oppna: oppna)
+        noteraLeverantor("plats." + plats, titel)
     }
 
     /// Byter hela vyn som appen visar (Skal gör det med sitt skal).

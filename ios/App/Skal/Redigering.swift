@@ -82,9 +82,14 @@ struct Forslagslista: View {
                     if !fs.lokala.isEmpty {
                         rubrik(tr("Historik och bokmärken"))
                         ForEach(fs.lokala) { r in
-                            rad(monogram: domanFor(URL(string: r.mal)), ikon: r.sort == .bokmarke ? .stjarna : .historik,
-                                titel: r.titel, detalj: r.detalj, fyllI: r.detalj, framhavd: false, fet: q) {
-                                if let u = URL(string: r.mal) { skal.ga(till: u) }
+                            if r.sort == .tidigare {
+                                rad(ikon: .historik, titel: r.titel, detalj: nil, fyllI: r.titel, framhavd: false, fet: q) { skal.ga(r.mal) }
+                            } else {
+                                rad(monogram: domanFor(URL(string: r.mal)), bild: app.bibliotek.favikon(r.favikon),
+                                    ikon: r.sort == .bokmarke ? .stjarna : .historik,
+                                    titel: r.titel, detalj: r.detalj, fyllI: r.detalj, framhavd: false, fet: q) {
+                                    if let u = URL(string: r.mal) { skal.ga(till: u) }
+                                }
                             }
                         }
                     }
@@ -131,14 +136,14 @@ struct Forslagslista: View {
             .padding(.bottom, 4)
     }
 
-    private func rad(monogram: String? = nil, ikon: Ikon, titel: String, detalj: String?, fyllI: String?, framhavd: Bool,
+    private func rad(monogram: String? = nil, bild: UIImage? = nil, ikon: Ikon, titel: String, detalj: String?, fyllI: String?, framhavd: Bool,
                      fet: String? = nil, fetResten: Bool = false, gor: @escaping @MainActor () -> Void) -> some View {
         HStack(spacing: 0) {
             Button { gor() } label: {
                 HStack(spacing: 12) {
                     ZStack {
                         if let monogram, !monogram.isEmpty {
-                            Monogram(doman: monogram, storlek: 28)
+                            Sajtikon(bild: bild, doman: monogram, storlek: 28)
                         } else {
                             Ikonvy(ikon, storlek: 18, streck: 2)
                                 .foregroundStyle(framhavd ? farger.accentText : farger.dampad)
