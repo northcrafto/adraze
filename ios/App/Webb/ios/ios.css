@@ -146,14 +146,22 @@ html.ios-anpassa #settings .anpk-falt input { height: 42px; font-size: 16px; bor
 
 /* Bakgrundsväljaren (Utseende › Bakgrund): ett ark nerifrån med större bilder, knapparna i full bredd */
 html.ios-anpassa #bgpick:not(.hidden) { z-index: 95; padding: 0; place-items: end stretch; background: rgb(12 11 10 / .48) !important; animation: iosTona .25s ease; }
-html.ios-anpassa #bgpick > div { max-width: none; border-radius: 28px 28px 0 0; padding: 26px 16px calc(env(safe-area-inset-bottom) + 18px); animation: iosArkIn .38s cubic-bezier(.32, .72, 0, 1); }
-html.ios-anpassa #bgpick h1 { font-size: 22px; letter-spacing: -.02em; }
+html.ios-anpassa #bgpick > div { max-width: none; border-radius: 28px 28px 0 0; padding: 30px 24px calc(env(safe-area-inset-bottom) + 18px); animation: iosArkIn .38s cubic-bezier(.32, .72, 0, 1); }
+/* Som appens andra ark: handtag, kryss 40 px 16 px från kanten i textens färg, rubrik Fraunces 32/600, och mörkt i
+   mörkt läge (datorns kort är alltid ljust) */
+html.ios-anpassa #bgpick > div::before { content: ""; position: absolute; top: 6px; left: 50%; width: 36px; height: 5px; margin-left: -18px; border-radius: 3px; background: currentColor; opacity: .18; }
+html.ios-anpassa #bgpick-close { top: 16px; right: 16px; width: 40px; height: 40px; border-radius: 999px; display: grid; place-items: center; background: rgb(31 30 27 / .06); color: var(--color-navy-900) !important; }
+html.ios-anpassa #bgpick-close svg { width: 16px; height: 16px; stroke-width: 2.3; }
+html.ios-anpassa #bgpick h1 { font-family: var(--font-display); font-size: 32px; line-height: 1.05; font-weight: 600; letter-spacing: -.03em; padding-right: 48px; }
 html.ios-anpassa #bgpick p { font-size: 14.5px; }
+html.ios-anpassa[data-theme="dark"] #bgpick { --color-navy-900: #eeede8; --color-paper: #262523; color-scheme: dark; }
+html.ios-anpassa[data-theme="dark"] #bgpick > div { background: #1f1e1c; color: #eeede8; }
+html.ios-anpassa[data-theme="dark"] #bgpick-close { background: rgb(255 255 255 / .08); }
 html.ios-anpassa #bgpick #bg-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 html.ios-anpassa #bgpick #bg-grid > * { border-radius: 12px; }
 html.ios-anpassa #bgpick > div > .flex { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 html.ios-anpassa #bgpick #bg-upload-btn { grid-column: 1 / -1; }
-html.ios-anpassa #bgpick :is(#bg-upload-btn, #bg-slump, #bg-daily) { height: 48px !important; font-size: 15px !important; border-radius: 12px; }
+html.ios-anpassa #bgpick :is(#bg-upload-btn, #bg-slump, #bg-daily) { height: 50px !important; font-size: 15px !important; border-radius: 16px; }   /* appens stora knappar */
 html.ios-anpassa #bgpick #bgpick-close { top: 16px; right: 16px; width: 40px; height: 40px; border-radius: 999px; background: rgb(31 30 27 / .06); }
 @keyframes iosTona { from { opacity: 0; } }
 /* Mörkt läge: arket följer temat (på datorn är väljaren alltid ljus) */

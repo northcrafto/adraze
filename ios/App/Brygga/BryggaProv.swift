@@ -5,7 +5,7 @@ import WebKit
 /// Självtestet `-mode brygga` (steg 4): schemat serverar sidorna, invoke fram och tillbaka, startdatan finns
 /// synkront, en nekad kanal avvisas, en vanlig flik saknar bryggan, Anpassa öppnas och en accentfärg vald på
 /// webbsidan ändrar `tema.accent` native (och tvärtom), mörkt läge, språkbyte och startsidan.
-/// Skärmbilder: anpassa-lista, anpassa-ljus, anpassa-mork, startsida.
+/// Skärmbilder: anpassa-lista, anpassa-ljus, anpassa-bakgrund-ljus, anpassa-mork, anpassa-bakgrund-mork, startsida.
 ///
 /// Ägare: Brygga och webb-UI.
 @MainActor
@@ -114,6 +114,7 @@ enum BryggaProv {
         if kat == nil { return }
         try await k.vanta(0.9)
         await bild(k, "anpassa-ljus", w)
+        await bakgrundsvaljaren(k, w, "anpassa-bakgrund-ljus")
 
         _ = try await w.kor("document.querySelector('#anp-tema [data-accent=\"#3b6fe0\"]').click(); return true;")
         let blatt = await k.vantaPa("accent vald på webbsidan når skalet (tema.accent)", max: 3) { app.tema.accenthex == "#3b6fe0" }
@@ -133,6 +134,7 @@ enum BryggaProv {
             _ = try await w.kor("const m = document.querySelector('.set-main'); m.scrollTop = 0; return true;")
             try await k.vanta(0.8)
             await bild(k, "anpassa-mork", w)
+            await bakgrundsvaljaren(k, w, "anpassa-bakgrund-mork")
         }
         inst.satt("tema.lage", nil)
         _ = await vantaJS(k, "tillbaka till ljust", w, max: 3, "return document.documentElement.dataset.theme;") { $0.text == "light" }
@@ -301,6 +303,19 @@ enum BryggaProv {
           ark: [...document.styleSheets].map((s) => (s.href || 'inline') + ':' + (() => { try { return s.cssRules.length; } catch { return 'x'; } })()),
           vy: [innerWidth, innerHeight, devicePixelRatio, document.visibilityState, document.hidden] };
         """
+
+    /// Bakgrundsväljaren (Utseende › Bakgrund) som ark: öppnas, fotograferas och stängs.
+    static func bakgrundsvaljaren(_ k: Labbkorning, _ w: AdrazeSida, _ namn: String) async {
+        _ = try? await w.kor("openBgPick(); return true;")
+        let oppen = await vantaJS(k, "bakgrundsväljaren öppnas (\(namn))", w, max: 3, """
+            const b = document.getElementById('bgpick'); return !b.classList.contains('hidden') && document.querySelectorAll('#bg-grid > *').length > 0;
+            """) { $0.bool == true }
+        guard oppen != nil else { return }
+        try? await k.vanta(0.6)
+        await bild(k, namn, w)
+        _ = try? await w.kor("closeBgPick(); return true;")
+        try? await k.vanta(0.3)
+    }
 
     /// Skärmbild med sidans webbinnehåll. `drawHierarchy` ritar inte webbvyns innehåll i ett ark (mätt 2026-11-17:
     /// arket blev tomt); `Labbkorning.skarmbild` lägger därför in webbvyerna i ark och helskärm med `takeSnapshot`.
