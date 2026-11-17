@@ -700,7 +700,10 @@ impl Klient {
                     k.andringar += 1;
                 }
             } else if k.andrad.is_some() {
-                blockerad = true;
+                // Servern visar den betrodda (verifierade) identiteten igen: det finns inget nytt att godkänna, och ett
+                // godkännande nu skulle annars godta identiteten som servern visade förut. Varningen (andrad_ts) ligger
+                // kvar så att användaren ser att numret har ändrats under tiden.
+                k.andrad = None;
             }
             betrodd = k.identitet.clone();
         }

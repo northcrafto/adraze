@@ -445,6 +445,7 @@ fn andrad_identitet_varnar_och_stoppar_verifierad_kontakt() {
     assert_eq!(b1.okop("kontakt.status", json!({ "uuid": a1.uuid }))["verifierad"], false);
 
     // Servern byter Bos identitet (till exempel ett angrepp, eller "börja om")
+    let bo_id = srv.konton[&b1.uuid].identitet.clone();
     let (falsk, _) = Enhet::skapa(&mut srv, "falsk");
     let falsk_id = srv.konton[&falsk.uuid].identitet.clone();
     let falsk_enhet = srv.konton.get_mut(&falsk.uuid).unwrap().enheter.remove(&1).unwrap();
@@ -458,6 +459,32 @@ fn andrad_identitet_varnar_och_stoppar_verifierad_kontakt() {
     assert_eq!(r["blockerad"][0], b1.uuid);
     let st = a1.okop("kontakt.status", json!({ "uuid": b1.uuid }));
     assert_eq!(st["vantar_godkannande"], true);
+
+    // Servern visar Bos riktiga identitet igen: stoppet hävs, verifieringen gäller, varningen ligger kvar
+    let bo = srv.konton.get_mut(&b1.uuid).unwrap();
+    bo.identitet = bo_id.clone();
+    let falsk_enhet = bo.enheter.remove(&2).unwrap();
+    let r = a1.uppdatera_enheter(&srv, &b1.uuid);
+    assert_eq!(r["blockerad"], false);
+    assert_eq!(r["enheter"], 1);
+    let st = a1.okop("kontakt.status", json!({ "uuid": b1.uuid }));
+    assert_eq!(st["vantar_godkannande"], false);
+    assert_eq!(st["verifierad"], true);
+    assert_eq!(st["andrad"], true, "varningen om att numret ändrats finns kvar");
+    a1.skicka(&mut srv, &[&b1.uuid], "igen");
+    assert_eq!(b1.texter(&mut srv), vec!["igen"]);
+
+    // Bytet igen, och användaren godkänner: den identitet som servern visar nu godtas, verifieringen tas bort
+    let falsk_id = srv.konton[&falsk.uuid].identitet.clone();
+    let bo = srv.konton.get_mut(&b1.uuid).unwrap();
+    bo.identitet = falsk_id.clone();
+    bo.enheter.insert(2, falsk_enhet);
+    assert_eq!(a1.uppdatera_enheter(&srv, &b1.uuid)["blockerad"], true);
+    a1.okop("kontakt.godkann", json!({ "uuid": b1.uuid }));
+    let st = a1.okop("kontakt.status", json!({ "uuid": b1.uuid }));
+    assert_eq!(st["verifierad"], false);
+    assert_eq!(st["identitet"], json!(falsk_id));
+    assert_ne!(st["identitet"], json!(bo_id));
 
     // En overifierad kontakt (Cia ser Bo för första gången efter bytet) varnas men stoppas inte
     let (c1, _) = Enhet::skapa(&mut srv, "Cia");

@@ -28,5 +28,12 @@ if [[ $VAD == alla || $VAD == ios ]]; then
   for t in aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios; do
     "${LATT[@]}" cargo rustc --release --target "$t" --lib --crate-type staticlib
   done
+  # Felsökningsinfo från std följer annars med i de statiska biblioteken (halva storleken); rust-objcopy kommer med rustup
+  SYSROOT="$(rustc --print sysroot)"
+  OBJCOPY="$SYSROOT/lib/rustlib/$(rustc -vV | sed -n 's/^host: //p')/bin/rust-objcopy"
+  for t in aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios; do
+    a="$CARGO_TARGET_DIR/$t/release/libadraze_e2e.a"
+    LD_LIBRARY_PATH="$SYSROOT/lib" "$OBJCOPY" --strip-debug "$a" "$a.tmp" && mv "$a.tmp" "$a"
+  done
   python3 "$HIT/xcframework.py" "$CARGO_TARGET_DIR" "$HIT/include/adraze_e2e.h" ../ios/App/E2E/Karna/AdrazeE2EKarna.xcframework
 fi

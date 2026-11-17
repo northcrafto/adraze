@@ -191,9 +191,21 @@ koll('sändningen stoppas', (await kastar(() => A1.skickaText(B1.jag, 'x')))?.ko
 const ce = await C1.uppdateraEnheter(B1.jag);
 koll('overifierad kontakt (Cia): varning men inget stopp, och Bos enheter godtas inte med fel identitet', ce.andrad === true && ce.blockerad === false && ce.enheter === 0 && ce.ogiltiga >= 1, ce);
 db.prepare('UPDATE e2e_konton SET identitet=? WHERE user_id=?').run(bosId, bo.id);
-await A1.uppdateraEnheter(B1.jag);
-koll('servern ångrar: fortfarande väntar godkännande', A1.kontaktStatus(B1.jag).vantar_godkannande === true);
+const tillbaka = await A1.uppdateraEnheter(B1.jag);
+const st1 = A1.kontaktStatus(B1.jag);
+koll('servern visar den verifierade identiteten igen: stoppet hävs, verifieringen gäller, varningen ligger kvar',
+  tillbaka.blockerad === false && st1.vantar_godkannande === false && st1.verifierad === true && st1.andrad === true, { tillbaka, st1 });
+await A1.skickaText(B1.jag, 'MARKÖR-efter ångrat byte');
+koll('det går att skicka igen', texter(await B1.hamta()).join() === 'MARKÖR-efter ångrat byte');
+db.prepare('UPDATE e2e_konton SET identitet=? WHERE user_id=?').run(ciasId, bo.id);
+koll('nytt byte: stopp igen', (await A1.uppdateraEnheter(B1.jag)).blockerad === true);
 await A1.godkannIdentitet(B1.jag);
+const st2 = A1.kontaktStatus(B1.jag);
+koll('godkänt: identiteten som servern visar nu godtas och kontakten är inte längre verifierad', st2.identitet === ciasId && !st2.verifierad && !st2.vantar_godkannande, st2);
+koll('Bos enheter är inte signerade av den identiteten: inget skickas till dem', (await kastar(() => A1.skickaText(B1.jag, 'x')))?.kod === 'ingen_e2e');
+db.prepare('UPDATE e2e_konton SET identitet=? WHERE user_id=?').run(bosId, bo.id);
+const tillbaka2 = await A1.uppdateraEnheter(B1.jag);
+koll('Bos identitet igen (overifierad): godtas med en ny varning', tillbaka2.andrad === true && tillbaka2.blockerad === false && tillbaka2.enheter >= 1, tillbaka2);
 await A1.skickaText(B1.jag, 'MARKÖR-efter godkännande');
 koll('efter godkännande går det igen, och kontakten är inte längre verifierad', texter(await B1.hamta()).join() === 'MARKÖR-efter godkännande' && !A1.kontaktStatus(B1.jag).verifierad);
 await A2.hamta();
