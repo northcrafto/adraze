@@ -673,3 +673,81 @@ html.mini #app, html.mini .call-ov, html.mini .modal-overlay, html.mini .toast, 
 .mi-btn.gron { background: #30a46c; }
 .mi-btn.glas { background: rgba(255, 255, 255, .14); }
 .mi-btn.glas.av { background: #fff; color: #1a1816; }
+
+
+/* ===== Nytt utseende (2026-11-17) =====
+ * Chattrutan får en egen tapet med små streckteckningar, bubblorna får pip och mjuk skugga, dagen står på en
+ * bricka, och skrivfältet är en rund ruta med en rund skicka-knapp. Listan med vänner har större bilder och
+ * tunna skiljelinjer. Färgerna är AdRazes egna; bubblor med egen stil (colored/skin) rörs inte. */
+:root { --wall: #efeae2; --bar: #f4f2ee; --chip: rgba(255, 255, 255, .92); --chip-ink: #5c5a54; --them: #ffffff; --them-line: transparent;
+  --bub-shadow: 0 1px .5px rgba(31, 30, 27, .16); --wall-img: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22280%22 viewBox=%220 0 280 280%22 fill=%22none%22 stroke=%22%233b2f25%22 stroke-opacity=%22.075%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M30 22l12 4v9c0 7-5 12-12 15-7-3-12-8-12-15v-9z%22/%3E%3Cpath d=%22M25 34l4 4 7-8%22/%3E%3Cpath d=%22M96 30h30a6 6 0 0 1 6 6v14a6 6 0 0 1-6 6h-16l-9 8v-8h-5a6 6 0 0 1-6-6V36a6 6 0 0 1 6-6z%22 transform=%22rotate%28-8 108 46%29%22/%3E%3Cpath d=%22M196 18l4 9 10 1-7 7 2 10-9-5-9 5 2-10-7-7 10-1z%22/%3E%3Ccircle cx=%22248%22 cy=%2262%22 r=%2213%22/%3E%3Cpath d=%22M239 71l18-18%22/%3E%3Cpath d=%22M58 96l-10 18h10l-4 16 16-22H60l6-12z%22 transform=%22rotate%2810 58 113%29%22/%3E%3Cpath d=%22M140 100v26l7-6 5 11 5-2-5-11h9z%22 transform=%22rotate%28-14 150 116%29%22/%3E%3Crect x=%22208%22 y=%22118%22 width=%2226%22 height=%2220%22 rx=%224%22 transform=%22rotate%286 221 128%29%22/%3E%3Cpath d=%22M213 118v-6a8 8 0 0 1 16 0v6%22 transform=%22rotate%286 221 128%29%22/%3E%3Cpath d=%22M30 176c0-8 12-10 14-2 2-8 14-6 14 2 0 10-14 18-14 18s-14-8-14-18z%22 transform=%22rotate%28-10 44 184%29%22/%3E%3Crect x=%22100%22 y=%22170%22 width=%2234%22 height=%2224%22 rx=%225%22 transform=%22rotate%288 117 182%29%22/%3E%3Cpath d=%22M108 178h18M108 186h11%22 transform=%22rotate%288 117 182%29%22/%3E%3Ccircle cx=%22182%22 cy=%22186%22 r=%224%22/%3E%3Ccircle cx=%22198%22 cy=%22186%22 r=%224%22/%3E%3Ccircle cx=%22214%22 cy=%22186%22 r=%224%22/%3E%3Cpath d=%22M250 200l6 6-6 6-6-6z%22/%3E%3Cpath d=%22M20 244h22M31 233v22%22/%3E%3Cpath d=%22M86 236a14 14 0 1 1 6 12l-8 3z%22/%3E%3Cpath d=%22M150 232l16 8-16 8 4-8z%22 transform=%22rotate%28-20 158 240%29%22/%3E%3Cpath d=%22M216 240c6-8 16-8 22 0s16 8 22 0%22 /%3E%3C/svg%3E"); }
+:root[data-theme="dark"] { --wall: #0f0e0d; --bar: #1c1b19; --chip: rgba(38, 37, 35, .94); --chip-ink: #a5a29c; --them: #25231f; --them-line: transparent;
+  --bub-shadow: 0 1px .5px rgba(0, 0, 0, .5); --wall-img: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22280%22 viewBox=%220 0 280 280%22 fill=%22none%22 stroke=%22%23ffffff%22 stroke-opacity=%22.055%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M30 22l12 4v9c0 7-5 12-12 15-7-3-12-8-12-15v-9z%22/%3E%3Cpath d=%22M25 34l4 4 7-8%22/%3E%3Cpath d=%22M96 30h30a6 6 0 0 1 6 6v14a6 6 0 0 1-6 6h-16l-9 8v-8h-5a6 6 0 0 1-6-6V36a6 6 0 0 1 6-6z%22 transform=%22rotate%28-8 108 46%29%22/%3E%3Cpath d=%22M196 18l4 9 10 1-7 7 2 10-9-5-9 5 2-10-7-7 10-1z%22/%3E%3Ccircle cx=%22248%22 cy=%2262%22 r=%2213%22/%3E%3Cpath d=%22M239 71l18-18%22/%3E%3Cpath d=%22M58 96l-10 18h10l-4 16 16-22H60l6-12z%22 transform=%22rotate%2810 58 113%29%22/%3E%3Cpath d=%22M140 100v26l7-6 5 11 5-2-5-11h9z%22 transform=%22rotate%28-14 150 116%29%22/%3E%3Crect x=%22208%22 y=%22118%22 width=%2226%22 height=%2220%22 rx=%224%22 transform=%22rotate%286 221 128%29%22/%3E%3Cpath d=%22M213 118v-6a8 8 0 0 1 16 0v6%22 transform=%22rotate%286 221 128%29%22/%3E%3Cpath d=%22M30 176c0-8 12-10 14-2 2-8 14-6 14 2 0 10-14 18-14 18s-14-8-14-18z%22 transform=%22rotate%28-10 44 184%29%22/%3E%3Crect x=%22100%22 y=%22170%22 width=%2234%22 height=%2224%22 rx=%225%22 transform=%22rotate%288 117 182%29%22/%3E%3Cpath d=%22M108 178h18M108 186h11%22 transform=%22rotate%288 117 182%29%22/%3E%3Ccircle cx=%22182%22 cy=%22186%22 r=%224%22/%3E%3Ccircle cx=%22198%22 cy=%22186%22 r=%224%22/%3E%3Ccircle cx=%22214%22 cy=%22186%22 r=%224%22/%3E%3Cpath d=%22M250 200l6 6-6 6-6-6z%22/%3E%3Cpath d=%22M20 244h22M31 233v22%22/%3E%3Cpath d=%22M86 236a14 14 0 1 1 6 12l-8 3z%22/%3E%3Cpath d=%22M150 232l16 8-16 8 4-8z%22 transform=%22rotate%28-20 158 240%29%22/%3E%3Cpath d=%22M216 240c6-8 16-8 22 0s16 8 22 0%22 /%3E%3C/svg%3E"); }
+
+/* Tapeten ligger still bakom meddelandena */
+.chat { background: var(--wall); }
+.chat-active { background: var(--wall) var(--wall-img) 0 0 / 280px 280px; }
+.chat-body { padding-top: 8px; }
+.chat-empty { background: var(--wall) var(--wall-img) 0 0 / 280px 280px; }
+.chat-empty p { background: var(--chip); color: var(--chip-ink); padding: 10px 16px; border-radius: 12px; box-shadow: var(--bub-shadow); }
+
+/* Bubblor: mjuk skugga, och en pip på den första i varje följd */
+.bubble { box-shadow: var(--bub-shadow); padding: 6px 10px 7px 11px; }
+.bubble.them { box-shadow: var(--bub-shadow); }
+.bubble.jumbo, .bubble.sticker, .bubble.unreadable { box-shadow: none; }
+.bubble:not(.g-cont):not(.jumbo):not(.sticker):not(.skin):not(.unreadable)::after { content: ''; position: absolute; top: 0; width: 9px; height: 13px; background: inherit; pointer-events: none; }
+.bubble.them:not(.g-cont):not(.jumbo):not(.sticker):not(.skin):not(.unreadable) { border-top-left-radius: 0; }
+.bubble.them:not(.g-cont)::after { left: -8px; clip-path: polygon(100% 0, 0 0, 100% 100%); }
+.bubble.me:not(.g-cont):not(.jumbo):not(.sticker):not(.skin):not(.unreadable) { border-top-right-radius: 0; }
+.bubble.me:not(.g-cont)::after { right: -8px; clip-path: polygon(0 0, 100% 0, 0 100%); }
+.bubble.img:not(.g-cont)::after { background: var(--them); }
+.bubble.img.me:not(.g-cont)::after { background: var(--me-bg); }
+.bubble .time { font: 500 10.5px/1 var(--sans); letter-spacing: 0; bottom: 5px; right: 9px; }
+.bubble .meta-sp { font: 500 10.5px/1 var(--sans); letter-spacing: 0; padding-left: 10px; }
+.typing { box-shadow: var(--bub-shadow); border-top-left-radius: 0; }
+.grp-name { color: var(--chip-ink); }
+
+/* Dagen på en bricka i mitten */
+.day-sep { align-self: center; gap: 0; margin: 14px 0 6px; padding: 5px 12px; border-radius: 8px; background: var(--chip); color: var(--chip-ink); box-shadow: var(--bub-shadow); font: 500 11.5px/1.2 var(--sans); letter-spacing: 0; text-transform: none; }
+.day-sep::before, .day-sep::after { display: none; }
+.day-sep::first-letter { text-transform: uppercase; }
+.seen { font: 500 10.5px/1 var(--sans); letter-spacing: 0; color: var(--chip-ink); background: var(--chip); padding: 4px 8px; border-radius: 999px; margin: 5px 0 0; box-shadow: var(--bub-shadow); }
+
+/* Rubriken över chatten */
+.chat-head { height: 58px; padding: 0 10px 0 8px; background: var(--bar); border-bottom: 1px solid var(--line); }
+.chat-head .avatar { width: 40px; height: 40px; font-size: 13px; }
+.peer-name { font-size: 15px; font-weight: 650; }
+
+/* Skrivfältet: en rund ruta och en rund skicka-knapp */
+.chat-foot-wrap { background: var(--bar); border-top: 1px solid var(--line); }
+.chat-foot { padding: 8px 10px; gap: 4px; align-items: flex-end; }
+.attach-btn { width: 42px; height: 42px; border: none; color: var(--ink-mute); }
+.attach-btn:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); color: var(--ink); }
+.attach-btn svg { width: 21px; height: 21px; }
+.input-wrap { margin: 0 4px; }
+.chat-foot textarea { border: 1px solid transparent; border-radius: 22px; background: var(--paper); padding: 10px 44px 10px 16px; min-height: 42px; font-size: 14.5px; box-shadow: var(--bub-shadow); }
+.chat-foot textarea:focus { border-color: transparent; box-shadow: var(--bub-shadow), 0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent); }
+.emoji-btn { right: 7px; bottom: 6px; }
+.btn.send { width: 42px; height: 42px; flex-shrink: 0; padding: 0; border-radius: 50%; font-size: 0; gap: 0; }
+.btn.send::after { content: ''; width: 20px; height: 20px; margin-left: 2px; background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3.4 20.4 21.6 12 3.4 3.6l-.01 6.53L15 12 3.39 13.87z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3.4 20.4 21.6 12 3.4 3.6l-.01 6.53L15 12 3.39 13.87z'/%3E%3C/svg%3E") center / contain no-repeat; }
+.btn.send:hover:not(:disabled) { color: var(--bg); }
+.reply-bar { background: var(--paper); border-radius: 0 10px 10px 0; box-shadow: var(--bub-shadow); }
+
+/* Listan med vänner och grupper */
+.sidebar { background: var(--paper); }
+.side-sec { padding: 12px 10px; }
+.side-title { padding: 0 6px; }
+.add-row { padding: 0 4px; }
+.add-row input { border-radius: 999px; padding: 9px 14px; background: var(--bar); border-color: transparent; }
+.add-row .btn { border-radius: 999px; }
+.contact { position: relative; gap: 12px; padding: 9px 8px; border-radius: 12px; }
+.contact .avatar { width: 46px; height: 46px; font-size: 15px; }
+.contact .cname { font-size: 14.5px; font-weight: 600; }
+.contact + .contact::before { content: ''; position: absolute; top: 0; left: 66px; right: 8px; height: 1px; background: var(--line); }
+.contact:hover + .contact::before, .contact.active + .contact::before, .contact:hover::before, .contact.active::before { background: transparent; }
+.contact:hover { background: var(--bar); }
+.contact.active { background: color-mix(in srgb, var(--ink) 9%, transparent); }
+.contact.active .pres { box-shadow: 0 0 0 2.5px var(--paper); }
+.contact .pres { width: 13px; height: 13px; }
