@@ -1,0 +1,232 @@
+/* ios.css – datorns sidor i telefonformat. Läggs ovanpå tailwind.css av preload-ios.js (adraze-app://localhost/ios/ios.css).
+ * Varje regel börjar med html.ios, så att den vinner över datorns regler oavsett ordning. Färgerna är datorns
+ * inställningstoken (--s-*), så ljust, mörkt, accentfärgen och Jul följer med utan egna värden här.
+ * Ägare: Brygga och webb-UI (App/Webb/ios/).
+ */
+
+/* ── Grund: en app, inte en webbsida ── */
+html.ios { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
+html.ios body { overscroll-behavior: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+html.ios :is(input, textarea, [contenteditable="true"], .set-desc code, .anp-kod, pre) { -webkit-user-select: text; user-select: text; }
+html.ios :is(input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]), textarea, select) { font-size: 16px; }
+html.ios :is(#tabstrip, #toolbar, #bmbar, #sp-list, #sp-panel, #omni-suggest, #apptoast, #dlthreat, #hxintro, .notis, #infobar, #permbar, #wsavebar, #wfillbar) { display: none !important; }
+html.ios :is(button, a, [role="button"], .set-tab, .engine-opt, .seg-btn) { touch-action: manipulation; }
+/* #views ligger i sidopanelens rad (#sp-rad). Raden blir hela ytan, utan datorns marginaler för flikpanelen. */
+html.ios #sp-rad { display: flex !important; flex: 1 1 auto; flex-direction: row !important; padding: 0 !important; min-height: 0; }
+html.ios #sp-rad > #views { margin: 0 !important; }
+/* Webbvyn visas först när sidan är klar (ingen blinkning med datorns layout) */
+html.ios body { background: var(--ios-bg, #f6f5f1); }
+html.ios[data-theme="dark"] body { background: var(--ios-bg-mork, #191816); }
+
+/* Vätskefyllningen vid tryck i stället för hovring. Hovring fastnar på iOS efter ett tryck, så den stängs av. */
+@media (hover: none) {
+  html.ios #settings :is(.btn, .set-btn, .pill:not(.pill-accent), .btn-ghost, .btn-safe):hover:not(.ios-fyll):not(:focus-visible)::before { transform: translateY(104%); }
+  html.ios #settings :is(.btn, .set-btn, .pill:not(.pill-accent), .btn-ghost, .btn-safe):hover:not(.ios-fyll):not(:focus-visible) { color: var(--sig-btn-ink) !important; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--sig-btn-ink) 20%, transparent); }
+}
+html.ios #settings :is(.btn, .set-btn, .pill:not(.pill-accent), .btn-ghost, .btn-safe).ios-fyll::before { transform: translateY(0); transition-duration: .55s; }
+html.ios #settings :is(.btn, .set-btn, .btn-safe).ios-fyll { color: var(--sig-btn) !important; box-shadow: inset 0 0 0 1.5px transparent; }
+html.ios #settings :is(.pill:not(.pill-accent), .btn-ghost).ios-fyll { color: #fff !important; box-shadow: inset 0 0 0 1.5px transparent; }
+html.ios[data-anp-accent] #settings :is(.pill:not(.pill-accent), .btn-ghost).ios-fyll { color: var(--anp-on) !important; }
+html.ios #settings :is(.btn, .set-btn, .pill, .btn-ghost, .btn-safe):active { transform: scale(.975); }
+
+/* ── Inställningarna: lista → detalj ── */
+html.ios-anpassa #views { position: fixed; inset: 0; background: transparent; }
+html.ios-anpassa #newtabpage, html.ios-anpassa #incogpage { display: none !important; }
+html.ios-anpassa #settings { position: fixed; inset: 0; display: block; overflow: hidden; z-index: 70; }
+html.ios-anpassa #settings.hidden { display: block !important; }
+html.ios-anpassa #settings :is(.set-rail, .set-main) {
+  position: absolute; inset: 0; overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  transition: transform .42s cubic-bezier(.32, .72, 0, 1), opacity .42s ease; will-change: transform; }
+html.ios-anpassa #settings .set-rail { border: 0; padding: calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 36px); max-height: none; background: var(--s-bg); }
+html.ios-anpassa #settings .set-main { padding: 0 0 calc(env(safe-area-inset-bottom) + 48px); background: var(--s-bg); transform: translateX(104%); box-shadow: -1px 0 0 var(--s-line), -18px 0 40px rgb(0 0 0 / .06); scrollbar-gutter: auto;
+  visibility: hidden; transition: transform .42s cubic-bezier(.32, .72, 0, 1), opacity .42s ease, visibility 0s linear .42s; }
+html.ios-anpassa.ios-detalj #settings .set-main { transform: none; visibility: visible; transition-delay: 0s; }
+/* Sökfältet hör till listan (skalets sökning filtrerar listans rader); den tomma raden i detaljvyn göms */
+html.ios-anpassa #settings .set-main > .set-top { display: none; }
+html.ios-anpassa.ios-detalj #settings .set-rail { transform: translateX(-30%); opacity: .55; pointer-events: none; }
+html.ios-anpassa #settings .set-wrap { max-width: none; margin: 0; padding: 4px 16px 0; }
+html.ios-anpassa #ios-dolda, html.ios .ios-dold { display: none !important; }
+
+/* Krysset: rund knapp uppe till höger, ovanför båda vyerna */
+html.ios-anpassa #settings .set-close { position: fixed; top: calc(env(safe-area-inset-top) + 12px); right: 14px; width: 34px; height: 34px; border-radius: 999px; display: grid; place-items: center; z-index: 90;
+  background: color-mix(in srgb, var(--s-ink) 7%, transparent); color: var(--s-mut); }
+html.ios-anpassa #settings .set-close svg { width: 15px; height: 15px; stroke-width: 2.2; }
+html.ios-anpassa #settings .set-close:active { background: color-mix(in srgb, var(--s-ink) 14%, transparent); }
+
+/* Listan */
+html.ios-anpassa #settings .set-brand { padding: 2px 4px 14px; gap: 10px; font-size: 32px; line-height: 1.05; font-weight: 700; letter-spacing: -.03em; color: var(--s-ink); }
+html.ios-anpassa #settings .set-brand img { width: 30px; height: 30px; }
+html.ios-anpassa #settings .set-search { height: 40px; margin: 0 0 6px; padding: 0 12px; border-radius: 12px; background: color-mix(in srgb, var(--s-ink) 6%, transparent); box-shadow: none; }
+html.ios-anpassa #settings .set-search:focus-within { box-shadow: inset 0 0 0 1.5px var(--s-accent); background: var(--s-surface); }
+html.ios-anpassa #settings .set-search svg { width: 17px; height: 17px; }
+html.ios-anpassa #settings .set-search input { font-size: 16px; }
+html.ios-anpassa #settings .set-glbl { padding: 22px 16px 8px; font-size: 12.5px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; color: var(--s-faint); }
+html.ios-anpassa #settings .ios-grupp { background: var(--s-surface); border-radius: 14px; overflow: hidden; box-shadow: var(--s-shadow), inset 0 0 0 1px var(--s-line); }
+html.ios-anpassa #settings .ios-grupp.sok-dold { display: none; }
+html.ios-anpassa #settings .set-tab { position: relative; width: 100%; height: 54px; padding: 0 14px 0 14px; gap: 14px; margin: 0; border-radius: 0; font-size: 16.5px; font-weight: 500; color: var(--s-ink); background: transparent; box-shadow: none; transition: background .2s; }
+html.ios-anpassa #settings .set-tab::before { display: none; }
+html.ios-anpassa #settings .set-tab + .set-tab::after { content: ""; position: absolute; left: 60px; right: 0; top: 0; height: 1px; background: var(--s-line); }
+html.ios-anpassa #settings .set-tab svg.ic { width: 32px; height: 32px; padding: 7px; border-radius: 9px; flex: none; color: var(--s-accent); background: var(--s-accent-soft); stroke-width: 1.9; }
+html.ios-anpassa #settings .set-tab:active { background: var(--s-hover); }
+html.ios-anpassa #settings #settings-nav .set-tab { background: transparent !important; box-shadow: none !important; font-weight: 500; }
+html.ios-anpassa #settings #settings-nav .set-tab:active { background: var(--s-hover) !important; }
+html.ios-anpassa #settings .set-tab .ios-pil { margin-left: auto; width: 8px; height: 8px; border-right: 2px solid var(--s-faint); border-top: 2px solid var(--s-faint); transform: rotate(45deg); border-radius: 1px; opacity: .8; flex: none; }
+html.ios-anpassa #settings .set-tab .upd-dot { display: none; }
+html.ios-anpassa #settings .set-search-none { padding: 18px 16px; font-size: 15px; }
+
+/* Detaljvyn: huvud med tillbaka-knapp, sedan rubriken stort */
+html.ios-anpassa #settings .ios-huvud { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 8px; height: calc(env(safe-area-inset-top) + 56px); padding: env(safe-area-inset-top) 60px 0 6px;
+  background: color-mix(in srgb, var(--s-bg) 82%, transparent); -webkit-backdrop-filter: saturate(1.6) blur(18px); backdrop-filter: saturate(1.6) blur(18px); transition: box-shadow .2s; }
+html.ios-anpassa #settings .ios-huvud.ios-skuggad { box-shadow: 0 1px 0 var(--s-line); }
+html.ios-anpassa #settings .ios-tillbaka { display: inline-flex; align-items: center; gap: 2px; height: 40px; padding: 0 10px 0 4px; border-radius: 10px; color: var(--s-accent-ink); font-size: 16.5px; font-weight: 500; background: transparent; flex: none; }
+html.ios-anpassa #settings .ios-tillbaka:active { background: var(--s-hover); }
+html.ios-anpassa #settings .ios-tillbaka svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
+html.ios-anpassa #settings .ios-huvud-titel { position: absolute; left: 50%; bottom: 0; height: 56px; display: flex; align-items: center; transform: translateX(-50%); max-width: 52%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 16.5px; font-weight: 650; letter-spacing: -.01em; color: var(--s-ink); opacity: 0; transition: opacity .2s; pointer-events: none; }
+html.ios-anpassa #settings .ios-huvud.ios-titel-syns .ios-huvud-titel { opacity: 1; }
+html.ios-anpassa #settings .set-hero { margin: 8px 0 22px; border-radius: 14px; }
+html.ios-anpassa #settings .set-h { font-size: 31px; letter-spacing: -.03em; margin: 2px 0 8px; }
+html.ios-anpassa #settings .set-h3 { font-size: 21px; letter-spacing: -.02em; margin-top: 34px; }
+html.ios-anpassa #settings .set-lead { font-size: 15px; line-height: 1.5; max-width: none; }
+
+/* Rader och kontroller: tummevänliga mått */
+html.ios-anpassa #settings .set-row { flex-wrap: wrap; gap: 10px 14px; padding: 14px 16px; min-height: 56px; }
+html.ios-anpassa #settings .set-row:not(.set-row + .set-row) { border-radius: 14px 14px 0 0; padding-top: 14px; }
+html.ios-anpassa #settings .set-row:not(:has(+ .set-row)) { border-radius: 0 0 14px 14px; }
+html.ios-anpassa #settings .set-row:not(.set-row + .set-row):not(:has(+ .set-row)) { border-radius: 14px; }
+html.ios-anpassa #settings .set-row > .set-txt, html.ios-anpassa #settings .set-row > div:first-child:not(.seg) { flex: 1 1 180px; min-width: 0; }
+html.ios-anpassa #settings .set-title { font-size: 16px; line-height: 1.3; }
+html.ios-anpassa #settings .set-desc { font-size: 13.5px; line-height: 1.45; margin-top: 3px; }
+html.ios-anpassa #settings .set-row:has(> .seg) { flex-direction: column; align-items: stretch; }
+html.ios-anpassa #settings .set-row:has(> .seg) > :is(.set-txt, div:first-child:not(.seg)) { flex: none; }
+html.ios-anpassa #settings .set-row > .seg, html.ios-anpassa #settings .set-row .seg { display: flex; width: 100%; padding: 3px; border-radius: 10px; }
+html.ios-anpassa #settings .seg-btn { flex: 1 1 0; min-width: 0; height: 34px; padding: 0 8px; font-size: 14px; border-radius: 8px; text-align: center; overflow: hidden; text-overflow: ellipsis; }
+html.ios-anpassa #settings .switch { width: 51px; height: 31px; }
+html.ios-anpassa #settings .switch .track::after { top: 2px; left: 2px; width: 27px; height: 27px; box-shadow: 0 2px 6px rgb(0 0 0 / .18), 0 0 0 .5px rgb(0 0 0 / .04); }
+html.ios-anpassa #settings .switch input:checked + .track::after { transform: translateX(20px); }
+html.ios-anpassa #settings :is(.btn, .set-btn, .pill:not(.pill-accent), .btn-ghost, .btn-safe) { height: 42px !important; padding: 0 18px; border-radius: 11px; font-size: 15px; }
+html.ios-anpassa #settings select, html.ios-anpassa #settings .set-select { height: 40px; border-radius: 10px; padding: 0 12px; }
+html.ios-anpassa #settings select, html.ios-anpassa #settings .set-select { padding-right: 34px; background-position: right 12px center; text-overflow: ellipsis; }
+
+/* Val i en lista (sökmotor, språk): grupperade rader med hårfina avdelare, som listor i iOS. Valet syns på punkten. */
+html.ios-anpassa #settings :is(#engine-list, #lang-list) { display: flex; flex-direction: column; gap: 0 !important; }
+html.ios-anpassa #settings .engine-opt { position: relative; min-height: 52px; margin: 0; padding: 0 16px; gap: 14px; font-size: 16px; font-weight: 450;
+  border: 0 !important; border-radius: 0 !important; box-shadow: none !important; background: var(--s-surface) !important; transition: background .2s; }
+html.ios-anpassa #settings .engine-opt + .engine-opt::after { content: ""; position: absolute; left: 48px; right: 0; top: 0; height: 1px; background: var(--s-line); }
+html.ios-anpassa #settings .engine-opt:not(.engine-opt + .engine-opt) { border-radius: 14px 14px 0 0 !important; }
+html.ios-anpassa #settings .engine-opt:not(:has(+ .engine-opt)) { border-radius: 0 0 14px 14px !important; }
+html.ios-anpassa #settings .engine-opt:not(.engine-opt + .engine-opt):not(:has(+ .engine-opt)) { border-radius: 14px !important; }
+html.ios-anpassa #settings .engine-opt:active { background: var(--s-hover) !important; }
+html.ios-anpassa #settings .engine-radio { width: 20px; height: 20px; }
+html.ios-anpassa #settings .engine-opt.on { font-weight: 600; }
+html.ios-anpassa #settings .anpk-motorrubrik { margin: 0; padding: 26px 16px 8px; font-size: 12.5px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; color: var(--s-faint); }
+/* "Samma som telefonen" är ett eget kort ovanför språken */
+html.ios-anpassa #settings #lang-list .engine-opt.ios-sprak-system { border-radius: 14px !important; margin-bottom: 24px; }
+html.ios-anpassa #settings #lang-list .ios-sprak-system + .engine-opt { border-radius: 14px 14px 0 0 !important; }
+html.ios-anpassa #settings #lang-list .ios-sprak-system + .engine-opt::after { display: none; }
+
+/* Anpassa › Tema: accentfärgerna i ett rutnät (åtta på första raden, eget val och hexkoden på nästa), gruppetiketter som i iOS */
+html.ios-anpassa #settings .anp-tema-farger { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 12px 8px; justify-items: center; align-items: center; width: 100%; }
+html.ios-anpassa #settings .anp-tema-farger > .anp-tema-prov { width: min(36px, 100%); height: auto; aspect-ratio: 1; }
+html.ios-anpassa #settings .anp-tema-farger > .anp-tema-skilj { display: none; }
+html.ios-anpassa #settings .anp-tema-farger > .anp-tema-egen { grid-column: 1; }
+html.ios-anpassa #settings .anp-tema-farger > .anp-tema-hex { grid-column: 2 / span 3; justify-self: stretch; height: 36px; font-size: 16px; }
+html.ios-anpassa #settings .anp-tema-grupp { margin: 0; padding: 26px 16px 8px; font-size: 12.5px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; color: var(--s-faint); }
+
+/* Rader med både knapp och reglage: reglaget till höger om texten, knappen på egen rad under */
+html.ios-anpassa #settings .set-row:has(> .switch):has(> :is(.pill, .btn, .set-btn)) > .switch { order: 1; }
+html.ios-anpassa #settings .set-row:has(> .switch):has(> :is(.pill, .btn, .set-btn)) > :is(.pill, .btn, .set-btn) { order: 2; }
+html.ios-anpassa #settings .set-row:has(> .switch):has(> :is(.pill, .btn, .set-btn)) > .set-txt { flex: 1 1 calc(100% - 80px); }
+/* Egna sökmotorer › Lägg till: fälten under varandra i stället för tre kolumner */
+html.ios-anpassa #settings .anpk-falt { grid-template-columns: minmax(0, 1fr) 96px; gap: 12px 10px; }
+html.ios-anpassa #settings .anpk-falt > label:nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
+html.ios-anpassa #settings .anpk-falt label { font-size: 13px; }
+html.ios-anpassa #settings .anpk-falt input { height: 42px; font-size: 16px; border-radius: 10px; }
+
+/* Bakgrundsväljaren (Utseende › Bakgrund): ett ark nerifrån med större bilder, knapparna i full bredd */
+html.ios-anpassa #bgpick:not(.hidden) { z-index: 95; padding: 0; place-items: end stretch; background: rgb(12 11 10 / .48) !important; animation: iosTona .25s ease; }
+html.ios-anpassa #bgpick > div { max-width: none; border-radius: 22px 22px 0 0; padding: 26px 16px calc(env(safe-area-inset-bottom) + 18px); animation: iosArkIn .38s cubic-bezier(.32, .72, 0, 1); }
+html.ios-anpassa #bgpick h1 { font-size: 22px; letter-spacing: -.02em; }
+html.ios-anpassa #bgpick p { font-size: 14.5px; }
+html.ios-anpassa #bgpick #bg-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+html.ios-anpassa #bgpick #bg-grid > * { border-radius: 12px; }
+html.ios-anpassa #bgpick > div > .flex { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+html.ios-anpassa #bgpick #bg-upload-btn { grid-column: 1 / -1; }
+html.ios-anpassa #bgpick :is(#bg-upload-btn, #bg-slump, #bg-daily) { height: 48px !important; font-size: 15px !important; border-radius: 12px; }
+html.ios-anpassa #bgpick #bgpick-close { top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 999px; background: rgb(31 30 27 / .06); }
+@keyframes iosTona { from { opacity: 0; } }
+/* Mörkt läge: arket följer temat (på datorn är väljaren alltid ljus) */
+html.ios-anpassa[data-theme="dark"] #bgpick > div { background: #1f1e1c !important; color-scheme: dark; box-shadow: inset 0 1px 0 rgb(255 255 255 / .06) !important; }
+html.ios-anpassa[data-theme="dark"] #bgpick h1 { color: #eeede8 !important; }
+html.ios-anpassa[data-theme="dark"] #bgpick p { color: rgb(238 237 232 / .6) !important; }
+html.ios-anpassa[data-theme="dark"] #bgpick :is(#bg-slump, #bg-daily) { background: #2c2b28 !important; color: #eeede8 !important; }
+html.ios-anpassa[data-theme="dark"] #bgpick #bg-upload-btn { background: #eeede8 !important; color: #1c1b19 !important; }
+html.ios-anpassa[data-theme="dark"] #bgpick #bgpick-close { color: #eeede8 !important; background: rgb(255 255 255 / .08); }
+html.ios-anpassa #settings .set-panel[data-cat="om"] .set-lead { margin-bottom: 16px; }
+
+/* Anpassa: det man ser och ändrar först, Ångra och spara sist (ångra-toasten finns ändå efter varje ändring) */
+html.ios-anpassa #settings .set-panel[data-cat="anpassa"]:not(.hidden) { display: flex; flex-direction: column; }
+html.ios-anpassa #settings #anp-angra { order: 1; margin-top: 34px; }
+html.ios-anpassa #settings #anp-tema > .set-h3:first-child { margin-top: 14px; }
+html.ios-anpassa #anp-toast { position: fixed; bottom: calc(env(safe-area-inset-bottom) + 14px); max-width: calc(100% - 32px); padding: 6px 6px 6px 16px; border-radius: 14px; font-size: 14.5px; }
+html.ios-anpassa #anp-toast .anp-toast-angra { height: 34px; padding: 0 14px; border-radius: 10px; font-size: 14px; }
+html.ios-anpassa #anp-toast .anp-toast-angra.ios-fyll { color: #fff; }
+html.ios-anpassa #anp-toast .anp-toast-angra.ios-fyll::before { transform: translateY(0); transition-duration: .55s; }
+
+/* Anpassa: bara det som gäller en iPhone (flikraden, sidopanelen, kortkommandon, arbetsytor och egen kod finns inte här) */
+html.ios-anpassa :is(#anp-flikar, #anp-sidopanel, #anp-kortkommandon, #anp-sajt, #anp-avancerat, #anp-arbetsytor) { display: none !important; }
+html.ios-anpassa #anp-verktyg > h3:first-of-type,
+html.ios-anpassa #anp-verktyg > h3:first-of-type + .set-lead,
+html.ios-anpassa #anp-verktyg > .anp-vf-lista,
+html.ios-anpassa #anp-verktyg > .anp-vf-atgarder,
+html.ios-anpassa #anp-verktyg > h3:nth-of-type(3),
+html.ios-anpassa #anp-verktyg > h3:nth-of-type(3) ~ * { display: none !important; }
+html.ios-anpassa #anp-verktyg > h3:nth-of-type(2) { margin-top: 34px; }
+
+/* ── Startsidan ── */
+html.ios-startsida #views { position: fixed; inset: 0; background: #141311; }
+html.ios-startsida #settings { display: none !important; }
+html.ios-startsida #newtabpage { position: fixed; inset: 0; }
+html.ios-startsida #nt-innehall { justify-content: flex-start; padding: calc(env(safe-area-inset-top) + 9vh) 20px calc(env(safe-area-inset-bottom) + var(--ios-nedre, 0px) + 120px); overflow-y: auto; overscroll-behavior: contain; }
+html.ios-startsida #nt-clock { font-size: 76px; }
+html.ios-startsida #nt-greet { margin: 10px 0 26px; font-size: 17px; text-align: center; }
+html.ios-startsida #nt-innehall > div:has(> #nt-search) { width: 100% !important; height: 54px; padding: 0 16px; border-radius: 16px; gap: 10px; }
+html.ios-startsida #nt-search { font-size: 17px; }
+html.ios-startsida #shortcuts { width: 100% !important; margin-top: 28px; gap: 18px 8px; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; justify-items: center; }
+html.ios-startsida .sc:hover .sc-tile { transform: none; }
+html.ios-startsida .sc:active .sc-tile { transform: scale(.94); transition: transform .12s; }
+html.ios-startsida .sc-label { font-size: 12.5px; max-width: 74px; }
+html.ios-startsida .nt-stats { bottom: calc(env(safe-area-inset-bottom) + var(--ios-nedre, 0px) + 16px); max-width: calc(100% - 32px); width: calc(100% - 32px); }
+html.ios-startsida .nt-st { padding: 12px 12px 11px; flex: 1 1 0; min-width: 0; }
+html.ios-startsida .nt-st-main { flex: 1.6 1 0; }
+html.ios-startsida .nt-st-l { white-space: normal; font-size: 11.5px; }
+html.ios-startsida #nt-credit { bottom: calc(env(safe-area-inset-bottom) + var(--ios-nedre, 0px) + 4px); right: 16px; max-width: 70%; font-size: 10px; }
+/* Anpassa-knappen uppe till höger: nere ligger statistiken och skalets verktygsrad */
+html.ios-startsida #anp-st-anpassa { position: fixed; left: auto; right: 16px; bottom: auto; top: calc(env(safe-area-inset-top) + 10px); height: 36px; padding: 0 14px 0 11px; border-radius: 999px; font-size: 14px; }
+html.ios-startsida #anp-st-anpassa:active { transform: scale(.96); transition: transform .12s; }
+/* Redigeringslådan: ett ark nerifrån över hela bredden, som ark i iOS */
+html.ios-startsida #newtabpage #anp-st-lada { position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: auto; max-width: none; max-height: min(76vh, 660px); border-radius: 22px 22px 0 0;
+  padding-bottom: env(safe-area-inset-bottom); animation: iosArkIn .38s cubic-bezier(.32, .72, 0, 1); }
+html.ios-startsida #newtabpage #anp-st-lada::before { content: ""; position: absolute; top: 6px; left: 50%; width: 36px; height: 5px; margin-left: -18px; border-radius: 3px; background: currentColor; opacity: .18; }
+@keyframes iosArkIn { from { transform: translateY(100%); } }
+html.ios-startsida .anp-lada-topp { padding: 24px 16px 12px 20px; }
+html.ios-startsida .anp-lada-topp h2 { font-size: 20px; }
+html.ios-startsida .anp-lada-topp p { font-size: 14px; }
+html.ios-startsida .anp-lada-x { width: 34px; height: 34px; border-radius: 999px; background: rgb(31 30 27 / .06); }
+html.ios-startsida .anp-lada-rubrik { padding: 6px 20px 6px; font-size: 12.5px; text-transform: uppercase; letter-spacing: .02em; }
+html.ios-startsida .anp-lada-rad { padding: 10px 8px; gap: 14px; }
+html.ios-startsida .anp-lada-ikon { width: 42px; height: 42px; border-radius: 12px; }
+html.ios-startsida .anp-lada-txt b { font-size: 16px; }
+html.ios-startsida .anp-lada-txt small { font-size: 13.5px; }
+html.ios-startsida :is(.anp-lada-till, .anp-lada-bort) { height: 36px; padding: 0 14px; border-radius: 10px; font-size: 14px; }
+html.ios-startsida :is(.anp-lada-angra, .anp-lada-mer) { height: 44px; padding: 0 12px; font-size: 15px; }
+html.ios-startsida .anp-lada-fot { padding: 10px 16px; }
+html.ios-startsida .anp-lada-klar { height: 44px !important; padding: 0 22px !important; border-radius: 12px !important; font-size: 15px !important; }
+html.ios-startsida[data-theme="dark"] .anp-lada-x { background: rgb(255 255 255 / .08); }
+
+/* Minska rörelse: iOS-inställningen eller AdRazes egen (Tillgänglighet › Minska rörelse) */
+@media (prefers-reduced-motion: reduce) {
+  html.ios #settings :is(.set-rail, .set-main), html.ios-anpassa #bgpick:not(.hidden), html.ios-anpassa #bgpick > div, html.ios-startsida #newtabpage #anp-st-lada { transition: none !important; animation: none !important; }
+}
+html.ios body.reduce-motion #settings :is(.set-rail, .set-main), html.ios body.reduce-motion #bgpick:not(.hidden), html.ios body.reduce-motion #bgpick > div,
+html.ios body.reduce-motion #newtabpage #anp-st-lada { transition: none !important; animation: none !important; }
