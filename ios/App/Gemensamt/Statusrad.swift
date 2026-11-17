@@ -82,6 +82,41 @@ enum Statusrad {
     }
 }
 
+/// Temats ljusa eller mörka läge på hela fönstret (`overrideUserInterfaceStyle`). Ark och helskärmar som visas
+/// ovanpå (Anpassa, kontot, chatten, Falk, chattens egna ark) får sina egenskaper från fönstret, inte från vyn
+/// som visar dem, så utan det här blev ett ark ljust ovanpå en mörk app. Byts läget medan appen syns tonas hela
+/// fönstret över på 0,3 s (direkt med Minska rörelse). Sätts av `RotVy` (`tema.uiStil`).
+///
+/// Ägare: Grund.
+@MainActor
+enum Fonstertema {
+    private static weak var fonster: UIWindow?
+    private static var stil: UIUserInterfaceStyle = .unspecified
+
+    static func folj(_ f: UIWindow) {
+        fonster = f
+        if f.overrideUserInterfaceStyle != stil { f.overrideUserInterfaceStyle = stil }
+    }
+
+    static func satt(_ ny: UIUserInterfaceStyle) {
+        let fore = stil
+        stil = ny
+        guard let f = fonster, f.overrideUserInterfaceStyle != ny else { return }
+        let fran = f.traitCollection.userInterfaceStyle
+        let till = ny == .unspecified ? (f.windowScene?.traitCollection.userInterfaceStyle ?? fran) : ny
+        if fore == ny || fran == till || UIAccessibility.isReduceMotionEnabled || f.isHidden || f.windowScene?.activationState != .foregroundActive {
+            f.overrideUserInterfaceStyle = ny
+        } else {
+            UIView.transition(with: f, duration: 0.3, options: [.transitionCrossDissolve, .allowUserInteraction, .beginFromCurrentState]) {
+                f.overrideUserInterfaceStyle = ny
+            }
+        }
+    }
+
+    /// Fönstrets läge just nu (för självtesten).
+    static var aktuell: UIUserInterfaceStyle? { fonster?.overrideUserInterfaceStyle }
+}
+
 /// Hittar fönstret som en SwiftUI-vy ligger i (för `Statusrad`).
 struct Fonstersond: UIViewRepresentable {
     let hittat: @MainActor (UIWindow) -> Void
