@@ -378,12 +378,14 @@ section { padding: 120px 0; }
 }
 
 /* ---------- Rörelsefamiljen (2026-11-18): namnet, menylänkar, rubriker, kort, siffror ---------- */
-/* Namnet: bokstäverna dras isär och fylls med orange vätska nerifrån. Gorillan tuggar. */
-.logo-ord { display: inline-flex; }
-.lb { position: relative; display: inline-block; transition: transform .7s var(--ease); transition-delay: calc(var(--i) * 22ms); }
+/* Namnet: när man har rullat ner drar ordet ihop sig till bara gorillan, och dras ut till hela namnet när man pekar på det.
+   Bokstäverna fylls med orange vätska nerifrån när man pekar. Gorillan tuggar. */
+.logo-ord { display: inline-flex; align-items: baseline; }
+.lb { position: relative; display: inline-block; max-width: 1.2em; overflow: clip; overflow-clip-margin: 3px;
+  transition: max-width .55s var(--ease), opacity .4s ease; transition-delay: calc(var(--i) * 35ms); }
 .lb::after { content: attr(data-b); position: absolute; left: 0; top: 0; color: var(--accent); clip-path: inset(105% -2px -4px -2px); transition: clip-path .75s var(--ease); transition-delay: calc(var(--i) * 55ms); }
-.logo:hover .lb, .logo:focus-visible .lb, .logo.hej .lb { transform: translateX(calc(var(--i) * 6px)); }
 .logo:hover .lb::after, .logo:focus-visible .lb::after, .logo.hej .lb::after { clip-path: inset(-4px -2px -4px -2px); }
+.top.liten .logo:not(:hover):not(:focus-visible) .lb { max-width: 0; opacity: 0; transition-delay: calc((5 - var(--i)) * 30ms); }
 .logo img { transform-origin: 50% 85%; }
 .logo:hover img, .logo:focus-visible img, .logo.hej img { animation: tugga .52s ease-in-out 2; }
 @keyframes tugga { 0%, 100% { transform: none; } 30% { transform: scale(1.07, .88); } 60% { transform: scale(.97, 1.04); } }
@@ -402,20 +404,15 @@ section { padding: 120px 0; }
 h2.syns:hover .penna path { animation: rita .8s cubic-bezier(.6,.05,.25,1); }
 @keyframes rita { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 
-/* Korten: den orange stapeln växer till full höjd, och gubben nickar till */
-.kort { position: relative; overflow: hidden; }
-.kort::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: linear-gradient(var(--sig-fill-top), var(--sig-fill-bottom)); transform: scaleY(0); transform-origin: center bottom; transition: transform .6s var(--ease); }
-.kort:hover::before, .kort:focus-within::before { transform: scaleY(1); }
+/* Korten och stegen: gubben nickar till */
 .kort img, .steg-lista img { transform-origin: 30% 100%; }
 .kort.syns img, .steg-lista li.syns img { animation: nick .8s var(--ease) calc(var(--n, 0) * 90ms) backwards; }
 .kort:hover img, .steg-lista li:hover img { animation: nick-igen .7s var(--ease); }
 @keyframes nick { 0% { transform: translateY(10px); opacity: 0; } 55% { transform: translateY(-5px) rotate(-1.6deg); opacity: 1; } 100% { transform: none; } }
 @keyframes nick-igen { 0%, 100% { transform: none; } 40% { transform: translateY(-6px) rotate(-1.8deg); } 70% { transform: translateY(1px) rotate(.6deg); } }
-@media (hover: none) { .kort.syns::before { transform: scaleY(1); transition-delay: calc(var(--n, 0) * 90ms + .2s); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .lb, .lb::after, .nav-link, .penna path, .kort::before { transition: none; }
-  .logo:hover .lb, .logo:focus-visible .lb, .logo.hej .lb { transform: none; }
+  .lb, .lb::after, .nav-link, .penna path { transition: none; }
   .logo:hover img, .logo.hej img, .kort.syns img, .kort:hover img, .steg-lista li.syns img, .steg-lista li:hover img, h2.syns:hover .penna path { animation: none; }
   .penna path { stroke-dashoffset: 0; }
 }

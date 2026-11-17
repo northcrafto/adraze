@@ -93,6 +93,12 @@ document.querySelectorAll('.sf-test').forEach((el) => new IntersectionObserver((
     [...ord].forEach((b, i) => { const e = document.createElement('span'); e.className = 'lb'; e.style.setProperty('--i', i); e.dataset.b = b; e.textContent = b; s.append(e); });
     tn.replaceWith(s);
   });
+  // Som en vikt logga: en bit ner på sidan blir namnet bara gorillan, och dras ut igen när man pekar på det
+  const topp = document.querySelector('.top');
+  if (topp && topp.querySelector('.lb')) {
+    const liten = () => topp.classList.toggle('liten', scrollY > 140);
+    addEventListener('scroll', liten, { passive: true }); liten();
+  }
   // En gång per besök visar namnet i toppen sig självt, så att även mobilen får se det
   const topplogga = document.querySelector('.top .logo');
   let sett = false; try { sett = sessionStorage.getItem('adraze-hej') === '1'; sessionStorage.setItem('adraze-hej', '1'); } catch {}
