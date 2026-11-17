@@ -19,6 +19,9 @@ final class SkalModul: NSObject, AppModul {
         let skal = SkalLage(app: app)
         lage = skal
         app.ersatt(huvudvy: "Skal") { SkalVy(skal: skal) }
+        // Startsidan visas i varje tom flik: börja ladda den medan appen ritar sin första ruta (kallstarten).
+        // -forladda 0 stänger av det (för att mäta skillnaden).
+        if app.startargument.tal("forladda") != 0 { app.sidor.forbered("startsida") }
 
         prenumerationer = [
             app.handelser.lyssna(SidaLaddad.self) { h in skal.sidaLaddad(h) },
@@ -30,6 +33,15 @@ final class SkalModul: NSObject, AppModul {
 
         app.labb.registrera("skal", beskrivning: "Skalet: lokal sida, flikväxlaren, menyn, adressfältet, accenter, mörkt läge, raden uppe, liggande, tyska och stor text") { k in
             try await SkalProv.kor(k, skal: skal)
+        }
+    }
+
+    /// Visar första fliken datorns startsida (tom och inte privat): startbilden väntar tills den syns, så att
+    /// gorillan öppnar sig direkt mot startsidan i stället för mot dess mörka platshållare.
+    static func starta(i app: AppMiljo) async {
+        let flik = app.flikar.aktiv
+        if app.sidor.finns("startsida"), flik == nil || (flik?.url == nil && flik?.privat == false) {
+            app.startbild.vanta("startsida")
         }
     }
 }

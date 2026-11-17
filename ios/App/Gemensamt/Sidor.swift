@@ -25,6 +25,9 @@ protocol SidTjanst: AnyObject {
     /// öppna en vanlig webbadress (`nil`: den aktiva tomma fliken, annars en ny flik). Vyn räknar med att värden
     /// har ett eget adressfält: startsidans sökruta döljs (`html.ios-i-skalet`), modalt (`visa`) syns den.
     func vy(_ yta: String, fragment: String?, nedre: CGFloat, navigera: (@MainActor (URL) -> Void)?) -> AnyView
+    /// Börja ladda ytan redan nu (webbvyn, webbprocessen och sidan), så att nästa `vy(yta, fragment: nil, …)` får
+    /// den färdig. Skal gör det med startsidan när appen startar. Används den aldrig ligger den kvar i minnet.
+    func forbered(_ yta: String)
 }
 
 extension SidTjanst {
@@ -66,4 +69,5 @@ final class IngaSidor: SidTjanst {
     func visa(_ yta: String, fragment: String?, som lage: Sidlage) -> Bool { false }
     func stang(_ yta: String?) {}
     func vy(_ yta: String, fragment: String?, nedre: CGFloat, navigera: (@MainActor (URL) -> Void)?) -> AnyView { AnyView(EmptyView()) }
+    func forbered(_ yta: String) {}
 }

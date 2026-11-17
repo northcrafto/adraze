@@ -94,6 +94,7 @@ final class AdrazeSchema: NSObject, WKURLSchemeHandler {
             svara(uppgift, fraga.url ?? URL(string: "\(Self.ursprung)/")!, 400, text: "fel adress")
             return
         }
+        if url.pathExtension == "html" { Starttider.markera("schema_" + url.lastPathComponent) }
         let metod = (fraga.httpMethod ?? "GET").uppercased()
         guard metod == "GET" || metod == "HEAD" else {
             svara(uppgift, url, 405, text: "bara GET")

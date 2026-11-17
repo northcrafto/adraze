@@ -43,9 +43,11 @@ final class AdrazeSida: UIView, WKNavigationDelegate, WKUIDelegate {
 
     init(yta: String, fragment: String? = nil) {
         guard let transport = BryggTransport.delad else { fatalError("AdrazeSida före BryggaModul.registrera") }
+        Starttider.markera("\(yta)_skapad")
         self.yta = yta
         self.transport = transport
         webbvy = WKWebView(frame: CGRect(x: 0, y: 0, width: 390, height: 700), configuration: transport.konfiguration())
+        Starttider.markera("\(yta)_webbvy")
         super.init(frame: .zero)
         webbvy.navigationDelegate = self
         webbvy.uiDelegate = self
@@ -97,10 +99,14 @@ final class AdrazeSida: UIView, WKNavigationDelegate, WKUIDelegate {
         // Ett nytt dokument i samma vy (omladdning vid språkbyte): måtten nertill gäller fortfarande.
         guard !arKlar else { skickaNedre(); return }
         notera("klar")
+        AppMiljo.delad?.startbild.klar(yta)
         arKlar = true
         klarEfterMs = (Date().timeIntervalSince(skapad) * 1000).rounded()
         skickaNedre()
-        UIView.animate(withDuration: 0.22, delay: 0, options: [.curveEaseOut, .allowUserInteraction]) { self.webbvy.alpha = 1 }
+        let yta = yta
+        UIView.animate(withDuration: 0.22, delay: 0, options: [.curveEaseOut, .allowUserInteraction],
+                       animations: { self.webbvy.alpha = 1 },
+                       completion: { _ in Starttider.markera("\(yta)_synlig") })
     }
 
     func temaAndrat() {
@@ -151,6 +157,7 @@ final class AdrazeSida: UIView, WKNavigationDelegate, WKUIDelegate {
             if huvudram, navigationAction.navigationType == .reload || !arSammaDokument(url, inlastDokument) {
                 notera("navigering")
                 transport?.forbered(webView, url: url)
+                notera("startdata")
             }
             return (.allow, preferences)
         }
@@ -180,6 +187,7 @@ final class AdrazeSida: UIView, WKNavigationDelegate, WKUIDelegate {
 
     private func notera(_ namn: String) {
         if tider[namn] == nil { tider[namn] = (Date().timeIntervalSince(skapad) * 1000).rounded() }
+        Starttider.markera("\(yta)_\(namn)")
     }
 
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
@@ -300,6 +308,48 @@ final class AdrazeSidaKontroller: UIViewController, UIAdaptivePresentationContro
 @MainActor
 enum AdrazeSidor {
     private static var visade: [String: AdrazeSidaKontroller] = [:]
+    /// Sidor som laddas innan någon vy har bett om dem (`forladda`), och ytor som redan har hämtat sin.
+    private static var forladdade: [String: AdrazeSida] = [:]
+    private static var hamtade: Set<String> = []
+
+    private static var vantande: Set<String> = []
+    private static var startlyssnare: NSObjectProtocol?
+
+    /// Skapar ytans sida (webbvyn börjar ladda) så tidigt det går, så att WebKits processer startar medan appen
+    /// ritar sin första ruta. Nästa `AdrazeSidaVy` för ytan (utan fragment) tar den. Bara en gång.
+    ///
+    /// Modulerna registreras innan UIKit har startat (AppMiljo skapas med appen), och en webbvy ska inte skapas då.
+    /// Sidan skapas därför när UIKit säger att appen har startat (`didFinishLaunchingNotification`), eller när
+    /// huvudtråden först är ledig om det kommer först. Då har alla moduler också lagt in sin startdata.
+    static func forladda(_ yta: String) {
+        guard forladdade[yta] == nil, !hamtade.contains(yta) else { return }
+        vantande.insert(yta)
+        if startlyssnare == nil {
+            startlyssnare = NotificationCenter.default.addObserver(forName: UIApplication.didFinishLaunchingNotification,
+                                                                   object: nil, queue: .main) { _ in
+                MainActor.assumeIsolated { skapaVantande() }
+            }
+        }
+        Task { @MainActor in skapaVantande() }
+    }
+
+    private static func skapaVantande() {
+        let ytor = vantande
+        vantande = []
+        for yta in ytor where forladdade[yta] == nil && !hamtade.contains(yta) {
+            forladdade[yta] = AdrazeSida(yta: yta)
+        }
+        if let l = startlyssnare {
+            NotificationCenter.default.removeObserver(l)
+            startlyssnare = nil
+        }
+    }
+
+    /// Den förladdade sidan för ytan, en gång.
+    static func taForladdad(_ yta: String) -> AdrazeSida? {
+        hamtade.insert(yta)
+        return forladdade.removeValue(forKey: yta)
+    }
 
     /// Visar en yta som ark eller helskärm (eller tar fram den som redan visas). Ger sidan.
     @discardableResult
@@ -315,12 +365,7 @@ enum AdrazeSidor {
         k.overrideUserInterfaceStyle = AppMiljo.delad?.tema.uiStil ?? .unspecified
         switch lage {
         case .ark:
-            k.modalPresentationStyle = .pageSheet
-            if let ark = k.sheetPresentationController {
-                ark.detents = [.large()]
-                ark.prefersGrabberVisible = true
-                ark.preferredCornerRadius = 24
-            }
+            AdrazeArk.forbered(k)
         case .helskarm:
             // overFullScreen: vyerna under ligger kvar i fönstret. Med fullScreen tas de bort, och SwiftUI avbryter
             // deras .task (appens start och självtesterna körs i en .task, mätt 2026-11-17).
@@ -369,7 +414,8 @@ struct AdrazeSidaVy: UIViewRepresentable {
     var navigera: (@MainActor (URL) -> Void)?
 
     func makeUIView(context: Context) -> AdrazeSida {
-        let s = AdrazeSida(yta: yta, fragment: fragment)
+        let forladdad = fragment == nil ? AdrazeSidor.taForladdad(yta) : nil
+        let s = forladdad ?? AdrazeSida(yta: yta, fragment: fragment)
         s.iSkalet = true
         return s
     }
@@ -401,5 +447,10 @@ final class Bryggsidor: SidTjanst {
 
     func vy(_ yta: String, fragment: String?, nedre: CGFloat, navigera: (@MainActor (URL) -> Void)?) -> AnyView {
         AnyView(AdrazeSidaVy(yta: yta, fragment: fragment, nedre: nedre, navigera: navigera))
+    }
+
+    func forbered(_ yta: String) {
+        guard finns(yta) else { return }
+        AdrazeSidor.forladda(yta)
     }
 }

@@ -35,6 +35,8 @@ final class AppMiljo {
     let labb: Labbregister
     let startargument: Startargument
     let starttid = Date()
+    /// Gorillan över appen tills det första innehållet syns (`Startbild.swift`).
+    let startbild = Startbild()
 
     private(set) var flikar: any FlikHanterare
     private(set) var skydd: any SkyddTjanst
@@ -63,6 +65,8 @@ final class AppMiljo {
     @ObservationIgnored private let logg = Logg("App")
 
     init(argument: Startargument = Startargument()) {
+        Starttider.markera("appmiljo")
+        Starttider.vaktaHuvudtraden()
         Logg.forbered()
         startargument = argument
         Typsnitt.registrera()
@@ -88,7 +92,9 @@ final class AppMiljo {
         logg.info("AdRaze \(info["CFBundleShortVersionString"] ?? "?") (\(info["CFBundleVersion"] ?? "?")), iOS \(UIDevice.current.systemVersion)"
                   + (argument.lage.map { ", självtest \($0)" } ?? ""))
         Sprak.delad.folj(self)
+        if argument.tal("startbild") == 0 { startbild.avstang() }
         registreraModuler()
+        Starttider.markera("moduler_registrerade")
         if flikar === stubbflikar, stubbflikar.flikar.isEmpty { stubbflikar.nyFlik(nil, privat: false, aktivera: true) }
     }
 
@@ -192,6 +198,7 @@ final class AppMiljo {
         }
         aktuellModul = "Grund"
         arIgang = true
+        Starttider.markera("moduler_startade")
         if let lage = startargument.lage { await labb.kor(lage, app: self) }
     }
 

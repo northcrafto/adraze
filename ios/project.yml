@@ -51,8 +51,12 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CFBundleIconName: AppIcon
         LSRequiresIPhoneOS: true
+        # Startskärmen: gorillan mitt på startfärgen. Appens startbild (Gemensamt/Startbild.swift) ritar exakt samma
+        # sak första rutan och öppnar sig sedan mot startsidan.
         UILaunchScreen:
           UIColorName: Startbakgrund
+          UIImageName: Startgorilla
+          UIImageRespectsSafeAreaInsets: false
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
           - UIInterfaceOrientationLandscapeLeft
