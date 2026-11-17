@@ -168,6 +168,10 @@ enum SkyddProv {
         guard let a = await korBlocksida(k, flik, mal, bas: bas, rubrik: "Blocktest", allaNas: false) else { return }
         k.notera("blocktest_skript_i_vyn", .tal(Double(skydd.antalSkript(i: flik.webbvy))))
         await k.skarmbild("blocktest")
+        // Räknaren mot blocktestet (räknarens kö skickas efter 250 ms)
+        try await k.vanta(0.8)
+        raknarkoll(k, skydd, flik, mal, a)
+        try await raknarsida(k, skydd, flik, mal, a, bas: bas)
 
         // B: samma sida med sajten pausad (bara listan "sidor")
         let fore = k.app.installningar[Nycklar.skyddPausade]
@@ -211,6 +215,114 @@ enum SkyddProv {
         k.kolla("inloggningssida: reklamadresserna blockeras inte där (\(inloggNadd))", inloggBlockerad.isEmpty && inloggNadd > 0,
                 .lista(inloggBlockerad.map(JSONVarde.text)))
         k.kolla("högst två mål gick inte att avgöra (nätet)", obestamda.count <= 2, .lista(obestamda.map(JSONVarde.text)))
+    }
+
+    // MARK: - Räknaren
+
+    /// Samma adress? (Sidan ger adressen som webbläsaren skrev om den, till exempel med `/` efter värden.)
+    static func sammaAdress(_ a: String, _ b: String) -> Bool {
+        (URL(string: a)?.absoluteString ?? a) == (URL(string: b)?.absoluteString ?? b)
+    }
+
+    /// Räknaren efter blocktestet: varje stoppat mål vars värd är en räknarvärd räknas en gång, och inget annat.
+    /// Mål som stoppas av en regel för en viss sökväg (inte hela värden) kan räknaren inte veta om.
+    static func raknarkoll(_ k: Labbkorning, _ skydd: Skydd, _ flik: any Flik, _ mal: [Mal], _ a: [String: String]) {
+        let stoppade = mal.filter { ($0.typ == "reklam" || $0.typ == "spårare") && a[$0.url] == "fel" }
+        let raknebara = stoppade.filter { m in URL(string: m.url).map { skydd.data.arRaknarvard(Vard.av($0)) } ?? false }
+        let raknade = skydd.raknadeAdresser(i: flik.webbvy)
+        let antal = skydd.antalBlockerade(i: flik.id) ?? -1
+        var perSatt: [String: JSONVarde] = [:]
+        for satt in Set(stoppade.map(\.satt)).sorted() {
+            let alla = stoppade.filter { $0.satt == satt }
+            let r = alla.filter { m in raknade.contains { sammaAdress($0, m.url) } }
+            perSatt[satt] = ["stoppade": .tal(Double(alla.count)), "raknade": .tal(Double(r.count))]
+        }
+        let ejRaknade = raknebara.filter { m in !raknade.contains { sammaAdress($0, m.url) } }.map(\.url)
+        let fororda = raknade.filter { r in !raknebara.contains { sammaAdress(r, $0.url) } }
+        k.notera("raknaren_blocktest", ["stoppade": .tal(Double(stoppade.count)), "raknebara": .tal(Double(raknebara.count)),
+                                        "raknat": .tal(Double(antal)), "per_satt": .objekt(perSatt),
+                                        "inte_raknade": .lista(ejRaknade.map(JSONVarde.text)),
+                                        "inte_raknebara": .lista(stoppade.filter { m in !raknebara.contains { $0.url == m.url } }.map { .text($0.url) })])
+        k.kolla("räknaren: \(antal) räknade av \(stoppade.count) stoppade (\(raknebara.count) från räknarvärdar)",
+                antal == raknebara.count && ejRaknade.isEmpty && fororda.isEmpty && !raknebara.isEmpty,
+                ["inte_raknade": .lista(ejRaknade.map(JSONVarde.text)), "fororda": .lista(fororda.map(JSONVarde.text))])
+    }
+
+    /// Det som blocktestet inte har: en ram, XMLHttpRequest, beacon och en bild som aldrig sätts in, mot värdar som
+    /// blocktestet visade stoppas, plus en kontroll som inte stoppas. Mäter vad räknaren ser.
+    static func raknarsida(_ k: Labbkorning, _ skydd: Skydd, _ flik: any Flik, _ mal: [Mal], _ a: [String: String], bas: String) async throws {
+        func stoppadVard(_ satt: String) -> String? {
+            mal.first { $0.satt == satt && a[$0.url] == "fel" && (URL(string: $0.url).map { skydd.data.arRaknarvard(Vard.av($0)) } ?? false) }
+                .flatMap { URL(string: $0.url)?.host() }
+        }
+        guard let fetchVard = stoppadVard("fetch"), let skriptVard = stoppadVard("skript") else {
+            k.kolla("räknarsidan: stoppade räknarvärdar finns", false)
+            return
+        }
+        let ram = "https://\(skriptVard)/adraze-raknare/ram.html", xhr = "https://\(fetchVard)/adraze-raknare/xhr"
+        let beacon = "https://\(fetchVard)/adraze-raknare/beacon", bild = "https://\(skriptVard)/adraze-raknare/bild.gif"
+        let html = """
+        <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Räknaren</title></head>
+        <body><h1>Räknaren</h1><script>
+        (function () {
+          var r = { beacon: null, xhr: null, bild: null, ram: null, kontroll: null };
+          window.__raknare = null;
+          var kvar = 4;
+          function klar() { if (--kvar === 0) window.__raknare = r; }
+          try { r.beacon = navigator.sendBeacon("\(beacon)", "x"); } catch (e) { r.beacon = "fel: " + e; }
+          var x = new XMLHttpRequest();
+          x.onload = function () { r.xhr = "nadd"; klar(); }; x.onerror = function () { r.xhr = "fel"; klar(); };
+          x.open("GET", "\(xhr)"); x.send();
+          var i = document.createElement("img");
+          i.onload = function () { r.bild = "nadd"; klar(); }; i.onerror = function () { r.bild = "fel"; klar(); };
+          i.src = "\(bild)";
+          // Ramen: hur den ser ut när sidans load har kommit (load väntar på ramar som fortfarande laddar)
+          var f = document.createElement("iframe");
+          f.src = "\(ram)"; document.body.appendChild(f);
+          addEventListener("load", function () { setTimeout(function () {
+            var d = null; try { d = f.contentDocument ? f.contentDocument.URL : "korsursprung"; } catch (e) { d = "korsursprung"; }
+            r.ram = d; klar();
+          }, 50); });
+          fetch("https://www.apple.com/favicon.ico", { mode: "no-cors", cache: "no-store" }).then(function () { r.kontroll = "nadd"; klar(); }, function () { r.kontroll = "fel"; klar(); });
+          setTimeout(function () { if (!window.__raknare) window.__raknare = r; }, 12000);
+        })();
+        </script></body></html>
+        """
+        guard await laddaHTML(k.app, flik, html, bas: bas) else {
+            k.kolla("räknarsidan laddades", false)
+            return
+        }
+        var res: [String: Any] = [:]
+        let t0 = Date()
+        while Date().timeIntervalSince(t0) < 15 {
+            if let s = await js(flik.webbvy, "JSON.stringify(window.__raknare || null)") as? String, s != "null",
+               let d = try? JSONSerialization.jsonObject(with: Data(s.utf8)) as? [String: Any] {
+                res = d
+                break
+            }
+            try? await Task.sleep(nanoseconds: 200_000_000)
+        }
+        try await k.vanta(0.8)
+        let raknade = skydd.raknadeAdresser(i: flik.webbvy)
+        let sag: [String: Bool] = ["ram": raknade.contains { sammaAdress($0, ram) }, "xhr": raknade.contains { sammaAdress($0, xhr) },
+                                   "beacon": raknade.contains { sammaAdress($0, beacon) }, "bild": raknade.contains { sammaAdress($0, bild) }]
+        let utfall = res.mapValues { v -> JSONVarde in
+            if let b = v as? Bool { return .bool(b) }
+            if let s = v as? String { return .text(s) }
+            return .null
+        }
+        k.notera("raknaren_ramar_och_anrop", ["sidan": .objekt(utfall), "raknat": .objekt(sag.mapValues(JSONVarde.bool)),
+                                              "antal": .tal(Double(skydd.antalBlockerade(i: flik.id) ?? -1)),
+                                              "adresser": .lista(raknade.map(JSONVarde.text))])
+        // Bara det som sidan såg misslyckas räknas; kontrollen (som nås) räknas aldrig
+        let xhrFel = (res["xhr"] as? String) == "fel", bildFel = (res["bild"] as? String) == "fel"
+        k.kolla("räknaren: XMLHttpRequest som stoppades räknas", !xhrFel || sag["xhr"] == true, ["sidan": utfall["xhr"] ?? .null])
+        k.kolla("räknaren: en bild som aldrig sätts in räknas när den stoppas", !bildFel || sag["bild"] == true, ["sidan": utfall["bild"] ?? .null])
+        k.kolla("räknaren: beacon räknas bara när WebKit svarar false", sag["beacon"] == ((res["beacon"] as? Bool) == false),
+                ["sendBeacon": utfall["beacon"] ?? .null, "raknad": .bool(sag["beacon"] == true)])
+        k.kolla("räknaren: en stoppad ram räknas (tom efter sidans load)", sag["ram"] == ((res["ram"] as? String) == "about:blank"),
+                ["ramen": utfall["ram"] ?? .null, "raknad": .bool(sag["ram"] == true)])
+        k.kolla("räknaren räknar inte kontrollen", !raknade.contains { $0.contains("apple.com") })
     }
 
     /// Laddar testsidan och väntar på resultatet: url -> "nadd", "fel" eller "tidsgrans".

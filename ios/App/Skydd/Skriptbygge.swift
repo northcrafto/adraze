@@ -30,6 +30,7 @@ struct Skriptdel: Sendable, Hashable {
 ///
 /// | Skript | Värld | Tillägget |
 /// |---|---|---|
+/// | Räknarens del: misslyckade fetch, XHR, beacon och fristående element (`Raknare.sidskript`) | sidans | – |
 /// | Vakten (popunders, osynliga helsideslänkar) | sidans | `content/guard.js` |
 /// | Scriptlets för sajten | sidans | `scriptlets/*.js` per värd |
 /// | YouTube (spola förbi reklam) | sidans | `content/youtube.js` |
@@ -50,6 +51,8 @@ enum Skriptbygge {
             if let p = data.sajtpost(n) { poster[n] = p }
         }
         var ut: [Skriptdel] = []
+        // Räknarens del i sidans värld (-raknareSida 0 stänger av den, för att mäta skillnaden)
+        if AppMiljo.delad?.startargument.tal("raknareSida") != 0 { ut.append(Skriptdel(Raknare.sidskript, .sida)) }
         if !data.vakt.isEmpty { ut.append(Skriptdel(data.vakt, .sida)) }
         ut += scriptlets(poster, data: data)
         if !data.youtube.isEmpty {

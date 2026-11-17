@@ -72,7 +72,9 @@ final class Skydd: SkyddTjanst {
         })
         // Ny sida i fliken: räknaren börjar om (som datorns did-start-navigation)
         lyssnare.append(app.handelser.lyssna(FlikNavigerade.self) { [weak self] h in
-            guard let self, let vy = self.app.flikar.flik(h.flik)?.webbvy, let st = self.status(vy), st.antal != 0 else { return }
+            guard let self, let vy = self.app.flikar.flik(h.flik)?.webbvy, let st = self.status(vy) else { return }
+            st.raknade = []
+            guard st.antal != 0 else { return }
             st.antal = 0
             self.raknarversion += 1
         })
@@ -98,6 +100,7 @@ final class Skydd: SkyddTjanst {
             // Annonsvärdarna (för omdirigeringar) läses parallellt med listorna; klart först när båda är inne
             await initiativ.value
             let regler = self.listor.klara.keys.reduce(0) { s, n in s + (self.data.listor.first { $0.namn == n }?.regler ?? 0) }
+            Starttider.markera("skydd_klart")
             if fel.isEmpty {
                 self.lage = .klart(regler: regler)
             } else {
@@ -225,6 +228,9 @@ final class Skydd: SkyddTjanst {
         app.installningar[Nycklar.skyddPausade] = lista
     }
 
+    /// Adresserna som räknades på sidan som visas i vyn (självtestet).
+    func raknadeAdresser(i vy: WKWebView) -> [String] { status(vy)?.raknade ?? [] }
+
     func antalBlockerade(i flik: UUID) -> Int? {
         _ = raknarversion
         guard app.installningar[.blockRaknare], let vy = app.flikar.flik(flik)?.webbvy, let st = status(vy) else { return nil }
@@ -247,12 +253,14 @@ final class Skydd: SkyddTjanst {
         // Bara när sidan har annons- eller spårlistan på sig (inte pausad, inte inloggning)
         guard st.listor.contains("ads") || st.listor.contains("privacy"),
               let sida = st.senasteHuvudsida, !sidlage(sida).tillat else { return }
-        let n = Raknare.adresser(m).reduce(0) { s, u in
+        let traffar = Raknare.adresser(m).filter { u in
             let v = Vard.av(u)
-            return s + (data.arRaknarvard(v) && !data.arTillatVard(v) ? 1 : 0)
+            return data.arRaknarvard(v) && !data.arTillatVard(v)
         }
+        let n = traffar.count
         guard n > 0 else { return }
         st.antal += n
+        if st.raknade.count < 200 { st.raknade += traffar.prefix(200 - st.raknade.count).map(\.absoluteString) }
         raknare.lagg(till: n)
         raknarversion += 1
         // Startsidans siffror (datorns adblock:hit, en per stoppad sak)
@@ -431,6 +439,8 @@ final class Skydd: SkyddTjanst {
         var annonsstopp: URL?
         /// Räknade stopp på sidan som visas (`Raknare`).
         var antal = 0
+        /// Adresserna som räknades på sidan som visas (högst 200, för självtestet).
+        var raknade: [String] = []
 
         init(vy: WKWebView, privat: Bool) {
             self.vy = vy
