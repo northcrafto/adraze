@@ -153,6 +153,42 @@
   const nativ = (k) => (NATIVA[k] && A.har(NATIVA[k].kanal)) ? NATIVA[k] : null;
   const RAD_KRAVER = { 'chat-rules-btn': 'auth:session', 'tgl-protection': 'skoll:check-url', 'tgl-adblock': 'skoll:adblock-toggle', 'adblock-more': 'blockinst:get', 'seg-freq': 'historik:lista', 'settings-bg-btn': null };
 
+  // Inställningar › Falk › Färg. I appen följer Falk appens accent tills man väljer en egen färg för Falk
+  // (Falk.swift `varden`), men datorns falk-inst.js visar då AdRaze-orange som vald, och ett klick på den orangea
+  // (standardfärgen) tar bort valet, så att Falk stannade i appens accent. Här visas färgen Falk har, och en vald färg
+  // sparas som den är, också den orangea. Samma färg som Falk redan har utan eget val ändrar ingenting.
+  function falkFarg() {
+    const An = window.Anpassa, s = $('falk-inst'), g = $('falk-farger');
+    if (!An || !s || !g) return;
+    const norm = (v) => { const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(String(v == null ? '' : v).trim()); if (!m) return null; const h = m[1].toLowerCase(); return '#' + (h.length === 3 ? h.replace(/./g, (c) => c + c) : h); };
+    const egen = () => norm(An.alla()['falk.accent']);
+    const falkens = () => egen() || norm(An.get('tema.accent')) || '#ff4b1f';   // samma ordning som Falk.swift
+    const visa = () => {
+      if (egen()) return;   // en sparad färg visar falk-inst.js själv
+      const f = falkens();
+      let traff = false;
+      for (const b of s.querySelectorAll('[data-farg]')) { const on = b.dataset.farg === f; traff = traff || on; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); }
+      const ruta = s.querySelector('.anp-tema-egen');
+      if (ruta) { ruta.classList.toggle('on', !traff); ruta.style.setProperty('--prov', f); try { ruta.style.setProperty('--prov-on', window.AnpassaTema.textPa(f)); } catch {} }
+      const inp = s.querySelector('[data-egen]'); if (inp) inp.value = f;
+      const hex = s.querySelector('[data-hex]'); if (hex && document.activeElement !== hex) hex.value = f;
+    };
+    const valj = (v) => {
+      const f = norm(v);
+      if (f && f !== egen() && (egen() || f !== falkens())) An.set('falk.accent', f, 'Falks färg');
+    };
+    // Före falk-inst.js egna lyssnare (fångstfasen på rutornas behållare), som annars tar bort den orangea
+    g.addEventListener('click', (e) => { const b = e.target.closest('[data-farg]'); if (!b || !g.contains(b)) return; e.stopImmediatePropagation(); e.preventDefault(); valj(b.dataset.farg); }, true);
+    g.addEventListener('change', (e) => { if (!e.target.matches('[data-egen]')) return; e.stopImmediatePropagation(); valj(e.target.value); }, true);
+    const hexKlar = (e) => { e.stopImmediatePropagation(); const f = norm(e.target.value); valj(f); e.target.value = f || falkens(); };
+    g.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches('[data-hex]')) { e.preventDefault(); hexKlar(e); } }, true);
+    g.addEventListener('blur', (e) => { if (e.target.matches && e.target.matches('[data-hex]')) hexKlar(e); }, true);
+    An.on('falk.', visa);   // efter falk-inst.js (den lyssnar sedan sidan laddades)
+    An.on('tema.accent', visa);
+    // falk-inst.js ritar rutorna vid DOMContentLoaded, och ios.js körs oftast före den (WKUserScript vid dokumentslut)
+    if (g.dataset.ritad) visa(); else document.addEventListener('DOMContentLoaded', visa, { once: true });
+  }
+
   function setUppAnpassa() {
     const s = $('settings'), nav = $('settings-nav'), main = s && s.querySelector('.set-main'), rail = s && s.querySelector('.set-rail');
     if (!s || !nav || !main || !rail) return;
@@ -179,6 +215,7 @@
     for (const b of nav.querySelectorAll('.set-tab')) { const p = document.createElement('span'); p.className = 'ios-pil'; p.setAttribute('aria-hidden', 'true'); b.appendChild(p); }
     for (const id of DOLDA_RADER) { const el = $(id); const r = el && el.closest('.set-row'); if (r) r.classList.add('ios-dold'); }
     const falkBredd = document.querySelector('#falk-inst [data-falk="bredd"]'); if (falkBredd && falkBredd.closest('.set-row')) falkBredd.closest('.set-row').classList.add('ios-dold');
+    falkFarg();
     // "Öppna Falk": datorns openKrypto öppnar sidopanelen; här visas Falk som ark ovanpå
     const oppnaFalk = $('open-krypto-btn');
     if (oppnaFalk) oppnaFalk.addEventListener('click', (e) => { e.stopImmediatePropagation(); e.preventDefault(); A.invoke('sida:visa', { yta: 'falk' }).catch(() => {}); }, true);

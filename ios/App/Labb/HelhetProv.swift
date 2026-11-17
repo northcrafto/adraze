@@ -244,6 +244,24 @@ enum HelhetProv {
         k.kolla("appen är mörk", app.tema.foredragetSchema == .dark)
         try await k.vanta(1.2)
         await k.skarmbild("15-anpassa-natt")
+        // Inställningar › Falk visar färgen Falk har (appens accent, Falk har ingen egen), också när sidan laddas om,
+        // och AdRaze-orange går att välja fast den är datorns standardfärg (datorns falk-inst.js tar bort den)
+        if let anpassa {
+            let falkFargJS = """
+                (() => { const s = document.getElementById('falk-inst'); if (!s) return 'saknas';
+                  const hex = s.querySelector('[data-hex]'), on = s.querySelector('[data-farg].on');
+                  return (hex ? hex.value : '-') + ' ' + (on ? on.dataset.farg : 'egen'); })()
+                """
+            k.lika("Inställningar › Falk visar appens accent", await Labbjs.kor(anpassa, falkFargJS) as? String ?? "-", "#3b6fe0 #3b6fe0")
+            _ = await Labbjs.kor(anpassa, "window.__laddasOm = true; setTimeout(() => location.reload(), 50); true")
+            try await k.vanta(0.3)
+            _ = await vantaJS(anpassa, max: 10, "!window.__laddasOm && !!(document.getElementById('falk-farger') && document.getElementById('falk-farger').dataset.ritad && document.documentElement.classList.contains('ios-redo'))")
+            k.lika("Inställningar › Falk visar appens accent när sidan laddas om", await Labbjs.kor(anpassa, falkFargJS) as? String ?? "-", "#3b6fe0 #3b6fe0")
+            _ = await Labbjs.kor(anpassa, "document.querySelector('#falk-inst [data-farg=\"#ff4b1f\"]').click(); true")
+            let orange = await vanta(3) { inst.sparat("falk.accent")?.text == "#ff4b1f" }
+            k.kolla("AdRaze-orange går att välja för Falk", orange, inst.sparat("falk.accent") ?? .null)
+            _ = inst.satt("falk.accent", nil, utanHistorik: true)   // Falk följer appen igen i resten av testet
+        }
         app.sidor.stang(nil)
         try await k.vanta(1.0)
         k.kolla("Anpassa stängdes", synligSida("anpassa") == nil)
