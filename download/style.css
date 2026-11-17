@@ -376,3 +376,60 @@ section { padding: 120px 0; }
   .nav { gap: 8px; }
   .links + .sprak { margin-left: auto; }
 }
+
+/* ---------- Rörelsefamiljen (2026-11-18): namnet, menylänkar, rubriker, kort, siffror, bäraren ---------- */
+/* Namnet: bokstäverna dras isär och fylls med orange vätska nerifrån. Gorillan tuggar. */
+.logo-ord { display: inline-flex; }
+.lb { position: relative; display: inline-block; transition: transform .7s var(--ease); transition-delay: calc(var(--i) * 22ms); }
+.lb::after { content: attr(data-b); position: absolute; left: 0; top: 0; color: var(--accent); clip-path: inset(105% -2px -4px -2px); transition: clip-path .75s var(--ease); transition-delay: calc(var(--i) * 55ms); }
+.logo:hover .lb, .logo:focus-visible .lb, .logo.hej .lb { transform: translateX(calc(var(--i) * 6px)); }
+.logo:hover .lb::after, .logo:focus-visible .lb::after, .logo.hej .lb::after { clip-path: inset(-4px -2px -4px -2px); }
+.logo img { transform-origin: 50% 85%; }
+.logo:hover img, .logo:focus-visible img, .logo.hej img { animation: tugga .52s ease-in-out 2; }
+@keyframes tugga { 0%, 100% { transform: none; } 30% { transform: scale(1.07, .88); } 60% { transform: scale(.97, 1.04); } }
+
+/* Menylänkar: ordet fylls med orange från vänster, strecket följer med */
+.nav-link { background-image: linear-gradient(var(--accent), var(--accent)), linear-gradient(currentColor, currentColor); background-repeat: no-repeat; background-size: 0% 100%, 100% 100%;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; transition: background-size .45s cubic-bezier(.4,0,.2,1); }
+.nav-link:hover, .nav-link:focus-visible { background-size: 100% 100%, 100% 100%; }
+@media (forced-colors: active) { .nav-link { background: none; -webkit-text-fill-color: currentColor; } }
+
+/* Rubriker: ett pennstreck ritas under sista ordet när rubriken syns, och en gång till när man pekar */
+.penna { position: relative; display: inline-block; white-space: nowrap; isolation: isolate; }
+.penna svg { position: absolute; left: -2%; bottom: -.14em; width: 104%; height: .2em; z-index: -1; overflow: visible; pointer-events: none; }
+.penna path { fill: none; stroke: var(--accent); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .9s cubic-bezier(.6,.05,.25,1) .15s; }
+.syns .penna path { stroke-dashoffset: 0; }
+h2.syns:hover .penna path { animation: rita .8s cubic-bezier(.6,.05,.25,1); }
+@keyframes rita { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+
+/* Korten: den orange stapeln växer till full höjd, och gubben nickar till */
+.kort { position: relative; overflow: hidden; }
+.kort::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: linear-gradient(var(--sig-fill-top), var(--sig-fill-bottom)); transform: scaleY(0); transform-origin: center bottom; transition: transform .6s var(--ease); }
+.kort:hover::before, .kort:focus-within::before { transform: scaleY(1); }
+.kort img, .steg-lista img { transform-origin: 30% 100%; }
+.kort.syns img, .steg-lista li.syns img { animation: nick .8s var(--ease) calc(var(--n, 0) * 90ms) backwards; }
+.kort:hover img, .steg-lista li:hover img { animation: nick-igen .7s var(--ease); }
+@keyframes nick { 0% { transform: translateY(10px); opacity: 0; } 55% { transform: translateY(-5px) rotate(-1.6deg); opacity: 1; } 100% { transform: none; } }
+@keyframes nick-igen { 0%, 100% { transform: none; } 40% { transform: translateY(-6px) rotate(-1.8deg); } 70% { transform: translateY(1px) rotate(.6deg); } }
+@media (hover: none) { .kort.syns::before { transform: scaleY(1); transition-delay: calc(var(--n, 0) * 90ms + .2s); } }
+
+/* Bäraren: en gubbe går över sidan och bär bort en annons */
+.barare { position: relative; height: 116px; margin: -32px 0 36px; overflow: hidden; border-bottom: 2px solid var(--linje); container-type: inline-size; }
+.barare-gar { position: absolute; left: 0; bottom: -2px; display: block; transform: translateX(-130px); }
+.barare img { height: 108px; width: auto; max-width: none; transform-origin: 40% 100%; }
+.barare.gar .barare-gar { animation: bar-bort var(--tid, 7s) linear forwards; }
+.barare.gar img { animation: kliv .46s steps(2, jump-none) infinite; }
+@keyframes bar-bort { from { transform: translateX(-130px); } to { transform: translateX(calc(100cqw + 10px)); } }
+@keyframes kliv { 0% { transform: translateY(0) rotate(-1.5deg); } 100% { transform: translateY(-5px) rotate(1.5deg); } }
+@media (max-width: 700px) { .barare { height: 104px; margin: -16px 0 32px; } .barare img { height: 96px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .lb, .lb::after, .nav-link, .penna path, .kort::before { transition: none; }
+  .logo:hover .lb, .logo:focus-visible .lb, .logo.hej .lb { transform: none; }
+  .logo:hover img, .logo.hej img, .kort.syns img, .kort:hover img, .steg-lista li.syns img, .steg-lista li:hover img, h2.syns:hover .penna path { animation: none; }
+  .penna path { stroke-dashoffset: 0; }
+  .barare-gar { transform: translateX(24px); }
+  .barare.gar .barare-gar, .barare.gar img { animation: none; }
+}
+/* Hjältens gorilla sticker ut 14 % åt sidorna: klipp där i stället för att sidan går att dra i sidled */
+main { overflow-x: clip; }
