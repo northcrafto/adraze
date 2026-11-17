@@ -4,9 +4,9 @@
   {
    "namn": "sidor",
    "fil": "listor/sidor.json",
-   "regler": 7386,
-   "byte": 1253686,
-   "sha256": "ec61b0003bf51d40adad11af5e7aedd81e16c6101f39f9ecc95ef83aaaf48450"
+   "regler": 7385,
+   "byte": 1253541,
+   "sha256": "b11aa71b2a00b7a8ab7c223e53e0044a9afdc1273dfdd096307a84fed400fd92"
   },
   {
    "namn": "security",

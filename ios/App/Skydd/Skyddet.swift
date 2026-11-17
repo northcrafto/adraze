@@ -13,6 +13,8 @@ import WebKit
 ///    listorna har själva undantag för de värdarna (som datorns `ADBLOCK_ALLOW`).
 ///  - Innehållsskripten byggs för huvudsidans värd (`Skriptbygge`) och byts innan sidan laddas. Andra modulers
 ///    skript i samma `userContentController` lämnas kvar.
+///  - En annonsvärd som skickar fliken till en annan sajt: stopplistan (`Regellistor.stopp`) läggs i vyn för just
+///    den navigeringen, WebKit stoppar adressen med fel 104 och Flikar visar stoppsidan med adressen.
 ///
 /// Ägare: Skydd.
 @MainActor
@@ -127,6 +129,8 @@ final class Skydd: SkyddTjanst {
         if !mal.isMainFrame {
             return st.javascript ? .tillat : Navigeringsbeslut(javascript: false)
         }
+        // Stopplistan gäller bara navigeringen den lades i vyn för
+        slappStopp(st)
         let schema = url.scheme?.lowercased() ?? ""
         if Vard.av(url) == Self.egenVard { return egenAdress(url, vy: vy, st: st) }
         guard schema == "http" || schema == "https" else {
@@ -141,12 +145,20 @@ final class Skydd: SkyddTjanst {
         // Annonsvärd som skickar fliken till en annan sajt (tilläggets main_frame-regler med initiatorDomains)
         let kallvard = initiator(kalla, vy: vy, url: url, typ: handling.navigationType)
         if !l.tillat, !l.fortsatt, !l.pausad, let k = kallvard, data.arInitiativ(k), Vard.sajt(k) != Vard.sajt(l.vard) {
-            if listor.klara["sidor"] != nil {
-                logga(url, "stoppad: \(k) skickade fliken vidare")
-                return Navigeringsbeslut(nyAdress: Self.stoppadress(url))
+            guard let stopp = listor.stopp else {
+                logga(url, "stoppad tyst (stopplistan är inte klar)")
+                return .stoppa
             }
-            logga(url, "stoppad tyst (listan sidor är inte klar)")
-            return .stoppa
+            // Navigeringen släpps till WebKit med stopplistan i vyn: adressen stoppas med fel 104 (listor som läggs
+            // till i decidePolicyFor gäller redan för samma navigering, mätt på iOS 26.1), och Flikar visar
+            // stoppsidan med den riktiga adressen i adressfältet.
+            synka(st, onskade: onskadeListor(l))
+            st.ucc.add(stopp)
+            st.stopplista = true
+            st.annonsstopp = url
+            sattSkript([], nyckel: "-", st)
+            logga(url, "stoppad: \(k) skickade fliken vidare")
+            return Navigeringsbeslut(javascript: false)
         }
         // Spårningsparametrar i huvudsidans adress
         if !l.tillat, !l.pausad, let ren = data.utanParametrar(url, kalla: kallvard) {
@@ -168,15 +180,15 @@ final class Skydd: SkyddTjanst {
         // huvudsidan.
         var stoppad = url
         if let s = st?.senasteHuvudsida, s != url, !Self.arWebb(url) || url == vy?.url { stoppad = s }
-        var adress = stoppad
-        var orsak = Stoppsida.Orsak.farlig
-        if let u = Self.stoppadMal(stoppad) {
-            adress = u
-            orsak = .annons
-        }
+        let adress = stoppad
+        // Stoppad av stopplistan (en annons skickade fliken) eller av listorna (farlig sida). Stopplistan tas bort
+        // innan Flikar laddar stoppsidan med samma adress.
+        let orsak: Stoppsida.Orsak = st?.annonsstopp == stoppad ? .annons : .farlig
+        if let st { slappStopp(st) }
         rensaBiljetter()
-        // Adressen stoppsidan får om fliken lägger den i historiken (loadSimulatedRequest med felets adress)
-        let stoppsidor: Set<String> = [stoppad.absoluteString, adress.absoluteString]
+        // Adressen stoppsidan får i historiken när fliken laddar den med felets adress (loadSimulatedRequest). Inte
+        // `url`: en flik som skickade den gamla sidans adress har den sidan som historikens aktuella post.
+        let stoppsidor: Set<String> = [adress.absoluteString]
         let tillbaka = nyBiljett(.tillbaka, url: nil, flik: flik, vag: "tillbaka", stoppsidor: stoppsidor)
         let barn = app.installningar.arBarnlage()
         let fortsattAdress = barn || !Self.arWebb(adress) ? nil : nyBiljett(.fortsatt, url: adress, flik: flik, vag: "fortsatt")
@@ -280,37 +292,12 @@ final class Skydd: SkyddTjanst {
         return .tillat
     }
 
-    // MARK: - adraze.invalid
-
-    static func stoppadress(_ url: URL) -> URL {
-        var c = URLComponents()
-        c.scheme = "https"
-        c.host = egenVard
-        c.path = "/stopp"
-        c.queryItems = [URLQueryItem(name: "u", value: url.absoluteString)]
-        return c.url!
-    }
-
-    /// Adressen som stoppades, ur `https://adraze.invalid/stopp?u=…`.
-    static func stoppadMal(_ url: URL) -> URL? {
-        guard Vard.av(url) == egenVard, url.path == "/stopp",
-              let u = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first(where: { $0.name == "u" })?.value
-        else { return nil }
-        return URL(string: u)
-    }
+    // MARK: - adraze.invalid (stoppsidans knappar)
 
     private func egenAdress(_ url: URL, vy: WKWebView, st: Vystatus) -> Navigeringsbeslut {
         let q = Dictionary((URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []).map { ($0.name, $0.value ?? "") },
                            uniquingKeysWith: { a, _ in a })
         switch url.path {
-        case "/stopp":
-            // WebKit stoppar adressen med listan "sidor" (fel 104), och Flikar visar då stoppsidan
-            st.senasteHuvudsida = url
-            synka(st, onskade: allaListor)
-            sattSkript([], nyckel: "-", st)
-            let klar = st.listor.contains("sidor")
-            logga(url, klar ? "stoppadress" : "stoppadress utan listan sidor")
-            return klar ? .tillat : .stoppa
         case "/fortsatt":
             guard !app.installningar.arBarnlage(), let u = q["u"].flatMap({ URL(string: $0) }), Self.arWebb(u) else {
                 logga(url, "fortsätt nekas")
@@ -396,6 +383,9 @@ final class Skydd: SkyddTjanst {
         var skriptnyckel: String?
         var senasteHuvudsida: URL?
         var javascript = true
+        /// Stopplistan ligger i vyn, för navigeringen till `annonsstopp`.
+        var stopplista = false
+        var annonsstopp: URL?
 
         init(vy: WKWebView, privat: Bool) {
             self.vy = vy
@@ -437,6 +427,13 @@ final class Skydd: SkyddTjanst {
                 st.listor.remove(namn)
             }
         }
+    }
+
+    /// Tar bort stopplistan ur vyn (efter navigeringen den lades för).
+    private func slappStopp(_ st: Vystatus) {
+        if st.stopplista, let s = listor.stopp { st.ucc.remove(s) }
+        st.stopplista = false
+        st.annonsstopp = nil
     }
 
     private func byggSkript(_ l: Sidlage, _ st: Vystatus) {
@@ -491,6 +488,9 @@ final class Skydd: SkyddTjanst {
         if beslutslogg.count > 200 { beslutslogg.removeFirst(100) }
         logg.felsok("\(vad): \(url.absoluteString.prefix(160))")
     }
+
+    /// Om stopplistan ligger i en vy (för självtestet).
+    func harStopplistan(_ vy: WKWebView) -> Bool { status(vy)?.stopplista ?? false }
 
     /// Antal skript skyddet har i en vy (för självtestet).
     func antalSkript(i vy: WKWebView) -> Int {

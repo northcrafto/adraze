@@ -70,10 +70,6 @@ ALL_RT = ['main_frame', 'sub_frame', 'stylesheet', 'script', 'image', 'font', 'o
 HUVUDSIDA = {'resource-type': ['document'], 'load-context': ['top-frame']}
 SPARR_HUVUDSIDA = {'trigger': {'url-filter': '.*', **HUVUDSIDA}, 'action': {'type': 'ignore-previous-rules'}}
 
-# Adress som appen själv skickar till när en annonsvärd försöker skicka hela fliken vidare (Skydd.beslut):
-# listan "sidor" stoppar den, WebKit ger fel 104 och Flikar visar stoppsidan.
-STOPP_VARD = 'adraze.invalid'
-
 # Datorns snabbkoll (browser/main.js instantDangerMain, ui/shell.js instantDanger): testdomäner som alltid
 # ger stoppsidan. Nyckelordsdelen (/phish|malware|bluff|scam/ i värden) tas inte med: den träffar riktiga
 # sajter som malwarebytes.com.
@@ -955,8 +951,6 @@ def main():
     sidor = [x.json for x in ordna(sid_alla)]
     for d in SNABBKOLL:
         sidor.append({'trigger': {'url-filter': vard_regex(d), **HUVUDSIDA}, 'action': {'type': 'block'}})
-    sidor.append({'trigger': {'url-filter': '^https://' + esc_domain(STOPP_VARD) + '/stopp', **HUVUDSIDA},
-                  'action': {'type': 'block'}})
     for t in tillatregler(inlogg, False):
         t['trigger'].update(HUVUDSIDA)
         sidor.append(t)
@@ -1052,7 +1046,8 @@ def main():
     vardar = 0
     for i, h in enumerate(hinkar):
         vardar += len(h)
-        skriv_json(os.path.join(hinkdir, f'{i:03d}.json'), h)
+        # Värdarna i bokstavsordning, så att samma regler alltid ger samma filer
+        skriv_json(os.path.join(hinkdir, f'{i:03d}.json'), dict(sorted(h.items())))
     s['sajtdata_värdar'] = vardar
 
     # ---- native data

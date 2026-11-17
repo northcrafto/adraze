@@ -67,6 +67,7 @@ enum SkyddProv {
         k.notera("lage", .text(skydd.lage.etikett))
         k.notera("listor", .lista(skydd.listor.matningar.map(\.json)))
         k.notera("listor_totalt_ms", .tal(avrunda(skydd.listor.totalMs)))
+        if let m = skydd.listor.stoppMatning { k.notera("stopplistan", m.json) }
         k.notera("listor_vantat_s", .tal(avrunda(Date().timeIntervalSince(t0), 2)))
         k.notera("listor_borttagna", .lista(skydd.listor.borttagna.map(JSONVarde.text)))
         k.notera("minne_mb_efter_listor", .tal(avrunda(Labbkorning.minneMB())))
@@ -74,6 +75,8 @@ enum SkyddProv {
         let felen = skydd.listor.matningar.filter { $0.fel != nil }
         k.kolla("alla listor laddades", felen.isEmpty && skydd.listor.klara.count == skydd.data.listor.count,
                 .lista(felen.map { .text("\($0.namn): \($0.fel ?? "")") }))
+        k.kolla("stopplistan (annonser som skickar fliken vidare) är klar", skydd.listor.stopp != nil,
+                skydd.listor.stoppMatning?.json ?? .null)
         let overGrans = skydd.data.listor.filter { $0.regler > 150_000 }
         k.kolla("varje lista under WebKits gräns (150 000 regler)", overGrans.isEmpty,
                 .objekt(Dictionary(uniqueKeysWithValues: skydd.data.listor.map { ($0.namn, JSONVarde.tal(Double($0.regler))) })))
@@ -535,12 +538,23 @@ enum SkyddProv {
         guard let ini = prov["initiativ"].text else { return }
         let mal = URL(string: "https://example.org/adraze-landning")!
         let html = sida([], rubrik: "Annonssida på \(ini)", extra: "<script>setTimeout(function () { location.href = \(Skriptbygge.json(mal.absoluteString)); }, 150);</script>")
+        let fore = skydd.beslutslogg.count
         let h = await vantaPaStopp(k, flik, adress: mal, namn: "annons på \(ini) skickar fliken till example.org", {
             flik.webbvy.loadHTMLString(html, baseURL: URL(string: "https://\(ini)/"))
         })
         guard h != nil else { return }
         let text = await js(flik.webbvy, "document.querySelector('p').textContent") as? String
         k.kolla("stoppsidan säger att en annons skickade fliken", text?.hasPrefix("En annons på sidan") == true, .text(text ?? ""))
+        // WebKit stoppade själva adressen (stopplistan), så Flikar har den riktiga adressen (adressfältet och
+        // felet). Stubbens flik nollar felet när stoppsidan visas; Flikars flik behåller det med felets adress.
+        let besluten = skydd.beslutslogg.dropFirst(fore)
+        let stoppad = besluten.contains { $0.url == mal.absoluteString && $0.vad.hasPrefix("stoppad:") }
+        let omvag = besluten.contains { $0.url.contains(Skydd.egenVard) }
+        let felAdress = flik.fel?.url
+        k.kolla("stopplistan stoppade adressen själv (ingen omväg via \(Skydd.egenVard))",
+                stoppad && !omvag && (felAdress == nil || felAdress == mal),
+                ["beslut": .lista(besluten.map { .text("\($0.vad): \($0.url)") }), "fel_url": .text(felAdress?.absoluteString ?? "inget")])
+        k.kolla("stopplistan togs bort ur fliken efter stoppet", !skydd.harStopplistan(flik.webbvy))
         await k.skarmbild("stoppsida-annons")
         // Samma navigering från en vanlig sida stoppas inte
         let start = skydd.beslutslogg.count

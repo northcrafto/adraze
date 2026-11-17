@@ -1,9 +1,14 @@
+import CryptoKit
 import Foundation
 import WebKit
 
 /// WebKits regellistor (`WKContentRuleList`): slås upp i `WKContentRuleListStore` om de redan är kompilerade,
 /// annars kompileras de (i WebKits egen bakgrundskö). Identiteten är `adraze-<namn>-<sha256:12>` ur manifestet,
 /// så en lista kompileras om bara när filen har ändrats. Gamla `adraze-`-listor tas bort efteråt.
+///
+/// Dessutom stopplistan (en regel som stoppar nästa huvudsida), som skyddet lägger i en vy bara för en enda
+/// navigering: när en annonsvärd skickar fliken vidare stoppar WebKit då själva adressen med fel 104, och
+/// Flikar visar stoppsidan med den riktiga adressen.
 ///
 /// Ägare: Skydd.
 @MainActor
@@ -30,11 +35,21 @@ final class Regellistor {
     private(set) var matningar: [Matning] = []
     private(set) var totalMs: Double = 0
     private(set) var borttagna: [String] = []
+    /// Stopplistan, eller `nil` om den inte är klar (eller inte gick att kompilera).
+    private(set) var stopp: WKContentRuleList?
+    private(set) var stoppMatning: Matning?
     private let logg = Logg("Skydd")
 
     private var store: WKContentRuleListStore { WKContentRuleListStore.default() }
 
     static func identitet(_ post: Regeldata.Listpost) -> String { "adraze-\(post.namn)-\(post.sha256.prefix(12))" }
+
+    /// Huvudsidan (dokument i översta ramen), vilken adress som helst.
+    static let stoppjson = #"[{"trigger":{"url-filter":".*","resource-type":["document"],"load-context":["top-frame"]},"action":{"type":"block"}}]"#
+    static let stoppid: String = {
+        let h = SHA256.hash(data: Data(stoppjson.utf8)).map { String(format: "%02x", $0) }.joined()
+        return "adraze-stopp-\(h.prefix(12))"
+    }()
 
     /// Slår upp eller kompilerar alla listor i manifestets ordning (sidor och security först).
     /// `framsteg` får andelen klara regler (0–1), `klar` varje lista när den går att använda.
@@ -51,9 +66,22 @@ final class Regellistor {
             finns = []
             logg.info("rensade de kompilerade listorna (-skyddRensa)")
         }
+        // Stopplistan först (en regel, några millisekunder)
+        let ts = CFAbsoluteTimeGetCurrent()
+        var stoppkalla = "uppslagen"
+        var stoppfel: String?
+        if finns.contains(Self.stoppid) { stopp = await slaUpp(Self.stoppid) }
+        if stopp == nil {
+            stoppkalla = "kompilerad"
+            (stopp, stoppfel) = await kompilera(Self.stoppid, Self.stoppjson)
+        }
+        let stoppms = (CFAbsoluteTimeGetCurrent() - ts) * 1000
+        stoppMatning = Matning(namn: "stopp", id: Self.stoppid, regler: 1, kalla: stoppkalla, ms: stoppms, fel: stoppfel)
+        if let stoppfel { logg.fel("stopplistan: \(stoppfel)") } else { logg.info("stopplistan \(stoppkalla) på \(Int(stoppms)) ms") }
+
         let totalt = max(1, data.listor.reduce(0) { $0 + $1.regler })
         var gjort = 0
-        var aktuella = Set<String>()
+        var aktuella: Set<String> = [Self.stoppid]
         for post in data.listor {
             let id = Self.identitet(post)
             aktuella.insert(id)

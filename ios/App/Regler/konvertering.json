@@ -3,8 +3,8 @@
  "max_per_lista": 150000,
  "listor": {
   "sidor": {
-   "regler": 7386,
-   "byte": 1253686
+   "regler": 7385,
+   "byte": 1253541
   },
   "security": {
    "regler": 13615,
@@ -65,5 +65,5 @@
   "undantag_i_varje_nätlista": 4121
  },
  "varningar": [],
- "totalt_webkit_regler": 180363
+ "totalt_webkit_regler": 180362
 }
