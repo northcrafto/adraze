@@ -197,7 +197,7 @@ Kör det när du ändrat något som andra moduler ser.
 | `SkyddTjanst`, `Skyddslage`, `Navigeringsbeslut` | `Skydd.swift` | Skyddet: förbered en webbvy, beslut per navigering, stoppsida, pausa per sajt, räknaren (`antalBlockerade`, `totaltBlockerade`) |
 | `KontoTjanst`, `Kontouppgifter`, `Nyckelring` | `Konto.swift` | Inloggad?, token, Keychain; `visaInloggning(rubrik:underrubrik:)` visar kontots ark ovanpå det som visas och svarar `true` om man är inloggad när det stängs |
 | `LokalHTTP` | `LokalHTTP.swift` | `http://` mot testservrar på 127.0.0.1, 10/8, 172.16/12, 192.168/16 och 100.64/10 (Tailscale) i `URLSession` (`protocolClasses`), som ATS annars stoppar. Bara för testservrar |
-| `AdrazeArk`, `Stangknapp`, `.adrazeArk()` | `Ark.swift` | Arken ser lika ut överallt: hörn 28, handtag, krysset 40 pt 16 pt från kanten, rubrik Fraunces 32/600, sidmarginal 24 |
+| `AdrazeArk`, `Stangknapp`, `.adrazeArk()` | `Ark.swift` | Arken ser lika ut överallt: hörn 28, handtag, krysset 40 pt 16 pt från kanten, rubrik Fraunces 32/600, sidmarginal 24; webbsidornas egna ark (startsidans låda, bakgrundsväljaren) gör likadant i `ios.css`, stora knappar 50 pt med hörn 16 |
 | `Startbild`, `StartbildVy` | `Startbild.swift` | `app.startbild`: gorillan från startskärmen ligger kvar tills det som laddar är klart (`vanta`/`klar`) och öppnar sig sedan i en cirkel |
 | `Starttider` | `Starttider.swift` | Var tiden går vid start, i ms från att processen startade, och när huvudtråden var upptagen (`stopp`) |
 | `Fonstertema` | `Statusrad.swift` | Fönstrets ljusa eller mörka läge följer temat; ett SwiftUI-`.sheet` behöver ändå `.preferredColorScheme` (se nedan) |
