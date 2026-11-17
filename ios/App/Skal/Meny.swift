@@ -21,35 +21,40 @@ struct Menyvy: View {
         let f = Skalfarger(tema, privat: flik?.privat ?? false)
         let yta = f.privat ? Color.hex("#140b26") : Color.tusch
         let accent = f.privat ? Color.hex("#a855f7") : Self.ljusAccent(tema)
-        GeometryReader { g in
-            let o = g.frame(in: .global).origin
-            let c = CGPoint(x: skal.menyCentrum.x - o.x, y: skal.menyCentrum.y - o.y)
-            let r = Self.radie(fran: c, i: g.size)
-            ZStack(alignment: .topLeading) {
-                yta
-                innehall(flik, f, accent: accent, bredd: g.size.width, sakerTopp: g.safeAreaInsets.top, sakerBotten: g.safeAreaInsets.bottom)
-                    .frame(width: g.size.width, height: g.size.height)
-            }
-            .mask {
-                Circle()
-                    .frame(width: 2 * r, height: 2 * r)
-                    .scaleEffect(visad || minska ? 1 : 0.001)
-                    .opacity(minska && !visad ? 0 : 1)
-                    .position(c)
-            }
-            .overlay {
-                // Krysset där hamburgaren satt.
-                Button { stang() } label: {
-                    Hamburgare(oppen: visad, accent: accent, farg: .papper)
-                        .frame(width: 48, height: 44)
-                        .contentShape(Rectangle())
+        // Säkerhetsmarginalerna läses i en yttre GeometryReader: inne i en vy med `.ignoresSafeArea()` är de 0
+        // (då hamnade rubriken under klockan och Dynamic Island).
+        GeometryReader { yttre in
+            let saker = yttre.safeAreaInsets
+            GeometryReader { g in
+                let o = g.frame(in: .global).origin
+                let c = CGPoint(x: skal.menyCentrum.x - o.x, y: skal.menyCentrum.y - o.y)
+                let r = Self.radie(fran: c, i: g.size)
+                ZStack(alignment: .topLeading) {
+                    yta
+                    innehall(flik, f, accent: accent, bredd: g.size.width, sakerTopp: saker.top, sakerBotten: saker.bottom)
+                        .frame(width: g.size.width, height: g.size.height)
                 }
-                .buttonStyle(Tryckstil(skala: 0.9))
-                .position(c)
-                .accessibilityLabel(tr("Stäng menyn"))
+                .mask {
+                    Circle()
+                        .frame(width: 2 * r, height: 2 * r)
+                        .scaleEffect(visad || minska ? 1 : 0.001)
+                        .opacity(minska && !visad ? 0 : 1)
+                        .position(c)
+                }
+                .overlay {
+                    // Krysset där hamburgaren satt.
+                    Button { stang() } label: {
+                        Hamburgare(oppen: visad, accent: accent, farg: .papper)
+                            .frame(width: 48, height: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(Tryckstil(skala: 0.9))
+                    .position(c)
+                    .accessibilityLabel(tr("Stäng menyn"))
+                }
             }
+            .ignoresSafeArea()
         }
-        .ignoresSafeArea()
         .onAppear {
             Haptik.forbered()
             withAnimation(Rorelse.val(Rorelse.cirkel, minska)) { visad = true }

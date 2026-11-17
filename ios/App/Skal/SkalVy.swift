@@ -36,6 +36,7 @@ struct SkalVy: View {
         let f = Skalfarger(tema, privat: privat)
         let uppe = app.installningar[.verktygPlacering] == .uppe
         let enRad = vsc == .compact || hsc == .regular
+        let stil = statusstil(flik, f, uppe: uppe || enRad)
         ZStack {
             Group {
                 if enRad {
@@ -91,6 +92,7 @@ struct SkalVy: View {
         .onChange(of: matt, initial: true) { _, m in uppdateraDelta(m, uppe: uppe, enRad: enRad) }
         .onChange(of: uppe) { _, u in uppdateraDelta(matt, uppe: u, enRad: enRad) }
         .onChange(of: enRad) { _, e in uppdateraDelta(matt, uppe: uppe, enRad: e) }
+        .onChange(of: stil, initial: true) { _, s in app.statusrad = s }
     }
 
     private func uppdateraDelta(_ m: Panelmatt, uppe: Bool, enRad: Bool) {
@@ -140,19 +142,33 @@ struct SkalVy: View {
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { skal.webbram = $0 }
     }
 
-    /// Statusraden ovanför sidan: sidans egen färg när statusraden går att läsa på den, annars skalets.
+    /// Statusraden ovanför sidan: sidans egen färg (`theme-color` eller bakgrunden), som i Safari, annars skalets.
+    /// Klockan och batteriet får ljus eller mörk text efter färgen (`statusstil`).
     private func statusfarg(_ flik: (any Flik)?, _ f: Skalfarger, uppe: Bool) -> Color {
         if uppe { return f.rad }
-        guard let flik, !visarStart(flik), flik.fel == nil, let c = skal.sidfarg else {
+        // Flikars felsida har skalets färg; skyddets stoppsida har en egen (theme-color) och får den
+        guard let flik, !visarStart(flik), flik.fel == nil || flik.fel?.blockeradAvSkyddet == true, let c = skal.sidfarg else {
             if visarStart(flik), flik?.privat == true, schema == .dark { return Color.hex("#1d0d36") }
             return f.sida
         }
         let r = c.resolvedColor(with: UITraitCollection(userInterfaceStyle: schema == .dark ? .dark : .light))
         var rr: CGFloat = 0, gg: CGFloat = 0, bb: CGFloat = 0, aa: CGFloat = 0
         guard r.getRed(&rr, green: &gg, blue: &bb, alpha: &aa), aa > 0.9 else { return f.sida }
+        return Color(uiColor: r)
+    }
+
+    /// Statusradens stil (`app.statusrad`) efter det som ligger under den: startsidans bild och menyns mörka yta
+    /// ger ljus text, annars avgör färgen (relativ luminans under 0,18 ger ljus text, där vit text har mest kontrast).
+    private func statusstil(_ flik: (any Flik)?, _ f: Skalfarger, uppe: Bool) -> Statusradsstil {
+        if skal.menyOppen { return .ljus }
+        let skalYta = skal.vaxlareOppen || skal.redigerar
+        if !uppe, !skalYta, visarStart(flik), webbstart(flik) { return .ljus }
+        let farg = skalYta ? f.sida : statusfarg(flik, f, uppe: uppe)
+        let r = UIColor(farg).resolvedColor(with: UITraitCollection(userInterfaceStyle: schema == .dark ? .dark : .light))
+        var rr: CGFloat = 0, gg: CGFloat = 0, bb: CGFloat = 0, aa: CGFloat = 0
+        guard r.getRed(&rr, green: &gg, blue: &bb, alpha: &aa) else { return .auto }
         let lum = 0.2126 * Palett.tillLin(Double(rr) * 255) + 0.7152 * Palett.tillLin(Double(gg) * 255) + 0.0722 * Palett.tillLin(Double(bb) * 255)
-        let lasbar = schema == .dark ? lum < 0.18 : lum > 0.4
-        return lasbar ? Color(uiColor: r) : f.sida
+        return lum < 0.18 ? .ljus : .mork
     }
 
     // MARK: - Raden nere (stående)

@@ -25,6 +25,7 @@ final class SkalModul: NSObject, AppModul {
             app.handelser.lyssna(FlikNavigerade.self) { h in
                 if h.flik == app.flikar.aktivId { skal.expandera() }
             },
+            app.handelser.lyssna(SkalVisa.self) { h in skal.visa(h.yta) },
         ]
 
         app.labb.registrera("skal", beskrivning: "Skalet: lokal sida, flikväxlaren, menyn, adressfältet, accenter, mörkt läge, raden uppe, liggande, tyska och stor text") { k in

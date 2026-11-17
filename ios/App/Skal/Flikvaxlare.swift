@@ -75,6 +75,9 @@ struct Flikvaxlare: View {
         .padding(.bottom, 6)
     }
 
+    /// Tonade kanter i rutnätet (lika mycket luft överst, så att första raden inte tonas när den inte rullats).
+    private static let kant: CGFloat = 16
+
     private func kolumner(_ bredd: CGFloat) -> Int {
         if bredd > 1000 { return 5 }
         if bredd > 700 { return 4 }
@@ -100,10 +103,18 @@ struct Flikvaxlare: View {
                         }
                     }
                     .padding(.horizontal, 16)
-                    .padding(.top, 8)
+                    .padding(.top, Self.kant)
                     .padding(.bottom, 20)
                 }
                 .scrollIndicators(.hidden)
+                // Korten tonar ut under rubriken och bottenraden i stället för att klippas av med en hård kant
+                .mask {
+                    VStack(spacing: 0) {
+                        LinearGradient(colors: [.clear, .black], startPoint: .top, endPoint: .bottom).frame(height: Self.kant)
+                        Rectangle()
+                        LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom).frame(height: Self.kant)
+                    }
+                }
                 .onAppear {
                     let id = app.flikar.aktivId
                     if let id { rulla.scrollTo(id, anchor: .center) }

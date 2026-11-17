@@ -397,6 +397,21 @@ final class SkalLage {
         }
     }
 
+    /// `SkalVisa` från en annan modul (självtest, genvägar).
+    func visa(_ yta: SkalVisa.Yta) {
+        switch yta {
+        case .flikvaxlare: oppnaVaxlare()
+        case .meny: oppnaMeny()
+        case .plats(let namn): oppnaPlats(namn)
+        case .inget:
+            stangMeny()
+            stangVaxlare()
+            snabbmeny = nil
+            ark = nil
+            plats = nil
+        }
+    }
+
     // MARK: - Notiser
 
     func notis(_ text: String, ikon: Ikon? = nil) {
