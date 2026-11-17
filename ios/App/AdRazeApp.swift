@@ -16,7 +16,9 @@ struct AdRazeApp: App {
             RotVy()
                 .environment(app)
                 .environment(app.tema)
-                .task { await app.korIgang() }
+                // Inte `.task`: SwiftUI avbryter den när vyn lämnar hierarkin (en `.fullScreen`-modal gör det),
+                // och då skulle starten och självtestet avbrytas mitt i. AppMiljo håller en egen uppgift.
+                .onAppear { app.borjaKoraIgang() }
         }
         .onChange(of: fas) { _, ny in app.fasAndrad(ny) }
     }

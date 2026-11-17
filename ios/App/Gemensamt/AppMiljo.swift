@@ -11,7 +11,7 @@ import UIKit
 ///
 /// | Egenskap | Protokoll | Ersättning från start | Riktig från |
 /// |---|---|---|---|
-/// | `flikar` | `FlikHanterare` | `EnkelFlikHanterare` (en flik åt gången) | Flikar |
+/// | `flikar` | `FlikHanterare` | `EnkelFlikHanterare` (flera flikar, inget sparas) | Flikar |
 /// | `skydd` | `SkyddTjanst` | `IngetSkydd` | Skydd |
 /// | `konto` | `KontoTjanst` | `EnkeltKonto` (läser token ur Keychain) | Konto |
 /// | `huvudvy` | – | `EnkeltSkal` (en webbvy och adressfältet nere) | Skal |
@@ -49,6 +49,7 @@ final class AppMiljo {
     @ObservationIgnored private(set) var aktuellModul = "Grund"
     @ObservationIgnored private var modultyper: [String: any AppModul.Type] = [:]
     @ObservationIgnored private var harStartat = false
+    @ObservationIgnored private var startuppgift: Task<Void, Never>?
     @ObservationIgnored private let logg = Logg("App")
 
     init(argument: Startargument = Startargument()) {
@@ -135,7 +136,15 @@ final class AppMiljo {
         logg.info("moduler: " + moduler.map { $0.utesluten ? "(\($0.namn))" : $0.namn }.joined(separator: ", "))
     }
 
-    /// Startar modulerna och sedan självtestet om appen startades med `-mode <namn>`. Anropas en gång av AdRazeApp.
+    /// Startar `korIgang()` i en egen uppgift som lever lika länge som appen (anropas av AdRazeApp, fler anrop gör
+    /// ingenting). Inte i en vys `.task`: SwiftUI avbryter den uppgiften när vyn lämnar hierarkin, till exempel
+    /// medan en `.fullScreen`-modal visas, och då avbröts modulernas start och självtesterna mitt i.
+    func borjaKoraIgang() {
+        guard startuppgift == nil else { return }
+        startuppgift = Task { await korIgang() }
+    }
+
+    /// Startar modulerna och sedan självtestet om appen startades med `-mode <namn>`. Körs en gång.
     func korIgang() async {
         guard !harStartat else { return }
         harStartat = true

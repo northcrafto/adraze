@@ -90,8 +90,8 @@ struct SidaLaddad: AppHandelse {
     let privat: Bool
 }
 
-/// Skyddet stoppade en hel sida (WebKit-fel 104). Skickas av Skydd när Flikar anropar
-/// `skydd.huvudsidaBlockerad(_:flik:)`.
+/// Skyddet stoppade en hel sida (WebKit-fel 104). Skickas av Skydd inifrån `blockeringssida(for:flik:)`, som
+/// Flikar anropar när huvudramen stoppades.
 struct HuvudsidaBlockerad: AppHandelse {
     let flik: UUID
     let url: URL
@@ -101,3 +101,55 @@ struct HuvudsidaBlockerad: AppHandelse {
 struct KontoAndrades: AppHandelse {
     let inloggad: Bool
 }
+
+// MARK: - Flikarna (skickas av Flikar)
+
+/// En flik öppnades (ny flik, länk med target=_blank, window.open eller ångrad stängning).
+struct FlikOppnad: AppHandelse {
+    let flik: UUID
+    let privat: Bool
+    /// Fliken som öppnade den (popup och länkar som öppnar nytt fönster).
+    let oppnadAv: UUID?
+}
+
+struct FlikStangd: AppHandelse {
+    let flik: UUID
+    let privat: Bool
+}
+
+struct FlikAktiverad: AppHandelse {
+    let flik: UUID
+}
+
+/// Fliken släppte sin webbvy för att spara minne (`flikar.sova`, minnesvarning).
+struct FlikSomnade: AppHandelse {
+    let flik: UUID
+}
+
+/// Fliken fick en webbvy igen.
+struct FlikVaknade: AppHandelse {
+    let flik: UUID
+}
+
+/// En sida gick in i eller ut ur helskärm (video eller Fullscreen API). Skalet kan gömma sina rader.
+struct FlikHelskarm: AppHandelse {
+    let flik: UUID
+    let helskarm: Bool
+}
+
+struct FlikNedladdningKlar: AppHandelse {
+    let id: String
+    let fil: URL
+    let privat: Bool
+}
+
+struct FlikNedladdningMisslyckades: AppHandelse {
+    let id: String
+    let text: String
+}
+
+/// Historiken ändrades (besök, borttaget, rensat, annat konto).
+struct FlikHistorikAndrad: AppHandelse {}
+
+/// Bokmärkena ändrades.
+struct FlikBokmarkenAndrade: AppHandelse {}

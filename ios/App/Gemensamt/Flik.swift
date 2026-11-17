@@ -33,6 +33,25 @@ protocol Flik: AnyObject, Observable {
     /// Webbvyn. Får skapas först när den behövs och släppas när fliken sover (`flikar.sova`).
     var webbvy: WKWebView { get }
 
+    /// Fliken som öppnade den här (länk med target=_blank, window.open), annars `nil`.
+    var oppnadAv: UUID? { get }
+    /// Fliken har släppt sin webbvy för att spara minne. `webbvy` väcker den.
+    var sover: Bool { get }
+    /// Fliken visar Flikars felsida (eller skyddets stoppsida) i webbvyn. Skalet lägger då inget eget ovanpå.
+    var visarFelsida: Bool { get }
+    /// Sajtens ikon (hämtad av fliken), eller `nil` medan den saknas.
+    var favikon: UIImage? { get }
+    /// Den senaste bilden av sidan, för flikväxlaren (tas när fliken lämnas och efter laddning).
+    var miniatyr: UIImage? { get }
+    /// Sidans `theme-color`, för skalets rader.
+    var temafarg: UIColor? { get }
+    /// Sidzoomen (0,5–3), sparad per sajt.
+    var zoom: Double { get }
+    /// Skrivbordsversionen av sajten (datorns användaragent och `preferredContentMode = .desktop`).
+    var skrivbordslage: Bool { get }
+    /// Sidan visar en video eller ett element i helskärm.
+    var helskarm: Bool { get }
+
     func ladda(_ url: URL)
     /// Det användaren skrev i adressfältet: en adress eller en sökning (`Webbadress.tolka`).
     func ladda(text: String)
@@ -40,6 +59,16 @@ protocol Flik: AnyObject, Observable {
     func framat()
     func laddaOm()
     func stoppa()
+
+    func sattZoom(_ z: Double)
+    /// Ett zoomsteg in eller ut.
+    func zooma(inat: Bool)
+    /// Byter mellan mobil- och skrivbordsversion och laddar om sidan.
+    func sattSkrivbordslage(_ pa: Bool)
+    /// Söker på sidan och ger antalet träffar (markerar den första).
+    func hitta(_ text: String) async -> Int
+    /// Visar systemets sökfält ("Hitta på sidan"), med `text` ifylld om den finns.
+    func visaSokfalt(_ text: String?)
 }
 
 /// Alla flikar. Kontraktet mellan Flikar och Skal (och Labb, som öppnar sidor i självtesterna).
@@ -56,6 +85,16 @@ protocol FlikHanterare: AnyObject, Observable {
     func nyFlik(_ url: URL?, privat: Bool, aktivera: Bool) -> any Flik
     func aktivera(_ id: UUID)
     func stang(_ id: UUID)
+
+    /// Det finns en stängd flik att öppna igen.
+    var kanAngraStang: Bool { get }
+    /// Öppnar den senast stängda fliken igen (med bakåt/framåt-listan) och gör den aktiv.
+    @discardableResult
+    func angraStang() -> (any Flik)?
+    /// Flyttar en flik till en ny plats i ordningen.
+    func flytta(_ id: UUID, till plats: Int)
+    /// Stänger alla privata (eller alla vanliga) flikar.
+    func stangAlla(privata: Bool)
 }
 
 extension FlikHanterare {
@@ -77,6 +116,13 @@ struct Sidfel: Sendable, Hashable {
     var blockeradAvSkyddet: Bool { doman == "WebKitErrorDomain" && kod == 104 }
     /// Användaren eller en ny navigering avbröt (inte ett riktigt fel).
     var avbruten: Bool { doman == NSURLErrorDomain && kod == NSURLErrorCancelled }
+
+    init(url: URL?, doman: String, kod: Int, text: String) {
+        self.url = url
+        self.doman = doman
+        self.kod = kod
+        self.text = text
+    }
 
     init(_ fel: Error, url: URL?) {
         let ns = fel as NSError

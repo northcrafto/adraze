@@ -230,7 +230,11 @@ final class Flikmotor: FlikHanterare {
 
     /// Öppnar den senast stängda fliken igen, med bakåt/framåt-listan (datorns Ctrl+Shift+T).
     @discardableResult
-    func angraStang() -> Webbflik? {
+    func angraStang() -> (any Flik)? { ateroppnaStangd() }
+
+    /// Som `angraStang()`, men ger Flikars egen typ.
+    @discardableResult
+    func ateroppnaStangd() -> Webbflik? {
         guard let s = stangda.popLast() else { return nil }
         let f = Webbflik(motor: self, stangd: s)
         alla.insert(f, at: min(max(0, s.index), alla.count))

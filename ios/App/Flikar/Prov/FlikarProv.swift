@@ -608,7 +608,7 @@ enum FlikarProv {
         motor.stang(v.f1.id)
         k.lika("en flik färre", motor.alla.count, antal - 1)
         k.kolla("går att ångra", motor.kanAngraStang)
-        guard let ater = motor.angraStang() else {
+        guard let ater = motor.ateroppnaStangd() else {
             k.kolla("ångra stäng", false)
             return
         }
