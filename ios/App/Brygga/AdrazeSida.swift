@@ -23,6 +23,9 @@ final class AdrazeSida: UIView, WKNavigationDelegate, WKUIDelegate {
     var stang: (@MainActor () -> Void)?
     /// Utrymme nertill som värdvyn täcker (skalets fält), i punkter. Sidan lägger sitt innehåll ovanför.
     var nedre: CGFloat = 0 { didSet { if nedre != oldValue { skickaNedre() } } }
+    /// Sidan ligger i skalet (ny flik), där skalets adressfält syns: `html.ios-i-skalet` (startsidans egen sökruta
+    /// döljs då, ios.css). Sätts av `AdrazeSidaVy`.
+    var iSkalet = false { didSet { if iSkalet != oldValue { skickaNedre() } } }
 
     /// Kontrollern som visar ytan modalt (`AdrazeSidor.visa`), annars `nil`.
     weak var kontroller: UIViewController?
@@ -129,8 +132,8 @@ final class AdrazeSida: UIView, WKNavigationDelegate, WKUIDelegate {
 
     private func skickaNedre() {
         guard arKlar else { return }
-        let js = "document.documentElement.style.setProperty('--ios-nedre', n + 'px');"
-        webbvy.callAsyncJavaScript(js, arguments: ["n": Double(nedre)], in: nil, in: .page, completionHandler: nil)
+        let js = "const h = document.documentElement; h.style.setProperty('--ios-nedre', n + 'px'); h.classList.toggle('ios-i-skalet', i);"
+        webbvy.callAsyncJavaScript(js, arguments: ["n": Double(nedre), "i": iSkalet], in: nil, in: .page, completionHandler: nil)
     }
 
     // MARK: - WKNavigationDelegate
@@ -365,7 +368,11 @@ struct AdrazeSidaVy: UIViewRepresentable {
     var nedre: CGFloat = 0
     var navigera: (@MainActor (URL) -> Void)?
 
-    func makeUIView(context: Context) -> AdrazeSida { AdrazeSida(yta: yta, fragment: fragment) }
+    func makeUIView(context: Context) -> AdrazeSida {
+        let s = AdrazeSida(yta: yta, fragment: fragment)
+        s.iSkalet = true
+        return s
+    }
 
     func updateUIView(_ vy: AdrazeSida, context: Context) {
         vy.nedre = nedre

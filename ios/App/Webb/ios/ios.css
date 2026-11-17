@@ -192,6 +192,9 @@ html.ios-startsida #nt-clock { font-size: 76px; }
 html.ios-startsida #nt-greet { margin: 10px 0 26px; font-size: 17px; text-align: center; }
 html.ios-startsida #nt-innehall > div:has(> #nt-search) { width: 100% !important; height: 54px; padding: 0 16px; border-radius: 16px; gap: 10px; }
 html.ios-startsida #nt-search { font-size: 17px; }
+/* I skalet (ny flik) ligger skalets adressfält med samma text nertill: ingen sökruta till på sidan */
+html.ios-startsida.ios-i-skalet #nt-innehall > div:has(> #nt-search) { display: none !important; }
+html.ios-startsida.ios-i-skalet #nt-greet { margin-bottom: 34px; }
 html.ios-startsida #shortcuts { width: 100% !important; margin-top: 28px; gap: 18px 8px; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; justify-items: center; }
 html.ios-startsida .sc:hover .sc-tile { transform: none; }
 html.ios-startsida .sc:active .sc-tile { transform: scale(.94); transition: transform .12s; }

@@ -22,7 +22,8 @@ protocol SidTjanst: AnyObject {
     /// Stänger en visad yta (`nil` = den översta).
     func stang(_ yta: String?)
     /// Ytan som SwiftUI-vy. `nedre` = punkter nertill som värdvyn täcker (skalets fält), `navigera` = sidan vill
-    /// öppna en vanlig webbadress (`nil`: den aktiva tomma fliken, annars en ny flik).
+    /// öppna en vanlig webbadress (`nil`: den aktiva tomma fliken, annars en ny flik). Vyn räknar med att värden
+    /// har ett eget adressfält: startsidans sökruta döljs (`html.ios-i-skalet`), modalt (`visa`) syns den.
     func vy(_ yta: String, fragment: String?, nedre: CGFloat, navigera: (@MainActor (URL) -> Void)?) -> AnyView
 }
 
