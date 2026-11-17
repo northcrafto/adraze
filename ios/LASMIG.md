@@ -258,6 +258,8 @@ Hur modulerna hänger ihop:
   `.preferredColorScheme(tema.foredragetSchema)`, som chattens `chattArk()` (utan den blev Nytt meddelande,
   chattinfo, gruppinfo och bakgrundsvalet ljusa ovanpå en mörk chatt, mätt 2026-11-17). Falk tar appens accent så
   länge den inte har en egen färg (Inställningar › Falk); startsidan och Anpassa läser accenten ur inställningarna.
+  `ios.js` (`falkFarg`) visar i Inställningar › Falk den färg Falk har och sparar ett val som det är, också
+  AdRaze-orange: datorns `falk-inst.js` tar bort värdet när man väljer standardfärgen, och då följde Falk appen.
 - En moduls CSS och JS för en AdRaze-sida: `app.brygga.skript(yta: "falk", css: …, js: …)`. Brygga lägger dem i
   sidan vid varje navigering, efter datorns preload och före `ios.js` (Falk gör så med `falk-ios.css`/`.js`).
 - Kallstarten: startskärmen (`UILaunchScreen` i `project.yml`) och appens första ruta är samma bild, gorillan mitt
