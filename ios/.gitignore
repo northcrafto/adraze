@@ -1,0 +1,13 @@
+# Skapas vid varje bygge (bygg-sim.sh kör xcodegen). Checkas aldrig in.
+*.xcodeproj/
+*.xcworkspace/
+Genererat/
+build/
+build-fran-mac/
+DerivedData/
+xcuserdata/
+.DS_Store
+__pycache__/
+
+# Kopia av datorns UI (~/adraze/browser/ui). Skapas före varje bygge av verktyg/kopiera-ui.sh (Brygga).
+App/Webb/ui/
