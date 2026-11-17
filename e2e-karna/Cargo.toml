@@ -1,0 +1,32 @@
+[package]
+name = "adraze-e2e-karna"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.89"
+license = "MPL-2.0"
+publish = false
+description = "AdRazes E2E-kärna: ett smalt lager runt vodozemac (Olm/Megolm), samma kod på iPhone (C-gränssnitt) och datorn (wasm)."
+
+[lib]
+name = "adraze_e2e"
+# staticlib (iPhone) och cdylib (wasm) väljs med `cargo rustc --crate-type …` i bygg.sh; rlib för testerna.
+crate-type = ["rlib"]
+
+[dependencies]
+# Låst version: byt bara efter att ha läst CHANGELOG (vodozemac ändrar API mellan mindre versioner).
+vodozemac = { version = "=0.11.2", default-features = false, features = ["precomputed-tables"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+base64 = "0.23"
+aes-gcm = { version = "0.11", features = ["aes", "zeroize"] }
+sha2 = "0.11"
+hkdf = "0.13"
+getrandom = "0.4"
+zeroize = "1"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+debug = false
+strip = "debuginfo"

@@ -1,0 +1,4 @@
+# wasm32-unknown-unknown har ingen slump från systemet: getrandom anropar __getrandom_v03_custom i lib.rs,
+# som hämtar byte från JS (crypto.getRandomValues).
+[target.wasm32-unknown-unknown]
+rustflags = ["--cfg", 'getrandom_backend="custom"']
