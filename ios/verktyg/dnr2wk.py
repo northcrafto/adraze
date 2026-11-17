@@ -17,6 +17,8 @@ Det som skrivs (allt under UT):
     data/sajter/NNN.json    per värd: sajtens dölj-regler, stilregler, kakrute-regler och scriptlet-data,
                             uppdelat i 256 hinkar (FNV-1a av värden), så att appen bara läser det den behöver
     data/initiativ.txt      annonsvärdar som inte får skicka hela fliken till en annan sajt (görs native)
+    data/raknare.txt        värdar som annons- och spårlistorna stoppar på alla sajter (||värd^ eller requestDomains
+                            utan initiatorDomains): appens räknare räknar resurser från dem som inte laddades
     data/popup.txt          popup-nätverkens värdar (native koll av nya fönster)
     data/parametrar.json    spårningsparametrar som tas bort (native för sidor, JS för fetch/XHR)
     data/inlogg.json        datorns tillåtlistor (inloggning, betalning, betrodda popup-fönster)
@@ -562,6 +564,21 @@ def convert_rule(r, kalla, s, native):
 
     dnr_typer, explicit = typer_for(c)
     huvud = 'main_frame' in dnr_typer
+    # Räknarens värdar: block för delresurser på alla sajter, hela värden (inte en viss sökväg)
+    if act['type'] == 'block' and kalla in ('ads', 'privacy') and not c.get('initiatorDomains') \
+            and not c.get('regexFilter') and any(t != 'main_frame' for t in dnr_typer):
+        uf = c.get('urlFilter')
+        if uf is None and c.get('requestDomains'):
+            for d in c['requestDomains']:
+                d = ren_vard(d)
+                if d:
+                    native['raknare'].add(d)
+        elif uf:
+            m = re.fullmatch(r'\|\|([a-z0-9][a-z0-9.-]*\.[a-z0-9-]+)\^?\|?', uf.lower())
+            if m and not c.get('requestDomains'):
+                d = ren_vard(m.group(1))
+                if d:
+                    native['raknare'].add(d)
     inc = domains(c.get('initiatorDomains'))
     exc = domains(c.get('excludedInitiatorDomains'))
     dt = c.get('domainType')
@@ -911,7 +928,7 @@ def main():
 
     # ---- nätlistor och sidlistan
     s = Counter()
-    native = {'initiativ': set()}
+    native = {'initiativ': set(), 'raknare': set()}
     block = {}
     lokala = {}
     undantag_alla = []   # DNR:s allow-regler gäller över alla regelpaket (som i tillägget och på datorn)
@@ -1059,6 +1076,10 @@ def main():
     with open(os.path.join(dst, 'data', 'popup.txt'), 'w') as fh:
         fh.write('\n'.join(popup_hosts) + '\n')
     s['native_initiativvärdar'] = len(initiativ)
+    raknare = sorted(native['raknare'])
+    with open(os.path.join(dst, 'data', 'raknare.txt'), 'w') as fh:
+        fh.write('\n'.join(raknare) + '\n')
+    s['native_räknarvärdar'] = len(raknare)
     s['native_popupvärdar'] = len(popup_hosts)
     par = convert_parametrar(json.load(open(os.path.join(ext, 'rules', 'parametrar.json'))), s)
     skriv_json(os.path.join(dst, 'data', 'parametrar.json'), par)

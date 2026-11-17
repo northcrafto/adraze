@@ -43,6 +43,8 @@ final class Regeldata {
     /// Annonsvärdar som inte får skicka hela fliken till en annan sajt. Laddas i bakgrunden (93 000 värdar).
     private(set) var initiativ: Set<String> = []
     private(set) var initiativLaddad = false
+    /// Värdar som annons- och spårlistorna stoppar på alla sajter, för räknaren (`Raknare`, 97 000 värdar).
+    private(set) var raknarvardar: Set<String> = []
     private(set) var parametrar: [Parameterregel] = []
 
     private(set) var kakUpplas = ""
@@ -116,6 +118,21 @@ final class Regeldata {
         initiativ = mangd
         initiativLaddad = true
     }
+
+    /// Läser räknarens värdar i bakgrunden (knappt 2 MB text).
+    func laddaRaknare() async {
+        guard raknarvardar.isEmpty else { return }
+        let fil = rot.appendingPathComponent("data/raknare.txt")
+        raknarvardar = await Task.detached(priority: .utility) { () -> Set<String> in
+            guard let t = try? String(contentsOf: fil, encoding: .utf8) else { return [] }
+            var m = Set<String>(minimumCapacity: 100_000)
+            for rad in t.split(separator: "\n") where !rad.isEmpty { m.insert(String(rad)) }
+            return m
+        }.value
+        if raknarvardar.isEmpty { logg.varning("Regler/data/raknare.txt saknas: skyddet räknar inget") }
+    }
+
+    func arRaknarvard(_ v: String) -> Bool { Vard.iMangd(v, raknarvardar) }
 
     private static func parameterregel(_ j: [String: Any]) -> Parameterregel? {
         let skift = (j["skiftlage"] as? Bool) ?? false

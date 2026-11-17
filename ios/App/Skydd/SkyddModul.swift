@@ -13,6 +13,15 @@ final class SkyddModul: NSObject, AppModul {
         app.ersatt(skydd: skydd)
         app.installningar.registrera(Nycklar.skyddPausade)
         app.brygga.hantera("skydd:status") { _ in .text(skydd.lage.etikett) }
+        // Startsidans siffror: datorns shell.js läser dem ur localStorage (skoll-stats), som preload-ios.js fyller
+        // med det här innan sidan startar. Sedan kommer adblock:hit för varje stopp.
+        app.brygga.startdata("skydd:statistik") { _ in
+            .objekt(["annonser": .tal(Double(skydd.raknare.totalt)), "sparare": .tal(0), "farliga": .tal(0)])
+        }
+        app.brygga.hantera("skoll:adblock-state") { _ in
+            .objekt(["on": .bool(true), "count": .tal(Double(skydd.raknare.session)),
+                     "raknare": .bool(app.installningar[.blockRaknare])])
+        }
         app.labb.registrera("skydd", beskrivning: "Listorna, blocktestet, inloggning, paus, kosmetik, scriptlets, vakten, parametrar och stoppsidan") { k in
             try await SkyddProv.kor(k)
         }

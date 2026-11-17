@@ -26,6 +26,12 @@
   // Som Electrons strukturerade kloning, men via JSON: undefined i objekt försvinner (= "inget värde", som på datorn)
   const rensa = (args) => { try { return JSON.parse(JSON.stringify(args, (_k, v) => (v === undefined ? null : v))); } catch { return []; } };
 
+  /* Startsidans siffror: Swift räknar (Skydd, Raknare.swift) och datorns shell.js läser skoll-stats vid start. */
+  const stat = boot['skydd:statistik'];
+  if (stat && typeof stat === 'object') {
+    try { localStorage.setItem('skoll-stats', JSON.stringify({ ads: stat.annonser | 0, trackers: stat.sparare | 0, dangers: stat.farliga | 0 })); } catch {}
+  }
+
   /* ── Kanaler som ingen modul har än: neutrala svar i datorns form ── */
   const STANDARD = {
     'defaultbrowser:state': { arStandard: false, kan: false },

@@ -25,6 +25,9 @@ final class Skydd: SkyddTjanst {
     let app: AppMiljo
     let data: Regeldata
     let listor = Regellistor()
+    let raknare = Raknare()
+    /// Ökar när någon flik räknat något eller nollställts, så att skölden ritas om.
+    private(set) var raknarversion = 0
 
     @ObservationIgnored private var vyer: [ObjectIdentifier: Vystatus] = [:]
     /// Värdar som fått "Fortsätt ändå" (resten av sessionen, som tilläggets session-regel).
@@ -67,6 +70,12 @@ final class Skydd: SkyddTjanst {
                 self.skriptordning.removeAll()
             }
         })
+        // Ny sida i fliken: räknaren börjar om (som datorns did-start-navigation)
+        lyssnare.append(app.handelser.lyssna(FlikNavigerade.self) { [weak self] h in
+            guard let self, let vy = self.app.flikar.flik(h.flik)?.webbvy, let st = self.status(vy), st.antal != 0 else { return }
+            st.antal = 0
+            self.raknarversion += 1
+        })
     }
 
     // MARK: - Listorna
@@ -78,6 +87,7 @@ final class Skydd: SkyddTjanst {
         lage = .laddar(andel: 0)
         let data = self.data
         let initiativ = Task { @MainActor in await data.laddaInitiativ() }
+        Task { @MainActor in await data.laddaRaknare() }
         laddning = Task { @MainActor [weak self] in
             guard let self else { return }
             let fel = await self.listor.ladda(self.data, rensa: rensa, framsteg: { [weak self] a in
@@ -110,6 +120,7 @@ final class Skydd: SkyddTjanst {
         let st = Vystatus(vy: webbvy, privat: privat)
         vyer[ObjectIdentifier(webbvy)] = st
         rensaDoda()
+        installeraRaknare(st)
         synka(st, onskade: nil)
     }
 
@@ -214,7 +225,39 @@ final class Skydd: SkyddTjanst {
         app.installningar[Nycklar.skyddPausade] = lista
     }
 
-    func antalBlockerade(i flik: UUID) -> Int? { nil }
+    func antalBlockerade(i flik: UUID) -> Int? {
+        _ = raknarversion
+        guard app.installningar[.blockRaknare], let vy = app.flikar.flik(flik)?.webbvy, let st = status(vy) else { return nil }
+        return st.antal
+    }
+
+    var totaltBlockerade: Int? {
+        _ = raknarversion
+        return raknare.totalt
+    }
+
+    // MARK: - Räknaren (Raknare.swift)
+
+    private func installeraRaknare(_ st: Vystatus) {
+        raknare.installera(i: st.ucc) { [weak self] m in self?.raknat(m) }
+    }
+
+    private func raknat(_ m: WKScriptMessage) {
+        guard let vy = m.webView, let st = status(vy), !data.raknarvardar.isEmpty else { return }
+        // Bara när sidan har annons- eller spårlistan på sig (inte pausad, inte inloggning)
+        guard st.listor.contains("ads") || st.listor.contains("privacy"),
+              let sida = st.senasteHuvudsida, !sidlage(sida).tillat else { return }
+        let n = Raknare.adresser(m).reduce(0) { s, u in
+            let v = Vard.av(u)
+            return s + (data.arRaknarvard(v) && !data.arTillatVard(v) ? 1 : 0)
+        }
+        guard n > 0 else { return }
+        st.antal += n
+        raknare.lagg(till: n)
+        raknarversion += 1
+        // Startsidans siffror (datorns adblock:hit, en per stoppad sak)
+        for _ in 0..<min(n, 100) { app.brygga.skicka("adblock:hit", .text("ad"), till: .yta("startsida")) }
+    }
 
     // MARK: - Läget för en sida
 
@@ -386,6 +429,8 @@ final class Skydd: SkyddTjanst {
         /// Stopplistan ligger i vyn, för navigeringen till `annonsstopp`.
         var stopplista = false
         var annonsstopp: URL?
+        /// Räknade stopp på sidan som visas (`Raknare`).
+        var antal = 0
 
         init(vy: WKWebView, privat: Bool) {
             self.vy = vy
@@ -403,6 +448,7 @@ final class Skydd: SkyddTjanst {
     private func registrera(_ vy: WKWebView) -> Vystatus {
         let st = Vystatus(vy: vy, privat: !vy.configuration.websiteDataStore.isPersistent)
         vyer[ObjectIdentifier(vy)] = st
+        installeraRaknare(st)
         synka(st, onskade: nil)
         return st
     }
