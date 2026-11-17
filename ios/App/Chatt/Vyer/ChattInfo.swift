@@ -102,8 +102,7 @@ struct ChattInfo: View {
             }
         }
         .presentationDetents([.large])
-        .presentationDragIndicator(.visible)
-        .presentationCornerRadius(28)
+        .adrazeArk()
         .task { await laddaMedlemmar() }
     }
 
@@ -140,7 +139,7 @@ struct ChattInfo: View {
             } else {
                 ChattAvatarMedNarvaro(namn: lage.namn(konv), bild: person?.avatar, storlek: 96, online: person?.online == true)
             }
-            Text(lage.namn(konv)).font(Typsnitt.rubrik(30, vikt: 600)).foregroundStyle(tema.text)
+            Text(lage.namn(konv)).font(Typsnitt.rubrik(AdrazeArk.rubrikstorlek, vikt: AdrazeArk.rubrikvikt)).foregroundStyle(tema.text)
                 .multilineTextAlignment(.center).padding(.top, 6)
             Text(status).font(Typsnitt.grotesk(15, vikt: person?.online == true ? 600 : 400, relativTill: .subheadline))
                 .foregroundStyle(person?.online == true ? tema[.accentText] : tema.dampad)

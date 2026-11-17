@@ -3,38 +3,10 @@ import UIKit
 
 // MARK: - Text
 
-/// Chattens texter: svenska är nyckeln. Först chattens egna ordlistor (`Chatt/Bunt/sprak/<kod>.json`),
-/// sedan datorns 54 språk via `tr` (datorns chatt har redan många av strängarna).
+/// Chattens texter. Chattens egna ordlistor (`Chatt/Bunt/sprak/<kod>.json`) läses av `Sprak` i Gemensamt
+/// tillsammans med datorns 54 språk (datorns chatt har redan många av strängarna), så det här är bara `tr`.
 @MainActor
-func ct(_ s: String, _ varden: [String: String] = [:]) -> String {
-    let kod = Sprak.delad.kod
-    guard kod != "sv" else { return tr(s, varden) }
-    let fyll: (String) -> String = { t in
-        var ut = t
-        for (n, v) in varden { ut = ut.replacingOccurrences(of: "{\(n)}", with: v) }
-        return ut
-    }
-    if let egen = ChattOrd.ordlista(kod)[s] { return fyll(egen) }
-    // Datorns ordlista för språket; saknas texten där blir det engelska i stället för svenska.
-    let t = tr(s, varden)
-    if t != fyll(s) || kod == "en" { return t }
-    return ChattOrd.ordlista("en")[s].map(fyll) ?? t
-}
-
-@MainActor
-enum ChattOrd {
-    private static var minne: [String: [String: String]] = [:]
-    static func ordlista(_ kod: String) -> [String: String] {
-        if let m = minne[kod] { return m }
-        var d: [String: String] = [:]
-        if let data = Bunt.data("Chatt", "sprak/\(kod).json"),
-           let o = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-            for (k, v) in o { if let s = v as? String, !s.isEmpty { d[k] = s } }
-        }
-        minne[kod] = d
-        return d
-    }
-}
+func ct(_ s: String, _ varden: [String: String] = [:]) -> String { tr(s, varden) }
 
 // MARK: - Tid
 
@@ -298,7 +270,7 @@ private struct ChattKnappkropp<E: View>: View {
     private var orange: Bool { sort == .primar || sort == .skicka }
 
     var body: some View {
-        let form = RoundedRectangle(cornerRadius: (sort == .rund || sort == .ikon || sort == .skicka) ? 999 : 16, style: .continuous)
+        let form = RoundedRectangle(cornerRadius: (sort == .rund || sort == .ikon || sort == .skicka) ? 999 : tema.radier.storKnapp, style: .continuous)
         etikett
             .foregroundStyle(vilande)
             .overlay {
@@ -382,13 +354,8 @@ struct ChattSajtfigur: View {
     var body: some View { Image(namn).resizable().scaledToFit().accessibilityHidden(true) }
 }
 
-/// Ark och helskärmar i chatten följer AdRazes val (ljust, mörkt eller systemet). Ett ark får annars sitt utseende
-/// från fönstret och kan bli ljust ovanpå en mörk chatt.
-private struct ChattArkSchema: ViewModifier {
-    @Environment(Tema.self) private var tema
-    func body(content: Content) -> some View { content.preferredColorScheme(tema.foredragetSchema) }
-}
-
+/// Ark i chatten. Ljust och mörkt sätts numera på hela fönstret (`Fonstertema` i Gemensamt), så ark följer AdRazes val
+/// av sig själva och det här gör ingenting. Finns kvar så att anropen inte behöver ändras.
 extension View {
-    func chattArk() -> some View { modifier(ChattArkSchema()) }
+    func chattArk() -> some View { self }
 }

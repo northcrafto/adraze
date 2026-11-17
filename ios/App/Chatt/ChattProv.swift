@@ -184,8 +184,12 @@ enum ChattProv {
         // Svara med citat
         if let fraga = lage.meddelanden[miraK]?.last(where: { $0.text == "Alva och Jonas hänger med 🙌" }) {
             let citat = ChattCitat(id: fraga.id, vem: fraga.franNamn, text: fraga.text, bild: false)
+            lage.notis = nil
             let ok = await lage.skicka(miraK, ChattUtkast(text: "Perfekt, då bokar jag för fyra", bild: nil, video: nil, svar: citat))
-            k.kolla("svar skickat med citat", ok && lage.meddelanden[miraK]?.last?.svar?.id == fraga.id)
+            let sista = lage.meddelanden[miraK]?.last
+            k.kolla("svar skickat med citat", ok && sista?.svar?.id == fraga.id,
+                    ["ok": .bool(ok), "fel": lage.notis.map(JSONVarde.text) ?? .null, "fraga": .text(fraga.id),
+                     "sista": .text(sista?.id ?? ""), "sista_svar": .text(sista?.svar?.id ?? "")])
             k.lika("citatet har Miras namn (som datorn visar)", lage.meddelanden[miraK]?.last?.svar?.vem, "Mira")
             k.notera("skickat_svar_id", .text(lage.meddelanden[miraK]?.last?.id ?? ""))
         }

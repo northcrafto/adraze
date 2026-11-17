@@ -107,7 +107,7 @@ struct NyChatt: View {
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button(ct("Stäng")) { stang() } } }
             .animation(.easeOut(duration: 0.2), value: svar)
         }
-        .presentationDragIndicator(.visible)
+        .adrazeArk()
     }
 
     private func skicka() async {

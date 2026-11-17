@@ -7,6 +7,8 @@ import UIKit
 /// - `chatt:visa` `{ konv?: "dm:<id>" | "grupp:<id>" }` – visar chatten i helskärm.
 /// Menyns plats "Chatt" (`Platser.chatt`) registreras med `app.ersatt(plats:titel:oppna:)` och visar samma sak.
 /// - `chatt:olasta` – antal olästa meddelanden (för en bricka i menyn).
+/// - `chatt:prov` – bara yta `labb` (helhetstestet): chattens läge (fas, raderna, öppen konversation) och
+///   `{ tillbaka: true }` som bakåtknappen.
 ///
 /// Ägare: Konto och chatt.
 final class ChattModul: NSObject, AppModul {
@@ -22,6 +24,28 @@ final class ChattModul: NSObject, AppModul {
             return .null
         }
         app.brygga.hantera("chatt:olasta") { _ in .tal(Double(lage?.antalOlasta ?? 0)) }
+        app.brygga.hantera("chatt:prov", ytor: ["labb"]) { anrop in
+            let l = delatLage(app)
+            if anrop.argument.first?["tillbaka"].bool == true {
+                l.provSkarm = "inkorg"
+                try? await Task.sleep(nanoseconds: 400_000_000)
+                l.provSkarm = nil
+            }
+            let fas: String
+            switch l.fas {
+            case .utloggad: fas = "utloggad"
+            case .laser: fas = "laser"
+            case .behoverNamn: fas = "behoverNamn"
+            case .klar: fas = "klar"
+            case .fel: fas = "fel"
+            }
+            return .objekt([
+                "fas": .text(fas), "listanLaddad": .bool(l.listanLaddad),
+                "rader": .lista(l.rader.prefix(20).map { r -> JSONVarde in ["namn": .text(r.namn), "konv": .text(r.konv.nyckel)] }),
+                "oppen": l.oppen.map { JSONVarde.text($0.nyckel) } ?? .null,
+                "meddelanden": .tal(Double(l.oppen.flatMap { l.meddelanden[$0]?.count } ?? 0)),
+            ])
+        }
         // Menyns plats "Chatt" (skalets meny öppnar den via app.platser): den native chatten i helskärm.
         app.ersatt(plats: Platser.chatt, titel: ct("Chatt")) { ChattVisning.visa(app) }
         app.labb.registrera("chatt", beskrivning: "Chatten mot en lokal testserver (-api): upplåsning, listan, öppna, skicka, långtryck, reaktion, svar, bakgrund, chattinfo, grupp, samtalsskärmen, ljust och mörkt") { k in

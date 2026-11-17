@@ -40,6 +40,8 @@ struct ChattRot: View {
             lage.borja()
         }
         .onChange(of: lage.fas) { _, ny in
+            // Inloggad medan chatten syns (kontots ark ovanpå): hämtningen stoppades när kontot ändrades, starta igen
+            if ny == .klar { lage.borja() }
             if ny == .klar, let k = lage.begard { lage.begard = nil; vag = [k] }
         }
         .onChange(of: lage.begard) { _, ny in
@@ -50,15 +52,11 @@ struct ChattRot: View {
     }
 }
 
-/// Stäng-knappen uppe till höger på chattens egna skärmar.
+/// Stäng-knappen uppe till höger på chattens egna skärmar: appens gemensamma kryss (`Stangknapp`).
 struct ChattStang: View {
     @Environment(\.dismiss) private var stang
     var body: some View {
-        Button { stang() } label: {
-            Image(systemName: "xmark").font(.system(size: 15, weight: .bold)).frame(width: 40, height: 40)
-        }
-        .buttonStyle(ChattKnapp(.ikon))
-        .accessibilityLabel(ct("Stäng"))
+        Stangknapp { stang() }.padding(-(Stangknapp.tryckyta - Stangknapp.storlek) / 2)
     }
 }
 
@@ -100,7 +98,8 @@ struct ChattUtloggad: View {
         ChattFigurskarm(figur: "ChattFigurSurfa", rubrik: ct("Logga in för att chatta"),
                    text: ct("Samma konto som i AdRaze på datorn. Vänner, grupper och chattar följer med."),
                    knapp: ct("Logga in")) {
-            Task { _ = try? await app.brygga.anropa("konto:visa", [], fran: BryggKalla(yta: "chatt")) }
+            // Kontots inloggning ovanpå chatten; ChattLage startar själv när kontot ändras (KontoAndrades)
+            Task { _ = await app.konto.visaInloggning(rubrik: ct("Logga in för att chatta"), underrubrik: nil) }
         }
         .overlay(alignment: .topTrailing) { ChattStang().padding(.trailing, 16).padding(.top, 8) }
     }
@@ -151,7 +150,7 @@ struct ChattValjNamn: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 ChattSajtfigur(namn: "ChattFigurProfil").frame(height: 190).frame(maxWidth: .infinity).padding(.bottom, 28)
-                Text(ct("Välj ett användarnamn")).font(Typsnitt.rubrik(30, vikt: 600)).foregroundStyle(tema.text)
+                Text(ct("Välj ett användarnamn")).font(Typsnitt.rubrik(AdrazeArk.rubrikstorlek, vikt: AdrazeArk.rubrikvikt)).foregroundStyle(tema.text)
                 Text(ct("Så hittar dina vänner dig i chatten. 3–20 tecken: bokstäver, siffror och _."))
                     .font(Typsnitt.grotesk(16, relativTill: .body)).foregroundStyle(tema.dampad).lineSpacing(3)
                     .padding(.top, 10).padding(.bottom, 24).fixedSize(horizontal: false, vertical: true)
