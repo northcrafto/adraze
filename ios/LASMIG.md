@@ -200,7 +200,7 @@ Kör det när du ändrat något som andra moduler ser.
 | `AdrazeArk`, `Stangknapp`, `.adrazeArk()` | `Ark.swift` | Arken ser lika ut överallt: hörn 28, handtag, krysset 40 pt 16 pt från kanten, rubrik Fraunces 32/600, sidmarginal 24 |
 | `Startbild`, `StartbildVy` | `Startbild.swift` | `app.startbild`: gorillan från startskärmen ligger kvar tills det som laddar är klart (`vanta`/`klar`) och öppnar sig sedan i en cirkel |
 | `Starttider` | `Starttider.swift` | Var tiden går vid start, i ms från att processen startade, och när huvudtråden var upptagen (`stopp`) |
-| `Fonstertema` | `Statusrad.swift` | Fönstrets ljusa eller mörka läge följer temat, så att allt som visas ovanpå (ark, helskärmar) följer med |
+| `Fonstertema` | `Statusrad.swift` | Fönstrets ljusa eller mörka läge följer temat; ett SwiftUI-`.sheet` behöver ändå `.preferredColorScheme` (se nedan) |
 | `Installningar`, `Nyckel<V>`, `Installningsdef` | `Installningar.swift` | En enda butik för alla inställningar, som datorns Anpassa |
 | `Nycklar.*`, `Sokmotorer` | `Nycklar.swift` | Typade nycklar (`tema.*`, `verktyg.*`, `flikar.*`, `sok.*`, `webb.*`, `block.*`) och datorns övriga |
 | `Tema`, `Fargroll`, `Matt`, `Radier` | `Tema.swift` | Färger, mått, hörn och typsnitt ur inställningarna |
@@ -252,9 +252,12 @@ Hur modulerna hänger ihop:
   det som visas (chatten, Falk), visar "Du är inloggad" en sekund efter inloggningen och stängs, och svaret är
   `true` om man är inloggad då. Chattens och Falks "Logga in" går den vägen; utan Konto-modulen svarar
   `EnkeltKonto` direkt. Chatten och Falk byter själva läge på `KontoAndrades`.
-- Ljust och mörkt: `Fonstertema` sätter fönstrets `overrideUserInterfaceStyle` efter temat, så kontots ark,
-  chatten, Falk och Anpassa följer med utan egen kod. Falk tar appens accent så länge den inte har en egen färg
-  (Inställningar › Falk); startsidan och Anpassa läser accenten ur inställningarna.
+- Ljust och mörkt: `Fonstertema` sätter fönstrets `overrideUserInterfaceStyle` efter temat, och kontrollerna som
+  modulerna visar (kontots ark, `ChattKontroller`, `AdrazeSida` för Falk och Anpassa) sätter sin egen efter temat.
+  Ett SwiftUI-`.sheet` inne i en sådan följer inte med av sig självt: innehållet behöver
+  `.preferredColorScheme(tema.foredragetSchema)`, som chattens `chattArk()` (utan den blev Nytt meddelande,
+  chattinfo, gruppinfo och bakgrundsvalet ljusa ovanpå en mörk chatt, mätt 2026-11-17). Falk tar appens accent så
+  länge den inte har en egen färg (Inställningar › Falk); startsidan och Anpassa läser accenten ur inställningarna.
 - En moduls CSS och JS för en AdRaze-sida: `app.brygga.skript(yta: "falk", css: …, js: …)`. Brygga lägger dem i
   sidan vid varje navigering, efter datorns preload och före `ios.js` (Falk gör så med `falk-ios.css`/`.js`).
 - Kallstarten: startskärmen (`UILaunchScreen` i `project.yml`) och appens första ruta är samma bild, gorillan mitt
