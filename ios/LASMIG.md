@@ -5,8 +5,8 @@ gäller alla agenter som bygger vidare: Skydd, Flikar, Skal, Brygga och webb-UI,
 
 Det som finns (2026-11-17): ett XcodeGen-projekt (`project.yml`), byggskripten, kontrakten i `App/Gemensamt/` med
 enkla ersättningar, självtestramverket i `App/Labb/` och modulerna Skydd, Flikar, Skal, Brygga (datorns Anpassa och
-startsida i webbvy), Konto och Chatt, ihopkopplade till en app. Falk byggs i `App/Falk/`. `-mode helhet` provar
-hela appen ihop, `-mode rok` grunden. Bundle-id `app.adraze.browser`, iOS 17.0 och senare, byggs med Xcode 26.1.1.
+startsida i webbvy), Konto, Chatt och Falk, ihopkopplade till en app. `-mode helhet` provar hela appen ihop
+(också inloggningen, chatten och Falk mot testservrar), `-mode rok` grunden och kallstarten. Bundle-id `app.adraze.browser`, iOS 17.0 och senare, byggs med Xcode 26.1.1.
 iPhone först, iPad följer med.
 
 ## 1. Bygga och testa från mint
@@ -18,6 +18,8 @@ cd ~/adraze/ios
 ./fran-mint.sh                                   # bara bygget (ingen simulator)
 ./fran-mint.sh rok ~/adraze-app/skarm            # bygg, kör -mode rok, hämta resultat och skärmbilder
 ./fran-mint.sh helhet ~/adraze-app/skarm         # hela appen ihop, en skärmbild per steg (avsnitt 5)
+~/.cache/claude-arbete/adraze-chatt-server/nollstall.sh    # chattens testserver (konto, chatt, helhet)
+./fran-mint.sh helhet ~/adraze-app/skarm -- -api http://100.122.13.91:18790 -testkod 246810
 ./fran-mint.sh -n steg1-skydd skydd ~/adraze-app/skarm     # eget prefix på filerna
 ./fran-mint.sh -B -k skydd ~/adraze-app/skarm    # -B bygg inte om, -k låt simulatorn vara igång
 ./fran-mint.sh -x Chatt rok /tmp/ut              # bygg utan App/Chatt (om den inte kompilerar just nu)
@@ -49,8 +51,9 @@ misslyckades, 4 = testet kördes men misslyckades (de misslyckade kontrollerna s
 Titta alltid på skärmbilderna (med Read). Ett test räknas inte som klart förrän det har körts i simulatorn och
 någon har tittat på bilden (3.6).
 
-Tider 2026-11-17: inkrementellt bygge 8–14 s, simulatorn startar på 33–46 s, `rok` tar 6–10 s och `helhet`
-40–46 s i appen. Hela `./fran-mint.sh rok` cirka 2 minuter.
+Tider 2026-11-17: inkrementellt bygge 8–31 s, simulatorn startar på 32–46 s, `rok` tar 6–10 s och `helhet`
+95–98 s i appen med chatten och Falk (40–46 s utan `-api`). Hela `./fran-mint.sh rok` cirka 2 minuter, `helhet`
+cirka 3.
 
 Simulatorer: standard är `AdRaze iPhone 16 iOS26` (iOS 26.1, UDID `97A89E3E-24A0-4D70-8D19-72A78E6F0791`).
 iOS 18.6: `-e "AdRaze iPhone 16"`. Någon iOS 17-simulator finns inte. Har du kört med `-k` stänger du den själv
@@ -82,8 +85,8 @@ någon annans bygge.
   av Grund. Behöver du något där: skriv vad och varför i din rapport. Du ska inte behöva det för vanligt arbete.
 - Nya filer plockas upp av sig själva, ingen rör `project.yml`:
   - `App/**/*.swift` kompileras (utom under `Bunt/`, `Webb/` och `Regler/`).
-  - `App/**/*.xcassets` kompileras. Namnen måste vara unika i hela appen (`AppIcon`, `AccentColor`, `Gorilla`
-    och `Startbakgrund` är tagna).
+  - `App/**/*.xcassets` kompileras. Namnen måste vara unika i hela appen (`AppIcon`, `AccentColor`, `Gorilla`,
+    `Startbakgrund` och `Startgorilla` är tagna).
   - `App/<Modul>/Bunt/**` kopieras till `AdRaze.app/<Modul>/**`. Läs med `Bunt.url("<Modul>", "fil")`,
     `Bunt.data(...)` eller `Bunt.filer(...)`.
   - `App/Webb/**` hamnar i `AdRaze.app/Webb/` och `App/Regler/**` i `AdRaze.app/Regler/`.
@@ -92,7 +95,9 @@ någon annans bygge.
 - Alla moduler kompileras i samma Swift-modul, så typnamn på toppnivå måste vara unika i hela appen (`Radtryck`
   fanns i både Skal och Chatt). Ge typen modulens namn (`ChattRadtryck`) eller gör den `private`.
 - Använd andra moduler bara via `app` och protokollen i `Gemensamt/`, aldrig deras klasser. Då går appen att
-  bygga utan en trasig modul (`fran-mint.sh -x Modul`) och starta utan den (`-- -utan Modul`).
+  bygga utan en trasig modul (`fran-mint.sh -x Modul`) och starta utan den (`-- -utan Modul`). Behöver ett test i
+  `Labb/` något ur en modul går det genom en kanal som bara yta `labb` får anropa (`konto:logga-in`, `konto:kod`,
+  `chatt:prov`, `falk:prov`).
 - Bryter en annan modul bygget: bygg med `-x Modul` och säg till ägaren. Laga inte i deras mapp.
 - Varje agent skriver ett eget självtest (avsnitt 5) och kör det innan något kallas klart.
 - Commit: lägg bara till dina egna filer (`git add ios/App/Skydd`, inte `git add .`). I repot ligger andras
@@ -156,7 +161,9 @@ Ett test som hänger avbryts efter `-maxtid` sekunder (standard 240). Okänt nam
 
 Övrigt i `Labbkorning`: `k.app`, `k.logga(text)`, `k.fel = "…"` (hela testet misslyckas),
 `Labbkorning.minneMB()` (appens `phys_footprint`), `Labbkorning.fonster()`. Pixelmått: `Bildmatt` i `Labb/`.
-Startargument läses med `k.app.startargument.text("url")` och `.tal("namn")`.
+Startargument läses med `k.app.startargument.text("url")` och `.tal("namn")`. Några som stänger av något för att
+mäta: `-forladda 0` (startsidan laddas inte i förväg), `-startbild 0` (ingen startbild), `-raknareSida 0` (räknaren
+bara på element, som före 2026-11-17).
 
 `k.skarmbild` ritar appens fönster och modaler, men inte statusraden, tangentbordet eller systemets dialoger.
 `await k.systembild("namn")` ger simulatorns egen bild: appen lägger `namn.vill` i testets mapp och `bygg-sim.sh`
@@ -166,9 +173,14 @@ Egna testsidor utan nätet: `Labbserver(sidor: ["/": html])` i `Labb/` är en li
 
 `-mode helhet` (`Labb/HelhetProv.swift`) kör hela appen som en användare: startsidan i en ny flik, en lokal
 nyhetssida med annonser (skölden räknar, annonsplatserna döljs), tre flikar, flikväxlaren och menyn (öppnade med
-`SkalVisa`), Anpassa från menyn, temat Natt via `anpassa:satt`, stoppsidan och felsidan, och kontrollerar
-statusraden och att inga datorord syns. Det går bara via `app` och Gemensamt, så en modul som saknas ger
-misslyckade kontroller, ingen krasch. Kör det när du ändrat något som andra moduler ser.
+`SkalVisa`); chatten från menyn utloggad, dess Logga in (`app.konto.visaInloggning`) med kontots ark ovanpå,
+inloggningen mot chattens testserver, inkorgen, en konversation och tillbaka; Falk som frågar om nyhetssidan
+(Falks testserver på 127.0.0.1 via `falk:prov`, aldrig den riktiga AI-tjänsten); Anpassa från menyn med blå accent
+och mörkt läge, och samma ytor igen i mörkt (skalet, menyn, chatten, Falk, startsidan); Falk utloggad med sin egen
+Logga in-knapp; stoppsidan och felsidan. Kontrollerar statusraden och att inga datorord syns. Utan `-api` och
+`-testkod` hoppas chatten, Falk och inloggningen över (det noteras). Det går bara via `app`, Gemensamt och
+bryggans kanaler, så en modul som saknas ger misslyckade kontroller, ingen krasch, och bygget går med `-x`.
+Kör det när du ändrat något som andra moduler ser.
 
 ## 6. Kontrakten i `App/Gemensamt/`
 
@@ -178,21 +190,26 @@ misslyckade kontroller, ingen krasch. Kör det när du ändrat något som andra 
 | `AppModul`, `Modulsokare`, `Modulinfo` | `AppModul.swift` | Moduler som hittas av sig själva |
 | `Flik`, `FlikHanterare`, `Sidfel` | `Flik.swift` | Flikarna (Flikar gör dem, Skal visar dem): adress, laddning, fel och felsida, favikon, miniatyr, sömn, theme-color, zoom, skrivbordsläge, helskärm, hitta på sidan; stäng, ångra, flytta, rensa webbdata |
 | `Bibliotekstjanst`, `Sidpost`, `Nedladdningspost` | `Bibliotek.swift` | `app.bibliotek` (Flikar): historik, bokmärken, nedladdningar, adressförslag och favikoner |
-| `SidTjanst`, `Sidlage`, `Plats`, `Platser` | `Sidor.swift` | `app.sidor` (Brygga): AdRazes sidor som ark, helskärm eller SwiftUI-vy; menyns platser med `app.ersatt(plats:titel:vy:)` eller `(plats:titel:oppna:)` |
-| `Sprak`, `tr()`, `trAntal()` | `Sprak.swift` | Appens språk följer `sprak.val` som AdRaze-sidorna, med datorns ordlistor |
+| `SidTjanst`, `Sidlage`, `Plats`, `Platser` | `Sidor.swift` | `app.sidor` (Brygga): AdRazes sidor som ark, helskärm eller SwiftUI-vy, `forbered(yta)` laddar en sida i förväg; menyns platser med `app.ersatt(plats:titel:vy:)` eller `(plats:titel:oppna:)` |
+| `Sprak`, `tr()`, `trAntal()` | `Sprak.swift` | Appens språk följer `sprak.val` som AdRaze-sidorna, med datorns ordlistor och modulernas egna (`App/<Modul>/Bunt/sprak/<kod>.json`, modulens ord vinner) |
 | `Statusradsstil`, `Statusrad` | `Statusrad.swift` | `app.statusrad`: ljus eller mörk statusrad över huvudvyn (SwiftUI saknar modifierare för det) |
 | `Webbadress`, `Anvandaragent` | `Flik.swift` | Adress eller sökning (som datorns `normalizeUrl`), Safaris slut på användaragenten |
 | `SkyddTjanst`, `Skyddslage`, `Navigeringsbeslut` | `Skydd.swift` | Skyddet: förbered en webbvy, beslut per navigering, stoppsida, pausa per sajt, räknaren (`antalBlockerade`, `totaltBlockerade`) |
-| `KontoTjanst`, `Kontouppgifter`, `Nyckelring` | `Konto.swift` | Inloggad?, token, Keychain |
+| `KontoTjanst`, `Kontouppgifter`, `Nyckelring` | `Konto.swift` | Inloggad?, token, Keychain; `visaInloggning(rubrik:underrubrik:)` visar kontots ark ovanpå det som visas och svarar `true` om man är inloggad när det stängs |
+| `LokalHTTP` | `LokalHTTP.swift` | `http://` mot testservrar på 127.0.0.1, 10/8, 172.16/12, 192.168/16 och 100.64/10 (Tailscale) i `URLSession` (`protocolClasses`), som ATS annars stoppar. Bara för testservrar |
+| `AdrazeArk`, `Stangknapp`, `.adrazeArk()` | `Ark.swift` | Arken ser lika ut överallt: hörn 28, handtag, krysset 40 pt 16 pt från kanten, rubrik Fraunces 32/600, sidmarginal 24 |
+| `Startbild`, `StartbildVy` | `Startbild.swift` | `app.startbild`: gorillan från startskärmen ligger kvar tills det som laddar är klart (`vanta`/`klar`) och öppnar sig sedan i en cirkel |
+| `Starttider` | `Starttider.swift` | Var tiden går vid start, i ms från att processen startade, och när huvudtråden var upptagen (`stopp`) |
+| `Fonstertema` | `Statusrad.swift` | Fönstrets ljusa eller mörka läge följer temat, så att allt som visas ovanpå (ark, helskärmar) följer med |
 | `Installningar`, `Nyckel<V>`, `Installningsdef` | `Installningar.swift` | En enda butik för alla inställningar, som datorns Anpassa |
 | `Nycklar.*`, `Sokmotorer` | `Nycklar.swift` | Typade nycklar (`tema.*`, `verktyg.*`, `flikar.*`, `sok.*`, `webb.*`, `block.*`) och datorns övriga |
 | `Tema`, `Fargroll`, `Matt`, `Radier` | `Tema.swift` | Färger, mått, hörn och typsnitt ur inställningarna |
 | `Palett`, `Accentpalett` | `Palett.swift` | Datorns palettmotor (WCAG, APCA, OKLCH), samma färger som datorn |
 | `Typsnitt` | `Typsnitt.swift` | Fraunces och Familjen Grotesk med vikt och optisk storlek |
-| `BryggRegister`, `BryggAnrop`, `BryggKalla`, `BryggFel` | `Brygga.swift` | Bryggans kanaler (avsnitt 7) |
+| `BryggRegister`, `BryggAnrop`, `BryggKalla`, `BryggFel` | `Brygga.swift` | Bryggans kanaler (avsnitt 7), och en moduls CSS och JS för en yta (`skript(yta:css:js:)`) |
 | `Handelser`, `AppHandelse` | `Handelser.swift` | Händelser mellan moduler: `SidaLaddad`, `FlikNavigerade`, `HuvudsidaBlockerad`, `FlikOppnad`/`Stangd`/`Aktiverad`/`Somnade`/`Vaknade`/`Helskarm`, nedladdningar, historik och bokmärken, `SkalVisa`, `InstallningAndrad`, `KontoAndrades`, `AppFasAndrad` |
 | `Logg` | `Logg.swift` | `Logg("Skydd").info(...)` till os_log, stdout och resultatfilen |
-| `Bunt` | `Bunt.swift` | Filer ur `App/<Modul>/Bunt/` |
+| `Bunt` | `Bunt.swift` | Filer ur `App/<Modul>/Bunt/` (`url`, `data`, `text`, `filer`) |
 | `JSONVarde` | `JSONVarde.swift` | JSON-värden för bryggan, inställningarna och resultatfilerna |
 | `EnkelFlikHanterare`, `IngetSkydd`, `EnkeltKonto`, `EnkeltSkal`, `TomtBibliotek`, `IngaSidor` | `Stubbar/`, `Sidor.swift` | Ersättningarna när en modul inte är med (`-x`, `-utan`) |
 
@@ -231,15 +248,38 @@ Hur modulerna hänger ihop:
 - Datorns texter om "datorn", "alla fönster" och Chromium byts i `App/Webb/ios/ios.js` (`iphoneOrd`) mot iPhone,
   hela appen och WebKit, på svenska och engelska. Andra språk behåller datorns översättning (utom motorns namn).
   Rader som bara gäller datorn döljs i `ios.js` (`DOLDA_RADER`), till exempel "Eget konto i varje fönster".
-- Startsidan i en tom flik laddas första gången skalet visar den. Fram till dess syns platshållaren (#141311). Vid
-  kallstart i simulatorn syns startsidan 4,6 s efter appstart i `rok`, se `startsidan_synlig_efter_appstart_s`
-  i resultatet. Ingen mätning på riktig iPhone än.
+- Inloggning från andra moduler: `await app.konto.visaInloggning(rubrik:underrubrik:)`. Kontots ark läggs ovanpå
+  det som visas (chatten, Falk), visar "Du är inloggad" en sekund efter inloggningen och stängs, och svaret är
+  `true` om man är inloggad då. Chattens och Falks "Logga in" går den vägen; utan Konto-modulen svarar
+  `EnkeltKonto` direkt. Chatten och Falk byter själva läge på `KontoAndrades`.
+- Ljust och mörkt: `Fonstertema` sätter fönstrets `overrideUserInterfaceStyle` efter temat, så kontots ark,
+  chatten, Falk och Anpassa följer med utan egen kod. Falk tar appens accent så länge den inte har en egen färg
+  (Inställningar › Falk); startsidan och Anpassa läser accenten ur inställningarna.
+- En moduls CSS och JS för en AdRaze-sida: `app.brygga.skript(yta: "falk", css: …, js: …)`. Brygga lägger dem i
+  sidan vid varje navigering, efter datorns preload och före `ios.js` (Falk gör så med `falk-ios.css`/`.js`).
+- Kallstarten: startskärmen (`UILaunchScreen` i `project.yml`) och appens första ruta är samma bild, gorillan mitt
+  på `Startbakgrund`. Skal laddar startsidan direkt vid start (`app.sidor.forbered("startsida")`, i
+  `registrera`, webbvyn skapas när `didFinishLaunching` kommit) och ber startbilden vänta på den
+  (`app.startbild.vanta("startsida")`); Brygga säger `klar` när sidan syns. Då öppnar sig gorillan i en cirkel mot
+  startsidan (Minska rörelse: den tonar), senast efter 4 s. Tar det mer än en halv sekund fylls ett tunt orange
+  streck under gorillan. `-forladda 0` och `-startbild 0` stänger av förladdningen och startbilden (för att mäta).
+  `rok` skriver var tiden går (`kallstart`, `huvudtradens_stopp`) och `startsidan_klar_efter_processstart_s`.
+  Mätt 2026-11-17 i simulatorn (debugbygge, ms från processstart): appens kod börjar ~1 460, modulerna är
+  registrerade ~1 850, startsidans webbvy finns ~2 000, första navigeringsanropet ~3 740, sidans första begäran
+  ~4 730, startsidan klar ~5 200 (4,8–5,4 s i fem körningar, lika före och efter startbilden: vinsten är att
+  gorillan syns från första rutan i stället för en tom mörk yta). Huvudtråden står still två gånger 0,34–0,40 s
+  (vid ~2,6 och ~3,2 s), också med `-utan Skydd`, så det är inte skyddets listor; troligen WebKits eller
+  SwiftUI:s första uppstart, inte utrett. Ingen mätning på riktig iPhone än.
 
 Skölden och startsidans siffra (`antalBlockerade`, `totaltBlockerade`): WebKit säger inte vad
-innehållsblockeraren stoppade (inget publikt API). Skydd räknar resurser (bild, skript, stilmall, video, objekt)
-som fick `error` och vars värd annons- eller spårlistorna stoppar på alla sajter (`Regler/data/raknare.txt`).
-Ramar, fetch/XHR/beacon, regler för en viss sökväg och kosmetik räknas inte, så siffran är en undre gräns. Per
-flik börjar den om vid ny sida; totalen sparas. `nil` = räknaren avslagen (`block.raknare`) eller inget skydd.
+innehållsblockeraren stoppade (inget publikt API), så Skydd räknar bara det som sidan själv ser misslyckas, mot
+en värd som annons- eller spårlistorna stoppar på alla sajter (`Regler/data/raknare.txt`): element med `error`
+(bild, skript, stilmall, video, objekt), `fetch` som avvisas, `XMLHttpRequest` med `error`, `sendBeacon` som svarar
+`false`, bilder och skript som aldrig sätts in i dokumentet, och ramar som efter sidans `load` fortfarande är tomma.
+Regler för en viss sökväg, WebSocket, ramar som sätts in efter `load` och kosmetik räknas inte, så siffran är en
+undre gräns (detaljer i `Skydd/Raknare.swift`). Mot blocktestet (16 stoppade): 11 räknade före, 14 efter (de
+två andra är Facebook-adresser som stoppas av regler för en viss sökväg och inte är räknarvärdar). Per flik börjar
+den om vid ny sida; totalen sparas. `nil` = räknaren avslagen (`block.raknare`) eller inget skydd.
 
 ## 7. Bryggkanaler
 
@@ -307,6 +347,18 @@ Nya, från grunden (2026-11-17):
 - WKWebView följer `<meta name="theme-color" media="(prefers-color-scheme: dark)">` (testat med stoppsidan,
   2026-11-17), så en egen sida kan ge skalet olika färg i ljust och mörkt läge.
 - `UIBackgroundModes: audio` finns för bild-i-bild (Apple kräver det). Bild-i-bild i sig är otestat i simulatorn.
+- WebKit ger ingen `load` för en ram som innehållsblockeraren stoppar (mätt i `skydd`: ramen var tom efter 12 s),
+  men sidans `load` väntar inte på den. `navigator.sendBeacon` svarar `false` när beaconen stoppas (mätt).
+- En closure som ska vara `@Sendable` (till exempel `Timer`) får inte ändra en fångad `var`, inte ens i Swift
+  5-läge. Lägg värdet i en statisk egenskap eller en liten klass.
+- Labb kan inte nå modulernas typer (bygget med `-x`). Klassnamnet på den översta kontrollern
+  (`String(describing: type(of:))`, till exempel `KontoKontroller`) räcker för att se vad som visas.
+- `fran-mint.sh` synkar hela `ios/`, också andras ocommittade ändringar. Bryter någon annans pågående arbete
+  bygget, testa dina commits från en ren arbetskopia: `git worktree add --detach /tmp/…/rent HEAD`, kopiera
+  `App/Regler` dit (sparar regelbygget) och kör `/tmp/…/rent/ios/fran-mint.sh …`. Låset är detsamma, så
+  ingen synk krockar; nästa vanliga körning synkar tillbaka hela trädet.
+- Chattens testserver (`nollstall.sh`, `seed.mjs`) läser miljövariabeln `BAS` som API-adress. Exportera ingen
+  egen `BAS` i skript som startar den.
 
 ## 9. Användaragenten
 
