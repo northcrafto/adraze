@@ -282,6 +282,7 @@ struct Matt: Sendable, Hashable {
 }
 
 /// Hörnradier i punkter (datorns ordning: flik, fält, knapp, inre, rad, kort och ruta).
+/// `storKnapp` är för appens stora knappar (54 pt, Logga in, Lägg till vän) i alla moduler.
 struct Radier: Sendable, Hashable {
     let flik: CGFloat
     let falt: CGFloat
@@ -290,4 +291,7 @@ struct Radier: Sendable, Hashable {
     let rad: CGFloat
     let kort: CGFloat
     let ruta: CGFloat
+
+    /// Stora knappar (54 pt): knappens hörn plus 8, så att de är lika i konto, chatt och Falk. 999 = kapsel.
+    var storKnapp: CGFloat { knapp == 999 ? 999 : knapp + 8 }
 }
