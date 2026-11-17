@@ -145,7 +145,12 @@
   // Rader som bara gäller datorn, eller vars kanal ingen har än
   // (standardwebbläsaren väljs i iOS egna inställningar, inte av appen)
   // (eget konto i varje fönster: en iPhone har inga fönster)
-  const DOLDA_RADER = ['tgl-bmbar', 'sel-dns', 'zoom-100', 'defbrowser-btn', 'kl-toggle'];
+  // (Falk: panelens bredd och Falk-knappen i verktygsraden finns bara på datorn; Falk öppnas från menyn)
+  const DOLDA_RADER = ['tgl-bmbar', 'sel-dns', 'zoom-100', 'defbrowser-btn', 'kl-toggle', 'tgl-krypto'];
+  // Kategorier som en native modul visar själv: raden finns kvar i listan och öppnar modulens egen vy
+  // (kontots ark, chatten) i stället för datorns panel, som behöver datorns huvudprocess (auth:*, friends:*)
+  const NATIVA = { konto: { kanal: 'konto:visa', arg: [] }, vanner: { kanal: 'chatt:visa', arg: [{}] } };
+  const nativ = (k) => (NATIVA[k] && A.har(NATIVA[k].kanal)) ? NATIVA[k] : null;
   const RAD_KRAVER = { 'chat-rules-btn': 'auth:session', 'tgl-protection': 'skoll:check-url', 'tgl-adblock': 'skoll:adblock-toggle', 'adblock-more': 'blockinst:get', 'seg-freq': 'historik:lista', 'settings-bg-btn': null };
 
   function setUppAnpassa() {
@@ -158,7 +163,7 @@
     const gom = document.createElement('div'); gom.id = 'ios-dolda'; gom.hidden = true; s.appendChild(gom);
     for (const b of [...nav.querySelectorAll('.set-tab')]) {
       const k = b.dataset.cat;
-      const bort = DOLDA_KATEGORIER.includes(k) || (KRAVER[k] && !A.har(KRAVER[k]));
+      const bort = DOLDA_KATEGORIER.includes(k) || (KRAVER[k] && !A.har(KRAVER[k]) && !nativ(k));
       if (bort) gom.appendChild(b);
     }
     // Grupper: etikett + kort med raderna (som grupperade listor i iOS)
@@ -173,6 +178,10 @@
     // Pil till höger på varje rad
     for (const b of nav.querySelectorAll('.set-tab')) { const p = document.createElement('span'); p.className = 'ios-pil'; p.setAttribute('aria-hidden', 'true'); b.appendChild(p); }
     for (const id of DOLDA_RADER) { const el = $(id); const r = el && el.closest('.set-row'); if (r) r.classList.add('ios-dold'); }
+    const falkBredd = document.querySelector('#falk-inst [data-falk="bredd"]'); if (falkBredd && falkBredd.closest('.set-row')) falkBredd.closest('.set-row').classList.add('ios-dold');
+    // "Öppna Falk": datorns openKrypto öppnar sidopanelen; här visas Falk som ark ovanpå
+    const oppnaFalk = $('open-krypto-btn');
+    if (oppnaFalk) oppnaFalk.addEventListener('click', (e) => { e.stopImmediatePropagation(); e.preventDefault(); A.invoke('sida:visa', { yta: 'falk' }).catch(() => {}); }, true);
     for (const [id, kanal] of Object.entries(RAD_KRAVER)) {
       if (kanal === null) continue;
       const el = $(id); if (!el || A.har(kanal)) continue;
@@ -232,6 +241,8 @@
     nav.addEventListener('click', (e) => {
       const b = e.target.closest('.set-tab'); if (!b) return;
       e.stopImmediatePropagation();
+      const n = nativ(b.dataset.cat);
+      if (n) { e.preventDefault(); A.invoke(n.kanal, ...n.arg).catch(() => {}); return; }
       visaKat(b.dataset.cat, true);
     }, true);
     huvud.querySelector('.ios-tillbaka').addEventListener('click', () => { if (history.state && history.state.kat) history.back(); else visaLista(); });
