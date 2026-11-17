@@ -47,14 +47,15 @@ html.ios-anpassa.ios-detalj #settings .set-rail { transform: translateX(-30%); o
 html.ios-anpassa #settings .set-wrap { max-width: none; margin: 0; padding: 4px 16px 0; }
 html.ios-anpassa #ios-dolda, html.ios .ios-dold { display: none !important; }
 
-/* Krysset: rund knapp uppe till höger, ovanför båda vyerna */
-html.ios-anpassa #settings .set-close { position: fixed; top: calc(env(safe-area-inset-top) + 12px); right: 14px; width: 34px; height: 34px; border-radius: 999px; display: grid; place-items: center; z-index: 90;
-  background: color-mix(in srgb, var(--s-ink) 7%, transparent); color: var(--s-mut); }
-html.ios-anpassa #settings .set-close svg { width: 15px; height: 15px; stroke-width: 2.2; }
+/* Krysset: rund knapp uppe till höger, ovanför båda vyerna. Samma som appens andra kryss (Stangknapp i Gemensamt/Ark.swift):
+   40 px, 16 px från arkets kant, textens färg */
+html.ios-anpassa #settings .set-close { position: fixed; top: calc(env(safe-area-inset-top) + 16px); right: 16px; width: 40px; height: 40px; border-radius: 999px; display: grid; place-items: center; z-index: 90;
+  background: color-mix(in srgb, var(--s-ink) 7%, transparent); color: var(--s-ink); }
+html.ios-anpassa #settings .set-close svg { width: 16px; height: 16px; stroke-width: 2.3; }
 html.ios-anpassa #settings .set-close:active { background: color-mix(in srgb, var(--s-ink) 14%, transparent); }
 
 /* Listan */
-html.ios-anpassa #settings .set-brand { padding: 2px 4px 14px; gap: 10px; font-size: 32px; line-height: 1.05; font-weight: 700; letter-spacing: -.03em; color: var(--s-ink); }
+html.ios-anpassa #settings .set-brand { padding: 2px 4px 14px; gap: 10px; font-size: 32px; line-height: 1.05; font-weight: 600; letter-spacing: -.03em; color: var(--s-ink); }
 html.ios-anpassa #settings .set-brand img { width: 30px; height: 30px; }
 html.ios-anpassa #settings .set-search { height: 40px; margin: 0 0 6px; padding: 0 12px; border-radius: 12px; background: color-mix(in srgb, var(--s-ink) 6%, transparent); box-shadow: none; }
 html.ios-anpassa #settings .set-search:focus-within { box-shadow: inset 0 0 0 1.5px var(--s-accent); background: var(--s-surface); }
@@ -75,7 +76,7 @@ html.ios-anpassa #settings .set-tab .upd-dot { display: none; }
 html.ios-anpassa #settings .set-search-none { padding: 18px 16px; font-size: 15px; }
 
 /* Detaljvyn: huvud med tillbaka-knapp, sedan rubriken stort */
-html.ios-anpassa #settings .ios-huvud { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 8px; height: calc(env(safe-area-inset-top) + 56px); padding: env(safe-area-inset-top) 60px 0 6px;
+html.ios-anpassa #settings .ios-huvud { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 8px; height: calc(env(safe-area-inset-top) + 64px); padding: calc(env(safe-area-inset-top) + 8px) 64px 0 6px;
   background: color-mix(in srgb, var(--s-bg) 82%, transparent); -webkit-backdrop-filter: saturate(1.6) blur(18px); backdrop-filter: saturate(1.6) blur(18px); transition: box-shadow .2s; }
 html.ios-anpassa #settings .ios-huvud.ios-skuggad { box-shadow: 0 1px 0 var(--s-line); }
 html.ios-anpassa #settings .ios-tillbaka { display: inline-flex; align-items: center; gap: 2px; height: 40px; padding: 0 10px 0 4px; border-radius: 10px; color: var(--s-accent-ink); font-size: 16.5px; font-weight: 500; background: transparent; flex: none; }
@@ -153,7 +154,7 @@ html.ios-anpassa #bgpick #bg-grid > * { border-radius: 12px; }
 html.ios-anpassa #bgpick > div > .flex { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 html.ios-anpassa #bgpick #bg-upload-btn { grid-column: 1 / -1; }
 html.ios-anpassa #bgpick :is(#bg-upload-btn, #bg-slump, #bg-daily) { height: 48px !important; font-size: 15px !important; border-radius: 12px; }
-html.ios-anpassa #bgpick #bgpick-close { top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 999px; background: rgb(31 30 27 / .06); }
+html.ios-anpassa #bgpick #bgpick-close { top: 16px; right: 16px; width: 40px; height: 40px; border-radius: 999px; background: rgb(31 30 27 / .06); }
 @keyframes iosTona { from { opacity: 0; } }
 /* Mörkt läge: arket följer temat (på datorn är väljaren alltid ljus) */
 html.ios-anpassa[data-theme="dark"] #bgpick > div { background: #1f1e1c !important; color-scheme: dark; box-shadow: inset 0 1px 0 rgb(255 255 255 / .06) !important; }

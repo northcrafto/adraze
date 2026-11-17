@@ -127,7 +127,7 @@ enum Flikfelsida {
                 + "--svag:\(v(.svag, m));--linje:\(v(.linje, m));--accent:\(v(.accent, m));--accent-text:\(v(.accentText, m));"
                 + "--pa-accent:\(v(.paAccent, m));--fyll-fran:\(v(.fyllnadFran, m));--fyll-till:\(v(.fyllnadTill, m));"
         }
-        let radie = tema.radier.knapp == 999 ? "999px" : "\(Int(tema.radier.knapp + 4))px"
+        let radie = tema.radier.storKnapp == 999 ? "999px" : "\(Int(tema.radier.storKnapp))px"   // som appens stora knappar
         return """
         :root{\(varden(false))--r:\(radie)}
         @media (prefers-color-scheme: dark){:root{\(varden(true))}
@@ -136,10 +136,10 @@ enum Flikfelsida {
         html{background:var(--bg);-webkit-text-size-adjust:100%}
         body{margin:0;min-height:100vh;min-height:100dvh;display:flex;align-items:center;background:var(--bg);color:var(--text);
         font:17px/1.5 "Familjen Grotesk",-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-        main{width:100%;max-width:460px;margin:0 auto;padding:max(28px,env(safe-area-inset-top)) 26px max(28px,env(safe-area-inset-bottom))}
+        main{width:100%;max-width:460px;margin:0 auto;padding:max(28px,env(safe-area-inset-top)) 24px max(28px,env(safe-area-inset-bottom))}
         .figur{display:block;width:auto;height:clamp(120px,27dvh,200px);max-width:100%;margin:0 0 22px -4px}
         .figur .a{fill:var(--accent)}
-        h1{font-family:"AdRaze Display",Charter,"Iowan Old Style",Georgia,serif;font-weight:540;font-size:31px;line-height:1.1;
+        h1{font-family:"AdRaze Display",Charter,"Iowan Old Style",Georgia,serif;font-weight:600;font-size:32px;line-height:1.08;
         letter-spacing:-.02em;font-variation-settings:"opsz" 40;margin:0 0 12px;text-wrap:balance}
         .t{margin:0;color:var(--dampad);overflow-wrap:anywhere;text-wrap:pretty}
         ul{list-style:none;margin:22px 0 0;padding:0;border-top:1px solid var(--linje)}

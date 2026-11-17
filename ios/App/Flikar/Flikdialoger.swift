@@ -432,7 +432,7 @@ struct FlikdialogVy: View {
                 .font(Typsnitt.grotesk(16, vikt: 620, relativTill: .body))
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
-                .frame(maxWidth: .infinity, minHeight: 48)
+                .frame(maxWidth: .infinity, minHeight: 50)
                 .padding(.horizontal, 12)
         }
         .buttonStyle(FlikVatskeknapp(sort))
@@ -497,7 +497,8 @@ private struct FlikVatskekropp<Etikett: View>: View {
     @State private var omgang = 0
 
     var body: some View {
-        let form = RoundedRectangle(cornerRadius: tema.radier.knapp == 999 ? 999 : tema.radier.knapp + 4, style: .continuous)
+        // Samma hörn som appens andra stora knappar (konto, chatt, Falk)
+        let form = RoundedRectangle(cornerRadius: tema.radier.storKnapp, style: .continuous)
         etikett
             .foregroundStyle(sort == .primar ? tema[.paAccent] : tema[.accentText])
             .overlay {

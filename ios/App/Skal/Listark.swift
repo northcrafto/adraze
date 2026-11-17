@@ -21,36 +21,40 @@ struct Arkvy: View {
             }
         }
         .presentationDetents(ark == .skydd ? [.medium] : [.medium, .large])
-        .presentationDragIndicator(.visible)
-        .presentationCornerRadius(26)
+        .adrazeArk()
         .presentationBackground(f.sida)
     }
 }
 
-/// Rubriken överst i ett ark: Fraunces och ett kryss.
+/// Rubriken överst i ett ark: Fraunces och ett kryss, i samma storlek och form som i appens andra ark
+/// (`AdrazeArk`, `Stangknapp`), med skalets färger (också de privata).
 struct Arkhuvud: View {
     let titel: String
     let farger: Skalfarger
     var hoger: AnyView?
     let stang: () -> Void
+    @Environment(Tema.self) private var tema
 
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
             Text(titel)
-                .rubrik(28, vikt: 620, tak: 40)
+                .rubrik(AdrazeArk.rubrikstorlek, vikt: AdrazeArk.rubrikvikt, tak: 44)
                 .foregroundStyle(farger.text)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
             Spacer(minLength: 8)
             if let hoger { hoger }
             Button { stang() } label: {
-                Ikonvy(.stang, storlek: 17, streck: 2.2).frame(width: 40, height: 38)
+                Ikonvy(.stang, storlek: 16, streck: 2.2)
+                    .frame(width: Stangknapp.storlek, height: Stangknapp.storlek)
+                    .background(Circle().fill(farger.privat ? farger.text.opacity(0.08) : tema[.yta2]))
             }
-            .buttonStyle(Vatskeknapp(.ikon, radie: 12, privat: farger.privat))
+            .buttonStyle(Vatskeknapp(.ikon, radie: Stangknapp.storlek / 2, privat: farger.privat))
             .accessibilityLabel(tr("Stäng"))
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 22)
+        .padding(.leading, 20)
+        .padding(.trailing, AdrazeArk.marginal)
+        .padding(.top, 20)
         .padding(.bottom, 8)
     }
 }
@@ -472,7 +476,7 @@ struct Platsvy: View {
             }
         }
         .presentationDetents([.large])
-        .presentationDragIndicator(.visible)
+        .adrazeArk()
         .presentationBackground(f.sida)
     }
 }

@@ -80,7 +80,8 @@ enum Stoppsida {
     }
 
     /// Färgerna är datorns (blocked.css och sajtens style.css). Knapparna fylls med orange underifrån när man
-    /// trycker (sajtens .liq), och länken följs när fyllningen syns.
+    /// trycker (sajtens .liq), och länken följs när fyllningen syns. Rubriken (Fraunces 32/600), sidmarginalen (24)
+    /// och knapparnas hörn (16) är appens, som i arken och felsidan.
     static let stil = """
     :root { --bg: #f2f2ef; --yta: #ffffff; --ink: #111113; --dov: #5c5c63; --linje: #dadad4; --accent: #ff4b1f;
       --fyll: #ff6a43; --knapp: #111113; --knapptext: #ffffff; }
@@ -94,7 +95,7 @@ enum Stoppsida {
     * { box-sizing: border-box; margin: 0; }
     html { -webkit-text-size-adjust: 100%; background: var(--bg); }
     body { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; justify-content: center;
-      padding: max(24px, env(safe-area-inset-top)) 22px max(28px, env(safe-area-inset-bottom));
+      padding: max(24px, env(safe-area-inset-top)) 24px max(28px, env(safe-area-inset-bottom));
       background: var(--bg); color: var(--ink); font: 17px/1.5 "Familjen Grotesk", -apple-system, system-ui, sans-serif;
       -webkit-font-smoothing: antialiased; }
     main { width: 100%; max-width: 520px; margin: 0 auto; }
@@ -102,14 +103,14 @@ enum Stoppsida {
     .marke img { width: 40px; height: 40px; display: block; }
     .figur { margin: 26px auto 4px; max-width: 330px; }
     .figur svg { display: block; width: 100%; height: auto; }
-    h1 { font-family: "AdRaze Display", Georgia, serif; font-weight: 560; font-variation-settings: "opsz" 48;
-      font-size: 34px; line-height: 1.05; letter-spacing: -0.025em; margin: 22px 0 12px; }
+    h1 { font-family: "AdRaze Display", Georgia, serif; font-weight: 600; font-variation-settings: "opsz" 48;
+      font-size: 32px; line-height: 1.08; letter-spacing: -0.025em; margin: 22px 0 12px; }
     p { color: var(--dov); }
     code { display: block; margin: 18px 0 24px; padding: 12px 14px; background: var(--yta); border: 1px solid var(--linje);
       border-radius: 12px; font: 14px/1.45 ui-monospace, Menlo, monospace; word-break: break-all; color: var(--ink); }
     .knappar { display: flex; flex-direction: column; gap: 10px; }
     .knapp { position: relative; overflow: hidden; isolation: isolate; display: block; text-align: center;
-      padding: 15px 22px; border-radius: 999px; font-weight: 600; font-size: 17px; line-height: 1.2; text-decoration: none;
+      padding: 15px 22px; border-radius: 16px; font-weight: 600; font-size: 17px; line-height: 1.2; text-decoration: none;
       -webkit-tap-highlight-color: transparent; transition: color .5s ease, box-shadow .4s ease, transform .2s ease; }
     .knapp::before { content: ""; position: absolute; z-index: -1; left: -15%; width: 130%; bottom: 0; height: 165%;
       transform: translateY(104%); background: linear-gradient(180deg, var(--fyll) 0%, var(--accent) 100%);
