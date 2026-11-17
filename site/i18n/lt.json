@@ -569,5 +569,20 @@
   "welcome.browser_title": "Norite visos naršyklės?",
   "welcome.browser_text": "AdRaze Browser turi įtaisytą blokavimą ir yra skirta Linux, Windows ir Mac.",
   "privacy.h_site": "Apsilankymai adraze.app",
-  "privacy.p_site": "Kai lankotės adraze.app, skaičiuojame puslapių peržiūras ir atsisiuntimo mygtukų paspaudimus, kad matytume, kas veikia. Tai vyksta mūsų pačių serveryje, be slapukų ir nesaugant jūsų IP adreso. Įdiegus plėtinį, vieną kartą atidaromas pasisveikinimo puslapis adraze.app."
+  "privacy.p_site": "Kai lankotės adraze.app, skaičiuojame puslapių peržiūras ir atsisiuntimo mygtukų paspaudimus, kad matytume, kas veikia. Tai vyksta mūsų pačių serveryje, be slapukų ir nesaugant jūsų IP adreso. Įdiegus plėtinį, vieną kartą atidaromas pasisveikinimo puslapis adraze.app.",
+  "konto.lg_title": "Prisijungti prie AdRaze",
+  "konto.lg_lead": "arba susikurkite paskyrą. Tai užtruks minutę.",
+  "konto.lg_email_ph": "Įveskite el. pašto adresą",
+  "konto.lg_next": "Tęsti su el. paštu",
+  "konto.lg_pw_title": "Įveskite slaptažodį",
+  "konto.lg_change": "Redaguoti",
+  "konto.lg_no_account": "Neturite paskyros? Sukurkite",
+  "konto.lg_name_title": "Koks tavo vardas?",
+  "konto.lg_name_lead": "Taigi AdRaze žino, kaip jums paskambinti.",
+  "konto.lg_name_ph": "Įveskite savo vardą",
+  "konto.lg_continue": "Tęsti",
+  "konto.lg_newpw_title": "Pasirinkite slaptažodį",
+  "konto.lg_newpw_lead": "Mažiausiai 8 simboliai. Paskyra susieta su",
+  "konto.lg_show_pw": "Rodyti slaptažodį",
+  "konto.lg_err_name": "Įveskite savo vardą."
 }

@@ -569,5 +569,20 @@
   "welcome.browser_title": "Želite cel brskalnik?",
   "welcome.browser_text": "AdRaze Browser ima blokiranje vgrajeno in je na voljo za Linux, Windows in Mac.",
   "privacy.h_site": "Obiski adraze.app",
-  "privacy.p_site": "Ko obiščete adraze.app, štejemo oglede strani in klike na gumbe za prenos, da vidimo, kaj deluje. To poteka na našem lastnem strežniku, brez piškotkov in brez shranjevanja vašega naslova IP. Ob namestitvi razširitve se enkrat odpre pozdravna stran na adraze.app."
+  "privacy.p_site": "Ko obiščete adraze.app, štejemo oglede strani in klike na gumbe za prenos, da vidimo, kaj deluje. To poteka na našem lastnem strežniku, brez piškotkov in brez shranjevanja vašega naslova IP. Ob namestitvi razširitve se enkrat odpre pozdravna stran na adraze.app.",
+  "konto.lg_title": "Prijava v AdRaze",
+  "konto.lg_lead": "ali ustvarite račun. Traja minuto.",
+  "konto.lg_email_ph": "Vnesite svoj e-poštni naslov",
+  "konto.lg_next": "Nadaljuj z e-pošto",
+  "konto.lg_pw_title": "Vnesite svoje geslo",
+  "konto.lg_change": "Uredi",
+  "konto.lg_no_account": "Nimate računa? Ustvarite enega",
+  "konto.lg_name_title": "Kako ti je ime?",
+  "konto.lg_name_lead": "Torej AdRaze ve, kako te klicati.",
+  "konto.lg_name_ph": "Vnesite svoje ime",
+  "konto.lg_continue": "Nadaljuj",
+  "konto.lg_newpw_title": "Izberite geslo",
+  "konto.lg_newpw_lead": "Vsaj 8 znakov. Račun bo povezan z",
+  "konto.lg_show_pw": "Prikaži geslo",
+  "konto.lg_err_name": "Vnesite svoje ime."
 }

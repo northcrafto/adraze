@@ -75,38 +75,59 @@
 
 <main class="wrap konto" id="konto" data-api="https://api.adraze.app" data-lang="ro" aria-busy="true">
 
-  <!-- Inte inloggad -->
+  <!-- Inte inloggad: ett steg i taget, centrerat. Samma flöde som i AdRaze-webbläsaren (browser/ui/shell.html #login). -->
   <section class="ut" id="vy-ut" hidden>
-    <div class="ut-intro">
-      <div class="vinkar"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
-      <h1>Vezi tot ce a oprit AdRaze.</h1>
-      <p>Autentifică-te și conectează extensia ca să vezi câte reclame, trackere și pagini periculoase au fost oprite, pe toate calculatoarele tale.</p>
-    </div>
+    <div class="lg-kort">
 
-    <div class="ruta">
-      <div class="flikar" role="tablist" id="flikar">
-        <button role="tab" type="button" data-flik="in" aria-selected="true">Autentificare</button>
-        <button role="tab" type="button" data-flik="skapa" aria-selected="false">Creează cont</button>
-        <span class="flik-markor" aria-hidden="true"></span>
-      </div>
-
-      <form class="steg" id="f-in" data-steg="in" novalidate>
-        <label class="falt"><span>Adresă de e-mail</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>Parolă</span><input type="password" name="password" autocomplete="current-password" required></label>
-        <button type="button" class="lank-knapp nav-link" data-ga="glomt">Ai uitat parola?</button>
-        <button class="btn btn-stor liq bred" type="submit">Autentifică-te</button>
+      <!-- Steg 1: Google eller mejl -->
+      <form class="steg lg-vy" id="f-start" data-steg="start" novalidate>
+        <h1 class="lg-h">Autentificare pe AdRaze</h1>
+        <p class="lg-lead">sau creează un cont. Durează un minut.</p>
+        <div class="google" id="google-ruta" hidden>
+          <div id="google-knapp"></div>
+          <div class="eller"><span>sau</span></div>
+        </div>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="Introdu adresa ta de e-mail" aria-label="Adresă de e-mail" required>
+        <button class="btn liq lg-knapp" type="submit">Continuă cu e-mailul</button>
       </form>
 
-      <form class="steg" id="f-skapa" data-steg="skapa" novalidate hidden>
-        <label class="falt"><span>Adresă de e-mail</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>Alege o parolă (minimum 8 caractere)</span><input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
-        <button class="btn btn-stor liq bred" type="submit">Creează cont</button>
+      <!-- Steg 2: lösenord -->
+      <form class="steg lg-vy" id="f-in" data-steg="in" novalidate hidden>
+        <h1 class="lg-h">Introdu parola ta</h1>
+        <p class="lg-lead"><b class="lg-mejl" translate="no"></b> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp" data-ga="start">Edita</button></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="current-password" placeholder="Parolă" aria-label="Parolă" required><button type="button" class="lg-oga" data-visa aria-label="Afișează parola" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">Autentifică-te</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="glomt">Ai uitat parola?</button>
+          <button type="button" class="lank-knapp" data-ga="namn">Niciun cont? Creează unul</button>
+        </div>
+      </form>
+
+      <!-- Skapa konto 1: namn -->
+      <form class="steg lg-vy" id="f-nynamn" data-steg="namn" novalidate hidden>
+        <h1 class="lg-h">Cum te cheamă?</h1>
+        <p class="lg-lead">Deci AdRaze știe cum să te numească.</p>
+        <input class="lg-in" name="namn" autocomplete="name" maxlength="40" placeholder="Introdu numele tău" aria-label="Introdu numele tău" required>
+        <button class="btn liq lg-knapp" type="submit">Continuă</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="in">← Înapoi</button></div>
+      </form>
+
+      <!-- Skapa konto 2: lösenord -->
+      <form class="steg lg-vy" id="f-skapa" data-steg="skapa" novalidate hidden>
+        <h1 class="lg-h">Alege o parolă</h1>
+        <p class="lg-lead">At least 8 characters. The account will be linked to <b class="lg-mejl" translate="no"></b></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Parolă" aria-label="Alege o parolă (minimum 8 caractere)" required><button type="button" class="lg-oga" data-visa aria-label="Afișează parola" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">Creează cont</button>
         <p class="liten">Prin crearea unui cont accepți <a class="nav-link" href="https://adraze.app/ro/integritet">politica noastră de confidențialitate</a>.</p>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="namn">← Înapoi</button></div>
       </form>
 
-      <form class="steg" id="f-kod" data-steg="kod" novalidate hidden>
-        <h2>Verifică-ți e-mailul</h2>
-        <p class="dov">Am trimis un cod din șase cifre la <b id="kod-till"></b></p>
+      <!-- Koden i mejlet (ny webbläsare, nytt konto eller glömt lösenord) -->
+      <form class="steg lg-vy" id="f-kod" data-steg="kod" novalidate hidden>
+        <h1 class="lg-h">Verifică-ți e-mailul</h1>
+        <p class="lg-lead">Am trimis un cod din șase cifre la <b id="kod-till" translate="no"></b></p>
         <div class="kodrutor" id="kodrutor">
           <input inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="1">
           <input inputmode="numeric" maxlength="1" aria-label="2">
@@ -116,26 +137,22 @@
           <input inputmode="numeric" maxlength="1" aria-label="5">
           <input inputmode="numeric" maxlength="1" aria-label="6">
         </div>
-        <label class="falt" id="nytt-losen" hidden><span>Alege o parolă (minimum 8 caractere)</span><input type="password" name="password" autocomplete="new-password" minlength="8"></label>
-        <button class="btn btn-stor liq bred" type="submit" id="kod-knapp">Confirmă</button>
-        <div class="rad-lankar">
-          <button type="button" class="lank-knapp nav-link" data-ga="tillbaka">Înapoi</button>
-          <button type="button" class="lank-knapp nav-link" id="ny-kod">Trimite un cod nou</button>
+        <div class="lg-falt" id="nytt-losen" hidden><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Alege o parolă (minimum 8 caractere)" aria-label="Alege o parolă (minimum 8 caractere)"><button type="button" class="lg-oga" data-visa aria-label="Afișează parola" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit" id="kod-knapp">Confirmă</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="tillbaka">← Înapoi</button>
+          <button type="button" class="lank-knapp" id="ny-kod">Trimite un cod nou</button>
         </div>
       </form>
 
-      <form class="steg" id="f-glomt" data-steg="glomt" novalidate hidden>
-        <h2>Parolă nouă</h2>
-        <p class="dov">Scrie adresa de e-mail și îți trimitem un cod.</p>
-        <label class="falt"><span>Adresă de e-mail</span><input type="email" name="email" autocomplete="email" required></label>
-        <button class="btn btn-stor liq bred" type="submit">Trimite codul</button>
-        <div class="rad-lankar"><button type="button" class="lank-knapp nav-link" data-ga="tillbaka">Înapoi</button></div>
+      <!-- Glömt lösenord -->
+      <form class="steg lg-vy" id="f-glomt" data-steg="glomt" novalidate hidden>
+        <h1 class="lg-h">Parolă nouă</h1>
+        <p class="lg-lead">Scrie adresa de e-mail și îți trimitem un cod.</p>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="Introdu adresa ta de e-mail" aria-label="Adresă de e-mail" required>
+        <button class="btn liq lg-knapp" type="submit">Trimite codul</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="tillbaka">← Înapoi</button></div>
       </form>
-
-      <div class="google" id="google-ruta" hidden>
-        <div class="eller"><span>sau</span></div>
-        <div id="google-knapp"></div>
-      </div>
 
       <p class="meddelande" id="meddelande" role="alert" aria-live="polite"></p>
     </div>
@@ -244,6 +261,7 @@
     <span data-k="reset_btn">Salvează parola nouă</span>
     <span data-k="code_btn">Confirmă</span>
     <span data-k="days_total">{n} oprite</span>
+    <span data-k="lg_err_name">Completează numele tău.</span>
     <span data-k="err_generic">Ceva n-a mers. Încearcă din nou.</span>
     <span data-k="err_network">Nu am putut contacta AdRaze. Verifică-ți conexiunea.</span>
     <span data-k="err_email">Scrie o adresă de e-mail validă.</span>

@@ -569,5 +569,20 @@
   "welcome.browser_title": "Soovid tervet brauserit?",
   "welcome.browser_text": "AdRaze Browseris on blokeerimine sisse ehitatud ning see on saadaval Linuxile, Windowsile ja Macile.",
   "privacy.h_site": "Külastused saidil adraze.app",
-  "privacy.p_site": "Kui külastad saiti adraze.app, loendame lehevaatamisi ja klõpse allalaadimisnuppudel, et näha, mis toimib. See toimub meie enda serveris, ilma küpsisteta ja sinu IP-aadressi salvestamata. Laienduse paigaldamisel avaneb üks kord tervitusleht saidil adraze.app."
+  "privacy.p_site": "Kui külastad saiti adraze.app, loendame lehevaatamisi ja klõpse allalaadimisnuppudel, et näha, mis toimib. See toimub meie enda serveris, ilma küpsisteta ja sinu IP-aadressi salvestamata. Laienduse paigaldamisel avaneb üks kord tervitusleht saidil adraze.app.",
+  "konto.lg_title": "Logi sisse AdRaze'i",
+  "konto.lg_lead": "või loo konto. See võtab minut aega.",
+  "konto.lg_email_ph": "Sisestage oma e-posti aadress",
+  "konto.lg_next": "Jätka e-postiga",
+  "konto.lg_pw_title": "Sisestage oma parool",
+  "konto.lg_change": "Muuda",
+  "konto.lg_no_account": "Pole kontot? Loo üks",
+  "konto.lg_name_title": "Mis su nimi on?",
+  "konto.lg_name_lead": "Nii et AdRaze teab, kuidas teile helistada.",
+  "konto.lg_name_ph": "Sisestage oma nimi",
+  "konto.lg_continue": "Jätka",
+  "konto.lg_newpw_title": "Vali parool",
+  "konto.lg_newpw_lead": "Vähemalt 8 tähemärki. Konto seotakse",
+  "konto.lg_show_pw": "Kuva parool",
+  "konto.lg_err_name": "Sisesta oma nimi."
 }

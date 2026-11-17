@@ -16,38 +16,59 @@
 
 <main class="wrap konto" id="konto" data-api="https://api.adraze.app" data-lang="{{lang}}" aria-busy="true">
 
-  <!-- Inte inloggad -->
+  <!-- Inte inloggad: ett steg i taget, centrerat. Samma flöde som i AdRaze-webbläsaren (browser/ui/shell.html #login). -->
   <section class="ut" id="vy-ut" hidden>
-    <div class="ut-intro">
-      <div class="vinkar"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
-      <h1>{{t:konto.title}}</h1>
-      <p>{{t:konto.lead}}</p>
-    </div>
+    <div class="lg-kort">
 
-    <div class="ruta">
-      <div class="flikar" role="tablist" id="flikar">
-        <button role="tab" type="button" data-flik="in" aria-selected="true">{{t:konto.tab_login}}</button>
-        <button role="tab" type="button" data-flik="skapa" aria-selected="false">{{t:konto.tab_signup}}</button>
-        <span class="flik-markor" aria-hidden="true"></span>
-      </div>
-
-      <form class="steg" id="f-in" data-steg="in" novalidate>
-        <label class="falt"><span>{{t:konto.email}}</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>{{t:konto.password}}</span><input type="password" name="password" autocomplete="current-password" required></label>
-        <button type="button" class="lank-knapp nav-link" data-ga="glomt">{{t:konto.forgot}}</button>
-        <button class="btn btn-stor liq bred" type="submit">{{t:konto.login_btn}}</button>
+      <!-- Steg 1: Google eller mejl -->
+      <form class="steg lg-vy" id="f-start" data-steg="start" novalidate>
+        <h1 class="lg-h">{{t:konto.lg_title}}</h1>
+        <p class="lg-lead">{{t:konto.lg_lead}}</p>
+        <div class="google" id="google-ruta" hidden>
+          <div id="google-knapp"></div>
+          <div class="eller"><span>{{t:konto.or}}</span></div>
+        </div>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="{{t:konto.lg_email_ph}}" aria-label="{{t:konto.email}}" required>
+        <button class="btn liq lg-knapp" type="submit">{{t:konto.lg_next}}</button>
       </form>
 
-      <form class="steg" id="f-skapa" data-steg="skapa" novalidate hidden>
-        <label class="falt"><span>{{t:konto.email}}</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>{{t:konto.password_new}}</span><input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
-        <button class="btn btn-stor liq bred" type="submit">{{t:konto.signup_btn}}</button>
+      <!-- Steg 2: lösenord -->
+      <form class="steg lg-vy" id="f-in" data-steg="in" novalidate hidden>
+        <h1 class="lg-h">{{t:konto.lg_pw_title}}</h1>
+        <p class="lg-lead"><b class="lg-mejl" translate="no"></b> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp" data-ga="start">{{t:konto.lg_change}}</button></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="current-password" placeholder="{{t:konto.password}}" aria-label="{{t:konto.password}}" required><button type="button" class="lg-oga" data-visa aria-label="{{t:konto.lg_show_pw}}" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">{{t:konto.login_btn}}</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="glomt">{{t:konto.forgot}}</button>
+          <button type="button" class="lank-knapp" data-ga="namn">{{t:konto.lg_no_account}}</button>
+        </div>
+      </form>
+
+      <!-- Skapa konto 1: namn -->
+      <form class="steg lg-vy" id="f-nynamn" data-steg="namn" novalidate hidden>
+        <h1 class="lg-h">{{t:konto.lg_name_title}}</h1>
+        <p class="lg-lead">{{t:konto.lg_name_lead}}</p>
+        <input class="lg-in" name="namn" autocomplete="name" maxlength="40" placeholder="{{t:konto.lg_name_ph}}" aria-label="{{t:konto.lg_name_ph}}" required>
+        <button class="btn liq lg-knapp" type="submit">{{t:konto.lg_continue}}</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="in">← {{t:konto.back}}</button></div>
+      </form>
+
+      <!-- Skapa konto 2: lösenord -->
+      <form class="steg lg-vy" id="f-skapa" data-steg="skapa" novalidate hidden>
+        <h1 class="lg-h">{{t:konto.lg_newpw_title}}</h1>
+        <p class="lg-lead">{{t:konto.lg_newpw_lead}} <b class="lg-mejl" translate="no"></b></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="{{t:konto.password}}" aria-label="{{t:konto.password_new}}" required><button type="button" class="lg-oga" data-visa aria-label="{{t:konto.lg_show_pw}}" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">{{t:konto.signup_btn}}</button>
         <p class="liten">{{t:konto.terms}} <a class="nav-link" href="{{pre}}/integritet">{{t:konto.privacy_link}}</a>.</p>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="namn">← {{t:konto.back}}</button></div>
       </form>
 
-      <form class="steg" id="f-kod" data-steg="kod" novalidate hidden>
-        <h2>{{t:konto.code_title}}</h2>
-        <p class="dov">{{t:konto.code_text}} <b id="kod-till"></b></p>
+      <!-- Koden i mejlet (ny webbläsare, nytt konto eller glömt lösenord) -->
+      <form class="steg lg-vy" id="f-kod" data-steg="kod" novalidate hidden>
+        <h1 class="lg-h">{{t:konto.code_title}}</h1>
+        <p class="lg-lead">{{t:konto.code_text}} <b id="kod-till" translate="no"></b></p>
         <div class="kodrutor" id="kodrutor">
           <input inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="1">
           <input inputmode="numeric" maxlength="1" aria-label="2">
@@ -57,26 +78,22 @@
           <input inputmode="numeric" maxlength="1" aria-label="5">
           <input inputmode="numeric" maxlength="1" aria-label="6">
         </div>
-        <label class="falt" id="nytt-losen" hidden><span>{{t:konto.password_new}}</span><input type="password" name="password" autocomplete="new-password" minlength="8"></label>
-        <button class="btn btn-stor liq bred" type="submit" id="kod-knapp">{{t:konto.code_btn}}</button>
-        <div class="rad-lankar">
-          <button type="button" class="lank-knapp nav-link" data-ga="tillbaka">{{t:konto.back}}</button>
-          <button type="button" class="lank-knapp nav-link" id="ny-kod">{{t:konto.code_resend}}</button>
+        <div class="lg-falt" id="nytt-losen" hidden><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="{{t:konto.password_new}}" aria-label="{{t:konto.password_new}}"><button type="button" class="lg-oga" data-visa aria-label="{{t:konto.lg_show_pw}}" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit" id="kod-knapp">{{t:konto.code_btn}}</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="tillbaka">← {{t:konto.back}}</button>
+          <button type="button" class="lank-knapp" id="ny-kod">{{t:konto.code_resend}}</button>
         </div>
       </form>
 
-      <form class="steg" id="f-glomt" data-steg="glomt" novalidate hidden>
-        <h2>{{t:konto.forgot_title}}</h2>
-        <p class="dov">{{t:konto.forgot_text}}</p>
-        <label class="falt"><span>{{t:konto.email}}</span><input type="email" name="email" autocomplete="email" required></label>
-        <button class="btn btn-stor liq bred" type="submit">{{t:konto.forgot_btn}}</button>
-        <div class="rad-lankar"><button type="button" class="lank-knapp nav-link" data-ga="tillbaka">{{t:konto.back}}</button></div>
+      <!-- Glömt lösenord -->
+      <form class="steg lg-vy" id="f-glomt" data-steg="glomt" novalidate hidden>
+        <h1 class="lg-h">{{t:konto.forgot_title}}</h1>
+        <p class="lg-lead">{{t:konto.forgot_text}}</p>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="{{t:konto.lg_email_ph}}" aria-label="{{t:konto.email}}" required>
+        <button class="btn liq lg-knapp" type="submit">{{t:konto.forgot_btn}}</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="tillbaka">← {{t:konto.back}}</button></div>
       </form>
-
-      <div class="google" id="google-ruta" hidden>
-        <div class="eller"><span>{{t:konto.or}}</span></div>
-        <div id="google-knapp"></div>
-      </div>
 
       <p class="meddelande" id="meddelande" role="alert" aria-live="polite"></p>
     </div>
@@ -185,6 +202,7 @@
     <span data-k="reset_btn">{{t:konto.reset_btn}}</span>
     <span data-k="code_btn">{{t:konto.code_btn}}</span>
     <span data-k="days_total">{{t:konto.days_total}}</span>
+    <span data-k="lg_err_name">{{t:konto.lg_err_name}}</span>
     <span data-k="err_generic">{{t:konto.err_generic}}</span>
     <span data-k="err_network">{{t:konto.err_network}}</span>
     <span data-k="err_email">{{t:konto.err_email}}</span>

@@ -569,5 +569,20 @@
   "welcome.browser_title": "Vēlies visu pārlūku?",
   "welcome.browser_text": "AdRaze Browser ir iebūvēta bloķēšana, un tas ir pieejams Linux, Windows un Mac.",
   "privacy.h_site": "Apmeklējumi vietnē adraze.app",
-  "privacy.p_site": "Kad apmeklē adraze.app, mēs saskaitām lapu skatījumus un klikšķus uz lejupielādes pogām, lai redzētu, kas darbojas. Tas notiek mūsu pašu serverī, bez sīkdatnēm un nesaglabājot tavu IP adresi. Kad paplašinājums tiek instalēts, vienu reizi tiek atvērta sveiciena lapa vietnē adraze.app."
+  "privacy.p_site": "Kad apmeklē adraze.app, mēs saskaitām lapu skatījumus un klikšķus uz lejupielādes pogām, lai redzētu, kas darbojas. Tas notiek mūsu pašu serverī, bez sīkdatnēm un nesaglabājot tavu IP adresi. Kad paplašinājums tiek instalēts, vienu reizi tiek atvērta sveiciena lapa vietnē adraze.app.",
+  "konto.lg_title": "Pieteikties AdRaze",
+  "konto.lg_lead": "vai izveido kontu. Tas aizņem minūti.",
+  "konto.lg_email_ph": "Ievadiet savu e-pasta adresi",
+  "konto.lg_next": "Turpināt ar e-pastu",
+  "konto.lg_pw_title": "Ievadiet savu paroli",
+  "konto.lg_change": "Rediģēt",
+  "konto.lg_no_account": "Nav konta? Izveidojiet",
+  "konto.lg_name_title": "Kā tevi sauc?",
+  "konto.lg_name_lead": "Tātad AdRaze zina, kā jūs saukt.",
+  "konto.lg_name_ph": "Ievadiet savu vārdu",
+  "konto.lg_continue": "Turpināt",
+  "konto.lg_newpw_title": "Izvēlieties paroli",
+  "konto.lg_newpw_lead": "Vismaz 8 rakstzīmes. Konts tiks saistīts ar",
+  "konto.lg_show_pw": "Rādīt paroli",
+  "konto.lg_err_name": "Ievadiet savu vārdu."
 }

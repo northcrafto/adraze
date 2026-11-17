@@ -75,38 +75,59 @@
 
 <main class="wrap konto" id="konto" data-api="https://api.adraze.app" data-lang="nb" aria-busy="true">
 
-  <!-- Inte inloggad -->
+  <!-- Inte inloggad: ett steg i taget, centrerat. Samma flöde som i AdRaze-webbläsaren (browser/ui/shell.html #login). -->
   <section class="ut" id="vy-ut" hidden>
-    <div class="ut-intro">
-      <div class="vinkar"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
-      <h1>Se alt AdRaze har stoppet.</h1>
-      <p>Logg inn og koble til utvidelsen, så ser du hvor mye reklame, sporere og farlige sider som er stoppet, på alle datamaskinene dine.</p>
-    </div>
+    <div class="lg-kort">
 
-    <div class="ruta">
-      <div class="flikar" role="tablist" id="flikar">
-        <button role="tab" type="button" data-flik="in" aria-selected="true">Logg inn</button>
-        <button role="tab" type="button" data-flik="skapa" aria-selected="false">Opprett konto</button>
-        <span class="flik-markor" aria-hidden="true"></span>
-      </div>
-
-      <form class="steg" id="f-in" data-steg="in" novalidate>
-        <label class="falt"><span>E-postadresse</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>Passord</span><input type="password" name="password" autocomplete="current-password" required></label>
-        <button type="button" class="lank-knapp nav-link" data-ga="glomt">Glemt passordet?</button>
-        <button class="btn btn-stor liq bred" type="submit">Logg inn</button>
+      <!-- Steg 1: Google eller mejl -->
+      <form class="steg lg-vy" id="f-start" data-steg="start" novalidate>
+        <h1 class="lg-h">Logg inn på AdRaze</h1>
+        <p class="lg-lead">eller opprett en konto. Det tar ett minutt.</p>
+        <div class="google" id="google-ruta" hidden>
+          <div id="google-knapp"></div>
+          <div class="eller"><span>eller</span></div>
+        </div>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="Skriv inn e-postadressen din" aria-label="E-postadresse" required>
+        <button class="btn liq lg-knapp" type="submit">Fortsett med e-post</button>
       </form>
 
-      <form class="steg" id="f-skapa" data-steg="skapa" novalidate hidden>
-        <label class="falt"><span>E-postadresse</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>Velg passord (minst 8 tegn)</span><input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
-        <button class="btn btn-stor liq bred" type="submit">Opprett konto</button>
+      <!-- Steg 2: lösenord -->
+      <form class="steg lg-vy" id="f-in" data-steg="in" novalidate hidden>
+        <h1 class="lg-h">Skriv inn passordet ditt</h1>
+        <p class="lg-lead"><b class="lg-mejl" translate="no"></b> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp" data-ga="start">Redigere</button></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="current-password" placeholder="Passord" aria-label="Passord" required><button type="button" class="lg-oga" data-visa aria-label="Vis passord" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">Logg inn</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="glomt">Glemt passordet?</button>
+          <button type="button" class="lank-knapp" data-ga="namn">Ingen konto? Opprett en</button>
+        </div>
+      </form>
+
+      <!-- Skapa konto 1: namn -->
+      <form class="steg lg-vy" id="f-nynamn" data-steg="namn" novalidate hidden>
+        <h1 class="lg-h">Hva heter du?</h1>
+        <p class="lg-lead">Så AdRaze vet hva jeg skal kalle deg.</p>
+        <input class="lg-in" name="namn" autocomplete="name" maxlength="40" placeholder="Skriv inn navnet ditt" aria-label="Skriv inn navnet ditt" required>
+        <button class="btn liq lg-knapp" type="submit">Fortsett</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="in">← Tilbake</button></div>
+      </form>
+
+      <!-- Skapa konto 2: lösenord -->
+      <form class="steg lg-vy" id="f-skapa" data-steg="skapa" novalidate hidden>
+        <h1 class="lg-h">Velg et passord</h1>
+        <p class="lg-lead">Minst 8 tegn. Kontoen kobles til <b class="lg-mejl" translate="no"></b></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Passord" aria-label="Velg passord (minst 8 tegn)" required><button type="button" class="lg-oga" data-visa aria-label="Vis passord" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">Opprett konto</button>
         <p class="liten">Ved å opprette en konto godtar du vår <a class="nav-link" href="https://adraze.app/nb/integritet">personvernerklæring</a>.</p>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="namn">← Tilbake</button></div>
       </form>
 
-      <form class="steg" id="f-kod" data-steg="kod" novalidate hidden>
-        <h2>Sjekk e-posten din</h2>
-        <p class="dov">Vi sendte en sekssifret kode til <b id="kod-till"></b></p>
+      <!-- Koden i mejlet (ny webbläsare, nytt konto eller glömt lösenord) -->
+      <form class="steg lg-vy" id="f-kod" data-steg="kod" novalidate hidden>
+        <h1 class="lg-h">Sjekk e-posten din</h1>
+        <p class="lg-lead">Vi sendte en sekssifret kode til <b id="kod-till" translate="no"></b></p>
         <div class="kodrutor" id="kodrutor">
           <input inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="1">
           <input inputmode="numeric" maxlength="1" aria-label="2">
@@ -116,26 +137,22 @@
           <input inputmode="numeric" maxlength="1" aria-label="5">
           <input inputmode="numeric" maxlength="1" aria-label="6">
         </div>
-        <label class="falt" id="nytt-losen" hidden><span>Velg passord (minst 8 tegn)</span><input type="password" name="password" autocomplete="new-password" minlength="8"></label>
-        <button class="btn btn-stor liq bred" type="submit" id="kod-knapp">Bekreft</button>
-        <div class="rad-lankar">
-          <button type="button" class="lank-knapp nav-link" data-ga="tillbaka">Tilbake</button>
-          <button type="button" class="lank-knapp nav-link" id="ny-kod">Send ny kode</button>
+        <div class="lg-falt" id="nytt-losen" hidden><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Velg passord (minst 8 tegn)" aria-label="Velg passord (minst 8 tegn)"><button type="button" class="lg-oga" data-visa aria-label="Vis passord" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit" id="kod-knapp">Bekreft</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="tillbaka">← Tilbake</button>
+          <button type="button" class="lank-knapp" id="ny-kod">Send ny kode</button>
         </div>
       </form>
 
-      <form class="steg" id="f-glomt" data-steg="glomt" novalidate hidden>
-        <h2>Nytt passord</h2>
-        <p class="dov">Skriv inn e-postadressen din, så sender vi en kode.</p>
-        <label class="falt"><span>E-postadresse</span><input type="email" name="email" autocomplete="email" required></label>
-        <button class="btn btn-stor liq bred" type="submit">Send kode</button>
-        <div class="rad-lankar"><button type="button" class="lank-knapp nav-link" data-ga="tillbaka">Tilbake</button></div>
+      <!-- Glömt lösenord -->
+      <form class="steg lg-vy" id="f-glomt" data-steg="glomt" novalidate hidden>
+        <h1 class="lg-h">Nytt passord</h1>
+        <p class="lg-lead">Skriv inn e-postadressen din, så sender vi en kode.</p>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="Skriv inn e-postadressen din" aria-label="E-postadresse" required>
+        <button class="btn liq lg-knapp" type="submit">Send kode</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="tillbaka">← Tilbake</button></div>
       </form>
-
-      <div class="google" id="google-ruta" hidden>
-        <div class="eller"><span>eller</span></div>
-        <div id="google-knapp"></div>
-      </div>
 
       <p class="meddelande" id="meddelande" role="alert" aria-live="polite"></p>
     </div>
@@ -244,6 +261,7 @@
     <span data-k="reset_btn">Lagre nytt passord</span>
     <span data-k="code_btn">Bekreft</span>
     <span data-k="days_total">{n} stoppet</span>
+    <span data-k="lg_err_name">Fyll inn navnet ditt.</span>
     <span data-k="err_generic">Noe gikk galt. Prøv igjen.</span>
     <span data-k="err_network">Fikk ikke kontakt med AdRaze. Sjekk tilkoblingen din.</span>
     <span data-k="err_email">Skriv inn en gyldig e-postadresse.</span>

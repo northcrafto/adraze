@@ -569,5 +569,20 @@
   "welcome.browser_title": "Quer o navegador completo?",
   "welcome.browser_text": "O AdRaze Browser tem o bloqueio integrado e está disponível para Linux, Windows e Mac.",
   "privacy.h_site": "Visitas a adraze.app",
-  "privacy.p_site": "Quando você visita adraze.app, contamos as visualizações de página e os cliques nos botões de download, para ver o que funciona. Isso acontece no nosso próprio servidor, sem cookies e sem guardar o seu endereço IP. Quando a extensão é instalada, uma página de boas-vindas em adraze.app abre uma única vez."
+  "privacy.p_site": "Quando você visita adraze.app, contamos as visualizações de página e os cliques nos botões de download, para ver o que funciona. Isso acontece no nosso próprio servidor, sem cookies e sem guardar o seu endereço IP. Quando a extensão é instalada, uma página de boas-vindas em adraze.app abre uma única vez.",
+  "konto.lg_title": "Entrar no AdRaze",
+  "konto.lg_lead": "ou crie uma conta. Leva um minuto.",
+  "konto.lg_email_ph": "Digite seu e-mail",
+  "konto.lg_next": "Continuar com e-mail",
+  "konto.lg_pw_title": "Digite sua senha",
+  "konto.lg_change": "Editar",
+  "konto.lg_no_account": "Sem conta? Crie uma",
+  "konto.lg_name_title": "Qual é o seu nome?",
+  "konto.lg_name_lead": "Então AdRaze sabe como ligar para você.",
+  "konto.lg_name_ph": "Digite seu nome",
+  "konto.lg_continue": "Continuar",
+  "konto.lg_newpw_title": "Escolha uma senha",
+  "konto.lg_newpw_lead": "Pelo menos 8 caracteres. A conta será vinculada a",
+  "konto.lg_show_pw": "Mostrar senha",
+  "konto.lg_err_name": "Preencha seu nome."
 }

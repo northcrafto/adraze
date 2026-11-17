@@ -569,5 +569,20 @@
   "welcome.browser_title": "Vill du ha hela webbläsaren?",
   "welcome.browser_text": "AdRaze Browser har blockeringen inbyggd och finns för Linux, Windows och Mac.",
   "privacy.h_site": "Besök på adraze.app",
-  "privacy.p_site": "När du besöker adraze.app räknar vi sidvisningar och klick på nedladdningsknapparna, för att se vad som fungerar. Det sker på vår egen server, utan kakor och utan att din IP-adress sparas. När tillägget installeras öppnas en välkomstsida på adraze.app en gång."
+  "privacy.p_site": "När du besöker adraze.app räknar vi sidvisningar och klick på nedladdningsknapparna, för att se vad som fungerar. Det sker på vår egen server, utan kakor och utan att din IP-adress sparas. När tillägget installeras öppnas en välkomstsida på adraze.app en gång.",
+  "konto.lg_title": "Logga in på AdRaze",
+  "konto.lg_lead": "eller skapa ett konto. Det tar en minut.",
+  "konto.lg_email_ph": "Ange din mejladress",
+  "konto.lg_next": "Fortsätt med mejl",
+  "konto.lg_pw_title": "Ange ditt lösenord",
+  "konto.lg_change": "Ändra",
+  "konto.lg_no_account": "Inget konto? Skapa ett",
+  "konto.lg_name_title": "Vad heter du?",
+  "konto.lg_name_lead": "Så att AdRaze vet vad du vill bli kallad.",
+  "konto.lg_name_ph": "Ange ditt namn",
+  "konto.lg_continue": "Fortsätt",
+  "konto.lg_newpw_title": "Välj ett lösenord",
+  "konto.lg_newpw_lead": "Minst 8 tecken. Kontot kopplas till",
+  "konto.lg_show_pw": "Visa lösenord",
+  "konto.lg_err_name": "Fyll i ditt namn."
 }

@@ -569,5 +569,20 @@
   "welcome.browser_title": "Viltu allan vafrann?",
   "welcome.browser_text": "AdRaze Browser er með lokunina innbyggða og er til fyrir Linux, Windows og Mac.",
   "privacy.h_site": "Heimsóknir á adraze.app",
-  "privacy.p_site": "Þegar þú heimsækir adraze.app teljum við síðuflettingar og smelli á niðurhalshnappana til að sjá hvað virkar. Það gerist á okkar eigin þjóni, án vafrakaka og án þess að IP-talan þín sé vistuð. Þegar viðbótin er sett upp opnast kynningarsíða á adraze.app einu sinni."
+  "privacy.p_site": "Þegar þú heimsækir adraze.app teljum við síðuflettingar og smelli á niðurhalshnappana til að sjá hvað virkar. Það gerist á okkar eigin þjóni, án vafrakaka og án þess að IP-talan þín sé vistuð. Þegar viðbótin er sett upp opnast kynningarsíða á adraze.app einu sinni.",
+  "konto.lg_title": "Skráðu þig inn á AdRaze",
+  "konto.lg_lead": "eða búðu til reikning. Það tekur eina mínútu.",
+  "konto.lg_email_ph": "Sláðu inn netfangið þitt",
+  "konto.lg_next": "Halda áfram með tölvupósti",
+  "konto.lg_pw_title": "Sláðu inn lykilorðið þitt",
+  "konto.lg_change": "Breyta",
+  "konto.lg_no_account": "Enginn reikningur? Búðu til einn",
+  "konto.lg_name_title": "Hvað heitir þú?",
+  "konto.lg_name_lead": "Svo AdRaze veit hvað ég á að kalla þig.",
+  "konto.lg_name_ph": "Sláðu inn nafnið þitt",
+  "konto.lg_continue": "Halda áfram",
+  "konto.lg_newpw_title": "Veldu lykilorð",
+  "konto.lg_newpw_lead": "Að minnsta kosti 8 stafir. Reikningurinn verður tengdur við",
+  "konto.lg_show_pw": "Sýna lykilorð",
+  "konto.lg_err_name": "Fylltu inn nafnið þitt."
 }

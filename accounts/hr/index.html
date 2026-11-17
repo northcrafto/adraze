@@ -75,38 +75,59 @@
 
 <main class="wrap konto" id="konto" data-api="https://api.adraze.app" data-lang="hr" aria-busy="true">
 
-  <!-- Inte inloggad -->
+  <!-- Inte inloggad: ett steg i taget, centrerat. Samma flöde som i AdRaze-webbläsaren (browser/ui/shell.html #login). -->
   <section class="ut" id="vy-ut" hidden>
-    <div class="ut-intro">
-      <div class="vinkar"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
-      <h1>Pogledaj sve što je AdRaze zaustavio.</h1>
-      <p>Prijavi se i poveži proširenje pa ćeš vidjeti koliko je oglasa, alata za praćenje i opasnih stranica zaustavljeno na svim tvojim računalima.</p>
-    </div>
+    <div class="lg-kort">
 
-    <div class="ruta">
-      <div class="flikar" role="tablist" id="flikar">
-        <button role="tab" type="button" data-flik="in" aria-selected="true">Prijava</button>
-        <button role="tab" type="button" data-flik="skapa" aria-selected="false">Izradi račun</button>
-        <span class="flik-markor" aria-hidden="true"></span>
-      </div>
-
-      <form class="steg" id="f-in" data-steg="in" novalidate>
-        <label class="falt"><span>Adresa e-pošte</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>Lozinka</span><input type="password" name="password" autocomplete="current-password" required></label>
-        <button type="button" class="lank-knapp nav-link" data-ga="glomt">Zaboravio si lozinku?</button>
-        <button class="btn btn-stor liq bred" type="submit">Prijavi se</button>
+      <!-- Steg 1: Google eller mejl -->
+      <form class="steg lg-vy" id="f-start" data-steg="start" novalidate>
+        <h1 class="lg-h">Prijava na AdRaze</h1>
+        <p class="lg-lead">ili stvorite račun. Traje minutu.</p>
+        <div class="google" id="google-ruta" hidden>
+          <div id="google-knapp"></div>
+          <div class="eller"><span>ili</span></div>
+        </div>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="Unesite svoju adresu e-pošte" aria-label="Adresa e-pošte" required>
+        <button class="btn liq lg-knapp" type="submit">Nastavi s e-poštom</button>
       </form>
 
-      <form class="steg" id="f-skapa" data-steg="skapa" novalidate hidden>
-        <label class="falt"><span>Adresa e-pošte</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>Odaberi lozinku (najmanje 8 znakova)</span><input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
-        <button class="btn btn-stor liq bred" type="submit">Izradi račun</button>
+      <!-- Steg 2: lösenord -->
+      <form class="steg lg-vy" id="f-in" data-steg="in" novalidate hidden>
+        <h1 class="lg-h">Unesite svoju lozinku</h1>
+        <p class="lg-lead"><b class="lg-mejl" translate="no"></b> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp" data-ga="start">Uredi</button></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="current-password" placeholder="Lozinka" aria-label="Lozinka" required><button type="button" class="lg-oga" data-visa aria-label="Prikaži lozinku" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">Prijavi se</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="glomt">Zaboravio si lozinku?</button>
+          <button type="button" class="lank-knapp" data-ga="namn">Nemate račun? Stvorite jedan</button>
+        </div>
+      </form>
+
+      <!-- Skapa konto 1: namn -->
+      <form class="steg lg-vy" id="f-nynamn" data-steg="namn" novalidate hidden>
+        <h1 class="lg-h">Kako se zoveš?</h1>
+        <p class="lg-lead">Dakle, AdRaze zna kako da vas nazove.</p>
+        <input class="lg-in" name="namn" autocomplete="name" maxlength="40" placeholder="Unesite svoje ime" aria-label="Unesite svoje ime" required>
+        <button class="btn liq lg-knapp" type="submit">Nastavi</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="in">← Natrag</button></div>
+      </form>
+
+      <!-- Skapa konto 2: lösenord -->
+      <form class="steg lg-vy" id="f-skapa" data-steg="skapa" novalidate hidden>
+        <h1 class="lg-h">Odaberite lozinku</h1>
+        <p class="lg-lead">Najmanje 8 znakova. Račun se povezuje s <b class="lg-mejl" translate="no"></b></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Lozinka" aria-label="Odaberi lozinku (najmanje 8 znakova)" required><button type="button" class="lg-oga" data-visa aria-label="Prikaži lozinku" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">Izradi račun</button>
         <p class="liten">Izradom računa prihvaćaš naša <a class="nav-link" href="https://adraze.app/hr/integritet">pravila o privatnosti</a>.</p>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="namn">← Natrag</button></div>
       </form>
 
-      <form class="steg" id="f-kod" data-steg="kod" novalidate hidden>
-        <h2>Provjeri e-poštu</h2>
-        <p class="dov">Poslali smo šesteroznamenkasti kod na <b id="kod-till"></b></p>
+      <!-- Koden i mejlet (ny webbläsare, nytt konto eller glömt lösenord) -->
+      <form class="steg lg-vy" id="f-kod" data-steg="kod" novalidate hidden>
+        <h1 class="lg-h">Provjeri e-poštu</h1>
+        <p class="lg-lead">Poslali smo šesteroznamenkasti kod na <b id="kod-till" translate="no"></b></p>
         <div class="kodrutor" id="kodrutor">
           <input inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="1">
           <input inputmode="numeric" maxlength="1" aria-label="2">
@@ -116,26 +137,22 @@
           <input inputmode="numeric" maxlength="1" aria-label="5">
           <input inputmode="numeric" maxlength="1" aria-label="6">
         </div>
-        <label class="falt" id="nytt-losen" hidden><span>Odaberi lozinku (najmanje 8 znakova)</span><input type="password" name="password" autocomplete="new-password" minlength="8"></label>
-        <button class="btn btn-stor liq bred" type="submit" id="kod-knapp">Potvrdi</button>
-        <div class="rad-lankar">
-          <button type="button" class="lank-knapp nav-link" data-ga="tillbaka">Natrag</button>
-          <button type="button" class="lank-knapp nav-link" id="ny-kod">Pošalji novi kod</button>
+        <div class="lg-falt" id="nytt-losen" hidden><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Odaberi lozinku (najmanje 8 znakova)" aria-label="Odaberi lozinku (najmanje 8 znakova)"><button type="button" class="lg-oga" data-visa aria-label="Prikaži lozinku" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit" id="kod-knapp">Potvrdi</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="tillbaka">← Natrag</button>
+          <button type="button" class="lank-knapp" id="ny-kod">Pošalji novi kod</button>
         </div>
       </form>
 
-      <form class="steg" id="f-glomt" data-steg="glomt" novalidate hidden>
-        <h2>Nova lozinka</h2>
-        <p class="dov">Upiši svoju e-poštu i poslat ćemo ti kod.</p>
-        <label class="falt"><span>Adresa e-pošte</span><input type="email" name="email" autocomplete="email" required></label>
-        <button class="btn btn-stor liq bred" type="submit">Pošalji kod</button>
-        <div class="rad-lankar"><button type="button" class="lank-knapp nav-link" data-ga="tillbaka">Natrag</button></div>
+      <!-- Glömt lösenord -->
+      <form class="steg lg-vy" id="f-glomt" data-steg="glomt" novalidate hidden>
+        <h1 class="lg-h">Nova lozinka</h1>
+        <p class="lg-lead">Upiši svoju e-poštu i poslat ćemo ti kod.</p>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="Unesite svoju adresu e-pošte" aria-label="Adresa e-pošte" required>
+        <button class="btn liq lg-knapp" type="submit">Pošalji kod</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="tillbaka">← Natrag</button></div>
       </form>
-
-      <div class="google" id="google-ruta" hidden>
-        <div class="eller"><span>ili</span></div>
-        <div id="google-knapp"></div>
-      </div>
 
       <p class="meddelande" id="meddelande" role="alert" aria-live="polite"></p>
     </div>
@@ -244,6 +261,7 @@
     <span data-k="reset_btn">Spremi novu lozinku</span>
     <span data-k="code_btn">Potvrdi</span>
     <span data-k="days_total">Zaustavljeno: {n}</span>
+    <span data-k="lg_err_name">Ispuni svoje ime.</span>
     <span data-k="err_generic">Nešto je pošlo po zlu. Pokušaj ponovno.</span>
     <span data-k="err_network">Nije moguće doći do AdRaze. Provjeri vezu.</span>
     <span data-k="err_email">Upiši valjanu adresu e-pošte.</span>

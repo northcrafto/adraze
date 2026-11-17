@@ -569,5 +569,20 @@
   "welcome.browser_title": "Vrei tot browserul?",
   "welcome.browser_text": "AdRaze Browser are blocarea integrată și este disponibil pentru Linux, Windows și Mac.",
   "privacy.h_site": "Vizite pe adraze.app",
-  "privacy.p_site": "Când vizitezi adraze.app, numărăm afișările de pagină și clicurile pe butoanele de descărcare, ca să vedem ce funcționează. Totul se întâmplă pe propriul nostru server, fără cookie-uri și fără a-ți salva adresa IP. La instalarea extensiei se deschide o singură dată o pagină de bun venit pe adraze.app."
+  "privacy.p_site": "Când vizitezi adraze.app, numărăm afișările de pagină și clicurile pe butoanele de descărcare, ca să vedem ce funcționează. Totul se întâmplă pe propriul nostru server, fără cookie-uri și fără a-ți salva adresa IP. La instalarea extensiei se deschide o singură dată o pagină de bun venit pe adraze.app.",
+  "konto.lg_title": "Autentificare pe AdRaze",
+  "konto.lg_lead": "sau creează un cont. Durează un minut.",
+  "konto.lg_email_ph": "Introdu adresa ta de e-mail",
+  "konto.lg_next": "Continuă cu e-mailul",
+  "konto.lg_pw_title": "Introdu parola ta",
+  "konto.lg_change": "Edita",
+  "konto.lg_no_account": "Niciun cont? Creează unul",
+  "konto.lg_name_title": "Cum te cheamă?",
+  "konto.lg_name_lead": "Deci AdRaze știe cum să te numească.",
+  "konto.lg_name_ph": "Introdu numele tău",
+  "konto.lg_continue": "Continuă",
+  "konto.lg_newpw_title": "Alege o parolă",
+  "konto.lg_newpw_lead": "At least 8 characters. The account will be linked to",
+  "konto.lg_show_pw": "Afișează parola",
+  "konto.lg_err_name": "Completează numele tău."
 }

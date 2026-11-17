@@ -569,5 +569,20 @@
   "welcome.browser_title": "Chcesz całą przeglądarkę?",
   "welcome.browser_text": "AdRaze Browser ma wbudowane blokowanie i jest dostępna na Linuksa, Windowsa i Maca.",
   "privacy.h_site": "Wizyty na adraze.app",
-  "privacy.p_site": "Gdy odwiedzasz adraze.app, liczymy wyświetlenia stron i kliknięcia przycisków pobierania, żeby zobaczyć, co działa. Dzieje się to na naszym własnym serwerze, bez plików cookie i bez zapisywania Twojego adresu IP. Po zainstalowaniu rozszerzenia jeden raz otwiera się strona powitalna na adraze.app."
+  "privacy.p_site": "Gdy odwiedzasz adraze.app, liczymy wyświetlenia stron i kliknięcia przycisków pobierania, żeby zobaczyć, co działa. Dzieje się to na naszym własnym serwerze, bez plików cookie i bez zapisywania Twojego adresu IP. Po zainstalowaniu rozszerzenia jeden raz otwiera się strona powitalna na adraze.app.",
+  "konto.lg_title": "Zaloguj się do AdRaze",
+  "konto.lg_lead": "lub utwórz konto. To zajmie chwilę.",
+  "konto.lg_email_ph": "Podaj swój adres e-mail",
+  "konto.lg_next": "Kontynuuj przez e-mail",
+  "konto.lg_pw_title": "Podaj swoje hasło",
+  "konto.lg_change": "Redagować",
+  "konto.lg_no_account": "Brak konta? Utwórz",
+  "konto.lg_name_title": "Jak masz na imię?",
+  "konto.lg_name_lead": "Więc AdRaze wie, jak cię nazwać.",
+  "konto.lg_name_ph": "Podaj swoje imię",
+  "konto.lg_continue": "Kontynuuj",
+  "konto.lg_newpw_title": "Wybierz hasło",
+  "konto.lg_newpw_lead": "Co najmniej 8 znaków. Konto zostanie powiązane z",
+  "konto.lg_show_pw": "Pokaż hasło",
+  "konto.lg_err_name": "Wpisz swoje imię."
 }

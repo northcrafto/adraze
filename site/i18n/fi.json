@@ -569,5 +569,20 @@
   "welcome.browser_title": "Haluatko koko selaimen?",
   "welcome.browser_text": "AdRaze Browserissa esto on sisäänrakennettu, ja se on saatavilla Linuxille, Windowsille ja Macille.",
   "privacy.h_site": "Käynnit adraze.app-sivustolla",
-  "privacy.p_site": "Kun käyt adraze.app-sivustolla, laskemme sivujen katselut ja latauspainikkeiden napsautukset nähdäksemme, mikä toimii. Tämä tapahtuu omalla palvelimellamme ilman evästeitä ja tallentamatta IP-osoitettasi. Kun laajennus asennetaan, adraze.app-sivuston tervetulosivu avautuu kerran."
+  "privacy.p_site": "Kun käyt adraze.app-sivustolla, laskemme sivujen katselut ja latauspainikkeiden napsautukset nähdäksemme, mikä toimii. Tämä tapahtuu omalla palvelimellamme ilman evästeitä ja tallentamatta IP-osoitettasi. Kun laajennus asennetaan, adraze.app-sivuston tervetulosivu avautuu kerran.",
+  "konto.lg_title": "Kirjaudu sisään AdRazeen",
+  "konto.lg_lead": "tai luo tili. Se vie minuutin.",
+  "konto.lg_email_ph": "Anna sähköpostiosoitteesi",
+  "konto.lg_next": "Jatka sähköpostilla",
+  "konto.lg_pw_title": "Anna salasanasi",
+  "konto.lg_change": "Muokata",
+  "konto.lg_no_account": "Ei tiliä? Luo sellainen",
+  "konto.lg_name_title": "Mikä sinun nimesi on?",
+  "konto.lg_name_lead": "Joten AdRaze tietää miksi kutsua sinua.",
+  "konto.lg_name_ph": "Anna nimesi",
+  "konto.lg_continue": "Jatka",
+  "konto.lg_newpw_title": "Valitse salasana",
+  "konto.lg_newpw_lead": "Vähintään 8 merkkiä. Tili yhdistetään",
+  "konto.lg_show_pw": "Näytä salasana",
+  "konto.lg_err_name": "Täytä nimesi."
 }

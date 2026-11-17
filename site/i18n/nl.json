@@ -569,5 +569,20 @@
   "welcome.browser_title": "Liever de hele browser?",
   "welcome.browser_text": "AdRaze Browser heeft de blokkering ingebouwd en is er voor Linux, Windows en Mac.",
   "privacy.h_site": "Bezoeken aan adraze.app",
-  "privacy.p_site": "Wanneer je adraze.app bezoekt, tellen we paginaweergaven en klikken op de downloadknoppen om te zien wat werkt. Dat gebeurt op onze eigen server, zonder cookies en zonder je IP-adres op te slaan. Bij het installeren van de extensie wordt één keer een welkomstpagina op adraze.app geopend."
+  "privacy.p_site": "Wanneer je adraze.app bezoekt, tellen we paginaweergaven en klikken op de downloadknoppen om te zien wat werkt. Dat gebeurt op onze eigen server, zonder cookies en zonder je IP-adres op te slaan. Bij het installeren van de extensie wordt één keer een welkomstpagina op adraze.app geopend.",
+  "konto.lg_title": "Inloggen op AdRaze",
+  "konto.lg_lead": "of maak een account aan. Dat duurt een minuut.",
+  "konto.lg_email_ph": "Voer uw e-mailadres in",
+  "konto.lg_next": "Doorgaan met e-mail",
+  "konto.lg_pw_title": "Voer uw wachtwoord in",
+  "konto.lg_change": "Bewerking",
+  "konto.lg_no_account": "Geen account? Maak er een",
+  "konto.lg_name_title": "Hoe heet je?",
+  "konto.lg_name_lead": "Dus AdRaze weet hoe hij je moet noemen.",
+  "konto.lg_name_ph": "Voer uw naam in",
+  "konto.lg_continue": "Doorgaan",
+  "konto.lg_newpw_title": "Kies een wachtwoord",
+  "konto.lg_newpw_lead": "Minstens 8 tekens. Het account wordt gekoppeld aan",
+  "konto.lg_show_pw": "Wachtwoord tonen",
+  "konto.lg_err_name": "Vul je naam in."
 }

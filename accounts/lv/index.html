@@ -75,38 +75,59 @@
 
 <main class="wrap konto" id="konto" data-api="https://api.adraze.app" data-lang="lv" aria-busy="true">
 
-  <!-- Inte inloggad -->
+  <!-- Inte inloggad: ett steg i taget, centrerat. Samma flöde som i AdRaze-webbläsaren (browser/ui/shell.html #login). -->
   <section class="ut" id="vy-ut" hidden>
-    <div class="ut-intro">
-      <div class="vinkar"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
-      <h1>Redzi visu, ko AdRaze apturēja.</h1>
-      <p>Piesakies un savieno paplašinājumu, lai redzētu, cik daudz reklāmu, izsekotāju un bīstamu lapu ir apturēts visos tavos datoros.</p>
-    </div>
+    <div class="lg-kort">
 
-    <div class="ruta">
-      <div class="flikar" role="tablist" id="flikar">
-        <button role="tab" type="button" data-flik="in" aria-selected="true">Pieteikties</button>
-        <button role="tab" type="button" data-flik="skapa" aria-selected="false">Izveidot kontu</button>
-        <span class="flik-markor" aria-hidden="true"></span>
-      </div>
-
-      <form class="steg" id="f-in" data-steg="in" novalidate>
-        <label class="falt"><span>E-pasta adrese</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>Parole</span><input type="password" name="password" autocomplete="current-password" required></label>
-        <button type="button" class="lank-knapp nav-link" data-ga="glomt">Aizmirsi paroli?</button>
-        <button class="btn btn-stor liq bred" type="submit">Pieteikties</button>
+      <!-- Steg 1: Google eller mejl -->
+      <form class="steg lg-vy" id="f-start" data-steg="start" novalidate>
+        <h1 class="lg-h">Pieteikties AdRaze</h1>
+        <p class="lg-lead">vai izveido kontu. Tas aizņem minūti.</p>
+        <div class="google" id="google-ruta" hidden>
+          <div id="google-knapp"></div>
+          <div class="eller"><span>vai</span></div>
+        </div>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="Ievadiet savu e-pasta adresi" aria-label="E-pasta adrese" required>
+        <button class="btn liq lg-knapp" type="submit">Turpināt ar e-pastu</button>
       </form>
 
-      <form class="steg" id="f-skapa" data-steg="skapa" novalidate hidden>
-        <label class="falt"><span>E-pasta adrese</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>Izvēlies paroli (vismaz 8 rakstzīmes)</span><input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
-        <button class="btn btn-stor liq bred" type="submit">Izveidot kontu</button>
+      <!-- Steg 2: lösenord -->
+      <form class="steg lg-vy" id="f-in" data-steg="in" novalidate hidden>
+        <h1 class="lg-h">Ievadiet savu paroli</h1>
+        <p class="lg-lead"><b class="lg-mejl" translate="no"></b> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp" data-ga="start">Rediģēt</button></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="current-password" placeholder="Parole" aria-label="Parole" required><button type="button" class="lg-oga" data-visa aria-label="Rādīt paroli" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">Pieteikties</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="glomt">Aizmirsi paroli?</button>
+          <button type="button" class="lank-knapp" data-ga="namn">Nav konta? Izveidojiet</button>
+        </div>
+      </form>
+
+      <!-- Skapa konto 1: namn -->
+      <form class="steg lg-vy" id="f-nynamn" data-steg="namn" novalidate hidden>
+        <h1 class="lg-h">Kā tevi sauc?</h1>
+        <p class="lg-lead">Tātad AdRaze zina, kā jūs saukt.</p>
+        <input class="lg-in" name="namn" autocomplete="name" maxlength="40" placeholder="Ievadiet savu vārdu" aria-label="Ievadiet savu vārdu" required>
+        <button class="btn liq lg-knapp" type="submit">Turpināt</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="in">← Atpakaļ</button></div>
+      </form>
+
+      <!-- Skapa konto 2: lösenord -->
+      <form class="steg lg-vy" id="f-skapa" data-steg="skapa" novalidate hidden>
+        <h1 class="lg-h">Izvēlieties paroli</h1>
+        <p class="lg-lead">Vismaz 8 rakstzīmes. Konts tiks saistīts ar <b class="lg-mejl" translate="no"></b></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Parole" aria-label="Izvēlies paroli (vismaz 8 rakstzīmes)" required><button type="button" class="lg-oga" data-visa aria-label="Rādīt paroli" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">Izveidot kontu</button>
         <p class="liten">Izveidojot kontu, tu piekrīti mūsu <a class="nav-link" href="https://adraze.app/lv/integritet">privātuma politikai</a>.</p>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="namn">← Atpakaļ</button></div>
       </form>
 
-      <form class="steg" id="f-kod" data-steg="kod" novalidate hidden>
-        <h2>Pārbaudi e-pastu</h2>
-        <p class="dov">Mēs nosūtījām sešciparu kodu uz <b id="kod-till"></b></p>
+      <!-- Koden i mejlet (ny webbläsare, nytt konto eller glömt lösenord) -->
+      <form class="steg lg-vy" id="f-kod" data-steg="kod" novalidate hidden>
+        <h1 class="lg-h">Pārbaudi e-pastu</h1>
+        <p class="lg-lead">Mēs nosūtījām sešciparu kodu uz <b id="kod-till" translate="no"></b></p>
         <div class="kodrutor" id="kodrutor">
           <input inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="1">
           <input inputmode="numeric" maxlength="1" aria-label="2">
@@ -116,26 +137,22 @@
           <input inputmode="numeric" maxlength="1" aria-label="5">
           <input inputmode="numeric" maxlength="1" aria-label="6">
         </div>
-        <label class="falt" id="nytt-losen" hidden><span>Izvēlies paroli (vismaz 8 rakstzīmes)</span><input type="password" name="password" autocomplete="new-password" minlength="8"></label>
-        <button class="btn btn-stor liq bred" type="submit" id="kod-knapp">Apstiprināt</button>
-        <div class="rad-lankar">
-          <button type="button" class="lank-knapp nav-link" data-ga="tillbaka">Atpakaļ</button>
-          <button type="button" class="lank-knapp nav-link" id="ny-kod">Sūtīt jaunu kodu</button>
+        <div class="lg-falt" id="nytt-losen" hidden><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Izvēlies paroli (vismaz 8 rakstzīmes)" aria-label="Izvēlies paroli (vismaz 8 rakstzīmes)"><button type="button" class="lg-oga" data-visa aria-label="Rādīt paroli" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit" id="kod-knapp">Apstiprināt</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="tillbaka">← Atpakaļ</button>
+          <button type="button" class="lank-knapp" id="ny-kod">Sūtīt jaunu kodu</button>
         </div>
       </form>
 
-      <form class="steg" id="f-glomt" data-steg="glomt" novalidate hidden>
-        <h2>Jauna parole</h2>
-        <p class="dov">Ievadi savu e-pasta adresi, un mēs tev nosūtīsim kodu.</p>
-        <label class="falt"><span>E-pasta adrese</span><input type="email" name="email" autocomplete="email" required></label>
-        <button class="btn btn-stor liq bred" type="submit">Sūtīt kodu</button>
-        <div class="rad-lankar"><button type="button" class="lank-knapp nav-link" data-ga="tillbaka">Atpakaļ</button></div>
+      <!-- Glömt lösenord -->
+      <form class="steg lg-vy" id="f-glomt" data-steg="glomt" novalidate hidden>
+        <h1 class="lg-h">Jauna parole</h1>
+        <p class="lg-lead">Ievadi savu e-pasta adresi, un mēs tev nosūtīsim kodu.</p>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="Ievadiet savu e-pasta adresi" aria-label="E-pasta adrese" required>
+        <button class="btn liq lg-knapp" type="submit">Sūtīt kodu</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="tillbaka">← Atpakaļ</button></div>
       </form>
-
-      <div class="google" id="google-ruta" hidden>
-        <div class="eller"><span>vai</span></div>
-        <div id="google-knapp"></div>
-      </div>
 
       <p class="meddelande" id="meddelande" role="alert" aria-live="polite"></p>
     </div>
@@ -244,6 +261,7 @@
     <span data-k="reset_btn">Saglabāt jauno paroli</span>
     <span data-k="code_btn">Apstiprināt</span>
     <span data-k="days_total">Apturēti: {n}</span>
+    <span data-k="lg_err_name">Ievadiet savu vārdu.</span>
     <span data-k="err_generic">Kaut kas nogāja greizi. Mēģini vēlreiz.</span>
     <span data-k="err_network">Neizdevās sazināties ar AdRaze. Pārbaudi savienojumu.</span>
     <span data-k="err_email">Ievadi derīgu e-pasta adresi.</span>

@@ -569,5 +569,20 @@
   "welcome.browser_title": "Želite cijeli preglednik?",
   "welcome.browser_text": "AdRaze Browser ima ugrađeno blokiranje i dostupan je za Linux, Windows i Mac.",
   "privacy.h_site": "Posjeti adraze.app",
-  "privacy.p_site": "Kada posjetite adraze.app, brojimo prikaze stranica i klikove na gumbe za preuzimanje kako bismo vidjeli što funkcionira. To se odvija na našem vlastitom poslužitelju, bez kolačića i bez spremanja vaše IP adrese. Pri instalaciji proširenja jednom se otvara stranica dobrodošlice na adraze.app."
+  "privacy.p_site": "Kada posjetite adraze.app, brojimo prikaze stranica i klikove na gumbe za preuzimanje kako bismo vidjeli što funkcionira. To se odvija na našem vlastitom poslužitelju, bez kolačića i bez spremanja vaše IP adrese. Pri instalaciji proširenja jednom se otvara stranica dobrodošlice na adraze.app.",
+  "konto.lg_title": "Prijava na AdRaze",
+  "konto.lg_lead": "ili stvorite račun. Traje minutu.",
+  "konto.lg_email_ph": "Unesite svoju adresu e-pošte",
+  "konto.lg_next": "Nastavi s e-poštom",
+  "konto.lg_pw_title": "Unesite svoju lozinku",
+  "konto.lg_change": "Uredi",
+  "konto.lg_no_account": "Nemate račun? Stvorite jedan",
+  "konto.lg_name_title": "Kako se zoveš?",
+  "konto.lg_name_lead": "Dakle, AdRaze zna kako da vas nazove.",
+  "konto.lg_name_ph": "Unesite svoje ime",
+  "konto.lg_continue": "Nastavi",
+  "konto.lg_newpw_title": "Odaberite lozinku",
+  "konto.lg_newpw_lead": "Najmanje 8 znakova. Račun se povezuje s",
+  "konto.lg_show_pw": "Prikaži lozinku",
+  "konto.lg_err_name": "Ispuni svoje ime."
 }

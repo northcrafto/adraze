@@ -569,5 +569,20 @@
   "welcome.browser_title": "Envie du navigateur complet ?",
   "welcome.browser_text": "AdRaze Browser intègre le blocage et existe pour Linux, Windows et Mac.",
   "privacy.h_site": "Visites sur adraze.app",
-  "privacy.p_site": "Lorsque vous visitez adraze.app, nous comptons les pages vues et les clics sur les boutons de téléchargement, pour voir ce qui fonctionne. Cela se fait sur notre propre serveur, sans cookies et sans enregistrer votre adresse IP. À l’installation de l’extension, une page de bienvenue sur adraze.app s’ouvre une seule fois."
+  "privacy.p_site": "Lorsque vous visitez adraze.app, nous comptons les pages vues et les clics sur les boutons de téléchargement, pour voir ce qui fonctionne. Cela se fait sur notre propre serveur, sans cookies et sans enregistrer votre adresse IP. À l’installation de l’extension, une page de bienvenue sur adraze.app s’ouvre une seule fois.",
+  "konto.lg_title": "Se connecter à AdRaze",
+  "konto.lg_lead": "ou créez un compte. Cela prend une minute.",
+  "konto.lg_email_ph": "Entrez votre adresse e-mail",
+  "konto.lg_next": "Continuer avec e-mail",
+  "konto.lg_pw_title": "Entrez votre mot de passe",
+  "konto.lg_change": "Modifier",
+  "konto.lg_no_account": "Pas de compte ? Créez-en un",
+  "konto.lg_name_title": "What's your name?",
+  "konto.lg_name_lead": "Ainsi, AdRaze sait comment vous appeler.",
+  "konto.lg_name_ph": "Entrez votre nom",
+  "konto.lg_continue": "Continuer",
+  "konto.lg_newpw_title": "Choisissez un mot de passe",
+  "konto.lg_newpw_lead": "8 caractères min. Le compte sera lié à",
+  "konto.lg_show_pw": "Afficher le mot de passe",
+  "konto.lg_err_name": "Saisissez votre nom."
 }

@@ -75,38 +75,59 @@
 
 <main class="wrap konto" id="konto" data-api="https://api.adraze.app" data-lang="nl" aria-busy="true">
 
-  <!-- Inte inloggad -->
+  <!-- Inte inloggad: ett steg i taget, centrerat. Samma flöde som i AdRaze-webbläsaren (browser/ui/shell.html #login). -->
   <section class="ut" id="vy-ut" hidden>
-    <div class="ut-intro">
-      <div class="vinkar"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
-      <h1>Zie alles wat AdRaze tegenhield.</h1>
-      <p>Log in en koppel de extensie, dan zie je hoeveel advertenties, trackers en gevaarlijke pagina's er zijn tegengehouden, op al je computers.</p>
-    </div>
+    <div class="lg-kort">
 
-    <div class="ruta">
-      <div class="flikar" role="tablist" id="flikar">
-        <button role="tab" type="button" data-flik="in" aria-selected="true">Inloggen</button>
-        <button role="tab" type="button" data-flik="skapa" aria-selected="false">Account maken</button>
-        <span class="flik-markor" aria-hidden="true"></span>
-      </div>
-
-      <form class="steg" id="f-in" data-steg="in" novalidate>
-        <label class="falt"><span>E-mailadres</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>Wachtwoord</span><input type="password" name="password" autocomplete="current-password" required></label>
-        <button type="button" class="lank-knapp nav-link" data-ga="glomt">Wachtwoord vergeten?</button>
-        <button class="btn btn-stor liq bred" type="submit">Inloggen</button>
+      <!-- Steg 1: Google eller mejl -->
+      <form class="steg lg-vy" id="f-start" data-steg="start" novalidate>
+        <h1 class="lg-h">Inloggen op AdRaze</h1>
+        <p class="lg-lead">of maak een account aan. Dat duurt een minuut.</p>
+        <div class="google" id="google-ruta" hidden>
+          <div id="google-knapp"></div>
+          <div class="eller"><span>of</span></div>
+        </div>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="Voer uw e-mailadres in" aria-label="E-mailadres" required>
+        <button class="btn liq lg-knapp" type="submit">Doorgaan met e-mail</button>
       </form>
 
-      <form class="steg" id="f-skapa" data-steg="skapa" novalidate hidden>
-        <label class="falt"><span>E-mailadres</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>Kies een wachtwoord (minstens 8 tekens)</span><input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
-        <button class="btn btn-stor liq bred" type="submit">Account maken</button>
+      <!-- Steg 2: lösenord -->
+      <form class="steg lg-vy" id="f-in" data-steg="in" novalidate hidden>
+        <h1 class="lg-h">Voer uw wachtwoord in</h1>
+        <p class="lg-lead"><b class="lg-mejl" translate="no"></b> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp" data-ga="start">Bewerking</button></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="current-password" placeholder="Wachtwoord" aria-label="Wachtwoord" required><button type="button" class="lg-oga" data-visa aria-label="Wachtwoord tonen" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">Inloggen</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="glomt">Wachtwoord vergeten?</button>
+          <button type="button" class="lank-knapp" data-ga="namn">Geen account? Maak er een</button>
+        </div>
+      </form>
+
+      <!-- Skapa konto 1: namn -->
+      <form class="steg lg-vy" id="f-nynamn" data-steg="namn" novalidate hidden>
+        <h1 class="lg-h">Hoe heet je?</h1>
+        <p class="lg-lead">Dus AdRaze weet hoe hij je moet noemen.</p>
+        <input class="lg-in" name="namn" autocomplete="name" maxlength="40" placeholder="Voer uw naam in" aria-label="Voer uw naam in" required>
+        <button class="btn liq lg-knapp" type="submit">Doorgaan</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="in">← Terug</button></div>
+      </form>
+
+      <!-- Skapa konto 2: lösenord -->
+      <form class="steg lg-vy" id="f-skapa" data-steg="skapa" novalidate hidden>
+        <h1 class="lg-h">Kies een wachtwoord</h1>
+        <p class="lg-lead">Minstens 8 tekens. Het account wordt gekoppeld aan <b class="lg-mejl" translate="no"></b></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Wachtwoord" aria-label="Kies een wachtwoord (minstens 8 tekens)" required><button type="button" class="lg-oga" data-visa aria-label="Wachtwoord tonen" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">Account maken</button>
         <p class="liten">Door een account te maken ga je akkoord met ons <a class="nav-link" href="https://adraze.app/nl/integritet">privacybeleid</a>.</p>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="namn">← Terug</button></div>
       </form>
 
-      <form class="steg" id="f-kod" data-steg="kod" novalidate hidden>
-        <h2>Check je e-mail</h2>
-        <p class="dov">We hebben een zescijferige code gestuurd naar <b id="kod-till"></b></p>
+      <!-- Koden i mejlet (ny webbläsare, nytt konto eller glömt lösenord) -->
+      <form class="steg lg-vy" id="f-kod" data-steg="kod" novalidate hidden>
+        <h1 class="lg-h">Check je e-mail</h1>
+        <p class="lg-lead">We hebben een zescijferige code gestuurd naar <b id="kod-till" translate="no"></b></p>
         <div class="kodrutor" id="kodrutor">
           <input inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="1">
           <input inputmode="numeric" maxlength="1" aria-label="2">
@@ -116,26 +137,22 @@
           <input inputmode="numeric" maxlength="1" aria-label="5">
           <input inputmode="numeric" maxlength="1" aria-label="6">
         </div>
-        <label class="falt" id="nytt-losen" hidden><span>Kies een wachtwoord (minstens 8 tekens)</span><input type="password" name="password" autocomplete="new-password" minlength="8"></label>
-        <button class="btn btn-stor liq bred" type="submit" id="kod-knapp">Bevestigen</button>
-        <div class="rad-lankar">
-          <button type="button" class="lank-knapp nav-link" data-ga="tillbaka">Terug</button>
-          <button type="button" class="lank-knapp nav-link" id="ny-kod">Nieuwe code sturen</button>
+        <div class="lg-falt" id="nytt-losen" hidden><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Kies een wachtwoord (minstens 8 tekens)" aria-label="Kies een wachtwoord (minstens 8 tekens)"><button type="button" class="lg-oga" data-visa aria-label="Wachtwoord tonen" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit" id="kod-knapp">Bevestigen</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="tillbaka">← Terug</button>
+          <button type="button" class="lank-knapp" id="ny-kod">Nieuwe code sturen</button>
         </div>
       </form>
 
-      <form class="steg" id="f-glomt" data-steg="glomt" novalidate hidden>
-        <h2>Nieuw wachtwoord</h2>
-        <p class="dov">Vul je e-mailadres in, dan sturen we je een code.</p>
-        <label class="falt"><span>E-mailadres</span><input type="email" name="email" autocomplete="email" required></label>
-        <button class="btn btn-stor liq bred" type="submit">Code sturen</button>
-        <div class="rad-lankar"><button type="button" class="lank-knapp nav-link" data-ga="tillbaka">Terug</button></div>
+      <!-- Glömt lösenord -->
+      <form class="steg lg-vy" id="f-glomt" data-steg="glomt" novalidate hidden>
+        <h1 class="lg-h">Nieuw wachtwoord</h1>
+        <p class="lg-lead">Vul je e-mailadres in, dan sturen we je een code.</p>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="Voer uw e-mailadres in" aria-label="E-mailadres" required>
+        <button class="btn liq lg-knapp" type="submit">Code sturen</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="tillbaka">← Terug</button></div>
       </form>
-
-      <div class="google" id="google-ruta" hidden>
-        <div class="eller"><span>of</span></div>
-        <div id="google-knapp"></div>
-      </div>
 
       <p class="meddelande" id="meddelande" role="alert" aria-live="polite"></p>
     </div>
@@ -244,6 +261,7 @@
     <span data-k="reset_btn">Nieuw wachtwoord opslaan</span>
     <span data-k="code_btn">Bevestigen</span>
     <span data-k="days_total">{n} tegengehouden</span>
+    <span data-k="lg_err_name">Vul je naam in.</span>
     <span data-k="err_generic">Er ging iets mis. Probeer het opnieuw.</span>
     <span data-k="err_network">Kan AdRaze niet bereiken. Controleer je verbinding.</span>
     <span data-k="err_email">Vul een geldig e-mailadres in.</span>

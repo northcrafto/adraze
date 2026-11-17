@@ -569,5 +569,20 @@
   "welcome.browser_title": "Lieber den ganzen Browser?",
   "welcome.browser_text": "Im AdRaze Browser ist der Blocker eingebaut. Es gibt ihn für Linux, Windows und Mac.",
   "privacy.h_site": "Besuche auf adraze.app",
-  "privacy.p_site": "Wenn du adraze.app besuchst, zählen wir Seitenaufrufe und Klicks auf die Download-Schaltflächen, um zu sehen, was funktioniert. Das geschieht auf unserem eigenen Server, ohne Cookies und ohne deine IP-Adresse zu speichern. Bei der Installation der Erweiterung wird einmalig eine Willkommensseite auf adraze.app geöffnet."
+  "privacy.p_site": "Wenn du adraze.app besuchst, zählen wir Seitenaufrufe und Klicks auf die Download-Schaltflächen, um zu sehen, was funktioniert. Das geschieht auf unserem eigenen Server, ohne Cookies und ohne deine IP-Adresse zu speichern. Bei der Installation der Erweiterung wird einmalig eine Willkommensseite auf adraze.app geöffnet.",
+  "konto.lg_title": "Bei AdRaze anmelden",
+  "konto.lg_lead": "oder erstelle ein Konto. Das dauert eine Minute.",
+  "konto.lg_email_ph": "Gib deine E-Mail-Adresse ein",
+  "konto.lg_next": "Mit E-Mail fortfahren",
+  "konto.lg_pw_title": "Gib dein Passwort ein",
+  "konto.lg_change": "Bearbeiten",
+  "konto.lg_no_account": "Kein Konto? Erstelle eines",
+  "konto.lg_name_title": "Wie heißt du?",
+  "konto.lg_name_lead": "So weiß AdRaze, wie es Sie nennen soll.",
+  "konto.lg_name_ph": "Gib deinen Namen ein",
+  "konto.lg_continue": "Weiter",
+  "konto.lg_newpw_title": "Wähle ein Passwort",
+  "konto.lg_newpw_lead": "Mindestens 8 Zeichen. Das Konto wird verknüpft mit",
+  "konto.lg_show_pw": "Passwort anzeigen",
+  "konto.lg_err_name": "Gib deinen Namen ein."
 }

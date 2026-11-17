@@ -75,38 +75,59 @@
 
 <main class="wrap konto" id="konto" data-api="https://api.adraze.app" data-lang="lt" aria-busy="true">
 
-  <!-- Inte inloggad -->
+  <!-- Inte inloggad: ett steg i taget, centrerat. Samma flöde som i AdRaze-webbläsaren (browser/ui/shell.html #login). -->
   <section class="ut" id="vy-ut" hidden>
-    <div class="ut-intro">
-      <div class="vinkar"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
-      <h1>Pažiūrėkite, ką sustabdė AdRaze.</h1>
-      <p>Prisijunkite ir susiekite plėtinį – matysite, kiek reklamų, sekiklių ir pavojingų puslapių sustabdyta visuose jūsų kompiuteriuose.</p>
-    </div>
+    <div class="lg-kort">
 
-    <div class="ruta">
-      <div class="flikar" role="tablist" id="flikar">
-        <button role="tab" type="button" data-flik="in" aria-selected="true">Prisijungti</button>
-        <button role="tab" type="button" data-flik="skapa" aria-selected="false">Sukurti paskyrą</button>
-        <span class="flik-markor" aria-hidden="true"></span>
-      </div>
-
-      <form class="steg" id="f-in" data-steg="in" novalidate>
-        <label class="falt"><span>El. pašto adresas</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>Slaptažodis</span><input type="password" name="password" autocomplete="current-password" required></label>
-        <button type="button" class="lank-knapp nav-link" data-ga="glomt">Pamiršote slaptažodį?</button>
-        <button class="btn btn-stor liq bred" type="submit">Prisijungti</button>
+      <!-- Steg 1: Google eller mejl -->
+      <form class="steg lg-vy" id="f-start" data-steg="start" novalidate>
+        <h1 class="lg-h">Prisijungti prie AdRaze</h1>
+        <p class="lg-lead">arba susikurkite paskyrą. Tai užtruks minutę.</p>
+        <div class="google" id="google-ruta" hidden>
+          <div id="google-knapp"></div>
+          <div class="eller"><span>arba</span></div>
+        </div>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="Įveskite el. pašto adresą" aria-label="El. pašto adresas" required>
+        <button class="btn liq lg-knapp" type="submit">Tęsti su el. paštu</button>
       </form>
 
-      <form class="steg" id="f-skapa" data-steg="skapa" novalidate hidden>
-        <label class="falt"><span>El. pašto adresas</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>Pasirinkite slaptažodį (bent 8 simboliai)</span><input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
-        <button class="btn btn-stor liq bred" type="submit">Sukurti paskyrą</button>
+      <!-- Steg 2: lösenord -->
+      <form class="steg lg-vy" id="f-in" data-steg="in" novalidate hidden>
+        <h1 class="lg-h">Įveskite slaptažodį</h1>
+        <p class="lg-lead"><b class="lg-mejl" translate="no"></b> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp" data-ga="start">Redaguoti</button></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="current-password" placeholder="Slaptažodis" aria-label="Slaptažodis" required><button type="button" class="lg-oga" data-visa aria-label="Rodyti slaptažodį" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">Prisijungti</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="glomt">Pamiršote slaptažodį?</button>
+          <button type="button" class="lank-knapp" data-ga="namn">Neturite paskyros? Sukurkite</button>
+        </div>
+      </form>
+
+      <!-- Skapa konto 1: namn -->
+      <form class="steg lg-vy" id="f-nynamn" data-steg="namn" novalidate hidden>
+        <h1 class="lg-h">Koks tavo vardas?</h1>
+        <p class="lg-lead">Taigi AdRaze žino, kaip jums paskambinti.</p>
+        <input class="lg-in" name="namn" autocomplete="name" maxlength="40" placeholder="Įveskite savo vardą" aria-label="Įveskite savo vardą" required>
+        <button class="btn liq lg-knapp" type="submit">Tęsti</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="in">← Atgal</button></div>
+      </form>
+
+      <!-- Skapa konto 2: lösenord -->
+      <form class="steg lg-vy" id="f-skapa" data-steg="skapa" novalidate hidden>
+        <h1 class="lg-h">Pasirinkite slaptažodį</h1>
+        <p class="lg-lead">Mažiausiai 8 simboliai. Paskyra susieta su <b class="lg-mejl" translate="no"></b></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Slaptažodis" aria-label="Pasirinkite slaptažodį (bent 8 simboliai)" required><button type="button" class="lg-oga" data-visa aria-label="Rodyti slaptažodį" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">Sukurti paskyrą</button>
         <p class="liten">Kurdami paskyrą sutinkate su mūsų <a class="nav-link" href="https://adraze.app/lt/integritet">privatumo politika</a>.</p>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="namn">← Atgal</button></div>
       </form>
 
-      <form class="steg" id="f-kod" data-steg="kod" novalidate hidden>
-        <h2>Patikrinkite el. paštą</h2>
-        <p class="dov">Išsiuntėme šešiaženklį kodą adresu <b id="kod-till"></b></p>
+      <!-- Koden i mejlet (ny webbläsare, nytt konto eller glömt lösenord) -->
+      <form class="steg lg-vy" id="f-kod" data-steg="kod" novalidate hidden>
+        <h1 class="lg-h">Patikrinkite el. paštą</h1>
+        <p class="lg-lead">Išsiuntėme šešiaženklį kodą adresu <b id="kod-till" translate="no"></b></p>
         <div class="kodrutor" id="kodrutor">
           <input inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="1">
           <input inputmode="numeric" maxlength="1" aria-label="2">
@@ -116,26 +137,22 @@
           <input inputmode="numeric" maxlength="1" aria-label="5">
           <input inputmode="numeric" maxlength="1" aria-label="6">
         </div>
-        <label class="falt" id="nytt-losen" hidden><span>Pasirinkite slaptažodį (bent 8 simboliai)</span><input type="password" name="password" autocomplete="new-password" minlength="8"></label>
-        <button class="btn btn-stor liq bred" type="submit" id="kod-knapp">Patvirtinti</button>
-        <div class="rad-lankar">
-          <button type="button" class="lank-knapp nav-link" data-ga="tillbaka">Atgal</button>
-          <button type="button" class="lank-knapp nav-link" id="ny-kod">Siųsti naują kodą</button>
+        <div class="lg-falt" id="nytt-losen" hidden><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Pasirinkite slaptažodį (bent 8 simboliai)" aria-label="Pasirinkite slaptažodį (bent 8 simboliai)"><button type="button" class="lg-oga" data-visa aria-label="Rodyti slaptažodį" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit" id="kod-knapp">Patvirtinti</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="tillbaka">← Atgal</button>
+          <button type="button" class="lank-knapp" id="ny-kod">Siųsti naują kodą</button>
         </div>
       </form>
 
-      <form class="steg" id="f-glomt" data-steg="glomt" novalidate hidden>
-        <h2>Naujas slaptažodis</h2>
-        <p class="dov">Įveskite el. pašto adresą ir atsiųsime jums kodą.</p>
-        <label class="falt"><span>El. pašto adresas</span><input type="email" name="email" autocomplete="email" required></label>
-        <button class="btn btn-stor liq bred" type="submit">Siųsti kodą</button>
-        <div class="rad-lankar"><button type="button" class="lank-knapp nav-link" data-ga="tillbaka">Atgal</button></div>
+      <!-- Glömt lösenord -->
+      <form class="steg lg-vy" id="f-glomt" data-steg="glomt" novalidate hidden>
+        <h1 class="lg-h">Naujas slaptažodis</h1>
+        <p class="lg-lead">Įveskite el. pašto adresą ir atsiųsime jums kodą.</p>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="Įveskite el. pašto adresą" aria-label="El. pašto adresas" required>
+        <button class="btn liq lg-knapp" type="submit">Siųsti kodą</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="tillbaka">← Atgal</button></div>
       </form>
-
-      <div class="google" id="google-ruta" hidden>
-        <div class="eller"><span>arba</span></div>
-        <div id="google-knapp"></div>
-      </div>
 
       <p class="meddelande" id="meddelande" role="alert" aria-live="polite"></p>
     </div>
@@ -244,6 +261,7 @@
     <span data-k="reset_btn">Išsaugoti naują slaptažodį</span>
     <span data-k="code_btn">Patvirtinti</span>
     <span data-k="days_total">Sustabdyta: {n}</span>
+    <span data-k="lg_err_name">Įveskite savo vardą.</span>
     <span data-k="err_generic">Kažkas nepavyko. Bandykite dar kartą.</span>
     <span data-k="err_network">Nepavyko pasiekti AdRaze. Patikrinkite ryšį.</span>
     <span data-k="err_email">Įveskite tinkamą el. pašto adresą.</span>

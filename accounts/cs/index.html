@@ -75,38 +75,59 @@
 
 <main class="wrap konto" id="konto" data-api="https://api.adraze.app" data-lang="cs" aria-busy="true">
 
-  <!-- Inte inloggad -->
+  <!-- Inte inloggad: ett steg i taget, centrerat. Samma flöde som i AdRaze-webbläsaren (browser/ui/shell.html #login). -->
   <section class="ut" id="vy-ut" hidden>
-    <div class="ut-intro">
-      <div class="vinkar"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
-      <h1>Podívejte se, co všechno AdRaze zastavil.</h1>
-      <p>Přihlaste se a propojte rozšíření – uvidíte, kolik reklam, sledovacích prvků a nebezpečných stránek bylo zastaveno na všech vašich počítačích.</p>
-    </div>
+    <div class="lg-kort">
 
-    <div class="ruta">
-      <div class="flikar" role="tablist" id="flikar">
-        <button role="tab" type="button" data-flik="in" aria-selected="true">Přihlášení</button>
-        <button role="tab" type="button" data-flik="skapa" aria-selected="false">Vytvořit účet</button>
-        <span class="flik-markor" aria-hidden="true"></span>
-      </div>
-
-      <form class="steg" id="f-in" data-steg="in" novalidate>
-        <label class="falt"><span>E-mailová adresa</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>Heslo</span><input type="password" name="password" autocomplete="current-password" required></label>
-        <button type="button" class="lank-knapp nav-link" data-ga="glomt">Zapomněli jste heslo?</button>
-        <button class="btn btn-stor liq bred" type="submit">Přihlásit se</button>
+      <!-- Steg 1: Google eller mejl -->
+      <form class="steg lg-vy" id="f-start" data-steg="start" novalidate>
+        <h1 class="lg-h">Přihlásit se k AdRaze</h1>
+        <p class="lg-lead">nebo si vytvořte účet. Zabere to minutu.</p>
+        <div class="google" id="google-ruta" hidden>
+          <div id="google-knapp"></div>
+          <div class="eller"><span>nebo</span></div>
+        </div>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="Zadejte svůj e-mail" aria-label="E-mailová adresa" required>
+        <button class="btn liq lg-knapp" type="submit">Pokračovat e-mailem</button>
       </form>
 
-      <form class="steg" id="f-skapa" data-steg="skapa" novalidate hidden>
-        <label class="falt"><span>E-mailová adresa</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>Zvolte heslo (alespoň 8 znaků)</span><input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
-        <button class="btn btn-stor liq bred" type="submit">Vytvořit účet</button>
+      <!-- Steg 2: lösenord -->
+      <form class="steg lg-vy" id="f-in" data-steg="in" novalidate hidden>
+        <h1 class="lg-h">Zadejte své heslo</h1>
+        <p class="lg-lead"><b class="lg-mejl" translate="no"></b> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp" data-ga="start">Upravit</button></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="current-password" placeholder="Heslo" aria-label="Heslo" required><button type="button" class="lg-oga" data-visa aria-label="Zobrazit heslo" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">Přihlásit se</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="glomt">Zapomněli jste heslo?</button>
+          <button type="button" class="lank-knapp" data-ga="namn">Nemáte účet? Vytvořte si ho</button>
+        </div>
+      </form>
+
+      <!-- Skapa konto 1: namn -->
+      <form class="steg lg-vy" id="f-nynamn" data-steg="namn" novalidate hidden>
+        <h1 class="lg-h">Jak se jmenuješ?</h1>
+        <p class="lg-lead">Takže AdRaze ví, jak vám má říkat.</p>
+        <input class="lg-in" name="namn" autocomplete="name" maxlength="40" placeholder="Zadejte své jméno" aria-label="Zadejte své jméno" required>
+        <button class="btn liq lg-knapp" type="submit">Pokračovat</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="in">← Zpět</button></div>
+      </form>
+
+      <!-- Skapa konto 2: lösenord -->
+      <form class="steg lg-vy" id="f-skapa" data-steg="skapa" novalidate hidden>
+        <h1 class="lg-h">Vyberte heslo</h1>
+        <p class="lg-lead">Alespoň 8 znaků. Účet bude propojen s <b class="lg-mejl" translate="no"></b></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Heslo" aria-label="Zvolte heslo (alespoň 8 znaků)" required><button type="button" class="lg-oga" data-visa aria-label="Zobrazit heslo" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">Vytvořit účet</button>
         <p class="liten">Vytvořením účtu souhlasíte s našimi <a class="nav-link" href="https://adraze.app/cs/integritet">zásadami ochrany osobních údajů</a>.</p>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="namn">← Zpět</button></div>
       </form>
 
-      <form class="steg" id="f-kod" data-steg="kod" novalidate hidden>
-        <h2>Zkontrolujte e-mail</h2>
-        <p class="dov">Poslali jsme šestimístný kód na adresu <b id="kod-till"></b></p>
+      <!-- Koden i mejlet (ny webbläsare, nytt konto eller glömt lösenord) -->
+      <form class="steg lg-vy" id="f-kod" data-steg="kod" novalidate hidden>
+        <h1 class="lg-h">Zkontrolujte e-mail</h1>
+        <p class="lg-lead">Poslali jsme šestimístný kód na adresu <b id="kod-till" translate="no"></b></p>
         <div class="kodrutor" id="kodrutor">
           <input inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="1">
           <input inputmode="numeric" maxlength="1" aria-label="2">
@@ -116,26 +137,22 @@
           <input inputmode="numeric" maxlength="1" aria-label="5">
           <input inputmode="numeric" maxlength="1" aria-label="6">
         </div>
-        <label class="falt" id="nytt-losen" hidden><span>Zvolte heslo (alespoň 8 znaků)</span><input type="password" name="password" autocomplete="new-password" minlength="8"></label>
-        <button class="btn btn-stor liq bred" type="submit" id="kod-knapp">Potvrdit</button>
-        <div class="rad-lankar">
-          <button type="button" class="lank-knapp nav-link" data-ga="tillbaka">Zpět</button>
-          <button type="button" class="lank-knapp nav-link" id="ny-kod">Poslat nový kód</button>
+        <div class="lg-falt" id="nytt-losen" hidden><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Zvolte heslo (alespoň 8 znaků)" aria-label="Zvolte heslo (alespoň 8 znaků)"><button type="button" class="lg-oga" data-visa aria-label="Zobrazit heslo" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit" id="kod-knapp">Potvrdit</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="tillbaka">← Zpět</button>
+          <button type="button" class="lank-knapp" id="ny-kod">Poslat nový kód</button>
         </div>
       </form>
 
-      <form class="steg" id="f-glomt" data-steg="glomt" novalidate hidden>
-        <h2>Nové heslo</h2>
-        <p class="dov">Zadejte svůj e-mail a my vám pošleme kód.</p>
-        <label class="falt"><span>E-mailová adresa</span><input type="email" name="email" autocomplete="email" required></label>
-        <button class="btn btn-stor liq bred" type="submit">Poslat kód</button>
-        <div class="rad-lankar"><button type="button" class="lank-knapp nav-link" data-ga="tillbaka">Zpět</button></div>
+      <!-- Glömt lösenord -->
+      <form class="steg lg-vy" id="f-glomt" data-steg="glomt" novalidate hidden>
+        <h1 class="lg-h">Nové heslo</h1>
+        <p class="lg-lead">Zadejte svůj e-mail a my vám pošleme kód.</p>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="Zadejte svůj e-mail" aria-label="E-mailová adresa" required>
+        <button class="btn liq lg-knapp" type="submit">Poslat kód</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="tillbaka">← Zpět</button></div>
       </form>
-
-      <div class="google" id="google-ruta" hidden>
-        <div class="eller"><span>nebo</span></div>
-        <div id="google-knapp"></div>
-      </div>
 
       <p class="meddelande" id="meddelande" role="alert" aria-live="polite"></p>
     </div>
@@ -244,6 +261,7 @@
     <span data-k="reset_btn">Uložit nové heslo</span>
     <span data-k="code_btn">Potvrdit</span>
     <span data-k="days_total">Zastaveno: {n}</span>
+    <span data-k="lg_err_name">Vyplňte své jméno.</span>
     <span data-k="err_generic">Něco se pokazilo. Zkuste to znovu.</span>
     <span data-k="err_network">AdRaze není dostupný. Zkontrolujte připojení.</span>
     <span data-k="err_email">Zadejte platnou e-mailovou adresu.</span>

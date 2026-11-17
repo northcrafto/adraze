@@ -569,5 +569,20 @@
   "welcome.browser_title": "Vil du ha hele nettleseren?",
   "welcome.browser_text": "AdRaze Browser har blokkeringen innebygd og finnes for Linux, Windows og Mac.",
   "privacy.h_site": "Besøk på adraze.app",
-  "privacy.p_site": "Når du besøker adraze.app, teller vi sidevisninger og klikk på nedlastingsknappene for å se hva som fungerer. Det skjer på vår egen server, uten informasjonskapsler og uten at IP-adressen din lagres. Når utvidelsen installeres, åpnes en velkomstside på adraze.app én gang."
+  "privacy.p_site": "Når du besøker adraze.app, teller vi sidevisninger og klikk på nedlastingsknappene for å se hva som fungerer. Det skjer på vår egen server, uten informasjonskapsler og uten at IP-adressen din lagres. Når utvidelsen installeres, åpnes en velkomstside på adraze.app én gang.",
+  "konto.lg_title": "Logg inn på AdRaze",
+  "konto.lg_lead": "eller opprett en konto. Det tar ett minutt.",
+  "konto.lg_email_ph": "Skriv inn e-postadressen din",
+  "konto.lg_next": "Fortsett med e-post",
+  "konto.lg_pw_title": "Skriv inn passordet ditt",
+  "konto.lg_change": "Redigere",
+  "konto.lg_no_account": "Ingen konto? Opprett en",
+  "konto.lg_name_title": "Hva heter du?",
+  "konto.lg_name_lead": "Så AdRaze vet hva jeg skal kalle deg.",
+  "konto.lg_name_ph": "Skriv inn navnet ditt",
+  "konto.lg_continue": "Fortsett",
+  "konto.lg_newpw_title": "Velg et passord",
+  "konto.lg_newpw_lead": "Minst 8 tegn. Kontoen kobles til",
+  "konto.lg_show_pw": "Vis passord",
+  "konto.lg_err_name": "Fyll inn navnet ditt."
 }

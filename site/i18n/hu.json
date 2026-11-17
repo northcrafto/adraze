@@ -569,5 +569,20 @@
   "welcome.browser_title": "A teljes böngészőt szeretnéd?",
   "welcome.browser_text": "Az AdRaze Browserbe be van építve a blokkolás, és elérhető Linuxra, Windowsra és Macre.",
   "privacy.h_site": "Látogatások az adraze.app oldalon",
-  "privacy.p_site": "Amikor felkeresed az adraze.app oldalt, megszámoljuk az oldalmegtekintéseket és a letöltőgombokra leadott kattintásokat, hogy lássuk, mi működik. Ez a saját szerverünkön történik, sütik nélkül és az IP-címed tárolása nélkül. A bővítmény telepítésekor egyszer megnyílik egy üdvözlőoldal az adraze.app oldalon."
+  "privacy.p_site": "Amikor felkeresed az adraze.app oldalt, megszámoljuk az oldalmegtekintéseket és a letöltőgombokra leadott kattintásokat, hogy lássuk, mi működik. Ez a saját szerverünkön történik, sütik nélkül és az IP-címed tárolása nélkül. A bővítmény telepítésekor egyszer megnyílik egy üdvözlőoldal az adraze.app oldalon.",
+  "konto.lg_title": "Bejelentkezés az AdRaze-be",
+  "konto.lg_lead": "vagy hozzon létre fiókot. Egy percet vesz igénybe.",
+  "konto.lg_email_ph": "Add meg az e-mail címed",
+  "konto.lg_next": "Folytatás e-maillel",
+  "konto.lg_pw_title": "Add meg a jelszavad",
+  "konto.lg_change": "Szerkesztés",
+  "konto.lg_no_account": "Nincs fiókod? Hozz létre egyet",
+  "konto.lg_name_title": "Hogy hívnak?",
+  "konto.lg_name_lead": "Tehát a AdRaze tudja, hogy hívjon.",
+  "konto.lg_name_ph": "Add meg a neved",
+  "konto.lg_continue": "Folytatás",
+  "konto.lg_newpw_title": "Válassz jelszót",
+  "konto.lg_newpw_lead": "Legalább 8 karakter. A fiók össze lesz kapcsolva",
+  "konto.lg_show_pw": "Jelszó megjelenítése",
+  "konto.lg_err_name": "Adja meg a nevét."
 }

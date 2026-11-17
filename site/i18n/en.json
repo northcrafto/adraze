@@ -569,5 +569,20 @@
   "welcome.browser_title": "Want the whole browser?",
   "welcome.browser_text": "AdRaze Browser has the blocking built in and is available for Linux, Windows and Mac.",
   "privacy.h_site": "Visits to adraze.app",
-  "privacy.p_site": "When you visit adraze.app we count page views and clicks on the download buttons, to see what works. This happens on our own server, without cookies and without storing your IP address. When the extension is installed, a welcome page on adraze.app opens once."
+  "privacy.p_site": "When you visit adraze.app we count page views and clicks on the download buttons, to see what works. This happens on our own server, without cookies and without storing your IP address. When the extension is installed, a welcome page on adraze.app opens once.",
+  "konto.lg_title": "Log in to AdRaze",
+  "konto.lg_lead": "or create an account. It takes a minute.",
+  "konto.lg_email_ph": "Enter your email address",
+  "konto.lg_next": "Continue with email",
+  "konto.lg_pw_title": "Enter your password",
+  "konto.lg_change": "Edit",
+  "konto.lg_no_account": "No account? Create one",
+  "konto.lg_name_title": "What's your name?",
+  "konto.lg_name_lead": "So AdRaze knows what to call you.",
+  "konto.lg_name_ph": "Enter your name",
+  "konto.lg_continue": "Continue",
+  "konto.lg_newpw_title": "Choose a password",
+  "konto.lg_newpw_lead": "At least 8 characters. The account will be linked to",
+  "konto.lg_show_pw": "Show password",
+  "konto.lg_err_name": "Enter your name."
 }

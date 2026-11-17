@@ -75,38 +75,59 @@
 
 <main class="wrap konto" id="konto" data-api="https://api.adraze.app" data-lang="bg" aria-busy="true">
 
-  <!-- Inte inloggad -->
+  <!-- Inte inloggad: ett steg i taget, centrerat. Samma flöde som i AdRaze-webbläsaren (browser/ui/shell.html #login). -->
   <section class="ut" id="vy-ut" hidden>
-    <div class="ut-intro">
-      <div class="vinkar"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
-      <h1>Виж всичко, което AdRaze спря.</h1>
-      <p>Влез и свържи разширението, за да видиш колко реклами, тракери и опасни страници са спрени на всичките ти компютри.</p>
-    </div>
+    <div class="lg-kort">
 
-    <div class="ruta">
-      <div class="flikar" role="tablist" id="flikar">
-        <button role="tab" type="button" data-flik="in" aria-selected="true">Вход</button>
-        <button role="tab" type="button" data-flik="skapa" aria-selected="false">Създай акаунт</button>
-        <span class="flik-markor" aria-hidden="true"></span>
-      </div>
-
-      <form class="steg" id="f-in" data-steg="in" novalidate>
-        <label class="falt"><span>Имейл адрес</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>Парола</span><input type="password" name="password" autocomplete="current-password" required></label>
-        <button type="button" class="lank-knapp nav-link" data-ga="glomt">Забрави паролата?</button>
-        <button class="btn btn-stor liq bred" type="submit">Влез</button>
+      <!-- Steg 1: Google eller mejl -->
+      <form class="steg lg-vy" id="f-start" data-steg="start" novalidate>
+        <h1 class="lg-h">Вход в AdRaze</h1>
+        <p class="lg-lead">или създай акаунт. Отнема минута.</p>
+        <div class="google" id="google-ruta" hidden>
+          <div id="google-knapp"></div>
+          <div class="eller"><span>или</span></div>
+        </div>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="Въведете имейл адреса си" aria-label="Имейл адрес" required>
+        <button class="btn liq lg-knapp" type="submit">Продължи с имейл</button>
       </form>
 
-      <form class="steg" id="f-skapa" data-steg="skapa" novalidate hidden>
-        <label class="falt"><span>Имейл адрес</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>Избери парола (поне 8 знака)</span><input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
-        <button class="btn btn-stor liq bred" type="submit">Създай акаунт</button>
+      <!-- Steg 2: lösenord -->
+      <form class="steg lg-vy" id="f-in" data-steg="in" novalidate hidden>
+        <h1 class="lg-h">Въведете паролата си</h1>
+        <p class="lg-lead"><b class="lg-mejl" translate="no"></b> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp" data-ga="start">Редактиране</button></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="current-password" placeholder="Парола" aria-label="Парола" required><button type="button" class="lg-oga" data-visa aria-label="Показване на парола" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">Влез</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="glomt">Забрави паролата?</button>
+          <button type="button" class="lank-knapp" data-ga="namn">Нямате акаунт? Създайте един</button>
+        </div>
+      </form>
+
+      <!-- Skapa konto 1: namn -->
+      <form class="steg lg-vy" id="f-nynamn" data-steg="namn" novalidate hidden>
+        <h1 class="lg-h">Как се казваш?</h1>
+        <p class="lg-lead">Така че AdRaze знае как да ви нарече.</p>
+        <input class="lg-in" name="namn" autocomplete="name" maxlength="40" placeholder="Въведете името си" aria-label="Въведете името си" required>
+        <button class="btn liq lg-knapp" type="submit">Продължи</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="in">← Назад</button></div>
+      </form>
+
+      <!-- Skapa konto 2: lösenord -->
+      <form class="steg lg-vy" id="f-skapa" data-steg="skapa" novalidate hidden>
+        <h1 class="lg-h">Изберете парола</h1>
+        <p class="lg-lead">Поне 8 знака. Акаунтът се свързва с <b class="lg-mejl" translate="no"></b></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Парола" aria-label="Избери парола (поне 8 знака)" required><button type="button" class="lg-oga" data-visa aria-label="Показване на парола" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">Създай акаунт</button>
         <p class="liten">Като създадеш акаунт, приемаш нашата <a class="nav-link" href="https://adraze.app/bg/integritet">политика за поверителност</a>.</p>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="namn">← Назад</button></div>
       </form>
 
-      <form class="steg" id="f-kod" data-steg="kod" novalidate hidden>
-        <h2>Провери имейла си</h2>
-        <p class="dov">Изпратихме шестцифрен код на <b id="kod-till"></b></p>
+      <!-- Koden i mejlet (ny webbläsare, nytt konto eller glömt lösenord) -->
+      <form class="steg lg-vy" id="f-kod" data-steg="kod" novalidate hidden>
+        <h1 class="lg-h">Провери имейла си</h1>
+        <p class="lg-lead">Изпратихме шестцифрен код на <b id="kod-till" translate="no"></b></p>
         <div class="kodrutor" id="kodrutor">
           <input inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="1">
           <input inputmode="numeric" maxlength="1" aria-label="2">
@@ -116,26 +137,22 @@
           <input inputmode="numeric" maxlength="1" aria-label="5">
           <input inputmode="numeric" maxlength="1" aria-label="6">
         </div>
-        <label class="falt" id="nytt-losen" hidden><span>Избери парола (поне 8 знака)</span><input type="password" name="password" autocomplete="new-password" minlength="8"></label>
-        <button class="btn btn-stor liq bred" type="submit" id="kod-knapp">Потвърди</button>
-        <div class="rad-lankar">
-          <button type="button" class="lank-knapp nav-link" data-ga="tillbaka">Назад</button>
-          <button type="button" class="lank-knapp nav-link" id="ny-kod">Изпрати нов код</button>
+        <div class="lg-falt" id="nytt-losen" hidden><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Избери парола (поне 8 знака)" aria-label="Избери парола (поне 8 знака)"><button type="button" class="lg-oga" data-visa aria-label="Показване на парола" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit" id="kod-knapp">Потвърди</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="tillbaka">← Назад</button>
+          <button type="button" class="lank-knapp" id="ny-kod">Изпрати нов код</button>
         </div>
       </form>
 
-      <form class="steg" id="f-glomt" data-steg="glomt" novalidate hidden>
-        <h2>Нова парола</h2>
-        <p class="dov">Въведи имейл адреса си и ще ти изпратим код.</p>
-        <label class="falt"><span>Имейл адрес</span><input type="email" name="email" autocomplete="email" required></label>
-        <button class="btn btn-stor liq bred" type="submit">Изпрати код</button>
-        <div class="rad-lankar"><button type="button" class="lank-knapp nav-link" data-ga="tillbaka">Назад</button></div>
+      <!-- Glömt lösenord -->
+      <form class="steg lg-vy" id="f-glomt" data-steg="glomt" novalidate hidden>
+        <h1 class="lg-h">Нова парола</h1>
+        <p class="lg-lead">Въведи имейл адреса си и ще ти изпратим код.</p>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="Въведете имейл адреса си" aria-label="Имейл адрес" required>
+        <button class="btn liq lg-knapp" type="submit">Изпрати код</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="tillbaka">← Назад</button></div>
       </form>
-
-      <div class="google" id="google-ruta" hidden>
-        <div class="eller"><span>или</span></div>
-        <div id="google-knapp"></div>
-      </div>
 
       <p class="meddelande" id="meddelande" role="alert" aria-live="polite"></p>
     </div>
@@ -244,6 +261,7 @@
     <span data-k="reset_btn">Запази новата парола</span>
     <span data-k="code_btn">Потвърди</span>
     <span data-k="days_total">{n} спрени</span>
+    <span data-k="lg_err_name">Попълни името си.</span>
     <span data-k="err_generic">Нещо се обърка. Опитай отново.</span>
     <span data-k="err_network">Няма връзка с AdRaze. Провери интернет връзката си.</span>
     <span data-k="err_email">Въведи валиден имейл адрес.</span>

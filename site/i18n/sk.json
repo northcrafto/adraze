@@ -569,5 +569,20 @@
   "welcome.browser_title": "Chcete celý prehliadač?",
   "welcome.browser_text": "AdRaze Browser má blokovanie zabudované a je dostupný pre Linux, Windows a Mac.",
   "privacy.h_site": "Návštevy adraze.app",
-  "privacy.p_site": "Keď navštívite adraze.app, počítame zobrazenia stránok a kliknutia na tlačidlá na stiahnutie, aby sme videli, čo funguje. Deje sa to na našom vlastnom serveri, bez cookies a bez ukladania vašej IP adresy. Pri inštalácii rozšírenia sa raz otvorí uvítacia stránka na adraze.app."
+  "privacy.p_site": "Keď navštívite adraze.app, počítame zobrazenia stránok a kliknutia na tlačidlá na stiahnutie, aby sme videli, čo funguje. Deje sa to na našom vlastnom serveri, bez cookies a bez ukladania vašej IP adresy. Pri inštalácii rozšírenia sa raz otvorí uvítacia stránka na adraze.app.",
+  "konto.lg_title": "Prihlásiť sa do AdRaze",
+  "konto.lg_lead": "alebo si vytvorte účet. Zaberie to minútu.",
+  "konto.lg_email_ph": "Zadajte svoj e-mail",
+  "konto.lg_next": "Pokračovať e-mailom",
+  "konto.lg_pw_title": "Zadajte svoje heslo",
+  "konto.lg_change": "Upraviť",
+  "konto.lg_no_account": "Nemáte účet? Vytvorte si ho",
+  "konto.lg_name_title": "Ako sa voláš?",
+  "konto.lg_name_lead": "Takže AdRaze vie, ako vás má volať.",
+  "konto.lg_name_ph": "Zadajte svoje meno",
+  "konto.lg_continue": "Pokračovať",
+  "konto.lg_newpw_title": "Vyberte heslo",
+  "konto.lg_newpw_lead": "Aspoň 8 znakov. Účet sa prepojí s",
+  "konto.lg_show_pw": "Zobraziť heslo",
+  "konto.lg_err_name": "Vyplňte svoje meno."
 }

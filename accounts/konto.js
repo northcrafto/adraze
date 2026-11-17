@@ -29,27 +29,33 @@ async function api(sokvag, kropp, felTexter = {}) {
 // ---------- utloggad: steg ----------
 const meddelande = $('#meddelande');
 const visaMeddelande = (text, bra) => { meddelande.textContent = text || ''; meddelande.classList.toggle('bra', !!bra); };
-const flikar = $('#flikar');
 let lage = { email: '', syfte: '' }; // pågående kodsteg
+let mejl = '';                       // adressen från första steget
+let fore = 'in';                     // steget man kom till koden ifrån (dit leder "Tillbaka")
 
+// Ett steg i taget, som i AdRaze-webbläsaren: mejl → lösenord, eller mejl → namn → lösenord → kod
 function visaSteg(steg) {
   for (const f of document.querySelectorAll('.ut .steg')) f.hidden = f.dataset.steg !== steg;
-  flikar.hidden = !(steg === 'in' || steg === 'skapa');
-  $('#google-ruta').hidden = !(steg === 'in' || steg === 'skapa') || !googleKlar;
-  if (steg === 'in' || steg === 'skapa') {
-    flikar.dataset.vald = steg;
-    for (const b of flikar.querySelectorAll('button')) b.setAttribute('aria-selected', String(b.dataset.flik === steg));
-  }
+  for (const b of document.querySelectorAll('.ut .lg-mejl')) b.textContent = mejl;
+  for (const f of [$('#f-in'), $('#f-skapa')]) f.email.value = mejl; // dolt fält: lösenordshanterare ser vilket konto det gäller
   visaMeddelande('');
-  const forsta = $(`.steg[data-steg="${steg}"] input:not([type=hidden])`);
+  const forsta = $(`.steg[data-steg="${steg}"] input:not([hidden])`);
   if (forsta && matchMedia('(pointer:fine)').matches) forsta.focus();
 }
-flikar.addEventListener('click', (e) => { const b = e.target.closest('[data-flik]'); if (b) visaSteg(b.dataset.flik); });
 document.addEventListener('click', (e) => {
+  const oga = e.target.closest('[data-visa]');
+  if (oga) {
+    const falt = oga.parentElement.querySelector('input');
+    const visa = falt.type === 'password';
+    falt.type = visa ? 'text' : 'password';
+    oga.setAttribute('aria-pressed', String(visa));
+    return;
+  }
   const b = e.target.closest('[data-ga]');
   if (!b) return;
-  if (b.dataset.ga === 'glomt') { $('#f-glomt').email.value = $('#f-in').email.value; visaSteg('glomt'); }
-  if (b.dataset.ga === 'tillbaka') visaSteg('in');
+  if (b.dataset.ga === 'glomt') { $('#f-glomt').email.value = mejl; visaSteg('glomt'); }
+  else if (b.dataset.ga === 'tillbaka') visaSteg(b.closest('form').id === 'f-kod' ? fore : 'in');
+  else visaSteg(b.dataset.ga); // start, in, namn
 });
 
 // Knappen låses medan ett anrop pågår
@@ -62,13 +68,14 @@ async function medKnapp(form, fn) {
 const giltigMejl = (s) => /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(s.trim());
 function kontrollera(form, losenMin) {
   const email = form.email, pass = form.password;
-  if (email && !giltigMejl(email.value)) { email.setAttribute('aria-invalid', 'true'); email.focus(); throw new Error(T.err_email); }
+  if (email && !giltigMejl(email.value)) { email.setAttribute('aria-invalid', 'true'); if (!email.hidden) email.focus(); throw new Error(T.err_email); }
   email?.removeAttribute('aria-invalid');
   if (pass && pass.value.length < (losenMin || 1)) { pass.setAttribute('aria-invalid', 'true'); pass.focus(); throw new Error(T.err_password); }
   pass?.removeAttribute('aria-invalid');
 }
 
 function tillKod(svar) {
+  fore = $('.ut .steg:not([hidden])')?.dataset.steg || 'in';
   lage = { email: svar.email, syfte: svar.syfte };
   $('#kod-till').textContent = svar.email;
   $('#nytt-losen').hidden = svar.syfte !== 'reset';
@@ -78,27 +85,43 @@ function tillKod(svar) {
   kodrutor[0].focus();
 }
 
+// ?skapa i adressen: gå direkt till "Vad heter du?" när mejlet är ifyllt
+const villSkapa = new URLSearchParams(location.search).has('skapa');
+$('#f-start').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const f = e.currentTarget;
+  try { kontrollera(f); } catch (fel) { return visaMeddelande(fel.message); }
+  mejl = f.email.value.trim().toLowerCase();
+  visaSteg(villSkapa ? 'namn' : 'in');
+});
 $('#f-in').addEventListener('submit', (e) => {
   e.preventDefault();
   const f = e.currentTarget;
   medKnapp(f, async () => {
     kontrollera(f);
-    const svar = await api('/auth/login', { email: f.email.value, password: f.password.value }, { 401: T.err_login });
+    const svar = await api('/auth/login', { email: mejl, password: f.password.value }, { 401: T.err_login });
     svar.steg === 'kod' ? tillKod(svar) : inloggad();
   });
+});
+$('#f-nynamn').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const f = e.currentTarget;
+  if (!f.namn.value.trim()) { f.namn.setAttribute('aria-invalid', 'true'); f.namn.focus(); return visaMeddelande(T.lg_err_name); }
+  f.namn.removeAttribute('aria-invalid');
+  visaSteg('skapa');
 });
 $('#f-skapa').addEventListener('submit', (e) => {
   e.preventDefault();
   const f = e.currentTarget;
   medKnapp(f, async () => {
     kontrollera(f, 8);
-    tillKod(await api('/auth/signup', { email: f.email.value, password: f.password.value }, { 409: T.err_exists, 400: T.err_password }));
+    tillKod(await api('/auth/signup', { email: mejl, password: f.password.value, namn: $('#f-nynamn').namn.value.trim() }, { 409: T.err_exists, 400: T.err_password }));
   });
 });
 $('#f-glomt').addEventListener('submit', (e) => {
   e.preventDefault();
   const f = e.currentTarget;
-  medKnapp(f, async () => { kontrollera(f); tillKod(await api('/auth/forgot', { email: f.email.value })); });
+  medKnapp(f, async () => { kontrollera(f); mejl = f.email.value.trim().toLowerCase(); tillKod(await api('/auth/forgot', { email: mejl })); });
 });
 
 // ---------- sex kodrutor: skriv, klistra in, backsteg, piltangenter ----------
@@ -160,7 +183,6 @@ $('#ny-kod').addEventListener('click', async () => {
 });
 
 // ---------- Google ----------
-let googleKlar = false;
 async function startaGoogle(clientId) {
   if (!clientId) return;
   await new Promise((ok, fel) => { const s = document.createElement('script'); s.src = 'https://accounts.google.com/gsi/client'; s.async = true; s.onload = ok; s.onerror = fel; document.head.append(s); });
@@ -170,11 +192,9 @@ async function startaGoogle(clientId) {
       try { await api('/auth/google', { credential }); inloggad(); } catch (e) { visaMeddelande(e.message); }
     },
   });
+  $('#google-ruta').hidden = false; // knappen måste synas för att få en bredd
   const ruta = $('#google-knapp');
-  google.accounts.id.renderButton(ruta, { theme: 'outline', size: 'large', shape: 'pill', text: 'continue_with', width: Math.min(ruta.clientWidth || 360, 400), locale: document.documentElement.lang });
-  googleKlar = true;
-  const steg = $('.ut .steg:not([hidden])')?.dataset.steg;
-  $('#google-ruta').hidden = !(steg === 'in' || steg === 'skapa');
+  google.accounts.id.renderButton(ruta, { theme: 'outline', size: 'large', shape: 'rectangular', text: 'continue_with', width: Math.min(ruta.clientWidth || 360, 400), locale: document.documentElement.lang });
 }
 
 // ---------- tillägget (content/konto.js svarar via postMessage) ----------
@@ -578,7 +598,7 @@ $('#f-radera').addEventListener('submit', (e) => {
   } catch (e) {
     if (e.status === 401) markeraInloggad(false);
     $('#vy-ut').hidden = false;
-    visaSteg(new URLSearchParams(location.search).has('skapa') ? 'skapa' : 'in');
+    visaSteg('start');
     if (e.status !== 401) visaMeddelande(e.message);
   } finally {
     sida.removeAttribute('aria-busy');

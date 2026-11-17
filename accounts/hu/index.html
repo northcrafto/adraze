@@ -75,38 +75,59 @@
 
 <main class="wrap konto" id="konto" data-api="https://api.adraze.app" data-lang="hu" aria-busy="true">
 
-  <!-- Inte inloggad -->
+  <!-- Inte inloggad: ett steg i taget, centrerat. Samma flöde som i AdRaze-webbläsaren (browser/ui/shell.html #login). -->
   <section class="ut" id="vy-ut" hidden>
-    <div class="ut-intro">
-      <div class="vinkar"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
-      <h1>Nézd meg, mi mindent állított meg az AdRaze.</h1>
-      <p>Jelentkezz be és kapcsold össze a bővítményt, így láthatod, mennyi reklám, nyomkövető és veszélyes oldal akadt meg az összes gépeden.</p>
-    </div>
+    <div class="lg-kort">
 
-    <div class="ruta">
-      <div class="flikar" role="tablist" id="flikar">
-        <button role="tab" type="button" data-flik="in" aria-selected="true">Bejelentkezés</button>
-        <button role="tab" type="button" data-flik="skapa" aria-selected="false">Fiók létrehozása</button>
-        <span class="flik-markor" aria-hidden="true"></span>
-      </div>
-
-      <form class="steg" id="f-in" data-steg="in" novalidate>
-        <label class="falt"><span>E-mail-cím</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>Jelszó</span><input type="password" name="password" autocomplete="current-password" required></label>
-        <button type="button" class="lank-knapp nav-link" data-ga="glomt">Elfelejtetted a jelszót?</button>
-        <button class="btn btn-stor liq bred" type="submit">Bejelentkezés</button>
+      <!-- Steg 1: Google eller mejl -->
+      <form class="steg lg-vy" id="f-start" data-steg="start" novalidate>
+        <h1 class="lg-h">Bejelentkezés az AdRaze-be</h1>
+        <p class="lg-lead">vagy hozzon létre fiókot. Egy percet vesz igénybe.</p>
+        <div class="google" id="google-ruta" hidden>
+          <div id="google-knapp"></div>
+          <div class="eller"><span>vagy</span></div>
+        </div>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="Add meg az e-mail címed" aria-label="E-mail-cím" required>
+        <button class="btn liq lg-knapp" type="submit">Folytatás e-maillel</button>
       </form>
 
-      <form class="steg" id="f-skapa" data-steg="skapa" novalidate hidden>
-        <label class="falt"><span>E-mail-cím</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>Válassz jelszót (legalább 8 karakter)</span><input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
-        <button class="btn btn-stor liq bred" type="submit">Fiók létrehozása</button>
+      <!-- Steg 2: lösenord -->
+      <form class="steg lg-vy" id="f-in" data-steg="in" novalidate hidden>
+        <h1 class="lg-h">Add meg a jelszavad</h1>
+        <p class="lg-lead"><b class="lg-mejl" translate="no"></b> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp" data-ga="start">Szerkesztés</button></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="current-password" placeholder="Jelszó" aria-label="Jelszó" required><button type="button" class="lg-oga" data-visa aria-label="Jelszó megjelenítése" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">Bejelentkezés</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="glomt">Elfelejtetted a jelszót?</button>
+          <button type="button" class="lank-knapp" data-ga="namn">Nincs fiókod? Hozz létre egyet</button>
+        </div>
+      </form>
+
+      <!-- Skapa konto 1: namn -->
+      <form class="steg lg-vy" id="f-nynamn" data-steg="namn" novalidate hidden>
+        <h1 class="lg-h">Hogy hívnak?</h1>
+        <p class="lg-lead">Tehát a AdRaze tudja, hogy hívjon.</p>
+        <input class="lg-in" name="namn" autocomplete="name" maxlength="40" placeholder="Add meg a neved" aria-label="Add meg a neved" required>
+        <button class="btn liq lg-knapp" type="submit">Folytatás</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="in">← Vissza</button></div>
+      </form>
+
+      <!-- Skapa konto 2: lösenord -->
+      <form class="steg lg-vy" id="f-skapa" data-steg="skapa" novalidate hidden>
+        <h1 class="lg-h">Válassz jelszót</h1>
+        <p class="lg-lead">Legalább 8 karakter. A fiók össze lesz kapcsolva <b class="lg-mejl" translate="no"></b></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Jelszó" aria-label="Válassz jelszót (legalább 8 karakter)" required><button type="button" class="lg-oga" data-visa aria-label="Jelszó megjelenítése" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">Fiók létrehozása</button>
         <p class="liten">A fiók létrehozásával elfogadod az <a class="nav-link" href="https://adraze.app/hu/integritet">adatvédelmi szabályzatunkat</a>.</p>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="namn">← Vissza</button></div>
       </form>
 
-      <form class="steg" id="f-kod" data-steg="kod" novalidate hidden>
-        <h2>Nézd meg a leveleidet</h2>
-        <p class="dov">Hatjegyű kódot küldtünk ide: <b id="kod-till"></b></p>
+      <!-- Koden i mejlet (ny webbläsare, nytt konto eller glömt lösenord) -->
+      <form class="steg lg-vy" id="f-kod" data-steg="kod" novalidate hidden>
+        <h1 class="lg-h">Nézd meg a leveleidet</h1>
+        <p class="lg-lead">Hatjegyű kódot küldtünk ide: <b id="kod-till" translate="no"></b></p>
         <div class="kodrutor" id="kodrutor">
           <input inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="1">
           <input inputmode="numeric" maxlength="1" aria-label="2">
@@ -116,26 +137,22 @@
           <input inputmode="numeric" maxlength="1" aria-label="5">
           <input inputmode="numeric" maxlength="1" aria-label="6">
         </div>
-        <label class="falt" id="nytt-losen" hidden><span>Válassz jelszót (legalább 8 karakter)</span><input type="password" name="password" autocomplete="new-password" minlength="8"></label>
-        <button class="btn btn-stor liq bred" type="submit" id="kod-knapp">Megerősítés</button>
-        <div class="rad-lankar">
-          <button type="button" class="lank-knapp nav-link" data-ga="tillbaka">Vissza</button>
-          <button type="button" class="lank-knapp nav-link" id="ny-kod">Új kód küldése</button>
+        <div class="lg-falt" id="nytt-losen" hidden><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Válassz jelszót (legalább 8 karakter)" aria-label="Válassz jelszót (legalább 8 karakter)"><button type="button" class="lg-oga" data-visa aria-label="Jelszó megjelenítése" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit" id="kod-knapp">Megerősítés</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="tillbaka">← Vissza</button>
+          <button type="button" class="lank-knapp" id="ny-kod">Új kód küldése</button>
         </div>
       </form>
 
-      <form class="steg" id="f-glomt" data-steg="glomt" novalidate hidden>
-        <h2>Új jelszó</h2>
-        <p class="dov">Add meg az e-mail-címed, és küldünk egy kódot.</p>
-        <label class="falt"><span>E-mail-cím</span><input type="email" name="email" autocomplete="email" required></label>
-        <button class="btn btn-stor liq bred" type="submit">Kód küldése</button>
-        <div class="rad-lankar"><button type="button" class="lank-knapp nav-link" data-ga="tillbaka">Vissza</button></div>
+      <!-- Glömt lösenord -->
+      <form class="steg lg-vy" id="f-glomt" data-steg="glomt" novalidate hidden>
+        <h1 class="lg-h">Új jelszó</h1>
+        <p class="lg-lead">Add meg az e-mail-címed, és küldünk egy kódot.</p>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="Add meg az e-mail címed" aria-label="E-mail-cím" required>
+        <button class="btn liq lg-knapp" type="submit">Kód küldése</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="tillbaka">← Vissza</button></div>
       </form>
-
-      <div class="google" id="google-ruta" hidden>
-        <div class="eller"><span>vagy</span></div>
-        <div id="google-knapp"></div>
-      </div>
 
       <p class="meddelande" id="meddelande" role="alert" aria-live="polite"></p>
     </div>
@@ -244,6 +261,7 @@
     <span data-k="reset_btn">Új jelszó mentése</span>
     <span data-k="code_btn">Megerősítés</span>
     <span data-k="days_total">{n} megállítva</span>
+    <span data-k="lg_err_name">Adja meg a nevét.</span>
     <span data-k="err_generic">Valami hiba történt. Próbáld újra.</span>
     <span data-k="err_network">Nem érhető el az AdRaze. Ellenőrizd a kapcsolatot.</span>
     <span data-k="err_email">Adj meg egy érvényes e-mail-címet.</span>

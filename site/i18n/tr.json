@@ -569,5 +569,20 @@
   "welcome.browser_title": "Tarayıcının tamamını ister misin?",
   "welcome.browser_text": "AdRaze Browser’da engelleme yerleşiktir; Linux, Windows ve Mac için mevcuttur.",
   "privacy.h_site": "adraze.app ziyaretleri",
-  "privacy.p_site": "adraze.app’i ziyaret ettiğinde, neyin işe yaradığını görmek için sayfa görüntülemelerini ve indirme düğmelerine yapılan tıklamaları sayarız. Bu, kendi sunucumuzda, çerez kullanmadan ve IP adresin kaydedilmeden yapılır. Uzantı yüklendiğinde adraze.app’te bir karşılama sayfası bir kez açılır."
+  "privacy.p_site": "adraze.app’i ziyaret ettiğinde, neyin işe yaradığını görmek için sayfa görüntülemelerini ve indirme düğmelerine yapılan tıklamaları sayarız. Bu, kendi sunucumuzda, çerez kullanmadan ve IP adresin kaydedilmeden yapılır. Uzantı yüklendiğinde adraze.app’te bir karşılama sayfası bir kez açılır.",
+  "konto.lg_title": "AdRaze'de oturum aç",
+  "konto.lg_lead": "veya bir hesap oluşturun. Bir dakika sürer.",
+  "konto.lg_email_ph": "E-posta adresini gir",
+  "konto.lg_next": "E-posta ile devam et",
+  "konto.lg_pw_title": "Şifreni gir",
+  "konto.lg_change": "Düzenlemek",
+  "konto.lg_no_account": "Hesabınız yok mu? Bir tane oluşturun",
+  "konto.lg_name_title": "Adın ne?",
+  "konto.lg_name_lead": "Yani AdRaze sana ne diyeceğini biliyor.",
+  "konto.lg_name_ph": "Adını gir",
+  "konto.lg_continue": "Devam et",
+  "konto.lg_newpw_title": "Bir şifre seçin",
+  "konto.lg_newpw_lead": "En az 8 karakter. Hesap şuna bağlanır",
+  "konto.lg_show_pw": "Şifreyi göster",
+  "konto.lg_err_name": "Adını doldur."
 }

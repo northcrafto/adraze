@@ -75,38 +75,59 @@
 
 <main class="wrap konto" id="konto" data-api="https://api.adraze.app" data-lang="uk" aria-busy="true">
 
-  <!-- Inte inloggad -->
+  <!-- Inte inloggad: ett steg i taget, centrerat. Samma flöde som i AdRaze-webbläsaren (browser/ui/shell.html #login). -->
   <section class="ut" id="vy-ut" hidden>
-    <div class="ut-intro">
-      <div class="vinkar"><img src="/mail/vinkar.gif" alt="" width="200" height="259"></div>
-      <h1>Подивіться все, що зупинив AdRaze.</h1>
-      <p>Увійдіть і підключіть розширення, щоб бачити, скільки реклами, трекерів і небезпечних сторінок зупинено на всіх ваших комп’ютерах.</p>
-    </div>
+    <div class="lg-kort">
 
-    <div class="ruta">
-      <div class="flikar" role="tablist" id="flikar">
-        <button role="tab" type="button" data-flik="in" aria-selected="true">Вхід</button>
-        <button role="tab" type="button" data-flik="skapa" aria-selected="false">Створити акаунт</button>
-        <span class="flik-markor" aria-hidden="true"></span>
-      </div>
-
-      <form class="steg" id="f-in" data-steg="in" novalidate>
-        <label class="falt"><span>Електронна пошта</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>Пароль</span><input type="password" name="password" autocomplete="current-password" required></label>
-        <button type="button" class="lank-knapp nav-link" data-ga="glomt">Забули пароль?</button>
-        <button class="btn btn-stor liq bred" type="submit">Увійти</button>
+      <!-- Steg 1: Google eller mejl -->
+      <form class="steg lg-vy" id="f-start" data-steg="start" novalidate>
+        <h1 class="lg-h">Увійти в AdRaze</h1>
+        <p class="lg-lead">або створіть обліковий запис. Це займе хвилину.</p>
+        <div class="google" id="google-ruta" hidden>
+          <div id="google-knapp"></div>
+          <div class="eller"><span>або</span></div>
+        </div>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="Введіть вашу електронну адресу" aria-label="Електронна пошта" required>
+        <button class="btn liq lg-knapp" type="submit">Продовжити з email</button>
       </form>
 
-      <form class="steg" id="f-skapa" data-steg="skapa" novalidate hidden>
-        <label class="falt"><span>Електронна пошта</span><input type="email" name="email" autocomplete="email" required></label>
-        <label class="falt"><span>Виберіть пароль (щонайменше 8 символів)</span><input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
-        <button class="btn btn-stor liq bred" type="submit">Створити акаунт</button>
+      <!-- Steg 2: lösenord -->
+      <form class="steg lg-vy" id="f-in" data-steg="in" novalidate hidden>
+        <h1 class="lg-h">Введіть ваш пароль</h1>
+        <p class="lg-lead"><b class="lg-mejl" translate="no"></b> <span aria-hidden="true">·</span> <button type="button" class="lank-knapp" data-ga="start">Редагувати</button></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="current-password" placeholder="Пароль" aria-label="Пароль" required><button type="button" class="lg-oga" data-visa aria-label="Показати пароль" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">Увійти</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="glomt">Забули пароль?</button>
+          <button type="button" class="lank-knapp" data-ga="namn">Немає облікового запису? Створіть</button>
+        </div>
+      </form>
+
+      <!-- Skapa konto 1: namn -->
+      <form class="steg lg-vy" id="f-nynamn" data-steg="namn" novalidate hidden>
+        <h1 class="lg-h">Як вас звати?</h1>
+        <p class="lg-lead">Тож AdRaze знає, як вас називати.</p>
+        <input class="lg-in" name="namn" autocomplete="name" maxlength="40" placeholder="Введіть ваше ім'я" aria-label="Введіть ваше ім'я" required>
+        <button class="btn liq lg-knapp" type="submit">Продовжити</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="in">← Назад</button></div>
+      </form>
+
+      <!-- Skapa konto 2: lösenord -->
+      <form class="steg lg-vy" id="f-skapa" data-steg="skapa" novalidate hidden>
+        <h1 class="lg-h">Виберіть пароль</h1>
+        <p class="lg-lead">Щонайменше 8 символів. Обліковий запис буде пов'язано з <b class="lg-mejl" translate="no"></b></p>
+        <input type="email" name="email" autocomplete="username" hidden>
+        <div class="lg-falt"><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Пароль" aria-label="Виберіть пароль (щонайменше 8 символів)" required><button type="button" class="lg-oga" data-visa aria-label="Показати пароль" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit">Створити акаунт</button>
         <p class="liten">Створюючи акаунт, ви приймаєте нашу <a class="nav-link" href="https://adraze.app/uk/integritet">політику конфіденційності</a>.</p>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="namn">← Назад</button></div>
       </form>
 
-      <form class="steg" id="f-kod" data-steg="kod" novalidate hidden>
-        <h2>Перевірте пошту</h2>
-        <p class="dov">Ми надіслали шестизначний код на <b id="kod-till"></b></p>
+      <!-- Koden i mejlet (ny webbläsare, nytt konto eller glömt lösenord) -->
+      <form class="steg lg-vy" id="f-kod" data-steg="kod" novalidate hidden>
+        <h1 class="lg-h">Перевірте пошту</h1>
+        <p class="lg-lead">Ми надіслали шестизначний код на <b id="kod-till" translate="no"></b></p>
         <div class="kodrutor" id="kodrutor">
           <input inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="1">
           <input inputmode="numeric" maxlength="1" aria-label="2">
@@ -116,26 +137,22 @@
           <input inputmode="numeric" maxlength="1" aria-label="5">
           <input inputmode="numeric" maxlength="1" aria-label="6">
         </div>
-        <label class="falt" id="nytt-losen" hidden><span>Виберіть пароль (щонайменше 8 символів)</span><input type="password" name="password" autocomplete="new-password" minlength="8"></label>
-        <button class="btn btn-stor liq bred" type="submit" id="kod-knapp">Підтвердити</button>
-        <div class="rad-lankar">
-          <button type="button" class="lank-knapp nav-link" data-ga="tillbaka">Назад</button>
-          <button type="button" class="lank-knapp nav-link" id="ny-kod">Надіслати новий код</button>
+        <div class="lg-falt" id="nytt-losen" hidden><input class="lg-in" type="password" name="password" autocomplete="new-password" minlength="8" placeholder="Виберіть пароль (щонайменше 8 символів)" aria-label="Виберіть пароль (щонайменше 8 символів)"><button type="button" class="lg-oga" data-visa aria-label="Показати пароль" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <button class="btn liq lg-knapp" type="submit" id="kod-knapp">Підтвердити</button>
+        <div class="lg-rad">
+          <button type="button" class="lank-knapp" data-ga="tillbaka">← Назад</button>
+          <button type="button" class="lank-knapp" id="ny-kod">Надіслати новий код</button>
         </div>
       </form>
 
-      <form class="steg" id="f-glomt" data-steg="glomt" novalidate hidden>
-        <h2>Новий пароль</h2>
-        <p class="dov">Введіть свою електронну адресу, і ми надішлемо код.</p>
-        <label class="falt"><span>Електронна пошта</span><input type="email" name="email" autocomplete="email" required></label>
-        <button class="btn btn-stor liq bred" type="submit">Надіслати код</button>
-        <div class="rad-lankar"><button type="button" class="lank-knapp nav-link" data-ga="tillbaka">Назад</button></div>
+      <!-- Glömt lösenord -->
+      <form class="steg lg-vy" id="f-glomt" data-steg="glomt" novalidate hidden>
+        <h1 class="lg-h">Новий пароль</h1>
+        <p class="lg-lead">Введіть свою електронну адресу, і ми надішлемо код.</p>
+        <input class="lg-in" type="email" name="email" inputmode="email" autocomplete="email" placeholder="Введіть вашу електронну адресу" aria-label="Електронна пошта" required>
+        <button class="btn liq lg-knapp" type="submit">Надіслати код</button>
+        <div class="lg-rad mitt"><button type="button" class="lank-knapp" data-ga="tillbaka">← Назад</button></div>
       </form>
-
-      <div class="google" id="google-ruta" hidden>
-        <div class="eller"><span>або</span></div>
-        <div id="google-knapp"></div>
-      </div>
 
       <p class="meddelande" id="meddelande" role="alert" aria-live="polite"></p>
     </div>
@@ -244,6 +261,7 @@
     <span data-k="reset_btn">Зберегти новий пароль</span>
     <span data-k="code_btn">Підтвердити</span>
     <span data-k="days_total">Зупинено: {n}</span>
+    <span data-k="lg_err_name">Введіть ваше ім'я.</span>
     <span data-k="err_generic">Щось пішло не так. Спробуйте ще раз.</span>
     <span data-k="err_network">Не вдалося з’єднатися з AdRaze. Перевірте підключення.</span>
     <span data-k="err_email">Введіть дійсну електронну адресу.</span>
