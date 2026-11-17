@@ -104,7 +104,13 @@ struct NyChatt: View {
             .background(tema.bakgrund)
             .navigationTitle(ct("Nytt meddelande"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button(ct("Stäng")) { stang() } } }
+            // Krysset till höger, som i appens andra ark (iOS 26 ritar det i en rund glasknapp)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { stang() } label: { Image(systemName: "xmark").font(.system(size: 15, weight: .bold)) }
+                        .accessibilityLabel(ct("Stäng"))
+                }
+            }
             .animation(.easeOut(duration: 0.2), value: svar)
         }
         .adrazeArk()
