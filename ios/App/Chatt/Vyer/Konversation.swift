@@ -33,7 +33,10 @@ struct ChattKonversation: View {
             rubrikton
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            ChattSkrivfalt(lage: lage, konv: konv, svar: $svar)
+            VStack(spacing: 0) {
+                if let fot = ChattModul.konversationsfot { fot(lage, konv) }
+                ChattSkrivfalt(lage: lage, konv: konv, svar: $svar)
+            }
         }
         .safeAreaInset(edge: .top, spacing: 0) { fastBanner }
         .navigationBarTitleDisplayMode(.inline)
@@ -227,6 +230,7 @@ struct ChattKonversation: View {
             ScrollViewReader { rull in
                 ScrollView {
                     LazyVStack(spacing: 0) {
+                        if let rad = ChattModul.konversationsrad { rad(lage, konv) }
                         if lage.laddar.contains(konv) && lista.isEmpty {
                             ProgressView().padding(.top, 60)
                         } else if lista.isEmpty {

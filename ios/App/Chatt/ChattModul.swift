@@ -17,6 +17,13 @@ final class ChattModul: NSObject, AppModul {
 
     @MainActor static var lage: ChattLage?
 
+    /// Krokar som E2E-modulen (`App/E2E`) sätter när den registreras (ordning 59, före Chatt). Utan den går chatten
+    /// med `ChattV1` och inga krypteringsrader visas.
+    @MainActor static var lagerFabrik: ((AppMiljo) -> any ChattLager)?
+    @MainActor static var konversationsrad: ((ChattLage, KonvId) -> AnyView)?
+    @MainActor static var konversationsfot: ((ChattLage, KonvId) -> AnyView)?
+    @MainActor static var inkorgsknapp: ((ChattLage) -> AnyView)?
+
     @MainActor static func registrera(i app: AppMiljo) {
         app.brygga.hantera("chatt:visa") { anrop in
             let konv = anrop.argument.first?["konv"].text.flatMap(KonvId.init(text:))
@@ -55,7 +62,7 @@ final class ChattModul: NSObject, AppModul {
 
     @MainActor static func delatLage(_ app: AppMiljo) -> ChattLage {
         if let l = lage { return l }
-        let l = ChattLage(app: app, lager: ChattV1(app: app))
+        let l = ChattLage(app: app, lager: lagerFabrik?(app) ?? ChattV1(app: app))
         lage = l
         return l
     }

@@ -1,0 +1,4 @@
+module AdrazeE2EKarna {
+    header "adraze_e2e.h"
+    export *
+}

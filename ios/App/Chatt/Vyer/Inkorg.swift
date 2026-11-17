@@ -115,6 +115,7 @@ struct ChattInkorg: View {
             }
             .buttonStyle(ChattKnapp(.ikon))
             .accessibilityLabel(ct("Nytt meddelande"))
+            if let knapp = ChattModul.inkorgsknapp { knapp(lage) }
             ChattStang()
         }
     }

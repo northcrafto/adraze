@@ -230,6 +230,7 @@ const rutter = {
     } }).then(() => { skanning.klar = true; }).catch((e) => { skanning.fel = e.kod || e.message; });
     return { ok: true };
   },
+  'GET /lanka/skanning': async () => skanning || {},
   'POST /lanka/bekrafta': async (b) => {
     await vantaPa(() => skanning?.kod, 30);
     skanning.appKod = String(b.kod);

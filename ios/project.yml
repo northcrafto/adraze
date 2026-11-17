@@ -37,6 +37,10 @@ targets:
           - "Webb/**"
           - "Regler/**"
           - "**/Bunt/**"
+    dependencies:
+      # E2E-kärnan (Rust + vodozemac) som statiskt bibliotek; byggs på mint med ../e2e-karna/bygg.sh ios (ägare: E2E)
+      - framework: App/E2E/Karna/AdrazeE2EKarna.xcframework
+        embed: false
     postBuildScripts:
       - name: Kopiera buntfiler
         basedOnDependencyAnalysis: false
