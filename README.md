@@ -25,7 +25,7 @@ Most ad blockers hide banners. AdRaze also goes after the things that make the w
 It is built on Chrome's native `declarativeNetRequest` engine, so blocking happens inside the browser before a request is even sent. No remote servers, no accounts, no telemetry.
 
 <div align="center">
-<img src=".github/assets/demo-before-after.png" alt="Before and after: a news page full of ads, a popup and trackers, and the same page with AdRaze turned on" width="860">
+<img src=".github/assets/demo-before-after.png" alt="The same news site in Chrome without an ad blocker and in AdRaze: the ads are gone" width="860">
 </div>
 
 ## Features
