@@ -447,7 +447,7 @@ final class ChattAnrop {
         k.httpCookieStorage = nil
         k.httpShouldSetCookies = false
         k.timeoutIntervalForRequest = 30
-        if bas.scheme == "http" { k.protocolClasses = [ChattLokalHTTP.self] }
+        if bas.scheme == "http" { k.protocolClasses = [LokalHTTP.self] }
         session = URLSession(configuration: k)
     }
 
