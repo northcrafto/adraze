@@ -51,6 +51,9 @@
         ['Den här datorn', 'Den här ' + enhet[1]], ['den här datorn', 'den här ' + enhet[1]],
         ['Din dator', 'Din ' + enhet[0]], ['din dator', 'din ' + enhet[0]],
         ['datorns', enhet[2]], ['datorn', enhet[1]], ['datorer', 'enheter'],
+        // Datorns fönster: en iPhone har bara appen och dess flikar
+        ['Syns direkt i alla fönster.', 'Syns direkt i hela appen.'],
+        ['Gäller i alla fönster utom inkognito.', 'Gäller överallt utom i privata flikar.'],
       ],
       en: [
         ['the button, panel, and keyboard shortcut disappear', 'the button and panel disappear'],
@@ -60,11 +63,13 @@
         ['This computer', 'This ' + enhet[0]], ['this computer', 'this ' + enhet[0]],
         ['Your computer', 'Your ' + enhet[0]], ['your computer', 'your ' + enhet[0]],
         ["the child's computer", "the child's " + enhet[0]], ['computers', 'devices'], ['computer', enhet[0]],
+        ['Applies right away in all windows.', 'Applies right away across the app.'],
+        ['Applies in all windows except incognito.', 'Applies everywhere except private tabs.'],
       ],
     };
     const lang = () => String((window.i18n && window.i18n.lang) || html.lang || 'sv').split('-')[0];
     const lista = () => [['Chromium (Electron)', 'WebKit'], ...(ORD[lang()] || [])];
-    const RE = /dator|computer|Chromium/;
+    const RE = /dator|computer|Chromium|alla fönster|all windows/;
     const ATTR = ['placeholder', 'title', 'aria-label'];
     const byt = (t) => { let u = t; for (const [a, b] of lista()) if (u.indexOf(a) >= 0) u = u.split(a).join(b); return u; };
     const egen = (el) => !!(el && el.closest && el.closest('[translate="no"], input, textarea, [contenteditable="true"], script, style'));
@@ -139,7 +144,8 @@
   const KRAVER = { konto: 'auth:session', vanner: 'auth:session', familj: 'family:me', nedladdningar: 'dl:list', losenord: 'pw:list', krypto: 'krypto:chat' };
   // Rader som bara gäller datorn, eller vars kanal ingen har än
   // (standardwebbläsaren väljs i iOS egna inställningar, inte av appen)
-  const DOLDA_RADER = ['tgl-bmbar', 'sel-dns', 'zoom-100', 'defbrowser-btn'];
+  // (eget konto i varje fönster: en iPhone har inga fönster)
+  const DOLDA_RADER = ['tgl-bmbar', 'sel-dns', 'zoom-100', 'defbrowser-btn', 'kl-toggle'];
   const RAD_KRAVER = { 'chat-rules-btn': 'auth:session', 'tgl-protection': 'skoll:check-url', 'tgl-adblock': 'skoll:adblock-toggle', 'adblock-more': 'blockinst:get', 'seg-freq': 'historik:lista', 'settings-bg-btn': null };
 
   function setUppAnpassa() {

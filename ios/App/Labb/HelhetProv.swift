@@ -197,11 +197,14 @@ enum HelhetProv {
         return Palett.hex([Double(rr) * 255, Double(gg) * 255, Double(bb) * 255])
     }
 
-    /// Texter på sidan (utom skript, stil och användarens egna) som fortfarande säger dator eller Chromium.
+    /// Texter på sidan (utom skript, stil och användarens egna) som fortfarande säger dator eller Chromium, och
+    /// synliga texter om "alla fönster" (dolda datorrader, som eget konto per fönster, får finnas kvar i sidan).
     static let datorordJS = """
     (() => { const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, { acceptNode: (n) =>
         n.parentElement && n.parentElement.closest('script, style, [translate="no"]') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
-      const hitt = []; let n; while ((n = w.nextNode())) if (/dator|Chromium/.test(n.nodeValue)) hitt.push(n.nodeValue.trim().slice(0, 90));
+      const hitt = []; let n; while ((n = w.nextNode())) {
+        const t = n.nodeValue, syns = n.parentElement.getClientRects().length > 0;
+        if (/dator|Chromium/.test(t) || (syns && /alla fönster/.test(t))) hitt.push(t.trim().slice(0, 90)); }
       return JSON.stringify(hitt.slice(0, 6)); })()
     """
 
