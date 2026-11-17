@@ -105,3 +105,63 @@ Saker att veta:
 - **Filterlistorna** finns inbakade i paketet, så färska listor kräver en ny version. Släpp gärna en version varannan vecka.
 - **De som laddat ner zip:en från GitHub** ("Läs in okomprimerat") får aldrig automatiska uppdateringar. De behöver ta bort den och installera från butiken en gång.
 - **Automatisering (senare):** Chrome Web Store API (`chromewebstore.googleapis.com`) kan ladda upp och publicera från GitHub Actions med OAuth-klient + refresh token, så att en ny tagg släpper en ny version.
+
+## 0.2.4: översatt namn och beskrivning (2026-11-17)
+
+Från 0.2.4 kommer namn och kort beskrivning ur `extension/_locales/<språk>/messages.json` (26 språk, engelska är standard). Namnet är "AdRaze – Ad Blocker" på engelska och "AdRaze – reklamblockerare" på svenska. Butiken söker i namnet, så det ska säga vad tillägget är. Använd aldrig en annan produkts namn i namn eller sökord.
+
+När paketet har `_locales` vill butiken ha en detaljerad beskrivning per språk under **Butiksinformation**. Den svenska finns ovan. Engelska (standardspråk, visas för alla språk som saknar egen text):
+
+```
+AdRaze stops ads, trackers, popups and redirects to dangerous sites. Free, forever, and with no "acceptable ads".
+
+What AdRaze does:
+• Blocks ads, trackers and popups with well-known open filter lists, including one made for Swedish sites.
+• Hides empty ad slots so the page looks clean.
+• Fixes sites that try to get around the blocking: small built-in scripts switch off anti-adblock warnings and ad scripts, and pages that wait for an ad script get a harmless stand-in so they do not break.
+• Removes known tracking parameters from addresses.
+• Mutes and skips ads on YouTube.
+• Rejects non-essential cookies automatically in common cookie banners. Banners with no free "no" are hidden without accepting anything.
+• Stops popunders and invisible click traps. Login and payment windows always open as usual.
+• Stops redirects to known scam and malware sites.
+• Pause protection or cookie banner handling per site with one click.
+
+100 out of 100 points on adblock-tester.com.
+
+Privacy: without an account AdRaze sends nothing anywhere. Everything happens locally in your browser. Open source (GPL-3): github.com/northcrafto/adraze
+```
+
+Välkomstsidan (`adraze.app/valkommen?k=tillagg`) öppnas en gång vid installation. Det kräver ingen ny behörighet (`tabs.create` är fri). Stycket "Besök på adraze.app" i integritetspolicyn beskriver det.
+
+## Fler butiker
+
+Samma `dist/adraze-<version>.zip` går till Edge och Opera. Firefox får ett eget paket.
+
+### Microsoft Edge Add-ons
+
+1. Partner Center (samma konto som Windows-appen) → **Enroll in a program** → *Microsoft Edge* (gratis). Det är inte gjort än: `partner.microsoft.com/dashboard/microsoftedge/overview` skickar till startsidan.
+2. **Create new extension** → ladda upp `dist/adraze-<version>.zip`.
+3. Properties: kategori *Privacy & security*, integritetspolicy `https://adraze.app/integritet`, webbplats `https://adraze.app`, support `https://support.adraze.app`.
+4. Store listings: lägg till engelska och svenska med beskrivningarna ovan och bilderna i `store/` (1280×800 går bra, liten kampanjbild 440×280).
+5. Sökord: högst sju, och aldrig andra produkters namn (Microsoft underkände "adblock" för Windows-appen). Förslag: `ad blocker, block ads, tracker blocker, privacy, popup blocker, cookie banners, open source`.
+6. Testing notes: "No account is needed. Install and open any news site; ads are blocked. The toolbar popup shows what was stopped."
+
+### Opera Addons
+
+1. Konto på `addons.opera.com/developer` (gratis), **Upload extension** → samma zip.
+2. Kategori *Privacy & Security*, samma texter och bilder. Granskningen är manuell och kan ta veckor.
+
+### Firefox (addons.mozilla.org)
+
+```sh
+cd tools && node pack.mjs firefox   # → dist/adraze-<version>-firefox.zip
+```
+
+Paketet har eget manifest (bakgrundssida i stället för service worker, id `adraze@adraze.app`, Firefox 128+). Provkört 2026-11-17 i Firefox 159 utan fönster: det läggs in, välkomstfliken öppnas och nätverksreglerna blockerar som i Chrome. `web-ext lint` ger 0 fel.
+
+Kvar innan inlämning:
+
+- **Räknarna.** Firefox saknar `declarativeNetRequest.getMatchedRules` och siffran på ikonen (`setExtensionActionOptions`). Blockeringen fungerar, men popupens "stoppat på den här sidan" och dagsstatistiken visar 0 för nätverksträffar.
+- **Datadeklaration.** AMO kräver `browser_specific_settings.gecko.data_collection_permissions` för nya tillägg. Utan konto skickas inget, med kopplat konto skickas mejl, inloggningsnyckel och dagssummor. Bestäm hur det deklareras innan paketet laddas upp.
+- **Inte provat i Firefox:** kosmetiska filter, scriptlets i sidans värld, popup-vakten, kakrutorna och YouTube-hanteringen.
+- **Granskarna** kommer att fråga om `eval` i fyra scriptlets (`web-ext lint` varnar). Källkoden är öppen och koden ligger oförminskad i paketet, hänvisa dit.

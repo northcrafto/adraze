@@ -366,7 +366,7 @@ function valkommen() {
   chrome.tabs.create({ url: `https://adraze.app${pre}/valkommen?k=tillagg` }).catch(() => {});
 }
 async function start() {
-  await chrome.declarativeNetRequest.setExtensionActionOptions({ displayActionCountAsBadgeText: true });
+  await chrome.declarativeNetRequest.setExtensionActionOptions?.({ displayActionCountAsBadgeText: true }); // finns inte i Firefox
   await chrome.action.setBadgeBackgroundColor({ color: "#ff4b1f" });
   await chrome.action.setBadgeTextColor?.({ color: "#ffffff" });
   await synkaPaus();
