@@ -15,10 +15,15 @@ extension Nycklar {
 ///     Text(tr("Ny flik"))
 ///     tr("{n} flikar", ["n": "3"])
 ///
-/// Ordlistorna läses i den här ordningen (den senare vinner):
+/// Ordlistorna läses i den här ordningen:
 ///  1. datorns `Webb/ui/locales/<kod>.json` (kopieras in av `verktyg/kopiera-ui.sh`), så att allt som redan är
 ///     översatt på datorn (54 språk) fungerar direkt,
-///  2. skalets egna `Skal/Bunt/sprak/<kod>.json` för texter som bara finns på telefonen.
+///  2. varje moduls egna `App/<Modul>/Bunt/sprak/<kod>.json` (Skal, Konto, Chatt, Falk …) för texter som bara
+///     finns på telefonen. De vinner över datorns. Saknar modulen språket används `<bas>.json` (`pt` för `pt-PT`),
+///     annars modulens `en.json`, men bara för texter som datorns ordlista inte redan översätter (hellre engelska
+///     än svenska för den som valt ett annat språk).
+///
+/// En modul behöver alltså ingen egen översättningsfunktion: lägg filerna i `Bunt/sprak/` och använd `tr`.
 ///
 /// Språket följer `sprak.val` (Anpassa › Språk), tomt = telefonens språk mappat till datorns koder (`aktivt`).
 /// Startargumentet `-sprak <kod>` väljer ett språk vid start (självtesterna). Svenska behöver ingen ordlista.
@@ -109,13 +114,51 @@ final class Sprak {
         let k = ny.replacingOccurrences(of: "[^A-Za-z-]", with: "", options: .regularExpression)
         var d: [String: String] = [:]
         if !k.isEmpty, k != "sv" {
-            for data in [Bunt.data("Webb", "ui/locales/\(k).json"), Bunt.data("Skal", "sprak/\(k).json")] {
-                guard let data, let o = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { continue }
-                for (nyckel, varde) in o { if let s = varde as? String, !s.isEmpty { d[nyckel] = s } }
-            }
+            let datorn = Self.las(Bunt.data("Webb", "ui/locales/\(k).json"))
+            d = datorn
+            // Modulernas egna språkfiler vinner över datorns; engelska bara där inget annat finns
+            for m in Self.modulerMedOrd { d.merge(Self.modulordlista(m, k, datorn: datorn)) { _, egen in egen } }
         }
         ordlista = d
         kod = k.isEmpty ? "sv" : k
+    }
+
+    // MARK: - Modulernas ordlistor
+
+    /// Moduler med en `sprak/`-mapp i bunten (`App/<Modul>/Bunt/sprak/`), i bokstavsordning.
+    static var modulerMedOrd: [String] {
+        if let m = modulminne { return m }
+        let fm = FileManager.default
+        let mappar = (try? fm.contentsOfDirectory(at: Bunt.rot, includingPropertiesForKeys: [.isDirectoryKey])) ?? []
+        let m = mappar.map(\.lastPathComponent).filter { $0 != "Webb" && fm.fileExists(atPath: Bunt.mapp($0).appendingPathComponent("sprak").path) }.sorted()
+        modulminne = m
+        return m
+    }
+    @ObservationIgnored private static var modulminne: [String]?
+
+    /// En moduls egna översättningar till ett språk (tom för svenska): `sprak/<kod>.json`, annars `sprak/<bas>.json`,
+    /// annars `sprak/en.json` för de texter som datorns ordlista för språket inte översätter. Falk skickar sin till
+    /// sin webbsida på det här sättet.
+    static func modulordlista(_ modul: String, _ kod: String) -> [String: String] {
+        guard kod != "sv", !kod.isEmpty else { return [:] }
+        return modulordlista(modul, kod, datorn: las(Bunt.data("Webb", "ui/locales/\(kod).json")))
+    }
+
+    private static func modulordlista(_ modul: String, _ kod: String, datorn: [String: String]) -> [String: String] {
+        let bas = kod.split(separator: "-").first.map(String.init) ?? kod
+        if let egen = Bunt.data(modul, "sprak/\(kod).json") ?? (bas != kod ? Bunt.data(modul, "sprak/\(bas).json") : nil) {
+            return las(egen)
+        }
+        guard kod != "en" else { return [:] }
+        return las(Bunt.data(modul, "sprak/en.json")).filter { datorn[$0.key] == nil }
+    }
+
+    /// `{ "svensk text": "översättning" }` ur JSON, tomma värden bort.
+    private static func las(_ data: Data?) -> [String: String] {
+        guard let data, let o = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return [:] }
+        var d: [String: String] = [:]
+        for (nyckel, varde) in o { if let s = varde as? String, !s.isEmpty { d[nyckel] = s } }
+        return d
     }
 
     /// Översätter en svensk sträng och fyller i `{namn}`.

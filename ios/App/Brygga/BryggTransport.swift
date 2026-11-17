@@ -120,9 +120,36 @@ final class BryggTransport: NSObject {
                 innehall.addUserScript(WKUserScript(source: s, injectionTime: .atDocumentStart, forMainFrameOnly: true, in: .page))
             }
         }
+        // Modulernas egen stil och JS för ytan (app.brygga.skript): stilen vid start, JS efter datorns skript, före ios.js
+        for m in app.brygga.skript(for: yta) {
+            if let css = m.css {
+                innehall.addUserScript(WKUserScript(source: Self.stilskript(css, id: m.namn + "-css"), injectionTime: .atDocumentStart,
+                                                    forMainFrameOnly: true, in: .page))
+                innehall.addUserScript(WKUserScript(source: Self.flyttaStil(id: m.namn + "-css"), injectionTime: .atDocumentEnd,
+                                                    forMainFrameOnly: true, in: .page))
+            }
+            if let js = m.js {
+                innehall.addUserScript(WKUserScript(source: js + "\n//# sourceURL=\(AdrazeSchema.ursprung)/\(m.namn).js\n",
+                                                    injectionTime: .atDocumentEnd, forMainFrameOnly: true, in: .page))
+            }
+        }
         if let s = skript("ios/ios.js") {
             innehall.addUserScript(WKUserScript(source: s, injectionTime: .atDocumentEnd, forMainFrameOnly: true, in: .page))
         }
+    }
+
+    /// En moduls stil som `<style id>` i dokumentet redan vid start (en gång per dokument).
+    static func stilskript(_ css: String, id: String) -> String {
+        """
+        (function () { if (document.getElementById(\(JSONVarde.text(id).jsonText))) return;
+          var s = document.createElement('style'); s.id = \(JSONVarde.text(id).jsonText); s.textContent = \(JSONVarde.text(css).jsonText);
+          (document.head || document.documentElement).appendChild(s); })();
+        """
+    }
+
+    /// Flyttar modulens stil sist i `<head>` när dokumentet är tolkat (efter datorns stilmallar).
+    static func flyttaStil(id: String) -> String {
+        "(function () { var s = document.getElementById(\(JSONVarde.text(id).jsonText)); if (s && document.head) document.head.appendChild(s); })();"
     }
 
     private func skript(_ fil: String) -> String? {

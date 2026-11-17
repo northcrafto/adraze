@@ -34,6 +34,7 @@ final class BryggRegister {
 
     private var kanalerna: [String: Post] = [:]
     private var startdatan: [String: (modul: String, f: @MainActor (BryggKalla) -> JSONVarde)] = [:]
+    private var skripten: [String: [Ytskript]] = [:]
     private let logg = Logg("Brygga")
 
     /// Modulen som registrerar just nu (sätts av AppMiljo), för felmeddelanden om krockar.
@@ -62,6 +63,25 @@ final class BryggRegister {
         }
         startdatan[namn] = (registrerande, f)
     }
+
+    /// Modulens egen stil och JavaScript ovanpå datorns sida för en yta (Falk lägger `falk-ios.css` och
+    /// `falk-ios.js` på `falk`). Datorns filer ändras aldrig. Transporten lägger in dem inför varje navigering:
+    ///
+    ///  - CSS vid dokumentstart som `<style id="<modul>-ios-css">` (till exempel `falk-ios-css`), som flyttas sist
+    ///    i `<head>` när dokumentet är tolkat, så att den vinner över datorns stil vid samma specificitet.
+    ///  - JS vid dokumentslut, efter datorns skript och före `ios.js`, i sidans egen värld.
+    ///
+    /// Samma modul och yta två gånger: den senaste gäller.
+    ///
+    ///     app.brygga.skript(yta: "falk", css: Bunt.text("Falk", "falk-ios.css"), js: Bunt.text("Falk", "falk-ios.js"))
+    func skript(yta: String, css: String? = nil, js: String? = nil) {
+        var lista = skripten[yta, default: []].filter { $0.modul != registrerande }
+        lista.append(Ytskript(modul: registrerande, css: css, js: js))
+        skripten[yta] = lista
+    }
+
+    /// Modulernas skript för en yta, i den ordning modulerna registrerades (för transporten).
+    func skript(for yta: String) -> [Ytskript] { skripten[yta] ?? [] }
 
     // MARK: - För transporten
 
@@ -98,6 +118,16 @@ final class BryggRegister {
         }
         sandare(kanal, data, till)
     }
+}
+
+/// En moduls stil och JavaScript på en yta (`BryggRegister.skript(yta:css:js:)`).
+struct Ytskript: Sendable, Hashable {
+    let modul: String
+    let css: String?
+    let js: String?
+
+    /// `falk-ios`: stilens id blir `falk-ios-css`, skriptets källa `adraze-app://localhost/falk-ios.js`.
+    var namn: String { modul.lowercased() + "-ios" }
 }
 
 /// Ett anrop från en sida.

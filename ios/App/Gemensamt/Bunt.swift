@@ -25,6 +25,11 @@ enum Bunt {
         url(modul, fil).flatMap { try? Data(contentsOf: $0) }
     }
 
+    /// Filens innehåll som UTF-8-text, eller `nil` om den inte finns.
+    static func text(_ modul: String, _ fil: String) -> String? {
+        data(modul, fil).flatMap { String(data: $0, encoding: .utf8) }
+    }
+
     /// Alla filer i en mapp i en moduls bunt (inte rekursivt), sorterade.
     static func filer(_ modul: String, _ mappnamn: String = "", filandelse: String? = nil) -> [URL] {
         let m = mappnamn.isEmpty ? mapp(modul) : mapp(modul).appendingPathComponent(mappnamn, isDirectory: true)
