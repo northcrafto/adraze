@@ -30,7 +30,7 @@ enum FalkProv {
         let bas = "http://127.0.0.1:\(port)"
         k.kolla("testservern startar på 127.0.0.1", port > 0, ["port": .tal(Double(port))])
         FalkKlient.basOverride = URL(string: bas)
-        FalkKlient.session = FalkKlient.gorSession(protokoll: [FalkLokalHTTP.self])
+        FalkKlient.session = FalkKlient.gorSession(protokoll: [LokalHTTP.self])
         let forraKonto = app.konto
         let konto = FalkProvkonto()
         app.ersatt(konto: konto)

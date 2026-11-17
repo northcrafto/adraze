@@ -3,11 +3,9 @@ import UIKit
 import WebKit
 
 /// Falks sida i appen: datorns `krypto.html` (yta `falk`) med Falks iPhone-anpassning ovanpå, `Bunt/falk-ios.css`
-/// och `Bunt/falk-ios.js`. Datorns fil ändras inte.
-///
-/// Skripten läggs in som användarskript i Falks webbvy när Brygga förbereder en navigering (startdatan `falk:ios`
-/// byggs då, se `Falk`). Hittas inte webbvyn just då sprutas de in med `callAsyncJavaScript` vid sidans första
-/// anrop i stället (`sakerstall`); skriptet gör inget andra gången (`window.__falkIos`).
+/// och `Bunt/falk-ios.js`. Datorns fil ändras inte. Skripten registreras med `app.brygga.skript(yta: "falk", …)`
+/// (se `Falk.registrera`), och Brygga lägger in dem vid varje navigering: stilen som `#falk-ios-css`, skriptet vid
+/// dokumentslut före `ios.js`. Här finns bara vägen till Falks webbvy och översta kontrollern.
 ///
 /// Ägare: Falk.
 @MainActor
@@ -18,62 +16,6 @@ enum FalkSida {
     }
 
     private static var kanda: [ObjectIdentifier: Svag] = [:]
-    /// Webbvyer vars nuvarande dokument har (eller får) Falks skript.
-    private static var klara: Set<ObjectIdentifier> = []
-    private static var minne: (css: String, js: String)?
-    private static let logg = Logg("Falk")
-
-    // MARK: - Skripten
-
-    static func kallkod() -> (css: String, js: String)? {
-        if let m = minne { return m }
-        guard let c = Bunt.data("Falk", "falk-ios.css").flatMap({ String(data: $0, encoding: .utf8) }),
-              let j = Bunt.data("Falk", "falk-ios.js").flatMap({ String(data: $0, encoding: .utf8) }) else {
-            logg.fel("saknar Falk/falk-ios.css eller falk-ios.js i appen")
-            return nil
-        }
-        let m = (css: c, js: j + "\n//# sourceURL=adraze-app://localhost/falk-ios.js\n")
-        minne = m
-        return m
-    }
-
-    /// Lägger in stilen först i dokumentet (falk-ios.js flyttar den sist i `<head>`, efter datorns stil).
-    static func cssSkript(_ css: String) -> String {
-        """
-        (function () { if (document.getElementById('falk-ios-css')) return;
-          var s = document.createElement('style'); s.id = 'falk-ios-css'; s.textContent = \(JSONVarde.text(css).jsonText);
-          (document.head || document.documentElement).appendChild(s); })();
-        """
-    }
-
-    // MARK: - Inför en navigering
-
-    /// Startdatan för Falks sida byggs: lägg in skripten i webbvyn (Brygga har just tömt dess användarskript).
-    static func forbered(_ kalla: BryggKalla) {
-        guard kalla.yta == "falk", let id = kalla.webbvy else { return }
-        klara.remove(id)
-        guard let vy = webbvy(id), let k = kallkod() else { return }
-        let uc = vy.configuration.userContentController
-        uc.addUserScript(WKUserScript(source: cssSkript(k.css), injectionTime: .atDocumentStart, forMainFrameOnly: true, in: .page))
-        uc.addUserScript(WKUserScript(source: k.js, injectionTime: .atDocumentEnd, forMainFrameOnly: true, in: .page))
-        klara.insert(id)
-    }
-
-    /// Sidan anropar Falk: har dokumentet inte fått skripten (webbvyn hittades inte när navigeringen förbereddes)
-    /// sprutas de in nu.
-    static func sakerstall(_ kalla: BryggKalla) {
-        guard kalla.yta == "falk", let id = kalla.webbvy, !klara.contains(id), let vy = webbvy(id), let k = kallkod() else { return }
-        klara.insert(id)
-        logg.info("skripten sprutas in i efterhand")
-        let js = cssSkript(k.css) + "\n" + k.js + "\nreturn true;"
-        vy.callAsyncJavaScript(js, arguments: [:], in: nil, in: .page) { r in
-            if case .failure(let e) = r { Logg("Falk").varning("falk-ios.js: \(e.localizedDescription)") }
-        }
-        // Användarskripten finns kvar till nästa navigering i samma vy (omladdning, språkbyte)
-        let uc = vy.configuration.userContentController
-        uc.addUserScript(WKUserScript(source: cssSkript(k.css), injectionTime: .atDocumentStart, forMainFrameOnly: true, in: .page))
-        uc.addUserScript(WKUserScript(source: k.js, injectionTime: .atDocumentEnd, forMainFrameOnly: true, in: .page))
-    }
 
     // MARK: - Hitta webbvyerna
 

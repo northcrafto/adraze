@@ -1,4 +1,4 @@
-/* falk-ios.js – Falk-panelen (datorns krypto.html) som iPhone-sida. Läggs in av FalkSida.swift som användarskript
+/* falk-ios.js – Falk-panelen (datorns krypto.html) som iPhone-sida. Läggs in av Brygga (app.brygga.skript i Falk.swift)
  * vid dokumentslut, efter datorns skript och före ios.js. Datorns fil ändras inte: här flyttas några element,
  * några av datorns funktioner byts ut (de är globala i sidan) och det som bara finns i appen läggs till:
  *

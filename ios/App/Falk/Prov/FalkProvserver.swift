@@ -18,6 +18,9 @@ final class FalkProvserver: @unchecked Sendable {
     private var _fragor: [JSONVarde] = []
     /// Ord per sekund i svaren (lägre = långsammare strömning).
     var takt: Double = 9
+    /// Godta vilken inloggning som helst (`Bearer` med valfri token): helhetstestet, där det riktiga kontot är inloggat
+    /// mot chattens testserver (`falk:prov`). `/me` svarar då 404, så att Falk tar namnet från kontot.
+    var godtaAllaToken = false
 
     /// Kropparna i alla `POST /falk/chat`, i ordning.
     var fragor: [JSONVarde] {
@@ -89,13 +92,16 @@ final class FalkProvserver: @unchecked Sendable {
         let metod = forsta.first.map(String.init) ?? "GET"
         var vag = forsta.count > 1 ? String(forsta[1]) : "/"
         if let q = vag.firstIndex(of: "?") { vag = String(vag[..<q]) }
-        let behorig = rader.contains { $0.lowercased().hasPrefix("authorization:") && $0.hasSuffix("Bearer \(Self.token)") }
+        let behorig = rader.contains { r in
+            r.lowercased().hasPrefix("authorization:") && (godtaAllaToken ? r.contains("Bearer ") : r.hasSuffix("Bearer \(Self.token)"))
+        }
 
         switch (metod, vag) {
         case ("GET", "/sida"):
             skicka(c, 200, "text/html; charset=utf-8", Data(Self.sida.utf8))
         case ("GET", "/me"):
             guard behorig else { return skicka(c, 401, "application/json", Data(#"{"ok":false,"error":"auth"}"#.utf8)) }
+            if godtaAllaToken { return skicka(c, 404, "application/json", Data(#"{"ok":false}"#.utf8)) }
             skicka(c, 200, "application/json", Data(#"{"ok":true,"me":{"namn":"Alex"}}"#.utf8))
         case ("GET", "/falk/kvot"):
             guard behorig else { return skicka(c, 401, "application/json", Data(#"{"ok":false,"error":"auth"}"#.utf8)) }
@@ -160,18 +166,32 @@ final class FalkProvserver: @unchecked Sendable {
     static func svar(pa fraga: JSONVarde) -> String {
         let sista = fraga["messages"].lista?.last?["content"].text ?? ""
         if sista.lowercased().contains("sidan") {
-            let harSidan = fraga.jsonText.contains(markor)
-            return harSidan
-                ? "Sidan heter **\(sidtitel)**. Den påstår att ett paket väntar på dig och ber dig betala en tullavgift på 49 kr via en knapp på sidan.\n\n"
+            if fraga.jsonText.contains(markor) {
+                return "Sidan heter **\(sidtitel)**. Den påstår att ett paket väntar på dig och ber dig betala en tullavgift på 49 kr via en knapp på sidan.\n\n"
                     + "## Det här talar emot den\n\n- Riktiga tullavgifter betalas inte via en okänd sajt.\n- Sidan skapar stress: \"betala i dag\".\n"
                     + "- Den ber om kortuppgifter direkt.\n\nBetala inte. Referenskoden på sidan är \(markor), men den bevisar ingenting."
-                : "Jag ser ingen sida just nu. Öppna sidan i en flik och fråga igen."
+            }
+            if let titel = flikensTitel(fraga) {
+                return "Sidan heter **\(titel)**.\n\nDet är en artikel. Jag ser inget på sidan som ber om kortuppgifter, lösenord eller koder, "
+                    + "och den vill inte att du laddar ner något.\n\n- Vill du att jag sammanfattar den? Fråga bara."
+            }
+            return "Jag ser ingen sida just nu. Öppna sidan i en flik och fråga igen."
         }
         return "Bra fråga! Här är tre tecken på att ett sms är en bluff:\n\n"
             + "1. **Det brådskar.** \"Ditt paket stoppas om du inte betalar i dag.\"\n"
             + "2. **Länken ser konstig ut.** Adressen liknar en känd sajt men stavas lite fel.\n"
             + "3. **De vill ha en kod eller ditt kort.** Riktiga företag ber aldrig om BankID-koder i ett sms.\n\n"
             + "Är du osäker: klicka inte. Gå direkt till företagets egen app eller sajt i stället."
+    }
+
+    /// Titeln i frågans block AKTUELL FLIK (`Titel: …`, som Falks sida skriver det), om det finns.
+    static func flikensTitel(_ fraga: JSONVarde) -> String? {
+        for m in fraga["messages"].lista ?? [] {
+            guard let t = m["content"].text, t.contains("AKTUELL FLIK"), let r = t.range(of: "\nTitel: ") else { continue }
+            let titel = t[r.upperBound...].prefix { $0 != "\n" }.trimmingCharacters(in: .whitespaces)
+            if !titel.isEmpty { return String(titel.prefix(120)) }
+        }
+        return nil
     }
 
     static let sida = """
@@ -188,99 +208,6 @@ final class FalkProvserver: @unchecked Sendable {
     <input id="kort" name="kort" autocomplete="cc-number"><button type="submit">Betala 49 kr</button></form></div>
     </main></body></html>
     """
-}
-
-/// Bara självtestet: ATS stoppar okrypterad HTTP i URLSession, så anropen till testservern (`http://127.0.0.1`) går
-/// via Network.framework, och svaret förs vidare bit för bit som det kommer (så att strömningen provas på riktigt).
-/// Registreras bara i testets egen session (`FalkKlient.gorSession(protokoll:)`).
-final class FalkLokalHTTP: URLProtocol, @unchecked Sendable {
-    private var anslutning: NWConnection?
-    private var huvudKlart = false
-    private var buf = Data()
-    private let ko = DispatchQueue(label: "app.adraze.falk.lokalhttp")
-
-    override class func canInit(with request: URLRequest) -> Bool {
-        request.url?.scheme == "http" && request.url?.host == "127.0.0.1"
-    }
-
-    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
-
-    override func startLoading() {
-        guard let url = request.url, let host = url.host, let port = NWEndpoint.Port(rawValue: UInt16(url.port ?? 80)) else {
-            client?.urlProtocol(self, didFailWithError: URLError(.badURL))
-            return
-        }
-        var sokvag = url.path.isEmpty ? "/" : url.path
-        if let q = url.query { sokvag += "?" + q }
-        var kropp = request.httpBody ?? Data()
-        if kropp.isEmpty, let strom = request.httpBodyStream {
-            strom.open()
-            var b = [UInt8](repeating: 0, count: 65_536)
-            while strom.hasBytesAvailable {
-                let n = strom.read(&b, maxLength: b.count)
-                if n <= 0 { break }
-                kropp.append(b, count: n)
-            }
-            strom.close()
-        }
-        var huvud = "\(request.httpMethod ?? "GET") \(sokvag) HTTP/1.1\r\nHost: \(host):\(port.rawValue)\r\n"
-        for (k, v) in request.allHTTPHeaderFields ?? [:] where k.lowercased() != "content-length" { huvud += "\(k): \(v)\r\n" }
-        huvud += "Content-Length: \(kropp.count)\r\nConnection: close\r\n\r\n"
-        let c = NWConnection(host: NWEndpoint.Host(host), port: port, using: .tcp)
-        anslutning = c
-        c.start(queue: ko)
-        c.send(content: Data(huvud.utf8) + kropp, completion: .contentProcessed { _ in })
-        lasSvar(c)
-    }
-
-    private func lasSvar(_ c: NWConnection) {
-        c.receive(minimumIncompleteLength: 1, maximumLength: 65_536) { [weak self] data, _, klar, fel in
-            guard let self else { c.cancel(); return }
-            if let data, !data.isEmpty { self.ta(data) }
-            if let fel {
-                self.client?.urlProtocol(self, didFailWithError: fel)
-                c.cancel()
-                return
-            }
-            if klar {
-                if self.huvudKlart { self.client?.urlProtocolDidFinishLoading(self) } else {
-                    self.client?.urlProtocol(self, didFailWithError: URLError(.badServerResponse))
-                }
-                c.cancel()
-                return
-            }
-            self.lasSvar(c)
-        }
-    }
-
-    private func ta(_ d: Data) {
-        if huvudKlart {
-            client?.urlProtocol(self, didLoad: d)
-            return
-        }
-        buf.append(d)
-        guard let r = buf.range(of: Data("\r\n\r\n".utf8)), let url = request.url else { return }
-        let rader = String(decoding: buf[..<r.lowerBound], as: UTF8.self).components(separatedBy: "\r\n")
-        let status = Int((rader.first ?? "").split(separator: " ").dropFirst().first ?? "") ?? 0
-        var falt: [String: String] = [:]
-        for rad in rader.dropFirst() {
-            if let i = rad.firstIndex(of: ":") {
-                falt[String(rad[..<i])] = rad[rad.index(after: i)...].trimmingCharacters(in: .whitespaces)
-            }
-        }
-        let rest = Data(buf[r.upperBound...])
-        buf = Data()
-        huvudKlart = true
-        if let svar = HTTPURLResponse(url: url, statusCode: status, httpVersion: "HTTP/1.1", headerFields: falt) {
-            client?.urlProtocol(self, didReceive: svar, cacheStoragePolicy: .notAllowed)
-        }
-        if !rest.isEmpty { client?.urlProtocol(self, didLoad: rest) }
-    }
-
-    override func stopLoading() {
-        anslutning?.cancel()
-        anslutning = nil
-    }
 }
 
 /// Ett låtsat konto för självtestet (token `falkprov`, som testservern godtar).
@@ -301,6 +228,16 @@ final class FalkProvkonto: KontoTjanst {
     func loggaIn() {
         konto = Kontouppgifter(id: "falkprov", namn: "Alex Lind", epost: "alex@example.com")
         AppMiljo.delad?.handelser.skicka(KontoAndrades(inloggad: true))
+    }
+
+    /// Hur många gånger Falk bad om inloggningen (för självtestet).
+    private(set) var inloggningar = 0
+
+    /// Ingen ruta i självtestet: loggar in direkt, som när någon har loggat in i kontots ark.
+    func visaInloggning(rubrik: String?, underrubrik: String?) async -> Bool {
+        inloggningar += 1
+        if konto == nil { loggaIn() }
+        return true
     }
 }
 

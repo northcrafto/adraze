@@ -6,7 +6,7 @@ import UIKit
 ///
 /// Frågorna går till AdRazes server med kontots token (`FalkKlient`), aldrig direkt till en AI-tjänst. Text som
 /// strömmar kommer till sidan bit för bit (`falk:strom`). Utan konto visar sidan en inloggningsvy (`falk:ios`,
-/// `falk:lage`) och inloggningen går genom kontot (`konto:visa`).
+/// `falk:lage`) och inloggningen går genom kontot (`app.konto.visaInloggning`).
 ///
 /// Kanaler utöver datorns (bara yta `falk`):
 /// - `falk:logga-in` – visar inloggningen (Konto).
@@ -99,8 +99,12 @@ final class Falk {
             if let s = x.text, lista.contains(s) { return .text(s) }
             return .text(std)
         }
-        var farg = (v("accent").text ?? "").lowercased()
-        if farg.range(of: "^#[0-9a-f]{6}$", options: .regularExpression) == nil { farg = "#ff4b1f" }
+        // Falks egen färg (Inställningar › Falk) om den är vald, annars appens accent från Anpassa, som resten av appen.
+        // Bara det sparade värdet: `hamta` ger nyckelns standard (#ff4b1f) när inget är valt, och då vann den alltid.
+        func hex(_ s: String) -> Bool { s.range(of: "^#[0-9a-f]{6}$", options: .regularExpression) != nil }
+        var farg = (inst.sparat("falk.accent")?.text ?? "").lowercased()
+        if !hex(farg) { farg = inst[.temaAccent].lowercased() }
+        if !hex(farg) { farg = "#ff4b1f" }
         return ["av": .bool(FalkFlik.falkAv(app)), "accent": .text(farg),
                 "text": en(v("text"), ["liten", "normal", "stor"], "normal"),
                 "svar": en(v("svar"), ["kort", "normal", "utforlig"], "normal"),
@@ -116,30 +120,19 @@ final class Falk {
         b.startdata("falk-inst:alla") { [unowned self] _ in self.varden() }
         b.startdata("falk:ios") { [unowned self] kalla in
             guard kalla.yta == "falk" else { return .null }
-            FalkSida.forbered(kalla)
             return self.iosData()
         }
+        // iPhone-anpassningen av datorns panel (Bunt/falk-ios.css och falk-ios.js), inlagd av Brygga vid varje navigering
+        b.skript(yta: "falk", css: Bunt.text("Falk", "falk-ios.css"), js: Bunt.text("Falk", "falk-ios.js"))
 
-        b.hantera("krypto:chat", ytor: falk) { [unowned self] anrop in
-            FalkSida.sakerstall(anrop.kalla)
-            return await self.chatta(anrop)
-        }
-        b.hantera("krypto:kvot", ytor: falk) { [unowned self] anrop in
-            FalkSida.sakerstall(anrop.kalla)
-            return await self.kvot()
-        }
-        b.hantera("krypto:me", ytor: falk) { [unowned self] anrop in
-            FalkSida.sakerstall(anrop.kalla)
-            return await self.jag()
-        }
+        b.hantera("krypto:chat", ytor: falk) { [unowned self] anrop in await self.chatta(anrop) }
+        b.hantera("krypto:kvot", ytor: falk) { [unowned self] _ in await self.kvot() }
+        b.hantera("krypto:me", ytor: falk) { [unowned self] _ in await self.jag() }
         b.hantera("krypto:samtycke", ytor: falk) { [unowned self] anrop in
             if let v = anrop.arg(0).bool { self.app.installningar.satt("webb.falkSamtycke", .bool(v)) }
             return .bool(FalkFlik.samtycke(self.app))
         }
-        b.hantera("krypto:tab", ytor: falk) { [unowned self] anrop in
-            FalkSida.sakerstall(anrop.kalla)
-            return FalkFlik.tab(self.app)
-        }
+        b.hantera("krypto:tab", ytor: falk) { [unowned self] _ in FalkFlik.tab(self.app) }
         b.hantera("krypto:page", ytor: falk) { [unowned self] _ in await FalkFlik.sida(self.app) }
         b.hantera("krypto:act", ytor: falk) { [unowned self] anrop in await FalkFlik.gor(self.app, anrop.arg(0)) }
         b.hantera("krypto:action", ytor: falk) { [unowned self] anrop in
@@ -155,7 +148,8 @@ final class Falk {
         }
 
         prenumerationer.append(app.handelser.lyssna(InstallningAndrad.self) { [unowned self] h in
-            guard h.nyckel.hasPrefix("falk.") else { return }
+            // Accenten i Anpassa ändrar också Falks färg (så länge Falk inte har en egen)
+            guard h.nyckel.hasPrefix("falk.") || h.nyckel == Nycklar.temaAccent.namn else { return }
             self.app.brygga.skicka("falk-inst:andrad", self.varden(), till: .yta("falk"))
             if h.nyckel == "falk.av" { self.skickaLage() }
         })
@@ -235,18 +229,16 @@ final class Falk {
         return ["name": .text(namn)]
     }
 
-    /// `falk:logga-in`: kontots inloggning (Konto), annars Anpassa › Konto.
+    /// `falk:logga-in`: kontots inloggning ovanpå Falk (`app.konto.visaInloggning`), och vänta tills den är klar.
+    /// Falk byter själv läge när kontot ändras (`KontoAndrades` → `falk:lage`). Utan Konto-modulen (`EnkeltKonto`):
+    /// Anpassa › Konto om datorns inloggning finns där.
     func loggaIn() async -> JSONVarde {
-        let b = app.brygga
-        if b.kanaler["konto:visa"] != nil {
-            do {
-                _ = try await b.anropa("konto:visa", [], fran: BryggKalla(yta: "falk"))
-                return ["ok": true]
-            } catch {
-                logg.varning("konto:visa: \(error.localizedDescription)")
-            }
+        if !(app.konto is EnkeltKonto) {
+            let inne = await app.konto.visaInloggning(rubrik: ft("Logga in för att använda Falk"),
+                                                      underrubrik: ft("Samma konto som i AdRaze på datorn."))
+            return ["ok": true, "inloggad": .bool(inne)]
         }
-        if b.kanaler["auth:session"] != nil, app.sidor.visa("anpassa", fragment: "konto", som: .ark) { return ["ok": true] }
+        if app.brygga.kanaler["auth:session"] != nil, app.sidor.visa("anpassa", fragment: "konto", som: .ark) { return ["ok": true] }
         return ["ok": false, "message": .text(ft("Inloggningen finns inte i appen än."))]
     }
 }

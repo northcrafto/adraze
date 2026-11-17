@@ -1,31 +1,18 @@
 import Foundation
 
 /// Falks egna texter på andra språk än svenska: de som bara finns i appen (inloggningsrutan, iPhone-texterna i
-/// samtyckesrutan, rutorna som frågar först …). Datorns texter översätts som vanligt av `Webb/ui/locales` och
-/// `tr()`. Ordlistorna ligger i `Bunt/sprak/<kod>.json`; språk utan egen fil får engelska.
+/// samtyckesrutan, rutorna som frågar först …). Ordlistorna ligger i `Bunt/sprak/<kod>.json` och läses av `Sprak`
+/// i Gemensamt (som `tr()` använder) tillsammans med datorns `Webb/ui/locales`. Språk utan egen fil får engelska för
+/// det som datorns ordlista inte översätter.
 ///
 /// Ägare: Falk.
 @MainActor
 enum FalkSprak {
-    private static var minne: (kod: String, ord: [String: String])?
+    /// Falks ordlista för ett språk (tom för svenska, som är källtexten), se `Sprak.modulordlista`.
+    static func ordlista(_ kod: String) -> [String: String] { Sprak.modulordlista("Falk", kod) }
 
-    /// Falks ordlista för ett språk (tom för svenska, som är källtexten). Ett språk utan egen fil får engelskan,
-    /// men bara för texter som appens ordlista (datorns `locales`) inte redan översätter till språket.
-    static func ordlista(_ kod: String) -> [String: String] {
-        if kod == "sv" || kod.isEmpty { return [:] }
-        if let m = minne, m.kod == kod { return m.ord }
-        let bas = kod.split(separator: "-").first.map(String.init) ?? kod
-        let las = { (d: Data?) in d.flatMap { try? JSONDecoder().decode([String: String].self, from: $0) } }
-        var ord = las(Bunt.data("Falk", "sprak/\(kod).json")) ?? las(Bunt.data("Falk", "sprak/\(bas).json"))
-        if ord == nil, var en = las(Bunt.data("Falk", "sprak/en.json")) {
-            if Sprak.delad.kod == kod { en = en.filter { tr($0.key) == $0.key } }
-            ord = en
-        }
-        minne = (kod, ord ?? [:])
-        return ord ?? [:]
-    }
-
-    /// Ordlistan för språket som gäller nu, som JSON till sidan (`falk:ios`).
+    /// Ordlistan för språket som gäller nu, som JSON till sidan (`falk:ios`): falk-ios.js översätter sina egna
+    /// texter med den och resten med datorns ordlista.
     static var ordlistaJSON: JSONVarde {
         .objekt(ordlista(Sprak.delad.kod).mapValues { .text($0) })
     }
@@ -37,9 +24,6 @@ enum FalkSprak {
     }
 }
 
-/// En synlig text i Falk: Falks ordlista först, sedan appens (`tr`), annars den svenska källtexten.
+/// En synlig text i Falk (bara `tr`; Falks ordlistor ingår i appens, se `Sprak`).
 @MainActor
-func ft(_ s: String, _ varden: [String: String] = [:]) -> String {
-    if let x = FalkSprak.ordlista(Sprak.delad.kod)[s], !x.isEmpty { return FalkSprak.fyll(x, varden) }
-    return tr(s, varden)
-}
+func ft(_ s: String, _ varden: [String: String] = [:]) -> String { tr(s, varden) }

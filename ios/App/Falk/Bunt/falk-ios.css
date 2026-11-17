@@ -19,7 +19,7 @@ html.ios.ios-falk {
   --fi-tint: rgb(28 27 25 / .055); --fi-tint2: rgb(28 27 25 / .1); --fi-scrim: rgb(24 23 21 / .3);
   --fi-skugga: 0 1px 2px rgb(28 27 25 / .04), 0 10px 28px rgb(28 27 25 / .055);
   --fi-fyll: #1b1a18; --fi-fylltext: #f6f5f1; --fi-diagram: #8a877f;
-  --fi-topp: max(env(safe-area-inset-top), 12px); --fi-botten: env(safe-area-inset-bottom); --fi-huvud: calc(var(--fi-topp) + 56px);
+  --fi-topp: max(env(safe-area-inset-top), 8px); --fi-botten: env(safe-area-inset-bottom); --fi-huvud: calc(var(--fi-topp) + 56px);
   --fi-sans: "Familjen Grotesk", -apple-system, system-ui, sans-serif;
   --fi-serif: "AdRaze Display", "New York", Georgia, serif;
   --bg: var(--fi-bg); --surface: var(--fi-yta); --surface-2: var(--fi-yta2); --line: var(--fi-linje2); --field-line: var(--fi-faltlinje);
@@ -50,7 +50,7 @@ html.ios.ios-falk :is(.s-item:not(.s-search), .s-conv:not(.on), .am, .cmd:not(.s
 html.ios.ios-falk .convrow:hover:not(:active) { background: var(--fi-yta); }
 
 /* ── Huvudet: meny till vänster, Falk i mitten, nytt samtal och stäng till höger ── */
-html.ios.ios-falk header { height: var(--fi-huvud); padding: var(--fi-topp) 12px 0; gap: 6px; background: var(--fi-bg); border: 0; z-index: 12; transition: box-shadow .2s ease; }
+html.ios.ios-falk header { height: var(--fi-huvud); padding: var(--fi-topp) 16px 0; gap: 6px; background: var(--fi-bg); border: 0; z-index: 12; transition: box-shadow .2s ease; }
 html.ios.ios-falk body.fi-rullad header { box-shadow: 0 1px 0 var(--fi-linje); }
 /* Det som rullar upp under huvudet tonas ut i stället för att klippas mitt i en rad */
 html.ios.ios-falk header::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 16px; background: linear-gradient(var(--fi-bg), transparent); pointer-events: none; opacity: 0; transition: opacity .2s ease; }
@@ -337,14 +337,14 @@ html.ios.ios-falk #fi-las { position: fixed; inset: 0; z-index: 80; display: non
 html.ios.ios-falk body.fi-last #fi-las { display: flex; animation: fiLasIn .38s cubic-bezier(.2, .8, .2, 1) both; }
 @keyframes fiLasIn { from { opacity: 0; transform: translateY(10px); } }
 html.ios.ios-falk body.fi-last :is(#main, #side, #scrim) { visibility: hidden; }
-html.ios.ios-falk .fi-las-stang { position: fixed; top: calc(var(--fi-topp) + 8px); right: 12px; width: 40px; height: 40px; border-radius: 999px; border: 0;
+html.ios.ios-falk .fi-las-stang { position: fixed; top: calc(var(--fi-topp) + 8px); right: 16px; width: 40px; height: 40px; border-radius: 999px; border: 0;
   display: grid; place-items: center; background: var(--fi-tint); color: var(--fi-ink); z-index: 2; }
 html.ios.ios-falk .fi-las-stang svg { width: 19px; height: 19px; }
 html.ios.ios-falk .fi-las-stang:active { background: var(--fi-tint2); transform: scale(.93); }
 html.ios.ios-falk .fi-las-inne { display: flex; flex-direction: column; flex: 1; width: 100%; max-width: 480px; margin: 0 auto; }
 html.ios.ios-falk .fi-las-topp { margin-top: auto; }
 html.ios.ios-falk .fi-las-falk { width: 76px; height: 76px; margin: 0 0 22px -6px; display: block; filter: var(--falk-bild, none); }
-html.ios.ios-falk .fi-las h1 { font-family: var(--fi-serif); font-size: 33px; font-weight: 520; line-height: 1.08; letter-spacing: -.026em; color: var(--fi-ink); font-variation-settings: "opsz" 48; text-wrap: balance; }
+html.ios.ios-falk .fi-las h1 { font-family: var(--fi-serif); font-size: 32px; font-weight: 600; line-height: 1.08; letter-spacing: -.026em; color: var(--fi-ink); font-variation-settings: "opsz" 48; text-wrap: balance; }
 html.ios.ios-falk .fi-las p.fi-lead { margin: 14px 0 0; font-size: 16.5px; line-height: 1.5; color: var(--fi-mut); max-width: 34ch; }
 html.ios.ios-falk .fi-las .fi-grupp { margin-top: 26px; }
 html.ios.ios-falk .fi-las .fi-rad { min-height: 0; padding: 14px 16px 14px 14px; align-items: flex-start; }
@@ -352,7 +352,7 @@ html.ios.ios-falk .fi-las .fi-rad .fi-tx small { white-space: normal; }
 html.ios.ios-falk .fi-las .fi-rad .fi-ik { margin-top: 1px; }
 html.ios.ios-falk .fi-las .fi-rad:active { background: transparent; }
 html.ios.ios-falk .fi-las-knappar { display: flex; flex-direction: column; gap: 8px; margin-top: auto; padding-top: 28px; }
-html.ios.ios-falk .fi-las-knappar button { height: 54px; width: 100%; border-radius: 18px; font-size: 17px; font-weight: 620; border: 0; }
+html.ios.ios-falk .fi-las-knappar button { height: 54px; width: 100%; border-radius: 16px; font-size: 17px; font-weight: 620; border: 0; }
 html.ios.ios-falk .fi-las-knappar .fi-sekundar { background: transparent; color: var(--fi-ink); }
 html.ios.ios-falk .fi-las-knappar .fi-sekundar:active { background: var(--fi-tint); }
 html.ios.ios-falk .fi-las-not { margin-top: 10px; text-align: center; font-size: 13px; color: var(--fi-svag); }
