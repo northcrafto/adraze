@@ -354,8 +354,14 @@ struct ChattSajtfigur: View {
     var body: some View { Image(namn).resizable().scaledToFit().accessibilityHidden(true) }
 }
 
-/// Ark i chatten. Ljust och mörkt sätts numera på hela fönstret (`Fonstertema` i Gemensamt), så ark följer AdRazes val
-/// av sig själva och det här gör ingenting. Finns kvar så att anropen inte behöver ändras.
+/// Ark och helskärmar i chatten följer AdRazes val (ljust, mörkt eller systemet). `Fonstertema` sätter fönstret,
+/// men ett SwiftUI-ark (`.sheet`, till exempel Nytt meddelande) tar sitt utseende från vyn som visar det och blev
+/// ljust ovanpå en mörk chatt utan det här (mätt i chattestet 2026-11-17).
+private struct ChattArkSchema: ViewModifier {
+    @Environment(Tema.self) private var tema
+    func body(content: Content) -> some View { content.preferredColorScheme(tema.foredragetSchema) }
+}
+
 extension View {
-    func chattArk() -> some View { self }
+    func chattArk() -> some View { modifier(ChattArkSchema()) }
 }

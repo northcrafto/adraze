@@ -108,6 +108,7 @@ struct NyChatt: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { stang() } label: { Image(systemName: "xmark").font(.system(size: 15, weight: .bold)) }
+                        .tint(tema.text)   // som Stangknapp: textfärgen, inte accenten
                         .accessibilityLabel(ct("Stäng"))
                 }
             }
