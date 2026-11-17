@@ -69,6 +69,11 @@ targets:
           NSAllowsArbitraryLoadsInWebContent: true
         # Avgörs när appen skickas in (del 3, 2.8: E2E-chatten använder systemets krypto).
         ITSAppUsesNonExemptEncryption: false
+        # Bild-i-bild och AirPlay för videor på webbsidor, och ljud som spelar vidare i bakgrunden. Apples
+        # "Configuring your app for media playback": utan bakgrundsläget Audio, AirPlay, and Picture in Picture
+        # (audio) får appen inte använda bild-i-bild. Själva bild-i-bilden är otestad i simulatorn.
+        UIBackgroundModes:
+          - audio
         # Nedladdningar och självtesternas resultat syns i appen Filer (Documents/).
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true

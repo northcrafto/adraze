@@ -136,6 +136,16 @@ fi
 
 # ---------- bygge ----------
 if [ "$BYGG" = 1 ]; then
+  # Genererat som inte checkas in: skapas här om det saknas och källorna finns (en ren klon av hela repot).
+  # fran-mint.sh skapar dem på mint och synkar hit, så där finns de redan.
+  if [ ! -f App/Webb/ui/shell.html ]; then
+    if [ -f ../browser/ui/shell.html ]; then ./verktyg/kopiera-ui.sh || { rapport "kopiera-ui.sh misslyckades"; exit 1; }
+    else rapport "App/Webb/ui saknas och ../browser finns inte (kör verktyg/kopiera-ui.sh eller fran-mint.sh)"; exit 1; fi
+  fi
+  if [ ! -f App/Regler/listor/manifest.json ]; then
+    if [ -d ../extension/rules ]; then ./verktyg/regler.sh || { rapport "regler.sh misslyckades"; exit 1; }
+    else rapport "App/Regler saknas och ../extension finns inte (kör verktyg/regler.sh eller fran-mint.sh)"; exit 1; fi
+  fi
   if [ ! -x "$XCODEGEN" ]; then
     if command -v xcodegen >/dev/null; then XCODEGEN="$(command -v xcodegen)"; else
       echo "xcodegen saknas – hämtar 2.46.0 till ~/bin (ingen sudo)"

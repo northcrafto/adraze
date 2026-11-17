@@ -1,11 +1,9 @@
 #!/bin/bash
 # kopiera-ui.sh – kopierar datorns UI in i iPhone-appen, så att Anpassa, startsidan, chatten och Falk är samma sidor
-# som på datorn (del 3, 3.4). Kör före varje bygge (fran-mint.sh gör det inte själv än):
+# som på datorn (del 3, 3.4). fran-mint.sh kör den före varje bygge (och bygg-sim.sh om App/Webb/ui saknas):
 #
-#   ./verktyg/kopiera-ui.sh && ./fran-mint.sh -n steg4-brygga brygga ~/adraze-app/skarm
-#
-#   ~/adraze/browser/ui/**           ->  App/Webb/ui/**            (adraze-app://localhost/<fil>)
-#   ~/adraze/browser/*preload*.js    ->  App/Webb/ui/_preload/     (körs som WKUserScript, serveras aldrig)
+#   ../browser/ui/**           ->  App/Webb/ui/**            (adraze-app://localhost/<fil>)
+#   ../browser/*preload*.js    ->  App/Webb/ui/_preload/     (körs som WKUserScript, serveras aldrig)
 #
 # App/Webb/ui/ är en genererad kopia: redigeras aldrig och checkas inte in (.gitignore). iOS-skillnaderna ligger i
 # App/Webb/ios/ (preload-ios.js, ios.js, ios.css) och läggs ovanpå av Brygga (App/Brygga/).
@@ -13,7 +11,7 @@
 set -euo pipefail
 export LC_ALL=C
 HIT="$(cd "$(dirname "$0")/.." && pwd)"
-KALLA="${ADRAZE_BROWSER:-$HOME/adraze/browser}"
+KALLA="${ADRAZE_BROWSER:-$HIT/../browser}"
 MAL="$HIT/App/Webb/ui"
 
 [ -f "$KALLA/ui/shell.html" ] || { echo "kopiera-ui.sh: hittar inte $KALLA/ui/shell.html" >&2; exit 1; }

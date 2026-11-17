@@ -11,3 +11,6 @@ __pycache__/
 
 # Kopia av datorns UI (~/adraze/browser/ui). Skapas före varje bygge av verktyg/kopiera-ui.sh (Brygga).
 App/Webb/ui/
+
+# Skyddets regler (~30 MB), skapas av verktyg/regler.sh (dnr2wk.py) ur ../extension före bygget.
+App/Regler/

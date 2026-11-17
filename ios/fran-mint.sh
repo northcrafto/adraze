@@ -69,6 +69,13 @@ if ! flock -n 9; then
   flock -w 3600 9 || { echo "gav upp efter en timmes väntan"; exit 3; }
 fi
 
+# ---------- det som skapas före bygget ----------
+# Datorns UI (App/Webb/ui) och skyddets regler (App/Regler) checkas inte in; de skapas här ur ../browser och
+# ../extension i samma repo, så att en ren klon bygger. Reglerna skapas bara om när källorna ändrats.
+"$HIT/verktyg/kopiera-ui.sh" || { echo "kopiera-ui.sh misslyckades"; exit 1; }
+if [ -x "$HOME/bin/latt" ]; then "$HOME/bin/latt" "$HIT/verktyg/regler.sh"; else "$HIT/verktyg/regler.sh"; fi \
+  || { echo "regler.sh misslyckades"; exit 1; }
+
 # ---------- synka ----------
 # Macen har openrsync (protokoll 29): --delete fungerar, men --delete-excluded hänger sig och P-filter ger
 # "zero-length pathname" ihop med det (testat 2026-11-17). Därför bara vanliga --exclude: det som skapas på

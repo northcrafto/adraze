@@ -2,7 +2,8 @@
 """dnr2wk.py – AdRazes regler och innehållsskript från datorn -> iOS-appens App/Regler/.
 
 Användning (från ~/adraze/ios):
-    python3 verktyg/dnr2wk.py                       # ~/adraze/extension + ~/adraze/browser -> App/Regler
+    python3 verktyg/dnr2wk.py                       # ../extension + ../browser (samma repo) -> App/Regler
+    ./verktyg/regler.sh                             # samma sak, men bara när källorna ändrats (bygget kör den)
     python3 verktyg/dnr2wk.py EXT BROWSER UT        # egna sökvägar
 
 Källan är tillägget (~/adraze/extension: rules/*.json, data/*.json, content/*.js, scriptlets/*.js). Datorns
@@ -46,9 +47,10 @@ import re
 import sys
 from collections import Counter, defaultdict
 
-HEM = os.path.expanduser('~')
-EXT = os.path.join(HEM, 'adraze', 'extension')
-BROWSER = os.path.join(HEM, 'adraze', 'browser')
+# Standard: samma repo (ios/verktyg/ -> ../../extension och ../../browser), så att en ren klon fungerar.
+REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
+EXT = os.path.join(REPO, 'extension')
+BROWSER = os.path.join(REPO, 'browser')
 UT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'App', 'Regler')
 
 DOMAIN_ANCHOR = '^[^:]+://+([^:/]+\\.)?'    # WebKits DNR-översättning (_regexURLFilterForChromeURLFilter)

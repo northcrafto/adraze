@@ -1,7 +1,0 @@
-{
- "upplas": "html.sp-message-open,body.didomi-popup-open,html.didomi-popup-open,body.qc-cmp-ui-showing,html.qc-cmp-ui-showing,\nbody.cmp-modal-open,body.cookie-consent-open,body.onetrust-consent-sdk-open,html.cookiebot-open,body.CybotCookiebotDialogActive,\nbody.cky-modal-open,html.cmpbox-open,body.cmplz-cookiebanner-open{overflow:auto!important}\nhtml.sp-message-open body{overflow:auto!important;position:static!important}\n",
- "dolj": {
-  "sourcepoint": "[id^=\"sp_message_container\"]{display:none!important}html.sp-message-open,html.sp-message-open body{overflow:auto!important}html.sp-message-open body{position:static!important}",
-  "didomi": "#didomi-host{display:none!important}body.didomi-popup-open,html.didomi-popup-open{overflow:auto!important}"
- }
-}
