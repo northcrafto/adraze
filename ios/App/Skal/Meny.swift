@@ -213,6 +213,12 @@ struct Menyvy: View {
         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.white.opacity(0.08)))
     }
 
+    /// Falkens färg som i Falk själv: Falks egen färg (Inställningar › Falk) om den är vald, annars appens accent.
+    private var falkensFarg: String {
+        if let egen = app.installningar.sparat("falk.accent")?.text, let f = Palett.normFarg(egen) { return f }
+        return tema.accenthex
+    }
+
     private func platser(accent: Color) -> some View {
         let alla: [(String, String, Ikon?, String?)] = [
             (Platser.anpassa, tr("Anpassa"), .palett, nil),
@@ -226,6 +232,7 @@ struct Menyvy: View {
                     VStack(spacing: 8) {
                         if let bild = p.3 {
                             Image(bild).resizable().interpolation(.high).scaledToFit().frame(width: 26, height: 26)
+                                .modifier(Falkfarg(hex: falkensFarg))
                         } else if let ikon = p.2 {
                             Ikonvy(ikon, storlek: 24, streck: 1.85)
                         }
@@ -331,5 +338,37 @@ final class Skalplatser {
 
     func ersatt<V: View>(plats: String, titel: String, @ViewBuilder _ vy: @escaping @MainActor () -> V) {
         AppMiljo.delad?.ersatt(plats: plats, titel: titel, vy: vy)
+    }
+}
+
+/// Falken är en orange bild (kulör 12°). Med en annan färg vrids kulören och mättnaden dämpas, som datorns
+/// krypto.html gör med `--falk-bild`, så att menyns falk och Falks egen har samma färg.
+private struct Falkfarg: ViewModifier {
+    let hex: String
+
+    func body(content: Content) -> some View {
+        if let k = Self.kulor(hex) {
+            content.hueRotation(.degrees(k.kulor - 12)).saturation(k.mattnad)
+        } else {
+            content
+        }
+    }
+
+    /// Kulör (grader) och mättnad (0–1) för `#rrggbb`; `nil` för AdRazes orange (bilden som den är) och ogiltiga färger.
+    static func kulor(_ hex: String) -> (kulor: Double, mattnad: Double)? {
+        let h = hex.lowercased()
+        guard h != "#ff4b1f", h.count == 7, h.hasPrefix("#"), let v = UInt32(h.dropFirst(), radix: 16) else { return nil }
+        let r = Double((v >> 16) & 0xff) / 255, g = Double((v >> 8) & 0xff) / 255, b = Double(v & 0xff) / 255
+        let mx = max(r, g, b), mn = min(r, g, b), d = mx - mn
+        var k = 0.0
+        if d > 0 {
+            if mx == r { k = ((g - b) / d).truncatingRemainder(dividingBy: 6) }
+            else if mx == g { k = (b - r) / d + 2 }
+            else { k = (r - g) / d + 4 }
+        }
+        k = (k * 60 + 360).truncatingRemainder(dividingBy: 360)
+        let l = (mx + mn) / 2
+        let s = d > 0 ? d / (1 - abs(2 * l - 1)) : 0
+        return (k, min(1, max(0, s)))
     }
 }
