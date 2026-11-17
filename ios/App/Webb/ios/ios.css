@@ -146,7 +146,7 @@ html.ios-anpassa #settings .anpk-falt input { height: 42px; font-size: 16px; bor
 
 /* Bakgrundsväljaren (Utseende › Bakgrund): ett ark nerifrån med större bilder, knapparna i full bredd */
 html.ios-anpassa #bgpick:not(.hidden) { z-index: 95; padding: 0; place-items: end stretch; background: rgb(12 11 10 / .48) !important; animation: iosTona .25s ease; }
-html.ios-anpassa #bgpick > div { max-width: none; border-radius: 22px 22px 0 0; padding: 26px 16px calc(env(safe-area-inset-bottom) + 18px); animation: iosArkIn .38s cubic-bezier(.32, .72, 0, 1); }
+html.ios-anpassa #bgpick > div { max-width: none; border-radius: 28px 28px 0 0; padding: 26px 16px calc(env(safe-area-inset-bottom) + 18px); animation: iosArkIn .38s cubic-bezier(.32, .72, 0, 1); }
 html.ios-anpassa #bgpick h1 { font-size: 22px; letter-spacing: -.02em; }
 html.ios-anpassa #bgpick p { font-size: 14.5px; }
 html.ios-anpassa #bgpick #bg-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
@@ -209,14 +209,14 @@ html.ios-startsida #nt-credit { bottom: calc(env(safe-area-inset-bottom) + var(-
 html.ios-startsida #anp-st-anpassa { position: fixed; left: auto; right: 16px; bottom: auto; top: calc(env(safe-area-inset-top) + 10px); height: 36px; padding: 0 14px 0 11px; border-radius: 999px; font-size: 14px; }
 html.ios-startsida #anp-st-anpassa:active { transform: scale(.96); transition: transform .12s; }
 /* Redigeringslådan: ett ark nerifrån över hela bredden, som ark i iOS */
-html.ios-startsida #newtabpage #anp-st-lada { position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: auto; max-width: none; max-height: min(76vh, 660px); border-radius: 22px 22px 0 0;
+html.ios-startsida #newtabpage #anp-st-lada { position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: auto; max-width: none; max-height: min(76vh, 660px); border-radius: 28px 28px 0 0;
   padding-bottom: env(safe-area-inset-bottom); animation: iosArkIn .38s cubic-bezier(.32, .72, 0, 1); }
 html.ios-startsida #newtabpage #anp-st-lada::before { content: ""; position: absolute; top: 6px; left: 50%; width: 36px; height: 5px; margin-left: -18px; border-radius: 3px; background: currentColor; opacity: .18; }
 @keyframes iosArkIn { from { transform: translateY(100%); } }
 html.ios-startsida .anp-lada-topp { padding: 24px 16px 12px 20px; }
-html.ios-startsida .anp-lada-topp h2 { font-size: 20px; }
+html.ios-startsida .anp-lada-topp h2 { font-family: var(--font-display); font-size: 32px; line-height: 1.05; font-weight: 600; letter-spacing: -.03em; margin-bottom: 6px; }   /* som arkens rubriker */
 html.ios-startsida .anp-lada-topp p { font-size: 14px; }
-html.ios-startsida .anp-lada-x { width: 34px; height: 34px; border-radius: 999px; background: rgb(31 30 27 / .06); }
+html.ios-startsida .anp-lada-x { width: 40px; height: 40px; border-radius: 999px; background: rgb(31 30 27 / .06); }   /* appens kryss: 40 pt */
 html.ios-startsida .anp-lada-rubrik { padding: 6px 20px 6px; font-size: 12.5px; text-transform: uppercase; letter-spacing: .02em; }
 html.ios-startsida .anp-lada-rad { padding: 10px 8px; gap: 14px; }
 html.ios-startsida .anp-lada-ikon { width: 42px; height: 42px; border-radius: 12px; }
@@ -225,7 +225,7 @@ html.ios-startsida .anp-lada-txt small { font-size: 13.5px; }
 html.ios-startsida :is(.anp-lada-till, .anp-lada-bort) { height: 36px; padding: 0 14px; border-radius: 10px; font-size: 14px; }
 html.ios-startsida :is(.anp-lada-angra, .anp-lada-mer) { height: 44px; padding: 0 12px; font-size: 15px; }
 html.ios-startsida .anp-lada-fot { padding: 10px 16px; }
-html.ios-startsida .anp-lada-klar { height: 44px !important; padding: 0 22px !important; border-radius: 12px !important; font-size: 15px !important; }
+html.ios-startsida .anp-lada-klar { height: 44px !important; padding: 0 22px !important; border-radius: 16px !important; font-size: 15px !important; }
 html.ios-startsida[data-theme="dark"] .anp-lada-x { background: rgb(255 255 255 / .08); }
 
 /* Minska rörelse: iOS-inställningen eller AdRazes egen (Tillgänglighet › Minska rörelse) */
