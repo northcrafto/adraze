@@ -250,11 +250,20 @@ enum RokProv {
         // I skalet visar en tom flik datorns startsida (Brygga), som laddas första gången den visas. Till dess syns
         // bara dess mörka bakgrund; vänta in den (och mät hur länge en kall start visar den mörka ytan).
         if flik.url == nil, app.sidor.finns("startsida"), app.leverantorer["huvudvy"] == "Skal" {
+            // Startbilden (gorillan) medan startsidan laddar, om den fortfarande syns
+            if !app.startbild.oppnas { await k.skarmbild("startbild") }
             let t0 = Date()
             while HelhetProv.synligSida("startsida") == nil, Date().timeIntervalSince(t0) < 8 { try await k.vanta(0.1) }
             let synlig = HelhetProv.synligSida("startsida") != nil
             k.kolla("startsidan syns i den tomma fliken", synlig)
             if synlig { k.notera("startsidan_synlig_efter_appstart_s", .tal((Date().timeIntervalSince(app.starttid) * 100).rounded() / 100)) }
+            // Var tiden går, i ms från att processen startade (Starttider): appen, modulerna, webbvyn, sidan
+            try await k.vanta(0.4)
+            k.notera("kallstart_ms", Starttider.json)
+            k.notera("kallstart", .lista(Starttider.rader.map(JSONVarde.text)))
+            k.notera("huvudtradens_stopp", .lista(Starttider.stopp.map { .text(String(format: "%.0f ms från %.0f", $0.ms, $0.fran)) }))
+            if let ms = Starttider.ms("startsida_klar") { k.notera("startsidan_klar_efter_processstart_s", .tal((ms / 10).rounded() / 100)) }
+            if let ms = Starttider.ms("startbild_visas") { k.notera("startbilden_efter_processstart_s", .tal((ms / 10).rounded() / 100)) }
         }
         await k.skarmbild("start")
 

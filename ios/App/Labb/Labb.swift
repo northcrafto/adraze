@@ -172,6 +172,11 @@ final class Labbkorning {
     /// fotograferas var för sig med `takeSnapshot` och läggs på sin plats, klippta efter arkets rundade hörn.
     @discardableResult
     func skarmbild(_ namn: String) async -> UIImage? {
+        // Startbilden (gorillan när appen startar) ligger över allt tills det första innehållet syns
+        if let sb = AppMiljo.delad?.startbild, !sb.borta, !namn.hasPrefix("startbild") {
+            let t0 = Date()
+            while !sb.borta, Date().timeIntervalSince(t0) < Startbild.langstaTid + 2 { try? await Task.sleep(nanoseconds: 50_000_000) }
+        }
         try? await Task.sleep(nanoseconds: 400_000_000)
         guard let fonster = Self.fonster() else {
             kolla("skärmbild \(namn)", false, "inget fönster")
@@ -181,22 +186,35 @@ final class Labbkorning {
         let bas = UIGraphicsImageRenderer(bounds: fonster.bounds, format: format).image { _ in
             _ = fonster.drawHierarchy(in: fonster.bounds, afterScreenUpdates: true)
         }
-        var lager: [(bild: UIImage, rekt: CGRect, form: UIBezierPath)] = []
-        for vy in Self.webbvyerIModaler(fonster) {
-            let konf = WKSnapshotConfiguration()
-            konf.afterScreenUpdates = true
-            let webb: UIImage? = await withCheckedContinuation { c in
-                vy.takeSnapshot(with: konf) { b, _ in c.resume(returning: b) }
+        var lager: [(bild: UIImage, rekt: CGRect, form: UIBezierPath, utom: UIBezierPath?)] = []
+        let nivaer = Self.modalnivaer(fonster)
+        for (i, niva) in nivaer.enumerated() {
+            // Ett ark ovanpå (kontots ark över Falk) har drawHierarchy redan ritat; webbvyn under ritas inte över det
+            let tackt = nivaer[(i + 1)...].map { $0.vy.convert($0.vy.bounds, to: fonster) }
+            var utom: UIBezierPath?
+            if !tackt.isEmpty {
+                let u = UIBezierPath(rect: fonster.bounds.insetBy(dx: -2, dy: -2))
+                for r in tackt { u.append(UIBezierPath(rect: r)) }
+                u.usesEvenOddFillRule = true
+                utom = u
             }
-            guard let webb, vy.window != nil else { continue }
-            let rekt = vy.convert(vy.bounds, to: fonster)
-            lager.append((webb, rekt, Self.klippform(for: vy, rekt: rekt, i: fonster)))
+            for vy in niva.webb {
+                let konf = WKSnapshotConfiguration()
+                konf.afterScreenUpdates = true
+                let webb: UIImage? = await withCheckedContinuation { c in
+                    vy.takeSnapshot(with: konf) { b, _ in c.resume(returning: b) }
+                }
+                guard let webb, vy.window != nil else { continue }
+                let rekt = vy.convert(vy.bounds, to: fonster)
+                lager.append((webb, rekt, Self.klippform(for: vy, rekt: rekt, i: fonster), utom))
+            }
         }
         let bild = lager.isEmpty ? bas : UIGraphicsImageRenderer(bounds: fonster.bounds, format: format).image { ctx in
             bas.draw(in: fonster.bounds)
             for l in lager {
                 ctx.cgContext.saveGState()
                 l.form.addClip()
+                l.utom?.addClip()
                 l.bild.draw(in: l.rekt)
                 ctx.cgContext.restoreGState()
             }
@@ -235,12 +253,12 @@ final class Labbkorning {
         }
     }
 
-    /// Synliga webbvyer i modaler (ark, helskärm), i den ordning de visas.
-    static func webbvyerIModaler(_ fonster: UIWindow) -> [WKWebView] {
-        var ut: [WKWebView] = []
+    /// Modalerna (ark, helskärm) i den ordning de visas, med sina synliga webbvyer.
+    static func modalnivaer(_ fonster: UIWindow) -> [(vy: UIView, webb: [WKWebView])] {
+        var ut: [(vy: UIView, webb: [WKWebView])] = []
         var k = fonster.rootViewController?.presentedViewController
         while let p = k {
-            if !p.isBeingDismissed, let v = p.viewIfLoaded { ut += webbvyer(i: v) }
+            if !p.isBeingDismissed, let v = p.viewIfLoaded { ut.append((v, webbvyer(i: v))) }
             k = p.presentedViewController
         }
         return ut
@@ -262,8 +280,8 @@ final class Labbkorning {
             }
             v = x.superview
         }
-        // Arken ritar sina hörn i en mask som inte syns som cornerRadius: 24 upptill (preferredCornerRadius i Brygga)
-        let horn: CGFloat = rekt.minY > 1 ? 24 : 0
+        // Arken ritar sina hörn i en mask som inte syns som cornerRadius: AdrazeArk.horn upptill (preferredCornerRadius)
+        let horn: CGFloat = rekt.minY > 1 ? AdrazeArk.horn : 0
         return UIBezierPath(roundedRect: rekt, byRoundingCorners: [.topLeft, .topRight], cornerRadii: CGSize(width: horn, height: horn))
     }
 

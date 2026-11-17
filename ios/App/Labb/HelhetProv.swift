@@ -2,8 +2,9 @@ import Foundation
 import UIKit
 import WebKit
 
-/// `-mode helhet`: hela appen ihop, som någon som använder den. Bara via `app` och Gemensamt, så att testet
-/// berättar vad som saknas om en modul inte är med (då misslyckas de kontrollerna, testet kraschar inte).
+/// `-mode helhet`: hela appen ihop, som någon som använder den. Bara via `app`, Gemensamt och bryggans kanaler, så
+/// att testet berättar vad som saknas om en modul inte är med (då misslyckas de kontrollerna, testet kraschar inte,
+/// och bygget går med `-x`).
 ///
 ///  1. Alla moduler är med och levererar sina tjänster; skyddet blir klart.
 ///  2. Startsidan (Brygga) i en ny flik, med ljus statusrad över bilden och utan egen sökruta (skalets
@@ -12,14 +13,25 @@ import WebKit
 ///     räknar det stoppade och annonsplatserna döljs.
 ///  4. Tre flikar, flikväxlaren och menyn (Skal, öppnade med `SkalVisa`). Statusraden byter ljus/mörk efter
 ///     sidans färg.
-///  5. Anpassa från menyn; temat Natt (blå accent, mörkt) sätts med samma kanal som Anpassa-sidan använder och
-///     skalet byter färg.
-///  6. En farlig sida ger stoppsidan (Skydd), ett sidfel felsidan (Flikar).
-///  7. Inställningarna återställs och en ny flik visar startsidan igen.
+///  5. Chatten från menyn, utloggad. Chattens "Logga in" (`app.konto.visaInloggning`) visar kontots ark ovanpå
+///     chatten; efter inloggningen mot chattens testserver stängs arket och man är tillbaka i chatten, som låses upp
+///     och visar inkorgen. En konversation öppnas, sedan tillbaka till listan.
+///  6. Falk från menyn frågar om nyhetssidan (Falks testserver på 127.0.0.1, `falk:prov`): sidans text följer med
+///     och svaret strömmar in.
+///  7. Anpassa från menyn; accenten blå och mörkt läge med samma kanal som Anpassa-sidan. Allt följer med: skalet,
+///     menyn, chatten, Falk (som tar appens accent) och startsidan, med skärmbilder av samma ytor i mörkt.
+///  8. Utloggad i Falk: Falks egen Logga in-knapp visar kontots ark ovanpå Falk; efter inloggningen är Falk tillbaka.
+///  9. En farlig sida ger stoppsidan (Skydd), ett sidfel felsidan (Flikar).
+/// 10. Inställningarna återställs, kontot loggas ut och en ny flik visar startsidan igen.
+///
+/// Steg 5, 6 och 8 behöver chattens testserver (som `-mode chatt`), annars hoppas de över och det noteras:
+///
+///     ~/.cache/claude-arbete/adraze-chatt-server/nollstall.sh
+///     ./fran-mint.sh -n helhet helhet ~/adraze-app/skarm -- -api http://100.122.13.91:18790 -testkod 246810
 ///
 /// `-system`-bilderna är simulatorns egna (med statusraden, `Labbkorning.systembild`). Sidorna kommer från en
 /// lokal server (`Labbserver`, `Labb/Bunt/helhet/`); bara annonsnätverken ligger på nätet, och dem stoppar skyddet
-/// innan något hämtas.
+/// innan något hämtas. Falk frågar aldrig den riktiga AI-tjänsten.
 ///
 /// Ägare: Grund.
 @MainActor
@@ -37,9 +49,10 @@ enum HelhetProv {
         let moduler = Set(app.moduler.filter { !$0.utesluten }.map(\.namn))
         k.notera("moduler", .lista(app.moduler.map { .text($0.namn + ($0.utesluten ? " (utesluten)" : "")) }))
         k.notera("leverantorer", .objekt(app.leverantorer.mapValues { .text($0) }))
-        for m in ["Skal", "Flikar", "Skydd", "Brygga"] { k.kolla("modulen \(m) är med", moduler.contains(m)) }
+        for m in ["Skal", "Flikar", "Skydd", "Brygga", "Konto", "Chatt", "Falk"] { k.kolla("modulen \(m) är med", moduler.contains(m)) }
         for (tjanst, modul) in [("huvudvy", "Skal"), ("flikar", "Flikar"), ("bibliotek", "Flikar"), ("skydd", "Skydd"),
-                                ("sidor", "Brygga"), ("plats.anpassa", "Brygga")] {
+                                ("sidor", "Brygga"), ("plats.anpassa", "Brygga"), ("konto", "Konto"), ("plats.chatt", "Chatt"),
+                                ("plats.falk", "Falk")] {
             k.lika("\(tjanst) kommer från \(modul)", app.leverantorer[tjanst] ?? "-", modul)
         }
         let skyddKlart = await k.vantaPa("skyddet är klart", max: 90) {
@@ -116,7 +129,98 @@ enum HelhetProv {
         await k.skarmbild("05-meny")
         await k.systembild("05-meny-system")
 
-        // 5. Anpassa från menyn, temat Natt
+        // 5. Chatten från menyn: utloggad, kontots ark ovanpå, inloggad, inkorgen, en konversation och tillbaka
+        let labb = BryggKalla(yta: "labb")
+        let medServer = app.startargument.text("api") != nil && app.startargument.text("testkod") != nil
+        k.notera("med_testserver", .bool(medServer))
+        if !medServer { k.notera("hoppat_over", .text("chatten, Falk och inloggningen (steg 5, 6, 8): -api och -testkod saknas")) }
+        let samtyckeFore = inst.sparat("webb.falkSamtycke")
+        defer {
+            inst.satt("webb.falkSamtycke", samtyckeFore, utanHistorik: true)
+            Task { @MainActor in
+                _ = try? await app.brygga.anropa("falk:prov", [["stoppa": true]], fran: labb)
+                if medServer, app.konto.arInloggad { await app.konto.loggaUt() }
+            }
+        }
+        if medServer {
+            if app.konto.arInloggad { await app.konto.loggaUt() }
+            app.handelser.skicka(SkalVisa(yta: .inget))
+            try await k.vanta(0.6)
+            app.handelser.skicka(SkalVisa(yta: .plats(Platser.chatt)))
+            k.kolla("Chatt öppnas från menyns plats", await vanta(6) { toppnamn() == "ChattKontroller" }, .text(toppnamn()))
+            let utloggad = await chattLage(app, max: 6) { $0["fas"].text == "utloggad" }
+            k.kolla("chatten visar utloggat läge", utloggad != nil, utloggad ?? .null)
+            try await k.vanta(1.0)
+            await k.skarmbild("06-chatt-utloggad")
+
+            // Chattens Logga in-knapp gör just detta
+            let svar = Svarslada()
+            Task { @MainActor in svar.inne = await app.konto.visaInloggning(rubrik: tr("Logga in för att chatta"), underrubrik: nil) }
+            k.kolla("Logga in visar kontots ark ovanpå chatten", await vanta(6) { toppnamn() == "KontoKontroller" }, .text(toppnamn()))
+            try await k.vanta(1.0)
+            await k.skarmbild("07-konto-fran-chatten")
+            k.kolla("inloggad mot testservern", await loggaIn(k, epost: Self.noah))
+            try await k.vanta(0.5)
+            await k.skarmbild("08-konto-inloggad")
+            k.kolla("arket stängs och visaInloggning svarar ja", await vanta(8) { svar.inne != nil } && svar.inne == true)
+            k.kolla("tillbaka i chatten efter inloggningen", await vanta(4) { toppnamn() == "ChattKontroller" }, .text(toppnamn()))
+            let inkorg = await chattLage(app, max: 30) { $0["fas"].text == "klar" && $0["listanLaddad"].bool == true }
+            k.kolla("chatten låses upp och visar inkorgen", inkorg != nil, inkorg.map { ["fas": $0["fas"], "rader": .tal(Double($0["rader"].lista?.count ?? 0))] } ?? .null)
+            try await k.vanta(1.2)
+            await k.skarmbild("09-chatt-inkorg")
+
+            let rader = inkorg?["rader"].lista ?? []
+            if let rad = rader.first(where: { $0["namn"].text == "Mira" }) ?? rader.first, let konv = rad["konv"].text {
+                let namn = rad["namn"].text ?? "?"
+                _ = try await app.brygga.anropa("chatt:visa", [["konv": .text(konv)]], fran: labb)
+                let oppen = await chattLage(app, max: 20) { $0["oppen"].text == konv && ($0["meddelanden"].tal ?? 0) > 0 }
+                k.kolla("konversationen med \(namn) öppnas och laddas", oppen != nil, ["meddelanden": oppen?["meddelanden"] ?? .null])
+                try await k.vanta(1.2)
+                await k.skarmbild("10-chatt-konversation")
+                _ = try await app.brygga.anropa("chatt:prov", [["tillbaka": true]], fran: labb)
+                k.kolla("tillbaka till listan", await chattLage(app, max: 5) { $0["oppen"].arNull } != nil)
+                try await k.vanta(0.9)
+                await k.skarmbild("11-chatt-tillbaka")
+            } else {
+                k.kolla("inkorgen har en konversation att öppna", false)
+            }
+            await stangToppen("ChattKontroller")
+            k.kolla("chatten stängdes", toppnamn() != "ChattKontroller", .text(toppnamn()))
+        }
+
+        // 6. Falk frågar om nyhetssidan (Falks testserver på 127.0.0.1, med kontots token)
+        if medServer {
+            let prov = try await app.brygga.anropa("falk:prov", [["starta": true]], fran: labb)
+            k.kolla("Falks testserver startar", prov["igang"].bool == true, prov)
+            inst.satt("webb.falkSamtycke", .bool(true), utanHistorik: true)
+            app.flikar.aktivera(flik.id)
+            try await k.vanta(0.6)
+            app.handelser.skicka(SkalVisa(yta: .plats(Platser.falk)))
+            if let falk = await vantaPaSida("falk", k, max: 15) {
+                k.kolla("Falk är redo", await vantaJS(falk, max: 10, "!!(window.__falkIos && window.__falkIos.klar)"))
+                _ = await Labbjs.kor(falk, "window.__falkIos.nollstall(); window.__falkIos.fraga('Vad står det på sidan jag har öppen?'); true")
+                _ = await vantaJS(falk, max: 8, "!!document.querySelector('.msg.typing .bubble') && document.querySelector('.msg.typing .bubble').textContent.length > 20")
+                await k.skarmbild("12-falk-fraga")
+                let svarat = await vantaJS(falk, max: 25, """
+                    (() => { if (window.__falkIos.upptagen()) return false;
+                      const m = [...document.querySelectorAll('.msg.krypto:not(.typing)')].pop();
+                      return !!m && m.querySelector('.bubble').textContent.includes('Stadsodlingen'); })()
+                    """)
+                let efter = try await app.brygga.anropa("falk:prov", [], fran: labb)
+                k.kolla("Falk svarar om nyhetssidan, med sidan i frågan", svarat && efter["aktuellFlik"].bool == true, efter)
+                try await k.vanta(0.6)
+                await k.skarmbild("13-falk-svar")
+                await k.systembild("13-falk-svar-system")
+                app.sidor.stang(nil)
+                _ = await vanta(4) { synligSida("falk") == nil }
+            } else {
+                k.kolla("Falk öppnas från menyns plats", false)
+            }
+        }
+
+        // 7. Anpassa från menyn: blå accent och mörkt läge, och allt följer med
+        app.handelser.skicka(SkalVisa(yta: .meny))
+        try await k.vanta(0.9)
         app.handelser.skicka(SkalVisa(yta: .plats(Platser.anpassa)))
         let anpassa = await vantaPaSida("anpassa", k, max: 15)
         k.kolla("Anpassa öppnades från menyn", anpassa != nil)
@@ -125,8 +229,8 @@ enum HelhetProv {
             let datorord = await Labbjs.kor(anpassa, Self.datorordJS) as? String
             k.lika("Anpassa säger inte datorn eller Chromium på iPhone", datorord ?? "-", "[]")
         }
-        await k.skarmbild("06-anpassa")
-        await k.systembild("06-anpassa-system")
+        await k.skarmbild("14-anpassa")
+        await k.systembild("14-anpassa-system")
         let kalla = BryggKalla(yta: "anpassa")
         for (nyckel, varde) in [("tema.accent", JSONVarde.text("#3b6fe0")), ("tema.lage", .text("morkt"))] {
             do {
@@ -139,13 +243,100 @@ enum HelhetProv {
         k.lika("accenten blev blå", inst[.temaAccent], "#3b6fe0")
         k.kolla("appen är mörk", app.tema.foredragetSchema == .dark)
         try await k.vanta(1.2)
-        await k.skarmbild("07-anpassa-natt")
+        await k.skarmbild("15-anpassa-natt")
         app.sidor.stang(nil)
         try await k.vanta(1.0)
         k.kolla("Anpassa stängdes", synligSida("anpassa") == nil)
-        await k.skarmbild("08-skalet-natt")
+        k.kolla("fönstret är mörkt (allt som visas ovanpå följer)", Labbkorning.fonster()?.traitCollection.userInterfaceStyle == .dark)
+        await k.skarmbild("16-skalet-natt")
+        app.handelser.skicka(SkalVisa(yta: .meny))
+        try await k.vanta(1.0)
+        await k.skarmbild("17-meny-natt")
+        app.handelser.skicka(SkalVisa(yta: .inget))
+        try await k.vanta(0.6)
 
-        // 6. Stoppsidan och felsidan i den aktiva fliken
+        if medServer {
+            app.handelser.skicka(SkalVisa(yta: .plats(Platser.chatt)))
+            if await vanta(6, { toppnamn() == "ChattKontroller" }) {
+                k.kolla("chatten är mörk", toppkontroller()?.traitCollection.userInterfaceStyle == .dark)
+                _ = await chattLage(app, max: 20) { $0["listanLaddad"].bool == true }
+                try await k.vanta(1.0)
+                await k.skarmbild("18-chatt-natt")
+                let rader = (await chattLage(app, max: 1) { _ in true })?["rader"].lista ?? []
+                if let konv = (rader.first(where: { $0["namn"].text == "Mira" }) ?? rader.first)?["konv"].text {
+                    _ = try await app.brygga.anropa("chatt:visa", [["konv": .text(konv)]], fran: labb)
+                    _ = await chattLage(app, max: 15) { $0["oppen"].text == konv && ($0["meddelanden"].tal ?? 0) > 0 }
+                    try await k.vanta(1.2)
+                    await k.skarmbild("19-konversation-natt")
+                    _ = try await app.brygga.anropa("chatt:prov", [["tillbaka": true]], fran: labb)
+                    try await k.vanta(0.6)
+                }
+                await stangToppen("ChattKontroller")
+            } else {
+                k.kolla("chatten öppnas i mörkt", false, .text(toppnamn()))
+            }
+
+            app.handelser.skicka(SkalVisa(yta: .plats(Platser.falk)))
+            if let falk = await vantaPaSida("falk", k, max: 15) {
+                let falkLage = await vantaJS(falk, max: 6, """
+                    matchMedia('(prefers-color-scheme: dark)').matches
+                      && getComputedStyle(document.documentElement).getPropertyValue('--accent').trim().toLowerCase() === '#3b6fe0'
+                    """)
+                let accent = await Labbjs.kor(falk, "getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()") as? String
+                k.kolla("Falk är mörk och tar appens blå accent", falkLage, .text(accent ?? "-"))
+                try await k.vanta(0.6)
+                await k.skarmbild("20-falk-natt")
+                await k.systembild("20-falk-natt-system")
+                app.sidor.stang(nil)
+                _ = await vanta(4) { synligSida("falk") == nil }
+            } else {
+                k.kolla("Falk öppnas i mörkt", false)
+            }
+        }
+
+        _ = app.flikar.nyFlik(nil)
+        if let startNatt = await vantaPaSida("startsida", k, max: 10) {
+            let mork = await vantaJS(startNatt, max: 4, "matchMedia('(prefers-color-scheme: dark)').matches")
+            k.kolla("startsidan i en ny flik är mörk", mork)
+            try await k.vanta(1.2)
+            await k.skarmbild("21-startsida-natt")
+            await k.systembild("21-startsida-natt-system")
+        } else {
+            k.kolla("startsidan i en ny flik (mörkt)", false)
+        }
+        if let ny = app.flikar.aktiv, ny.url == nil, app.flikar.flikar.count > 1 { app.flikar.stang(ny.id) }
+        app.flikar.aktivera(flik.id)
+        try await k.vanta(0.6)
+
+        // 8. Utloggad i Falk: Falks egen Logga in-knapp visar kontots ark, sedan tillbaka i Falk
+        if medServer {
+            await app.konto.loggaUt()
+            app.handelser.skicka(SkalVisa(yta: .plats(Platser.falk)))
+            if let falk = await vantaPaSida("falk", k, max: 15) {
+                let las = await vantaJS(falk, max: 8, "document.body.classList.contains('fi-last') && !!document.querySelector('#fi-las .fi-logga-in')")
+                k.kolla("utloggad: Falk visar Logga in", las)
+                try await k.vanta(0.6)
+                await k.skarmbild("22-falk-utloggad-natt")
+                _ = await Labbjs.kor(falk, "document.querySelector('#fi-las .fi-logga-in').click(); true")
+                k.kolla("Falks Logga in visar kontots ark ovanpå Falk", await vanta(6) { toppnamn() == "KontoKontroller" }, .text(toppnamn()))
+                try await k.vanta(1.0)
+                await k.skarmbild("23-konto-fran-falk-natt")
+                await k.systembild("23-konto-fran-falk-natt-system")
+                k.kolla("inloggad igen", await loggaIn(k, epost: Self.noah))
+                k.kolla("kontots ark stängs efter inloggningen", await vanta(8) { toppnamn() != "KontoKontroller" }, .text(toppnamn()))
+                let igen = await vantaJS(falk, max: 6, "!document.body.classList.contains('fi-last')")
+                k.kolla("tillbaka i Falk, inloggad", igen)
+                try await k.vanta(0.8)
+                await k.skarmbild("24-falk-inloggad-natt")
+                app.sidor.stang(nil)
+                _ = await vanta(4) { synligSida("falk") == nil }
+            } else {
+                k.kolla("Falk öppnas utloggad", false)
+            }
+            try await k.vanta(0.6)
+        }
+
+        // 9. Stoppsidan och felsidan i den aktiva fliken
         guard let aktiv = app.flikar.aktiv else { return }
         let farlig = farligVard()
         var stoppad: HuvudsidaBlockerad?
@@ -161,8 +352,8 @@ enum HelhetProv {
         k.lika("stoppsidans theme-color följer det mörka läget (bandet under statusraden)",
                aktiv.webbvy.themeColor.map { Self.hex($0, mork: true) } ?? "ingen", "#0c0c0e")
         k.lika("statusraden: ljus text över stoppsidan", app.statusrad.rawValue, "ljus")
-        await k.skarmbild("09-stoppsida")
-        await k.systembild("09-stoppsida-system")
+        await k.skarmbild("25-stoppsida")
+        await k.systembild("25-stoppsida-system")
 
         aktiv.ladda(URL(string: bas + "/trasig")!)
         let felvisad = await vanta(15) { aktiv.fel != nil && aktiv.visarFelsida }
@@ -170,9 +361,13 @@ enum HelhetProv {
         let feltext = await vantaPaText(aktiv.webbvy, max: 6) { t in t.contains("Försök igen") }
         k.kolla("felsidan har Försök igen", feltext.contains("Försök igen"), .text(String(feltext.prefix(200))))
         try await k.vanta(0.8)   // laddlinjen tonar ut efter laddningen
-        await k.skarmbild("10-felsida")
+        await k.skarmbild("26-felsida")
 
-        // 7. Tillbaka till standard och en ny flik
+        // 10. Tillbaka till standard och en ny flik
+        if medServer {
+            _ = try? await app.brygga.anropa("falk:prov", [["stoppa": true]], fran: labb)
+            if app.konto.arInloggad { await app.konto.loggaUt() }
+        }
         inst[.temaAccent] = fore.accent
         inst[.temaLage] = fore.lage
         inst[.verktygPlacering] = fore.placering
@@ -180,8 +375,8 @@ enum HelhetProv {
         let igen = await vantaPaSida("startsida", k, max: 10)
         k.kolla("startsidan i en ny flik igen", igen != nil)
         try await k.vanta(1.2)
-        await k.skarmbild("11-ny-flik")
-        await k.systembild("11-ny-flik-system")
+        await k.skarmbild("27-ny-flik")
+        await k.systembild("27-ny-flik-system")
         k.notera("minne_mb", .tal(Labbkorning.minneMB()))
         k.notera("flikar", .tal(Double(app.flikar.flikar.count)))
         inst[Nycklar.sprakVal] = fore.sprak
@@ -189,6 +384,63 @@ enum HelhetProv {
     }
 
     // MARK: - Hjälp
+
+    /// Testkontot med chattdata på chattens testserver (som `-mode chatt`).
+    static let noah = "noah@adraze.test"
+    static let losen = "Testlosen-2026"
+
+    /// Loggar in som formuläret i kontots ark gör, via kontots kanaler för självtesterna (kod vid ny enhet).
+    private static func loggaIn(_ k: Labbkorning, epost: String) async -> Bool {
+        let app = k.app, labb = BryggKalla(yta: "labb")
+        do {
+            let steg = try await app.brygga.anropa("konto:logga-in", [["email": .text(epost), "password": .text(losen)]], fran: labb)
+            if steg["steg"].text == "kod" {
+                let kod = app.startargument.text("testkod") ?? ""
+                _ = try await app.brygga.anropa("konto:kod", [["email": .text(epost), "code": .text(kod)]], fran: labb)
+            }
+        } catch {
+            k.notera("inloggningsfel", .text(String(describing: error)))
+            return false
+        }
+        return await vanta(5) { app.konto.arInloggad }
+    }
+
+    /// Chattens läge (`chatt:prov`) när villkoret gäller, högst `max` sekunder.
+    private static func chattLage(_ app: AppMiljo, max: Double, _ villkor: (JSONVarde) -> Bool) async -> JSONVarde? {
+        let t0 = Date()
+        repeat {
+            if let l = try? await app.brygga.anropa("chatt:prov", [], fran: BryggKalla(yta: "labb")), villkor(l) { return l }
+            try? await Task.sleep(nanoseconds: 250_000_000)
+        } while Date().timeIntervalSince(t0) < max
+        return nil
+    }
+
+    /// Kör uttrycket i sidan tills det blir `true`, högst `max` sekunder.
+    private static func vantaJS(_ vy: WKWebView, max: Double, _ js: String) async -> Bool {
+        let t0 = Date()
+        repeat {
+            if (await Labbjs.kor(vy, js) as? Bool) == true { return true }
+            try? await Task.sleep(nanoseconds: 150_000_000)
+        } while Date().timeIntervalSince(t0) < max
+        return false
+    }
+
+    /// Den översta kontrollern i appens fönster (det som visas ovanpå allt annat).
+    private static func toppkontroller() -> UIViewController? {
+        var k = Labbkorning.fonster()?.rootViewController
+        while let p = k?.presentedViewController, !p.isBeingDismissed { k = p }
+        return k
+    }
+
+    /// Klassnamnet på den översta kontrollern (`ChattKontroller`, `KontoKontroller` …), utan att Labb behöver modulerna.
+    private static func toppnamn() -> String { toppkontroller().map { String(describing: type(of: $0)) } ?? "inget" }
+
+    /// Stänger den översta kontrollern om den heter `namn`, som dess kryss gör, och väntar tills den är borta.
+    private static func stangToppen(_ namn: String) async {
+        guard let t = toppkontroller(), String(describing: type(of: t)) == namn else { return }
+        await withCheckedContinuation { (c: CheckedContinuation<Void, Never>) in t.dismiss(animated: true) { c.resume() } }
+        try? await Task.sleep(nanoseconds: 300_000_000)
+    }
 
     static func hex(_ c: UIColor, mork: Bool) -> String {
         let r = c.resolvedColor(with: UITraitCollection(userInterfaceStyle: mork ? .dark : .light))
@@ -269,6 +521,12 @@ enum HelhetProv {
         }
         return t
     }
+}
+
+/// Svaret från något som körs vid sidan av testet (till exempel `visaInloggning` medan testet loggar in).
+@MainActor
+private final class Svarslada {
+    var inne: Bool?
 }
 
 /// JavaScript i en webbvy från självtesten.
