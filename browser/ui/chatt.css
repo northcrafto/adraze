@@ -751,3 +751,39 @@ html.mini #app, html.mini .call-ov, html.mini .modal-overlay, html.mini .toast, 
 .contact.active { background: color-mix(in srgb, var(--ink) 9%, transparent); }
 .contact.active .pres { box-shadow: 0 0 0 2.5px var(--paper); }
 .contact .pres { width: 13px; height: 13px; }
+
+
+/* ===== Samtalsskärmen, nytt utseende (2026-11-17) =====
+ * Lugn blågrön toning över hela rutan, tiden och namnet överst, profilbilden i mitten (ringen runt den följer
+ * rösten), och runda glasknappar med text under. Lägg på sitter ensam i mitten på nedre raden. */
+.call-ov { background: #173b7a; }
+.co-bg, .co-bg.none { inset: 0; filter: none; transform: none;
+  background-image: radial-gradient(90% 60% at 0% 0%, rgba(104, 158, 150, .95) 0%, rgba(104, 158, 150, 0) 70%),
+    radial-gradient(80% 55% at 100% 0%, rgba(24, 52, 140, .95) 0%, rgba(24, 52, 140, 0) 72%),
+    linear-gradient(180deg, #2c5f8c 0%, #2f7488 46%, #0f6a90 100%) !important; }
+.call-ov::after { background: linear-gradient(180deg, rgba(0, 0, 0, .10), rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, .16)); }
+.co-top { padding: 14px 16px 0; }
+.co-min { background: rgba(255, 255, 255, .16); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22); }
+.co-lock { font: 500 12px var(--sans); letter-spacing: 0; opacity: .7; }
+.co-mid { justify-content: flex-start; gap: 4px; padding: clamp(10px, 5vh, 44px) 22px 0; width: 100%; }
+.co-status { order: 1; font: 500 17px/1.2 var(--sans); letter-spacing: 0; opacity: .66; }
+.co-name { order: 2; font-family: var(--sans); font-size: clamp(28px, 7vw, 36px); font-weight: 650; letter-spacing: -.015em; font-variation-settings: normal; line-height: 1.15; }
+.co-av-wrap { order: 3; width: 116px; height: 116px; margin: auto 0; }
+.co-av { background: rgba(255, 255, 255, .18); font-size: 40px; font-weight: 600;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .28), 0 18px 40px -18px rgba(0, 0, 0, .5), 0 0 0 calc(var(--niva, 0) * 14px) rgba(255, 255, 255, .18); }
+.co-ring { border-color: rgba(255, 255, 255, .45); }
+.co-actions { gap: 22px clamp(18px, 7vw, 40px); padding: 10px 16px clamp(28px, 6vh, 52px); }
+.co-actions:has(.co-btn-w:nth-child(4)) { display: grid; grid-template-columns: repeat(3, 88px); justify-content: center; justify-items: center; }
+.co-actions:has(.co-btn-w:nth-child(4)) .co-btn-w:has(.rod) { grid-column: 2; }
+.co-btn-w { width: 88px; gap: 9px; font-size: 13.5px; font-weight: 500; color: #fff; }
+.co-btn { width: 76px; height: 76px; }
+.co-btn svg { width: 30px; height: 30px; }
+.co-btn.glas { background: rgba(255, 255, 255, .15); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .30); backdrop-filter: blur(18px) saturate(1.3); }
+.co-btn.glas:hover { background: rgba(255, 255, 255, .24); }
+.co-btn.glas.av, .co-btn.glas.on { background: #fff; color: #17365f; box-shadow: none; }
+.co-btn.rod { background: #e0271f; }
+.co-btn.rod:hover { background: #ee3a31; }
+.co-btn.rod svg { width: 34px; height: 34px; }
+.co-btn.gron { background: #34c759; }
+.call-ov.in[data-fas="ringer"] .co-actions { gap: clamp(64px, 22vw, 140px); }
+.co-vol { margin: 0 0 16px; padding: 12px 18px; border-radius: 22px; background: rgba(255, 255, 255, .15); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .26); backdrop-filter: blur(18px) saturate(1.3); }
