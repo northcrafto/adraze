@@ -26,7 +26,7 @@ final class E2EKlient {
     private(set) var avvisade: [(fel: String, fran: String?, tid: Date)] = []
 
     init(app: AppMiljo, konto: String) {
-        lagring = E2ELagring(konto: konto)
+        lagring = E2ELagring(konto: konto, server: E2ENat.bas(app))
         natet = E2ENat(app: app)
     }
 
@@ -444,9 +444,15 @@ final class E2ENat {
     let bas: URL
     private let session: URLSession
 
+    /// AdRazes server, eller testservern i startargumentet `-api`.
+    static func bas(_ app: AppMiljo) -> URL {
+        if let s = app.startargument.text("api"), let u = URL(string: s), u.scheme != nil { return u }
+        return URL(string: "https://api.adraze.app")!
+    }
+
     init(app: AppMiljo) {
         self.app = app
-        if let s = app.startargument.text("api"), let u = URL(string: s), u.scheme != nil { bas = u } else { bas = URL(string: "https://api.adraze.app")! }
+        bas = Self.bas(app)
         let k = URLSessionConfiguration.ephemeral
         k.httpCookieStorage = nil
         k.httpShouldSetCookies = false

@@ -37,8 +37,10 @@ enum E2EProv {
         guard let alvaId = E2EJSON.text(alva["id"]), let boUuid = bo["uuid"] as? String, let ciaUuid = cia["uuid"] as? String else {
             k.fel = "motparten gav ingen testdata"; return
         }
-        // Ren start: inga E2E-filer eller nycklar kvar från en tidigare körning i simulatorn
-        E2ELagring(konto: alvaId).radera()
+        // Ren start: inga E2E-filer eller nycklar kvar från en tidigare körning i simulatorn (också den gamla mappen
+        // E2E/<konto> från tiden innan testservrar fick egna mappar)
+        E2ELagring(konto: alvaId, server: E2ENat.bas(app)).radera()
+        E2ELagring(konto: alvaId, server: URL(string: "https://api.adraze.app")!).radera()
         E2EProvlage.kontroll = nil
         E2EProvlage.lankQr = nil
         var markorer: [String] = []

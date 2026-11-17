@@ -9,6 +9,8 @@ import Security
 /// - **Kärnans tillstånd** (identitet, enhetsnycklar, sessioner, gruppnycklar) och **historiken** ligger som filer i
 ///   `Application Support/E2E/<konto>/`, krypterade med lagringsnyckeln (AES-256-GCM i kärnan, etiketten som AAD),
 ///   med filskyddet `CompleteUntilFirstUserAuthentication` och undantagna från säkerhetskopian (`isExcludedFromBackup`).
+/// - **En annan server** än AdRazes (en testserver) ger mappen `E2E/<värd>-<port>-<konto>/` och en egen nyckel: samma
+///   konto-id på två servrar delar alltså aldrig nycklar eller historik (i simulatorn körs flera testservrar).
 ///
 /// Efter en återställning från iCloud finns alltså varken nyckel eller tillstånd: telefonen länkas igen eller
 /// använder återställningskoden.
@@ -19,11 +21,21 @@ final class E2ELagring {
     static let tjanst = "app.adraze.e2e"
     let konto: String
     let mapp: URL
-    private var nyckelnamn: String { "e2e.lagringsnyckel.\(konto)" }
+    /// Kontot på servern: bara konto-id:t hos AdRazes server, med värd och port framför hos andra.
+    private let id: String
+    private var nyckelnamn: String { "e2e.lagringsnyckel.\(id)" }
 
-    init(konto: String) {
+    init(konto: String, server: URL) {
         self.konto = konto
-        mapp = Self.rot.appendingPathComponent(konto.filter { $0.isLetter || $0.isNumber || $0 == "-" }, isDirectory: true)
+        let tagg = Self.tagg(server)
+        id = tagg.isEmpty ? konto : tagg + "-" + konto
+        mapp = Self.rot.appendingPathComponent(id.filter { $0.isLetter || $0.isNumber || $0 == "-" }, isDirectory: true)
+    }
+
+    /// "" för AdRazes server, annars värd och port ("100-122-13-91-18791").
+    static func tagg(_ server: URL) -> String {
+        guard let vard = server.host, vard != "api.adraze.app" else { return "" }
+        return (vard + (server.port.map { "-\($0)" } ?? "")).map { $0.isLetter || $0.isNumber ? String($0) : "-" }.joined()
     }
 
     static var rot: URL {
