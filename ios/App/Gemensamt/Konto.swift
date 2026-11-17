@@ -19,6 +19,16 @@ protocol KontoTjanst: AnyObject, Observable {
     /// En giltig åtkomsttoken (förnyas av tjänsten vid behov), `nil` = inte inloggad.
     func token() async -> String?
     func loggaUt() async
+    /// Visar inloggningen ovanpå det som syns och väntar tills den är klar: `true` = inloggad (rutan stänger sig
+    /// själv), `false` = användaren stängde rutan. Redan inloggad: `true` direkt. `rubrik` och `underrubrik`
+    /// ersätter "Logga in" och texten under (till exempel "Logga in för att chatta").
+    ///
+    ///     if await app.konto.visaInloggning(rubrik: tr("Logga in för att chatta"), underrubrik: nil) { … }
+    func visaInloggning(rubrik: String?, underrubrik: String?) async -> Bool
+}
+
+extension KontoTjanst {
+    func visaInloggning() async -> Bool { await visaInloggning(rubrik: nil, underrubrik: nil) }
 }
 
 /// Det appen vet om kontot. Inget hemligt här; token ligger i Keychain.

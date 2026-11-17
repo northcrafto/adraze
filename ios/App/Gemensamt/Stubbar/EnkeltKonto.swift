@@ -37,6 +37,9 @@ final class EnkeltKonto: KontoTjanst {
         return String(data: d, encoding: .utf8)
     }
 
+    /// Ersättningen har ingen inloggning att visa: svaret är bara om en token redan finns.
+    func visaInloggning(rubrik: String?, underrubrik: String?) async -> Bool { arInloggad }
+
     func loggaUt() async {
         try? Nyckelring.radera(konto: Self.tokenNamn)
         try? Nyckelring.radera(konto: Self.uppgifterNamn)

@@ -1,10 +1,15 @@
 import SwiftUI
 
-/// Kontoarket: inloggningen när ingen är inloggad, annars kontokortet med utloggning.
+/// Kontoarket: inloggningen när ingen är inloggad, annars kontokortet med utloggning. `vantar`: någon väntar på
+/// inloggningen (`KontoTjanst.visaInloggning`, Falk och Chatt): efter inloggningen visas en kort bekräftelse och
+/// arket stänger sig självt (`KontoKontroller`).
 struct KontoRot: View {
     let kontot: Kontot
     var start: KontoInloggning.Lage = .logga
     var epost = ""
+    var rubrik: String?
+    var underrubrik: String?
+    var vantar = false
     @Environment(Tema.self) private var tema
     @Environment(\.dismiss) private var stang
 
@@ -12,22 +17,77 @@ struct KontoRot: View {
         ZStack(alignment: .topTrailing) {
             tema.bakgrund.ignoresSafeArea()
             if kontot.arInloggad {
-                KontoKortvy(kontot: kontot)
-                    .transition(.opacity.combined(with: .scale(scale: 0.98)))
+                if vantar {
+                    KontoKlar(kontot: kontot)
+                        .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                } else {
+                    KontoKortvy(kontot: kontot)
+                        .transition(.opacity.combined(with: .scale(scale: 0.98)))
+                }
             } else {
-                KontoInloggning(kontot: kontot, start: start, epost: epost)
+                KontoInloggning(kontot: kontot, rubrik: rubrik, underrubrik: underrubrik, start: start, epost: epost)
                     .transition(.opacity)
             }
-            Button { stang() } label: {
-                Image(systemName: "xmark").font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(tema.dampad)
-                    .frame(width: 34, height: 34)
-                    .background(Circle().fill(tema[.yta2]))
+            if !(vantar && kontot.arInloggad) {
+                Stangknapp { stang() }
+                    .padding(.top, Stangknapp.inpassning).padding(.trailing, Stangknapp.inpassning)
+                    .transition(.opacity)
             }
-            .accessibilityLabel(kt("Stäng"))
-            .padding(.top, 18).padding(.trailing, 18)
         }
         .animation(.spring(response: 0.42, dampingFraction: 0.88), value: kontot.arInloggad)
+    }
+}
+
+/// Bekräftelsen när någon har loggat in för att något annat väntade (Falk, Chatt): gorillan, en bock som ritas
+/// och namnet. Arket stänger sig självt strax efter.
+struct KontoKlar: View {
+    let kontot: Kontot
+    @Environment(Tema.self) private var tema
+    @Environment(\.accessibilityReduceMotion) private var minska
+    @State private var ritad: CGFloat = 0
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Spacer(minLength: 40)
+            ZStack(alignment: .bottomTrailing) {
+                Image("Gorilla").resizable().scaledToFit().frame(width: 88, height: 88)
+                ZStack {
+                    Circle().fill(tema.accent)
+                    KontoBock().trim(from: 0, to: ritad)
+                        .stroke(tema[.paAccent], style: StrokeStyle(lineWidth: 3.2, lineCap: .round, lineJoin: .round))
+                        .frame(width: 16, height: 16)
+                }
+                .frame(width: 34, height: 34)
+                .overlay(Circle().strokeBorder(tema.bakgrund, lineWidth: 3))
+                .offset(x: 6, y: 4)
+            }
+            .padding(.bottom, 26)
+            Text(kt("Du är inloggad"))
+                .font(Typsnitt.rubrik(AdrazeArk.rubrikstorlek, vikt: AdrazeArk.rubrikvikt))
+                .foregroundStyle(tema.text)
+            Text(kontot.konto?.namn ?? kontot.konto?.epost ?? "")
+                .font(Typsnitt.grotesk(16, relativTill: .body))
+                .foregroundStyle(tema.dampad)
+                .padding(.top, 8)
+            Spacer(minLength: 80)
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
+        .onAppear {
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            withAnimation(minska ? .easeOut(duration: 0.15) : .timingCurve(0.2, 0.75, 0.25, 1, duration: 0.5).delay(0.15)) { ritad = 1 }
+        }
+    }
+}
+
+/// Bocken i bekräftelsen.
+struct KontoBock: Shape {
+    func path(in r: CGRect) -> Path {
+        var p = Path()
+        p.move(to: CGPoint(x: r.minX + r.width * 0.08, y: r.minY + r.height * 0.55))
+        p.addLine(to: CGPoint(x: r.minX + r.width * 0.38, y: r.minY + r.height * 0.84))
+        p.addLine(to: CGPoint(x: r.maxX - r.width * 0.04, y: r.minY + r.height * 0.18))
+        return p
     }
 }
 
@@ -67,11 +127,11 @@ struct KontoInloggning: View {
             VStack(alignment: .leading, spacing: 0) {
                 Image("Gorilla")
                     .resizable().scaledToFit()
-                    .frame(width: 74, height: 74)
+                    .frame(width: 76, height: 76)
                     .padding(.bottom, 22)
                     .accessibilityHidden(true)
                 Text(titel)
-                    .font(Typsnitt.rubrik(32, vikt: 600))
+                    .font(Typsnitt.rubrik(AdrazeArk.rubrikstorlek, vikt: AdrazeArk.rubrikvikt))
                     .foregroundStyle(tema.text)
                     .fixedSize(horizontal: false, vertical: true)
                 Text(undertext)
@@ -108,7 +168,7 @@ struct KontoInloggning: View {
                 .accessibilityIdentifier("konto.skicka")
                 lankar.padding(.top, 18)
             }
-            .padding(.horizontal, 26)
+            .padding(.horizontal, AdrazeArk.sidor)
             .padding(.top, 64)
             .padding(.bottom, 40)
             .frame(maxWidth: 520)
@@ -345,7 +405,7 @@ struct KontoKortvy: View {
                 KontoAvatar(namn: kontot.konto?.namn ?? kontot.konto?.epost ?? "?", dataUrl: kontot.avatar, storlek: 96)
                     .padding(.bottom, 18)
                 Text(kontot.konto?.namn ?? kt("Ditt konto"))
-                    .font(Typsnitt.rubrik(30, vikt: 600))
+                    .font(Typsnitt.rubrik(AdrazeArk.rubrikstorlek, vikt: AdrazeArk.rubrikvikt))
                     .foregroundStyle(tema.text)
                 if let e = kontot.konto?.epost {
                     Text(e).font(Typsnitt.grotesk(16, relativTill: .body)).foregroundStyle(tema.dampad).padding(.top, 4)
@@ -391,7 +451,7 @@ struct KontoKortvy: View {
                 .padding(.top, 8)
                 .accessibilityIdentifier("konto.loggaut")
             }
-            .padding(.horizontal, 26)
+            .padding(.horizontal, AdrazeArk.sidor)
             .padding(.top, 70)
             .padding(.bottom, 40)
             .frame(maxWidth: 520)

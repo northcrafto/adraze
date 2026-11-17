@@ -49,6 +49,11 @@ final class Kontot: KontoTjanst {
 
     func token() async -> String? { sparadToken }
 
+    /// Inloggningen som ark, och vänta tills den är klar (`KontoTjanst`). Falk och Chatt använder den.
+    func visaInloggning(rubrik: String?, underrubrik: String?) async -> Bool {
+        await KontoArk.vantaPaInloggning(app, rubrik: rubrik, underrubrik: underrubrik)
+    }
+
     // MARK: - In och ut
 
     enum Steg: Equatable {
@@ -182,7 +187,7 @@ final class KontoServer {
         k.httpShouldSetCookies = false
         k.timeoutIntervalForRequest = 30
         k.waitsForConnectivity = false
-        if bas.scheme == "http" { k.protocolClasses = [KontoLokalHTTP.self] }
+        if bas.scheme == "http" { k.protocolClasses = [LokalHTTP.self] }
         session = URLSession(configuration: k)
     }
 

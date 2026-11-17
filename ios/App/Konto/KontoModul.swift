@@ -19,7 +19,7 @@ final class KontoModul: NSObject, AppModul {
 
         app.brygga.hantera("konto:visa") { anrop in
             let start = anrop.argument.first?["epost"].text
-            await MainActor.run { KontoArk.visa(app, epost: start ?? "") }
+            await MainActor.run { _ = KontoArk.visa(app, epost: start ?? "") }
             return .null
         }
         app.brygga.hantera("konto:status") { _ in

@@ -3,38 +3,10 @@ import UIKit
 
 // MARK: - Text
 
-/// Kontots texter: svenska är nyckeln (som `tr` i Gemensamt). Först kontots egna ordlistor
-/// (`Konto/Bunt/sprak/<kod>.json`, texter som bara finns på telefonen), sedan datorns 54 språk via `tr`.
+/// Kontots texter. Kontots egna ordlistor (`Konto/Bunt/sprak/<kod>.json`) läses av `Sprak` i Gemensamt tillsammans
+/// med datorns 54 språk, så det här är bara `tr` (namnet finns kvar för kontots kod).
 @MainActor
-func kt(_ s: String, _ varden: [String: String] = [:]) -> String {
-    let kod = Sprak.delad.kod
-    guard kod != "sv" else { return tr(s, varden) }
-    let fyll: (String) -> String = { t in
-        var ut = t
-        for (n, v) in varden { ut = ut.replacingOccurrences(of: "{\(n)}", with: v) }
-        return ut
-    }
-    if let egen = KontoOrd.ordlista(kod)[s] { return fyll(egen) }
-    // Datorns ordlista för språket; saknas texten där blir det engelska i stället för svenska.
-    let t = tr(s, varden)
-    if t != fyll(s) || kod == "en" { return t }
-    return KontoOrd.ordlista("en")[s].map(fyll) ?? t
-}
-
-@MainActor
-enum KontoOrd {
-    private static var minne: [String: [String: String]] = [:]
-    static func ordlista(_ kod: String) -> [String: String] {
-        if let m = minne[kod] { return m }
-        var d: [String: String] = [:]
-        if let data = Bunt.data("Konto", "sprak/\(kod).json"),
-           let o = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-            for (k, v) in o { if let s = v as? String, !s.isEmpty { d[k] = s } }
-        }
-        minne[kod] = d
-        return d
-    }
-}
+func kt(_ s: String, _ varden: [String: String] = [:]) -> String { tr(s, varden) }
 
 // MARK: - Vätskeknappen
 
@@ -103,7 +75,7 @@ private struct KontoKnappkropp<E: View>: View {
     @State private var fylld: CGFloat = -1
 
     var body: some View {
-        let form = RoundedRectangle(cornerRadius: tema.radier.knapp == 999 ? 999 : tema.radier.knapp + 6, style: .continuous)
+        let form = RoundedRectangle(cornerRadius: tema.radier.storKnapp, style: .continuous)
         etikett
             .foregroundStyle(vilande)
             .overlay {
@@ -202,29 +174,66 @@ enum KontoArk {
         return k
     }
 
-    /// Visar kontot (inloggning eller kontokortet) som ark. `start` öppnar inloggningen i ett visst läge.
-    static func visa(_ app: AppMiljo, start: KontoInloggning.Lage = .logga, epost: String = "") {
-        guard let kontot = app.konto as? Kontot, let topp = topp() else { return }
-        if topp is KontoKontroller { return }
+    /// Visar kontot (inloggning eller kontokortet) som ark. `start` öppnar inloggningen i ett visst läge,
+    /// `rubrik` och `underrubrik` byter inloggningens texter. Visas kontot redan ges det arket.
+    @discardableResult
+    static func visa(_ app: AppMiljo, start: KontoInloggning.Lage = .logga, epost: String = "",
+                     rubrik: String? = nil, underrubrik: String? = nil, vantar: Bool = false) -> KontoKontroller? {
+        guard let kontot = app.konto as? Kontot, let topp = topp() else { return nil }
+        if let k = topp as? KontoKontroller { return k }
         let k = KontoKontroller(rootView: AnyView(
-            KontoRot(kontot: kontot, start: start, epost: epost).environment(app).environment(app.tema)))
+            KontoRot(kontot: kontot, start: start, epost: epost, rubrik: rubrik, underrubrik: underrubrik, vantar: vantar)
+                .environment(app).environment(app.tema)))
         k.folj(app.tema)
         k.view.backgroundColor = app.tema.ui(.bakgrund)
-        if let ark = k.sheetPresentationController {
-            ark.detents = [.large()]
-            ark.prefersGrabberVisible = true
-            ark.preferredCornerRadius = 28
-        }
+        AdrazeArk.forbered(k)
         topp.present(k, animated: true)
+        return k
+    }
+
+    /// `KontoTjanst.visaInloggning`: visar inloggningen och väntar. Ger `true` när någon har loggat in (arket visar
+    /// en kort bekräftelse och stänger sig självt) och `false` om arket stängdes utan inloggning.
+    static func vantaPaInloggning(_ app: AppMiljo, rubrik: String?, underrubrik: String?) async -> Bool {
+        guard let kontot = app.konto as? Kontot else { return false }
+        if kontot.arInloggad { return true }
+        guard let k = visa(app, rubrik: rubrik, underrubrik: underrubrik, vantar: true) else { return false }
+        k.stangVidInloggning(app)
+        return await withCheckedContinuation { c in k.vantare.append(c) }
     }
 }
 
 /// Värdkontrollern för kontoarket. Följer temat (ljust, mörkt, system) medan den visas.
 final class KontoKontroller: UIHostingController<AnyView> {
+    /// De som väntar på inloggningen (`KontoArk.vantaPaInloggning`); får svaret när arket stängs.
+    var vantare: [CheckedContinuation<Bool, Never>] = []
+    private var lyssnare: Prenumeration?
+
     func folj(_ tema: Tema) {
         overrideUserInterfaceStyle = tema.uiStil
         withObservationTracking { _ = tema.uiStil } onChange: { [weak self] in
             Task { @MainActor [weak self] in self?.folj(tema) }
         }
+    }
+
+    /// Stäng arket av sig självt när någon har loggat in (efter bekräftelsen i `KontoRot`).
+    func stangVidInloggning(_ app: AppMiljo) {
+        guard lyssnare == nil else { return }
+        lyssnare = app.handelser.lyssna(KontoAndrades.self) { [weak self] h in
+            guard h.inloggad else { return }
+            Task { @MainActor [weak self] in
+                try? await Task.sleep(nanoseconds: 1_100_000_000)
+                guard let self, self.presentingViewController != nil, !self.isBeingDismissed else { return }
+                self.dismiss(animated: true)
+            }
+        }
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        guard isBeingDismissed || presentingViewController == nil else { return }
+        let inne = AppMiljo.delad?.konto.arInloggad ?? false
+        let alla = vantare
+        vantare = []
+        for c in alla { c.resume(returning: inne) }
     }
 }
