@@ -2,7 +2,7 @@
 
 ## 0.2.4 (2026-11-17)
 
-- Store name says what AdRaze is ("AdRaze – Ad Blocker"), and name and short description are translated to 26 languages.
+- Store name says what AdRaze is ("AdRaze: Ad Blocker"), and name and short description are translated to 26 languages.
 - A welcome page (adraze.app/valkommen) opens once after installation: how to pin the icon, what the number means and how to pause a site.
 - Fresh filter lists.
 

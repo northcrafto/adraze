@@ -38,7 +38,7 @@ Höj `version` i `extension/manifest.json` före varje uppladdning. Storen avvis
 AdRaze stoppar reklam, spårare, popups och omdirigeringar till farliga sidor. Gratis, för alltid, och utan "godkänd reklam".
 
 Det här gör AdRaze:
-• Blockerar reklam, spårare och popups med välkända öppna filterlistor – inklusive en lista gjord för svenska sajter.
+• Blockerar reklam, spårare och popups med välkända öppna filterlistor, inklusive en lista gjord för svenska sajter.
 • Döljer tomma annonsrutor så att sidan ser ren ut.
 • Lagar sajter som försöker kringgå blockeringen: små inbyggda skript stänger av adblock-varningar och reklamskript, och sidor som väntar på ett reklamskript får en ofarlig ersättare så att de inte går sönder.
 • Tar bort kända spårningsparametrar ur adresser.
@@ -108,7 +108,7 @@ Saker att veta:
 
 ## 0.2.4: översatt namn och beskrivning (2026-11-17)
 
-Från 0.2.4 kommer namn och kort beskrivning ur `extension/_locales/<språk>/messages.json` (26 språk, engelska är standard). Namnet är "AdRaze – Ad Blocker" på engelska och "AdRaze – reklamblockerare" på svenska. Butiken söker i namnet, så det ska säga vad tillägget är. Använd aldrig en annan produkts namn i namn eller sökord.
+Från 0.2.4 kommer namn och kort beskrivning ur `extension/_locales/<språk>/messages.json` (26 språk, engelska är standard). Namnet är "AdRaze: Ad Blocker" på engelska och "AdRaze: reklamblockerare" på svenska. Butiken söker i namnet, så det ska säga vad tillägget är. Använd aldrig en annan produkts namn i namn eller sökord.
 
 När paketet har `_locales` vill butiken ha en detaljerad beskrivning per språk under **Butiksinformation**. Den svenska finns ovan. Engelska (standardspråk, visas för alla språk som saknar egen text):
 

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Sidan finns inte – AdRaze</title>
+<title>Sidan finns inte | AdRaze</title>
 <link rel="icon" href="/favicon.png">
 <style>
   /* 404 i samma stil som barnspärren i webbläsaren: mörkblå yta, jättestor kontur-gubbe i orange, text till vänster. */
@@ -65,7 +65,7 @@
     const kod = T[forsta] ? forsta : (navigator.languages || [navigator.language || 'sv']).map((l) => String(l).slice(0, 2).toLowerCase()).find((l) => T[l]) || 'sv';
     const t = T[kod];
     document.documentElement.lang = kod;
-    document.title = t.title + ' – AdRaze';
+    document.title = t.title + ' | AdRaze';
     $('rubrik').textContent = t.title; $('text').textContent = t.text; $('hem').textContent = t.home; $('tillbaka').textContent = t.back;
     if (kod !== 'sv' && T[forsta]) $('hem').href = '/' + kod + '/';
     $('adress').textContent = location.host + decodeURIComponent(location.pathname);
