@@ -1,0 +1,230 @@
+{
+ "blocktest": {
+  "topp": "blocktest.adraze.test",
+  "mal": [
+   {
+    "typ": "reklam",
+    "satt": "skript",
+    "url": "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js",
+    "vantat": "blockerad"
+   },
+   {
+    "typ": "reklam",
+    "satt": "skript",
+    "url": "https://securepubads.g.doubleclick.net/tag/js/gpt.js",
+    "vantat": "blockerad"
+   },
+   {
+    "typ": "reklam",
+    "satt": "skript",
+    "url": "https://cdn.taboola.com/libtrc/loader.js",
+    "vantat": "blockerad"
+   },
+   {
+    "typ": "reklam",
+    "satt": "skript",
+    "url": "https://c.amazon-adsystem.com/aax2/apstag.js",
+    "vantat": "blockerad"
+   },
+   {
+    "typ": "reklam",
+    "satt": "skript",
+    "url": "https://static.criteo.net/js/ld/publishertag.js",
+    "vantat": "blockerad"
+   },
+   {
+    "typ": "reklam",
+    "satt": "skript",
+    "url": "https://widgets.outbrain.com/outbrain.js",
+    "vantat": "blockerad"
+   },
+   {
+    "typ": "reklam",
+    "satt": "bild",
+    "url": "https://googleads.g.doubleclick.net/pagead/viewthroughconversion/123/?random=1",
+    "vantat": "blockerad"
+   },
+   {
+    "typ": "reklam",
+    "satt": "fetch",
+    "url": "https://ib.adnxs.com/ut/v3/prebid",
+    "vantat": "blockerad"
+   },
+   {
+    "typ": "spårare",
+    "satt": "skript",
+    "url": "https://www.google-analytics.com/analytics.js",
+    "vantat": "blockerad"
+   },
+   {
+    "typ": "spårare",
+    "satt": "skript",
+    "url": "https://www.googletagmanager.com/gtm.js?id=GTM-ABC123",
+    "vantat": "blockerad"
+   },
+   {
+    "typ": "spårare",
+    "satt": "skript",
+    "url": "https://connect.facebook.net/en_US/fbevents.js",
+    "vantat": "blockerad"
+   },
+   {
+    "typ": "spårare",
+    "satt": "skript",
+    "url": "https://static.hotjar.com/c/hotjar-123.js?sv=6",
+    "vantat": "blockerad"
+   },
+   {
+    "typ": "spårare",
+    "satt": "skript",
+    "url": "https://bat.bing.com/bat.js",
+    "vantat": "blockerad"
+   },
+   {
+    "typ": "spårare",
+    "satt": "skript",
+    "url": "https://sb.scorecardresearch.com/beacon.js",
+    "vantat": "blockerad"
+   },
+   {
+    "typ": "spårare",
+    "satt": "fetch",
+    "url": "https://www.facebook.com/tr?id=123&ev=PageView&noscript=1",
+    "vantat": "blockerad"
+   },
+   {
+    "typ": "spårare",
+    "satt": "fetch",
+    "url": "https://region1.google-analytics.com/g/collect?v=2&tid=G-ABC",
+    "vantat": "blockerad"
+   },
+   {
+    "typ": "kontroll",
+    "satt": "bild",
+    "url": "https://www.wikipedia.org/static/favicon/wikipedia.ico",
+    "vantat": "nådd"
+   },
+   {
+    "typ": "kontroll",
+    "satt": "bild",
+    "url": "https://www.apple.com/favicon.ico",
+    "vantat": "nådd"
+   },
+   {
+    "typ": "kontroll",
+    "satt": "bild",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/6/63/Wikipedia-logo.png",
+    "vantat": "nådd"
+   },
+   {
+    "typ": "kontroll",
+    "satt": "skript",
+    "url": "https://code.jquery.com/jquery-3.7.1.min.js",
+    "vantat": "nådd"
+   },
+   {
+    "typ": "inloggning",
+    "satt": "skript",
+    "url": "https://www.google.com/recaptcha/api.js",
+    "vantat": "nådd",
+    "utanTillatlistan": "nådd"
+   },
+   {
+    "typ": "inloggning",
+    "satt": "skript",
+    "url": "https://js.stripe.com/v3/",
+    "vantat": "nådd",
+    "utanTillatlistan": "nådd"
+   },
+   {
+    "typ": "inloggning",
+    "satt": "skript",
+    "url": "https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js",
+    "vantat": "nådd",
+    "utanTillatlistan": "nådd"
+   },
+   {
+    "typ": "inloggning",
+    "satt": "skript",
+    "url": "https://www.paypalobjects.com/api/checkout.js",
+    "vantat": "nådd",
+    "utanTillatlistan": "nådd"
+   },
+   {
+    "typ": "inloggning",
+    "satt": "fetch",
+    "url": "https://collector.github.com/github/collect",
+    "vantat": "nådd",
+    "utanTillatlistan": "blockerad"
+   },
+   {
+    "typ": "inloggning",
+    "satt": "fetch",
+    "url": "https://i.paypal.com/x.gif",
+    "vantat": "nådd",
+    "utanTillatlistan": "blockerad"
+   }
+  ]
+ },
+ "kosmetik": {
+  "generiska": [
+   "#AC_ad",
+   "#AD_300",
+   ".ADLeader",
+   ".ADMiddle1",
+   ".ADPod"
+  ],
+  "sajt": {
+   "vard": "1001games.com",
+   "selektorer": [
+    ".banner",
+    ".gc-halfpage",
+    ".gc-leaderboard"
+   ]
+  },
+  "utanGeneriska": "1001tracklists.com",
+  "stil": {
+   "vard": "drphil.com",
+   "selektor": ".adBanner",
+   "egenskap": "height",
+   "varde": "1px"
+  },
+  "kakor": [
+   "#ACCETTA_COOKIES",
+   "#AF_GDPR"
+  ]
+ },
+ "scriptlet": {
+  "vard": "1001tracklists.com",
+  "egenskap": "showAds",
+  "varde": true
+ },
+ "stoppsida": {
+  "farlig": "zykqk.com",
+  "snabbkoll": "farlig.exempel.se",
+  "snabbkollAndra": "bank-verifiering.se"
+ },
+ "initiativ": "000491b06a.com",
+ "parameter": {
+  "regel": {
+   "re": [
+    "^[^:]+://+([^:/]+\\.)?youtube\\.com/@.*\\?sub_confirmation="
+   ],
+   "typer": [
+    "main_frame",
+    "sub_frame",
+    "xmlhttprequest"
+   ],
+   "bort": [
+    "sub_confirmation"
+   ],
+   "prio": 1000,
+   "doman": "youtube.com"
+  },
+  "fore": "https://www.youtube.com/@adraze?sub_confirmation=1&adraze=prov",
+  "efter": "https://www.youtube.com/@adraze?adraze=prov"
+ },
+ "inlogg": {
+  "vard": "accounts.google.com"
+ }
+}
