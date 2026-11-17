@@ -327,12 +327,29 @@
   });
   // Taggarna ([[minne+ …]], [[gör:…]]) visas aldrig, inte heller halvfärdiga
   const rensa = (t) => String(t).replace(/\[\[[\s\S]*?\]\]/g, '').replace(/\[\[[^\]]*$/, '').replace(/\[$/, '').replace(/\n{3,}/g, '\n\n');
+  // Halvfärdig fetstil syns inte som stjärnor medan svaret strömmar ("1. **Det" blev "**Det" tills ordet var klart).
+  // Datorns md() tar ** bara inom en rad, så det gäller sista raden: ett öppet ** stängs, stjärnor som inget ord följt
+  // än ("1. **") och ett halvt slut-** ("**Det.*") visas inte. Kod lämnas som den är. Bara visningen: S.text är orörd.
+  function halvfardig(t) {
+    if ((t.match(/^\s*```/gm) || []).length % 2) return t;
+    const n = t.lastIndexOf('\n') + 1;
+    let rad = t.slice(n);
+    if (rad.includes('`')) return t;
+    const par = (s) => (s.match(/\*\*/g) || []).length;
+    const m = rad.match(/\*+$/);
+    if (m) {
+      const fore = rad.slice(0, m.index);
+      if (!fore || /\s$/.test(fore) || (m[0].length === 1 && par(fore) % 2)) rad = fore;
+    }
+    if (par(rad) % 2) rad += '**';
+    return t.slice(0, n) + rad;
+  }
   function rita() {
     S.raf = 0;
     const typing = [...log.querySelectorAll('.msg.typing')].pop();
     if (!typing || !S.aktiv) return;
-    const ren = rensa(S.text).trim();
-    if (!ren) return;
+    const ren = halvfardig(rensa(S.text).trim());
+    if (!ren.trim()) return;
     if (S.el !== typing) {
       S.el = typing; S.fodd = [];
       typing.classList.add('fi-strom');
@@ -492,6 +509,7 @@
   stat.antal = () => history.length;
   stat.strommar = () => !!(S.aktiv && S.el);
   stat.stromtext = () => S.text;
+  stat.halvfardig = halvfardig;
   stat.nollstall = () => {
     for (const k of ['krypto-memories', 'krypto-convos', 'krypto-chat-history', 'krypto-projects', 'krypto-senast', 'krypto-mode', 'falk-modell', 'falk-modell-gomd']) {
       try { localStorage.removeItem(k); } catch {}

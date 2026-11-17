@@ -5,7 +5,7 @@ import UIKit
 /// Den riktiga AI-tjänsten anropas aldrig.
 ///
 /// 1. En lokal testsida i en vanlig flik, Falk från menyns plats: välkomsten föreslår sidan.
-/// 2. En fråga: samtyckesrutan (iPhone-texten med Qwen och DeepSeek), sedan strömmar svaret in.
+/// 2. En fråga: samtyckesrutan (iPhone-texten med Qwen och DeepSeek), sedan strömmar svaret in (halvfärdig fetstil utan stjärnor).
 /// 3. En fråga om sidan: sidans text följer med till servern och svaret bygger på den.
 /// 4. Mörkt läge genom Falk (anpassa-falk:gor), sidomenyn, utloggat läge i mörkt och ljust, avstängt läge.
 /// 5. Helskärm med en fråga från appen (`visa(fraga:)`), och att Falk aldrig läser en privat flik.
@@ -102,6 +102,14 @@ enum FalkProv {
             return b ? { n: b.textContent.length, text: b.textContent, ord: b.querySelectorAll('.fi-w').length, status: document.getElementById('convtitle').textContent } : null;
             """) { ($0["n"].tal ?? 0) > 40 }
         await bild(k, "03-strommar", system: true)
+        // Halvfärdig fetstil visas inte som stjärnor under strömningen (falk-ios.js `halvfardig`; bara visningen)
+        let halv = try? await w.kor("""
+            const f = window.__falkIos.halvfardig;
+            return ['1. **Det', 'bluff:\\n\\n1. **', '**Det brådskar.*', 'x *kursiv*', '```\\nx = a**'].map(f).join('|');
+            """)
+        k.lika("halvfärdig fetstil stängs under strömningen, kursiv och kod orörda", halv?.text ?? "",
+               "1. **Det**|bluff:\n\n1. |**Det brådskar.**|x *kursiv*|```\nx = a**")
+        k.kolla("under strömningen syns inga stjärnor", !(mitt?["text"].text ?? "*").contains("*"), mitt ?? .null)
         let svar = await vantaJS(k, "svaret klart, kvar som ett vanligt svar", w, max: 25, """
             if (window.__falkIos.upptagen()) return null;
             const m = [...document.querySelectorAll('.msg.krypto:not(.typing)')].pop();
