@@ -54,6 +54,9 @@ def url(kod, sida):
     bas = '' if kod == 'sv' else f'/{kod}'
     return f'{bas}/{sida}' if sida else f'{bas}/'
 
+# Kort hash av filen: ny adress när filen ändras, så att ingen sitter kvar med en gammal kopia
+import hashlib
+VER = {f: hashlib.sha1((rot / f).read_bytes()).hexdigest()[:8] for f in ('style.css', 'main.js')}
 sv = json.loads((rot / 'i18n' / 'sv.json').read_text())
 finns = [(k, n) for k, n in SPRAK if (rot / 'i18n' / f'{k}.json').exists()]
 saknas = [k for k, _ in SPRAK if (k, dict(SPRAK)[k]) not in finns]
@@ -97,6 +100,7 @@ for kod, namn in finns:
         ut = ut.replace('{{pre}}', hem + ('' if kod == 'sv' else f'/{kod}'))   # länkar inne i översättningar
         ut = re.sub(r'\{\{([a-z-]+)\}\}', lambda m: ikon(m.group(1)), ut)
         assert '{{' not in ut, re.findall(r'\{\{.*?\}\}', ut)[:3]
+        ut = re.sub(r'(href|src)="/(style\.css|main\.js)"', lambda m: f'{m.group(1)}="/{m.group(2)}?v={VER[m.group(2)]}"', ut)
         mal = MAPP[sajt] / (kod if kod != 'sv' else '') / ((sida or 'index') + '.html')
         mal.parent.mkdir(parents=True, exist_ok=True)
         mal.write_text(ut)

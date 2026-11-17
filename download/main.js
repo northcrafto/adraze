@@ -153,16 +153,4 @@ document.querySelectorAll('.sf-test').forEach((el) => new IntersectionObserver((
       rakna(tn, 0, mal, (v) => m[1] + String(v).replace(/\B(?=(\d{3})+$)/g, skilj) + m[3]);
     });
   }, 0.3);
-
-  // Bäraren går över sidan när den syns, och en gång till när man pekar eller trycker på den
-  document.querySelectorAll('.barare').forEach((scen) => {
-    const ga = () => {
-      if (lugn || scen.classList.contains('gar')) return;
-      scen.style.setProperty('--tid', `${Math.max(4, (scen.clientWidth + 140) / 165).toFixed(1)}s`);
-      scen.classList.add('gar');
-    };
-    scen.querySelector('.barare-gar').addEventListener('animationend', (e) => { if (e.animationName === 'bar-bort') scen.classList.remove('gar'); });
-    narSyns(scen, ga, 0.8);
-    scen.addEventListener('pointerenter', ga); scen.addEventListener('click', ga);
-  });
 })();
