@@ -82,7 +82,8 @@ enum SkalProv {
         let forsta = app.flikar.aktiv ?? app.flikar.nyFlik(nil)
         if forsta.privat { app.flikar.nyFlik(nil, privat: false, aktivera: true) }
         let flik = app.flikar.aktiv ?? forsta
-        try await k.vanta(0.5)
+        // Datorns startsida (Brygga) laddas första gången den visas.
+        try await k.vanta(app.sidor.finns("startsida") ? 2.5 : 0.5)
         await k.skarmbild("start")
         k.kolla("tom flik visar startsidan", arTomAdress(flik.url))
 

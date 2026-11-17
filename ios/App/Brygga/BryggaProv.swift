@@ -302,33 +302,10 @@ enum BryggaProv {
           vy: [innerWidth, innerHeight, devicePixelRatio, document.visibilityState, document.hidden] };
         """
 
-    /// Skärmbild med sidans innehåll. `k.skarmbild` (drawHierarchy) ritar inte webbvyns innehåll i ett ark
-    /// (mätt 2026-11-17: arket blev tomt), så webbvyns egen ögonblicksbild (takeSnapshot) ritas ovanpå på samma plats.
+    /// Skärmbild med sidans webbinnehåll. `drawHierarchy` ritar inte webbvyns innehåll i ett ark (mätt 2026-11-17:
+    /// arket blev tomt); `Labbkorning.skarmbild` lägger därför in webbvyerna i ark och helskärm med `takeSnapshot`.
     static func bild(_ k: Labbkorning, _ namn: String, _ sida: AdrazeSida) async {
-        guard let bas = await k.skarmbild(namn), let fonster = Labbkorning.fonster() else { return }
-        let konf = WKSnapshotConfiguration()
-        konf.afterScreenUpdates = true
-        let webb: UIImage? = await withCheckedContinuation { c in
-            sida.webbvy.takeSnapshot(with: konf) { bild, _ in c.resume(returning: bild) }
-        }
-        guard let webb else {
-            k.kolla("webbvyns ögonblicksbild \(namn)", false)
-            return
-        }
-        let rekt = sida.webbvy.convert(sida.webbvy.bounds, to: fonster)
-        let format = UIGraphicsImageRendererFormat(for: fonster.traitCollection)
-        let bild = UIGraphicsImageRenderer(bounds: fonster.bounds, format: format).image { _ in
-            bas.draw(in: fonster.bounds)
-            // Arkets rundade hörn upptill (preferredCornerRadius 24); helskärm har inga
-            let horn: CGFloat = rekt.minY > 1 ? 24 : 0
-            UIBezierPath(roundedRect: rekt, byRoundingCorners: [.topLeft, .topRight], cornerRadii: CGSize(width: horn, height: horn)).addClip()
-            webb.draw(in: rekt)
-        }
-        do {
-            try bild.pngData()?.write(to: k.mapp.appendingPathComponent("\(namn).png"), options: .atomic)
-        } catch {
-            k.kolla("skärmbild \(namn)", false, .text(error.localizedDescription))
-        }
+        _ = await k.skarmbild(namn)
     }
 
     /// Frågar sidan var 100:e ms tills villkoret är sant. Blir en kontroll; ger det sista svaret när det lyckades.

@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import UIKit
+import WebKit
 
 /// Självtesterna. Appen startad med `-mode <namn>` kör testet `<namn>`, skriver resultatet till
 /// `Documents/resultat-<namn>.json`, stannar kvar en stund (`-stanna`, standard 15 s) så att `bygg-sim.sh` hinner ta
@@ -166,6 +167,9 @@ final class Labbkorning {
 
     /// Tar en skärmbild av appens fönster (med webbvyernas innehåll) och sparar den som `Documents/Labb/<test>/<namn>.png`.
     /// `fran-mint.sh` hämtar hem den som `<prefix>-<namn>.png`.
+    ///
+    /// `drawHierarchy` ritar inte webbinnehållet i webbvyer som ligger i en modal (ark, helskärm), så de
+    /// fotograferas var för sig med `takeSnapshot` och läggs på sin plats, klippta efter arkets rundade hörn.
     @discardableResult
     func skarmbild(_ namn: String) async -> UIImage? {
         try? await Task.sleep(nanoseconds: 400_000_000)
@@ -174,8 +178,28 @@ final class Labbkorning {
             return nil
         }
         let format = UIGraphicsImageRendererFormat(for: fonster.traitCollection)
-        let bild = UIGraphicsImageRenderer(bounds: fonster.bounds, format: format).image { _ in
+        let bas = UIGraphicsImageRenderer(bounds: fonster.bounds, format: format).image { _ in
             _ = fonster.drawHierarchy(in: fonster.bounds, afterScreenUpdates: true)
+        }
+        var lager: [(bild: UIImage, rekt: CGRect, form: UIBezierPath)] = []
+        for vy in Self.webbvyerIModaler(fonster) {
+            let konf = WKSnapshotConfiguration()
+            konf.afterScreenUpdates = true
+            let webb: UIImage? = await withCheckedContinuation { c in
+                vy.takeSnapshot(with: konf) { b, _ in c.resume(returning: b) }
+            }
+            guard let webb, vy.window != nil else { continue }
+            let rekt = vy.convert(vy.bounds, to: fonster)
+            lager.append((webb, rekt, Self.klippform(for: vy, rekt: rekt, i: fonster)))
+        }
+        let bild = lager.isEmpty ? bas : UIGraphicsImageRenderer(bounds: fonster.bounds, format: format).image { ctx in
+            bas.draw(in: fonster.bounds)
+            for l in lager {
+                ctx.cgContext.saveGState()
+                l.form.addClip()
+                l.bild.draw(in: l.rekt)
+                ctx.cgContext.restoreGState()
+            }
         }
         let fil = mapp.appendingPathComponent("\(namn).png")
         do {
@@ -186,6 +210,38 @@ final class Labbkorning {
             kolla("skärmbild \(namn)", false, .text(error.localizedDescription))
         }
         return bild
+    }
+
+    /// Synliga webbvyer i modaler (ark, helskärm), i den ordning de visas.
+    static func webbvyerIModaler(_ fonster: UIWindow) -> [WKWebView] {
+        var ut: [WKWebView] = []
+        var k = fonster.rootViewController?.presentedViewController
+        while let p = k {
+            if !p.isBeingDismissed, let v = p.viewIfLoaded { ut += webbvyer(i: v) }
+            k = p.presentedViewController
+        }
+        return ut
+    }
+
+    private static func webbvyer(i vy: UIView) -> [WKWebView] {
+        if vy.isHidden || vy.alpha < 0.01 { return [] }
+        if let w = vy as? WKWebView { return w.bounds.width > 1 && w.bounds.height > 1 ? [w] : [] }
+        return vy.subviews.flatMap { webbvyer(i: $0) }
+    }
+
+    /// Formen som webbvyn syns i: närmaste förälder med rundade hörn (arkets behållare), annars hela rutan.
+    private static func klippform(for vy: UIView, rekt: CGRect, i fonster: UIWindow) -> UIBezierPath {
+        var v: UIView? = vy
+        while let x = v, x !== fonster {
+            if x.layer.cornerRadius > 0.5, x.layer.masksToBounds || x.clipsToBounds || x !== vy {
+                let r = x.convert(x.bounds, to: fonster)
+                return UIBezierPath(roundedRect: r.intersection(rekt).isNull ? rekt : r, cornerRadius: x.layer.cornerRadius)
+            }
+            v = x.superview
+        }
+        // Arken ritar sina hörn i en mask som inte syns som cornerRadius: 24 upptill (preferredCornerRadius i Brygga)
+        let horn: CGFloat = rekt.minY > 1 ? 24 : 0
+        return UIBezierPath(roundedRect: rekt, byRoundingCorners: [.topLeft, .topRight], cornerRadii: CGSize(width: horn, height: horn))
     }
 
     /// Appens fönster.

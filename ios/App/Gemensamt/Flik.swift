@@ -95,6 +95,9 @@ protocol FlikHanterare: AnyObject, Observable {
     func flytta(_ id: UUID, till plats: Int)
     /// Stänger alla privata (eller alla vanliga) flikar.
     func stangAlla(privata: Bool)
+    /// Rensar webbdata (`WKWebsiteDataType…`) i flikarnas datalager: vanliga flikar och öppna privata flikar,
+    /// aldrig AdRaze-UI:ts eget lager. Används av Anpassa › Rensa webbdata (`webb:clear`).
+    func rensaWebbdata(_ typer: Set<String>) async
 }
 
 extension FlikHanterare {

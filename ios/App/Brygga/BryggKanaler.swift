@@ -160,8 +160,9 @@ enum BryggKanaler {
                 typer.formUnion([WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache, WKWebsiteDataTypeOfflineWebApplicationCache])
             }
             guard !typer.isEmpty else { return false }
-            // Flikarnas lager. AdRaze-UI:ts eget (transport.datalager) rensas aldrig härifrån.
-            await WKWebsiteDataStore.default().removeData(ofTypes: typer, modifiedSince: .distantPast)
+            // Flikarnas lager, vanliga och privata (som datorn: standardsessionen och inkognito). AdRaze-UI:ts
+            // eget (transport.datalager) rensas aldrig härifrån.
+            await app.flikar.rensaWebbdata(typer)
             return true
         }
 

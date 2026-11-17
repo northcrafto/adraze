@@ -91,7 +91,8 @@ final class AdrazeSida: UIView, WKNavigationDelegate, WKUIDelegate {
 
     func markeraKlar(sidansMs: Double? = nil) {
         if let sidansMs { tider["sidan_klar"] = sidansMs }
-        guard !arKlar else { return }
+        // Ett nytt dokument i samma vy (omladdning vid språkbyte): måtten nertill gäller fortfarande.
+        guard !arKlar else { skickaNedre(); return }
         notera("klar")
         arKlar = true
         klarEfterMs = (Date().timeIntervalSince(skapad) * 1000).rounded()

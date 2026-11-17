@@ -110,9 +110,18 @@ struct SkalVy: View {
         !(flik?.privat ?? false) && app.sidor.finns("startsida")
     }
 
-    /// Datorns startsida i den tomma fliken. `nedre` = skalets rad som ligger ovanpå sidan nertill.
-    private func startsida(nedre: CGFloat) -> some View {
-        app.sidor.vy("startsida", fragment: nil, nedre: nedre) { [weak skal] url in skal?.ga(till: url) }
+    /// Datorns startsida i den tomma fliken. `nedre` = skalets rad som ligger ovanpå sidan nertill. Sidan finns
+    /// kvar (osynlig) när en vanlig sida visas, så att nästa nya flik visar den direkt i stället för en tom yta
+    /// medan webbvyn laddar.
+    @ViewBuilder private func startsida(_ flik: (any Flik)?, nedre: CGFloat) -> some View {
+        if app.sidor.finns("startsida") {
+            let syns = visarStart(flik) && webbstart(flik)
+            app.sidor.vy("startsida", fragment: nil, nedre: nedre) { [weak skal] url in skal?.ga(till: url) }
+                .opacity(syns ? 1 : 0)
+                .allowsHitTesting(syns)
+                .accessibilityHidden(!syns)
+                .animation(Rorelse.val(.easeOut(duration: 0.18), minska), value: syns)
+        }
     }
 
     /// Webbytan. Felsidor (nätfel, skyddets stoppsida) visar fliken själv i webbvyn, så skalet lägger inget
@@ -120,14 +129,10 @@ struct SkalVy: View {
     private func webbflade(_ flik: (any Flik)?, _ f: Skalfarger, uppe: Bool, startILager: Bool = false) -> some View {
         ZStack(alignment: .top) {
             Webbyta(flik: flik, skal: skal, bakgrund: UIColor(f.sida))
-            if visarStart(flik) {
-                if !webbstart(flik) {
-                    Startvy(skal: skal, privat: flik?.privat ?? false, uppe: uppe)
-                        .transition(.opacity)
-                } else if !startILager {
-                    startsida(nedre: 0)
-                        .transition(.opacity)
-                }
+            if !startILager { startsida(flik, nedre: 0) }
+            if visarStart(flik), !webbstart(flik) {
+                Startvy(skal: skal, privat: flik?.privat ?? false, uppe: uppe)
+                    .transition(.opacity)
             }
             Dragvisare(skal: skal, farger: f)
         }
@@ -160,11 +165,8 @@ struct SkalVy: View {
             }
             // Startsidan går under statusraden och raden nere (bilden ända ut i kanterna); sidan lägger sitt
             // innehåll ovanför raden med --ios-nedre.
-            if visarStart(flik), webbstart(flik) {
-                startsida(nedre: skal.kompakt ? matt.kompakt : matt.full)
-                    .ignoresSafeArea()
-                    .transition(.opacity)
-            }
+            startsida(flik, nedre: skal.kompakt ? matt.kompakt : matt.full)
+                .ignoresSafeArea()
             if skal.kompakt {
                 kompaktremsa(flik, f, uppe: false)
                     .transition(.opacity.animation(Rorelse.val(.easeOut(duration: 0.2), minska)))

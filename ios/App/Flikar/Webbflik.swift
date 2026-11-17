@@ -73,6 +73,8 @@ final class Webbflik: Flik {
     @ObservationIgnored private var behoverLaddasOm = false
     @ObservationIgnored private var dialogerPaSidan = 0
     @ObservationIgnored private var stoppaDialoger = false
+    /// Endast HTTPS: huvudramen gick till https i stället för http (värden och den ursprungliga adressen).
+    @ObservationIgnored private var httpsUppgradering: (vard: String, fran: URL)?
     @ObservationIgnored private let logg = Logg("Flik")
 
     init(motor: Flikmotor, privat: Bool, oppnadAv: UUID?) {
@@ -164,7 +166,8 @@ final class Webbflik: Flik {
         bevaka(v)
         Flikmeny.forbered(v)
         motor?.app.skydd.forbered(v, privat: privat)
-        if zoom != 1 { v.pageZoom = CGFloat(zoom) }
+        let z = verkligZoom(zoom)
+        if z != 1 { v.pageZoom = z }
         sover = false
         if konfiguration == nil {
             if let d = sparatTillstand {
@@ -421,6 +424,14 @@ final class Webbflik: Flik {
             tillbakaFranFelsida()
             return (.cancel, p)
         }
+        // "Fortsätt utan kryptering" på felsidan för Endast HTTPS: värden får http tills appen startas om.
+        if huvudram, visarFelsida, adress.fragment == Flikfelsida.osakertFragment, Self.sammaDokument(adress, vy?.url),
+           let u = fel?.url, let vard = u.host(percentEncoded: false)?.lowercased() {
+            motor.httpTillatna.insert(vard)
+            appnavigering()
+            vy?.load(URLRequest(url: u))
+            return (.cancel, p)
+        }
         let schema = (adress.scheme ?? "").lowercased()
         if !Self.webbscheman.contains(schema) {
             // mailto:, tel:, appar. adraze-app: och file: öppnas aldrig (3.4).
@@ -435,11 +446,26 @@ final class Webbflik: Flik {
             vy?.load(URLRequest(url: ny))
             return (.cancel, p)
         }
+        // Endast HTTPS (webb.httpsOnly): huvudsidan hämtas med https; går det inte visas felsidan med "Fortsätt
+        // utan kryptering" (som datorns webbinst.js upgradeUrl och httpsFailed).
+        if huvudram, schema == "http", let https = motor.httpsAdress(for: adress) {
+            httpsUppgradering = ((https.host(percentEncoded: false) ?? "").lowercased(), adress)
+            appnavigering()
+            vy?.load(URLRequest(url: https))
+            return (.cancel, p)
+        }
         p.allowsContentJavaScript = b.javascript
         p.preferredContentMode = skrivbordslage ? .desktop : .mobile
         if huvudram, !Self.sammaDokument(adress, vy?.url) { vantandeTyp = h.navigationType }
         return (.allow, p)
     }
+
+    /// Fel som betyder att sajten inte har (fungerande) https (datorns `HTTPS_FAIL`).
+    static let httpsFel: Set<Int> = [
+        NSURLErrorSecureConnectionFailed, NSURLErrorServerCertificateHasBadDate, NSURLErrorServerCertificateUntrusted,
+        NSURLErrorServerCertificateHasUnknownRoot, NSURLErrorServerCertificateNotYetValid, NSURLErrorCannotConnectToHost,
+        NSURLErrorTimedOut, NSURLErrorNetworkConnectionLost, NSURLErrorBadServerResponse,
+    ]
 
     /// `a` och `b` är samma dokument med olika #-del (då laddas ingen ny sida).
     static func sammaDokument(_ a: URL, _ b: URL?) -> Bool {
@@ -492,6 +518,7 @@ final class Webbflik: Flik {
         }
         visarFelsida = false
         fel = nil
+        if let upg = httpsUppgradering, v.url?.host(percentEncoded: false)?.lowercased() != upg.vard { httpsUppgradering = nil }
         let forra = url
         url = v.url
         if forra?.host() != v.url?.host() {
@@ -565,6 +592,16 @@ final class Webbflik: Flik {
         logg.varning("\(adress?.host() ?? "?"): \(ns.domain) \(ns.code) \(ns.localizedDescription)\(provisoriskt ? "" : " (efter bekräftelse)")")
         // Ett fel efter att sidan bekräftats (sidan syns redan, kanske halvt) ersätts inte med en felsida.
         guard provisoriskt else { return }
+        // Endast HTTPS och sajten svarar inte säkert: felsidan för den ursprungliga http-adressen.
+        if let upg = httpsUppgradering, let motor, ns.domain == NSURLErrorDomain, Self.httpsFel.contains(ns.code),
+           adress?.host(percentEncoded: false)?.lowercased() == upg.vard {
+            httpsUppgradering = nil
+            let tom = Sidfel(url: upg.fran, doman: Flikfelsida.httpsdoman, kod: ns.code, text: "")
+            let f = Sidfel(url: upg.fran, doman: Flikfelsida.httpsdoman, kod: ns.code, text: Flikfelsida.innehall(for: tom).text)
+            fel = f
+            visaFelsida(Flikfelsida.html(for: f, tema: motor.app.tema, kanGaBakat: harRiktigSidaBakom(v, upg.fran)), for: upg.fran, i: v)
+            return
+        }
         let f = Self.sidfel(e, url: adress)
         fel = f
         // Bakåt eller framåt till en sida som inte går att ladda: en ny felsida skulle hamna efter den här sidan i
@@ -717,7 +754,7 @@ final class Webbflik: Flik {
     func sattZoom(_ z: Double) {
         let z = Sajtminne.begransa(z)
         if zoom != z { zoom = z }
-        vy?.pageZoom = CGFloat(z)
+        vy?.pageZoom = verkligZoom(z)
         if let vard = url?.host(percentEncoded: false) { motor?.sajter.sparaZoom(z, vard: vard, privat: privat) }
     }
 
@@ -728,7 +765,19 @@ final class Webbflik: Flik {
         guard let motor else { return }
         let z = u?.host(percentEncoded: false).map { motor.sajter.zoom(vard: $0, privat: privat) } ?? 1
         if zoom != z { zoom = z }
-        if let v = vy, abs(Double(v.pageZoom) - z) > 0.0001 { v.pageZoom = CGFloat(z) }
+        if let v = vy, abs(v.pageZoom - verkligZoom(z)) > 0.0001 { v.pageZoom = verkligZoom(z) }
+    }
+
+    /// Sajtens zoom gånger textstorleken i Anpassa (`webb.fontSize`, 16 = 100 %). iOS har inget publikt sätt att
+    /// ändra webbsidornas standardtypsnitt som datorns `defaultFontSize`, så storleken blir sidzoom, som Safaris
+    /// textstorlek (aA): sidan skalas och radbryts om.
+    private func verkligZoom(_ z: Double) -> CGFloat {
+        CGFloat(min(5, max(0.25, z * (motor?.textfaktor ?? 1))))
+    }
+
+    /// Textstorleken i Anpassa ändrades: samma sajtzoom med den nya faktorn.
+    func textstorlekAndrad() {
+        if let v = vy { v.pageZoom = verkligZoom(zoom) }
     }
 
     /// Begär skrivbordsversionen (som Safaris "Begär datorwebbplats"): datorns användaragent och

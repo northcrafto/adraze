@@ -172,10 +172,23 @@ struct Monogram: View {
 
     var body: some View {
         let ren = doman.hasPrefix("www.") ? String(doman.dropFirst(4)) : doman
+        // En IP-adress (127.0.0.1) eller ingen värd: en jordglob i stället för en siffra.
+        if ren.first.map({ !$0.isLetter }) ?? true {
+            RoundedRectangle(cornerRadius: storlek * 0.3, style: .continuous)
+                .fill(Color.hex("#5f6b7a").opacity(schema == .dark ? 0.24 : 0.12))
+                .overlay(Ikonvy(.glob, storlek: storlek * 0.56, streck: max(1.4, storlek / 14)).foregroundStyle(Color.hex(schema == .dark ? "#aab4c0" : "#5f6b7a")))
+                .frame(width: storlek, height: storlek)
+                .accessibilityHidden(true)
+        } else {
+            bokstavsruta(ren)
+        }
+    }
+
+    private func bokstavsruta(_ ren: String) -> some View {
         let bokstav = ren.first.map { String($0).uppercased() } ?? "·"
         let i = Int(ren.unicodeScalars.reduce(UInt32(7)) { ($0 &* 31) &+ $1.value } % UInt32(Self.toner.count))
         let ton = Color.hex(Self.toner[i])
-        RoundedRectangle(cornerRadius: storlek * 0.3, style: .continuous)
+        return RoundedRectangle(cornerRadius: storlek * 0.3, style: .continuous)
             .fill(ton.opacity(schema == .dark ? 0.24 : 0.13))
             .overlay(
                 Text(bokstav)

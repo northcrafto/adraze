@@ -15,6 +15,10 @@ enum Flikfelsida {
     /// "Tillbaka" på felsidan är en länk till `#adraze-tillbaka`, som fliken fångar och går till närmaste sida
     /// bakåt som inte är en felsida (`Webbflik.tillbakaFranFelsida`).
     static let tillbakaFragment = "adraze-tillbaka"
+    /// Feldomänen när Endast HTTPS är på och sajten inte svarar säkert (koden är NSURLError-koden).
+    static let httpsdoman = "AdRazeHttps"
+    /// "Fortsätt utan kryptering" på den felsidan (`Webbflik.beslut` släpper igenom värden med http).
+    static let osakertFragment = "adraze-osakert"
 
     struct Innehall {
         let rubrik: String
@@ -31,6 +35,12 @@ enum Flikfelsida {
         if f.doman == kraschdoman {
             return Innehall(rubrik: "Sidan kraschade", text: "\(vard) kraschade flera gånger i rad, så AdRaze laddar den inte igen av sig själv.",
                             tips: ["Försök igen om en stund", "Stäng andra flikar om telefonen har ont om minne"], figur: "cancel")
+        }
+        if f.doman == httpsdoman {
+            return Innehall(rubrik: "Sidan har ingen säker anslutning", text: "Du har Endast HTTPS på, men \(vard) svarar inte säkert.",
+                            tips: ["Sidan går bara att öppna utan kryptering",
+                                   "Det du skickar till sidan, till exempel lösenord, kan läsas av andra på nätverket"],
+                            figur: "secure-server")
         }
         if f.blockeradAvSkyddet {
             return Innehall(rubrik: "AdRaze stoppade sidan", text: "Skyddet stoppade \(vard) innan den laddades.",
@@ -74,7 +84,7 @@ enum Flikfelsida {
     static func html(for f: Sidfel, tema: Tema, kanGaBakat: Bool) -> String {
         let inn = innehall(for: f)
         let adress = f.url?.absoluteString ?? ""
-        let kod = f.doman == kraschdoman ? "" : "\(f.doman) \(f.kod)"
+        let kod = f.doman == kraschdoman || f.doman == httpsdoman ? "" : "\(f.doman) \(f.kod)"
         var rader: [String] = []
         rader.append("<!doctype html><html lang=\"sv\"><head><meta charset=\"utf-8\">")
         rader.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">")
@@ -89,7 +99,9 @@ enum Flikfelsida {
         }
         if !kod.isEmpty { rader.append("<p class=\"kod\">Felkod: \(esc(kod))</p>") }
         rader.append("<div class=\"knappar\">")
-        if !adress.isEmpty, !f.blockeradAvSkyddet {
+        if f.doman == httpsdoman {
+            rader.append("<a class=\"liq\" id=\"osakert\" href=\"#\(osakertFragment)\">Fortsätt utan kryptering</a>")
+        } else if !adress.isEmpty, !f.blockeradAvSkyddet {
             rader.append("<a class=\"liq\" id=\"igen\" href=\"\(esc(adress))\">Försök igen</a>")
         }
         if kanGaBakat {

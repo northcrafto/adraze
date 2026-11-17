@@ -76,6 +76,10 @@ final class EnkelFlikHanterare: FlikHanterare {
         for f in flikar where f.privat == privata { stang(f.id) }
     }
 
+    func rensaWebbdata(_ typer: Set<String>) async {
+        await WKWebsiteDataStore.default().removeData(ofTypes: typer, modifiedSince: .distantPast)
+    }
+
     /// Länkar som vill öppna ett nytt fönster (target=_blank, window.open efter ett tryck) blir en ny flik.
     fileprivate func oppnaFonster(_ u: URL, fran f: EnkelFlik) {
         oppna(u, privat: f.privat, aktivera: true, oppnadAv: f.id, plats: (flikar.firstIndex { $0.id == f.id } ?? flikar.count - 1) + 1)

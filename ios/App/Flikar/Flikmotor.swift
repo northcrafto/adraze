@@ -105,6 +105,9 @@ final class Flikmotor: FlikHanterare {
         harStartat = true
         prenumerationer.append(app.handelser.lyssna(AppFasAndrad.self) { [weak self] h in self?.fasAndrad(h.fas) })
         prenumerationer.append(app.handelser.lyssna(KontoAndrades.self) { [weak self] _ in self?.kontoAndrat() })
+        prenumerationer.append(app.handelser.lyssna(InstallningAndrad.self) { [weak self] h in
+            if h.nyckel.hasPrefix("webb.") { self?.webbInstallning(h) }
+        })
         kontoAndrat()
         minnesvakt = NotificationCenter.default.addObserver(forName: UIApplication.didReceiveMemoryWarningNotification,
                                                             object: nil, queue: .main) { [weak self] _ in
@@ -114,6 +117,53 @@ final class Flikmotor: FlikHanterare {
             MainActor.assumeIsolated { self?.sovKoll() }
         }
         if let a = aktivStrikt, a.sover, a.harInnehall { a.vakna() }
+    }
+
+    // MARK: - Webbinställningarna i Anpassa (webb.*)
+
+    /// Värdar som fått öppnas utan kryptering trots Endast HTTPS (tills appen startas om, som datorns `httpOk`).
+    var httpTillatna: Set<String> = []
+
+    /// Textstorleken på webbsidor som zoomfaktor (`webb.fontSize` 9–30, 16 = 1).
+    var textfaktor: Double { min(30, max(9, app.installningar[.webbFontSize])) / 16 }
+
+    /// https-adressen som en http-adress ska bytas mot med Endast HTTPS, annars `nil` (av, lokal adress eller
+    /// värden har tillåtits).
+    func httpsAdress(for u: URL) -> URL? {
+        guard app.installningar[.webbHttpsOnly], u.scheme?.lowercased() == "http",
+              let vard = u.host(percentEncoded: false)?.lowercased(), !Self.lokal(vard), !httpTillatna.contains(vard),
+              var c = URLComponents(url: u, resolvingAgainstBaseURL: false) else { return nil }
+        c.scheme = "https"
+        if c.port == 80 { c.port = nil }
+        return c.url
+    }
+
+    /// Lokala adresser uppgraderas aldrig (datorns `lokal`).
+    static func lokal(_ vard: String) -> Bool {
+        if vard == "localhost" || vard.hasSuffix(".localhost") || vard.hasSuffix(".local") || vard == "::1" || vard == "[::1]" { return true }
+        let d = vard.split(separator: ".").compactMap { Int($0) }
+        guard d.count == 4 else { return false }
+        return d[0] == 127 || d[0] == 10 || (d[0] == 192 && d[1] == 168) || (d[0] == 172 && (16...31).contains(d[1]))
+            || (d[0] == 169 && d[1] == 254)
+    }
+
+    private func webbInstallning(_ h: InstallningAndrad) {
+        switch h.nyckel {
+        case Nycklar.webbFontSize.namn:
+            for f in alla where !f.sover { f.textstorlekAndrad() }
+        case Nycklar.webbHttpsOnly.namn:
+            if !app.installningar[.webbHttpsOnly] { httpTillatna = [] }
+        default:
+            break
+        }
+    }
+
+    /// Rensar webbdata i flikarnas datalager: vanliga flikar och de privata flikarnas (om några är öppna).
+    /// AdRaze-UI:ts eget lager (Brygga) och nycklarna i Keychain rörs inte.
+    func rensaWebbdata(_ typer: Set<String>) async {
+        await WKWebsiteDataStore.default().removeData(ofTypes: typer, modifiedSince: .distantPast)
+        if let p = privatLagret { await p.removeData(ofTypes: typer, modifiedSince: .distantPast) }
+        if typer.contains(WKWebsiteDataTypeCookies) { behorighet.glomPrivata() }
     }
 
     private func kontoAndrat() {
