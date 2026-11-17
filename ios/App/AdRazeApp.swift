@@ -35,5 +35,7 @@ struct RotVy: View {
             .tint(tema.accent)
             .preferredColorScheme(tema.foredragetSchema)
             .dynamicTypeSize(tema.dynamiskTextstorlek(systemetsTextstorlek))
+            .background { Fonstersond { Statusrad.folj($0) }.accessibilityHidden(true) }
+            .onChange(of: app.statusrad, initial: true) { _, stil in Statusrad.satt(stil) }
     }
 }

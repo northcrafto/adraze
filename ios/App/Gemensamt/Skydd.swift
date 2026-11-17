@@ -33,8 +33,18 @@ protocol SkyddTjanst: AnyObject, Observable {
     func arPausat(for vard: String) -> Bool
     func pausa(_ pausat: Bool, for vard: String)
 
-    /// Antal stoppade anrop i en flik sedan sidan laddades, om skyddet kan räkna (del 1, 7.6). `nil` = vet inte.
+    /// Antal stoppade anrop i en flik sedan sidan laddades, om skyddet kan räkna (del 1, 7.6). `nil` = vet inte
+    /// eller räknaren är avslagen (`block.raknare`). Skydds räknare: se `App/Skydd/Raknare.swift` för vad som räknas
+    /// (WebKit säger inte vad det stoppade, så siffran är en undre gräns).
     func antalBlockerade(i flik: UUID) -> Int?
+
+    /// Stoppade annonser och spårare totalt sedan appen installerades (startsidans siffra), samma räkning som
+    /// `antalBlockerade`. `nil` = skyddet räknar inte.
+    var totaltBlockerade: Int? { get }
+}
+
+extension SkyddTjanst {
+    var totaltBlockerade: Int? { nil }
 }
 
 /// Var skyddet står.

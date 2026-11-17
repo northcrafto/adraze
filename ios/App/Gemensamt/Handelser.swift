@@ -153,3 +153,17 @@ struct FlikHistorikAndrad: AppHandelse {}
 
 /// Bokmärkena ändrades.
 struct FlikBokmarkenAndrade: AppHandelse {}
+
+/// Be skalet visa eller stänga en av sina egna ytor (självtest, genvägar). Skal lyssnar; utan Skal händer inget.
+/// AdRazes sidor (Anpassa, startsidan) visas med `app.sidor`, menyns platser med `.plats`.
+struct SkalVisa: AppHandelse {
+    enum Yta: Sendable, Equatable {
+        case flikvaxlare
+        case meny
+        /// En plats ur menyn (`Platser.anpassa` …), som när man trycker på den i menyn.
+        case plats(String)
+        /// Stänger flikväxlaren, menyn och skalets ark.
+        case inget
+    }
+    let yta: Yta
+}

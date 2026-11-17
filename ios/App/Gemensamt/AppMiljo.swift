@@ -51,6 +51,9 @@ final class AppMiljo {
     private(set) var moduler: [Modulinfo] = []
     /// Sant när alla moduler har startat.
     private(set) var arIgang = false
+    /// Statusradens stil över huvudvyn (`Statusrad.swift`). Den modul som lägger något under statusraden
+    /// sätter den och återställer `.auto`.
+    var statusrad: Statusradsstil = .auto
 
     /// Modulen som registrerar eller startar just nu.
     @ObservationIgnored private(set) var aktuellModul = "Grund"
