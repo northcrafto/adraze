@@ -189,12 +189,31 @@ function visaFlikRaknare() {
   const el = $('adcount'); if (!el) return;
   el.textContent = active && active.url ? String(active.blocked || 0) : '';
 }
+// Det man skrivit i adressfältet eller sökrutan utan att trycka Enter hör till fliken: det ligger kvar när man byter
+// flik och kommer tillbaka (tills man navigerar, tömmer fältet eller trycker Esc).
+function sparaUtkast(tab) {
+  if (!tab) return;
+  try {
+    const a = addressInput.value;
+    tab.utkast = (a && a !== (tab.url || '') && a !== (tab.url ? pretty(tab.url) : '')) ? a : null;
+    tab.utkastSok = ($(tab.incognito ? 'incog-search' : 'nt-search') || {}).value || '';
+  } catch {}
+}
+function visaUtkast(tab) {
+  try {
+    addressInput.value = tab.utkast || (tab.url ? pretty(tab.url) : '');
+    const nt = $('nt-search'), ink = $('incog-search');
+    if (nt) nt.value = tab.incognito ? '' : (tab.utkastSok || '');
+    if (ink) ink.value = tab.incognito ? (tab.utkastSok || '') : '';
+  } catch {}
+}
 function switchTab(tab) {
+  if (active && active !== tab && tabs.indexOf(active) >= 0) sparaUtkast(active);
   active = tab;
   document.body.classList.toggle('incog', !!tab.incognito);
   updateTitlebar();
   $('search-engine').textContent = tab.incognito ? INCOG_ENGINE.label : motorEtikett();
-  addressInput.value = tab.url ? pretty(tab.url) : '';
+  visaUtkast(tab);
   setShield(tab.url ? (protectionOn ? (tab.verdict ? tab.verdict.status : 'ok') : 'off') : 'home');
   hideOverlayElements();
   hideDanger();
@@ -379,7 +398,7 @@ function guardedNavigate(tab, raw, opts = {}) {
   loadInTab(tab, url);
 }
 function loadInTab(tab, url) {
-  tab.url = url;
+  tab.url = url; tab.utkast = null; tab.utkastSok = '';
   tab.warning = null;
   if (tab === active) { newtabpage.classList.add('hidden'); incogpage.classList.add('hidden'); hideInfobar(); addressInput.value = pretty(url); setShield(protectionOn ? 'checking' : 'off'); }
   window.view.load(tab.id, url);
@@ -405,11 +424,12 @@ function backgroundCheck(tab, url) {
 window.view.onLinkNavigate((id, url) => { const t = byId(id); if (t) guardedNavigate(t, url); });
 window.view.onDidNavigate((id, url, b, f) => {
   const t = byId(id); if (!t) return;
+  if (t.url !== url) { t.utkast = null; t.utkastSok = ''; }   // sidan gick vidare: det halvskrivna gäller inte längre
   t.url = url; t.canBack = b; t.canForward = f;
   saveOpenTabs();
   if (t === active) visaFlikRaknare();
   if (t.warning && t.warning.url !== url) { t.warning = null; if (t === active) hideInfobar(); }
-  if (t === active) { addressInput.value = pretty(url); updateNavButtons(); updateStar(); }
+  if (t === active) { if (!(t.utkast && document.activeElement === addressInput)) addressInput.value = pretty(url); updateNavButtons(); updateStar(); }
   // Korsdomän-navigeringar sker numera nativt (så POST bevaras) – därför görs de snabba kollarna här i stället.
   if (typeof famBlocked === 'function' && famBlocked(url)) { try { window.view.stop(t.id); } catch {} if (typeof showBlockScreen === 'function') showBlockScreen(url); return; }
   if (protectionOn && !t.bypassed.has(url) && instantDanger(url)) { try { window.view.stop(t.id); } catch {} t.verdict = localDanger(); if (t === active) { window.view.hide(); setShield('danger'); } showDanger(t, url, t.verdict); return; }
@@ -2091,7 +2111,8 @@ function attachAutocomplete(inp, anchor) {
     const openList = suggestEl.classList.contains('on') && sug.items.length;
     if (openList && e.key === 'ArrowDown') { e.preventDefault(); sug.sel = (sug.sel + 1) % sug.items.length; renderSug(); return; }
     if (openList && e.key === 'ArrowUp') { e.preventDefault(); sug.sel = (sug.sel - 1 + sug.items.length) % sug.items.length; renderSug(); return; }
-    if (openList && e.key === 'Escape') { e.preventDefault(); closeSug(); inp.value = (active && active.url) ? pretty(active.url) : ''; return; }
+    if (e.key === 'Escape' && active && inp === addressInput && active.utkast && !openList) { e.preventDefault(); active.utkast = null; inp.value = active.url ? pretty(active.url) : ''; return; }
+    if (openList && e.key === 'Escape') { e.preventDefault(); closeSug(); if (active && inp === addressInput) active.utkast = null; inp.value = (active && active.url) ? pretty(active.url) : ''; return; }
     if (e.key === 'Enter') {
       e.preventDefault();
       if (openList && sug.sel >= 0) { pickSug(sug.items[sug.sel]); return; }
@@ -2529,11 +2550,15 @@ window.view.onCloseTabId((id) => { const t = tabs.find((x) => x.id === id); if (
 window.view.onFocusAddress(() => { addressInput.focus(); addressInput.select(); });
 // Klick/fokus i adressfältet → visa HELA URL:en (https://…), markerad så den är lätt att ändra.
 addressInput.addEventListener('focus', () => {
+  if (active && active.utkast) return;   // det halvskrivna står kvar, markören hamnar där man klickar
   if (active && active.url) { addressInput.value = active.url; setTimeout(() => { try { addressInput.select(); } catch {} }, 0); }
 });
+addressInput.addEventListener('input', () => { if (active) sparaUtkast(active); });
 // Lämnar man fältet utan att navigera → tillbaka till den snygga versionen (utan https://).
 addressInput.addEventListener('blur', () => {
-  if (active) addressInput.value = active.url ? pretty(active.url) : '';
+  if (!active) return;
+  sparaUtkast(active);
+  if (!active.utkast) addressInput.value = active.url ? pretty(active.url) : '';
 });
 window.view.onClearData(() => { const kept = !clearHistory(); if (typeof historyOpen !== 'undefined' && historyOpen) renderHistory(); showToast(kept ? 'Surfdata rensad – historiken sparas åt dina föräldrar.' : 'Surfdata rensad.'); });
 
