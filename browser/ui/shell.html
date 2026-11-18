@@ -288,80 +288,24 @@
       </div>
     </div>
 
-    <!-- Inkognito-startsida -->
-    <div id="incogpage" class="absolute inset-0 hidden overflow-hidden" style="background: radial-gradient(125% 92% at 50% 18%, #2a1148 0%, #170b2c 48%, #080603 100%);">
-      <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(38% 30% at 76% 26%, rgba(168,85,247,.20), transparent 70%), radial-gradient(46% 36% at 18% 78%, rgba(124,58,237,.16), transparent 72%);"></div>
-      <div class="relative z-10 h-full flex flex-col items-center justify-center px-8 text-center">
-        <div class="mb-6 incog-hero">
-          <svg viewBox="0 0 440 320" width="330" height="240" fill="none" xmlns="http://www.w3.org/2000/svg" style="max-width:74vw;">
-            <defs>
-              <linearGradient id="lockg" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#c084fc"/><stop offset=".55" stop-color="#9333ea"/><stop offset="1" stop-color="#6b21a8"/>
-              </linearGradient>
-              <linearGradient id="shackg" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0" stop-color="#ede9fe"/><stop offset="1" stop-color="#a855f7"/>
-              </linearGradient>
-              <radialGradient id="glowg" cx=".5" cy=".5" r=".5">
-                <stop offset="0" stop-color="#a855f7" stop-opacity=".55"/><stop offset="1" stop-color="#a855f7" stop-opacity="0"/>
-              </radialGradient>
-            </defs>
-            <!-- lila glöd -->
-            <ellipse cx="214" cy="212" rx="158" ry="126" fill="url(#glowg)"/>
-            <!-- snokaren bakom muren -->
-            <g>
-              <path d="M296 152 C296 108 316 92 340 92 C364 92 384 108 384 152 Z" fill="#100a20" stroke="#7c3aed" stroke-opacity=".55" stroke-width="2"/>
-              <path d="M312 152 C312 121 326 110 340 110 C354 110 368 121 368 152 Z" fill="#1d1236"/>
-              <ellipse cx="330" cy="137" rx="7.5" ry="8.5" fill="#ede9fe"/>
-              <ellipse cx="350" cy="137" rx="7.5" ry="8.5" fill="#ede9fe"/>
-              <circle cx="326.5" cy="139.5" r="3.6" fill="#4c1d95"/>
-              <circle cx="346.5" cy="139.5" r="3.6" fill="#4c1d95"/>
-            </g>
-            <!-- muren -->
-            <g>
-              <rect x="36" y="152" width="368" height="168" rx="4" fill="#150c28"/>
-              <rect x="36" y="152" width="368" height="9" fill="#241442"/>
-              <g stroke="#7c3aed" stroke-opacity=".16" stroke-width="2">
-                <line x1="36" y1="184" x2="404" y2="184"/><line x1="36" y1="216" x2="404" y2="216"/>
-                <line x1="36" y1="248" x2="404" y2="248"/><line x1="36" y1="280" x2="404" y2="280"/>
-                <line x1="108" y1="161" x2="108" y2="184"/><line x1="196" y1="161" x2="196" y2="184"/><line x1="284" y1="161" x2="284" y2="184"/>
-                <line x1="70" y1="184" x2="70" y2="216"/><line x1="152" y1="184" x2="152" y2="216"/><line x1="330" y1="184" x2="330" y2="216"/>
-                <line x1="110" y1="216" x2="110" y2="248"/><line x1="366" y1="216" x2="366" y2="248"/>
-              </g>
-            </g>
-            <!-- händer som greppar murkanten -->
-            <g fill="#231541" stroke="#7c3aed" stroke-opacity=".5" stroke-width="1.4">
-              <rect x="299" y="143" width="6.5" height="19" rx="3.2"/><rect x="308" y="141" width="6.5" height="21" rx="3.2"/>
-              <rect x="317" y="142" width="6.5" height="20" rx="3.2"/>
-              <rect x="360" y="142" width="6.5" height="20" rx="3.2"/><rect x="369" y="141" width="6.5" height="21" rx="3.2"/>
-              <rect x="378" y="143" width="6.5" height="19" rx="3.2"/>
-            </g>
-            <!-- hänglås i förgrunden -->
-            <g>
-              <path d="M191 182 L191 158 A29 29 0 0 1 249 158 L249 182" fill="none" stroke="url(#shackg)" stroke-width="15" stroke-linecap="round"/>
-              <rect x="156" y="182" width="128" height="116" rx="20" fill="url(#lockg)"/>
-              <rect x="166" y="190" width="108" height="40" rx="14" fill="#ffffff" opacity=".09"/>
-              <rect x="156.75" y="182.75" width="126.5" height="114.5" rx="19.5" fill="none" stroke="#e9d5ff" stroke-opacity=".4" stroke-width="1.5"/>
-              <circle cx="220" cy="224" r="12" fill="#3b0764"/>
-              <path d="M214 232 L226 232 L230 260 L210 260 Z" fill="#3b0764"/>
-            </g>
-          </svg>
+    <!-- Inkognito-startsida (ny 2026-11-18): lugn mörk yta, text och sökfält till vänster, figuren som blir iakttagen till höger -->
+    <div id="incogpage" class="absolute inset-0 hidden overflow-hidden incog2">
+      <div class="incog2-grid">
+        <div class="incog2-text">
+          <h1>Du surfar privat</h1>
+          <p class="incog2-lede">Ingen ser vad du gör här. Ingen historik, inga kakor och inga spår när du stänger fliken, hur mycket någon än försöker kika.</p>
+          <div class="incog2-sok">
+            <svg class="ic ic-sm"><use href="#i-incognito" /></svg>
+            <input id="incog-search" type="text" placeholder="Sök privat eller skriv en adress" spellcheck="false" />
+          </div>
+          <ul class="incog2-lista">
+            <li><svg class="ic"><use href="#i-history" /></svg>Ingen historik</li>
+            <li><svg class="ic"><use href="#i-lock" /></svg>Inga kakor sparas</li>
+            <li><svg class="ic"><use href="#i-eye" /></svg>Inga spår</li>
+          </ul>
+          <p class="incog2-not"><svg class="ic ic-sm"><use href="#i-shield-check" /></svg><span>AdRaze skyddar dig</span></p>
         </div>
-        <h1 class="text-[33px] font-extrabold tracking-tight text-white">Du surfar privat</h1>
-        <p class="mt-3 text-[15px] leading-relaxed" style="color:#c3b3e0; max-width:470px;">Ingen ser vad du gör här. Ingen historik, inga kakor och inga spår när du stänger fliken — hur mycket någon än försöker kika.</p>
-        <div class="mt-8 flex items-center gap-3 px-5 rounded-[10px]" style="width:min(540px,92%); height:54px; background:rgba(23,13,38,.85); border:1px solid rgba(168,85,247,.32); box-shadow:0 10px 30px rgba(88,28,135,.28);">
-          <span style="color:#c084fc;"><svg class="ic ic-sm"><use href="#i-incognito" /></svg></span>
-          <input id="incog-search" type="text" placeholder="Sök privat eller skriv en adress" spellcheck="false"
-                 class="flex-1 bg-transparent outline-none text-[16px] text-white placeholder:text-white/35" />
-        </div>
-        <div class="mt-9 flex flex-wrap items-center justify-center gap-2.5">
-          <span class="incog-chip"><svg class="ic"><use href="#i-history" /></svg>Ingen historik</span>
-          <span class="incog-chip"><svg class="ic"><use href="#i-lock" /></svg>Inga kakor sparas</span>
-          <span class="incog-chip"><svg class="ic"><use href="#i-eye" /></svg>Inga spår</span>
-        </div>
-        <div class="mt-11 flex items-center gap-2 px-4 py-2 rounded-[8px]" style="background:rgba(124,58,237,.18); border:1px solid rgba(168,85,247,.4); color:#e2d3fb;">
-          <svg class="ic ic-sm" style="color:#c084fc;"><use href="#i-shield-check" /></svg>
-          <span class="text-[13px] font-semibold">AdRaze skyddar dig</span>
-        </div>
+        <img class="incog2-bild" src="illu/inkognito.svg" alt="" width="460" height="400">
       </div>
     </div>
 

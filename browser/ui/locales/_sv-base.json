@@ -420,7 +420,6 @@
  "Ingen historik",
  "Ingen historik än.",
  "Ingen ny historik",
- "Ingen ser vad du gör här. Ingen historik, inga kakor och inga spår när du stänger fliken — hur mycket någon än försöker kika.",
  "Inget har skickats. Skriv igen när du vill fortsätta.",
  "Inget hittades.",
  "Inget i historiken matchar.",
@@ -2794,5 +2793,6 @@
  "Diners",
  "Maestro",
  "Alla nedladdningar",
- "Blockerad: {hot}"
+ "Blockerad: {hot}",
+ "Ingen ser vad du gör här. Ingen historik, inga kakor och inga spår när du stänger fliken, hur mycket någon än försöker kika."
 ]

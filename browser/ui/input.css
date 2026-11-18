@@ -2475,3 +2475,22 @@ body.incog #gal-provbar .gpb-farg { box-shadow: inset 0 0 0 1px rgb(255 255 255 
 .nt-st-l { margin-top: 7px; font-size: 12.5px; color: rgb(255 255 255 / .7); }
 :root:not([data-theme="dark"]) #newtabpage.anp-utan-bild .nt-st + .nt-st::before { background: rgb(31 30 27 / .1); }
 @media (max-width: 620px) { .nt-st, .nt-st-main { padding: 12px 16px; } .nt-st-n { font-size: 22px; } }
+
+/* ── Inkognitosidan, ny (2026-11-18) ── En enfärgad mörk yta utan toningar och glöd, rubrik i rubriktypsnittet,
+   sökfältet som en rund ruta och tre korta löften som vanlig text. Figuren (unDraw) blir iakttagen av ett öga. */
+.incog2 { background: #16131d; color: #f1eef8; }
+.incog2-grid { height: 100%; width: min(1080px, 100% - 64px); margin-inline: auto; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); align-items: center; gap: clamp(24px, 5vw, 72px); }
+.incog2-text { text-align: left; }
+.incog2 h1 { font-family: var(--font-display); font-size: clamp(38px, 4.6vw, 60px); font-weight: 520; letter-spacing: -.03em; line-height: 1.02; color: #fff; }
+.incog2-lede { margin-top: 18px; font-size: 16.5px; line-height: 1.55; color: #b9b2c9; max-width: 44ch; }
+.incog2-sok { margin-top: 30px; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 22px; border-radius: 999px; background: #211c2b; box-shadow: inset 0 0 0 1px #37304a; color: #a78bfa; max-width: 520px; transition: box-shadow .15s; }
+.incog2-sok:focus-within { box-shadow: inset 0 0 0 1.5px #a78bfa; }
+.incog2-sok input { flex: 1; min-width: 0; background: transparent; outline: none; border: 0; font-size: 16px; color: #fff; }
+.incog2-sok input::placeholder { color: #8a829c; }
+.incog2-lista { list-style: none; margin: 26px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 26px; font-size: 14px; font-weight: 500; color: #d8d2e6; }
+.incog2-lista li { display: inline-flex; align-items: center; gap: 8px; }
+.incog2-lista svg { width: 17px; height: 17px; color: #a78bfa; stroke-width: 1.8; fill: none; }
+.incog2-not { margin-top: 22px; display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; color: #b9b2c9; }
+.incog2-not svg { color: #a78bfa; }
+.incog2-bild { width: 100%; max-height: min(58vh, 440px); object-fit: contain; object-position: center; }
+@media (max-width: 860px) { .incog2-grid { grid-template-columns: 1fr; align-content: center; gap: 20px; } .incog2-bild { max-height: 26vh; order: -1; } .incog2-text { text-align: center; } .incog2-lede, .incog2-sok { margin-inline: auto; } .incog2-lista { justify-content: center; } }
