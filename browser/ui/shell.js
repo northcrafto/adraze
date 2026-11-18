@@ -3152,7 +3152,7 @@ async function renderWallet() {
   cards.forEach((c) => {
     if (wlEditing === c.id) { wrap.appendChild(walletEditCard(c)); return; }
     const el = document.createElement('div'); el.className = 'wl-card';
-    el.innerHTML = `<div class="wl-card-face"><span class="wl-chip"></span><div class="wl-card-info"><div class="wl-card-num">•••• •••• •••• ${escapeHtml(c.last4 || '••••')}</div><div class="wl-card-meta"><span>${escapeHtml(c.holder || 'Kortinnehavare')}</span><span>${escapeHtml(c.exp || 'MM/ÅÅ')}</span></div></div><span class="wl-brand">${escapeHtml(c.brand || 'Kort')}</span></div>
+    el.innerHTML = `<div class="wl-card-face"><span class="wl-chip"></span><div class="wl-card-info"><div class="wl-card-num">•••• •••• •••• ${escapeHtml(c.last4 || '••••')}</div><div class="wl-card-meta"><span>${escapeHtml(c.holder || 'Kortinnehavare')}</span><span>${escapeHtml(c.exp || 'MM/ÅÅ')}</span></div></div>${kortMarke(c.brand)}</div>
       <div class="wl-card-actions"><button class="wl-btn" data-a="edit"><svg class="ic ic-sm"><use href="#i-settings" /></svg>Ändra</button><button class="wl-btn wl-del" data-a="del"><svg class="ic ic-sm"><use href="#i-trash" /></svg>Ta bort</button></div>`;
     el.querySelector('[data-a=edit]').addEventListener('click', () => { wlEditing = c.id; renderWallet(); });
     el.querySelector('[data-a=del]').addEventListener('click', async () => { await window.wallet.del(c.id); if (wlEditing === c.id) wlEditing = null; renderWallet(); });
@@ -3161,7 +3161,7 @@ async function renderWallet() {
 }
 function walletEditCard(pub) {
   const el = document.createElement('div'); el.className = 'wl-card';
-  el.innerHTML = `<div class="wl-card-face"><span class="wl-chip"></span><div class="wl-card-info"><div class="wl-card-num">•••• •••• •••• ${escapeHtml(pub.last4 || '••••')}</div><div class="wl-card-meta"><span>Ändra kortuppgifter</span></div></div><span class="wl-brand">${escapeHtml(pub.brand || 'Kort')}</span></div>`;
+  el.innerHTML = `<div class="wl-card-face"><span class="wl-chip"></span><div class="wl-card-info"><div class="wl-card-num">•••• •••• •••• ${escapeHtml(pub.last4 || '••••')}</div><div class="wl-card-meta"><span>Ändra kortuppgifter</span></div></div>${kortMarke(pub.brand)}</div>`;
   el.appendChild(walletEditForm(pub.id));
   return el;
 }
@@ -3192,6 +3192,22 @@ $('wl-buy-toggle') && $('wl-buy-toggle').addEventListener('change', (e) => { try
 
 /* ── Falk handlar åt användaren (tillstånd + säkerhetskoll + bekräftelse) ── */
 function kbuyAllowed() { try { return localStorage.getItem('adraze-krypto-buy') === '1'; } catch { return false; } }
+// Kortnätets märke som liten bild på kortet (okänt nät: bara texten)
+const KORTMARKEN = {
+  mastercard: '<circle cx="15" cy="13" r="8.5" fill="#eb001b"/><circle cx="25" cy="13" r="8.5" fill="#f79e1b"/><path d="M20 6.1a8.5 8.5 0 0 1 0 13.8 8.5 8.5 0 0 1 0-13.8z" fill="#ff5f00"/>',
+  maestro: '<circle cx="15" cy="13" r="8.5" fill="#eb001b"/><circle cx="25" cy="13" r="8.5" fill="#00a2e5"/><path d="M20 6.1a8.5 8.5 0 0 1 0 13.8 8.5 8.5 0 0 1 0-13.8z" fill="#7375cf"/>',
+  visa: '<rect width="40" height="26" rx="4" fill="#fff"/><text x="20" y="18.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="900" font-style="italic" letter-spacing=".4" fill="#1a1f71">VISA</text>',
+  amex: '<rect width="40" height="26" rx="4" fill="#016fd0"/><text x="20" y="17.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9.5" font-weight="900" letter-spacing=".3" fill="#fff">AMEX</text>',
+  discover: '<rect width="40" height="26" rx="4" fill="#fff"/><text x="15.5" y="16.2" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="5.8" font-weight="800" fill="#1a1a1a">DISCOVER</text><circle cx="34.6" cy="14" r="3.2" fill="#f47216"/>',
+  diners: '<rect width="40" height="26" rx="4" fill="#fff"/><circle cx="20" cy="13" r="8.4" fill="none" stroke="#0079be" stroke-width="2.2"/><path d="M20 6.8v12.4" stroke="#0079be" stroke-width="2.2"/>',
+  jcb: '<rect width="40" height="26" rx="4" fill="#fff"/><rect x="6" y="5" width="8.6" height="16" rx="2.6" fill="#0b4ea2"/><rect x="15.7" y="5" width="8.6" height="16" rx="2.6" fill="#e21836"/><rect x="25.4" y="5" width="8.6" height="16" rx="2.6" fill="#00a94f"/>',
+  unionpay: '<rect width="40" height="26" rx="4" fill="#fff"/><path d="M9 5h8l-3 16H6z" fill="#e21836"/><path d="M18 5h8l-3 16h-8z" fill="#00447c"/><path d="M27 5h7l-3 16h-7z" fill="#007b84"/>',
+};
+function kortMarke(brand) {
+  const inre = KORTMARKEN[String(brand || '').toLowerCase()];
+  if (!inre) return '<span class="wl-brand">' + escapeHtml(brand || tf('Kort')) + '</span>';
+  return '<span class="wl-brand bild" role="img" aria-label="' + escapeHtml(brand) + '" title="' + escapeHtml(brand) + '"><svg viewBox="0 0 40 26" aria-hidden="true">' + inre + '</svg></span>';
+}
 function cardLabel(c) { return (c.brand || tf('Kort')) + ' •• ' + (c.last4 || '····'); }
 function kbuyOverlay(inner) {
   const ov = document.createElement('div'); ov.id = 'kbuy-modal';

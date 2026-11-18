@@ -1788,10 +1788,14 @@ function saveCards(l) { try { fs.writeFileSync(WALLET_FILE, walletEncrypt(JSON.s
 function digits(s) { return String(s || '').replace(/\D/g, ''); }
 function cardBrand(num) {
   const n = digits(num);
-  if (/^4/.test(n)) return 'Visa';
-  if (/^(5[1-5]|2[2-7])/.test(n)) return 'Mastercard';
   if (/^3[47]/.test(n)) return 'Amex';
-  if (/^6(011|5)/.test(n)) return 'Discover';
+  if (/^3(0[0-5]|[689])/.test(n)) return 'Diners';
+  if (/^35(2[89]|[3-8])/.test(n)) return 'JCB';
+  if (/^4/.test(n)) return 'Visa';
+  if (/^(5[1-5]|222[1-9]|22[3-9]|2[3-6]|27[01]|2720)/.test(n)) return 'Mastercard';
+  if (/^6(011|4[4-9]|5)/.test(n)) return 'Discover';
+  if (/^62/.test(n)) return 'UnionPay';
+  if (/^(5[06-9]|6)/.test(n)) return 'Maestro';
   return 'Kort';
 }
 /* Publik vy (för listan) – ALDRIG fullt nummer/CVC. */
