@@ -2414,3 +2414,45 @@ body.incog #gal-provbar .gpb-farg { box-shadow: inset 0 0 0 1px rgb(255 255 255 
 #settings .falk-inst-knappar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 26px; }
 /* Falk avstängd: inget av Falk syns någonstans i webbläsaren */
 :root.falk-av #krypto-btn, :root.falk-av #falk-granskar, :root.falk-av .anp-w[data-w="falk"], :root.falk-av .falk-bara { display: none !important; }
+
+
+/* ===== Mindre "genererat" (2026-11-18, Cettos bilder) =====
+ * Inga brickor med tonad bakgrund, inga rutor fyllda med accentfärgen, inga tonade profilbilder och inga
+ * reglage i webbläsarens blå. Etiketter är vanlig text, rutor ligger på den neutrala ytan med hårfin kant. */
+#settings .kn-badge { display: inline-block; margin-top: 6px; padding: 0; border-radius: 0; background: none; color: var(--s-accent-ink); font-size: 13px; font-weight: 700; letter-spacing: 0; }
+#login .lg-chip { margin-left: 4px; padding: 0; border-radius: 0; background: none; color: var(--color-terra); font-size: inherit; font-weight: 700; vertical-align: baseline; }
+:root[data-anp-accent] #login .lg-chip { color: var(--color-terra); }
+#settings .fam-code, :root[data-anp-accent] #settings .fam-code { background: var(--s-surface); border-color: var(--s-line); }
+#settings .fam-code .code { color: var(--s-ink); font-weight: 700; }
+#settings .fam-knapp:hover:not(:disabled), #settings .fam-code button:hover { background: var(--s-surface-2); color: var(--s-ink); border-color: var(--s-ink); }
+#settings .fam-avatar { border-radius: 50%; background: var(--s-ink); color: var(--s-surface); font-weight: 700; }
+#settings .kn-avatar { border-radius: 50%; background: var(--s-ink); color: var(--s-surface); font-weight: 700; }
+#settings .set-hero-avatar { background: var(--s-ink); color: var(--s-surface); }
+#settings .wl-card-face { background: var(--s-surface); color: var(--s-ink); }
+#settings .wl-card-num { color: var(--s-ink); font-weight: 650; }
+#settings .wl-card-meta { color: var(--s-mut); }
+#settings .wl-brand { color: var(--s-mut); opacity: 1; font-weight: 700; }
+#settings .wl-chip { background: var(--s-surface-2); box-shadow: inset 0 0 0 1px var(--s-field-line); }
+#settings .engine-opt.on { border-color: var(--s-ink); box-shadow: inset 0 0 0 1px var(--s-ink); background: var(--s-surface); }
+#settings .engine-opt.on .engine-radio { border-color: var(--s-ink); background: var(--s-ink) content-box; }
+#settings input[type="radio"], #settings input[type="range"] { accent-color: var(--s-ink); }
+
+/* Familj: ljud vid spärrad sida som små kort man trycker på (ett kort per ljud, lyssna med knappen i kortet) */
+#settings .fam-ljudval { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; margin: 4px 0 10px; }
+#settings .fl-kort { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 7px 12px 7px 8px; border: 1px solid var(--s-line); border-radius: 10px; background: var(--s-surface); color: var(--s-ink); cursor: pointer; text-align: left; transition: border-color .15s; }
+#settings .fl-kort:hover { border-color: var(--s-faint); }
+#settings .fl-kort:focus-visible { outline: 2px solid var(--s-ink); outline-offset: 2px; }
+#settings .fl-kort[aria-checked="true"] { border-color: var(--s-ink); box-shadow: inset 0 0 0 1px var(--s-ink); }
+#settings .fl-kort.av { padding-left: 14px; }
+#settings .fl-spela { width: 36px; height: 36px; flex: none; display: grid; place-items: center; border: none; border-radius: 50%; background: var(--s-ink); color: var(--s-surface); cursor: pointer; transition: transform .15s; }
+#settings .fl-spela:hover { transform: scale(1.07); }
+#settings .fl-spela.spelar { background: var(--s-accent); color: #fff; }
+#settings .fl-spela svg { width: 14px; height: 14px; fill: currentColor; stroke: none; }
+#settings .fl-text { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }
+#settings .fl-nr { font-size: 11px; font-weight: 600; color: var(--s-faint); font-variant-numeric: tabular-nums; }
+#settings .fl-namn { font-size: 13.5px; font-weight: 600; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+#settings .fl-bock { width: 16px; height: 16px; flex: none; opacity: 0; color: var(--s-ink); }
+#settings .fl-kort[aria-checked="true"] .fl-bock { opacity: 1; }
+#settings .fl-vol { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--s-mut); margin-bottom: 8px; }
+#settings .fl-vol.av { opacity: .45; }
+#settings .fl-vol input { width: 140px; }

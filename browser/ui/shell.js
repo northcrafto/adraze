@@ -3981,30 +3981,38 @@ let _famProv = null, _famProvKnapp = null, _famProvVarnad = false;
 function famLjudStoppa() {
   try { if (_famProv) { _famProv.pause(); _famProv.currentTime = 0; } } catch {}
   _famProv = null;
-  if (_famProvKnapp) { _famProvKnapp.classList.remove('spelar'); _famProvKnapp.textContent = tf('Provlyssna'); _famProvKnapp = null; }
+  if (_famProvKnapp) { famLjudKnapp(_famProvKnapp, false); _famProvKnapp = null; }
 }
-// Provlyssna: spelar valt ljud och knappen blir "Stoppa", så att man kan avbryta när man vill
+const FAM_IKON_SPELA = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.6v10.8a.6.6 0 0 0 .92.5l8.3-5.4a.6.6 0 0 0 0-1L5.42 2.1a.6.6 0 0 0-.92.5z"/></svg>';
+const FAM_IKON_STOPP = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="3.5" width="9" height="9" rx="1.6"/></svg>';
+function famLjudKnapp(knapp, spelar) {
+  knapp.classList.toggle('spelar', spelar);
+  const text = tf(spelar ? 'Stoppa' : 'Provlyssna');
+  knapp.innerHTML = spelar ? FAM_IKON_STOPP : FAM_IKON_SPELA; knapp.setAttribute('aria-label', text); knapp.title = text;
+}
+// Provlyssna: spelar ljudet i kortet och knappen blir "Stoppa", så att man kan avbryta när man vill
 function famLjudProva(id, volym, knapp) {
   famLjudStoppa();
   if (!id) return null;
   const a = new Audio('ljud/sparr-' + id + '.ogg'); a.volume = Math.min(0.8, Math.max(0.1, volym / 100));
   _famProv = a;
-  if (knapp) { _famProvKnapp = knapp; knapp.classList.add('spelar'); knapp.textContent = tf('Stoppa'); }
+  if (knapp) { _famProvKnapp = knapp; famLjudKnapp(knapp, true); }
   a.addEventListener('ended', () => { if (_famProv === a) famLjudStoppa(); });
   a.play().catch(() => { if (_famProv === a) famLjudStoppa(); });
   return a;
 }
+// Ett litet kort per ljud: tryck på kortet för att välja, på den runda knappen för att lyssna
 function famLjudHtml(c) {
   const l = famLjud(c);
+  const kort = (id, namn, nr) => '<div class="fl-kort' + (id ? '' : ' av') + '" data-a="ljud-kort" data-ljud="' + id + '" role="radio" tabindex="0" aria-checked="' + (l.id === id) + '">'
+    + (id ? '<button type="button" class="fl-spela" data-a="ljud-prova" data-ljud="' + id + '" aria-label="' + escapeHtml(tf('Provlyssna')) + '" title="' + escapeHtml(tf('Provlyssna')) + '">' + FAM_IKON_SPELA + '</button>' : '')
+    + '<span class="fl-text">' + (nr ? '<span class="fl-nr">' + nr + '</span>' : '') + '<span class="fl-namn">' + escapeHtml(tf(namn)) + '</span></span>'
+    + '<svg class="fl-bock" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 5"/></svg></div>';
   return '<div class="fam-sub">' + escapeHtml(tf('Ljud vid spärrad sida')) + '</div>'
-    + '<div class="fam-ljud" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 8px;">'
-    + '<select data-a="ljud" class="fam-in" style="height:38px;flex:1;min-width:170px;">'
-    + '<option value=""' + (l.id ? '' : ' selected') + '>' + escapeHtml(tf('Av')) + '</option>'
-    + FAM_LJUD.map((x) => '<option value="' + x.id + '"' + (l.id === x.id ? ' selected' : '') + '>' + escapeHtml(tf(x.namn)) + '</option>').join('')
-    + '</select>'
-    + '<button data-a="ljud-prova" class="fam-knapp" style="padding:8px 12px;"' + (l.id ? '' : ' disabled') + '>' + escapeHtml(tf('Provlyssna')) + '</button>'
-    + '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--color-navy-600);' + (l.id ? '' : 'opacity:.45;') + '">' + escapeHtml(tf('Volym')) + ' <input data-a="ljud-vol" type="range" min="10" max="80" step="5" value="' + l.volym + '"' + (l.id ? '' : ' disabled') + ' style="width:110px;accent-color:var(--color-terra);"></label>'
-    + '</div>';
+    + '<div class="fam-ljudval" role="radiogroup" aria-label="' + escapeHtml(tf('Ljud vid spärrad sida')) + '">'
+    + kort('', 'Av', 0) + FAM_LJUD.map((x, n) => kort(x.id, x.namn, n + 1)).join('')
+    + '</div>'
+    + '<label class="fl-vol' + (l.id ? '' : ' av') + '">' + escapeHtml(tf('Volym')) + ' <input data-a="ljud-vol" type="range" min="10" max="80" step="5" value="' + l.volym + '"' + (l.id ? '' : ' disabled') + '></label>';
 }
 async function famLjudSpara(c, id, volym) {
   const x = famChildById(c.id) || c;
@@ -4018,24 +4026,36 @@ async function famLjudSpara(c, id, volym) {
   return false;
 }
 function famLjudKoppla(el, c) {
-  const sel = el.querySelector('[data-a=ljud]'), prova = el.querySelector('[data-a=ljud-prova]'), vol = el.querySelector('[data-a=ljud-vol]');
-  if (!sel) return;
-  sel.addEventListener('change', async () => {
-    const fore = famLjud(famChildById(c.id) || c), id = sel.value;
+  const val = el.querySelector('.fam-ljudval'), vol = el.querySelector('[data-a=ljud-vol]');
+  if (!val) return;
+  const valj = async (id) => {
+    const fore = famLjud(famChildById(c.id) || c);
+    if (id === fore.id) return;
     if (id && !fore.id) {
       const ok = await famConfirm(tf('Slå på spärrljud?'), tn('Rekommenderas inte – det här är bara ett roligt/läskigt tillägg. Ljuden låter trasiga och obehagliga med flit och kan skrämma små barn. Använd det inte om {n} har autism, ångest eller trauma, är ljudkänslig (hyperakusis, misofoni, tinnitus) eller använder hörlurar. Ljudet spelas en gång varje gång {n} hamnar på en spärrad sida. Provlyssna först, gärna med låg volym.', c.name), tf('Slå på'), false);
-      if (!ok) { sel.value = ''; return; }
+      if (!ok) return;
     }
-    if (await famLjudSpara(c, id, fore.volym)) renderFam(); else sel.value = fore.id;
-  });
-  if (prova) prova.addEventListener('click', async () => {
-    if (_famProvKnapp === prova) { famLjudStoppa(); return; }
+    famLjudStoppa();
+    if (await famLjudSpara(c, id, fore.volym)) renderFam();
+  };
+  const prova = async (knapp) => {
+    if (_famProvKnapp === knapp) { famLjudStoppa(); return; }
     if (!_famProvVarnad) {
       const ok = await famConfirm(tf('Sänk volymen först'), tf('Ljudet är högt och obehagligt med flit. Sänk datorns volym och se till att inget barn sitter bredvid innan du provlyssnar. Du kan stoppa ljudet när du vill.'), tf('Provlyssna'), false);
       if (!ok) return;
       _famProvVarnad = true;
     }
-    famLjudProva(sel.value, Number(vol && vol.value) || 60, prova);
+    famLjudProva(knapp.dataset.ljud, Number(vol && vol.value) || 60, knapp);
+  };
+  val.addEventListener('click', (e) => {
+    const k = e.target.closest('[data-a=ljud-prova]');
+    if (k) { e.stopPropagation(); prova(k); return; }
+    const kort = e.target.closest('[data-a=ljud-kort]');
+    if (kort) valj(kort.dataset.ljud);
+  });
+  val.addEventListener('keydown', (e) => {
+    if ((e.key !== 'Enter' && e.key !== ' ') || !e.target.matches('[data-a=ljud-kort]')) return;
+    e.preventDefault(); valj(e.target.dataset.ljud);
   });
   if (vol) vol.addEventListener('change', () => { const id = famLjud(famChildById(c.id) || c).id; if (id) famLjudSpara(c, id, Number(vol.value)); });
 }

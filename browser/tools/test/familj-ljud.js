@@ -43,15 +43,15 @@ async function kor() {
       fam = { children: [{ id: 'b1', name: 'Emma', age: 9, blocklist: ['spel.se'], allows: [], local: true }], activeChild: null };
       window.family.children = async () => ({ ok: false }); famSave(); openSettings(); showSettingsCat('familj'); renderFam(); return 1; })()`);
     await sov(600);
-    T.ok('av från början', await k(`document.querySelector('[data-child=b1] [data-a=ljud]').value === '' && document.querySelector('[data-child=b1] [data-a=ljud-prova]').disabled`));
-    await k(`document.querySelector('[data-child=b1] .fam-ljud').scrollIntoView({ block: 'center' })`);
+    T.ok('av från början', await k(`document.querySelector('[data-child=b1] [data-a=ljud-kort][aria-checked=true]').dataset.ljud === '' && document.querySelector('[data-child=b1] [data-a=ljud-vol]').disabled`));
+    await k(`document.querySelector('[data-child=b1] .fam-ljudval').scrollIntoView({ block: 'center' })`);
     await bild('1-kortet-av');
 
     // Spion på uppspelning (efter att filerna provats på riktigt ovan)
     await k(`(() => { window.__spelat = []; const A = window.Audio; window.Audio = function (src) { const a = new A(src); a.play = () => { window.__spelat.push({ src, vol: a.volume }); return Promise.resolve(); }; return a; }; return 1; })()`);
 
     // Välj ljud → varning; avbryt = fortfarande av
-    await k(`(() => { const s = document.querySelector('[data-child=b1] [data-a=ljud]'); s.value = 'stotar'; s.dispatchEvent(new Event('change')); return 1; })()`);
+    await k(`(() => { document.querySelector('[data-child=b1] [data-a=ljud-kort][data-ljud=stotar]').click(); return 1; })()`);
     await sov(500);
     const varning = await k(`(() => { const m = [...document.querySelectorAll('div')].find((d) => /Slå på spärrljud/.test(d.textContent) && getComputedStyle(d).position === 'fixed'); return !!m; })()`);
     T.ok('varning visas innan ljudet slås på', varning);
@@ -61,20 +61,20 @@ async function kor() {
     T.ok('varningen har Slå på och Avbryt', Array.isArray(knappar) && knappar.includes('Slå på') && knappar.includes('Avbryt'), knappar);
     await k(`[...document.querySelectorAll('button')].find((b) => b.offsetParent && b.textContent.trim() === 'Avbryt').click()`);
     await sov(400);
-    T.ok('avbryt = fortfarande av', await k(`document.querySelector('[data-child=b1] [data-a=ljud]').value === '' && !(famChildById('b1').sound && famChildById('b1').sound.id)`));
+    T.ok('avbryt = fortfarande av', await k(`document.querySelector('[data-child=b1] [data-a=ljud-kort][aria-checked=true]').dataset.ljud === '' && !(famChildById('b1').sound && famChildById('b1').sound.id)`));
 
     // Slå på på riktigt
-    await k(`(() => { const s = document.querySelector('[data-child=b1] [data-a=ljud]'); s.value = 'stotar'; s.dispatchEvent(new Event('change')); return 1; })()`);
+    await k(`(() => { document.querySelector('[data-child=b1] [data-a=ljud-kort][data-ljud=stotar]').click(); return 1; })()`);
     await sov(500);
     await k(`[...document.querySelectorAll('button')].find((b) => b.offsetParent && b.textContent.trim() === 'Slå på').click()`);
     await sov(600);
     T.ok('ljudet sparas', await k(`JSON.stringify(famChildById('b1').sound)`) === JSON.stringify({ id: 'stotar', volym: 60 }));
-    T.ok('valet syns efter omritning', await k(`document.querySelector('[data-child=b1] [data-a=ljud]').value === 'stotar' && !document.querySelector('[data-child=b1] [data-a=ljud-prova]').disabled`));
-    await k(`document.querySelector('[data-child=b1] .fam-ljud').scrollIntoView({ block: 'center' })`);
+    T.ok('valet syns efter omritning', await k(`document.querySelector('[data-child=b1] [data-a=ljud-kort][aria-checked=true]').dataset.ljud === 'stotar' && !document.querySelector('[data-child=b1] [data-a=ljud-vol]').disabled`));
+    await k(`document.querySelector('[data-child=b1] .fam-ljudval').scrollIntoView({ block: 'center' })`);
     await bild('3-kortet-pa');
 
     // Provlyssna och volym
-    await k(`document.querySelector('[data-child=b1] [data-a=ljud-prova]').click()`);
+    await k(`document.querySelector('[data-child=b1] [data-a=ljud-prova][data-ljud=stotar]').click()`);
     await sov(400);
     const provVarning = await k(`(() => { const m = document.getElementById('fam-confirm'); return m ? { text: m.textContent, emoji: /\\p{Extended_Pictographic}/u.test(m.textContent) } : null; })()`);
     T.ok('provlyssna varnar först (sänk volymen), utan emoji', provVarning && /Sänk volymen/.test(provVarning.text) && !provVarning.emoji, provVarning);
@@ -84,12 +84,12 @@ async function kor() {
     await sov(300);
     let s = await k(`window.__spelat.slice(-1)[0]`);
     T.ok('provlyssna spelar valt ljud', s && /sparr-stotar\.ogg$/.test(s.src) && Math.abs(s.vol - 0.6) < 0.01, s);
-    T.ok('knappen blir Stoppa medan ljudet spelar', await k(`document.querySelector('[data-child=b1] [data-a=ljud-prova]').textContent.trim()`) === 'Stoppa');
+    T.ok('knappen blir Stoppa medan ljudet spelar', await k(`document.querySelector('[data-child=b1] [data-a=ljud-prova][data-ljud=stotar]').getAttribute('aria-label')`) === 'Stoppa');
     await bild('3c-spelar');
-    await k(`document.querySelector('[data-child=b1] [data-a=ljud-prova]').click()`);
+    await k(`document.querySelector('[data-child=b1] [data-a=ljud-prova][data-ljud=stotar]').click()`);
     await sov(200);
-    T.ok('Stoppa avbryter ljudet direkt', await k(`(() => { const b = document.querySelector('[data-child=b1] [data-a=ljud-prova]'); return b.textContent.trim() === 'Provlyssna' && !b.classList.contains('spelar') && _famProv === null; })()`));
-    await k(`document.querySelector('[data-child=b1] [data-a=ljud-prova]').click()`);
+    T.ok('Stoppa avbryter ljudet direkt', await k(`(() => { const b = document.querySelector('[data-child=b1] [data-a=ljud-prova][data-ljud=stotar]'); return b.getAttribute('aria-label') === 'Provlyssna' && !b.classList.contains('spelar') && _famProv === null; })()`));
+    await k(`document.querySelector('[data-child=b1] [data-a=ljud-prova][data-ljud=stotar]').click()`);
     await sov(300);
     T.ok('andra provlyssningen varnar inte igen', !(await k(`!!document.getElementById('fam-confirm')`)) && (await k(`window.__spelat.length`)) === 2);
     await k(`famLjudStoppa()`);

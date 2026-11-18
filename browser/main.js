@@ -3095,8 +3095,12 @@ app.whenReady().then(async () => {
   // [widevine-init] Widevine DRM (Netflix/Spotify/HBO m.fl.). castlabs-Electron laddar CDM:en vid start.
   try {
     if (components && components.whenReady) {
-      await components.whenReady();
-      console.log('[widevine]', components.status && JSON.stringify(components.status()));
+      // Vänta högst några sekunder: svarar inte nedladdningen av Widevine (ny profil, ingen kontakt med servern)
+      // ska fönstret öppnas ändå. Widevine blir klart i bakgrunden och fungerar då utan omstart av appen.
+      const klar = components.whenReady().then(() => true, (e) => { console.error('[widevine] init misslyckades:', e && e.message); return true; });
+      const iTid = await Promise.race([klar, new Promise((r) => setTimeout(() => r(false), 6000))]);
+      if (iTid) console.log('[widevine]', components.status && JSON.stringify(components.status()));
+      else { console.log('[widevine] inte klart efter 6 s, startar ändå'); klar.then(() => console.log('[widevine] klart i efterhand', components.status && JSON.stringify(components.status()))); }
     }
   } catch (e) { console.error('[widevine] init misslyckades:', e && e.message); }
   setInterval(sweepIdleTabs, DISCARD_SWEEP_MS).unref();   // kasta lediga bakgrundsflikar löpande
