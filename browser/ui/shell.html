@@ -9,7 +9,7 @@
 <style>#bm-star{color:var(--color-navy-900);opacity:.55;transition:all .15s;cursor:pointer}#bm-star:hover{opacity:1;background:rgba(28,43,58,.09)}#bm-star.on{opacity:1;color:var(--color-terra,#d9663f)}#bm-star.on svg{fill:currentColor}</style>
 <style>
 @keyframes dlpulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
-#dl-btn.dl-busy svg { animation: dlpulse 1.1s ease-in-out infinite; color: #2f8fd4; }
+#dl-btn.dl-busy svg { animation: dlpulse 1.1s ease-in-out infinite; color: var(--color-terra, #ff4b1f); }
 </style>
 <script src="fokus.js"></script>
 </head>
@@ -38,7 +38,7 @@
   <svg width="0" height="0" class="hidden" aria-hidden="true">
     <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
     <symbol id="i-fwd" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
-    <symbol id="i-reload" viewBox="0 0 24 24"><path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 5v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2M20 19v-4h-4"/></symbol>
+    <symbol id="i-reload" viewBox="0 0 24 24"><path d="M19.6 12a7.6 7.6 0 1 1-2.5-5.6"/><path d="M19.8 4.2v4.9h-4.9"/></symbol>
     <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
     <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
@@ -53,7 +53,7 @@
     <symbol id="i-update" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4.5h-4.5"/><path d="M12 8v4.5l3 1.8"/></symbol>
     <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><ellipse cx="12" cy="12" rx="3.8" ry="9"/></symbol>
     <symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></symbol>
-    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 6h16v10h-9l-4 3v-3H4z"/><path d="M8 10h8M8 13h5"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M12 4.2c4.7 0 8.5 3.2 8.5 7.2s-3.8 7.2-8.5 7.2c-1.1 0-2.100-.17-3.050-.48L4.6 19.6l1.250-3.650C4.400 14.700 3.500 13.130 3.500 11.400c0-4 3.800-7.200 8.500-7.200z"/></symbol>
     <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.4-3.2 7.6-8 9-4.8-1.4-8-4.6-8-9V6z"/></symbol>
     <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.4-3.2 7.6-8 9-4.8-1.4-8-4.6-8-9V6z"/><path d="M9 11.5l2 2 4-4.5"/></symbol>
     <symbol id="i-shield-search" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.4-3.2 7.6-8 9-4.8-1.4-8-4.6-8-9V6z"/><circle cx="12" cy="11" r="2.3"/></symbol>
@@ -73,7 +73,7 @@
     <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></symbol>
     <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></symbol>
     <symbol id="i-flytt" viewBox="0 0 24 24"><path d="M4 8h12M12 4l4 4-4 4"/><path d="M20 16H8M12 12l-4 4 4 4"/></symbol>
-    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v10M8 10l4 4 4-4"/><path d="M5 19h14"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v10.5M7.5 10.4 12 15l4.5-4.600"/><path d="M5 15.5v2.200a1.800 1.800 0 0 0 1.800 1.800h10.400a1.800 1.800 0 0 0 1.800-1.800v-2.200"/></symbol>
     <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16.5 6.5l2 2M13.5 9.5l2 2"/></symbol>
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9.5 7V5h5v2M6.5 7l.9 12h9.2l.9-12"/></symbol>
     <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
@@ -122,7 +122,7 @@
     </button>
     <button id="krypto-btn" class="icon-btn falk-btn off" title="Falk AI: din säkerhetsassistent"><svg class="ic"><use href="#i-sparkle" /></svg></button>
     <button id="chatt-btn" class="icon-btn relative" title="Chatt: vänner och grupper"><svg class="ic"><use href="#i-chat" /></svg><span id="chatt-badge" style="display:none;position:absolute;top:1px;right:0;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--color-terra);color:#fff;font-size:9.5px;font-weight:800;line-height:16px;text-align:center;box-shadow:0 0 0 2px var(--color-chrome,#f4f1ed)"></span></button>
-    <button id="dl-btn" class="icon-btn relative" title="Nedladdningar" style="display:none"><svg class="ic"><use href="#i-download" /></svg><span id="dl-badge" style="display:none;position:absolute;bottom:2px;right:2px;min-width:15px;height:15px;padding:0 3px;border-radius:999px;background:#2f8fd4;color:#fff;font-size:9px;font-weight:700;line-height:15px;text-align:center;box-shadow:0 0 0 2px var(--color-chrome,#f4f1ed)"></span></button>
+    <button id="dl-btn" class="icon-btn relative" title="Nedladdningar" style="display:none"><svg class="ic"><use href="#i-download" /></svg><span id="dl-badge" style="display:none;position:absolute;bottom:2px;right:2px;min-width:15px;height:15px;padding:0 3px;border-radius:999px;background:var(--color-terra,#ff4b1f);color:#fff;font-size:9px;font-weight:700;line-height:15px;text-align:center;box-shadow:0 0 0 2px var(--color-chrome,#f4f1ed)"></span></button>
     <button id="settings-btn" class="icon-btn" title="Inställningar"><svg class="ic"><use href="#i-settings" /></svg></button>
     <button id="account-btn" class="icon-btn relative" title="Konto"><svg class="ic"><use href="#i-user" /></svg></button>
     <button id="menu-btn" class="icon-btn" title="Meny"><svg class="ic"><use href="#i-menu" /></svg></button>

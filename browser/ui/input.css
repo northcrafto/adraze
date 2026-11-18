@@ -2460,3 +2460,18 @@ body.incog #gal-provbar .gpb-farg { box-shadow: inset 0 0 0 1px rgb(255 255 255 
 /* Kortnätets märke som bild på kortet */
 #settings .wl-brand.bild { align-self: center; opacity: 1; line-height: 0; }
 #settings .wl-brand.bild svg { display: block; width: 46px; height: 30px; border-radius: 5px; stroke: none; }
+
+/* ── Startsidans statistik, nytt utseende (2026-11-18) ──
+   Tre stora tal bredvid varandra på en lugn glasskiva. Ingen logga, ingen färgad linje överst. */
+.nt-stats { bottom: 40px; border-radius: 22px; background: rgb(14 14 16 / .44); border: 1px solid rgb(255 255 255 / .13); backdrop-filter: blur(24px) saturate(1.35); padding: 4px 6px; }
+.nt-stats::before { display: none; }
+.nt-st { padding: 15px 28px 14px; align-items: flex-start; position: relative; }
+.nt-st + .nt-st { border-left: 0; }
+.nt-st + .nt-st::before { content: ""; position: absolute; left: 0; top: 18px; bottom: 18px; width: 1px; background: rgb(255 255 255 / .14); }
+.nt-st-main { flex-direction: column; align-items: flex-start; gap: 0; padding-left: 28px; }
+.nt-st-mark { display: none; }
+.nt-st-n { font-size: 28px; font-weight: 600; letter-spacing: -.03em; }
+.nt-st-n small { margin-left: 5px; font-size: 13.5px; font-weight: 500; color: rgb(255 255 255 / .66); }
+.nt-st-l { margin-top: 7px; font-size: 12.5px; color: rgb(255 255 255 / .7); }
+:root:not([data-theme="dark"]) #newtabpage.anp-utan-bild .nt-st + .nt-st::before { background: rgb(31 30 27 / .1); }
+@media (max-width: 620px) { .nt-st, .nt-st-main { padding: 12px 16px; } .nt-st-n { font-size: 22px; } }

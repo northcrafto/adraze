@@ -5,70 +5,50 @@
 <style>
   html, body { margin: 0; background: transparent; overflow: hidden;
     font-family: -apple-system, "SF Pro Text", "Segoe UI", system-ui, sans-serif; }
-  .card { margin: 8px 10px 16px 10px; background: #fff; border-radius: 18px; overflow: hidden;
-    box-shadow: 0 20px 48px rgba(31,30,27,.30), 0 4px 12px rgba(31,30,27,.12);
-    border: 1px solid #eeebe7; animation: pop .18s cubic-bezier(.2,.8,.2,1); transform-origin: top right; }
-  @keyframes pop { from { opacity: 0; transform: translateY(-10px) scale(.97); } to { opacity: 1; transform: none; } }
-  .head { display: flex; align-items: center; justify-content: space-between;
-    padding: 13px 10px 13px 18px; }
-  .head h1 { font-size: 14.5px; font-weight: 750; color: #1f1e1b; margin: 0; letter-spacing: -.015em; }
+  /* Nytt utseende (2026-11-18): en ren lista som i Chrome och Brave. Ingen färgad platta bakom ikonen, en ring runt
+     ikonen visar hur långt nedladdningen kommit, och knapparna till höger syns när man pekar på raden. */
+  :root { --yta: #fff; --kant: #e9e6e0; --text: #1f1e1b; --dov: #6f6d66; --svag: #a3a19a; --hover: #f5f3ee; --acc: #ff4b1f; --fara: #c8372d; --ring: #e6e3dc; }
+  .card { margin: 8px 10px 16px 10px; background: var(--yta); border-radius: 14px; overflow: hidden;
+    box-shadow: 0 18px 44px rgba(31,30,27,.26), 0 3px 10px rgba(31,30,27,.10);
+    border: 1px solid var(--kant); animation: pop .16s cubic-bezier(.2,.8,.2,1); transform-origin: top right; }
+  @keyframes pop { from { opacity: 0; transform: translateY(-8px) scale(.98); } to { opacity: 1; transform: none; } }
+  .head { display: flex; align-items: center; justify-content: space-between; padding: 12px 8px 8px 16px; }
+  .head h1 { font-size: 13px; font-weight: 650; color: var(--text); margin: 0; letter-spacing: -.005em; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .spin { width: 20px; height: 20px; border-radius: 50%; border: 2.4px solid #d7e3f2;
-    border-top-color: #2f8fd4; animation: spin .7s linear infinite; }
-  .warn .spin { border-color: #f6d3d3; border-top-color: #d13b3b; }
-  .x { border: 0; background: transparent; cursor: pointer; color: #8394a6; width: 28px; height: 28px;
-    border-radius: 8px; display: grid; place-items: center; font-size: 18px; line-height: 1; }
-  .x:hover { background: #f6f5f0; color: #1f1e1b; }
-  .list { max-height: 380px; overflow-y: auto; padding: 6px 8px 8px; }
-  .empty { padding: 26px 16px; text-align: center; color: #8ba3bf; font-size: 13px; }
-  .row { display: flex; gap: 12px; align-items: center; padding: 11px 12px; border-radius: 12px;
-    cursor: default; }
+  .x { border: 0; background: transparent; cursor: pointer; color: var(--dov); width: 28px; height: 28px;
+    border-radius: 50%; display: grid; place-items: center; font-size: 18px; line-height: 1; }
+  .x:hover { background: var(--hover); color: var(--text); }
+  .list { max-height: 380px; overflow-y: auto; padding: 2px 6px 6px; }
+  .empty { padding: 26px 16px 30px; text-align: center; color: var(--svag); font-size: 13px; }
+  .row { display: flex; gap: 12px; align-items: center; padding: 9px 10px; border-radius: 10px; cursor: default; }
+  .row:hover { background: var(--hover); }
   .row.open { cursor: pointer; }
-  .row.open:hover { background: #f9f6f2; }
-  .ico { flex: none; width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center;
-    background: #eef4fb; color: #2f6db0; }
-  .ico svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.9;
-    stroke-linecap: round; stroke-linejoin: round; }
-  .ico.done { background: #e6f7ee; color: #12925a; }
-  .ico.warn { background: #fdecec; color: #d13b3b; }
+  .ico { position: relative; flex: none; width: 36px; height: 36px; display: grid; place-items: center; color: var(--dov); }
+  .ico > svg:not(.ring) { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .ico.warn { color: var(--fara); }
+  .ico.gar > svg:not(.ring) { width: 15px; height: 15px; stroke-width: 2; color: var(--text); }
+  .ring { position: absolute; inset: 0; width: 36px; height: 36px; transform: rotate(-90deg); fill: none; stroke-width: 2.6; stroke-linecap: round; }
+  .ring .rb { stroke: var(--ring); }
+  .ring .rf { stroke: var(--acc); transition: stroke-dasharray .25s ease; }
+  .ring.ob { animation: spin .9s linear infinite; }
+  .ring.vila .rf { stroke: var(--svag); }
   .meta { flex: 1; min-width: 0; }
-  .name { font-size: 13px; font-weight: 600; color: #1f1e1b; white-space: nowrap;
-    overflow: hidden; text-overflow: ellipsis; }
-  .sub { font-size: 11.5px; color: #6b7d8f; margin-top: 2px; white-space: nowrap;
-    overflow: hidden; text-overflow: ellipsis; }
-  .sub.warn { color: #d13b3b; font-weight: 600; }
-  .sub.done { color: #12925a; }
-  .bar { height: 5px; border-radius: 999px; background: #e6ecf3; margin-top: 7px; overflow: hidden; }
-  .bar > i { display: block; height: 100%; border-radius: 999px; background: #2f8fd4;
-    transition: width .2s ease; }
-  .fbtn { flex: none; border: 0; background: transparent; cursor: pointer; color: #8394a6;
-    width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; }
-  .fbtn:hover { background: #f4f1ed; color: #1f1e1b; }
-  .fbtn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8;
-    stroke-linecap: round; stroke-linejoin: round; }
-  /* Mörkt läge: samma val som skalet (skriptet nedan läser skoll-theme). Förr var rutan alltid vit. */
-  :root[data-theme="dark"] .card { background: #1e1c19; border-color: #2e2c29; box-shadow: 0 20px 48px rgba(0,0,0,.5), 0 4px 12px rgba(0,0,0,.3); }
-  :root[data-theme="dark"] .head h1, :root[data-theme="dark"] .name { color: #eeede8; }
-  :root[data-theme="dark"] .x, :root[data-theme="dark"] .fbtn { color: #a2a097; }
-  :root[data-theme="dark"] .x:hover, :root[data-theme="dark"] .fbtn:hover, :root[data-theme="dark"] .row.open:hover { background: rgba(255,255,255,.07); color: #eeede8; }
-  :root[data-theme="dark"] .empty, :root[data-theme="dark"] .sub { color: #a2a097; }
-  :root[data-theme="dark"] .ico { background: rgba(47,143,212,.16); color: #7cb8ec; }
-  :root[data-theme="dark"] .ico.done { background: rgba(18,146,90,.18); color: #4cc38a; }
-  :root[data-theme="dark"] .ico.warn { background: rgba(209,59,59,.18); color: #ff8a7a; }
-  :root[data-theme="dark"] .sub.done { color: #4cc38a; }
-  :root[data-theme="dark"] .sub.warn { color: #ff8a7a; }
-  :root[data-theme="dark"] .bar { background: #2e2c29; }
-  :root[data-theme="dark"] .spin { border-color: #2c3a4a; border-top-color: #2f8fd4; }
+  .name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sub { font-size: 11.5px; color: var(--dov); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+  .sub.warn { color: var(--fara); font-weight: 600; }
+  .fbtn { flex: none; border: 0; background: transparent; cursor: pointer; color: var(--dov);
+    width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; opacity: 0; transition: opacity .12s; }
+  .row:hover .fbtn, .row.aktiv .fbtn, .fbtn:focus-visible { opacity: 1; }
+  .fbtn:hover { background: color-mix(in srgb, var(--text) 9%, transparent); color: var(--text); }
+  .fbtn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .fot { border-top: 1px solid var(--kant); padding: 4px 6px; }
+  .alla { display: flex; align-items: center; justify-content: space-between; width: 100%; border: 0; background: transparent; cursor: pointer; padding: 9px 10px; border-radius: 10px; font: inherit; font-size: 12.5px; font-weight: 600; color: var(--text); }
+  .alla:hover { background: var(--hover); }
+  .alla svg { width: 15px; height: 15px; fill: none; stroke: var(--dov); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  :root[data-theme="dark"] { --yta: #1e1c19; --kant: #2e2c29; --text: #eeede8; --dov: #a2a097; --svag: #77756d; --hover: rgba(255,255,255,.06); --fara: #ff8a7a; --ring: #34322e; }
+  :root[data-theme="dark"] .card { box-shadow: 0 18px 44px rgba(0,0,0,.5), 0 3px 10px rgba(0,0,0,.3); }
   :root[data-theme="dark"] .list { scrollbar-color: #3f3e3a transparent; }
-  /* Temat Jul (tema.palett, kommer med i adressen): samma gran som verktygsraden ovanför, se jul.css */
-  :root[data-theme="dark"][data-palett="jul"] .card { background: #132e21; border-color: #214a35; }
-  :root[data-theme="dark"][data-palett="jul"] .head h1, :root[data-theme="dark"][data-palett="jul"] .name { color: #f4ecd8; }
-  :root[data-theme="dark"][data-palett="jul"] .x, :root[data-theme="dark"][data-palett="jul"] .fbtn, :root[data-theme="dark"][data-palett="jul"] .empty, :root[data-theme="dark"][data-palett="jul"] .sub { color: #a9b8a6; }
-  :root[data-theme="dark"][data-palett="jul"] .x:hover, :root[data-theme="dark"][data-palett="jul"] .fbtn:hover, :root[data-theme="dark"][data-palett="jul"] .row.open:hover { background: rgba(244,236,216,.09); color: #f4ecd8; }
-  :root[data-theme="dark"][data-palett="jul"] .sub.done { color: #4cc38a; }
-  :root[data-theme="dark"][data-palett="jul"] .sub.warn { color: #ff8a7a; }
-  :root[data-theme="dark"][data-palett="jul"] .bar { background: #214a35; }
-  :root[data-theme="dark"][data-palett="jul"] .list { scrollbar-color: #214a35 transparent; }
+  :root[data-theme="dark"][data-palett="jul"] { --yta: #132e21; --kant: #214a35; --text: #f4ecd8; --dov: #a9b8a6; --svag: #7d927f; --hover: rgba(244,236,216,.08); --ring: #214a35; }
 </style>
 <script>
   // Tema: skalet sparar skoll-theme i localStorage (samma file://-origin) → följ det, även om det byts medan rutan är öppen
@@ -100,6 +80,7 @@
       <button class="x" id="close" title="Stäng">&times;</button>
     </div>
     <div class="list" id="list"><div class="empty">Inga nedladdningar än.</div></div>
+    <div class="fot"><button class="alla" id="alla" type="button"><span>Alla nedladdningar</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></div>
   </div>
   <script>
     // Översättning: samma ordlista som skalet (adraze-lang i localStorage delas, samma file://-origin).
@@ -114,6 +95,7 @@
     const ICO_DL = '<svg viewBox="0 0 24 24"><path d="M12 4v10M8 10l4 4 4-4"/><path d="M5 19h14"/></svg>';
     const ICO_DOC = '<svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>';
     const ICO_WARN = '<svg viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/></svg>';
+    const ICO_NER = '<svg viewBox="0 0 24 24"><path d="M12 5v13M6.5 12.5 12 18l5.5-5.5"/></svg>';
     const ICO_PAUSE = '<svg viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></svg>';
     const ICO_PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
     const ICO_X = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
@@ -138,18 +120,20 @@
         const done = d.state === 'completed';
         const failed = d.state === 'cancelled' || d.state === 'interrupted';
         const row = document.createElement('div');
-        row.className = 'row' + (done ? ' open' : '');
+        row.className = 'row' + (done ? ' open' : '') + (prog ? ' aktiv' : '');
 
-        let icoCls = 'ico', ico = ICO_DL, sub = '', subCls = 'sub', pct = 0;
+        let icoCls = 'ico', ico = ICO_DOC, sub = '', subCls = 'sub', pct = 0;
+        const ring = (p, cls) => '<svg class="ring ' + (cls || '') + '" viewBox="0 0 36 36" aria-hidden="true"><circle class="rb" cx="18" cy="18" r="16"/><circle class="rf" cx="18" cy="18" r="16" pathLength="100" stroke-dasharray="' + p + ' 100"/></svg>';
         if (prog) {
           pct = d.total > 0 ? Math.round(d.received / d.total * 100) : 0;
           sub = d.total > 0 ? (fmt(d.received) + ' / ' + fmt(d.total) + ' · ' + pct + '%') : t('{storlek} hämtat…', { storlek: fmt(d.received) });
-          ico = paused ? ICO_PAUSE : '<div class="spin"></div>';
+          icoCls = 'ico gar';
+          ico = (d.total > 0 ? ring(Math.max(pct, 2), paused ? 'vila' : '') : ring(26, 'ob')) + (paused ? ICO_PAUSE : ICO_NER);
           if (paused) sub = t('Pausad') + ' · ' + sub;
-        } else if (scan) { sub = t('Skannar efter virus…'); ico = '<div class="spin"></div>'; }
-        else if (infected) { icoCls = 'ico warn'; ico = ICO_WARN; subCls = 'sub warn'; sub = t('Blockerad — {hot}', { hot: d.threat || t('hot') }); }
+        } else if (scan) { sub = t('Skannar efter virus…'); icoCls = 'ico gar'; ico = ring(26, 'ob') + ICO_DOC; }
+        else if (infected) { icoCls = 'ico warn'; ico = ICO_WARN; subCls = 'sub warn'; sub = t('Blockerad: {hot}', { hot: d.threat || t('hot') }); }
         else if (removed) { icoCls = 'ico warn'; ico = ICO_WARN; subCls = 'sub warn'; sub = t('Borttagen (virus)'); }
-        else if (done) { icoCls = 'ico done'; ico = ICO_DOC; subCls = 'sub done';
+        else if (done) {
           sub = (d.total > 0 ? fmt(d.total) + ' · ' : '') + (d.scan === 'overridden' ? t('Klar (behållen)') : (d.scan === 'clean' ? t('Säker') : t('Klar'))); }
         else if (failed) { sub = d.state === 'cancelled' ? t('Avbruten') : t('Misslyckades'); }
 
@@ -157,7 +141,7 @@
           '<span class="' + icoCls + '">' + ico + '</span>' +
           '<div class="meta"><div class="name" translate="no">' + esc(d.filename) + '</div>' +
           '<div class="' + subCls + '">' + esc(sub) + '</div>' +
-          (prog ? '<div class="bar"><i style="width:' + pct + '%"></i></div>' : '') + '</div>' +
+          '</div>' +
           (done ? '<button class="fbtn" title="' + esc(t('Visa i mapp')) + '" data-folder="' + d.id + '">' + ICO_FOLDER + '</button>' : '') +
           (prog ? '<button class="fbtn" title="' + esc(paused ? t('Fortsätt') : t('Pausa')) + '" data-toggle="' + d.id + '">' + (paused ? ICO_PLAY : ICO_PAUSE) + '</button><button class="fbtn" title="' + esc(t('Avbryt')) + '" data-cancel="' + d.id + '">' + ICO_X + '</button>' : '');
 
@@ -186,6 +170,7 @@
     function reportSize() { try { const c = document.querySelector('.card'); if (c) ipcRenderer.send('dl:popup-size', Math.ceil(c.getBoundingClientRect().bottom) + 16); } catch (e) {} }
     ipcRenderer.on('dl-data', (_e, arr) => { data = Array.isArray(arr) ? arr : []; render(); reportSize(); scheduleIdleClose(); });
     document.getElementById('close').onclick = () => ipcRenderer.send('dl:popup-close');
+    document.getElementById('alla').onclick = () => ipcRenderer.send('dl:show-all');
     document.body.addEventListener('mouseenter', () => { hovered = true; clearTimeout(idleTimer); }, true);
     document.body.addEventListener('mouseleave', () => { hovered = false; scheduleIdleClose(); }, true);
   </script>

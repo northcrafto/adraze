@@ -2016,6 +2016,7 @@ ipcMain.on('dl:resume', (_e, id) => { const it = dlItems.get(id), r = downloads.
 ipcMain.on('dl:cancel', (_e, id) => { const it = dlItems.get(id), r = downloads.find((d) => d.id === id); if (!r) return; try { if (it) it.cancel(); } catch {} dlItems.delete(id); r.state = 'cancelled'; broadcast('download-update', r); });
 ipcMain.on('dl:popup-toggle', (e) => { const ctx = wins.get(e.sender.id); if (!ctx) return; if (ctx.dlView) closeDlPopup(ctx); else openDlPopup(ctx); });
 ipcMain.on('dl:popup-close', (e) => { const ctx = [...wins.values()].find((c) => c.dlView && !c.dlView.webContents.isDestroyed() && c.dlView.webContents === e.sender); if (ctx) closeDlPopup(ctx); });
+ipcMain.on('dl:show-all', (e) => { const ctx = [...wins.values()].find((c) => c.dlView && !c.dlView.webContents.isDestroyed() && c.dlView.webContents === e.sender); if (ctx) { closeDlPopup(ctx); sendTo(ctx, 'open-downloads'); } });
 ipcMain.on('dl:popup-size', (e, h) => { const ctx = [...wins.values()].find((c) => c.dlView && !c.dlView.webContents.isDestroyed() && c.dlView.webContents === e.sender); if (ctx && typeof h === 'number') positionDlPopup(ctx, Math.round(h)); });
 
 /* "Spara lösenord"-notisen = flytande kort uppe till höger, som nedladdningsrutan: en

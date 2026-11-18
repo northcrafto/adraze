@@ -365,6 +365,16 @@
   .think .tt { background: linear-gradient(90deg, #77756d 0%, #77756d 35%, #eeede8 50%, #77756d 65%, #77756d 100%); background-size: 250% 100%;
     -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 1.8s linear infinite; }
   @keyframes shimmer { from { background-position: 100% 0; } to { background-position: -150% 0; } }
+  /* Lugnare tankeanimation (2026-11-18): stjärnan tar ett kvarts varv i taget och andas, utan gnistor och ring.
+     Texten glittrar långsammare och har inga punkter som räknar upp efter sig. */
+  .fspark .tw, .fspark .halo { display: none; }
+  .fspark .core { animation: fs-lugn 1.9s cubic-bezier(.65,0,.25,1) infinite; }
+  @keyframes fs-lugn { 0% { transform: rotate(0) scale(1); } 38% { transform: rotate(90deg) scale(.8); } 58% { transform: rotate(90deg) scale(1.06); } 72%, 100% { transform: rotate(90deg) scale(1); } }
+  .writing-spark .core { animation-duration: 2.6s; }
+  .think { gap: 10px; }
+  .think .tt { animation-duration: 2.6s; }
+  .think .tt::after { content: none !important; animation: none; width: 0; }
+  @media (prefers-reduced-motion: reduce) { .fspark .core { animation: none; } }
   @media (prefers-reduced-motion: reduce) { .anim, .anim * { animation: none !important; } .think .tt { animation: none; color: var(--mut); } }
 
   /* ── Filer, mappar och projekt ── */
