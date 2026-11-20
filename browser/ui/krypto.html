@@ -1688,6 +1688,13 @@ try { falkUtseende(window.falkInst && window.falkInst.alla()); } catch (e) { fal
     }
     function toggleAttMenu(open) {
       const m = $('attmenu'); const on = open === undefined ? !m.classList.contains('on') : open;
+      // Menyn öppnas precis ovanför plusknappen. Förr låg den ovanför HELA sidfoten (lägena, modellväljaren och pilen
+      // hamnade emellan), långt från knappen man tryckt på.
+      if (on) {
+        const f = m.offsetParent || m.parentElement, fr = f.getBoundingClientRect(), ar = $('attach').getBoundingClientRect();
+        m.style.bottom = Math.round(fr.bottom - ar.top + 8) + 'px';
+        m.style.left = Math.max(8, Math.round(ar.left - fr.left)) + 'px';
+      }
       m.classList.toggle('on', on);
       const p = projOf(activeConvo()); $('am-projname').textContent = p ? p.name : '';
     }
