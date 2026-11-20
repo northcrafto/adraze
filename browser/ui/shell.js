@@ -1962,7 +1962,10 @@ function bestCompletion(q) {
 function positionSug() {
   if (!sug.anchor) return;
   const r = sug.anchor.getBoundingClientRect();
-  suggestEl.style.left = r.left + 'px'; suggestEl.style.top = (r.bottom + 5) + 'px'; suggestEl.style.width = r.width + 'px';
+  // Startsidans sökruta: listan sitter ihop med rutan som en enda form (ingen glipa, raka hörn i skarven)
+  const ihop = sug.anchor.id === 'nt-sokruta';
+  suggestEl.classList.toggle('ihop', ihop); $('nt-sokruta').classList.toggle('oppen', ihop);
+  suggestEl.style.left = r.left + 'px'; suggestEl.style.top = (r.bottom + (ihop ? 0 : 5)) + 'px'; suggestEl.style.width = r.width + 'px';
   try { if (window.AnpassaVerktyg) window.AnpassaVerktyg.forslag(suggestEl, r, sug.anchor); } catch {}   // Anpassa › verktyg: adressfältet längst ner → listan öppnas uppåt
 }
 // Brave-stil: en rad per förslag. Sökningar: det du skrivit normalt, resten fett.
@@ -2053,7 +2056,7 @@ function localSug(query, comp) {
   return out.concat(past, sidor);
 }
 function openSug() { if (!sug.open) { sug.open = true; window.view.hide(); } positionSug(); suggestEl.classList.add('on'); }
-function closeSug(restore) { suggestEl.classList.remove('on'); sug.items = []; sug.sel = -1; if (sug.open) { sug.open = false; if (restore !== false) showActiveTab(); } }
+function closeSug(restore) { suggestEl.classList.remove('on', 'ihop'); $('nt-sokruta').classList.remove('oppen'); sug.items = []; sug.sel = -1; if (sug.open) { sug.open = false; if (restore !== false) showActiveTab(); } }
 function topSitesForSug() {
   if (active && active.incognito) return [];                     // ingen historik i inkognito
   const seen = new Set(); const out = [];
@@ -2124,7 +2127,7 @@ function attachAutocomplete(inp, anchor) {
   inp.addEventListener('blur', () => setTimeout(() => { if (document.activeElement !== inp) closeSug(); }, 120));
 }
 attachAutocomplete(addressInput, $('omnibox'));
-attachAutocomplete($('nt-search'), $('nt-search'));
+attachAutocomplete($('nt-search'), $('nt-sokruta'));   // förslagen hänger ihop med hela den vita rutan, inte bara textfältet
 window.addEventListener('resize', () => { if (sug.open) positionSug(); });
 
 /* ── Bakgrundsval ── */
