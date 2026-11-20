@@ -39,11 +39,11 @@ async function kor() {
     T.ok('listan öppnas med förslag', m.oppen && m.rader > 0, m);
     T.ok('ingen glipa mellan ruta och lista', m.ihop && m.glipa === 0, m.glipa);
     T.ok('samma vänsterkant och bredd', m.vanster === 0 && m.bredd === 0, [m.vanster, m.bredd]);
-    T.ok('raka hörn i skarven, runda längst ner', m.rutaNere === '0px' && m.listaUppe === '0px' && m.listaNere === '10px', [m.rutaNere, m.listaUppe, m.listaNere]);
+    T.ok('raka hörn i skarven, runda längst ner', m.rutaNere === '0px' && m.listaUppe === '0px' && m.listaNere === '26px', [m.rutaNere, m.listaUppe, m.listaNere]);
     await k(`(() => { document.getElementById('nt-search').dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); return 1; })()`);
     await H.sov(600);
     const e = await k(`(() => ({ oppen: document.getElementById('omni-suggest').classList.contains('on'), klass: document.getElementById('nt-sokruta').classList.contains('oppen'), horn: getComputedStyle(document.getElementById('nt-sokruta')).borderBottomLeftRadius }))()`);
-    T.ok('stängd lista: rutan är rundad igen', !e.oppen && !e.klass && e.horn === '10px', e);
+    T.ok('stängd lista: rutan är rundad igen', !e.oppen && !e.klass && e.horn === '26px', e);
     await bild('2-stangd');
     // Mörkt läge: rutan är vit både stängd och öppen, och listan har samma vita yta
     await k(`(() => { document.documentElement.dataset.theme = 'dark'; return 1; })()`);

@@ -2496,8 +2496,10 @@ body.incog #gal-provbar .gpb-farg { box-shadow: inset 0 0 0 1px rgb(255 255 255 
 @media (max-width: 860px) { .incog2-grid { grid-template-columns: 1fr; align-content: center; gap: 20px; } .incog2-bild { max-height: 26vh; order: -1; } .incog2-text { text-align: center; } .incog2-lede, .incog2-sok { margin-inline: auto; } .incog2-lista { justify-content: center; } }
 
 /* Startsidans sökruta och förslagslistan som en enda form (Cetto 2026-11-20): ingen glipa, raka hörn i skarven, samma yta */
+/* Rund som Chromes sökruta (Cetto 2026-11-20): helt rundade ändar stängd, och listan under får samma rundning nertill */
+#nt-sokruta { border-radius: 26px; }
 #nt-sokruta.oppen { border-bottom-left-radius: 0; border-bottom-right-radius: 0; background: #fff; }
-#omni-suggest.ihop { border: 0; border-top: 1px solid var(--color-line); border-radius: 0 0 10px 10px; box-shadow: 0 26px 38px -10px rgb(0 0 0 / .32); }
+#omni-suggest.ihop { border: 0; border-top: 1px solid var(--color-line); border-radius: 0 0 26px 26px; padding-bottom: 8px; box-shadow: 0 26px 38px -10px rgb(0 0 0 / .32); }
 /* Rutan är vit även i mörkt läge, så listan under den är också vit: samma färg stängd som öppen */
 :root[data-theme="dark"] #omni-suggest.ihop { background: #fff; border-top-color: #e1dfd8; box-shadow: 0 26px 38px -10px rgb(0 0 0 / .45); }
 :root[data-theme="dark"] #omni-suggest.ihop :is(.sug.sel, .sug:hover) { background: #f2f1ec; }
