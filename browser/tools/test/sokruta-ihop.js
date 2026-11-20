@@ -45,6 +45,17 @@ async function kor() {
     const e = await k(`(() => ({ oppen: document.getElementById('omni-suggest').classList.contains('on'), klass: document.getElementById('nt-sokruta').classList.contains('oppen'), horn: getComputedStyle(document.getElementById('nt-sokruta')).borderBottomLeftRadius }))()`);
     T.ok('stängd lista: rutan är rundad igen', !e.oppen && !e.klass && e.horn === '10px', e);
     await bild('2-stangd');
+    // Mörkt läge: rutan är vit både stängd och öppen, och listan har samma vita yta
+    await k(`(() => { document.documentElement.dataset.theme = 'dark'; return 1; })()`);
+    const fore = await k(`getComputedStyle(document.getElementById('nt-sokruta')).backgroundColor`);
+    await k(`(() => { const i = document.getElementById('nt-search'); i.focus(); i.value = 'a'; i.dispatchEvent(new InputEvent('input', { inputType: 'insertText', data: 'a', bubbles: true })); return 1; })()`);
+    await H.sov(2000);
+    const mork = await k(`(() => ({ ruta: getComputedStyle(document.getElementById('nt-sokruta')).backgroundColor, lista: getComputedStyle(document.getElementById('omni-suggest')).backgroundColor, text: getComputedStyle(document.querySelector('#omni-suggest .sline, #omni-suggest .surl')).color, falt: getComputedStyle(document.getElementById('nt-search')).color }))()`);
+    await bild('3-mork-oppen');
+    T.ok('mörkt läge: rutan förblir vit när listan öppnas', /255, 255, 255|oklab\(0\.99/.test(fore) && mork.ruta === 'rgb(255, 255, 255)' && mork.lista === 'rgb(255, 255, 255)', [fore, mork.ruta, mork.lista]);
+    T.ok('mörkt läge: mörk text på den vita listan', mork.text === 'rgb(31, 30, 27)' && mork.falt !== 'rgb(255, 255, 255)', [mork.text, mork.falt]);
+    await k(`(() => { document.getElementById('nt-search').dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); delete document.documentElement.dataset.theme; return 1; })()`);
+    await H.sov(500);
     // Adressfältet uppe ska vara som förut (egen lista med glipa)
     await k(`(() => { const i = document.getElementById('address'); i.focus(); i.value = 'a'; i.dispatchEvent(new InputEvent('input', { inputType: 'insertText', data: 'a', bubbles: true })); return 1; })()`);
     await H.sov(1500);
