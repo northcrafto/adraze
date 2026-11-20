@@ -752,5 +752,15 @@
   "propage.gift_price_1": "79 kr",
   "propage.gift_price_12": "948 kr",
   "propage.gift_done": "Pro är nu på {namn}s konto. Hälsa att det är klart.",
-  "propage.pay_amount": "Betala {pris}"
+  "propage.pay_amount": "Betala {pris}",
+  "prowl.pre": "Prowl",
+  "prowl.title": "Webbläsaren som jagar sårbarheter.",
+  "prowl.lead": "Prowl är AdRaze för utvecklare och säkerhetstestare. En inbyggd trafikfångare, Falk vid din sida och ett mörkt tema byggt för långa pass. Samma konto som i AdRaze, och Pro-kvoten delas mellan dem.",
+  "prowl.val_title": "Validatorn är hjärtat.",
+  "prowl.val_text": "Falks validator i Prowl bygger på en prompt vi finslipat under lång tid, så den dömer dina fynd lika hårt som en erfaren triager. Är det en riktig vuln, vem är offret, bevisas en state change. Den säger ifrån innan du lämnar in något svagt.",
+  "prowl.p1": "Fånga all trafik, stoppa och skicka om anrop, fråga Falk om vad du ser",
+  "prowl.p2": "Validator, rapportskrivare och kritiker som en riktig bug bounty-pipeline",
+  "prowl.p3": "Byggd på AdRaze, så blockeringen och integriteten följer med",
+  "prowl.cta": "Ladda ner Prowl",
+  "prowl.note": "Linux nu, Windows och Mac på väg. Använd verktygen på egna system eller med tillstånd."
 }
