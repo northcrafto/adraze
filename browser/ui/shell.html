@@ -212,7 +212,8 @@
       /* Notiser uppe till höger, i samma stil som "Stäng alla flikar?" (uppdatering, flytta hit, huvudwebbläsare) */
       /* Notiser uppe till höger, i samma stil som adraze.app: svart huvudknapp med ikon + tunn kantknapp,
          orange vätska fyller knappen vid hover (signaturkitet). */
-      .notis { position: fixed; top: 100px; right: 12px; width: 344px; max-width: 88vw; z-index: 240;
+      .notis { display: none !important; }   /* korten visas i den flytande notisvyn (ui/notis.html) ovanpå sidan, inte här */
+      .notis-skal { position: fixed; top: 100px; right: 12px; width: 344px; max-width: 88vw; z-index: 240;
         background: #fff; color: #13110e; border-radius: 18px; padding: 18px 18px 16px; border: 1px solid #e4e4df;
         box-shadow: 0 22px 60px rgba(17,17,19,.18), 0 2px 8px rgba(17,17,19,.06);
         animation: ccpop .16s cubic-bezier(.2,.7,.2,1); }

@@ -192,6 +192,49 @@ function openDlPopup(ctx) {
   view.webContents.on('did-finish-load', () => { view.webContents.send('dl-data', downloads); });
 }
 
+/* Notiserna (uppdatering, huvudwebbläsare, flytta hit, julfrågan) i en egen flytande ruta OVANPÅ sidan. Skalet lägger
+ * korten i sitt eget DOM som förut (dolda), speglar dem hit via `notis:lista`, och klick här klickar rätt knapp i skalet.
+ * Förr låg korten bara i skalet och den öppna webbsidan målades ovanpå → syntes bara på startsidan. */
+const NOTIS_W = 360;
+const notisPrefs = () => ({ preload: path.join(__dirname, 'notis-preload.js'), contextIsolation: true, sandbox: true, nodeIntegration: false, transparent: true });
+function positionNotis(ctx) {
+  if (!ctx || !ctx.notisView || !ctx.win || ctx.win.isDestroyed()) return;
+  const cb = ctx.win.getContentBounds();
+  const top = Math.max(0, Math.round((ctx.topInset || Math.min(92, ctx.bounds ? ctx.bounds.y : 92)) + 6));
+  const h = Math.max(1, Math.min(ctx._notisH || 120, cb.height - top - 8));
+  try { ctx.notisView.setBounds({ x: Math.round(cb.width - NOTIS_W - 4), y: top, width: NOTIS_W, height: h }); } catch {}
+}
+function sendNotis(ctx) { try { if (ctx.notisView && !ctx.notisView.webContents.isDestroyed()) ctx.notisView.webContents.send('notis-data', ctx._notisData || { lista: [], mork: false }); } catch {} }
+function closeNotis(ctx) {
+  if (!ctx || !ctx.notisView) return;
+  try { ctx.win.contentView.removeChildView(ctx.notisView); } catch {}
+  try { ctx.notisView.webContents.close(); } catch {}
+  if (ctx._notisRepos) { try { ctx.win.removeListener('resize', ctx._notisRepos); ctx.win.removeListener('move', ctx._notisRepos); } catch {} ctx._notisRepos = null; }
+  ctx.notisView = null;
+}
+function showNotis(ctx, lista, mork) {
+  if (!ctx || !ctx.win || ctx.win.isDestroyed()) return;
+  ctx._notisData = { lista: Array.isArray(lista) ? lista : [], mork: !!mork };
+  if (!ctx._notisData.lista.length) { closeNotis(ctx); return; }
+  if (!ctx.notisView) {
+    const view = new WebContentsView({ webPreferences: notisPrefs() });
+    try { view.setBackgroundColor('#00000000'); } catch {}
+    view.webContents.__ctx = ctx;
+    ctx.notisView = view; ctx._notisH = 120;
+    ctx.win.contentView.addChildView(view);
+    const repos = () => positionNotis(ctx);
+    ctx._notisRepos = repos; ctx.win.on('resize', repos); ctx.win.on('move', repos);
+    view.webContents.loadFile(path.join(__dirname, 'ui', 'notis.html'));
+    view.webContents.on('did-finish-load', () => sendNotis(ctx));
+  } else { try { ctx.win.contentView.addChildView(ctx.notisView); } catch {} }
+  positionNotis(ctx); sendNotis(ctx);
+}
+const notisCtxForWc = (id) => [...wins.values()].find((c) => c.notisView && !c.notisView.webContents.isDestroyed() && c.notisView.webContents.id === id);
+ipcMain.on('notis:lista', (e, lista, mork) => { const ctx = wins.get(e.sender.id); if (ctx) showNotis(ctx, lista, mork); });
+ipcMain.on('notis:redo', (e) => { const ctx = notisCtxForWc(e.sender.id); if (ctx) sendNotis(ctx); });
+ipcMain.on('notis:hojd', (e, h) => { const ctx = notisCtxForWc(e.sender.id); if (ctx && typeof h === 'number') { ctx._notisH = h; positionNotis(ctx); } });
+ipcMain.on('notis:klick', (e, id, knapp) => { const ctx = notisCtxForWc(e.sender.id); if (ctx) sendTo(ctx, 'notis-klick', { id: String(id || ''), knapp: knapp === 'sek' ? 'sek' : 'knapp' }); });
+
 /* Sök på sidan (Ctrl+F): en liten vy uppe till höger över fliken, som nedladdningsrutan. */
 const FIND_W = 380, FIND_H = 62;
 function positionFind(ctx) {
@@ -508,6 +551,7 @@ function applyBounds(ctx) {
   if (!ctx) return;
   try { sidopanel.placera(ctx); } catch {}   // Anpassa: sidopanel – appens vy följer med (dold när fliken visar video i helskärm)
   if (ctx.findView) positionFind(ctx);
+  if (ctx.notisView) positionNotis(ctx);
   const b = ctx.bounds;
   if (ctx.htmlFull && ctx.visibleTab && ctx.views.has(ctx.visibleTab)) {   // video/element i helskärm → täck HELA fönstret (över verktygsrad + flikar)
     const cb = ctx.win.getContentBounds();
@@ -2871,6 +2915,7 @@ function createWindow(incognito, fran) {
     ctx.views.forEach((v) => { try { v.webContents.close(); } catch {} });
     ctx.views.clear();
     if (ctx.kryptoView) { try { ctx.kryptoView.webContents.close(); } catch {} ctx.kryptoView = null; }
+    closeNotis(ctx);
     chattDestroy(ctx);
     wins.delete(id);
     if (!stangerAppen) skrivStartkonto();   // ett fönster stängdes: startkontot räknas om bland de som är kvar

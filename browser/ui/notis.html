@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'self'; img-src 'none'">
+<title>AdRaze</title>
+<style>
+  /* Notiserna (uppdatering, huvudwebbläsare, flytta hit) som en egen flytande ruta OVANPÅ sidan. Bakgrunden är genomskinlig:
+     bara korten syns. Samma utseende som förr (då de låg i skalet), men nu täcks de aldrig av den öppna webbsidan. */
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; background: transparent; }
+  body { font: 14px/1.5 "Familjen Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; overflow: hidden; }
+  #stack { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; padding: 2px; }
+  .notis { width: 344px; max-width: calc(100vw - 4px); background: #fff; color: #13110e; border-radius: 18px; padding: 18px 18px 16px; border: 1px solid #e4e4df;
+    box-shadow: 0 22px 60px rgba(17,17,19,.18), 0 2px 8px rgba(17,17,19,.06); animation: pop .16s cubic-bezier(.2,.7,.2,1); }
+  .notis.ut { opacity: 0; transform: translateY(-6px); transition: opacity .15s, transform .15s; }
+  @keyframes pop { from { opacity: 0; transform: translateY(-8px) scale(.98); } }
+  .rubrik { display: flex; align-items: center; gap: 9px; font-size: 16px; font-weight: 700; margin: 0 0 4px; letter-spacing: -.015em; }
+  .rubrik svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; color: #ff4b1f; }
+  .under { font-size: 13.5px; color: #5f5d5a; margin: 0; line-height: 1.5; }
+  .rad { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+  button { position: relative; overflow: hidden; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 40px; padding: 0 18px; border-radius: 999px; font-weight: 600; font-size: 13.5px; font-family: inherit; cursor: pointer; border: 0; white-space: nowrap;
+    transition: color .6s ease, box-shadow .3s ease, transform .2s ease, background-color 0s; }
+  button::before { content: ""; position: absolute; z-index: -1; left: -15%; width: 130%; bottom: 0; height: 165%; transform: translateY(100%);
+    background: linear-gradient(180deg, #ff6a43 0%, #ff4b1f 100%); border-radius: 46% 46% 0 0; transition: transform .95s cubic-bezier(.2,.75,.25,1); pointer-events: none; }
+  button:hover::before, button:focus-visible::before { transform: translateY(0); }
+  button:active { transform: translateY(1px); }
+  button:disabled { opacity: .7; cursor: default; }
+  button:disabled::before { display: none; }
+  .knapp { background: #13110e; color: #fff; }
+  .knapp:hover:not(:disabled), .knapp:focus-visible { color: #13110e; background-color: #ff4b1f; transition: color .6s ease, transform .2s ease, background-color 0s .6s; }
+  .sek { background: transparent; color: #13110e; box-shadow: inset 0 0 0 1px rgba(17,17,19,.18); }
+  .sek:hover, .sek:focus-visible { box-shadow: inset 0 0 0 1px transparent; }
+  :focus-visible { outline: 2px solid #ff4b1f; outline-offset: 2px; }
+  body.mork .notis { background: #201e1b; color: #f1efe9; border-color: #34322d; box-shadow: 0 22px 60px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.3); }
+  body.mork .under { color: #a7a39b; }
+  body.mork .knapp { background: #f1efe9; color: #201e1b; }
+  body.mork .knapp:hover:not(:disabled), body.mork .knapp:focus-visible { color: #201e1b; }
+  body.mork .sek { color: #f1efe9; box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); }
+  @media (prefers-reduced-motion: reduce) { .notis { animation: none; } button::before { transition: none; } }
+</style>
+</head>
+<body>
+<div id="stack"></div>
+<script src="notis.js"></script>
+</body>
+</html>

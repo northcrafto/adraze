@@ -217,6 +217,8 @@ contextBridge.exposeInMainWorld('dl', {
 
 contextBridge.exposeInMainWorld('view', {
   load: (id, url) => ipcRenderer.send('view:load', id, url),
+  notisLista: (lista, mork) => ipcRenderer.send('notis:lista', lista, mork),
+  onNotisKlick: (cb) => ipcRenderer.on('notis-klick', (_e, d) => cb(d)),
   show: (id) => ipcRenderer.send('view:show', id),
   hide: () => ipcRenderer.send('view:hide'),
   suggest: (q, engine) => ipcRenderer.invoke('omni:suggest', { q, engine }),

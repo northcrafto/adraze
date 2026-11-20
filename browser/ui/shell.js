@@ -2497,13 +2497,37 @@ function visaNotis({ id, ikon, titel, under, knapp, sek, onKnapp, onSek, onStang
   document.body.appendChild(el);
   return el;
 }
+/* Notiserna visas i en egen flytande ruta över sidan (main: notisView), inte här i skalet där den öppna webbsidan
+ * annars täcker dem. Korten ligger kvar i skalet (dolda, så julfrågans och testernas .notis-koll funkar) och speglas dit.
+ * Klick i den flytande rutan klickar på rätt knapp här, så all logik (onKnapp/onSek) ligger kvar. */
+function serialiseraNotis(el) {
+  const kn = el.querySelector('.notis-knapp'), u = el.querySelector('.notis-knapp svg use'), ut = el.querySelector('.notis-knapp .notis-kt');
+  return { id: el.id, ikon: u ? String(u.getAttribute('href') || '').slice(1) : '',
+    titel: (el.querySelector('.notis-titel') || {}).textContent || '', under: (el.querySelector('.notis-under') || {}).textContent || '',
+    knapp: (ut || kn || {}).textContent || '', knappDisabled: !!(kn && kn.disabled), sek: (el.querySelector('.notis-sek') || {}).textContent || '' };
+}
+let _notisTimer = 0;
+function pushNotiser() {
+  clearTimeout(_notisTimer);
+  _notisTimer = setTimeout(() => {
+    try {
+      const lista = [...document.querySelectorAll('body > .notis')].filter((e) => e.id && !e.classList.contains('ut')).map(serialiseraNotis);
+      window.view.notisLista(lista, document.documentElement.dataset.theme === 'dark');
+    } catch {}
+  }, 30);
+}
+try { new MutationObserver(pushNotiser).observe(document.body, { childList: true }); } catch {}
+if (window.view.onNotisKlick) window.view.onNotisKlick(({ id, knapp }) => {
+  const sel = '#' + ((window.CSS && CSS.escape) ? CSS.escape(id) : id) + ' .notis-' + (knapp === 'sek' ? 'sek' : 'knapp');
+  const b = document.querySelector(sel); if (b) b.click();
+});
 function showUpdateBanner(version) {
   // Fanns redan en banner (äldre version hämtad)? Bygg om den med den nya versionen,
   // och behåll "Startar om…" om användaren redan tryckt.
   const prev = document.getElementById('update-banner');
   const busy = !!(prev && prev.dataset.busy);
   const tt = (k) => (typeof window.t === 'function') ? window.t(k) : k;
-  const starta = (el) => { el.dataset.busy = '1'; const b = el.querySelector('.notis-knapp'); (b.querySelector('.notis-kt') || b).textContent = tt('Startar om…'); b.disabled = true; };
+  const starta = (el) => { el.dataset.busy = '1'; const b = el.querySelector('.notis-knapp'); (b.querySelector('.notis-kt') || b).textContent = tt('Startar om…'); b.disabled = true; pushNotiser(); };
   const bar = visaNotis({
     id: 'update-banner', ikon: 'i-update',
     titel: tt('Uppdatera AdRaze?'),
@@ -2536,11 +2560,11 @@ function showDefaultBrowserBanner() {
     under: tw('Då öppnas länkar från andra program utan reklam.'),
     knapp: tw('Ja, gör det'), sek: tw('Senare'),
     onKnapp: async (el) => {
-      const b = el.querySelector('.notis-knapp'); b.textContent = tw('Sätter…'); b.disabled = true;
+      const b = el.querySelector('.notis-knapp'); b.textContent = tw('Sätter…'); b.disabled = true; pushNotiser();
       let r; try { r = await window.defaultBrowser.set(); } catch { r = null; }
       if (r && r.ok) { showToast(tw('AdRaze är nu din huvudwebbläsare')); el.stang(); }
       else if (r && r.manual) { showToast(tw('Välj AdRaze i systeminställningarna som öppnades.')); el.stang(); }
-      else { b.textContent = tw('Ja, gör det'); b.disabled = false; showToast(tw('Kunde inte sätta AdRaze som standard.')); }
+      else { b.textContent = tw('Ja, gör det'); b.disabled = false; pushNotiser(); showToast(tw('Kunde inte sätta AdRaze som standard.')); }
     },
     onSek: () => { try { localStorage.setItem('skoll-defbrowser-snooze', String(Date.now() + 7 * 24 * 3600 * 1000)); } catch {} },
   });
