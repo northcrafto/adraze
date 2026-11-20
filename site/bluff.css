@@ -1,0 +1,57 @@
+/* Bluffkollen: textruta, dom, skäl, råd och länktabell. Bygger på kolla.css (hjälten, så funkar det, avslutet). */
+#bluff [hidden] { display: none !important; }
+.bl-form { margin-top: 40px; max-width: 820px; background: var(--mork-yta); border: 1.5px solid #2c2c33; border-radius: 22px; padding: 8px; transition: border-color .2s ease; }
+.bl-form:focus-within { border-color: var(--accent); }
+.bl-form textarea { display: block; width: 100%; min-height: 148px; resize: vertical; background: none; border: 0; outline: 0; color: #fff; font: 500 18px/1.45 "Familjen Grotesk", system-ui, sans-serif; padding: 16px 18px 8px; }
+.bl-form textarea::placeholder { color: #6d6d76; }
+.bl-form-rad { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 4px 4px 4px 18px; }
+.bl-not { color: #8b8b93; font-size: 14.5px; max-width: 44ch; }
+.bl-form .btn svg { transition: transform .25s var(--ease); }
+.bl-form .btn:hover svg { transform: translateX(3px); }
+.bl-form.vantar { opacity: .7; pointer-events: none; }
+
+.bl-res { padding: 80px 0 96px; border-bottom: 1px solid var(--linje); }
+.bl-dom-fore { font-weight: 600; color: var(--dov); font-size: 17px; }
+.bl-dom { margin-top: 10px; font-size: clamp(44px, 7.6vw, 112px); letter-spacing: -0.055em; line-height: .94; max-width: 14ch; outline: 0; }
+.bl-res[data-dom="farligt"] .bl-dom { color: #d7280a; }
+.bl-res[data-dom="misstankt"] .bl-dom { color: #a65f00; }
+.bl-dom-text { margin-top: 22px; font-size: 21px; max-width: 52ch; color: #2c2c2a; }
+.bl-tva { margin-top: 64px; display: grid; grid-template-columns: 1.15fr .85fr; gap: clamp(32px, 6vw, 96px); align-items: start; }
+.bl-res h3 { font-size: 15px; font-weight: 600; color: var(--dov); padding-bottom: 14px; border-bottom: 1px solid var(--ink); letter-spacing: 0; }
+.bl-skal li { display: grid; grid-template-columns: 12px 1fr; gap: 16px; align-items: baseline; padding: 18px 0; border-bottom: 1px solid var(--linje); font-size: 18.5px; line-height: 1.4; overflow-wrap: anywhere; }
+.bl-skal li::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: #b9b9b2; transform: translateY(-1px); }
+.bl-skal li[data-niva="rod"]::before { background: #d7280a; }
+.bl-skal li[data-niva="gul"]::before { background: #d08a00; }
+.bl-skal li[data-niva="gron"]::before { background: #1f8a4c; }
+.bl-skal b { font-weight: 700; }
+.bl-rad { counter-reset: rad; }
+.bl-rad li { counter-increment: rad; display: grid; grid-template-columns: 34px 1fr; gap: 8px; padding: 18px 0; border-bottom: 1px solid var(--linje); font-size: 18.5px; line-height: 1.4; }
+.bl-rad li::before { content: counter(rad, decimal-leading-zero); font-weight: 700; color: var(--accent); font-size: 15px; transform: translateY(3px); }
+#bl-lankar-del { margin-top: 64px; }
+.bl-tabell-yta { overflow-x: auto; }
+.bl-tabell { width: 100%; border-collapse: collapse; font-size: 17px; }
+.bl-tabell th { text-align: left; font-weight: 600; color: var(--dov); font-size: 14.5px; padding: 14px 16px 10px 0; }
+.bl-tabell td { padding: 16px 16px 16px 0; border-top: 1px solid var(--linje); vertical-align: top; }
+.bl-tabell td:first-child { font-weight: 700; word-break: break-all; min-width: 200px; }
+.bl-tabell small { display: block; font-weight: 500; color: var(--dov); font-size: 14.5px; margin-top: 2px; }
+.bl-tabell .varn { color: #d7280a; font-weight: 700; }
+.bl-igen { margin-top: 48px; }
+.bl-om { padding: 88px 0 96px; }
+.bl-om-inre { display: grid; grid-template-columns: .55fr 1.45fr; gap: clamp(24px, 6vw, 96px); align-items: start; }
+.bl-om h2 { font-size: clamp(28px, 3.4vw, 44px); letter-spacing: -0.04em; line-height: 1; }
+.bl-om-lista { border-top: 1px solid var(--ink); }
+.bl-om-lista div { display: grid; grid-template-columns: 150px 1fr; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--linje); }
+.bl-om-lista dt { font-weight: 700; font-size: 18px; }
+.bl-om-lista dd { margin: 0; color: var(--dov); font-size: 18px; line-height: 1.45; }
+.bl-slut { margin-top: 72px; display: flex; align-items: center; justify-content: space-between; gap: 28px; flex-wrap: wrap; }
+.bl-slut p { font-size: clamp(22px, 2.6vw, 32px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; max-width: 26ch; }
+@media (max-width: 820px) {
+  .bl-om { padding: 56px 0 72px; }
+  .bl-om-inre { grid-template-columns: 1fr; }
+  .bl-om-lista div { grid-template-columns: 1fr; gap: 4px; }
+  .bl-slut { margin-top: 48px; }
+  .bl-tva { grid-template-columns: 1fr; margin-top: 44px; }
+  .bl-form-rad { flex-direction: column; align-items: stretch; padding: 4px; }
+  .bl-not { padding: 0 12px 6px; }
+  .bl-res { padding: 56px 0 72px; }
+}

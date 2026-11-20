@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{t:bluff.meta_title}}</title>
+<meta name="description" content="{{t:bluff.meta_description}}">
+<link rel="icon" href="/favicon.png">
+{{alternates}}
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/kolla.css">
+<link rel="stylesheet" href="/bluff.css">
+</head>
+<body class="ko-sida">
+{{topp}}
+
+<main id="bluff" data-api="https://api.adraze.app" data-lang="{{lang}}">
+
+  <section class="ko-hjalte">
+    <div class="wrap">
+      <p class="ko-fore">{{t:bluff.pre}}</p>
+      <h1>{{t:bluff.title}}</h1>
+      <p class="ko-lead">{{t:bluff.lead}}</p>
+      <form id="bl-form" class="bl-form" novalidate>
+        <label class="ko-dold" for="bl-text">{{t:bluff.label}}</label>
+        <textarea id="bl-text" name="text" rows="5" maxlength="6000" spellcheck="false" autocapitalize="off" placeholder="{{t:bluff.placeholder}}" required></textarea>
+        <div class="bl-form-rad">
+          <p class="bl-not">{{t:bluff.privacy}}</p>
+          <button class="btn btn-stor liq" type="submit" id="bl-knapp">{{t:bluff.button}}{{arrow-right}}</button>
+        </div>
+      </form>
+      <p class="ko-fel" id="bl-fel" role="alert" hidden></p>
+      <p class="ko-exempel">{{t:bluff.examples}}
+        <button type="button" data-exempel="paket">{{t:bluff.ex_parcel}}</button>
+        <button type="button" data-exempel="familj">{{t:bluff.ex_family}}</button>
+        <button type="button" data-exempel="bank">{{t:bluff.ex_bank}}</button>
+      </p>
+    </div>
+  </section>
+
+  <section class="bl-res" id="bl-res" hidden aria-live="polite">
+    <div class="wrap">
+      <p class="bl-dom-fore">{{t:bluff.verdict_pre}}</p>
+      <h2 class="bl-dom" id="bl-dom" tabindex="-1"></h2>
+      <p class="bl-dom-text" id="bl-dom-text"></p>
+
+      <div class="bl-tva">
+        <div id="bl-skal-del">
+          <h3>{{t:bluff.why}}</h3>
+          <ul class="bl-skal" id="bl-skal"></ul>
+        </div>
+        <div>
+          <h3>{{t:bluff.do}}</h3>
+          <ol class="bl-rad" id="bl-rad"></ol>
+        </div>
+      </div>
+
+      <div id="bl-lankar-del" hidden>
+        <h3>{{t:bluff.links}}</h3>
+        <div class="bl-tabell-yta"><table class="bl-tabell">
+          <thead><tr><th>{{t:bluff.col_address}}</th><th>{{t:bluff.col_age}}</th><th>{{t:bluff.col_lists}}</th></tr></thead>
+          <tbody id="bl-lankar"></tbody>
+        </table></div>
+      </div>
+
+      <p class="bl-igen"><button type="button" class="btn liq-ghost" id="bl-ny">{{t:bluff.again}}</button></p>
+    </div>
+  </section>
+
+  <section class="bl-om">
+    <div class="wrap bl-om-inre">
+      <h2>{{t:bluff.how_title}}</h2>
+      <dl class="bl-om-lista">
+        <div><dt>{{t:bluff.how1_label}}</dt><dd>{{t:bluff.how1}}</dd></div>
+        <div><dt>{{t:bluff.how2_label}}</dt><dd>{{t:bluff.how2}}</dd></div>
+        <div><dt>{{t:bluff.how3_label}}</dt><dd>{{t:bluff.how3}}</dd></div>
+        <div><dt>{{t:bluff.how4_label}}</dt><dd>{{t:bluff.how4}}</dd></div>
+      </dl>
+    </div>
+    <div class="wrap bl-slut">
+      <p>{{t:bluff.cta_text}}</p>
+      <a class="btn liq" href="{{ladda}}">{{t:nav.download}}{{arrow-right}}</a>
+    </div>
+  </section>
+</main>
+
+<script type="application/json" id="bl-t">{
+"dom_farligt":"{{t:bluff.v_danger}}","dom_misstankt":"{{t:bluff.v_suspicious}}","dom_inga":"{{t:bluff.v_none}}",
+"text_farligt":"{{t:bluff.v_danger_text}}","text_misstankt":"{{t:bluff.v_suspicious_text}}","text_inga":"{{t:bluff.v_none_text}}",
+"inga_skal":"{{t:bluff.no_reasons}}","dagar":"{{t:bluff.days}}","ar":"{{t:bluff.years}}","okand":"{{t:bluff.unknown}}","listor":"{{t:bluff.lists_n}}","via":"{{t:bluff.via}}","vantar":"{{t:bluff.checking}}",
+"e_tom":"{{t:bluff.err_empty}}","e_for_lang":"{{t:bluff.err_long}}","e_for_manga":"{{t:bluff.err_limit}}","e_okant":"{{t:bluff.err_generic}}",
+"ex_paket":"{{t:bluff.ex_parcel_text}}","ex_familj":"{{t:bluff.ex_family_text}}","ex_bank":"{{t:bluff.ex_bank_text}}",
+"s_sparrlista":"{{t:bluff.r_blocklist}}","s_harmar":"{{t:bluff.r_lookalike}}","s_harmar_mejl":"{{t:bluff.r_lookalike_mail}}","s_at_tecken":"{{t:bluff.r_at}}","s_specialtecken":"{{t:bluff.r_special}}",
+"s_ny_doman":"{{t:bluff.r_new}}","s_ung_doman":"{{t:bluff.r_young}}","s_ovanlig_andelse":"{{t:bluff.r_tld}}","s_forkortad":"{{t:bluff.r_short}}","s_forkortad_leder":"{{t:bluff.r_short_to}}",
+"s_okrypterad":"{{t:bluff.r_http}}","s_rorig_adress":"{{t:bluff.r_messy}}","s_finns_inte":"{{t:bluff.r_gone}}","s_ip_adress":"{{t:bluff.r_ip}}","s_fel_avsandare":"{{t:bluff.r_wrong_sender}}",
+"s_fel_avsandare_uppgifter":"{{t:bluff.r_wrong_sender_data}}","s_bradska":"{{t:bluff.r_urgent}}","s_hot":"{{t:bluff.r_threat}}","s_betalning":"{{t:bluff.r_pay}}","s_uppgifter":"{{t:bluff.r_data}}",
+"s_vinst":"{{t:bluff.r_prize}}","s_familj":"{{t:bluff.r_family}}","s_familj_pengar":"{{t:bluff.r_family_money}}","s_fjarr":"{{t:bluff.r_remote}}","s_investering":"{{t:bluff.r_invest}}",
+"s_presentkort":"{{t:bluff.r_giftcard}}","s_bankid_uppmaning":"{{t:bluff.r_bankid}}","s_larm":"{{t:bluff.r_alarm}}","s_paket_avgift":"{{t:bluff.r_parcel_fee}}","s_hemlig":"{{t:bluff.r_secret}}","s_officiell_adress":"{{t:bluff.r_official}}",
+"r_klicka_inte":"{{t:bluff.a_noclick}}","r_ring_gamla_numret":"{{t:bluff.a_call_old}}","r_bankid_aldrig":"{{t:bluff.a_bankid}}","r_ingen_fjarrstyrning":"{{t:bluff.a_remote}}","r_inga_presentkort":"{{t:bluff.a_giftcard}}",
+"r_ga_direkt":"{{t:bluff.a_direct}}","r_redan_fyllt_i":"{{t:bluff.a_already}}","r_anmal":"{{t:bluff.a_report}}","r_inget_bevis":"{{t:bluff.a_noproof}}","r_for_lite":"{{t:bluff.a_more}}"
+}</script>
+
+<footer class="fot">
+  <div class="wrap fot-grid">
+    <div><a href="{{hem}}" class="logo"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a><p>{{t:footer.tagline}}</p>
+      <ul class="fot-kanaler">
+        <li><a href="https://www.instagram.com/adraze.app/" rel="me noopener" aria-label="Instagram" title="Instagram">{{instagram-logo}}</a></li>
+        <li><a href="https://www.tiktok.com/@adraze.app" rel="me noopener" aria-label="TikTok" title="TikTok">{{tiktok-logo}}</a></li>
+        <li><a href="https://www.youtube.com/@adraze_adblocker" rel="me noopener" aria-label="YouTube" title="YouTube">{{youtube-logo}}</a></li>
+        <li><a href="https://www.facebook.com/profile.php?id=61596213391880" rel="me noopener" aria-label="Facebook" title="Facebook">{{facebook-logo}}</a></li>
+      </ul></div>
+    <ul>
+      <li><a class="nav-link" href="{{hem}}">{{t:privacy.back}}</a></li>
+      <li><a class="nav-link" href="{{pre}}/kolla">{{t:nav.check}}</a></li>
+      <li><a class="nav-link" href="{{ladda}}">{{t:nav.download}}</a></li>
+      <li><a class="nav-link" href="{{hjalp}}">{{t:nav.help}}</a></li>
+      <li><a class="nav-link" href="{{pre}}/integritet">{{t:footer.privacy}}</a></li>
+    </ul>
+  </div>
+</footer>
+<script src="/bluff.js" defer></script>
+<script src="/main.js"></script>
+</body>
+</html>

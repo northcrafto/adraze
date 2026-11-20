@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://js.stripe.com; frame-src https://js.stripe.com https://hooks.stripe.com https://*.stripe.com; connect-src 'self' https://api.adraze.app https://api.stripe.com https://*.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'">
+<title>{{t:propage.meta_title}}</title>
+<meta name="description" content="{{t:propage.meta_description}}">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.png">
+{{alternates}}
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/pro.css">
+</head>
+<body class="pro-sida">
+{{topp}}
+
+<main id="propage" data-api="https://api.adraze.app" data-konto="{{konto}}" data-retur="{{pre}}/pro" data-lang="{{lang}}">
+
+  <section class="pro-hjalte">
+    <div class="wrap">
+      <p class="pro-fore">{{t:propage.pre}}</p>
+      <h1>{{t:propage.title}}</h1>
+      <p class="pro-lead">{{t:propage.lead}}</p>
+    </div>
+  </section>
+
+  <section class="wrap pro-yta">
+    <!-- Laddar -->
+    <div id="pro-laddar" class="pro-laddar">{{t:propage.loading}}</div>
+
+    <!-- Inte inloggad -->
+    <div id="pro-login" class="pro-ruta" hidden>
+      <h2>{{t:propage.login_title}}</h2>
+      <p>{{t:propage.login_text}}</p>
+      <a id="pro-login-btn" class="btn btn-stor liq" href="#">{{t:propage.login_cta}}{{arrow-right}}</a>
+    </div>
+
+    <!-- Har redan Pro -->
+    <div id="pro-har" class="pro-ruta" hidden>
+      <h2>{{t:propage.have_title}}</h2>
+      <p id="pro-har-text"></p>
+      <a class="btn liq-ghost" href="#ge">{{t:propage.have_gift}}{{arrow-right}}</a>
+    </div>
+
+    <!-- Köp -->
+    <div id="pro-kop" class="pro-kop" hidden>
+      <div class="pro-plan-rad" role="group" aria-label="{{t:propage.plan_label}}">
+        <button type="button" class="pro-plan on" data-plan="pro_month">
+          <span class="pp-namn">{{t:propage.plan_month}}</span>
+          <span class="pp-pris" data-pris-month></span>
+          <span class="pp-bf" data-bf hidden>{{t:propage.bf_first}}</span>
+        </button>
+        <button type="button" class="pro-plan" data-plan="pro_year">
+          <span class="pp-namn">{{t:propage.plan_year}}</span>
+          <span class="pp-pris" data-pris-year></span>
+          <span class="pp-spar">{{t:propage.plan_year_note}}</span>
+        </button>
+      </div>
+
+      <div class="pro-kassa">
+        <div id="pro-pay-element"></div>
+        <p class="pro-fel" id="pro-fel" role="alert" hidden></p>
+        <button type="button" class="btn btn-stor liq" id="pro-betala" disabled><span id="pro-betala-text">{{t:propage.pay}}</span></button>
+        <p class="pro-trygg">{{t:propage.secure}}</p>
+      </div>
+    </div>
+
+    <!-- Klart -->
+    <div id="pro-klar" class="pro-ruta pro-klar" hidden>
+      <h2 id="pro-klar-titel">{{t:propage.done_title}}</h2>
+      <p id="pro-klar-text"></p>
+      <a class="btn liq" href="{{ladda}}">{{t:propage.done_cta}}{{arrow-right}}</a>
+    </div>
+  </section>
+
+  <!-- Ge bort Pro -->
+  <section class="wrap pro-ge" id="ge">
+    <div class="sektion-huvud">
+      <h2>{{t:propage.gift_title}}</h2>
+      <p>{{t:propage.gift_lead}}</p>
+    </div>
+
+    <div id="ge-login" class="pro-ruta" hidden>
+      <p>{{t:propage.gift_login}}</p>
+      <a id="ge-login-btn" class="btn liq" href="#">{{t:propage.login_cta}}{{arrow-right}}</a>
+    </div>
+
+    <!-- Steg 1: mottagare -->
+    <div id="ge-sok" class="pro-ruta" hidden>
+      <label for="ge-email">{{t:propage.gift_email_label}}</label>
+      <input id="ge-email" type="email" inputmode="email" autocomplete="off" spellcheck="false" placeholder="{{t:propage.gift_email_ph}}">
+      <p class="pro-fel" id="ge-fel" role="alert" hidden></p>
+      <button type="button" class="btn liq" id="ge-kolla">{{t:propage.gift_check}}</button>
+    </div>
+
+    <!-- Steg 2: EXTRA VARNING -->
+    <div id="ge-varning" class="pro-ruta pro-varning" hidden>
+      {{warning-octagon}}
+      <h3>{{t:propage.gift_warn_title}}</h3>
+      <p class="ge-vem"><strong id="ge-namn"></strong><span id="ge-adress"></span></p>
+      <p class="ge-varn-text">{{t:propage.gift_warn_text}}</p>
+      <div class="ge-period" role="group" aria-label="{{t:propage.gift_period_label}}">
+        <button type="button" class="ge-p on" data-man="1"><span>{{t:propage.gift_1m}}</span><span data-ge-pris="1"></span></button>
+        <button type="button" class="ge-p" data-man="12"><span>{{t:propage.gift_12m}}</span><span data-ge-pris="12"></span></button>
+      </div>
+      <div class="ge-knappar">
+        <button type="button" class="btn liq-ghost" id="ge-avbryt">{{t:propage.gift_back}}</button>
+        <button type="button" class="btn liq" id="ge-fortsatt">{{t:propage.gift_confirm}}</button>
+      </div>
+    </div>
+
+    <!-- Steg 3: betala gåvan -->
+    <div id="ge-kassa" class="pro-ruta" hidden>
+      <p class="ge-till">{{t:propage.gift_paying_for}} <strong id="ge-till-namn"></strong></p>
+      <div id="ge-pay-element"></div>
+      <p class="pro-fel" id="ge-betal-fel" role="alert" hidden></p>
+      <button type="button" class="btn btn-stor liq" id="ge-betala" disabled><span id="ge-betala-text">{{t:propage.pay}}</span></button>
+    </div>
+
+    <!-- Gåvan klar -->
+    <div id="ge-klar" class="pro-ruta pro-klar" hidden>
+      <h3>{{t:propage.gift_done_title}}</h3>
+      <p id="ge-klar-text"></p>
+      <button type="button" class="btn liq-ghost" id="ge-igen">{{t:propage.gift_again}}</button>
+    </div>
+  </section>
+</main>
+
+<footer class="fot">
+  <div class="wrap fot-grid">
+    <div><a href="{{hem}}" class="logo"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a><p>{{t:footer.tagline}}</p>
+      <ul class="fot-kanaler">
+        <li><a href="https://www.instagram.com/adraze.app/" rel="me noopener" aria-label="Instagram" title="Instagram">{{instagram-logo}}</a></li>
+        <li><a href="https://www.tiktok.com/@adraze.app" rel="me noopener" aria-label="TikTok" title="TikTok">{{tiktok-logo}}</a></li>
+        <li><a href="https://www.youtube.com/@adraze_adblocker" rel="me noopener" aria-label="YouTube" title="YouTube">{{youtube-logo}}</a></li>
+        <li><a href="https://www.facebook.com/profile.php?id=61596213391880" rel="me noopener" aria-label="Facebook" title="Facebook">{{facebook-logo}}</a></li>
+      </ul></div>
+    <ul>
+      <li><a class="nav-link" href="{{hem}}">{{t:privacy.back}}</a></li>
+      <li><a class="nav-link" href="{{ladda}}">{{t:nav.download}}</a></li>
+      <li><a class="nav-link" href="{{hjalp}}">{{t:nav.help}}</a></li>
+      <li><a class="nav-link" href="{{pre}}/integritet">{{t:footer.privacy}}</a></li>
+    </ul>
+  </div>
+</footer>
+<script type="application/json" id="pro-t">{
+"pay":"{{t:propage.pay}}","paying":"{{t:propage.paying}}","err_generic":"{{t:propage.err_generic}}","err_login":"{{t:propage.err_login}}","err_already":"{{t:propage.err_already}}",
+"month_price":"{{t:propage.month_price}}","month_bf":"{{t:propage.month_bf}}","year_price":"{{t:propage.year_price}}","sum_month":"{{t:propage.sum_month}}","sum_year":"{{t:propage.sum_year}}",
+"done_sub":"{{t:propage.done_sub}}","done_slow":"{{t:propage.done_slow}}","have_until":"{{t:propage.have_until}}","have_forever":"{{t:propage.have_forever}}",
+"gift_notfound":"{{t:propage.gift_notfound}}","gift_price_1":"{{t:propage.gift_price_1}}","gift_price_12":"{{t:propage.gift_price_12}}","gift_done":"{{t:propage.gift_done}}","pay_amount":"{{t:propage.pay_amount}}"
+}</script>
+<script src="https://js.stripe.com/v3/"></script>
+<script src="/pro.js" defer></script>
+<script src="/main.js"></script>
+</body>
+</html>

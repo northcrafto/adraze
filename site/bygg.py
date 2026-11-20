@@ -25,13 +25,16 @@ SPRAK = [
 # Källa → (sajt, sökväg på sajten)
 SIDOR = {'index.src.html': (SAJT, ''), 'integritet.src.html': (SAJT, 'integritet'), 'chattregler.src.html': (SAJT, 'chattregler'), 'integritet-webblasaren.src.html': (SAJT, 'integritet-webblasaren'), 'statistik.src.html': (SAJT, 'statistik'),
          'kolla.src.html': (SAJT, 'kolla'),
+         'bluff.src.html': (SAJT, 'bluff'),  # bluffkollen: sms, mejl och länkar
+         'pro.src.html': (SAJT, 'pro'),  # köp och ge bort AdRaze Pro
          'valkommen.src.html': (SAJT, 'valkommen'),  # öppnas av tillägget efter installation
          'konto.src.html': (KONTO, ''), 'download.src.html': (LADDA, ''),
          'support.src.html': (HJALP, ''), 'arende.src.html': (HJALP, 'arende'), 'team.src.html': (HJALP, 'team'),
          'proxy.src.html': (PROXY, '')}
 MAPP = {SAJT: rot, KONTO: rot.parent / 'accounts', LADDA: rot.parent / 'download', HJALP: rot.parent / 'support', PROXY: rot.parent / 'proxy'}
-UTAN_SITEMAP = {(KONTO, ''), (HJALP, 'arende'), (HJALP, 'team'), (SAJT, 'valkommen')}  # inloggning, ärenden och teampanelen ska inte indexeras
+UTAN_SITEMAP = {(KONTO, ''), (HJALP, 'arende'), (HJALP, 'team'), (SAJT, 'valkommen'), (SAJT, 'pro')}  # inloggning, ärenden och teampanelen ska inte indexeras
 BARA_SV = {'team.src.html'}  # teamets panel finns bara på svenska
+BARA = {'bluff.src.html': ('sv', 'en'), 'pro.src.html': ('sv', 'en')}  # sidor som än så länge bara finns på vissa språk (texterna i i18n saknas för övriga)
 # Filer som subdomänerna serverar själva (kopieras från site/ vid varje bygge)
 TILLGANGAR = {
     KONTO: ['style.css', 'konto.css', 'konto.js', 'main.js', 'fonts', 'mail/vinkar.gif', 'logo-mark.svg', 'favicon.png',
@@ -80,16 +83,18 @@ for kod, namn in finns:
     t = {**sv, **json.loads((rot / 'i18n' / f'{kod}.json').read_text())}
     for src, (sajt, sida) in SIDOR.items():
         if src in BARA_SV and kod != 'sv': continue
+        if src in BARA and kod not in BARA[src]: continue
+        finns_har = [(k, n) for k, n in finns if src not in BARA or k in BARA[src]]
         # Länkar till huvudsajten blir fullständiga på subdomänerna
         hem = '' if sajt == SAJT else SAJT
         # Gemensam topp med hamburgarmeny för alla sidor (före ikonerna, {{topp}} ser ut som ett ikonnamn)
         mall = (rot / src).read_text().replace('{{topp}}', (rot / '_topp.html').read_text())
-        alternates = '\n'.join(f'<link rel="alternate" hreflang="{k}" href="{sajt}{url(k, sida)}">' for k, _ in finns)
+        alternates = '\n'.join(f'<link rel="alternate" hreflang="{k}" href="{sajt}{url(k, sida)}">' for k, _ in finns_har)
         alternates += f'\n<link rel="alternate" hreflang="x-default" href="{sajt}{url("sv", sida)}">'
         alternates += f'\n<link rel="canonical" href="{sajt}{url(kod, sida)}">'
         val = ''.join(
             f'<li><a href="{url(k, sida)}" hreflang="{k}" lang="{k}"{" aria-current=\"true\"" if k == kod else ""} data-sprak="{k}">{html.escape(n)}</a></li>'
-            for k, n in finns)
+            for k, n in finns_har)
         sprakval = (f'<details class="sprak"><summary aria-label="{html.escape(t["nav.language"])}">{ikon("globe")}<span>{kod.upper()}</span></summary>'
                     f'<ul class="sprak-lista">{val}</ul></details>')
         ut = mall.replace('{{alternates}}', alternates).replace('{{sprakval}}', sprakval)
@@ -116,9 +121,11 @@ for sajt, mapp in MAPP.items():
         (mapp / 'robots.txt').write_text('User-agent: *\nDisallow: /\n')
         continue
     rader = []
+    bara_sida = {v: BARA[k] for k, (s_, v) in SIDOR.items() if s_ == sajt and k in BARA}
     for sida in sidor:
-        for kod, _ in finns:
-            alt = ''.join(f'<xhtml:link rel="alternate" hreflang="{k}" href="{sajt}{url(k, sida)}"/>' for k, _ in finns)
+        har = [(k, n) for k, n in finns if sida not in bara_sida or k in bara_sida[sida]]
+        for kod, _ in har:
+            alt = ''.join(f'<xhtml:link rel="alternate" hreflang="{k}" href="{sajt}{url(k, sida)}"/>' for k, _ in har)
             rader.append(f'<url><loc>{sajt}{url(kod, sida)}</loc>{alt}</url>')
     (mapp / 'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' + '\n'.join(rader) + '\n</urlset>\n')
     (mapp / 'robots.txt').write_text(f'User-agent: *\nAllow: /\nSitemap: {sajt}/sitemap.xml\n')

@@ -1,0 +1,52 @@
+/* AdRaze Pro: köp och ge bort. Bygger på style.css (knappar, topp, sidfot). */
+#propage [hidden] { display: none !important; }
+.pro-hjalte { background: var(--mork); color: #fff; padding: 88px 0 72px; --sig-btn: #fff; --sig-btn-ink: var(--ink); }
+.pro-fore { font-weight: 600; color: var(--accent); font-size: 18px; }
+.pro-hjalte h1 { margin-top: 14px; font-size: clamp(44px, 7vw, 92px); letter-spacing: -0.05em; line-height: .95; }
+.pro-lead { margin-top: 22px; max-width: 48ch; color: #a9a7a1; font-size: 19px; }
+.pro-yta { padding: 56px 0 40px; }
+.pro-laddar { color: var(--dov); padding: 40px 0; }
+.pro-ruta { max-width: 560px; background: var(--yta); border: 1px solid var(--linje); border-radius: 22px; padding: 30px 32px; }
+.pro-ruta h2 { font-size: clamp(26px, 3.4vw, 34px); letter-spacing: -0.03em; }
+.pro-ruta > p { margin-top: 12px; color: var(--dov); font-size: 16.5px; line-height: 1.5; }
+.pro-ruta .btn { margin-top: 22px; }
+.pro-kop { max-width: 620px; }
+.pro-plan-rad { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pro-plan { text-align: left; background: var(--yta); border: 1.5px solid var(--linje); border-radius: 16px; padding: 18px 18px 16px; cursor: pointer; display: flex; flex-direction: column; gap: 4px; transition: border-color .15s ease; }
+.pro-plan:hover { border-color: #c9c6b9; }
+.pro-plan.on { border-color: var(--accent); }
+.pp-namn { font-weight: 600; font-size: 15px; }
+.pp-pris { font-size: 26px; font-weight: 700; letter-spacing: -0.03em; }
+.pp-pris small { font-size: 14px; font-weight: 500; color: var(--dov); }
+.pp-bf { font-size: 13.5px; font-weight: 600; color: var(--accent); }
+.pp-spar { font-size: 13.5px; color: var(--dov); }
+.pro-kassa { margin-top: 26px; max-width: 560px; }
+#pro-pay-element, #ge-pay-element { margin-bottom: 18px; min-height: 42px; }
+.pro-betala, .btn-stor { width: 100%; }
+#pro-betala, #ge-betala { width: 100%; justify-content: center; }
+.pro-trygg { margin-top: 14px; color: var(--svag); font-size: 13.5px; text-align: center; }
+.pro-fel { color: #c2360e; font-weight: 600; font-size: 14.5px; margin-top: 4px; margin-bottom: 14px; }
+.pro-klar h2, .pro-klar h3 { color: #1f8a4c; }
+.pro-ge { padding: 40px 0 96px; border-top: 1px solid var(--linje); margin-top: 48px; }
+.pro-ge label { display: block; font-weight: 600; font-size: 14.5px; margin-bottom: 8px; }
+.pro-ge input { width: 100%; max-width: 420px; height: 50px; border-radius: 12px; border: 1.5px solid var(--linje); background: #fff; padding: 0 16px; font: 500 16px "Familjen Grotesk", system-ui, sans-serif; outline: 0; }
+.pro-ge input:focus { border-color: var(--accent); }
+.pro-ge .btn { margin-top: 18px; }
+.pro-varning { border-color: #e9b44c; background: #fff9ef; }
+:root[data-theme="dark"] .pro-varning { background: #2a2318; }
+.pro-varning svg { width: 38px; height: 38px; color: #c77f0a; }
+.pro-varning h3 { margin-top: 12px; font-size: 24px; letter-spacing: -0.02em; }
+.ge-vem { margin-top: 16px; font-size: 18px; display: flex; flex-direction: column; gap: 2px; }
+.ge-vem strong { font-size: 22px; letter-spacing: -0.02em; }
+.ge-vem span { color: var(--dov); }
+.ge-varn-text { margin-top: 14px; color: #8a6d2a; font-weight: 500; font-size: 15px; }
+:root[data-theme="dark"] .ge-varn-text { color: #e5c072; }
+.ge-period { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ge-p { background: #fff; border: 1.5px solid var(--linje); border-radius: 14px; padding: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 3px; text-align: left; }
+:root[data-theme="dark"] .ge-p { background: #211d16; }
+.ge-p.on { border-color: var(--accent); }
+.ge-p span:first-child { font-weight: 600; font-size: 15px; }
+.ge-p span:last-child { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+.ge-knappar { margin-top: 24px; display: flex; gap: 10px; }
+.ge-till { margin-bottom: 18px; color: var(--dov); }
+.ge-till strong { color: var(--ink); }

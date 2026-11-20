@@ -420,3 +420,24 @@ h2.syns:hover .penna path { animation: rita .8s cubic-bezier(.6,.05,.25,1); }
 }
 /* Hjältens gorilla sticker ut 14 % åt sidorna: klipp där i stället för att sidan går att dra i sidled */
 main { overflow-x: clip; }
+
+/* Priser / Pro på startsidan */
+.priser { padding: 20px 0 40px; }
+.pris-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 44px; }
+.pris-kort { background: var(--yta); border: 1px solid var(--linje); border-radius: 22px; padding: 30px 30px 28px; display: flex; flex-direction: column; }
+.pris-pro { background: var(--mork); color: #f3f1ec; border-color: var(--mork); }
+.pris-namn { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.pris-pro .pris-namn { color: var(--accent); }
+.pris-pris { margin-top: 10px; font-size: 18px; color: var(--dov); display: flex; align-items: baseline; gap: 8px; }
+.pris-pro .pris-pris { color: #b4b1aa; }
+.pris-pris strong { font-size: clamp(38px, 5vw, 52px); font-weight: 700; letter-spacing: -0.04em; color: var(--ink); }
+.pris-pro .pris-pris strong { color: #fff; }
+.pris-under { margin-top: 8px; color: var(--dov); font-size: 15px; }
+.pris-bf { margin-top: 8px; font-size: 15px; font-weight: 600; color: var(--accent); }
+.pris-kort .btn { margin-top: 24px; align-self: flex-start; }
+.pris-pro .liq { --sig-btn: #fff; --sig-btn-ink: var(--ink); }
+.pris-lista { margin-top: 26px; display: grid; gap: 13px; }
+.pris-lista li { display: flex; gap: 11px; align-items: flex-start; font-size: 15.5px; line-height: 1.45; }
+.pris-lista li svg { width: 19px; height: 19px; flex: none; margin-top: 1px; color: var(--accent); }
+.pris-ge { margin-top: 22px; align-self: flex-start; font-size: 14.5px; font-weight: 600; color: #cfccc4; }
+@media (max-width: 760px) { .pris-grid { grid-template-columns: 1fr; } }

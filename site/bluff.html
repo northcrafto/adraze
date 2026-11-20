@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bluffkollen: kolla sms, mejl och länkar gratis | AdRaze</title>
+<meta name="description" content="Klistra in ett sms, ett mejl eller en länk och få veta direkt om det ser ut som bedrägeri, och varför. Gratis, utan konto. Texten sparas inte.">
+<link rel="icon" href="/favicon.png">
+<link rel="alternate" hreflang="sv" href="https://adraze.app/bluff">
+<link rel="alternate" hreflang="en" href="https://adraze.app/en/bluff">
+<link rel="alternate" hreflang="x-default" href="https://adraze.app/bluff">
+<link rel="canonical" href="https://adraze.app/bluff">
+<link rel="stylesheet" href="/style.css?v=a618e656">
+<link rel="stylesheet" href="/kolla.css?v=b09ce2e1">
+<link rel="stylesheet" href="/bluff.css?v=e7bd97fc">
+</head>
+<body class="ko-sida">
+<header class="top">
+  <nav class="wrap nav">
+    <a href="/" class="logo" aria-label="AdRaze startsida"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a>
+    <ul class="links">
+      <li><a class="nav-link" href="/#se-skillnaden">Se skillnaden</a></li>
+      <li><a class="nav-link" href="/#funktioner">Funktioner</a></li>
+      <li><a class="nav-link" href="/#sa-funkar-det">Så funkar det</a></li>
+      <li><a class="nav-link" href="/#fragor">Frågor</a></li>
+      <li><a class="nav-link" href="/kolla">Kolla en sajt</a></li>
+      <li><a class="nav-link" href="https://proxy.adraze.app/">Proxy</a></li>
+    </ul>
+    <details class="sprak"><summary aria-label="Språk"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M128,20A108,108,0,1,0,236,128,108.12,108.12,0,0,0,128,20Zm0,187a113.4,113.4,0,0,1-20.39-35h40.82a116.94,116.94,0,0,1-10,20.77A108.61,108.61,0,0,1,128,207Zm-26.49-59a135.42,135.42,0,0,1,0-40h53a135.42,135.42,0,0,1,0,40ZM44,128a83.49,83.49,0,0,1,2.43-20H77.25a160.63,160.63,0,0,0,0,40H46.43A83.49,83.49,0,0,1,44,128Zm84-79a113.4,113.4,0,0,1,20.39,35H107.59a116.94,116.94,0,0,1,10-20.77A108.61,108.61,0,0,1,128,49Zm50.73,59h30.82a83.52,83.52,0,0,1,0,40H178.75a160.63,160.63,0,0,0,0-40Zm20.77-24H173.71a140.82,140.82,0,0,0-15.5-34.36A84.51,84.51,0,0,1,199.52,84ZM97.79,49.64A140.82,140.82,0,0,0,82.29,84H56.48A84.51,84.51,0,0,1,97.79,49.64ZM56.48,172H82.29a140.82,140.82,0,0,0,15.5,34.36A84.51,84.51,0,0,1,56.48,172Zm101.73,34.36A140.82,140.82,0,0,0,173.71,172h25.81A84.51,84.51,0,0,1,158.21,206.36Z"/></svg><span>SV</span></summary><ul class="sprak-lista"><li><a href="/bluff" hreflang="sv" lang="sv" aria-current="true" data-sprak="sv">Svenska</a></li><li><a href="/en/bluff" hreflang="en" lang="en" data-sprak="en">English</a></li></ul></details>
+    <a class="nav-link nav-login" href="https://accounts.adraze.app/" data-inloggad="Mitt konto">Logga in</a>
+    <a href="https://download.adraze.app/" class="btn liq nav-cta"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M228,144v64a12,12,0,0,1-12,12H40a12,12,0,0,1-12-12V144a12,12,0,0,1,24,0v52H204V144a12,12,0,0,1,24,0Zm-108.49,8.49a12,12,0,0,0,17,0l40-40a12,12,0,0,0-17-17L140,115V32a12,12,0,0,0-24,0v83L96.49,95.51a12,12,0,0,0-17,17Z"/></svg>Ladda ner</a>
+    <button id="menu-btn" class="menu-btn" aria-expanded="false" aria-controls="menu" aria-label="Meny" data-meny="Meny" data-stang="Stäng menyn">
+      <span class="hb"><span></span><span></span><span></span></span>
+    </button>
+  </nav>
+</header>
+
+<div id="menu" class="menu" aria-hidden="true">
+  <ul>
+    <li class="m-item" style="--i:0"><a href="/#se-skillnaden"><span>01</span>Se skillnaden</a></li>
+    <li class="m-item" style="--i:1"><a href="/#funktioner"><span>02</span>Funktioner</a></li>
+    <li class="m-item" style="--i:2"><a href="/#sa-funkar-det"><span>03</span>Så funkar det</a></li>
+    <li class="m-item" style="--i:3"><a href="/#fragor"><span>04</span>Frågor</a></li>
+    <li class="m-item" style="--i:4"><a href="/kolla"><span>05</span>Kolla en sajt</a></li>
+    <li class="m-item" style="--i:5"><a href="https://proxy.adraze.app/"><span>06</span>Proxy</a></li>
+    <li class="m-item" style="--i:6"><a href="https://accounts.adraze.app/" data-inloggad="Mitt konto"><span>07</span>Logga in</a></li>
+  </ul>
+  <a href="https://download.adraze.app/" class="btn liq m-item m-cta" style="--i:7"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M228,144v64a12,12,0,0,1-12,12H40a12,12,0,0,1-12-12V144a12,12,0,0,1,24,0v52H204V144a12,12,0,0,1,24,0Zm-108.49,8.49a12,12,0,0,0,17,0l40-40a12,12,0,0,0-17-17L140,115V32a12,12,0,0,0-24,0v83L96.49,95.51a12,12,0,0,0-17,17Z"/></svg>Ladda ner</a>
+</div>
+
+
+<main id="bluff" data-api="https://api.adraze.app" data-lang="sv">
+
+  <section class="ko-hjalte">
+    <div class="wrap">
+      <p class="ko-fore">Bluffkollen</p>
+      <h1>Kolla innan du klickar.</h1>
+      <p class="ko-lead">Klistra in en länk, ett sms eller ett mejl du har fått. Vi säger direkt om det ser ut som bedrägeri, och varför.</p>
+      <form id="bl-form" class="bl-form" novalidate>
+        <label class="ko-dold" for="bl-text">Meddelandet eller länken du vill kolla</label>
+        <textarea id="bl-text" name="text" rows="5" maxlength="6000" spellcheck="false" autocapitalize="off" placeholder="Klistra in meddelandet eller länken här" required></textarea>
+        <div class="bl-form-rad">
+          <p class="bl-not">Texten sparas inte. Länkar öppnas aldrig, de slås bara upp.</p>
+          <button class="btn btn-stor liq" type="submit" id="bl-knapp">Kolla<svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg></button>
+        </div>
+      </form>
+      <p class="ko-fel" id="bl-fel" role="alert" hidden></p>
+      <p class="ko-exempel">Prova ett exempel:
+        <button type="button" data-exempel="paket">Paket-sms</button>
+        <button type="button" data-exempel="familj">Hej mamma</button>
+        <button type="button" data-exempel="bank">Banken larmar</button>
+      </p>
+    </div>
+  </section>
+
+  <section class="bl-res" id="bl-res" hidden aria-live="polite">
+    <div class="wrap">
+      <p class="bl-dom-fore">Vår bedömning</p>
+      <h2 class="bl-dom" id="bl-dom" tabindex="-1"></h2>
+      <p class="bl-dom-text" id="bl-dom-text"></p>
+
+      <div class="bl-tva">
+        <div id="bl-skal-del">
+          <h3>Därför</h3>
+          <ul class="bl-skal" id="bl-skal"></ul>
+        </div>
+        <div>
+          <h3>Gör så här</h3>
+          <ol class="bl-rad" id="bl-rad"></ol>
+        </div>
+      </div>
+
+      <div id="bl-lankar-del" hidden>
+        <h3>Länkarna vi hittade</h3>
+        <div class="bl-tabell-yta"><table class="bl-tabell">
+          <thead><tr><th>Adress</th><th>Ålder</th><th>Spärrlistor</th></tr></thead>
+          <tbody id="bl-lankar"></tbody>
+        </table></div>
+      </div>
+
+      <p class="bl-igen"><button type="button" class="btn liq-ghost" id="bl-ny">Kolla ett till</button></p>
+    </div>
+  </section>
+
+  <section class="bl-om">
+    <div class="wrap bl-om-inre">
+      <h2>Det här tittar vi på</h2>
+      <dl class="bl-om-lista">
+        <div><dt>Länkarna</dt><dd>Slås upp mot spärrlistor med miljontals kända bluffsidor. Ingen länk öppnas.</dd></div>
+        <div><dt>Adressen</dt><dd>Hur gammal den är, och om den härmar en bank, en myndighet eller ett fraktbolag.</dd></div>
+        <div><dt>Texten</dt><dd>De vanliga knepen: tidspress, hot, avgifter, koder och nya nummer.</dd></div>
+        <div><dt>Efteråt</dt><dd>Ingenting sparas. Texten försvinner när du stänger sidan.</dd></div>
+      </dl>
+    </div>
+    <div class="wrap bl-slut">
+      <p>AdRaze Browser spärrar kända bluffsidor automatiskt.</p>
+      <a class="btn liq" href="https://download.adraze.app/">Ladda ner<svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg></a>
+    </div>
+  </section>
+</main>
+
+<script type="application/json" id="bl-t">{
+"dom_farligt":"Det här ser ut som bluff.","dom_misstankt":"Var försiktig.","dom_inga":"Vi hittade inga varningstecken.",
+"text_farligt":"Klicka inte, svara inte och betala ingenting.","text_misstankt":"Flera saker stämmer inte. Kontrollera med avsändaren innan du gör något.","text_inga":"Det är inget bevis för att det är äkta. Bedragare hittar på nya upplägg hela tiden.",
+"inga_skal":"Inget i texten eller länkarna stack ut.","dagar":"{n} dagar","ar":"{n} år","okand":"Okänt","listor":"{n} av {av}","via":"förkortad via {via}","vantar":"Kollar",
+"e_tom":"Klistra in ett meddelande eller en länk först.","e_for_lang":"Texten är för lång. Klistra in högst 6 000 tecken.","e_for_manga":"Det blev många kollar på kort tid. Vänta några minuter och försök igen.","e_okant":"Något gick fel. Försök igen om en stund.",
+"ex_paket":"PostNord: Ditt paket kunde inte levereras. Betala tullavgiften på 19 kr inom 24 timmar, annars skickas paketet tillbaka: https://postnord-leverans.top/se/track","ex_familj":"Hej mamma, jag har tappat mobilen så det här är mitt nya nummer. Kan du hjälpa mig att betala en räkning i dag? Jag swishar tillbaka i morgon.","ex_bank":"Swedbank: Vi har upptäckt en misstänkt transaktion på 8 900 kr. Öppna BankID nu för att stoppa betalningen, eller ring säkerhetsavdelningen på 08-123 456 78.",
+"s_sparrlista":"{adress} finns på {antal} av {av} spärrlistor över farliga sidor.","s_harmar":"Adressen {adress} försöker se ut som {namn}. Den riktiga adressen är {riktig}.","s_harmar_mejl":"Mejladressen slutar på {adress} och försöker se ut som {namn}. Den riktiga adressen är {riktig}.","s_at_tecken":"Länken innehåller ett @, ett knep för att dölja vart den egentligen leder.","s_specialtecken":"Adressen {adress} använder specialtecken som kan se ut som vanliga bokstäver.",
+"s_ny_doman":"{adress} registrerades för {dagar} dagar sedan. Bluffsidor är nästan alltid nya.","s_ung_doman":"{adress} är bara {dagar} dagar gammal.","s_ovanlig_andelse":"Adressen slutar på {andelse}, en ändelse som är billig och vanlig bland bluffsidor.","s_forkortad":"Länken är förkortad via {adress}, så det går inte att se vart den leder.","s_forkortad_leder":"Länken är förkortad via {via} och leder till {adress}.",
+"s_okrypterad":"{adress} använder ingen kryptering (http i stället för https).","s_rorig_adress":"Adressen {adress} är lång och rörig. Det är vanligt när någon vill dölja det riktiga namnet.","s_finns_inte":"{adress} går inte att nå just nu. Bluffsidor tas ofta ner efter några dagar.","s_ip_adress":"Länken går till en sifferadress ({adress}) i stället för ett namn. Seriösa avsändare gör inte så.","s_fel_avsandare":"Meddelandet nämner {namn}, men länken går till {adress}. Den riktiga adressen är {riktig}.",
+"s_fel_avsandare_uppgifter":"Du ombeds lämna uppgifter eller betala på en sida som inte tillhör avsändaren.","s_bradska":"Det är bråttom. Tidspress är det vanligaste knepet för att du inte ska hinna tänka efter.","s_hot":"Meddelandet hotar med att något spärras, stängs eller skickas tillbaka.","s_betalning":"Du ombeds betala en avgift eller en skuld.","s_uppgifter":"Du ombeds logga in eller lämna koder, lösenord eller kortuppgifter.",
+"s_vinst":"Du har vunnit eller blivit utvald, fast du inte har deltagit i något.","s_familj":"Någon som säger sig vara ditt barn eller en anhörig skriver från ett nytt nummer. Det är ett av de vanligaste bedrägerierna.","s_familj_pengar":"Den som skriver ber dessutom om pengar eller hjälp att betala.","s_fjarr":"Du ombeds installera ett program som låter någon annan styra din dator eller mobil.","s_investering":"Meddelandet lockar med investeringar, krypto eller snabb avkastning.",
+"s_presentkort":"Du ombeds köpa eller skicka presentkort. Ingen seriös avsändare tar betalt så.","s_bankid_uppmaning":"Du uppmanas använda BankID eller flytta pengar för att någon annan ber om det.","s_larm":"Meddelandet larmar om en misstänkt transaktion eller inloggning för att skrämma dig.","s_paket_avgift":"Ett paket som kräver en liten avgift via en länk är ett klassiskt bluffupplägg.","s_hemlig":"Du ombeds hålla det hemligt.","s_officiell_adress":"Länken går till {adress}, som är den riktiga adressen för {namn}.",
+"r_klicka_inte":"Klicka inte på länken och svara inte.","r_ring_gamla_numret":"Ring personen på det gamla numret och fråga om det verkligen är hen.","r_bankid_aldrig":"Använd aldrig BankID eller bankdosa för att någon som har kontaktat dig ber om det.","r_ingen_fjarrstyrning":"Installera inga program och släpp inte in någon i din dator eller mobil.","r_inga_presentkort":"Köp inga presentkort åt någon som ber om det i ett meddelande.",
+"r_ga_direkt":"Vill du kontrollera, öppna avsändarens app eller skriv in deras adress själv.","r_redan_fyllt_i":"Har du redan lämnat kortuppgifter eller loggat in, ring din bank direkt och spärra kortet.","r_anmal":"Anmäl bedrägeriförsök till polisen på 114 14 eller på polisen.se.","r_inget_bevis":"Är du ändå osäker, kontakta avsändaren på ett nummer eller en adress som du själv letar upp.","r_for_lite":"Klistra in hela meddelandet, gärna med länken, så kan vi säga mer."
+}</script>
+
+<footer class="fot">
+  <div class="wrap fot-grid">
+    <div><a href="/" class="logo"><img src="/logo-mark.svg" alt="" width="30" height="30">adraze</a><p>Sveriges bästa adblocker.</p>
+      <ul class="fot-kanaler">
+        <li><a href="https://www.instagram.com/adraze.app/" rel="me noopener" aria-label="Instagram" title="Instagram"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160ZM176,24H80A56.06,56.06,0,0,0,24,80v96a56.06,56.06,0,0,0,56,56h96a56.06,56.06,0,0,0,56-56V80A56.06,56.06,0,0,0,176,24Zm40,152a40,40,0,0,1-40,40H80a40,40,0,0,1-40-40V80A40,40,0,0,1,80,40h96a40,40,0,0,1,40,40ZM192,76a12,12,0,1,1-12-12A12,12,0,0,1,192,76Z"/></svg></a></li>
+        <li><a href="https://www.tiktok.com/@adraze.app" rel="me noopener" aria-label="TikTok" title="TikTok"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224,72a48.05,48.05,0,0,1-48-48,8,8,0,0,0-8-8H128a8,8,0,0,0-8,8V156a20,20,0,1,1-28.57-18.08A8,8,0,0,0,96,130.69V88a8,8,0,0,0-9.4-7.88C50.91,86.48,24,119.1,24,156a76,76,0,0,0,152,0V116.29A103.25,103.25,0,0,0,224,128a8,8,0,0,0,8-8V80A8,8,0,0,0,224,72Zm-8,39.64a87.19,87.19,0,0,1-43.33-16.15A8,8,0,0,0,160,102v54a60,60,0,0,1-120,0c0-25.9,16.64-49.13,40-57.6v27.67A36,36,0,1,0,136,156V32h24.5A64.14,64.14,0,0,0,216,87.5Z"/></svg></a></li>
+        <li><a href="https://www.youtube.com/@adraze_adblocker" rel="me noopener" aria-label="YouTube" title="YouTube"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M164.44,121.34l-48-32A8,8,0,0,0,104,96v64a8,8,0,0,0,12.44,6.66l48-32a8,8,0,0,0,0-13.32ZM120,145.05V111l25.58,17ZM234.33,69.52a24,24,0,0,0-14.49-16.4C185.56,39.88,131,40,128,40s-57.56-.12-91.84,13.12a24,24,0,0,0-14.49,16.4C19.08,79.5,16,97.74,16,128s3.08,48.5,5.67,58.48a24,24,0,0,0,14.49,16.41C69,215.56,120.4,216,127.34,216h1.32c6.94,0,58.37-.44,91.18-13.11a24,24,0,0,0,14.49-16.41c2.59-10,5.67-28.22,5.67-58.48S236.92,79.5,234.33,69.52Zm-15.49,113a8,8,0,0,1-4.77,5.49c-31.65,12.22-85.48,12-86,12H128c-.54,0-54.33.2-86-12a8,8,0,0,1-4.77-5.49C34.8,173.39,32,156.57,32,128s2.8-45.39,5.16-54.47A8,8,0,0,1,41.93,68c30.52-11.79,81.66-12,85.85-12h.27c.54,0,54.38-.18,86,12a8,8,0,0,1,4.77,5.49C221.2,82.61,224,99.43,224,128S221.2,173.39,218.84,182.47Z"/></svg></a></li>
+        <li><a href="https://www.facebook.com/profile.php?id=61596213391880" rel="me noopener" aria-label="Facebook" title="Facebook"><svg class="ikon" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm8,191.63V152h24a8,8,0,0,0,0-16H136V112a16,16,0,0,1,16-16h16a8,8,0,0,0,0-16H152a32,32,0,0,0-32,32v24H96a8,8,0,0,0,0,16h24v63.63a88,88,0,1,1,16,0Z"/></svg></a></li>
+      </ul></div>
+    <ul>
+      <li><a class="nav-link" href="/">Till startsidan</a></li>
+      <li><a class="nav-link" href="/kolla">Kolla en sajt</a></li>
+      <li><a class="nav-link" href="https://download.adraze.app/">Ladda ner</a></li>
+      <li><a class="nav-link" href="https://support.adraze.app/">Support</a></li>
+      <li><a class="nav-link" href="/integritet">Integritetspolicy</a></li>
+    </ul>
+  </div>
+</footer>
+<script src="/bluff.js?v=9f614f12" defer></script>
+<script src="/main.js?v=5f8bb000"></script>
+</body>
+</html>
