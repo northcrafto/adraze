@@ -33,7 +33,8 @@
   .pw-steg { counter-reset: s; display: grid; gap: 14px; }
   .pw-steg li { counter-increment: s; list-style: none; display: grid; grid-template-columns: 30px 1fr; gap: 12px; font-size: 16px; line-height: 1.5; color: #d6d2e6; }
   .pw-steg li::before { content: counter(s, decimal-leading-zero); font-weight: 700; color: #a78bfa; font-size: 14px; }
-  .pw-steg code, .pw-sha code { font: 500 13.5px ui-monospace, Menlo, Consolas, monospace; background: #0f0b18; border: 1px solid #2a2338; border-radius: 7px; padding: 2px 7px; color: #e8e4f5; word-break: break-all; }
+  .pw-steg li span { min-width: 0; }
+  .pw-steg code, .pw-sha code { display: inline; white-space: nowrap; font: 500 13.5px ui-monospace, Menlo, Consolas, monospace; background: #0f0b18; border: 1px solid #2a2338; border-radius: 7px; padding: 2px 7px; color: #e8e4f5; word-break: break-all; }
   .pw-sha { margin-top: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .pw-sha button { font: 600 13px "Familjen Grotesk", system-ui, sans-serif; color: #a78bfa; background: none; border: 1px solid #2a2338; border-radius: 999px; padding: 6px 13px; cursor: pointer; }
   .pw-sha button:hover { border-color: #a78bfa; }
@@ -65,17 +66,17 @@
   <section class="pw-sektion">
     <h3>Så installerar du (Linux)</h3>
     <ol class="pw-steg">
-      <li>Gör filen körbar: <code>chmod +x Prowl.AppImage</code></li>
-      <li>Starta den: <code>./Prowl.AppImage</code></li>
-      <li>Vill du ha den i menyn, högerklicka och välj integrera, eller lägg den i <code>~/Applications</code>.</li>
+      <li><span>Gör filen körbar: <code>chmod +x Prowl.AppImage</code></span></li>
+      <li><span>Starta den: <code>./Prowl.AppImage</code></span></li>
+      <li><span>Vill du ha den i menyn, högerklicka och välj integrera, eller lägg den i <code>~/Applications</code>.</span></li>
     </ol>
   </section>
 
   <section class="pw-sektion">
     <h3>Kontrollera att filen är äkta</h3>
     <ol class="pw-steg">
-      <li>Kör <code>sha256sum Prowl.AppImage</code> i mappen där du laddade ner den.</li>
-      <li>Jämför med summan nedan. Är de lika är filen oförändrad. Skiljer de sig, ladda inte igång den.</li>
+      <li><span>Kör <code>sha256sum Prowl.AppImage</code> i mappen där du laddade ner den.</span></li>
+      <li><span>Jämför med summan nedan. Är de lika är filen oförändrad. Skiljer de sig, ladda inte igång den.</span></li>
     </ol>
     <div class="pw-sha"><code id="pw-sha">329618e4bbb4c9add3365b2121c974eca882ce9caf69f6202eb49f2e3689cd27</code><button id="pw-kopiera" type="button">Kopiera</button></div>
   </section>
