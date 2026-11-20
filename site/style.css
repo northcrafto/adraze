@@ -408,14 +408,11 @@ section { padding: 120px 0; }
 h2.syns:hover .penna path { animation: rita .8s cubic-bezier(.6,.05,.25,1); }
 @keyframes rita { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 
-/* Korten och stegen: gubben nickar till */
-.kort img, .steg-lista img { transform-origin: 30% 100%; }
-.kort.syns img, .steg-lista li.syns img { animation: nick .8s var(--ease) calc(var(--n, 0) * 90ms) backwards; }
-@keyframes nick { 0% { transform: translateY(10px); opacity: 0; } 55% { transform: translateY(-5px) rotate(-1.6deg); opacity: 1; } 100% { transform: none; } }
+/* Korten och stegen: figurerna är stilla, ingen reaktion när de kommer in i bild (Cetto 2026-11-21) */
 
 @media (prefers-reduced-motion: reduce) {
   .lb, .lb::after, .nav-link, .penna path { transition: none; }
-  .logo:hover img, .logo.hej img, .kort.syns img, .steg-lista li.syns img, h2.syns:hover .penna path { animation: none; }
+  .logo:hover img, .logo.hej img, h2.syns:hover .penna path { animation: none; }
   .penna path { stroke-dashoffset: 0; }
 }
 /* Hjältens gorilla sticker ut 14 % åt sidorna: klipp där i stället för att sidan går att dra i sidled */
