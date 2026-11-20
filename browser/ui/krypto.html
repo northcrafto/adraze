@@ -86,9 +86,9 @@
   .fk-modell.oppen .fk-modell-knapp .pil { transform: rotate(180deg); }
   .fk-logga { width: 16px; height: 16px; flex: none; display: inline-flex; }
   .fk-logga svg { width: 100%; height: 100%; }
-  .fk-modell-meny { position: absolute; left: 0; bottom: calc(100% + 6px); z-index: 20; width: 284px; padding: 5px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); box-shadow: 0 10px 30px rgba(0,0,0,.28); }
+  .fk-modell-meny { position: absolute; left: 0; bottom: calc(100% + 6px); z-index: 20; width: 284px; padding: 6px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); box-shadow: 0 10px 30px rgba(0,0,0,.28); }
   .fk-modell-meny[hidden] { display: none; }
-  .fk-modell-val { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 9px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+  .fk-modell-val { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 9px; border: 0; border-radius: 11px; background: transparent; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
   .fk-modell-val:hover { background: var(--line); }
   .fk-modell-val .fk-logga { width: 20px; height: 20px; }
   .fk-modell-val .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
@@ -186,7 +186,7 @@
   .cmd:hover, .cmd.sel { background: var(--surface-2); }
   .cmd .cname { font-weight: 600; color: var(--accent-ink); font-size: 12.5px; font-family: ui-monospace, monospace; }
   .cmd .cdesc { color: var(--mut); font-size: 12px; }
-  .inwrap { display: flex; align-items: flex-end; gap: 8px; background: var(--surface); border: 1px solid var(--field-line); border-radius: 14px; padding: 8px 8px 8px 14px; transition: border-color .15s; }
+  .inwrap { display: flex; align-items: flex-end; gap: 8px; background: var(--surface); border: 1px solid var(--field-line); border-radius: 24px; padding: 8px 8px 8px 16px; transition: border-color .15s; }
   .inwrap:focus-within { border-color: #585653; }
   #inp { flex: 1; background: transparent; border: 0; outline: none; color: var(--ink); font-size: 14px; line-height: 1.5; resize: none; max-height: 140px; font-family: inherit; padding: 4px 0; }
   #inp::placeholder { color: var(--faint); }
@@ -200,6 +200,7 @@
   .modechip { display: none; }
   body.full #log { max-width: 760px; margin: 0 auto; width: 100%; }
   body.full footer .inwrap, body.full .foot-note { max-width: 760px; margin-left: auto; margin-right: auto; }
+  body.full footer :is(.fk-modell, .inwrap-hold, #chips, #pagechip, .fk-kvot) { max-width: 760px; margin-left: auto; margin-right: auto; width: 100%; }
   ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-thumb { background: rgb(255 255 255 / .1); border-radius: 8px; }
   /* Sidomenyn (som ChatGPT-appen): nytt samtal, sök, minnen och alla samtal.
      Bred panel/helskärm: alltid synlig. Smal panel: glider in från vänster. */
@@ -380,9 +381,9 @@
   /* ── Filer, mappar och projekt ── */
   .inwrap { padding-left: 6px; }
   #attach { width: 32px; height: 32px; flex: none; }
-  #attmenu { position: absolute; left: 14px; bottom: calc(100% + 4px); min-width: 230px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 5px; display: none; z-index: 9; box-shadow: 0 16px 40px rgb(0 0 0 / .45); }
+  #attmenu { position: absolute; left: 14px; bottom: calc(100% + 4px); min-width: 230px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 6px; display: none; z-index: 9; box-shadow: 0 16px 40px rgb(0 0 0 / .45); }
   #attmenu.on { display: block; animation: msgin .15s ease-out both; }
-  .am { display: flex; align-items: center; gap: 10px; width: 100%; height: 36px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); font: inherit; font-size: 13.5px; text-align: left; cursor: pointer; }
+  .am { display: flex; align-items: center; gap: 10px; width: 100%; height: 36px; padding: 0 10px; border: 0; border-radius: 11px; background: transparent; color: var(--ink); font: inherit; font-size: 13.5px; text-align: left; cursor: pointer; }
   .am:hover { background: var(--surface-2); } .am svg { width: 17px; height: 17px; color: var(--mut); flex: none; } .am small { margin-left: auto; color: var(--faint); font-size: 11.5px; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .am-sep { height: 1px; background: var(--line); margin: 4px 6px; }
   #pagechip { display: flex; align-items: center; gap: 7px; max-width: 100%; margin-bottom: 8px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--mut); font: inherit; font-size: 12px; cursor: pointer; text-align: left; align-self: flex-start; }
@@ -450,7 +451,7 @@
   .msg.krypto .bubble { font-family: inherit; font-size: 14.5px; line-height: 1.7; color: #e4e2dc; letter-spacing: 0; }
   .msg.krypto .bubble :is(h1, h2, h3) { font-family: "AdRaze Display", Charter, Georgia, serif; font-weight: 500; letter-spacing: -.01em; }
   .msg.user .bubble { background: #2a2926; }
-  .inwrap { background: #22211f; border-color: #33322e; border-radius: 16px; }
+  .inwrap { background: #22211f; border-color: #33322e; border-radius: 24px; }
   .inwrap:focus-within { border-color: #4a4843; }
   .think .tt.byt { animation: ttin .35s ease-out both, shimmer 1.8s linear infinite; }
   @keyframes ttin { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
