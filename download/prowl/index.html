@@ -25,6 +25,13 @@
   .pw-rek h2 { margin-top: 6px; font: 600 26px/1.1 "Familjen Grotesk", system-ui, sans-serif; letter-spacing: -.02em; }
   .pw-rek .liq { margin-top: 20px; height: 56px; padding: 0 30px; font-size: 17px; }
   .pw-rek .liten { margin-top: 12px; color: #8b85a3; font-size: 14px; }
+  .pw-rek .liten a { color: #a78bfa; }
+  .pw-rad { margin-top: 20px; display: flex; align-items: center; gap: 12px; background: #0f0b18; border: 1px solid #2a2338; border-radius: 999px; padding: 6px 6px 6px 22px; text-align: left; }
+  .pw-rad:hover, .pw-rad:focus-within { border-color: #4a3f66; }
+  .pw-rad code { flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; scrollbar-width: none; font: 15px/1.5 ui-monospace, "JetBrains Mono", Menlo, monospace; color: #f1eef8; padding: 8px 0; }
+  .pw-rad code::-webkit-scrollbar { display: none; }
+  .pw-rad .liq { flex: none; margin: 0; height: 46px; padding: 0 22px; font-size: 15px; }
+  @media (max-width: 560px) { .pw-rad { border-radius: 20px; padding-left: 16px; } .pw-rad .liq { padding: 0 16px; } }
   .pw-andra { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
   .pw-andra div { background: #171222; border: 1px solid #2a2338; border-radius: 16px; padding: 18px 20px; }
   .pw-andra b { font-weight: 600; } .pw-andra span { display: block; color: #8b85a3; font-size: 14px; margin-top: 3px; }
@@ -34,7 +41,7 @@
   .pw-steg li { counter-increment: s; list-style: none; display: grid; grid-template-columns: 30px 1fr; gap: 12px; font-size: 16px; line-height: 1.5; color: #d6d2e6; }
   .pw-steg li::before { content: counter(s, decimal-leading-zero); font-weight: 700; color: #a78bfa; font-size: 14px; }
   .pw-steg li span { min-width: 0; }
-  .pw-steg code, .pw-sha code { display: inline; white-space: nowrap; font: 500 13.5px ui-monospace, Menlo, Consolas, monospace; background: #0f0b18; border: 1px solid #2a2338; border-radius: 7px; padding: 2px 7px; color: #e8e4f5; word-break: break-all; }
+  .pw-steg code, .pw-sha code { display: inline; font: 500 13.5px ui-monospace, Menlo, Consolas, monospace; background: #0f0b18; border: 1px solid #2a2338; border-radius: 7px; padding: 2px 7px; color: #e8e4f5; word-break: break-all; }
   .pw-sha { margin-top: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .pw-sha button { font: 600 13px "Familjen Grotesk", system-ui, sans-serif; color: #a78bfa; background: none; border: 1px solid #2a2338; border-radius: 999px; padding: 6px 13px; cursor: pointer; }
   .pw-sha button:hover { border-color: #a78bfa; }
@@ -53,9 +60,13 @@
 
   <div class="pw-kort pw-rek">
     <p class="os" id="pw-os">För din dator</p>
-    <h2 id="pw-rubrik">Prowl för Linux</h2>
-    <a class="btn liq" id="pw-ladda" href="/prowl/Prowl.AppImage" download>Ladda ner för Linux</a>
-    <p class="liten" id="pw-storlek">AppImage, 131M</p>
+    <h2 id="pw-rubrik">Installera med en rad i terminalen</h2>
+    <div class="pw-rad">
+      <code id="pw-kommando">curl -fsSL https://download.adraze.app/prowl/install.sh | sh</code>
+      <button type="button" class="btn liq" id="pw-kopiera-rad" data-klar="Kopierat"><span>Kopiera</span></button>
+    </div>
+    <p class="liten" id="pw-storlek">Hämtar Prowl (131 MB), kontrollerar summan och lägger Prowl i programmenyn. Inget sudo behövs.</p>
+    <p class="liten"><a id="pw-ladda" href="/prowl/Prowl.AppImage" download>Eller hämta AppImage-filen direkt</a></p>
   </div>
 
   <div class="pw-andra">
@@ -66,16 +77,17 @@
   <section class="pw-sektion">
     <h3>Så installerar du (Linux)</h3>
     <ol class="pw-steg">
-      <li><span>Gör filen körbar: <code>chmod +x Prowl.AppImage</code></span></li>
-      <li><span>Starta den: <code>./Prowl.AppImage</code></span></li>
-      <li><span>Vill du ha den i menyn, högerklicka och välj integrera, eller lägg den i <code>~/Applications</code>.</span></li>
+      <li><span>Kopiera raden här ovanför.</span></li>
+      <li><span>Klistra in den i terminalen och tryck Enter.</span></li>
+      <li><span>Starta Prowl från programmenyn, eller skriv <code>prowl</code> i terminalen.</span></li>
+      <li><span>Ny version? Kör samma rad igen. Ta bort Prowl: <code>curl -fsSL https://download.adraze.app/prowl/install.sh | sh -s -- --ta-bort</code></span></li>
     </ol>
   </section>
 
   <section class="pw-sektion">
     <h3>Kontrollera att filen är äkta</h3>
     <ol class="pw-steg">
-      <li><span>Kör <code>sha256sum Prowl.AppImage</code> i mappen där du laddade ner den.</span></li>
+      <li><span>Raden ovan kontrollerar summan åt dig. Hämtade du filen själv, kör <code>sha256sum Prowl.AppImage</code> i mappen där den ligger.</span></li>
       <li><span>Jämför med summan nedan. Är de lika är filen oförändrad. Skiljer de sig, ladda inte igång den.</span></li>
     </ol>
     <div class="pw-sha"><code id="pw-sha">329618e4bbb4c9add3365b2121c974eca882ce9caf69f6202eb49f2e3689cd27</code><button id="pw-kopiera" type="button">Kopiera</button></div>

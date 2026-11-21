@@ -1,17 +1,23 @@
-// Prowl-nedladdning: OS-igenkänning + kopiera kontrollsumma (extern fil pga CSP script-src 'self').
+// Prowl-nedladdning: kopiera terminalraden och kontrollsumman, OS-igenkänning (extern fil pga CSP script-src 'self').
 (function () {
-  var sha = document.getElementById('pw-sha').textContent.trim();
+  var $ = function (id) { return document.getElementById(id); };
+  function kopiera(knapp, kalla, etikett) {
+    knapp.addEventListener('click', function () {
+      var text = kalla.textContent.trim();
+      var klar = function () { var f = etikett.textContent; etikett.textContent = knapp.dataset.klar || 'Kopierad'; setTimeout(function () { etikett.textContent = f; }, 1600); };
+      // utan urklipp: markera texten så den kan kopieras för hand
+      var forHand = function () { getSelection().selectAllChildren(kalla); };
+      if (navigator.clipboard) navigator.clipboard.writeText(text).then(klar, forHand); else forHand();
+    });
+  }
+  kopiera($('pw-kopiera-rad'), $('pw-kommando'), $('pw-kopiera-rad').querySelector('span'));
+  kopiera($('pw-kopiera'), $('pw-sha'), $('pw-kopiera'));
+
   var ua = navigator.userAgent;
   var os = /Windows/.test(ua) ? 'windows' : /Mac OS X|Macintosh/.test(ua) ? 'mac' : /Linux|X11/.test(ua) ? 'linux' : null;
-  var rub = document.getElementById('pw-rubrik'), os_ = document.getElementById('pw-os'), ladda = document.getElementById('pw-ladda');
   if (os === 'windows' || os === 'mac') {
-    os_.textContent = os === 'windows' ? 'Windows upptäckt' : 'Mac upptäckt';
-    rub.textContent = (os === 'windows' ? 'Windows' : 'Mac') + '-versionen är på väg';
-    ladda.textContent = 'Ladda ner för Linux ändå';
-    ladda.className = 'btn liq-ghost';
+    $('pw-os').textContent = (os === 'windows' ? 'Windows' : 'Mac') + ' upptäckt. Den versionen är på väg, Linux finns nu';
   } else {
-    os_.textContent = 'Linux upptäckt';
+    $('pw-os').textContent = os === 'linux' ? 'Linux upptäckt' : 'För Linux';
   }
-  var k = document.getElementById('pw-kopiera');
-  k.addEventListener('click', function () { navigator.clipboard && navigator.clipboard.writeText(sha); k.textContent = 'Kopierad'; setTimeout(function () { k.textContent = 'Kopiera'; }, 1500); });
 })();
