@@ -439,18 +439,3 @@ main { overflow-x: clip; }
 .pris-ge { margin-top: 22px; align-self: flex-start; font-size: 14.5px; font-weight: 600; color: #cfccc4; }
 @media (max-width: 760px) { .pris-grid { grid-template-columns: 1fr; } }
 
-/* Prowl-sektionen på startsidan */
-.prowl-band { background: #140f1e; color: #f1eef8; padding: clamp(64px, 9vw, 120px) 0; }
-.prowl-inre { display: flex; justify-content: center; }
-.prowl-text { max-width: 720px; }
-.prowl-fore { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; color: #a78bfa; font-size: 17px; }
-.prowl-band h2 { margin-top: 18px; font-size: clamp(36px, 5.5vw, 68px); letter-spacing: -0.045em; line-height: 1; }
-.prowl-lead { margin-top: 22px; font-size: 20px; line-height: 1.5; color: #c3bedd; max-width: 56ch; }
-.prowl-validator { margin-top: 34px; border-left: 3px solid #a78bfa; padding: 4px 0 4px 22px; }
-.prowl-validator h3 { font-size: 21px; letter-spacing: -0.02em; }
-.prowl-validator p { margin-top: 10px; color: #c3bedd; font-size: 17px; line-height: 1.55; max-width: 54ch; }
-.prowl-lista { margin-top: 30px; display: grid; gap: 13px; }
-.prowl-lista li { display: flex; gap: 11px; align-items: flex-start; font-size: 16.5px; color: #e4e1f0; }
-.prowl-lista li svg { width: 20px; height: 20px; flex: none; margin-top: 1px; color: #a78bfa; }
-.prowl-band .liq { margin-top: 34px; --sig-btn: #a78bfa; --sig-btn-ink: #140f1e; --sig-fill-top: #c4b2ff; --sig-fill-bottom: #a78bfa; }
-.prowl-not { margin-top: 16px; color: #827ba0; font-size: 14px; }
