@@ -609,5 +609,19 @@
   "pris.pro_6": "Garākas un izsmeļošākas atbildes",
   "pris.pro_7": "Pievieno lielākus failus un veselas mapes",
   "pris.pro_8": "Atcel, kad vēlies, spēkā līdz mēneša beigām",
-  "pris.gift_link": "Vai uzdāvini Pro kādam"
+  "pris.gift_link": "Vai uzdāvini Pro kādam",
+  "mot.title": "Kāpēc AdRaze, nevis Brave?",
+  "mot.lead": "Brave sola privātumu, taču vairākkārt ir darījis lietas, nejautājot lietotājiem. Šeit ir četri gadījumi ar avotiem.",
+  "mot.b_h": "Tas ir noticis Brave",
+  "mot.b1": "Brave vāca kriptoziedojumus satura veidotāju vārdā, ar viņu vārdu un attēlu, lai gan viņi nebija pieteikušies. Jūtūberis Toms Skots protestēja, un Brave mainīja sistēmu.",
+  "mot.b2": "Brave pievienoja savus ieteikuma kodus, kad lietotāji rakstīja kriptobiržu, piemēram, Binance un Coinbase, adreses. Vadītājs Brendans Eihs to nosauca par kļūdu un atvainojās.",
+  "mot.b3": "Brave privātais logs ar Tor nopludināja lietotāju DNS pakalpojuma sniedzējam, kuras .onion adreses viņi apmeklēja. Kļūda bija iebūvētajā reklāmu bloķētājā, un tā tika izlabota.",
+  "mot.b4": "Brave uzstādīja Windows sistēmā divus VPN pakalpojumus, nejautājot, arī tiem, kas nekad nebija pirkuši VPN. Tas beidzās 2024. gadā.",
+  "mot.b_note": "Brave pēc kritikas mainīja visus četrus. Mēs tos pieminam, jo tie parāda, kas notiek, kad pārlūkam jāpelna ar kriptovalūtu un reklāmām.",
+  "mot.a_h": "Tā dara AdRaze",
+  "mot.a1": "Nekādas kriptovalūtas, nekādu tokenu un nekādu savu reklāmu",
+  "mot.a2": "Mēs nekad neko nepievienojam adresēm, ko tu raksti",
+  "mot.a3": "Viss, ko pārlūks sūta, ir norādīts privātuma politikā, un lielāko daļu var izslēgt",
+  "mot.a4": "Finansē Pro un brīvprātīgs atbalsts, nevis reklāmas",
+  "mot.kalla": "Avots"
 }

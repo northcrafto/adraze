@@ -609,5 +609,19 @@
   "pris.pro_6": "Længere og mere udførlige svar",
   "pris.pro_7": "Vedhæft større filer og hele mapper",
   "pris.pro_8": "Opsig når du vil, gælder måneden ud",
-  "pris.gift_link": "Eller giv Pro til nogen"
+  "pris.gift_link": "Eller giv Pro til nogen",
+  "mot.title": "Hvorfor AdRaze i stedet for Brave?",
+  "mot.lead": "Brave lover privatliv, men har flere gange gjort ting uden at spørge sine brugere. Her er fire tilfælde, med kilder.",
+  "mot.b_h": "Det er sket hos Brave",
+  "mot.b1": "Brave indsamlede kryptodonationer i skaberes navn, med deres navn og billede, uden at de havde tilmeldt sig. Youtuberen Tom Scott protesterede, og Brave ændrede systemet.",
+  "mot.b2": "Brave tilføjede egne henvisningskoder, når brugere skrev adresser til kryptobørser som Binance og Coinbase. Direktøren Brendan Eich kaldte det en fejl og undskyldte.",
+  "mot.b3": "Braves private vindue med Tor lækkede, hvilke .onion-adresser brugerne besøgte, til deres DNS-udbyder. Fejlen lå i den indbyggede reklameblokering og blev rettet.",
+  "mot.b4": "Brave installerede to VPN-tjenester på Windows uden at spørge, også hos dem der aldrig havde købt VPN. Det ophørte i 2024.",
+  "mot.b_note": "Brave ændrede alle fire efter kritikken. Vi nævner dem, fordi de viser, hvad der sker, når en browser skal tjene penge på krypto og reklamer.",
+  "mot.a_h": "Sådan gør AdRaze",
+  "mot.a1": "Ingen krypto, ingen tokens og ingen egne reklamer",
+  "mot.a2": "Vi tilføjer aldrig noget til adresser, du skriver",
+  "mot.a3": "Alt, hvad browseren sender, står i privatlivspolitikken, og det meste kan slås fra",
+  "mot.a4": "Betales af Pro og frivillig støtte, ikke af reklamer",
+  "mot.kalla": "Kilde"
 }

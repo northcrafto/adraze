@@ -609,5 +609,19 @@
   "pris.pro_6": "Dlhšie a podrobnejšie odpovede",
   "pris.pro_7": "Prikladaj väčšie súbory a celé priečinky",
   "pris.pro_8": "Zruš, kedy chceš, platí do konca mesiaca",
-  "pris.gift_link": "Alebo niekomu Pro daruj"
+  "pris.gift_link": "Alebo niekomu Pro daruj",
+  "mot.title": "Prečo AdRaze namiesto Brave?",
+  "mot.lead": "Brave sľubuje súkromie, ale niekoľkokrát urobil veci bez toho, aby sa používateľov opýtal. Tu sú štyri prípady so zdrojmi.",
+  "mot.b_h": "Toto sa stalo v Brave",
+  "mot.b1": "Brave vyberal kryptomenové dary v mene tvorcov, s ich menom a fotkou, hoci sa neprihlásili. Youtuber Tom Scott protestoval a Brave systém zmenil.",
+  "mot.b2": "Brave pridával vlastné odporúčacie kódy, keď používatelia písali adresy kryptobúrz ako Binance a Coinbase. Šéf Brendan Eich to označil za chybu a ospravedlnil sa.",
+  "mot.b3": "Súkromné okno s Torom v Brave prezrádzalo poskytovateľovi DNS používateľov, ktoré adresy .onion navštevovali. Chyba bola vo vstavanom blokovaní reklám a bola opravená.",
+  "mot.b4": "Brave nainštaloval do Windowsu dve služby VPN bez opýtania, aj ľuďom, ktorí si VPN nikdy nekúpili. Skončilo sa to v roku 2024.",
+  "mot.b_note": "Brave po kritike zmenil všetky štyri. Spomíname ich, lebo ukazujú, čo sa stane, keď má prehliadač zarábať na krypte a reklame.",
+  "mot.a_h": "Takto to robí AdRaze",
+  "mot.a1": "Žiadne krypto, žiadne tokeny a žiadna vlastná reklama",
+  "mot.a2": "Nikdy nič nepridávame k adresám, ktoré píšeš",
+  "mot.a3": "Všetko, čo prehliadač odosiela, je v zásadách ochrany súkromia a väčšinu možno vypnúť",
+  "mot.a4": "Platí ho Pro a dobrovoľná podpora, nie reklama",
+  "mot.kalla": "Zdroj"
 }

@@ -609,5 +609,19 @@
   "pris.pro_6": "Langere en uitgebreidere antwoorden",
   "pris.pro_7": "Voeg grotere bestanden en hele mappen toe",
   "pris.pro_8": "Zeg op wanneer je wilt, geldig tot het einde van de maand",
-  "pris.gift_link": "Of geef Pro cadeau"
+  "pris.gift_link": "Of geef Pro cadeau",
+  "mot.title": "Waarom AdRaze in plaats van Brave?",
+  "mot.lead": "Brave belooft privacy, maar heeft meerdere keren dingen gedaan zonder het zijn gebruikers te vragen. Hier zijn vier gevallen, met bronnen.",
+  "mot.b_h": "Dit is er bij Brave gebeurd",
+  "mot.b1": "Brave zamelde cryptodonaties in op naam van makers, met hun naam en foto, zonder dat zij zich hadden aangemeld. Youtuber Tom Scott protesteerde en Brave paste het systeem aan.",
+  "mot.b2": "Brave voegde eigen verwijzingscodes toe wanneer gebruikers adressen van cryptobeurzen zoals Binance en Coinbase typten. Topman Brendan Eich noemde het een fout en bood excuses aan.",
+  "mot.b3": "Het privévenster met Tor van Brave lekte naar de DNS-provider van gebruikers welke .onion-adressen ze bezochten. De fout zat in de ingebouwde advertentieblokkering en is verholpen.",
+  "mot.b4": "Brave installeerde ongevraagd twee VPN-diensten op Windows, ook bij mensen die nooit een VPN hadden gekocht. Dat stopte in 2024.",
+  "mot.b_note": "Brave heeft alle vier aangepast na de kritiek. We noemen ze omdat ze laten zien wat er gebeurt als een browser geld moet verdienen met crypto en advertenties.",
+  "mot.a_h": "Zo doet AdRaze het",
+  "mot.a1": "Geen crypto, geen tokens en geen eigen advertenties",
+  "mot.a2": "We voegen nooit iets toe aan adressen die je typt",
+  "mot.a3": "Alles wat de browser verstuurt staat in het privacybeleid, en het meeste kun je uitzetten",
+  "mot.a4": "Betaald door Pro en vrijwillige steun, niet door advertenties",
+  "mot.kalla": "Bron"
 }

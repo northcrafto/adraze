@@ -755,5 +755,19 @@
   "propage.gift_price_1": "79 kr",
   "propage.gift_price_12": "948 kr",
   "propage.gift_done": "Pro är nu på {namn}s konto. Hälsa att det är klart.",
-  "propage.pay_amount": "Betala {pris}"
+  "propage.pay_amount": "Betala {pris}",
+  "mot.title": "Varför AdRaze i stället för Brave?",
+  "mot.lead": "Brave lovar integritet, men har flera gånger gjort saker utan att fråga sina användare. Här är fyra tillfällen, med källor.",
+  "mot.b_h": "Det här har hänt hos Brave",
+  "mot.b1": "Brave samlade in kryptodonationer i kreatörers namn, med deras namn och bild, utan att de hade gått med. Youtubern Tom Scott protesterade och Brave ändrade systemet.",
+  "mot.b2": "Brave lade till egna värvningskoder när användare skrev in adresser till kryptobörser som Binance och Coinbase. Vd:n Brendan Eich kallade det ett misstag och bad om ursäkt.",
+  "mot.b3": "Braves privata fönster med Tor läckte vilka .onion-adresser användarna besökte till deras DNS-leverantör. Felet låg i den inbyggda reklamblockeringen och rättades.",
+  "mot.b4": "Brave installerade två VPN-tjänster på Windows utan att fråga, även hos den som aldrig köpt VPN. Det upphörde 2024.",
+  "mot.b_note": "Brave ändrade på alla fyra efter kritiken. Vi tar upp dem för att de visar vad som händer när en webbläsare ska tjäna pengar på krypto och reklam.",
+  "mot.a_h": "Så gör AdRaze",
+  "mot.a1": "Ingen krypto, inga tokens och ingen egen reklam",
+  "mot.a2": "Vi lägger aldrig till något i adresser du skriver",
+  "mot.a3": "Allt webbläsaren skickar står i integritetspolicyn, och det mesta går att stänga av",
+  "mot.a4": "Betalas av Pro och frivilligt stöd, inte av reklam",
+  "mot.kalla": "Källa"
 }

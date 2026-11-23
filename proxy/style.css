@@ -303,6 +303,21 @@ section { padding: 120px 0; }
 .fot-kanaler svg.ikon { width: 21px; height: 21px; }
 .fot-liten { grid-column: 1 / -1; color: #6f6f78; font-size: 13px; border-top: 1px solid #2a2a30; padding-top: 24px; }
 
+/* ---------- Mot Brave: årtal och källor till vänster, vårt sätt till höger ---------- */
+.mot-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 72px; align-items: start; }
+.mot h3 { font-size: 22px; margin-bottom: 20px; }
+.mot-lista { display: grid; border-top: 2px solid var(--ink); }
+.mot-lista li { display: grid; grid-template-columns: 72px 1fr; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--linje); }
+.mot-lista b { font-size: 18px; font-variant-numeric: tabular-nums; }
+.mot-lista p { color: var(--dov); margin-bottom: 8px; }
+.mot-lista a { font-size: 14px; }
+.mot-not { color: var(--dov); font-size: 15px; margin-top: 20px; max-width: 60ch; }
+.mot-vi .bocklista { margin-bottom: 26px; }
+.mot-vi .bocklista li { align-items: flex-start; }
+.mot-vi .bocklista svg { flex: none; margin-top: 3px; }
+@media (max-width: 960px) { .mot-grid { grid-template-columns: 1fr; gap: 48px; } }
+@media (max-width: 640px) { .mot-lista li { grid-template-columns: 52px 1fr; gap: 12px; } }
+
 /* ---------- Mobil ---------- */
 @media (max-width: 960px) {
   .links, .nav-cta, .nav-login { display: none; }

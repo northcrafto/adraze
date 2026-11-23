@@ -609,5 +609,19 @@
   "pris.pro_6": "Lengri og ítarlegri svör",
   "pris.pro_7": "Hengdu við stærri skrár og heilar möppur",
   "pris.pro_8": "Segðu upp hvenær sem er, gildir út mánuðinn",
-  "pris.gift_link": "Eða gefðu einhverjum Pro"
+  "pris.gift_link": "Eða gefðu einhverjum Pro",
+  "mot.title": "Af hverju AdRaze í stað Brave?",
+  "mot.lead": "Brave lofar persónuvernd en hefur nokkrum sinnum gert hluti án þess að spyrja notendur sína. Hér eru fjögur tilvik, með heimildum.",
+  "mot.b_h": "Þetta hefur gerst hjá Brave",
+  "mot.b1": "Brave safnaði rafmyntaframlögum í nafni efnishöfunda, með nafni þeirra og mynd, án þess að þeir hefðu skráð sig. Youtube-höfundurinn Tom Scott mótmælti og Brave breytti kerfinu.",
+  "mot.b2": "Brave bætti við eigin tilvísunarkóðum þegar notendur slógu inn vefföng rafmyntakauphalla eins og Binance og Coinbase. Forstjórinn Brendan Eich kallaði það mistök og baðst afsökunar.",
+  "mot.b3": "Einkagluggi Brave með Tor lak því hvaða .onion-vefföng notendur heimsóttu til DNS-þjónustu þeirra. Villan var í innbyggðu auglýsingalokuninni og var lagfærð.",
+  "mot.b4": "Brave setti upp tvær VPN-þjónustur á Windows án þess að spyrja, líka hjá þeim sem höfðu aldrei keypt VPN. Því var hætt árið 2024.",
+  "mot.b_note": "Brave breytti öllum fjórum eftir gagnrýnina. Við nefnum þau því þau sýna hvað gerist þegar vafri á að græða á rafmynt og auglýsingum.",
+  "mot.a_h": "Svona gerir AdRaze",
+  "mot.a1": "Engin rafmynt, engir tókar og engar eigin auglýsingar",
+  "mot.a2": "Við bætum aldrei neinu við vefföng sem þú slærð inn",
+  "mot.a3": "Allt sem vafrinn sendir stendur í persónuverndarstefnunni og flest má slökkva á",
+  "mot.a4": "Greitt af Pro og frjálsum stuðningi, ekki auglýsingum",
+  "mot.kalla": "Heimild"
 }

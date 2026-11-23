@@ -609,5 +609,19 @@
   "pris.pro_6": "Des réponses plus longues et plus détaillées",
   "pris.pro_7": "Joins des fichiers plus gros et des dossiers entiers",
   "pris.pro_8": "Résilie quand tu veux, valable jusqu'à la fin du mois",
-  "pris.gift_link": "Ou offre Pro à quelqu'un"
+  "pris.gift_link": "Ou offre Pro à quelqu'un",
+  "mot.title": "Pourquoi AdRaze plutôt que Brave ?",
+  "mot.lead": "Brave promet la vie privée, mais a plusieurs fois agi sans demander à ses utilisateurs. Voici quatre cas, avec les sources.",
+  "mot.b_h": "Ce qui s'est passé chez Brave",
+  "mot.b1": "Brave a collecté des dons en cryptomonnaie au nom de créateurs, avec leur nom et leur photo, sans qu'ils se soient inscrits. Le youtubeur Tom Scott a protesté et Brave a modifié le système.",
+  "mot.b2": "Brave ajoutait ses propres codes de parrainage quand les utilisateurs tapaient l'adresse de plateformes crypto comme Binance et Coinbase. Le patron Brendan Eich a parlé d'une erreur et s'est excusé.",
+  "mot.b3": "La fenêtre privée avec Tor de Brave révélait au fournisseur DNS des utilisateurs les adresses .onion qu'ils visitaient. Le défaut venait du bloqueur de pubs intégré et a été corrigé.",
+  "mot.b4": "Brave a installé deux services VPN sur Windows sans demander, même chez ceux qui n'avaient jamais acheté de VPN. Cela a pris fin en 2024.",
+  "mot.b_note": "Brave a changé les quatre après les critiques. Nous les citons parce qu'ils montrent ce qui arrive quand un navigateur doit gagner de l'argent avec la crypto et la pub.",
+  "mot.a_h": "Ce que fait AdRaze",
+  "mot.a1": "Pas de crypto, pas de tokens et pas de pubs maison",
+  "mot.a2": "Nous n'ajoutons jamais rien aux adresses que tu tapes",
+  "mot.a3": "Tout ce que le navigateur envoie figure dans la politique de confidentialité, et la plupart peut être désactivé",
+  "mot.a4": "Financé par Pro et le soutien volontaire, pas par la pub",
+  "mot.kalla": "Source"
 }

@@ -609,5 +609,19 @@
   "pris.pro_6": "Daha uzun ve daha ayrıntılı yanıtlar",
   "pris.pro_7": "Daha büyük dosyalar ve tüm klasörleri ekle",
   "pris.pro_8": "İstediğin zaman iptal et, ay sonuna kadar geçerli",
-  "pris.gift_link": "Ya da Pro'yu birine hediye et"
+  "pris.gift_link": "Ya da Pro'yu birine hediye et",
+  "mot.title": "Neden Brave yerine AdRaze?",
+  "mot.lead": "Brave gizlilik vaat ediyor, ama birkaç kez kullanıcılarına sormadan işler yaptı. İşte kaynaklarıyla dört olay.",
+  "mot.b_h": "Brave'de bunlar yaşandı",
+  "mot.b1": "Brave, içerik üreticilerinin adına, onların adı ve fotoğrafıyla, onlar katılmadan kripto bağışı topladı. Youtuber Tom Scott itiraz etti ve Brave sistemi değiştirdi.",
+  "mot.b2": "Brave, kullanıcılar Binance ve Coinbase gibi kripto borsalarının adreslerini yazdığında kendi referans kodlarını ekledi. Şirketin başındaki Brendan Eich bunu bir hata olarak niteledi ve özür diledi.",
+  "mot.b3": "Brave'in Tor'lu gizli penceresi, kullanıcıların hangi .onion adreslerini ziyaret ettiğini DNS sağlayıcılarına sızdırdı. Hata yerleşik reklam engelleyicideydi ve düzeltildi.",
+  "mot.b4": "Brave, Windows'a sormadan iki VPN hizmeti kurdu, hiç VPN satın almamış kişilerde bile. Bu 2024'te sona erdi.",
+  "mot.b_note": "Brave eleştirilerin ardından dördünü de değiştirdi. Bunları anıyoruz, çünkü bir tarayıcının kripto ve reklamdan para kazanması gerektiğinde ne olduğunu gösteriyorlar.",
+  "mot.a_h": "AdRaze böyle yapıyor",
+  "mot.a1": "Kripto yok, token yok, kendi reklamımız yok",
+  "mot.a2": "Yazdığın adreslere asla bir şey eklemeyiz",
+  "mot.a3": "Tarayıcının gönderdiği her şey gizlilik politikasında yazıyor ve çoğu kapatılabiliyor",
+  "mot.a4": "Reklamla değil, Pro ve gönüllü destekle ayakta duruyor",
+  "mot.kalla": "Kaynak"
 }

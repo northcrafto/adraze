@@ -609,5 +609,19 @@
   "pris.pro_6": "Pikemad ja põhjalikumad vastused",
   "pris.pro_7": "Lisa suuremaid faile ja terveid kaustu",
   "pris.pro_8": "Tühista millal soovid, kehtib kuu lõpuni",
-  "pris.gift_link": "Või kingi Pro kellelegi"
+  "pris.gift_link": "Või kingi Pro kellelegi",
+  "mot.title": "Miks AdRaze, mitte Brave?",
+  "mot.lead": "Brave lubab privaatsust, kuid on mitu korda teinud asju kasutajatelt küsimata. Siin on neli juhtumit koos allikatega.",
+  "mot.b_h": "See on Brave'is juhtunud",
+  "mot.b1": "Brave kogus krüptoannetusi sisuloojate nimel, nende nime ja pildiga, ilma et nad oleksid liitunud. Youtuber Tom Scott protestis ja Brave muutis süsteemi.",
+  "mot.b2": "Brave lisas oma soovituskoode, kui kasutajad trükkisid krüptobörside, näiteks Binance'i ja Coinbase'i aadresse. Tegevjuht Brendan Eich nimetas seda veaks ja vabandas.",
+  "mot.b3": "Brave'i privaatne Tori aken lekitas kasutajate DNS-teenusepakkujale, milliseid .onion-aadresse nad külastasid. Viga oli sisseehitatud reklaamiblokeerijas ja see parandati.",
+  "mot.b4": "Brave paigaldas Windowsi kaks VPN-teenust küsimata, ka neile, kes polnud kunagi VPN-i ostnud. See lõppes 2024. aastal.",
+  "mot.b_note": "Brave muutis pärast kriitikat kõiki nelja. Toome need välja, sest need näitavad, mis juhtub, kui brauser peab teenima raha krüpto ja reklaamiga.",
+  "mot.a_h": "Nii teeb AdRaze",
+  "mot.a1": "Ei krüptot, ei tokeneid ega oma reklaame",
+  "mot.a2": "Me ei lisa kunagi midagi aadressidele, mida trükid",
+  "mot.a3": "Kõik, mida brauser saadab, on kirjas privaatsuspoliitikas ja enamiku saab välja lülitada",
+  "mot.a4": "Rahastavad Pro ja vabatahtlik toetus, mitte reklaam",
+  "mot.kalla": "Allikas"
 }

@@ -609,5 +609,19 @@
   "pris.pro_6": "Răspunsuri mai lungi și mai detaliate",
   "pris.pro_7": "Atașează fișiere mai mari și dosare întregi",
   "pris.pro_8": "Anulează când vrei, valabil până la sfârșitul lunii",
-  "pris.gift_link": "Sau dăruiește Pro cuiva"
+  "pris.gift_link": "Sau dăruiește Pro cuiva",
+  "mot.title": "De ce AdRaze în loc de Brave?",
+  "mot.lead": "Brave promite confidențialitate, dar a făcut de mai multe ori lucruri fără să își întrebe utilizatorii. Iată patru cazuri, cu surse.",
+  "mot.b_h": "Asta s-a întâmplat la Brave",
+  "mot.b1": "Brave a strâns donații în criptomonede în numele creatorilor, cu numele și poza lor, fără ca ei să se fi înscris. Youtuberul Tom Scott a protestat, iar Brave a schimbat sistemul.",
+  "mot.b2": "Brave adăuga propriile coduri de recomandare când utilizatorii tastau adresele unor burse cripto precum Binance și Coinbase. Șeful Brendan Eich a numit asta o greșeală și și-a cerut scuze.",
+  "mot.b3": "Fereastra privată cu Tor din Brave dezvăluia furnizorului DNS al utilizatorilor ce adrese .onion vizitau. Defectul era în blocarea de reclame integrată și a fost reparat.",
+  "mot.b4": "Brave a instalat două servicii VPN pe Windows fără să întrebe, chiar și la cei care nu cumpăraseră niciodată VPN. Asta s-a oprit în 2024.",
+  "mot.b_note": "Brave le-a schimbat pe toate patru după critici. Le pomenim pentru că arată ce se întâmplă când un browser trebuie să câștige bani din cripto și reclame.",
+  "mot.a_h": "Așa face AdRaze",
+  "mot.a1": "Fără cripto, fără tokeni și fără reclame proprii",
+  "mot.a2": "Nu adăugăm niciodată nimic la adresele pe care le tastezi",
+  "mot.a3": "Tot ce trimite browserul este scris în politica de confidențialitate, iar cea mai mare parte se poate opri",
+  "mot.a4": "Plătit de Pro și de sprijin voluntar, nu de reclame",
+  "mot.kalla": "Sursă"
 }

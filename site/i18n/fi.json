@@ -609,5 +609,19 @@
   "pris.pro_6": "Pidemmät ja perusteellisemmat vastaukset",
   "pris.pro_7": "Liitä suurempia tiedostoja ja kokonaisia kansioita",
   "pris.pro_8": "Peru milloin haluat, voimassa kuukauden loppuun",
-  "pris.gift_link": "Tai anna Pro lahjaksi"
+  "pris.gift_link": "Tai anna Pro lahjaksi",
+  "mot.title": "Miksi AdRaze eikä Brave?",
+  "mot.lead": "Brave lupaa yksityisyyttä, mutta on useaan otteeseen tehnyt asioita kysymättä käyttäjiltään. Tässä neljä tapausta lähteineen.",
+  "mot.b_h": "Tämä on tapahtunut Bravella",
+  "mot.b1": "Brave keräsi kryptolahjoituksia sisällöntekijöiden nimissä, heidän nimellään ja kuvallaan, vaikka he eivät olleet liittyneet mukaan. Tubettaja Tom Scott protestoi, ja Brave muutti järjestelmää.",
+  "mot.b2": "Brave lisäsi omia suosituskoodejaan, kun käyttäjät kirjoittivat kryptopörssien, kuten Binancen ja Coinbasen, osoitteita. Toimitusjohtaja Brendan Eich kutsui sitä virheeksi ja pyysi anteeksi.",
+  "mot.b3": "Braven yksityinen Tor-ikkuna vuoti käyttäjien DNS-palveluntarjoajalle, millä .onion-osoitteilla he kävivät. Vika oli sisäänrakennetussa mainostenestossa, ja se korjattiin.",
+  "mot.b4": "Brave asensi Windowsiin kaksi VPN-palvelua kysymättä, myös niille, jotka eivät olleet koskaan ostaneet VPN:ää. Tämä loppui vuonna 2024.",
+  "mot.b_note": "Brave muutti kaikkia neljää kritiikin jälkeen. Nostamme ne esiin, koska ne näyttävät, mitä tapahtuu, kun selaimen pitää tienata kryptolla ja mainoksilla.",
+  "mot.a_h": "Näin AdRaze toimii",
+  "mot.a1": "Ei kryptoa, ei tokeneita eikä omia mainoksia",
+  "mot.a2": "Emme koskaan lisää mitään kirjoittamiisi osoitteisiin",
+  "mot.a3": "Kaikki, mitä selain lähettää, lukee tietosuojakäytännössä, ja suurimman osan voi kytkeä pois",
+  "mot.a4": "Rahoitus tulee Prosta ja vapaaehtoisesta tuesta, ei mainoksista",
+  "mot.kalla": "Lähde"
 }

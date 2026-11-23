@@ -609,5 +609,19 @@
   "pris.pro_6": "Hosszabb és részletesebb válaszok",
   "pris.pro_7": "Csatolj nagyobb fájlokat és egész mappákat",
   "pris.pro_8": "Bármikor lemondhatod, a hónap végéig érvényes",
-  "pris.gift_link": "Vagy ajándékozd el a Prót valakinek"
+  "pris.gift_link": "Vagy ajándékozd el a Prót valakinek",
+  "mot.title": "Miért AdRaze a Brave helyett?",
+  "mot.lead": "A Brave adatvédelmet ígér, de többször tett dolgokat a felhasználók megkérdezése nélkül. Íme négy eset, forrásokkal.",
+  "mot.b_h": "Ez történt a Brave-nél",
+  "mot.b1": "A Brave kriptoadományokat gyűjtött alkotók nevében, a nevükkel és a képükkel, pedig nem csatlakoztak. Tom Scott youtuber tiltakozott, és a Brave megváltoztatta a rendszert.",
+  "mot.b2": "A Brave saját ajánlókódokat fűzött hozzá, amikor a felhasználók olyan kriptotőzsdék címét írták be, mint a Binance és a Coinbase. Brendan Eich vezérigazgató hibának nevezte, és bocsánatot kért.",
+  "mot.b3": "A Brave Tor-os privát ablaka elárulta a felhasználók DNS-szolgáltatójának, mely .onion címeket látogatták. A hiba a beépített reklámblokkolóban volt, és kijavították.",
+  "mot.b4": "A Brave kérdezés nélkül két VPN-szolgáltatást telepített Windowsra, azoknak is, akik soha nem vettek VPN-t. Ez 2024-ben megszűnt.",
+  "mot.b_note": "A Brave a kritika után mind a négyen változtatott. Azért említjük őket, mert megmutatják, mi történik, ha egy böngészőnek kriptóból és reklámból kell pénzt keresnie.",
+  "mot.a_h": "Így csinálja az AdRaze",
+  "mot.a1": "Nincs kripto, nincs token és nincs saját reklám",
+  "mot.a2": "Soha nem fűzünk semmit a beírt címekhez",
+  "mot.a3": "Minden, amit a böngésző elküld, szerepel az adatvédelmi szabályzatban, és a legtöbb kikapcsolható",
+  "mot.a4": "A Pro és az önkéntes támogatás tartja el, nem a reklám",
+  "mot.kalla": "Forrás"
 }

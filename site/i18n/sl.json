@@ -609,5 +609,19 @@
   "pris.pro_6": "Daljši in izčrpnejši odgovori",
   "pris.pro_7": "Priloži večje datoteke in cele mape",
   "pris.pro_8": "Prekliči kadar želiš, velja do konca meseca",
-  "pris.gift_link": "Ali podari Pro komu"
+  "pris.gift_link": "Ali podari Pro komu",
+  "mot.title": "Zakaj AdRaze namesto Brave?",
+  "mot.lead": "Brave obljublja zasebnost, a je večkrat naredil stvari, ne da bi vprašal uporabnike. Tukaj so štirje primeri z viri.",
+  "mot.b_h": "To se je zgodilo pri Brave",
+  "mot.b1": "Brave je zbiral kripto donacije v imenu ustvarjalcev, z njihovim imenom in sliko, ne da bi se prijavili. Youtuber Tom Scott je protestiral in Brave je sistem spremenil.",
+  "mot.b2": "Brave je dodajal svoje priporočilne kode, ko so uporabniki vpisovali naslove kripto borz, kot sta Binance in Coinbase. Direktor Brendan Eich je to označil za napako in se opravičil.",
+  "mot.b3": "Zasebno okno s Torom v Brave je ponudniku DNS uporabnikov razkrivalo, katere naslove .onion so obiskovali. Napaka je bila v vgrajenem zaviralniku oglasov in je bila odpravljena.",
+  "mot.b4": "Brave je v Windows namestil dve storitvi VPN brez vprašanja, tudi tistim, ki VPN nikoli niso kupili. To se je končalo leta 2024.",
+  "mot.b_note": "Brave je po kritikah spremenil vse štiri. Omenjamo jih, ker kažejo, kaj se zgodi, ko mora brskalnik služiti s kriptom in oglasi.",
+  "mot.a_h": "Tako dela AdRaze",
+  "mot.a1": "Brez kripta, brez žetonov in brez lastnih oglasov",
+  "mot.a2": "Naslovom, ki jih vpišeš, nikoli ničesar ne dodamo",
+  "mot.a3": "Vse, kar brskalnik pošilja, piše v pravilniku o zasebnosti, večino pa lahko izklopiš",
+  "mot.a4": "Plačujeta ga Pro in prostovoljna podpora, ne oglasi",
+  "mot.kalla": "Vir"
 }

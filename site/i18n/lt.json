@@ -609,5 +609,19 @@
   "pris.pro_6": "Ilgesni ir išsamesni atsakymai",
   "pris.pro_7": "Pridėk didesnius failus ir ištisus aplankus",
   "pris.pro_8": "Atšauk kada nori, galioja iki mėnesio pabaigos",
-  "pris.gift_link": "Arba padovanok Pro kam nors"
+  "pris.gift_link": "Arba padovanok Pro kam nors",
+  "mot.title": "Kodėl AdRaze, o ne Brave?",
+  "mot.lead": "Brave žada privatumą, bet ne kartą darė dalykus neklausdama savo naudotojų. Štai keturi atvejai su šaltiniais.",
+  "mot.b_h": "Tai nutiko Brave",
+  "mot.b1": "Brave rinko kriptovaliutų aukas kūrėjų vardu, su jų vardu ir nuotrauka, nors jie nebuvo prisijungę. Jutuberis Tomas Scottas protestavo, ir Brave pakeitė sistemą.",
+  "mot.b2": "Brave pridėdavo savo rekomendacijos kodus, kai naudotojai rašydavo kriptovaliutų biržų, tokių kaip Binance ir Coinbase, adresus. Vadovas Brendanas Eichas tai pavadino klaida ir atsiprašė.",
+  "mot.b3": "Brave privatus langas su Tor nutekino naudotojų DNS teikėjui, kuriuos .onion adresus jie lankė. Klaida buvo įtaisytame reklamų blokavime ir buvo ištaisyta.",
+  "mot.b4": "Brave įdiegė Windows sistemoje dvi VPN tarnybas neklausdama, net tiems, kurie niekada nepirko VPN. Tai baigėsi 2024 metais.",
+  "mot.b_note": "Po kritikos Brave pakeitė visus keturis. Minime juos, nes jie parodo, kas nutinka, kai naršyklė turi uždirbti iš kriptovaliutų ir reklamos.",
+  "mot.a_h": "Taip daro AdRaze",
+  "mot.a1": "Jokių kriptovaliutų, jokių tokenų ir jokios savos reklamos",
+  "mot.a2": "Niekada nieko nepridedame prie adresų, kuriuos rašai",
+  "mot.a3": "Viskas, ką naršyklė siunčia, surašyta privatumo politikoje, ir daugumą galima išjungti",
+  "mot.a4": "Išlaiko Pro ir savanoriška parama, o ne reklama",
+  "mot.kalla": "Šaltinis"
 }

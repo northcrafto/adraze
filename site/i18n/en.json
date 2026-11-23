@@ -755,5 +755,19 @@
   "propage.gift_price_1": "79 kr",
   "propage.gift_price_12": "948 kr",
   "propage.gift_done": "Pro is now on {namn}'s account. Let them know it is done.",
-  "propage.pay_amount": "Pay {pris}"
+  "propage.pay_amount": "Pay {pris}",
+  "mot.title": "Why AdRaze instead of Brave?",
+  "mot.lead": "Brave promises privacy, but has several times done things without asking its users. Here are four occasions, with sources.",
+  "mot.b_h": "What has happened at Brave",
+  "mot.b1": "Brave collected crypto donations in creators' names, using their name and photo, without them having signed up. YouTuber Tom Scott objected and Brave changed the system.",
+  "mot.b2": "Brave added its own referral codes when users typed addresses to crypto exchanges such as Binance and Coinbase. CEO Brendan Eich called it a mistake and apologised.",
+  "mot.b3": "Brave's private window with Tor leaked which .onion addresses users visited to their DNS provider. The fault was in the built-in ad blocker and was fixed.",
+  "mot.b4": "Brave installed two VPN services on Windows without asking, even for people who never bought the VPN. It stopped in 2024.",
+  "mot.b_note": "Brave changed all four after the criticism. We bring them up because they show what happens when a browser has to make money from crypto and ads.",
+  "mot.a_h": "How AdRaze does it",
+  "mot.a1": "No crypto, no tokens and no ads of our own",
+  "mot.a2": "We never add anything to addresses you type",
+  "mot.a3": "Everything the browser sends is listed in the privacy policy, and most of it can be turned off",
+  "mot.a4": "Paid for by Pro and voluntary support, not by ads",
+  "mot.kalla": "Source"
 }
