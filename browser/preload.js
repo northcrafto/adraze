@@ -329,6 +329,7 @@ contextBridge.exposeInMainWorld('view', {
   onOpenNewTab: (cb) => ipcRenderer.on('open-new-tab', (_e, url) => cb(url)),
   onOpenTabRaw: (cb) => ipcRenderer.on('open-tab-raw', (_e, url) => cb(url)),
   onShowQR: (cb) => ipcRenderer.on('show-qr', (_e, url, dataUrl) => cb(url, dataUrl)),
+  qr: (url) => ipcRenderer.send('qr:visa', url),   // QR-rutan under adressfältet
   onContentWarning: (cb) => ipcRenderer.on('content-warning', (_e, id, url, res) => cb(id, url, res)),
   onWindowResized: (cb) => ipcRenderer.on('window-resized', () => cb()),
 });

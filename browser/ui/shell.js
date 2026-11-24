@@ -4175,7 +4175,7 @@ function famChildCard(c) {
   return '<div class="fam-child" data-child="' + c.id + '">'
     + '<div class="fam-child-head"><span class="fam-avatar">' + escapeHtml((c.name[0] || '?').toUpperCase()) + '</span>'
     + '<div class="grow"><div class="fam-name" translate="no">' + escapeHtml(c.name) + '</div><div class="fam-age">' + escapeHtml(tn('{n} år', c.age)) + '</div></div>'
-    + '<button class="fam-active' + (active ? ' on' : '') + '" data-a="active">' + (active ? 'Aktiv på denna enhet' : 'Aktivera här') + '</button></div>'
+    + '<button class="fam-active' + (active ? ' on' : '') + '" data-a="active">' + (active ? 'Spärrarna gäller här' : 'Använd spärrarna här') + '</button></div>'
     + (c.code ? '<div class="fam-code"><span class="code">' + escapeHtml(c.code) + '</span><span style="font-size:11.5px;color:var(--color-navy-600)">' + escapeHtml(tf('Inloggningskod')) + '</span><button data-a="copy">Kopiera</button></div>' : '')
     + (c.code ? '<div class="fam-loginrow" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 6px;">' + '<span style="font-size:12.5px;color:var(--color-navy-600);">' + escapeHtml(c.sessions ? tn('Inloggad nu', '') : tn('Inte inloggad', '')) + '</span>' + '<button data-a="rotate" class="fam-knapp">Byt kod</button>' + (c.sessions ? '<button data-a="sessions" class="fam-knapp">' + escapeHtml(tn('Visa enheter', '')) + '</button>' : '') + '</div>' : '')
     + famFragorHtml(c)
@@ -4229,11 +4229,25 @@ function famLjudHtml(c) {
     + (id ? '<button type="button" class="fl-spela" data-a="ljud-prova" data-ljud="' + id + '" aria-label="' + escapeHtml(tf('Provlyssna')) + '" title="' + escapeHtml(tf('Provlyssna')) + '">' + FAM_IKON_SPELA + '</button>' : '')
     + '<span class="fl-text">' + (nr ? '<span class="fl-nr">' + nr + '</span>' : '') + '<span class="fl-namn">' + escapeHtml(tf(namn)) + '</span></span>'
     + '<svg class="fl-bock" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 5"/></svg></div>';
-  return '<div class="fam-sub">' + escapeHtml(tf('Ljud vid spärrad sida')) + '</div>'
+  const gomd = famLjudGomd();
+  return '<div class="fam-sub fl-rubrik"><span>' + escapeHtml(tf('Ljud vid spärrad sida')) + '</span><button type="button" class="fl-gom" data-a="ljud-gom" aria-expanded="' + !gomd + '">' + escapeHtml(tf(gomd ? 'Visa' : 'Göm')) + '</button></div>'
+    + '<div class="fl-vik' + (gomd ? ' gomd' : '') + '"><div class="fl-vik-inne">'
     + '<div class="fam-ljudval" role="radiogroup" aria-label="' + escapeHtml(tf('Ljud vid spärrad sida')) + '">'
     + kort('', 'Av', 0) + FAM_LJUD.map((x, n) => kort(x.id, x.namn, n + 1)).join('')
     + '</div>'
-    + '<label class="fl-vol' + (l.id ? '' : ' av') + '">' + escapeHtml(tf('Volym')) + ' <input data-a="ljud-vol" type="range" min="10" max="80" step="5" value="' + l.volym + '"' + (l.id ? '' : ' disabled') + '></label>';
+    + '<label class="fl-vol' + (l.id ? '' : ' av') + '">' + escapeHtml(tf('Volym')) + ' <input data-a="ljud-vol" type="range" min="10" max="80" step="5" value="' + l.volym + '"' + (l.id ? '' : ' disabled') + '></label>'
+    + '</div></div>';
+}
+// Ljudavsnittet går att gömma: korten glider ihop och resten av barnkortet glider upp. Valet gäller alla barnkort och sparas.
+function famLjudGomd() { try { return localStorage.getItem('adraze-fam-ljud-gomd') === '1'; } catch { return false; } }
+function famLjudGom(el) {
+  const vik = el.querySelector('.fl-vik'), knapp = el.querySelector('[data-a=ljud-gom]'); if (!vik || !knapp) return;
+  const gom = !vik.classList.contains('gomd');
+  if (gom) famLjudStoppa();
+  try { localStorage.setItem('adraze-fam-ljud-gomd', gom ? '1' : '0'); } catch {}
+  // alla barnkort följer med
+  document.querySelectorAll('#settings .fl-vik').forEach((v) => v.classList.toggle('gomd', gom));
+  document.querySelectorAll('#settings [data-a=ljud-gom]').forEach((k) => { k.textContent = tf(gom ? 'Visa' : 'Göm'); k.setAttribute('aria-expanded', String(!gom)); });
 }
 async function famLjudSpara(c, id, volym) {
   const x = famChildById(c.id) || c;
@@ -4249,6 +4263,7 @@ async function famLjudSpara(c, id, volym) {
 function famLjudKoppla(el, c) {
   const val = el.querySelector('.fam-ljudval'), vol = el.querySelector('[data-a=ljud-vol]');
   if (!val) return;
+  const gk = el.querySelector('[data-a=ljud-gom]'); if (gk) gk.addEventListener('click', () => famLjudGom(el));
   const valj = async (id) => {
     const fore = famLjud(famChildById(c.id) || c);
     if (id === fore.id) return;

@@ -82,7 +82,7 @@ const KOMMANDON = [
   { id: 'kalla', namn: 'Visa sidans källa', kat: 'Sidan', std: [], ikon: 'kod', sok: 'källkod html', kor: (ctx) => { const u = sidUrl(ctx); if (u) skicka(ctx, 'open-tab-raw', 'view-source:' + u); } },
   { id: 'qr-kod', namn: 'Skapa QR-kod för sidan', kat: 'Sidan', std: [], ikon: 'qr', sok: 'telefon dela', kor: (ctx) => { const u = sidUrl(ctx); if (u) api.showQR(ctx, u); } },
   // Namn och målspråk följer användarens språk (main.js oversattning()); på svenska "Översätt till svenska" som förut
-  { id: 'oversatt', namn: 'Översätt till svenska', get visaNamn() { return api && api.oversattning ? api.oversattning().namn : this.namn; }, kat: 'Sidan', std: [], ikon: 'oversatt', sok: 'översätt sidan språk', kor: (ctx) => { const u = sidUrl(ctx); const tl = api && api.oversattning ? api.oversattning().tl : 'sv'; if (u) skicka(ctx, 'open-new-tab', 'https://translate.google.com/translate?sl=auto&tl=' + encodeURIComponent(tl) + '&u=' + encodeURIComponent(u)); } },
+  { id: 'oversatt', namn: 'Översätt till svenska', get visaNamn() { return api && api.oversattning ? api.oversattning().namn : this.namn; }, kat: 'Sidan', std: [], ikon: 'oversatt', sok: 'översätt sidan språk', kor: (ctx) => { if (sidUrl(ctx) && api && api.oversattVaxla) api.oversattVaxla(ctx); } },
   // AdRaze
   { id: 'palett', namn: 'Kommandopalett', kat: 'AdRaze', std: ['CmdOrCtrl+K'], ikon: 'palett', lamnar: true, sok: 'kommandon sök allt', var: 'skal' },   // skalet tar själv fokus (efter att ha valt sökrutan)
   { id: 'historik', namn: 'Historik', kat: 'AdRaze', std: ['CmdOrCtrl+H'], ikon: 'historik', lamnar: true, kor: (ctx) => skicka(ctx, 'open-history') },

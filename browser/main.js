@@ -33,6 +33,7 @@ const WEBB_KANALER = new Set([
   'adraze:start', 'adraze:css', 'adraze:kakor', 'adraze:rakna', 'adraze:dolj-regler',   // adraze-preload.js
   'page:click', 'i18n:t', 'pw:capture', 'pw:for-origin', 'pw:open-manager', 'pip:state',            // content-preload.js
   'wallet:capture', 'wallet:debug', 'wallet:menu', 'wallet:open-manager', 'wallet:token', 'wallet:valj', 'wallet:want', 'wallet:nav',
+  'oversatt:batch', 'oversatt:status',   // content-preload.js: översätt sidan på plats
   'avancerat:skript',   // anpassa-avancerat-preload.js (användarskript; huvudprocessen väljer utifrån ramens egen adress)
 ]);
 function ramUrl(e) { try { return (e.senderFrame && e.senderFrame.url) || ''; } catch { return ''; } }
@@ -697,9 +698,63 @@ async function sparaBildSom(ctx, wc, src) {
   nastaLaddningSokvag = r.filePath;
   try { wc.downloadURL(src); } catch { nastaLaddningSokvag = ''; }
 }
-async function showQR(ctx, url) {
-  try { const dataUrl = await QRCode.toDataURL(url, { width: 416, margin: 0, errorCorrectionLevel: 'H', color: { dark: '#141414', light: '#ffffff' } }); sendTo(ctx, 'show-qr', url, dataUrl); } catch {}
+/* QR-koden för sidan: en liten ruta under adressfältet, OVANPÅ sidan (förr tog den över hela fliken).
+ * Egen vy som nedladdningsrutan. Stängs med krysset, Esc, eller när man klickar någon annanstans. */
+const QR_W = 322;
+function positionQr(ctx, h) {
+  if (!ctx || !ctx.qrView || !ctx.win || ctx.win.isDestroyed()) return;
+  const cb = ctx.win.getContentBounds();
+  if (typeof h === 'number') ctx._qrH = h;
+  const top = Math.max(0, Math.round((ctx.topInset || Math.min(92, ctx.bounds ? ctx.bounds.y : 92)) + 2));
+  const height = Math.max(120, Math.min(ctx._qrH || 420, cb.height - top - 8));
+  // Under adressfältets högra del: till vänster om knapparna längst ut (som i Chrome och Brave)
+  const x = Math.max(8, Math.round(cb.width - QR_W - Math.min(230, cb.width * 0.2)));
+  try { ctx.qrView.setBounds({ x, y: anpVerktyg.popupY(ctx, top, height), width: QR_W, height }); } catch {}
 }
+function closeQr(ctx) {
+  if (!ctx || !ctx.qrView) return;
+  const v = ctx.qrView; ctx.qrView = null;
+  try { ctx.win.contentView.removeChildView(v); } catch {}
+  try { v.webContents.close(); } catch {}
+  if (ctx._qrRepos) { try { ctx.win.removeListener('resize', ctx._qrRepos); ctx.win.removeListener('move', ctx._qrRepos); } catch {} ctx._qrRepos = null; }
+}
+const qrCtx = (e) => [...wins.values()].find((c) => c.qrView && !c.qrView.webContents.isDestroyed() && c.qrView.webContents === e.sender);
+async function showQR(ctx, url) {
+  if (!ctx || !ctx.win || ctx.win.isDestroyed() || !/^https?:/i.test(String(url || ''))) return;
+  let dataUrl; try { dataUrl = await QRCode.toDataURL(url, { width: 800, margin: 0, errorCorrectionLevel: 'H', color: { dark: '#141414', light: '#ffffff' } }); } catch { return; }
+  ctx._qrData = { url, dataUrl };
+  if (ctx.qrView) { try { ctx.win.contentView.addChildView(ctx.qrView); } catch {} positionQr(ctx); ctx.qrView.webContents.send('qr-data', ctx._qrData); try { ctx.qrView.webContents.focus(); } catch {} return; }
+  const view = new WebContentsView({ webPreferences: POPUP_PREFS({ transparent: true }) });
+  try { view.setBackgroundColor('#00000000'); } catch {}
+  ctx.qrView = view; ctx._qrH = 420;
+  ctx.win.contentView.addChildView(view);
+  positionQr(ctx);
+  const repos = () => positionQr(ctx);
+  ctx._qrRepos = repos; ctx.win.on('resize', repos); ctx.win.on('move', repos);
+  view.webContents.loadFile(path.join(__dirname, 'ui', 'qr.html'), { query: palettFraga() });
+  view.webContents.on('did-finish-load', () => { try { view.webContents.send('qr-data', ctx._qrData); view.webContents.focus(); } catch {} });
+  view.webContents.on('blur', () => { if (ctx.qrView === view) closeQr(ctx); });   // klick någon annanstans stänger rutan
+}
+ipcMain.on('qr:visa', (e, url) => { const ctx = wins.get(e.sender.id); if (ctx) showQR(ctx, String(url || '')); });   // från skalet
+ipcMain.on('qr:stang', (e) => { const ctx = qrCtx(e); if (ctx) closeQr(ctx); });
+ipcMain.on('qr:storlek', (e, h) => { const ctx = qrCtx(e); if (ctx && Number(h) > 0) positionQr(ctx, Math.min(700, Math.round(Number(h)))); });
+ipcMain.handle('qr:kopiera', (e, text) => { if (!qrCtx(e) || typeof text !== 'string' || text.length > 8192) return false; try { clipboard.writeText(text); return true; } catch { return false; } });
+// Spara bilden i mappen för hämtade filer. Bara PNG från vår egen ruta, högst 4 MB, och namnet byggs här (aldrig av sidan).
+ipcMain.handle('qr:spara', (e, d) => {
+  try {
+    if (!qrCtx(e)) return { ok: false };
+    const m = /^data:image\/png;base64,([A-Za-z0-9+/=]+)$/.exec(String((d && d.png) || ''));
+    if (!m || m[1].length > 5_600_000) return { ok: false };
+    const buf = Buffer.from(m[1], 'base64');
+    if (buf.length < 8 || buf.readUInt32BE(0) !== 0x89504e47) return { ok: false };
+    let host = 'sida'; try { host = new URL(String(d.url)).hostname.replace(/^www\./, '').replace(/[^a-z0-9.-]/gi, '').slice(0, 60) || 'sida'; } catch {}
+    const mapp = webb.downloadDir(); fs.mkdirSync(mapp, { recursive: true });
+    let fil = path.join(mapp, `QR ${host}.png`);
+    for (let i = 2; fs.existsSync(fil) && i < 200; i++) fil = path.join(mapp, `QR ${host} (${i}).png`);
+    fs.writeFileSync(fil, buf, { flag: 'wx' });
+    return { ok: true, fil: path.basename(fil) };
+  } catch { return { ok: false }; }
+});
 /* Skriv ut: finns en skrivare → systemets utskriftsdialog. Annars faller vi
  * tillbaka på PDF (som Chromes "Spara som PDF") så knappen ALLTID gör något. */
 async function makePdf(ctx, wc) {
@@ -762,7 +817,7 @@ function buildContextMenu(ctx, wc, params) {
   t.push({ label: T('Spara som…'), click: () => savePage(ctx, wc) });
   t.push({ label: T('Skriv ut…'), click: () => printPage(ctx, wc) });
   t.push({ label: T('Skapa QR-kod för sidan'), click: () => showQR(ctx, url) });
-  { const o = oversattning(); t.push({ label: o.namn, click: () => sendTo(ctx, 'open-new-tab', 'https://translate.google.com/translate?sl=auto&tl=' + encodeURIComponent(o.tl) + '&u=' + encodeURIComponent(url)) }); }
+  if (/^https?:/i.test(url)) { const o = oversattning(); const pa = wc.__ovs && wc.__ovs.lage !== 'original' && wc.__ovs.lage !== 'fel'; t.push(pa ? { label: T('Visa originalet'), click: () => oversattAterstall(ctx, wc) } : { label: o.namn, click: () => oversattSidan(ctx, wc, o.tl) }); }
   t.push({ type: 'separator' });
   t.push({ label: T('Visa sidans källa'), click: () => sendTo(ctx, 'open-tab-raw', 'view-source:' + url) });
   if (!barnNagonstans()) t.push({ label: T('Inspektera'), click: () => { try { if (!barnNagonstans()) wc.inspectElement(params.x, params.y); } catch {} } });
@@ -1886,6 +1941,109 @@ function oversattning() {
   return { tl: l === 'nb' ? 'no' : l, namn: T('Översätt till {sprak}', { sprak }) };
 }
 
+/* ── Översätt sidan på plats ──
+ * Förr öppnades translate.google.com i en ny flik, så att Google fick både adressen och användarens IP. Nu översätts
+ * texten i sidan: content-preload.js samlar texten, vi skickar den till AdRazes server (/oversatt) som frågar
+ * översättningstjänsten åt oss. En liten ruta under adressfältet visar läget och låter en byta språk eller gå tillbaka. */
+const OVS_W = 322;
+const ovsNamn = (kod, visaPa) => { try { return new Intl.DisplayNames([visaPa || uiLang || 'sv'], { type: 'language' }).of(kod === 'no' ? 'nb' : kod) || kod; } catch { return kod; } };
+function positionOvs(ctx, h) {
+  if (!ctx || !ctx.ovsView || !ctx.win || ctx.win.isDestroyed()) return;
+  const cb = ctx.win.getContentBounds();
+  if (typeof h === 'number') ctx._ovsH = h;
+  const top = Math.max(0, Math.round((ctx.topInset || Math.min(92, ctx.bounds ? ctx.bounds.y : 92)) + 2));
+  const height = Math.max(90, Math.min(ctx._ovsH || 190, cb.height - top - 8));
+  const x = Math.max(8, Math.round(cb.width - OVS_W - Math.min(230, cb.width * 0.2)));
+  try { ctx.ovsView.setBounds({ x, y: anpVerktyg.popupY(ctx, top, height), width: OVS_W, height }); } catch {}
+}
+function closeOvs(ctx) {
+  if (!ctx || !ctx.ovsView) return;
+  const v = ctx.ovsView; ctx.ovsView = null; ctx._ovsWc = null; ctx._ovsFokus = false; clearTimeout(ctx._ovsTimer);
+  try { ctx.win.contentView.removeChildView(v); } catch {}
+  try { v.webContents.close(); } catch {}
+  if (ctx._ovsRepos) { try { ctx.win.removeListener('resize', ctx._ovsRepos); ctx.win.removeListener('move', ctx._ovsRepos); } catch {} ctx._ovsRepos = null; }
+}
+const ovsCtx = (e) => [...wins.values()].find((c) => c.ovsView && !c.ovsView.webContents.isDestroyed() && c.ovsView.webContents === e.sender);
+function ovsData(wc) {
+  const o = (wc && wc.__ovs) || { lage: 'original', till: oversattning().tl };
+  return { lage: o.lage, till: o.till, tillNamn: ovsNamn(o.till), franNamn: o.fran ? ovsNamn(o.fran) : '', delvis: !!o.delvis, ui: uiLang || 'sv' };
+}
+function ovsSkicka(ctx) {
+  try { if (ctx && ctx.ovsView && ctx._ovsWc && !ctx.ovsView.webContents.isDestroyed()) ctx.ovsView.webContents.send('ovs-data', ovsData(ctx._ovsWc)); } catch {}
+  ovsSjalvstang(ctx);
+}
+// Klar eller tillbaka på originalet, och ingen har klickat i rutan: den går bort efter åtta sekunder
+function ovsSjalvstang(ctx) {
+  if (!ctx) return; clearTimeout(ctx._ovsTimer);
+  const l = ctx._ovsWc && ctx._ovsWc.__ovs && ctx._ovsWc.__ovs.lage;
+  if (ctx.ovsView && !ctx._ovsFokus && (l === 'klar' || l === 'original')) ctx._ovsTimer = setTimeout(() => { if (ctx.ovsView && !ctx._ovsFokus) closeOvs(ctx); }, 8000);
+}
+function visaOvs(ctx, wc) {
+  if (!ctx || !ctx.win || ctx.win.isDestroyed()) return;
+  ctx._ovsWc = wc;
+  if (ctx.ovsView) { try { ctx.win.contentView.addChildView(ctx.ovsView); } catch {} positionOvs(ctx); ovsSkicka(ctx); return; }
+  const view = new WebContentsView({ webPreferences: POPUP_PREFS({ transparent: true }) });
+  try { view.setBackgroundColor('#00000000'); } catch {}
+  ctx.ovsView = view; ctx._ovsH = 190;
+  ctx.win.contentView.addChildView(view);
+  positionOvs(ctx);
+  const repos = () => positionOvs(ctx);
+  ctx._ovsRepos = repos; ctx.win.on('resize', repos); ctx.win.on('move', repos);
+  view.webContents.loadFile(path.join(__dirname, 'ui', 'oversatt.html'), { query: palettFraga() });
+  // Rutan tar inte fokus från sidan. Klickar man i den och sedan någon annanstans stängs den, annars går den bort
+  // av sig själv en stund efter att översättningen är klar (ovsSjalvstang).
+  view.webContents.on('did-finish-load', () => ovsSkicka(ctx));
+  // En ny vy kan få fokus av sig själv och tappa det igen direkt: bara om användaren faktiskt rört rutan (ovs:ror)
+  // betyder tappat fokus att hen klickat någon annanstans.
+  view.webContents.on('blur', () => { if (ctx.ovsView === view && ctx._ovsFokus) closeOvs(ctx); });
+}
+function oversattSidan(ctx, wc, till) {
+  if (!wc || wc.isDestroyed() || !/^https?:/i.test(wc.getURL())) return;
+  if (!/^[a-z]{2,3}(-[A-Za-z]{2,4})?$/.test(String(till || ''))) return;
+  if (!wc.__ovsLyssnar) {   // ny sida = inget översatt längre
+    wc.__ovsLyssnar = true;
+    wc.on('did-start-navigation', (_e, _u, inPage, isMain) => { if (isMain && !inPage && wc.__ovs) { wc.__ovs = null; const c = [...wins.values()].find((x) => x._ovsWc === wc); if (c) closeOvs(c); } });
+  }
+  wc.__ovs = { lage: 'kor', till, fran: '' };
+  try { wc.send('oversatt:kor', { till }); } catch {}
+  visaOvs(ctx, wc);
+}
+function oversattAterstall(ctx, wc) {
+  if (!wc || wc.isDestroyed()) return;
+  try { wc.send('oversatt:aterstall'); } catch {}
+  wc.__ovs = { lage: 'original', till: (wc.__ovs && wc.__ovs.till) || oversattning().tl, fran: (wc.__ovs && wc.__ovs.fran) || '' };
+  ovsSkicka(ctx);
+}
+// Kortkommandot: översätt, eller tillbaka till originalet om sidan redan är översatt
+function oversattVaxla(ctx) {
+  const v = activeView(ctx), wc = v && !v.webContents.isDestroyed() ? v.webContents : null; if (!wc) return;
+  if (wc.__ovs && (wc.__ovs.lage === 'klar' || wc.__ovs.lage === 'kor')) { oversattAterstall(ctx, wc); visaOvs(ctx, wc); }
+  else oversattSidan(ctx, wc, oversattning().tl);
+}
+// Sidans förladdningsskript: en omgång text → servern. Bara flikarnas huvudram, och bara medan vi själva bett om översättning.
+const ovsFlikWc = (e) => { try { const wc = e.sender; return wc && wc.__ovs && e.senderFrame === wc.mainFrame ? wc : null; } catch { return null; } };
+ipcMain.handle('oversatt:batch', async (e, d) => {
+  const wc = ovsFlikWc(e); if (!wc || wc.__ovs.lage === 'original') return { ok: false, stopp: true };
+  const till = wc.__ovs.till, texter = d && Array.isArray(d.texter) ? d.texter : null;
+  if (!texter || !texter.length || texter.length > 40 || texter.some((t) => typeof t !== 'string' || t.length > 2000) || texter.reduce((n, t) => n + t.length, 0) > 4000) return { ok: false };
+  const j = await adrazeApi('/oversatt', { till, texter });
+  if (!j.ok) return { ok: false, stopp: j.status === 429 || j.status === 503 };
+  return { ok: true, texter: j.texter, fran: j.fran };
+});
+ipcMain.on('oversatt:status', (e, d) => {
+  const wc = ovsFlikWc(e); if (!wc || !d) return;
+  const lage = ['kor', 'klar', 'fel', 'original'].includes(d.lage) ? d.lage : null; if (!lage) return;
+  if (wc.__ovs.lage === 'original' && lage !== 'original') return;   // användaren hann gå tillbaka
+  wc.__ovs.lage = lage; wc.__ovs.delvis = !!d.delvis;
+  if (typeof d.fran === 'string' && /^[a-zA-Z-]{2,10}$/.test(d.fran)) wc.__ovs.fran = d.fran;
+  const ctx = [...wins.values()].find((c) => c._ovsWc === wc); if (ctx) ovsSkicka(ctx);
+});
+ipcMain.on('ovs:ror', (e) => { const ctx = ovsCtx(e); if (ctx) { ctx._ovsFokus = true; clearTimeout(ctx._ovsTimer); } });
+ipcMain.on('ovs:stang', (e) => { const ctx = ovsCtx(e); if (ctx) closeOvs(ctx); });
+ipcMain.on('ovs:storlek', (e, h) => { const ctx = ovsCtx(e); if (ctx && Number(h) > 0) positionOvs(ctx, Math.min(400, Math.round(Number(h)))); });
+ipcMain.on('ovs:original', (e) => { const ctx = ovsCtx(e); if (ctx && ctx._ovsWc) oversattAterstall(ctx, ctx._ovsWc); });
+ipcMain.on('ovs:oversatt', (e, till) => { const ctx = ovsCtx(e); if (ctx && ctx._ovsWc) oversattSidan(ctx, ctx._ovsWc, String(till || '')); });
+
 /* ── AdRaze Wallet (kort-plånbok, E2E-krypterad på enheten) ──
  * Zero-knowledge: korten lämnar ALDRIG datorn. På disk ligger bara chiffertext
  * (AES-256-GCM). Nyckeln är slumpad per enhet och slås själv in i OS:ets
@@ -2857,7 +3015,7 @@ function ctxForWc(wc) { return wins.get(wc.id) || wc.__ctx || null; }
 function activeView(ctx) { return ctx && ctx.visibleTab ? ctx.views.get(ctx.visibleTab) : null; }
 // Anpassa › kortkommandon, kommandopalett och musgester: egna kortkommandon, Ctrl+K och högerklicksgester (anpassa-kortkommandon.js)
 const anpKortkommandon = require('./anpassa-kortkommandon');
-anpKortkommandon.init({ anpassa, wins, sendTo, activeView, openFind, closeFind, openDlPopup, savePage, printPage, bildIBild, createWindow, toggleFull, barnNagonstans, showQR, T, oversattning });
+anpKortkommandon.init({ anpassa, wins, sendTo, activeView, openFind, closeFind, openDlPopup, savePage, printPage, bildIBild, createWindow, toggleFull, barnNagonstans, showQR, T, oversattning, oversattVaxla });
 function handleShortcut(wc, input) {
   if (input.type !== 'keyDown') return false;
   const ctx = ctxForWc(wc);

@@ -810,3 +810,96 @@ if (/^https?:$/.test(location.protocol)) {
   };
   for (const ev of ['loadedmetadata', 'play', 'emptied', 'enterpictureinpicture', 'leavepictureinpicture']) document.addEventListener(ev, () => setTimeout(meddela, 60), true);
 }
+
+/* ── Översätt sidan på plats ──
+ * Huvudprocessen ber oss (oversatt:kor) översätta sidans text till ett språk. Vi samlar textnoderna, skickar texten i
+ * omgångar till huvudprocessen (som frågar AdRazes server, aldrig Google direkt) och byter texten på plats. Originalet
+ * sparas per nod, så att "Visa originalet" lägger tillbaka allt. Det som sidan lägger till efteråt översätts också.
+ * Bara huvudramen. Formulärfält, kod och det sidan själv märkt translate="no" rörs inte. */
+(() => {
+  let ar_topp = false; try { ar_topp = window.top === window; } catch {}
+  if (!ar_topp || location.protocol === 'adraze:') return;
+  const HOPPA = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'INPUT', 'SELECT', 'CODE', 'PRE', 'KBD', 'SAMP', 'VAR', 'SVG', 'MATH', 'IFRAME', 'CANVAS', 'VIDEO', 'AUDIO']);
+  const orig = new Map();        // textnod → { text: originalet, satt: vår översättning }
+  let till = null, lopnr = 0, vakt = null, vantar = null, franSprak = '';
+  const status = (lage, extra) => { try { ipcRenderer.send('oversatt:status', { lage, till, fran: franSprak, antal: orig.size, ...(extra || {}) }); } catch {} };
+  const hoppaOver = (el) => { for (let e = el; e && e.nodeType === 1; e = e.parentElement) { if (HOPPA.has(e.nodeName.toUpperCase()) || e.isContentEditable || e.getAttribute('translate') === 'no' || (e.classList && e.classList.contains('notranslate'))) return true; } return false; };
+  const duger = (n) => { const t = n.nodeValue; return !!t && t.length < 2000 && /\p{L}{2}/u.test(t) && n.parentElement && !hoppaOver(n.parentElement); };
+  function samla(rot) {
+    const ut = [];
+    try {
+      if (rot.nodeType === 3) { if (duger(rot)) ut.push(rot); return ut; }
+      if (rot.nodeType !== 1 && rot.nodeType !== 9) return ut;
+      const w = document.createTreeWalker(rot, NodeFilter.SHOW_TEXT);
+      for (let n = w.nextNode(); n; n = w.nextNode()) if (duger(n)) ut.push(n);
+    } catch {}
+    return ut;
+  }
+  async function oversatt(noder, nr) {
+    // Samma text översätts en gång. Omgångar om högst 30 texter / 3000 tecken, tre i taget.
+    const grupper = new Map();
+    for (const n of noder) { const o = orig.get(n); if (o && n.nodeValue === o.satt) continue; const k = n.nodeValue.trim(); if (!k) continue; if (!grupper.has(k)) grupper.set(k, []); grupper.get(k).push(n); }
+    const texter = [...grupper.keys()], omg = [];
+    for (let i = 0; i < texter.length;) { const b = []; let l = 0; while (i < texter.length && b.length < 30 && (!b.length || l + texter[i].length <= 3000)) { l += texter[i].length; b.push(texter[i++]); } omg.push(b); }
+    let fel = 0, nasta = 0;
+    const arbetare = async () => {
+      while (nasta < omg.length && nr === lopnr) {
+        const b = omg[nasta++];
+        let r = null; try { r = await ipcRenderer.invoke('oversatt:batch', { till, texter: b }); } catch {}
+        if (nr !== lopnr) return;
+        if (!r || !r.ok || !Array.isArray(r.texter) || r.texter.length !== b.length) { fel++; if (r && r.stopp) { nasta = omg.length; } continue; }
+        if (!franSprak && Array.isArray(r.fran)) franSprak = r.fran.find((x) => x && x !== till) || r.fran.find(Boolean) || '';
+        b.forEach((k, i) => {
+          const ny = r.texter[i]; if (typeof ny !== 'string' || !ny) return;
+          for (const n of grupper.get(k)) {
+            if (!n.isConnected) continue;
+            const nu = n.nodeValue, kant = /^(\s*)[\s\S]*?(\s*)$/.exec(nu);
+            if (nu.trim() !== k) continue;                    // sidan hann ändra texten
+            const satt = kant[1] + ny + kant[2];
+            if (!orig.has(n)) orig.set(n, { text: nu, satt }); else orig.get(n).satt = satt;
+            n.nodeValue = satt;
+          }
+        });
+      }
+    };
+    await Promise.all([arbetare(), arbetare(), arbetare()]);
+    return { fel, omgangar: omg.length };
+  }
+  function bevaka() {
+    if (vakt) return;
+    vakt = new MutationObserver((ms) => {
+      if (!till) return;
+      for (const m of ms) {
+        if (m.type === 'characterData') { const o = orig.get(m.target); if (o && m.target.nodeValue === o.satt) continue; (vantar || (vantar = new Set())).add(m.target); }
+        else for (const n of m.addedNodes) (vantar || (vantar = new Set())).add(n);
+      }
+      if (vantar && !bevaka.t) bevaka.t = setTimeout(async () => {
+        bevaka.t = null; const rotter = vantar; vantar = null; if (!till || !rotter) return;
+        const noder = []; for (const r of rotter) if (r.isConnected) noder.push(...samla(r));
+        if (noder.length) await oversatt(noder, lopnr);
+      }, 700);
+    });
+    try { vakt.observe(document.documentElement, { childList: true, subtree: true, characterData: true }); } catch {}
+  }
+  function aterstall() {
+    lopnr++; till = null;
+    if (vakt) { try { vakt.disconnect(); } catch {} vakt = null; } vantar = null;
+    for (const [n, o] of orig) { try { if (n.isConnected && n.nodeValue === o.satt) n.nodeValue = o.text; } catch {} }
+    orig.clear();
+    try { if (document.documentElement.dataset.adrazeLang !== undefined) { const l = document.documentElement.dataset.adrazeLang; if (l) document.documentElement.lang = l; else document.documentElement.removeAttribute('lang'); delete document.documentElement.dataset.adrazeLang; } } catch {}
+  }
+  ipcRenderer.on('oversatt:kor', async (_e, d) => {
+    const mal = d && typeof d.till === 'string' ? d.till : '';
+    if (!/^[a-z]{2,3}(-[A-Za-z]{2,4})?$/.test(mal)) return;
+    if (till) aterstall();
+    till = mal; franSprak = ''; const nr = ++lopnr;
+    status('kor');
+    const r = await oversatt(samla(document.body || document.documentElement), nr);
+    if (nr !== lopnr) return;
+    if (r.omgangar && r.fel >= r.omgangar) { aterstall(); status('fel'); return; }
+    try { const h = document.documentElement; if (h.dataset.adrazeLang === undefined) h.dataset.adrazeLang = h.getAttribute('lang') || ''; h.lang = mal; } catch {}
+    bevaka();
+    status('klar', { delvis: r.fel > 0 });
+  });
+  ipcRenderer.on('oversatt:aterstall', () => { aterstall(); status('original'); });
+})();

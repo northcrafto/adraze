@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  html, body { margin: 0; background: transparent; overflow: hidden; font-family: -apple-system, "SF Pro Text", "Segoe UI", system-ui, sans-serif; }
+  /* QR-koden som en liten ruta under adressfältet, ovanpå sidan (förr tog den över hela fliken) */
+  :root { --yta: #fff; --kant: #e9e6e0; --text: #1f1e1b; --dov: #6f6d66; --falt: #f5f3ee; --faltkant: #dedad2; --hover: #f5f3ee; --acc: #ff4b1f; }
+  :root[data-theme="dark"] { --yta: #1e1c19; --kant: #2e2c29; --text: #eeede8; --dov: #a2a097; --falt: #161412; --faltkant: #3a3834; --hover: rgba(255,255,255,.06); }
+  :root[data-theme="dark"][data-palett="jul"] { --yta: #132e21; --kant: #214a35; --text: #f4ecd8; --dov: #a9b8a6; --falt: #0e2419; --faltkant: #2b5a42; --hover: rgba(244,236,216,.08); }
+  .card { margin: 8px 10px 18px; padding: 14px 18px 16px; background: var(--yta); border: 1px solid var(--kant); border-radius: 14px;
+    box-shadow: 0 18px 44px rgba(31,30,27,.26), 0 3px 10px rgba(31,30,27,.10); animation: pop .16s cubic-bezier(.2,.8,.2,1); transform-origin: top right; }
+  :root[data-theme="dark"] .card { box-shadow: 0 18px 44px rgba(0,0,0,.5), 0 3px 10px rgba(0,0,0,.3); }
+  @keyframes pop { from { opacity: 0; transform: translateY(-8px) scale(.98); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .card { animation: none; } }
+  .head { display: flex; align-items: center; justify-content: space-between; margin: 0 -8px 10px 0; }
+  .head h1 { margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -.005em; color: var(--text); }
+  .x { border: 0; background: transparent; cursor: pointer; color: var(--dov); width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; }
+  .x:hover { background: var(--hover); color: var(--text); }
+  .x svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+  .ram { position: relative; width: 224px; height: 224px; margin: 0 auto; padding: 12px; box-sizing: border-box; background: #fff; border-radius: 10px; border: 1px solid var(--kant); }
+  .ram #bild { display: block; width: 200px; height: 200px; image-rendering: pixelated; }
+  .logo { position: absolute; left: 50%; top: 50%; width: 42px; height: 42px; margin: -21px 0 0 -21px; box-sizing: border-box; padding: 4px; border-radius: 11px; background: #fff; box-shadow: 0 0 0 3px #fff; }
+  .logo img { display: block; width: 100%; height: 100%; }
+  #adress { display: block; width: 100%; box-sizing: border-box; margin-top: 14px; height: 34px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--faltkant); background: var(--falt); color: var(--text);
+    font: 12.5px -apple-system, "Segoe UI", system-ui, sans-serif; outline: none; }
+  #adress:focus { border-color: var(--acc); box-shadow: 0 0 0 2px color-mix(in srgb, var(--acc) 22%, transparent); }
+  .rad { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+  #besked { min-height: 16px; margin-top: 10px; font-size: 12px; line-height: 16px; color: var(--dov); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* Knapparna fylls nerifrån som vätska, som i resten av AdRaze */
+  .knapp { position: relative; isolation: isolate; overflow: hidden; white-space: nowrap; height: 32px; padding: 0 16px; border-radius: 999px; border: 0; cursor: pointer; background: transparent; color: var(--text);
+    font: 600 12.5px -apple-system, "Segoe UI", system-ui, sans-serif; box-shadow: inset 0 0 0 1px var(--faltkant); transition: color .45s ease, box-shadow .45s ease; }
+  .knapp::before { content: ""; position: absolute; z-index: -1; left: -15%; width: 130%; bottom: -2px; height: 170%; transform: translateY(100%); border-radius: 46% 46% 0 0; background: var(--acc); transition: transform .7s cubic-bezier(.2,.75,.25,1); pointer-events: none; }
+  .knapp:hover, .knapp:focus-visible { color: #fff; box-shadow: inset 0 0 0 1px transparent; outline: none; }
+  .knapp:hover::before, .knapp:focus-visible::before { transform: translateY(0); }
+  .knapp:active { transform: translateY(1px); }
+  @media (prefers-reduced-motion: reduce) { .knapp::before { transition: none; } }
+</style>
+<script>
+  (function () {
+    function tema() { try { document.documentElement.dataset.theme = localStorage.getItem('skoll-theme') === 'dark' ? 'dark' : 'light'; } catch (e) {} }
+    tema(); window.addEventListener('storage', function (e) { if (!e.key || e.key === 'skoll-theme') tema(); });
+    try { if (new URLSearchParams(location.search).get('palett') === 'jul') document.documentElement.dataset.palett = 'jul'; } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+  <div class="card" id="card">
+    <div class="head"><h1>Skanna QR-kod</h1><button class="x" id="stang" aria-label="Stäng" title="Stäng"><svg viewBox="0 0 14 14"><path d="M2 2l10 10M12 2L2 12"/></svg></button></div>
+    <div class="ram"><img id="bild" alt="" /><span class="logo"><img id="logo" src="adraze-mark.png" alt="" /></span></div>
+    <input id="adress" readonly spellcheck="false" aria-label="Adress" />
+    <div class="rad"><button class="knapp" id="kopiera">Kopiera</button><button class="knapp" id="ladda">Ladda ned</button></div>
+    <div id="besked" aria-live="polite"></div>
+  </div>
+  <script>
+    window.locale = { load: (l) => { try { return window.adrazeIpc.sendSync('i18n:load', l) || {}; } catch (e) { return {}; } } };
+  </script>
+  <script src="i18n.js"></script>
+  <script>
+    const ipc = window.adrazeIpc, $ = (id) => document.getElementById(id);
+    const t = (s) => (typeof window.t === 'function' ? window.t(s) : s);
+    let adress = '';
+    const storlek = () => { try { ipc.send('qr:storlek', Math.ceil($('card').getBoundingClientRect().height) + 26); } catch (e) {} };
+    ipc.on('qr-data', (_e, d) => {
+      adress = String((d && d.url) || '');
+      $('bild').src = (d && d.dataUrl) || ''; $('adress').value = adress; $('besked').textContent = '';
+      setTimeout(() => { storlek(); try { $('adress').focus(); $('adress').select(); } catch (e) {} }, 30);
+    });
+    $('stang').addEventListener('click', () => ipc.send('qr:stang'));
+    addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); ipc.send('qr:stang'); } });
+    $('adress').addEventListener('focus', () => { try { $('adress').select(); } catch (e) {} });
+    $('kopiera').addEventListener('click', async () => {
+      let ok = false; try { ok = !!(await ipc.invoke('qr:kopiera', adress)); } catch (e) {}
+      $('besked').textContent = t(ok ? 'Kopierad!' : 'Kunde inte kopiera.');
+    });
+    // Bilden som sparas: koden med vit marginal och gorillan i mitten, 1024 px
+    $('ladda').addEventListener('click', async () => {
+      try {
+        const S = 1024, M = 64, c = document.createElement('canvas'); c.width = c.height = S;
+        const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, S, S); g.imageSmoothingEnabled = false;
+        g.drawImage($('bild'), M, M, S - 2 * M, S - 2 * M);
+        const L = 190, x = (S - L) / 2; g.fillStyle = '#fff'; g.beginPath(); g.roundRect(x - 14, x - 14, L + 28, L + 28, 46); g.fill();
+        g.imageSmoothingEnabled = true; g.drawImage($('logo'), x + 12, x + 12, L - 24, L - 24);
+        const r = await ipc.invoke('qr:spara', { url: adress, png: c.toDataURL('image/png') });
+        $('besked').textContent = r && r.ok ? t('Sparad i Hämtade filer') : t('Kunde inte spara bilden.');
+      } catch (e) { $('besked').textContent = t('Kunde inte spara bilden.'); }
+    });
+    addEventListener('load', storlek);
+  </script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  html, body { margin: 0; background: transparent; overflow: hidden; font-family: -apple-system, "SF Pro Text", "Segoe UI", system-ui, sans-serif; }
+  :root { --yta: #fff; --kant: #e9e6e0; --text: #1f1e1b; --dov: #6f6d66; --falt: #f5f3ee; --faltkant: #dedad2; --hover: #f5f3ee; --acc: #ff4b1f; }
+  :root[data-theme="dark"] { --yta: #1e1c19; --kant: #2e2c29; --text: #eeede8; --dov: #a2a097; --falt: #161412; --faltkant: #3a3834; --hover: rgba(255,255,255,.06); }
+  :root[data-theme="dark"][data-palett="jul"] { --yta: #132e21; --kant: #214a35; --text: #f4ecd8; --dov: #a9b8a6; --falt: #0e2419; --faltkant: #2b5a42; --hover: rgba(244,236,216,.08); }
+  .card { margin: 8px 10px 18px; padding: 14px 18px 16px; background: var(--yta); border: 1px solid var(--kant); border-radius: 14px;
+    box-shadow: 0 18px 44px rgba(31,30,27,.26), 0 3px 10px rgba(31,30,27,.10); animation: pop .16s cubic-bezier(.2,.8,.2,1); transform-origin: top right; }
+  :root[data-theme="dark"] .card { box-shadow: 0 18px 44px rgba(0,0,0,.5), 0 3px 10px rgba(0,0,0,.3); }
+  @keyframes pop { from { opacity: 0; transform: translateY(-8px) scale(.98); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .card { animation: none; } }
+  .head { display: flex; align-items: center; justify-content: space-between; margin: 0 -8px 10px 0; }
+  .head h1 { margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -.005em; color: var(--text); }
+  .x { border: 0; background: transparent; cursor: pointer; color: var(--dov); width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; }
+  .x:hover { background: var(--hover); color: var(--text); }
+  .x svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+  .rad { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+  /* Knapparna fylls nerifrån som vätska, som i resten av AdRaze */
+  .knapp { position: relative; isolation: isolate; overflow: hidden; white-space: nowrap; height: 32px; padding: 0 16px; border-radius: 999px; border: 0; cursor: pointer; background: transparent; color: var(--text);
+    font: 600 12.5px -apple-system, "Segoe UI", system-ui, sans-serif; box-shadow: inset 0 0 0 1px var(--faltkant); transition: color .45s ease, box-shadow .45s ease; }
+  .knapp::before { content: ""; position: absolute; z-index: -1; left: -15%; width: 130%; bottom: -2px; height: 170%; transform: translateY(100%); border-radius: 46% 46% 0 0; background: var(--acc); transition: transform .7s cubic-bezier(.2,.75,.25,1); pointer-events: none; }
+  .knapp:hover, .knapp:focus-visible { color: #fff; box-shadow: inset 0 0 0 1px transparent; outline: none; }
+  .knapp:hover::before, .knapp:focus-visible::before { transform: translateY(0); }
+  .knapp:active { transform: translateY(1px); }
+  @media (prefers-reduced-motion: reduce) { .knapp::before { transition: none; } }
+  /* Översätt sidan: läget, språkvalet och vägen tillbaka till originalet */
+  #lage { margin: 0 0 12px; font-size: 13px; line-height: 1.45; color: var(--dov); min-height: 19px; }
+  #lage b { color: var(--text); font-weight: 600; }
+  .falt { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--dov); }
+  #sprak { flex: 1; min-width: 0; height: 34px; padding: 0 8px; border-radius: 8px; border: 1px solid var(--faltkant); background: var(--falt); color: var(--text); font: 12.5px -apple-system, "Segoe UI", system-ui, sans-serif; outline: none; }
+  #sprak:focus { border-color: var(--acc); box-shadow: 0 0 0 2px color-mix(in srgb, var(--acc) 22%, transparent); }
+  .gar { display: inline-block; width: 11px; height: 11px; margin-right: 7px; border-radius: 50%; border: 2px solid var(--faltkant); border-top-color: var(--acc); vertical-align: -1px; animation: snurr .8s linear infinite; }
+  @keyframes snurr { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .gar { animation: none; } }
+  .knapp[hidden] { display: none; }
+</style>
+<script>
+  (function () {
+    function tema() { try { document.documentElement.dataset.theme = localStorage.getItem('skoll-theme') === 'dark' ? 'dark' : 'light'; } catch (e) {} }
+    tema(); window.addEventListener('storage', function (e) { if (!e.key || e.key === 'skoll-theme') tema(); });
+    try { if (new URLSearchParams(location.search).get('palett') === 'jul') document.documentElement.dataset.palett = 'jul'; } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+  <div class="card" id="card">
+    <div class="head"><h1>Översätt sidan</h1><button class="x" id="stang" aria-label="Stäng" title="Stäng"><svg viewBox="0 0 14 14"><path d="M2 2l10 10M12 2L2 12"/></svg></button></div>
+    <p id="lage" aria-live="polite"></p>
+    <label class="falt"><span>Översätt till</span><select id="sprak" aria-label="Översätt till"></select></label>
+    <div class="rad"><button class="knapp" id="original" hidden>Visa originalet</button><button class="knapp" id="oversatt" hidden>Översätt</button></div>
+  </div>
+  <script>
+    window.locale = { load: (l) => { try { return window.adrazeIpc.sendSync('i18n:load', l) || {}; } catch (e) { return {}; } } };
+  </script>
+  <script src="i18n.js"></script>
+  <script>
+    const ipc = window.adrazeIpc, $ = (id) => document.getElementById(id);
+    const t = (s, v) => (typeof window.t === 'function' ? window.t(s, v) : s.replace(/\{(\w+)\}/g, (m, n) => (v && v[n] != null ? v[n] : m)));
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    // Språken som går att välja, visade på användarens eget språk och sorterade efter namn
+    const KODER = ['sv', 'en', 'de', 'fr', 'es', 'it', 'pt', 'nl', 'da', 'no', 'fi', 'is', 'pl', 'cs', 'sk', 'hu', 'ro', 'bg', 'el', 'tr', 'uk', 'ru', 'sr', 'hr', 'bs', 'sl', 'et', 'lv', 'lt', 'ar', 'fa', 'he', 'hi', 'ur', 'bn', 'ta', 'th', 'vi', 'id', 'ms', 'tl', 'zh-CN', 'zh-TW', 'ja', 'ko', 'sw', 'so', 'ti', 'am', 'ku', 'sq'];
+    let ritatFor = '', data = null;
+    function ritaSprak(ui, vald) {
+      if (ritatFor !== ui) {
+        let dn = null; try { dn = new Intl.DisplayNames([ui], { type: 'language' }); } catch (e) {}
+        const namn = (k) => { try { const n = dn && dn.of(k === 'no' ? 'nb' : k); return n ? n.charAt(0).toLocaleUpperCase(ui) + n.slice(1) : k; } catch (e) { return k; } };
+        const lista = KODER.map((k) => [k, namn(k)]).sort((a, b) => a[1].localeCompare(b[1], ui));
+        $('sprak').innerHTML = lista.map(([k, n]) => '<option value="' + k + '" translate="no">' + esc(n) + '</option>').join('');
+        ritatFor = ui;
+      }
+      if (![...$('sprak').options].some((o) => o.value === vald)) { const o = document.createElement('option'); o.value = vald; o.textContent = vald; o.setAttribute('translate', 'no'); $('sprak').appendChild(o); }
+      $('sprak').value = vald;
+    }
+    const storlek = () => { try { ipc.send('ovs:storlek', Math.ceil($('card').getBoundingClientRect().height) + 26); } catch (e) {} };
+    function rita(d) {
+      data = d; ritaSprak(d.ui || 'sv', d.till);
+      const L = $('lage');
+      if (d.lage === 'kor') L.innerHTML = '<span class="gar"></span>' + esc(t('Översätter…'));
+      else if (d.lage === 'klar') L.innerHTML = (d.franNamn ? esc(t('Översatt från {fran} till {till}.', { fran: '\u0001', till: '\u0002' })).replace('\u0001', '<b translate="no">' + esc(d.franNamn) + '</b>').replace('\u0002', '<b translate="no">' + esc(d.tillNamn) + '</b>') : esc(t('Sidan är översatt.'))) + (d.delvis ? ' ' + esc(t('En del av texten gick inte att översätta.')) : '');
+      else if (d.lage === 'fel') L.textContent = t('Det gick inte att översätta sidan just nu. Försök igen om en stund.');
+      else L.textContent = t('Sidan visas på originalspråket.');
+      $('original').hidden = !(d.lage === 'klar' || d.lage === 'kor');
+      $('oversatt').hidden = !(d.lage === 'original' || d.lage === 'fel');
+      setTimeout(storlek, 20);
+    }
+    ipc.on('ovs-data', (_e, d) => { if (d) rita(d); });
+    addEventListener('pointerdown', () => ipc.send('ovs:ror'), true);   // användaren rör rutan: den stänger sig inte själv
+    addEventListener('keydown', () => ipc.send('ovs:ror'), true);
+    $('stang').addEventListener('click', () => ipc.send('ovs:stang'));
+    addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); ipc.send('ovs:stang'); } });
+    $('original').addEventListener('click', () => ipc.send('ovs:original'));
+    $('oversatt').addEventListener('click', () => ipc.send('ovs:oversatt', $('sprak').value));
+    $('sprak').addEventListener('change', () => ipc.send('ovs:oversatt', $('sprak').value));
+    addEventListener('load', storlek);
+  </script>
+</body>
+</html>

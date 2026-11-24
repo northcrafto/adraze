@@ -2438,6 +2438,15 @@ body.incog #gal-provbar .gpb-farg { box-shadow: inset 0 0 0 1px rgb(255 255 255 
 #settings input[type="radio"], #settings input[type="range"] { accent-color: var(--s-ink); }
 
 /* Familj: ljud vid spärrad sida som små kort man trycker på (ett kort per ljud, lyssna med knappen i kortet) */
+/* Ljudavsnittet går att gömma: raden viks ihop (grid 1fr → 0fr) så att resten av kortet glider upp */
+#settings .fl-rubrik { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+#settings .fl-gom { font: inherit; font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--s-faint); background: none; border: 0; padding: 2px 0; cursor: pointer; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 3px; transition: color .15s, text-decoration-color .15s; }
+#settings .fl-gom:hover, #settings .fl-gom:focus-visible { color: var(--s-ink); text-decoration-color: currentColor; outline: none; }
+#settings .fl-vik { display: grid; grid-template-rows: 1fr; transition: grid-template-rows .38s cubic-bezier(.2,.75,.25,1), opacity .25s ease; }
+#settings .fl-vik-inne { overflow: hidden; min-height: 0; padding: 2px; margin: -2px; transition: transform .38s cubic-bezier(.2,.75,.25,1), visibility 0s; }
+#settings .fl-vik.gomd { grid-template-rows: 0fr; opacity: 0; }
+#settings .fl-vik.gomd .fl-vik-inne { transform: translateY(-10px); visibility: hidden; transition: transform .38s cubic-bezier(.2,.75,.25,1), visibility 0s .38s; }
+@media (prefers-reduced-motion: reduce) { #settings .fl-vik, #settings .fl-vik-inne { transition: none; } }
 #settings .fam-ljudval { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; margin: 4px 0 10px; }
 #settings .fl-kort { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 7px 12px 7px 8px; border: 1px solid var(--s-line); border-radius: 10px; background: var(--s-surface); color: var(--s-ink); cursor: pointer; text-align: left; transition: border-color .15s; }
 #settings .fl-kort:hover { border-color: var(--s-faint); }
