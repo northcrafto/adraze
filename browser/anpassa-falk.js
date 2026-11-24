@@ -275,6 +275,9 @@ async function gor(ctx, a, opt = {}) {
   if (!kanAndras(nyckel, def)) return { ok: false, fel: 'Den ändrar du själv i Inställningar → Anpassa.', etikett };
   const t = tolka(nyckel, def, text.slice(i + 1));
   if (!t.ok) return { ok: false, fel: t.fel, etikett };
+  // Rutan du godkänner visar bara de första 600 tecknen av CSS:en. Vägra längre CSS från Falk, annars kan
+  // beständig CSS du aldrig sett (dolda element, falska varningar) läggas på sajten efter ett Tillåt-klick.
+  if (t.css && t.css.css && t.css.css.length > 600) return { ok: false, fel: 'CSS:en är för lång för att visas i rutan. Lägg kortare CSS, eller lägg till den själv i Inställningar, Anpassa, Avancerat.', etikett };
   const nu = anpassa.hamta(nyckel), blir = t.varde === undefined ? (def ? def.standard : undefined) : t.varde;
   // Det som visas i chatten: värdet, och för egen CSS bara vilken sajt (CSS:en själv står i rutan du godkänner)
   const vad = etikett + ': ' + (t.css ? sajtNamn(t.css.mal) + (t.css.css ? '' : ' (borttagen)') : visaVarde(blir));

@@ -6,7 +6,42 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { app, ipcMain, session, shell } = require('electron');
-const extract = require('extract-zip');
+const yauzl = require('yauzl');
+
+// Packa upp ett zip-arkiv (CRX-nyttolast) utan att följa symlänkar eller skriva utanför mappen.
+// extract-zip skrev genom symlänkar i arkivet och kunde lägga filer var som helst (t.ex. ~/.local/bin/adraze).
+function packaUpp(zipFil, dir) {
+  return new Promise((resolve, reject) => {
+    yauzl.open(zipFil, { lazyEntries: true, autoClose: true }, (err, zip) => {
+      if (err || !zip) return reject(err || new Error('Kunde inte läsa tilläggsarkivet.'));
+      let klar = false, kvar = 0, fel = null;
+      const ferdig = () => { if (klar && kvar === 0) { fel ? reject(fel) : resolve(); } };
+      zip.on('error', (e) => { fel = fel || e; });
+      zip.on('end', () => { klar = true; ferdig(); });
+      zip.on('entry', (entry) => {
+        const lage = (entry.externalFileAttributes >>> 16) & 0o170000;   // Unix-läge ur zip-posten
+        const rel = String(entry.fileName).replace(/\\/g, '/');
+        const ut = path.join(dir, rel);
+        // Hoppa över symlänkar och allt som skulle hamna utanför mappen (absolut sökväg eller ..-steg)
+        const trygg = lage !== 0o120000 && !/^(\/|[a-zA-Z]:)/.test(rel) && !rel.split('/').some((d) => d === '..') && (ut === dir || ut.startsWith(dir + path.sep));
+        if (!trygg) { zip.readEntry(); return; }
+        if (/\/$/.test(rel)) { try { fs.mkdirSync(ut, { recursive: true }); } catch {} zip.readEntry(); return; }   // katalogpost
+        kvar++;
+        try { fs.mkdirSync(path.dirname(ut), { recursive: true }); } catch {}
+        zip.openReadStream(entry, (e2, rs) => {
+          if (e2 || !rs) { kvar--; zip.readEntry(); ferdig(); return; }
+          const out = fs.createWriteStream(ut);
+          out.on('close', () => { kvar--; ferdig(); });
+          out.on('error', (e3) => { fel = fel || e3; });
+          rs.on('error', (e3) => { fel = fel || e3; try { out.destroy(); } catch {} });
+          rs.pipe(out);
+          zip.readEntry();
+        });
+      });
+      zip.readEntry();
+    });
+  });
+}
 
 let ROT = '';
 let LISTA = '';           // JSON: { [id]: { namn, aktiv, installerad } }
@@ -45,7 +80,7 @@ async function hamtaOchPacka(id) {
   const dir = krMapp(id);
   try { fs.rmSync(dir, { recursive: true, force: true }); } catch {}
   fs.mkdirSync(dir, { recursive: true });
-  try { await extract(tmpZip, { dir }); } finally { try { fs.unlinkSync(tmpZip); } catch {} }
+  try { await packaUpp(tmpZip, dir); } finally { try { fs.unlinkSync(tmpZip); } catch {} }
   // Chrome tål ett "_metadata"-fält i manifestet som Electron inte gillar — lämna det, Electron ignorerar
   if (!fs.existsSync(path.join(dir, 'manifest.json'))) throw new Error('Tillägget saknar manifest.');
   return dir;
@@ -59,7 +94,7 @@ function laddadInfo(vid) {
   if (!vid) return null;
   try { return exApi().getAllExtensions().find((e) => e.id === vid) || null; } catch { return null; }
 }
-async function laddaIn(dir) { return exApi().loadExtension(dir, { allowFileAccess: true }); }
+async function laddaIn(dir) { return exApi().loadExtension(dir, { allowFileAccess: false }); }   // tillägg får ALDRIG läsa file:// (skalets ui/, valv, nyckelfil)
 function taBortInladdad(vid) { if (!vid) return; try { exApi().removeExtension(vid); } catch {} }
 
 // Läs in sparade, aktiva tillägg vid start
@@ -138,7 +173,7 @@ async function laddaISession(ses) {
     for (const id of Object.keys(o)) {
       if (!o[id] || !o[id].aktiv) continue;
       const dir = krMapp(id);
-      if (fs.existsSync(path.join(dir, 'manifest.json'))) { try { await api.loadExtension(dir, { allowFileAccess: true }); } catch {} }
+      if (fs.existsSync(path.join(dir, 'manifest.json'))) { try { await api.loadExtension(dir, { allowFileAccess: false }); } catch {} }
     }
   } catch {}
 }

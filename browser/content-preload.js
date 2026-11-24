@@ -43,9 +43,9 @@ if (location.protocol === 'adraze:') {
       return !(cs.opacity === '0' || cs.visibility === 'hidden');
     } catch { return false; }
   };
-  window.addEventListener('pointerdown', (e) => report(linkOf(e.target), knappOf(e.target)), true);
-  window.addEventListener('mousedown', (e) => report(linkOf(e.target), knappOf(e.target)), true);
-  window.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') report(linkOf(document.activeElement), knappOf(document.activeElement)); }, true);
+  window.addEventListener('pointerdown', (e) => { if (!e.isTrusted) return; report(linkOf(e.target), knappOf(e.target)); }, true);
+  window.addEventListener('mousedown', (e) => { if (!e.isTrusted) return; report(linkOf(e.target), knappOf(e.target)); }, true);
+  window.addEventListener('keydown', (e) => { if (!e.isTrusted) return; if (e.key === 'Enter' || e.key === ' ') report(linkOf(document.activeElement), knappOf(document.activeElement)); }, true);
 })();
 
 /* Få AdRaze att se ut EXAKT som riktiga Google Chrome för sajternas JavaScript
@@ -474,7 +474,7 @@ const WL_MSG = '__adrazeWallet';
 let _wlTok = null;
 function wlTok() { if (_wlTok === null) { try { _wlTok = ipcRenderer.sendSync('wallet:token') || ''; } catch { _wlTok = ''; } } return _wlTok; }
 const WL_KEYS = ['ArrowDown', 'ArrowUp', 'Enter', 'Escape'];
-let wlHost = null, wlShadow = null, wlRows = [], wlIdx = -1, wlBusy = false;
+let wlHost = null, wlShadow = null, wlRows = [], wlIdx = -1, wlBusy = false, wlOppnad = 0;   // wlOppnad: när väljaren ritades (klick ignoreras de första 500 ms – klickskydd)
 let wlAnchor = null;      // () => DOMRect i den här ramens vy
 let wlOnPick = null;      // (id) => void
 let wlStatic = false;     // ankaret är en fryst rektangel (fält i en iframe) → stäng vid scroll
@@ -599,9 +599,10 @@ function wlShow(menu, anchor, onPick, darkRef, isStatic) {
   box.addEventListener('mousedown', (e) => e.preventDefault(), true);
   wlRows.forEach((el, i) => {
     el.addEventListener('mouseenter', () => wlHighlight(i));
-    el.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); if (e.isTrusted) wlPickRow(i); });
+    el.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); if (e.isTrusted && Date.now() - wlOppnad >= 500) wlPickRow(i); });   // klickskydd: ett kort väljs inte av ett klick de första 500 ms efter att väljaren dök upp
   });
   (document.body || document.documentElement).appendChild(wlHost);
+  wlOppnad = Date.now();
   wlPosition();
   wlLog('visar', { kort: menu.cards.length });
 }

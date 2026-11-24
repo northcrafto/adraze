@@ -346,7 +346,9 @@ adblock.forhand = (d) => webb.upgradeUrl(d);   // endast HTTPS (webbinst.js)
  * huvudram, i efterhand). Kanalen 'barn:regler' når bara vårt eget skal (IPC-vakten ovan). */
 let barnRegler = null;                                         // null = inget barnläge på den här enheten
 const barnNorm = (x) => String(x || '').trim().toLowerCase().replace(/\.+$/, '').replace(/^www\./, '');
-const BARN_ALLTID = ['proxy.adraze.app'];                      // AdRazes webbproxy öppnar vilken sajt som helst
+// Proxy-/arkivvärdar som öppnar vilken sajt som helst – alltid spärrade i barnläge, annars kringgås spärrlistan
+// (t.ex. www-youtube-com.translate.goog eller web.archive.org). translate.google.<tld> hanteras i barnSparrad.
+const BARN_ALLTID = ['proxy.adraze.app', 'translate.goog', 'translate.googleusercontent.com', 'webcache.googleusercontent.com', 'web.archive.org', 'archive.org', 'archive.ph', 'archive.today'];
 const barnLasOk = (h) => h === 'accounts.adraze.app' || h === 'accounts.youtube.com' || /^accounts\.google\.[a-z.]+$/.test(h);
 // "Fortsätt med Google" i inloggningen öppnar exakt adraze.app/app-google (ADRAZE_SITE) – den får laddas när låst
 const barnGoogleSida = (url) => { try { const u = new URL(String(url || '')); return u.protocol === 'https:' && u.origin === new URL(process.env.ADRAZE_SITE || 'https://adraze.app').origin && u.pathname === '/app-google'; } catch { return false; } };
@@ -386,6 +388,7 @@ function barnSparrad(url, regler) {
   if (r.last) return !barnLasOk(h) && !barnGoogleSida(url);    // låst: bara inloggningen
   const traff = (b) => { b = barnNorm(b); return !!b && (h === b || h.endsWith('.' + b)); };
   if (BARN_ALLTID.some(traff)) return true;
+  if (/^translate\.google\.[a-z.]+$/.test(h)) return true;    // translate.google.<tld>/translate öppnar vilken sajt som helst
   if (!r.blocklist.some(traff)) return false;
   const nu = Date.now();
   return !r.allows.some((a) => a.until > nu && traff(a.host));
@@ -1468,6 +1471,8 @@ function wwwTvilling(origin) {
   } catch { return ''; }
 }
 ipcMain.handle('pw:for-origin', medKonto((e) => {
+  // Falk skickade nyss simulerad inmatning hit → lämna inte ut lösenord (samma skydd som kortväljaren).
+  if (e.sender.__falkSenast && Date.now() - e.sender.__falkSenast < 15000) return [];
   const origin = ramOrigin(e);
   if (!origin) return [];
   const tvilling = wwwTvilling(origin);
@@ -1793,24 +1798,33 @@ const WALLET_KEY_FILE = path.join(app.getPath('userData'), 'adraze-wallet.key');
 let _walletKey = null;
 function walletKey() {
   if (_walletKey) return _walletKey;
+  const safe = !!(safeStorage && safeStorage.isEncryptionAvailable());
   let raw = null;
-  try {
-    if (fs.existsSync(WALLET_KEY_FILE)) {
-      const blob = fs.readFileSync(WALLET_KEY_FILE);
-      let b64;
-      try { b64 = (safeStorage && safeStorage.isEncryptionAvailable()) ? safeStorage.decryptString(blob) : blob.toString('utf8'); }
-      catch { b64 = blob.toString('utf8'); }
-      const buf = Buffer.from(b64, 'base64');
-      if (buf.length === 32) raw = buf;
+  if (fs.existsSync(WALLET_KEY_FILE)) {
+    const blob = fs.readFileSync(WALLET_KEY_FILE);
+    // safeStorage-blobbar börjar med "v10"/"v11". Saknas det är nyckeln i klartext (äldre eller skapad utan nyckelring).
+    const krypterad = blob.length >= 3 && (blob.toString('latin1', 0, 3) === 'v10' || blob.toString('latin1', 0, 3) === 'v11');
+    if (krypterad && !safe) {
+      // Nyckeln är krypterad men nyckelringen är låst: valvet är låst. Skapa ALDRIG en ny nyckel och skriv
+      // aldrig över filen – då blir korten, lösenorden och kakvalven oläsbara för alltid.
+      throw new Error('wallet-locked');
     }
-  } catch {}
+    let b64 = null;
+    try { b64 = krypterad ? safeStorage.decryptString(blob) : blob.toString('utf8'); } catch { b64 = null; }
+    if (b64 != null) {
+      const buf = Buffer.from(b64, 'base64');
+      if (buf.length === 32) {
+        raw = buf;
+        // Migrera en klartextnyckel in i nyckelringen när den nu fungerar. Skriv ALDRIG över en redan krypterad fil.
+        if (!krypterad && safe) { try { fs.writeFileSync(WALLET_KEY_FILE, safeStorage.encryptString(b64), { mode: 0o600 }); } catch {} }
+      }
+    }
+  }
   if (!raw) {
+    // Skapa aldrig en klartextnyckel bredvid valven. Utan nyckelring är valvet låst tills den går att nå.
+    if (!safe) throw new Error('wallet-locked');
     raw = crypto.randomBytes(32);
-    const b64 = raw.toString('base64');
-    try {
-      const out = (safeStorage && safeStorage.isEncryptionAvailable()) ? safeStorage.encryptString(b64) : Buffer.from(b64, 'utf8');
-      fs.writeFileSync(WALLET_KEY_FILE, out, { mode: 0o600 });
-    } catch {}
+    try { fs.writeFileSync(WALLET_KEY_FILE, safeStorage.encryptString(raw.toString('base64')), { mode: 0o600 }); } catch {}
   }
   _walletKey = raw;
   return raw;
@@ -1881,10 +1895,14 @@ ipcMain.on('wallet:nav', (e, key) => {
 });
 ipcMain.handle('wallet:valj', (e, id) => {
   if (!huvudram(e)) return null;
+  // Falk (agenten) skickade nyss simulerad inmatning till den här fliken → lämna aldrig ut kortet. En ond kassasida
+  // kan annars be Falk klicka kortfältet + ner + enter och få hela kortet utan att användaren valt något.
+  if (e.sender.__falkSenast && Date.now() - e.sender.__falkSenast < 15000) return null;
   const o = ramOrigin(e);
   if (!/^https:\/\//.test(o)) return null;                     // bara krypterade sidor (som Chrome)
   const card = loadCards().find((c) => c.id === id);
   if (!card) return null;
+  const sida = { ...card, cvc: '' };                           // CVC fylls ALDRIG i av sidan – skrivs in för hand vid köp
   const wc = e.sender, vill = wc.__wlVill, ok = new Set([o]);
   if (vill && Date.now() - vill.t < 120000) for (const x of vill.kedja) ok.add(x);
   try {
@@ -1892,10 +1910,10 @@ ipcMain.handle('wallet:valj', (e, id) => {
       if (!f.parent) continue;
       let bra = true;                                            // ramen OCH alla dess förälderramar ska vara godkända
       for (let g = f; g && g.parent; g = g.parent) { let go = ''; try { go = g.origin; } catch {} if (!ok.has(go)) { bra = false; break; } }
-      if (bra) { try { f.send('wallet-fyll', card); } catch {} }
+      if (bra) { try { f.send('wallet-fyll', sida); } catch {} }
     }
   } catch {}
-  return card;
+  return sida;
 });
 ipcMain.handle('wallet:save', (_e, c) => {
   const l = loadCards();
@@ -2002,7 +2020,8 @@ function clamScanFile(file) {
     p.on('error', () => resolve(null));
     p.on('exit', (code) => {
       if (code === 1) { const m = out.match(/:\s*(.+?)\s+FOUND/); resolve({ threat: (m && m[1]) || 'Okänt hot' }); }
-      else resolve(null); // 0 = ren, 2 = fel
+      else if (code === 0) resolve({ clean: true });   // 0 = ren
+      else resolve(null);                              // 2 = fel → oskannad (räknas INTE som ren)
     });
   });
 }
@@ -2019,16 +2038,18 @@ function quarantineThreat(rec, threat) {
 async function scanDownload(rec) {
   if (!rec.path) { rec.state = 'completed'; rec.scan = 'unscanned'; broadcast('download-update', rec); return; }
   rec.state = 'scanning'; rec.scan = 'scanning'; broadcast('download-update', rec);
-  const cloud = await cloudDownloadCheck(rec);          // 1) moln-hash-rykte
+  const cloud = rec.priv ? null : await cloudDownloadCheck(rec);   // 1) moln-hash-rykte (hoppas över i privata fönster)
   if (cloud && cloud.threat) { quarantineThreat(rec, cloud.threat); return; }
   const local = await clamScanFile(rec.path);           // 2) lokal ClamAV (om finns)
   if (local && local.threat) { quarantineThreat(rec, local.threat); return; }
   rec.state = 'completed';
-  rec.scan = ((cloud && cloud.clean) || CLAMSCAN) ? 'clean' : 'unscanned';
+  // 'clean' bara när ETT lager faktiskt sa rent. Molnmiss eller clamscan-fel (kod 2) → 'unscanned' (visas som "ingen känd skadlig fil").
+  rec.scan = ((cloud && cloud.clean) || (local && local.clean)) ? 'clean' : 'unscanned';
   broadcast('download-update', rec);
 }
 let nastaLaddningSokvag = '';   // sökväg vald i "Spara bild som…" (används av nästa will-download)
 function trackDownloads(sess) {
+  const privSess = (() => { try { return sess === session.fromPartition('skoll-incognito'); } catch { return false; } })();
   sess.on('will-download', (_e, item) => {
     const id = 'd' + Date.now() + Math.floor(Math.random() * 1000);
     let savePath = path.join(webb.downloadDir(), item.getFilename());
@@ -2039,7 +2060,7 @@ function trackDownloads(sess) {
     else if (webb.prefs.askDownload) { savePath = ''; try { item.setSaveDialogOptions({ defaultPath: savePath }); } catch {} }
     else { try { item.setSavePath(savePath); } catch {} }
     dlItems.set(id, item);
-    const rec = { id, filename: item.getFilename(), url: item.getURL(), path: savePath, total: item.getTotalBytes(), received: 0, state: 'progressing', scan: null };
+    const rec = { id, filename: item.getFilename(), url: item.getURL(), path: savePath, total: item.getTotalBytes(), received: 0, state: 'progressing', scan: null, priv: privSess };
     downloads.unshift(rec);
     broadcast('download-update', rec);
     try { const fw = BrowserWindow.getFocusedWindow(); let c = fw ? wins.get(fw.webContents.id) : null; if (!c) c = wins.values().next().value; if (c) openDlPopup(c); } catch {}
@@ -2101,7 +2122,7 @@ const pwCtxOf = (e) => [...wins.values()].find((c) => c.pwView && !c.pwView.webC
 ipcMain.on('pw:popup-open', (e, d) => { const ctx = ctxFor(e); if (ctx && d && d.cred) openPwPopup(ctx, d.cred, d.theme); });
 ipcMain.on('pw:popup-close', (e) => { const ctx = pwCtxOf(e); if (ctx) closePwPopup(ctx); });
 ipcMain.on('pw:popup-size', (e, h) => { const ctx = pwCtxOf(e); if (ctx && typeof h === 'number') positionPwPopup(ctx, h); });
-ipcMain.on('dl:open', (_e, id) => { const r = downloads.find((d) => d.id === id); if (r && r.state !== 'infected' && r.state !== 'deleted') shell.openPath(r.path).catch(() => {}); });
+ipcMain.on('dl:open', (_e, id) => { const r = downloads.find((d) => d.id === id); if (r && r.state === 'completed' && r.path) shell.openPath(r.path).catch(() => {}); });   // öppna aldrig innan skanningen är klar (completed)
 ipcMain.on('dl:folder', (_e, id) => { const r = downloads.find((d) => d.id === id); if (r && r.state !== 'infected' && r.state !== 'deleted') shell.showItemInFolder(r.path); });
 ipcMain.on('dl:remove-threat', (_e, id) => {
   const r = downloads.find((d) => d.id === id); if (!r) return;
@@ -2387,7 +2408,9 @@ ipcMain.on('krypto:toggle', (e, open, mode, token) => {
           else if (url.includes('/back')) { ctx.kryptoView._mode = null; loadKrypto(ctx, ctx.authToken ? 'nopro' : 'signedout'); }
           else if (url.includes('login')) sendTo(ctx, 'open-login');
           else if (url.includes('recheck')) sendTo(ctx, 'krypto-recheck');
-        } else if (!url.startsWith('file:')) {
+        } else if (url.startsWith('file:')) {
+          if (!url.startsWith(UI_URL)) ev.preventDefault();   // panelen får bara ladda våra egna ui/-sidor, inga andra lokala filer
+        } else {
           ev.preventDefault(); sendTo(ctx, 'open-new-tab', url);
         }
       });
@@ -2526,14 +2549,21 @@ const FALK_BILD = `(() => {
     if (falt) { const l = el.id && document.querySelector('label[for="' + CSS.escape(el.id) + '"]'); namn = [namn, l && l.innerText, el.placeholder, el.name].filter(Boolean).join(' · ').replace(/\\s+/g, ' '); }
     const hemligt = typ === 'password' || /cc-|card|kort|cvc|cvv|kontonummer/i.test((el.autocomplete || '') + ' ' + (el.name || '') + ' ' + (el.id || ''));
     const r = el.getBoundingClientRect();
-    let varde = falt && !hemligt ? String(el.value || '').slice(0, 60) : '';
+    // Skicka ALDRIG texten i inmatningsfält till servern/AI:n (kan vara lösenord, 2FA-kod, PIN, kort). Bara
+    // kryssrutans på/av och sökfältets text går med; select hanteras nedan.
+    let varde = '';
+    if (falt && !hemligt) { if (typ === 'checkbox' || typ === 'radio') varde = el.checked ? 'i' : ''; else if (typ === 'search') varde = String(el.value || '').slice(0, 60); }
     if (tag === 'select') { varde = (el.selectedOptions[0] && el.selectedOptions[0].text) || ''; namn = (namn ? namn + ' · ' : '') + 'val: ' + Array.from(el.options).slice(0, 12).map((o) => o.text.trim()).join(', '); }
     items.push({ id, tag, typ, namn: namn.slice(0, 160), varde, hemligt, synlig: r.top < innerHeight && r.bottom > 0 });
   }
   const text = (document.body ? document.body.innerText : '').replace(/\\n{3,}/g, '\\n\\n').slice(0, 14000);
   return { url: location.href, titel: document.title, text, items, nere: Math.round(scrollY), hojd: document.documentElement.scrollHeight, fonster: innerHeight };
 })()`;
-const FALK_KOP = /(slutför|genomför|bekräfta|lägg|skicka|godkänn|fullfölj)\s*(köp|beställning|order|betalning)|^\s*(köp|betala|beställ|swisha)(\s+(nu|och betala|med\s+\S+))?\s*$|\bbetala\b|place\s+order|buy\s+now|\bpay\b|complete\s+(purchase|order|payment)|confirm\s+(order|purchase|payment)|submit\s+(order|payment)|purchase/i;
+const FALK_KOP = /(slutför|genomför|bekräfta|lägg|skicka|godkänn|fullfölj)\s*(köp|beställning|order|betalning)|^\s*(köp|betala|beställ|swisha)(\s+(nu|och betala|med\s+\S+))?\s*$|\bbetala\b|place\s+order|buy\s+now|\bpay\b|complete\s+(purchase|order|payment)|confirm\s+(order|purchase|payment)|submit\s+(order|payment)|purchase|\b(skicka|send|publicera|post(a)?|svara|reply|radera|ta\s*bort|delete|överför|transfer|signera|sign|slutför|godkänn|approve|bekräfta|confirm)\b/i;
+// Är det fokuserade elementet ett kort- eller lösenordsfält? (Falk ska aldrig skriva/trycka i dem – se wallet:valj)
+const FALK_KORTFALT = `(() => { const el = document.activeElement; if (!el || !el.tagName) return false;
+  const typ = (el.getAttribute('type') || '').toLowerCase();
+  return typ === 'password' || /cc-|card|kort|cvc|cvv|kontonummer|credit/i.test((el.autocomplete || '') + ' ' + (el.name || '') + ' ' + (el.id || '')); })()`;
 const falkInkognito = (wc) => { try { return wc.session === session.fromPartition('skoll-incognito'); } catch { return false; } };
 function falkFlik(ctx) { const v = activeView(ctx) || (ctx.senasteFlik != null && ctx.views.get(ctx.senasteFlik)); const wc = v && v.webContents; return wc && !wc.isDestroyed() ? wc : null; }
 // executeJavaScript väntar tills sidan laddat klart, och vissa sidor (strömmar, annonser som laddar i evighet)
@@ -2583,6 +2613,9 @@ ipcMain.handle('krypto:act', async (e, a) => {
     if (namn === 'ga' || namn === 'oppna') {
       let url = v; if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
       if (!/^https?:\/\/[^\s/]+\.[^\s]+/i.test(url)) return { ok: false, fel: 'Ogiltig adress.' };
+      // Lämnar navigeringen sajten användaren står på? Fråga först och visa hela adressen – text på en sida
+      // kan annars styra Falk att öppna t.ex. webbmejlen eller skicka data till en främmande adress.
+      if (!a.godkant && wc && /^https?:/i.test(wc.getURL()) && !sameSite(wc.getURL(), url)) return { ok: false, godkann: true, vad: url, slag: 'ga' };
       if (wc && /^https?:/i.test(wc.getURL())) wc.loadURL(url).catch(() => {});
       else { sendTo(ctx, 'open-new-tab', url); await new Promise((r) => setTimeout(r, 900)); wc = falkFlik(ctx); }
       if (wc) await falkVantaLaddat(wc, 12000);
@@ -2603,6 +2636,10 @@ ipcMain.handle('krypto:act', async (e, a) => {
           return { risk: !!(knapp || el.form || tag === 'textarea' || el.isContentEditable), namn }; })()`).catch(() => ({ risk: true, namn: '' }));
         if (fokus && fokus.risk) return { ok: false, godkann: true, vad: (fokus.namn || 'Enter'), slag: FALK_KOP.test(fokus.namn || '') ? 'kop' : 'formular' };
       }
+      // Trycker Falk tangent i ett kortfält kan en ond kassa plocka ut kortet via kortväljaren (ner + enter). Neka.
+      const kfTangent = await falkKor(wc, FALK_KORTFALT).catch(() => false);
+      if (kfTangent) return { ok: false, fel: 'Falk trycker inte tangenter i kort- eller lösenordsfält.' };
+      wc.__falkSenast = Date.now();   // markera att Falk styrde inmatningen här (wallet:valj/pw:for-origin spärras 15 s)
       wc.sendInputEvent({ type: 'keyDown', keyCode: key }); if (key === 'Enter') wc.sendInputEvent({ type: 'char', keyCode: '\r' }); wc.sendInputEvent({ type: 'keyUp', keyCode: key });
       await falkVantaLaddat(wc, 8000); return { ok: true };
     }
@@ -2618,12 +2655,18 @@ ipcMain.handle('krypto:act', async (e, a) => {
       const submit = !!el.form && ((tag === 'button' && (!typ || typ === 'submit')) || (tag === 'input' && (typ === 'submit' || typ === 'image')));
       const skrivbar = tag === 'textarea' || tag === 'select' || el.isContentEditable || (tag === 'input' && /^(|text|search|email|tel|url|number|date|datetime-local|month|week|time)$/.test(typ));
       const etiketter = [el.getAttribute('aria-label'), el.innerText, el.value, el.title].filter(Boolean).join(' · ').replace(/\\s+/g, ' ').slice(0, 300);
-      return { x: r.left + r.width / 2, y: r.top + r.height / 2, namn, tag, hemligt, submit, skrivbar, etiketter }; })()`);
+      const lank = (tag === 'a' && el.href && /^https?:/i.test(el.href)) ? el.href : '';
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2, namn, tag, hemligt, submit, skrivbar, etiketter, lank }; })()`);
     if (!info) return { ok: false, fel: fyll('Hittade inte element {id} längre. Sidan kan ha ändrats.', { id }) };
     if (namn === 'klicka') {
+      // Klick i ett kort- eller lösenordsfält öppnar kortväljaren/autofyll – det sköter användaren själv.
+      if (info.hemligt) return { ok: false, fel: 'Falk klickar inte i kort- eller lösenordsfält.' };
+      // Lämnar länken sajten användaren står på? Fråga först och visa hela adressen (ren navigering inom samma sajt frågar vi inte om).
+      if (!a.godkant && info.lank && !sameSite(wc.getURL(), info.lank)) return { ok: false, godkann: true, vad: info.lank, slag: 'ga' };
       // Köp-/betalknappar OCH alla knappar som skickar ett formulär (publicera, skicka, beställa …) godkänns av användaren
       if (!a.godkant && FALK_KOP.test(info.etiketter || info.namn)) return { ok: false, godkann: true, vad: info.namn, slag: 'kop' };
       if (!a.godkant && info.submit) return { ok: false, godkann: true, vad: info.namn || 'Skicka', slag: 'formular' };
+      wc.__falkSenast = Date.now();   // Falk styrde inmatningen här (wallet:valj/pw:for-origin spärras 15 s)
       const z = wc.getZoomFactor() || 1, x = Math.round(info.x * z), y = Math.round(info.y * z);
       wc.sendInputEvent({ type: 'mouseMove', x, y });
       wc.sendInputEvent({ type: 'mouseDown', x, y, button: 'left', clickCount: 1 });
@@ -2642,6 +2685,7 @@ ipcMain.handle('krypto:act', async (e, a) => {
         return r ? { ok: true, vad: info.namn } : { ok: false, fel: 'Hittade inget sådant val i listan.' };
       }
       await falkKor(wc, `(() => { const el = document.querySelector('[data-falk="${id}"]'); el.focus(); if (el.select) el.select(); else document.execCommand('selectAll'); })()`);
+      wc.__falkSenast = Date.now();   // Falk styrde inmatningen här (wallet:valj/pw:for-origin spärras 15 s)
       wc.insertText(text);
       await new Promise((r) => setTimeout(r, 300));
       return { ok: true, vad: info.namn };
@@ -2679,7 +2723,9 @@ ipcMain.on('krypto:action', (e, a) => {
   } catch {}
 });
 // Vilka Falk-handlingar sänker skyddet? (samma tolkning av "av" som skalets kryptoOnOff)
-const falkAv = (v) => /(^av$|off|nej|stäng|stang|inaktiv|false|^0$|\bav\b)/i.test(String(v || '').trim());
+// Normalisera värdet FÖRST (NFKC + gemener) så t.ex. Kelvin-tecknet (U+212A) i "inaKtiv" tolkas som k –
+// annars kunde dialogen hoppas över medan skalet ändå stängde av skyddet. Samma normalisering som shellens kryptoOnOff.
+const falkAv = (v) => /(^av$|off|nej|stäng|stang|inaktiv|false|^0$|\bav\b)/.test(String(v == null ? '' : v).normalize('NFKC').toLowerCase().trim());
 function falkSankning(name, a) {
   const v = String((a && a.value) || '').trim();
   if ((name === 'adblock' || name === 'annonsblockerare') && falkAv(v)) return T('Falk vill stänga av annonsblockeraren.');

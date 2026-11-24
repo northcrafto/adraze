@@ -784,7 +784,7 @@ try { falkUtseende(window.falkInst && window.falkInst.alla()); } catch (e) { fal
     function updateBadge() { const n = memGet().length; const b = $('membadge'); b.textContent = n; b.classList.toggle('on', n > 0); if ($('mempanel').classList.contains('on')) renderMemList(); }
 
     /* ── Rendering av chatten ── */
-    function esc(s) { return (s || '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
+    function esc(s) { return (s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
     // Följ med nedåt bara så länge du inte själv scrollat upp (då får du läsa i fred medan Falk skriver)
     let follow = true;
     const nearBottom = () => log.scrollHeight - log.scrollTop - log.clientHeight < 60;
@@ -884,7 +884,7 @@ try { falkUtseende(window.falkInst && window.falkInst.alla()); } catch (e) { fal
     function drawChart(c, raw, anim) {
       const S = normSpec(raw); if (!S) return;
       const cols = S.series.length === 1 ? [C_ONE] : C_MANY;
-      const unit = S.unit && S.unit.length <= 5 ? (S.unit === '%' ? ' %' : ' ' + S.unit) : '';
+      const unit = S.unit && S.unit.length <= 5 ? (S.unit === '%' ? ' %' : ' ' + esc(S.unit)) : '';
       const fu = (v) => nf(v) + (Number.isFinite(v) ? unit : '');
       let html = (S.title ? '<div class="ch-t">' + esc(S.title) + '</div>' : '') + (S.unit && !unit ? '<div class="ch-s">' + esc(S.unit) + '</div>' : (S.unit ? '<div class="ch-s">' + esc(tx('Enhet: {x}', { x: S.unit })) + '</div>' : ''));
       if (S.series.length > 1) html += '<div class="ch-lg">' + S.series.map((x, k) => '<span><i class="' + (S.type === 'line' ? 'ln' : '') + '" style="background:' + cols[k] + '"></i>' + esc(x.name || tx('Serie {n}', { n: k + 1 })) + '</span>').join('') + '</div>';
@@ -1384,8 +1384,11 @@ try { falkUtseende(window.falkInst && window.falkInst.alla()); } catch (e) { fal
     function fragaGodkann(vad, slag) {
       return new Promise((ok) => {
         const el = document.createElement('div'); el.className = 'fk-ok';
-        const varfor = slag === 'formular' ? tx('Det här skickar ett formulär på sidan – det kan publicera, skicka, spara eller beställa något. Kolla vad som står ifyllt först.') : tx('Det här kan slutföra ett köp. Kolla vara, pris och adress på sidan först.');
-        el.innerHTML = '<p><b translate="no">' + esc(tx('Falk vill trycka på "{vad}"', { vad })) + '</b><br>' + esc(varfor) + '</p><div class="rad"><button class="nej">' + esc(tx('Stoppa')) + '</button><button class="ja">' + esc(tx('Godkänn')) + '</button></div>';
+        const varfor = slag === 'formular' ? tx('Det här skickar ett formulär på sidan. Det kan publicera, skicka, spara eller beställa något. Kolla vad som står ifyllt först.')
+          : slag === 'ga' ? tx('Det här lämnar sidan du står på och öppnar en annan adress. Kolla att adressen stämmer innan du godkänner.')
+          : tx('Det här kan slutföra ett köp. Kolla vara, pris och adress på sidan först.');
+        const rubrik = slag === 'ga' ? tx('Falk vill öppna {vad}', { vad }) : tx('Falk vill trycka på "{vad}"', { vad });
+        el.innerHTML = '<p><b translate="no">' + esc(rubrik) + '</b><br>' + esc(varfor) + '</p><div class="rad"><button class="nej">' + esc(tx('Stoppa')) + '</button><button class="ja">' + esc(tx('Godkänn')) + '</button></div>';
         log.appendChild(el); scrollBottom();
         el.querySelector('.nej').addEventListener('click', () => { el.remove(); ok(false); });
         el.querySelector('.ja').addEventListener('click', () => { el.remove(); ok(true); });

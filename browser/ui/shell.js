@@ -909,7 +909,7 @@ if ($('seg-dark')) $('seg-dark').addEventListener('click', () => valjTema('dark'
 setTheme(theme);
 
 /* ── Falk-agent: låt AI:n ändra inställningar via naturligt språk ── */
-function kryptoOnOff(v) { v = ('' + (v || '')).toLowerCase().trim(); return !/(^av$|off|nej|stäng|stang|inaktiv|false|^0$|\bav\b)/.test(v); }
+function kryptoOnOff(v) { v = ('' + (v || '')).normalize('NFKC').toLowerCase().trim(); return !/(^av$|off|nej|stäng|stang|inaktiv|false|^0$|\bav\b)/.test(v); }
 function matchEngine(v) {
   v = ('' + (v || '')).toLowerCase();
   if (/adraze/.test(v)) return 'adraze';
@@ -2885,7 +2885,7 @@ function renderDownloads() {
     else if (scanning) { status = 'Skannar efter virus…'; col = 'var(--color-terra)'; }
     else if (infected) { status = d.threat ? tf('Blockerad — {hot}', { hot: tf(d.threat) }) : tf('Blockerad — hot'); col = 'var(--color-danger)'; }
     else if (removed) { status = 'Borttagen (virus)'; col = 'var(--color-danger)'; }
-    else if (done) { status = d.scan === 'overridden' ? 'Klar (behållen trots varning)' : (d.scan === 'clean' ? 'Säker' : 'Klar'); col = 'var(--color-safe)'; }
+    else if (done) { status = d.scan === 'overridden' ? 'Klar (behållen trots varning)' : (d.scan === 'clean' ? 'Ingen känd skadlig fil' : 'Klar'); col = 'var(--color-safe)'; }
     else { status = d.state === 'cancelled' ? 'Avbruten' : 'Misslyckades'; }
     const useIco = infected || removed ? 'i-shield-x' : (scanning ? 'i-shield' : 'i-download');
     row.innerHTML = `<span class="hist-fav" style="display:grid;place-items:center;color:${col}"><svg class="ic ic-sm"><use href="#${useIco}" /></svg></span><div class="hist-txt"><div class="hist-title" translate="no">${escapeHtml(d.filename)}</div><div class="hist-url" style="color:${infected || removed ? 'var(--color-danger)' : ''}">${escapeHtml(status)}</div></div>` + (done ? `<button class="row-btn" title="Visa i mapp"><svg class="ic ic-sm"><use href="#i-folder" /></svg></button>` : '')

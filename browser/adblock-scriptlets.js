@@ -43,7 +43,11 @@ function regexKod(a) {
   if (!a || a === '*' || a === '/^/') return '/.?/';
   if (a.length > 1 && a[0] === '/' && a.lastIndexOf('/') > 0) {
     const slut = a.lastIndexOf('/'); const kropp = a.slice(1, slut); const flagg = a.slice(slut + 1);
-    try { new RegExp(kropp, flagg); return '/' + kropp + '/' + flagg; } catch { /* faller igenom */ }
+    // Bygg ALDRIG en regex-literal av argumentet (kropp/flagg kan annars bryta sig ut och injicera kod).
+    // Skicka in kropp och flagg som strängar till new RegExp, och tillåt bara giltiga flaggor.
+    if (/^[dgimsuyv]*$/.test(flagg)) {
+      try { new RegExp(kropp, flagg); return 'new RegExp(' + S(kropp) + ',' + S(flagg) + ')'; } catch { /* faller igenom */ }
+    }
   }
   return 'new RegExp(' + S(a.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) + ')';
 }

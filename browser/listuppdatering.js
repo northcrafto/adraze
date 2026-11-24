@@ -16,6 +16,10 @@ const KALLOR = {
   'frellwit.txt': 'https://raw.githubusercontent.com/lassekongo83/Frellwits-filter-lists/master/Frellwits-Swedish-Filter.txt',
 };
 const INTERVALL = 6 * 3600 * 1000;
+// ##+js(...) kör kod på sidan. Ta bara emot scriptlet-rader från betrodda listor (uBlock Origin, AdGuard, EasyList).
+// Från övriga listor (enmansrepon, delade värdar) kastas raderna när listan hämtas – en kapad värd ska inte kunna köra kod.
+const BETRODDA_JS = new Set(['easylist.txt', 'easyprivacy.txt', 'ubo-filters.txt', 'badware.txt', 'adguard-popups.txt']);
+const kastaScriptlets = (text) => text.split(/\r?\n/).filter((l) => !/#@?#\+js\(/.test(l)).join('\n');
 
 function lasMeta(dir) { try { return JSON.parse(fs.readFileSync(path.join(dir, 'meta.json'), 'utf8')); } catch { return { filer: {} }; } }
 function sparaMeta(dir, meta) { try { fs.writeFileSync(path.join(dir, 'meta.json'), JSON.stringify(meta, null, 1)); } catch {} }
@@ -46,7 +50,8 @@ async function hamta(dir, medskickadDir, kallor, hel = true) {
       const r = await fetch(url, { headers: huvud, signal: AbortSignal.timeout(60000) });
       if (r.status === 304) continue;
       if (!r.ok) { console.warn('[listor]', fil, 'HTTP', r.status); continue; }
-      const text = await r.text();
+      let text = await r.text();
+      if (!BETRODDA_JS.has(fil)) text = kastaScriptlets(text);   // kasta ##+js från listor vi inte märkt som betrodda
       let gammal = 0;
       try { gammal = fs.statSync(har ? mal : path.join(medskickadDir, fil)).size; } catch {}
       if (!rimlig(text, gammal)) { console.warn('[listor]', fil, 'ser trasig ut, behåller den gamla'); continue; }
