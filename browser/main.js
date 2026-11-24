@@ -1160,6 +1160,94 @@ ipcMain.handle('auth:recall', () => {
   } catch { return { ok: false }; }
 });
 ipcMain.handle('auth:forget', () => { try { if (fs.existsSync(SESSION_FILE)) fs.unlinkSync(SESSION_FILE); } catch {} return { ok: true }; });
+/* ── Barnlås ──
+ * Föräldern låser webbläsaren till ett barnkonto och väljer ett lösenord. Så länge låset sitter finns bara barnkontot:
+ * ingen utloggning, inga andra profiler (de ligger kvar på disk men lämnas aldrig ut), och varje fönster får barnets
+ * egen webbsession. Lösenordet sparas bara här, som scrypt-hash i en fil som krypteras med OS-nyckelringen.
+ * Fem fel lösenord ger fem minuters paus. Glömt lösenord: en kod mejlas till föräldern (låsets märkning hos servern). */
+const BARNLAS_FILE = path.join(app.getPath('userData'), 'adraze-barnlas.dat');
+const LAS_MAX_FEL = 5, LAS_PAUS_MS = 5 * 60_000, LAS_MIN_TECKEN = 6;
+let _barnLas;   // undefined = inte läst än, null = inget lås
+function barnLas() {
+  if (_barnLas !== undefined) return _barnLas;
+  if (!app.isReady()) return null;   // nyckelringen finns först när appen är redo: läs inte (och kom inte ihåg) något innan dess
+  _barnLas = null;
+  try {
+    if (fs.existsSync(BARNLAS_FILE)) {
+      const blob = fs.readFileSync(BARNLAS_FILE);
+      let str; try { str = (safeStorage && safeStorage.isEncryptionAvailable()) ? safeStorage.decryptString(blob) : blob.toString('utf8'); } catch { str = blob.toString('utf8'); }
+      const l = JSON.parse(str);
+      if (l && l.key && l.konto && l.konto.token && l.salt && l.hash) _barnLas = l;
+    }
+  } catch { _barnLas = null; }
+  return _barnLas;
+}
+function sparaBarnLas(l) {
+  _barnLas = l || null;
+  try {
+    if (!l) { if (fs.existsSync(BARNLAS_FILE)) fs.unlinkSync(BARNLAS_FILE); return true; }
+    const str = JSON.stringify(l);
+    fs.writeFileSync(BARNLAS_FILE, (safeStorage && safeStorage.isEncryptionAvailable()) ? safeStorage.encryptString(str) : Buffer.from(str, 'utf8'), { mode: 0o600 });
+    return true;
+  } catch { return false; }
+}
+const lasHash = (losen, salt) => new Promise((ok, fel) => require('crypto').scrypt(String(losen), Buffer.from(salt, 'hex'), 64, { N: 32768, r: 8, p: 1, maxmem: 96 * 1024 * 1024 }, (e, dk) => (e ? fel(e) : ok(dk.toString('hex')))));
+const lasLika = (a, b) => { try { const x = Buffer.from(a, 'hex'), y = Buffer.from(b, 'hex'); return x.length === y.length && require('crypto').timingSafeEqual(x, y); } catch { return false; } };
+const barnLasNyckel = () => { const l = barnLas(); return l ? l.key : null; };
+const barnLasUt = () => { const l = barnLas(); return l ? { last: true, namn: l.konto.name || '', barnId: l.konto.childId || '', key: l.key, konto: l.konto, sparrTill: l.sparrTill || 0 } : { last: false }; };
+ipcMain.on('barnlas:status', (e) => { e.returnValue = barnLasUt(); });
+// Låset sätts av skalet direkt efter att servern loggat in barnet (family:las). Går inte att sätta över ett befintligt lås.
+const lasSagTill = (e) => { try { wins.forEach((ctx) => { if (ctx && ctx.win && !ctx.win.isDestroyed() && ctx.win.webContents !== e.sender) sendTo(ctx, 'barnlas:andrad'); }); } catch {} };   // de andra fönstren följer med
+ipcMain.handle('barnlas:satt', async (e, d) => {
+  if (barnLas()) return { ok: false, message: 'Webbläsaren är redan låst.' };
+  const k = d && d.konto, losen = d && d.losenord;
+  if (!k || typeof k.token !== 'string' || !k.childId || typeof d.key !== 'string') return { ok: false, message: 'Något gick fel. Försök igen.' };
+  if (typeof losen !== 'string' || losen.length < LAS_MIN_TECKEN || losen.length > 200) return { ok: false, message: 'Lösenordet ska vara minst 6 tecken.' };
+  const salt = require('crypto').randomBytes(16).toString('hex');
+  const l = { key: d.key, konto: { token: k.token, email: '', pro: false, name: String(k.name || ''), isChild: true, childId: String(k.childId) }, las: typeof d.las === 'string' ? d.las : '', salt, hash: await lasHash(losen, salt), fel: 0, sparrTill: 0, sedan: Date.now() };
+  if (!sparaBarnLas(l)) return { ok: false, message: 'Låset kunde inte sparas på den här datorn.' };
+  senasteKonto = l.key;
+  lasSagTill(e);
+  return { ok: true };
+});
+let _lasKo = Promise.resolve();   // ett försök i taget, så att fem samtidiga gissningar inte räknas som ett
+ipcMain.handle('barnlas:las-upp', (e, losen) => { const r = _lasKo.then(async () => {
+  const l = barnLas();
+  if (!l) return { ok: true };
+  if (l.sparrTill && l.sparrTill > Date.now()) return { ok: false, sparrTill: l.sparrTill, message: 'För många fel försök. Vänta en stund.' };
+  const ratt = typeof losen === 'string' && losen.length <= 200 && lasLika(await lasHash(losen, l.salt), l.hash);
+  if (!ratt) {
+    l.fel = (l.fel || 0) + 1;
+    if (l.fel >= LAS_MAX_FEL) { l.fel = 0; l.sparrTill = Date.now() + LAS_PAUS_MS; }
+    sparaBarnLas(l);
+    return { ok: false, sparrTill: l.sparrTill > Date.now() ? l.sparrTill : 0, kvar: LAS_MAX_FEL - l.fel, message: 'Fel lösenord.' };
+  }
+  const las = l.las, barnToken = l.konto.token, key = l.key;
+  sparaBarnLas(null);
+  if (las) { try { adrazeApi('/barn/las-bort', { las }); } catch {} }
+  lasSagTill(e);
+  return { ok: true, key, barnToken };
+}); _lasKo = r.catch(() => {}); return r; });
+ipcMain.handle('barnlas:kod', async () => {
+  const l = barnLas(); if (!l) return { ok: false, message: 'Webbläsaren är inte låst.' };
+  if (!l.las) return { ok: false, message: 'Låset saknar koppling till kontot. Logga in som förälder på en annan enhet och logga ut barnet.' };
+  return adrazeApi('/barn/las-kod', { las: l.las });
+});
+ipcMain.handle('barnlas:nytt', async (_e, d) => {
+  const l = barnLas(); if (!l) return { ok: false, message: 'Webbläsaren är inte låst.' };
+  const losen = d && d.losenord;
+  if (typeof losen !== 'string' || losen.length < LAS_MIN_TECKEN || losen.length > 200) return { ok: false, message: 'Lösenordet ska vara minst 6 tecken.' };
+  const j = await adrazeApi('/barn/las-verifiera', { las: l.las, kod: String((d && d.kod) || '') });
+  if (!j.ok || !j.godkand) return { ok: false, message: j.message || 'Fel kod.' };
+  const salt = require('crypto').randomBytes(16).toString('hex');
+  l.salt = salt; l.hash = await lasHash(losen, salt); l.fel = 0; l.sparrTill = 0;
+  return sparaBarnLas(l) ? { ok: true } : { ok: false, message: 'Lösenordet kunde inte sparas på den här datorn.' };
+});
+// Barnets token byts (barnet loggades ut och loggar in igen med sin barnkod): låset följer med
+ipcMain.handle('barnlas:ny-token', (_e, d) => {
+  const l = barnLas(); if (!l || !d || typeof d.token !== 'string' || d.childId !== l.konto.childId) return { ok: false };
+  l.konto.token = d.token; return { ok: sparaBarnLas(l) };
+});
 /* Profiler (som Netflix): konton som loggat in på enheten sparas krypterat med sin token, så att
  * "Logga ut" visar profilväljaren och man kan fortsätta som någon av dem utan att logga in igen.
  * Skalet får bara se namn/bild – token lämnas ut först när en profil väljs. */
@@ -1181,7 +1269,9 @@ function sparaProfiler(l) {
   } catch {}
 }
 const profilUt = (p) => ({ key: p.key, name: p.account.name || '', email: p.account.email || '', isChild: !!p.account.isChild, pro: !!p.account.pro, avatar: p.avatar || null });
-ipcMain.handle('profiler:lista', () => lasProfiler().sort((a, b) => (b.senast || 0) - (a.senast || 0)).map(profilUt));
+// Barnlås: de andra profilerna ligger kvar men varken visas eller lämnas ut
+const profilSynlig = (p) => { const k = barnLasNyckel(); return !k || p.key === k; };
+ipcMain.handle('profiler:lista', () => lasProfiler().filter(profilSynlig).sort((a, b) => (b.senast || 0) - (a.senast || 0)).map(profilUt));
 ipcMain.handle('profiler:spara', (_e, d) => {
   const acc = d && d.account, key = d && d.key;
   if (!acc || typeof acc.token !== 'string' || typeof key !== 'string') return { ok: false };
@@ -1192,9 +1282,10 @@ ipcMain.handle('profiler:spara', (_e, d) => {
   sparaProfiler([ny].concat(l.filter((p) => p.key !== key)));
   return { ok: true };
 });
-ipcMain.handle('profiler:hamta', (_e, key) => { const p = lasProfiler().find((x) => x.key === key); return p ? { ok: true, account: p.account } : { ok: false }; });
+ipcMain.handle('profiler:hamta', (_e, key) => { const p = lasProfiler().filter(profilSynlig).find((x) => x.key === key); return p ? { ok: true, account: p.account } : { ok: false }; });
 // Ta bort från enheten = riktig utloggning: token ogiltigförklaras på servern och kontots sparade kakor raderas
 ipcMain.handle('profiler:ta-bort', async (_e, key) => {
+  if (barnLasNyckel()) return { ok: false };   // barnlås: inga profiler tas bort
   const l = lasProfiler(), p = l.find((x) => x.key === key);
   sparaProfiler(l.filter((x) => x.key !== key));
   if (p && p.account && p.account.token) {
@@ -1224,6 +1315,10 @@ ipcMain.handle('family:join', async (_e, d) => {
 ipcMain.handle('family:approve', async (_e, d) => {
   const j = await adrazeApi('/barn/verifiera', { kod: d && d.code, godkannande: d && d.approval });
   return j.ok ? { ok: true, token: j.token, child: { id: j.barn.id, name: j.barn.namn, age: j.barn.alder } } : j;
+});
+ipcMain.handle('family:las', async (_e, d) => {
+  const j = await adrazeApi('/familj/las', { barn_id: d && d.child_id }, d && d.token);
+  return j.ok ? { ok: true, token: j.token, las: j.las, child: { id: j.barn.id, name: j.barn.namn, age: j.barn.alder } } : j;
 });
 ipcMain.handle('family:children', async (_e, d) => {
   const j = await adrazeApi('/familj/lista', {}, d && d.token);
@@ -1604,6 +1699,7 @@ function migratePwLegacy(key) {   // första inloggningen: flytta ev. gamla (ick
 // Sätt inloggat konto UTAN att röra webbsessionen (vid uppstart — sessionen ligger redan kvar på disk)
 // Uppstart: sätt kontonyckel utan att röra webbsessionen (cookies ligger redan på disk för rätt konto).
 ipcMain.handle('session:setkey', (e, d) => {
+  if (barnLasNyckel()) d = { key: barnLasNyckel() };   // barnlås: bara barnets webbsession
   if (KONTO_PER_FONSTER) { const ctx = ctxFor(e); senasteKonto = (d && d.key) || null; migratePwLegacy(senasteKonto || 'lokal'); return ctx ? bytFonsterKonto(ctx, senasteKonto) : { ok: true }; }
   currentAcctKey = (d && d.key) || null; migratePwLegacy(currentAcctKey || 'lokal'); return { ok: true };
 });
@@ -1613,7 +1709,7 @@ ipcMain.handle('session:setkey', (e, d) => {
 let sessionKo = Promise.resolve();
 const iSessionKo = (f) => { const r = sessionKo.then(f, f); sessionKo = r.catch(() => {}); return r; };
 ipcMain.handle('session:login', (e, d) => iSessionKo(async () => {
-  const key = d && d.key;
+  const key = barnLasNyckel() || (d && d.key);   // barnlås: bara barnets webbsession
   if (KONTO_PER_FONSTER) { const ctx = ctxFor(e); senasteKonto = key || null; if (key) migratePwLegacy(key); return ctx ? bytFonsterKonto(ctx, key || null) : { ok: true }; }
   // Samma konto loggar in igen (t.ex. när inloggningen gått ut): sessionen är redan rätt, och att rensa den tappade allt
   if (key && key === currentAcctKey) { migratePwLegacy(key); return { ok: true }; }
@@ -1632,7 +1728,7 @@ ipcMain.on('barn:regler', (e, d) => {
   try {
     const ctx = ctxFor(e);
     const satt = (r) => { if (KONTO_PER_FONSTER) { if (ctx) ctx.barnRegler = r; } else barnRegler = r; };
-    if (!d || typeof d !== 'object') { satt(null); return; }
+    if (!d || typeof d !== 'object') { satt(barnLasNyckel() ? { last: true, blocklist: [], allows: [] } : null); return; }   // barnlås utan barnregler = allt låst
     const lista = (x) => (Array.isArray(x) ? x : []).map((v) => String(v || '')).filter(Boolean).slice(0, 5000);
     const allows = (Array.isArray(d.allows) ? d.allows : []).filter((a) => a && a.host).slice(0, 500).map((a) => ({ host: String(a.host), until: Number(a.until) || 0 }));
     satt({ last: !!d.last, blocklist: lista(d.blocklist), allows });
@@ -1645,6 +1741,7 @@ ipcMain.on('barn:regler', (e, d) => {
 });
 // Utloggning: spara kontots cookies, rensa sedan webbsessionen (utloggad ur Google m.fl. — inget ligger kvar).
 ipcMain.handle('session:logout', (e, d) => iSessionKo(async () => {
+  if (barnLasNyckel()) return { ok: true };   // barnlås: barnets webbsession ligger kvar
   if (KONTO_PER_FONSTER) { const ctx = ctxFor(e); senasteKonto = null; return ctx ? bytFonsterKonto(ctx, null) : { ok: true }; }
   const key = (d && d.key) || currentAcctKey;
   if (key) { try { await saveAccountCookies(key); } catch {} }
@@ -1751,6 +1848,8 @@ ipcMain.on('konto:fonster', (e) => {
   try {
     const ctx = ctxFor(e);
     if (!KONTO_PER_FONSTER || !ctx) { e.returnValue = { perFonster: KONTO_PER_FONSTER }; return; }
+    const l = barnLas();
+    if (l) { e.returnValue = { perFonster: true, key: l.key, account: l.konto }; return; }   // barnlås: alla fönster är barnets
     const key = ctx.acctKey === undefined ? senasteKonto : ctx.acctKey;
     const p = key ? lasProfiler().find((x) => x.key === key) : null;
     e.returnValue = { perFonster: true, key: key || null, account: p ? p.account : null };
@@ -2844,7 +2943,7 @@ function createWindow(incognito, fran) {
   const id = win.webContents.id;
   const ctx = makeCtx(win, incognito);
   // Nytt fönster får samma konto som fönstret det öppnades från (ett barn kan inte öppna ett fönster som förälder)
-  ctx.acctKey = fran && fran.acctKey !== undefined ? fran.acctKey : senasteKonto;
+  ctx.acctKey = barnLasNyckel() || (fran && fran.acctKey !== undefined ? fran.acctKey : senasteKonto);   // barnlås: alltid barnets konto
   wins.set(id, ctx);
   // Skalet (file://, full IPC) får aldrig navigera bort eller öppna fönster – inte ens om någon lyckas
   // injicera HTML i det (t.ex. <meta http-equiv=refresh>). Bara omladdning av skalet självt släpps igenom.

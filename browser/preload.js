@@ -52,6 +52,7 @@ contextBridge.exposeInMainWorld('family', {
   join: (code) => ipcRenderer.invoke('family:join', { code }),
   approve: (code, approval) => ipcRenderer.invoke('family:approve', { code, approval }),
   children: (token) => ipcRenderer.invoke('family:children', { token }),
+  las: (token, child_id) => ipcRenderer.invoke('family:las', { token, child_id }),
   removeChild: (token, child_id) => ipcRenderer.invoke('family:remove', { token, child_id }),
   setBlocklist: (token, child_id, blocklist) => ipcRenderer.invoke('family:blocklist', { token, child_id, blocklist }),
   setSound: (token, child_id, sound, volume) => ipcRenderer.invoke('family:sound', { token, child_id, sound, volume }),
@@ -171,6 +172,16 @@ contextBridge.exposeInMainWorld('anpassaKortkommandon', {
   extra: (lista) => ipcRenderer.send('anpassa-kort:extra', lista),
   onKommando: (fn) => ipcRenderer.on('anpassa-kort:kommando', (_e, id, kalla, franSida) => fn(id, kalla, franSida)),
   onInspelning: (fn) => ipcRenderer.on('anpassa-kort:inspelning', (_e, d) => fn(d)),
+});
+// Barnlås: webbläsaren låst till ett barnkonto (lösenordet kontrolleras i huvudprocessen)
+contextBridge.exposeInMainWorld('barnlas', {
+  status: () => ipcRenderer.sendSync('barnlas:status'),
+  satt: (d) => ipcRenderer.invoke('barnlas:satt', d),
+  lasUpp: (losenord) => ipcRenderer.invoke('barnlas:las-upp', losenord),
+  kod: () => ipcRenderer.invoke('barnlas:kod'),
+  nytt: (kod, losenord) => ipcRenderer.invoke('barnlas:nytt', { kod, losenord }),
+  nyToken: (token, childId) => ipcRenderer.invoke('barnlas:ny-token', { token, childId }),
+  onAndrad: (fn) => ipcRenderer.on('barnlas:andrad', () => fn()),
 });
 contextBridge.exposeInMainWorld('kontoLage', {
   fonster: () => ipcRenderer.sendSync('konto:fonster'),

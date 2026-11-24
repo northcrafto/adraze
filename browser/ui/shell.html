@@ -436,6 +436,47 @@
           <p class="lg-lead"><span id="login-email-shown" class="lg-strong" translate="no"></span> <span id="login-pro-badge" class="lg-chip" style="display:none;">Pro</span></p>
           <div class="lg-status"><i></i><span>Skydd aktivt på den här datorn</span></div>
           <button id="logout-btn" class="lg-btn ghost">Logga ut</button>
+          <button id="las-upp-btn" class="lg-btn ghost" style="display:none;">Lås upp webbläsaren</button>
+        </div>
+
+        <!-- Barnlås: föräldern låser webbläsaren till ett barnkonto -->
+        <div id="login-las" class="lg-view" style="display:none;">
+          <h1 class="lg-h" id="las-rubrik">Lås webbläsaren</h1>
+          <p class="lg-lead" id="las-lead"></p>
+          <p class="lg-lead" style="margin-top:-6px;font-size:13.5px;">Låset gäller AdRaze, inte andra program på datorn.</p>
+          <input id="las-pw1" type="password" autocomplete="new-password" placeholder="Välj ett lösenord till låset" class="lg-in" />
+          <input id="las-pw2" type="password" autocomplete="new-password" placeholder="Skriv lösenordet igen" class="lg-in" style="margin-top:10px;" />
+          <div id="las-error" class="lg-err" style="display:none;"></div>
+          <button id="las-submit" class="lg-btn">Lås webbläsaren</button>
+          <div class="lg-row"><button id="las-avbryt" type="button" class="lg-link dim">← Avbryt</button></div>
+        </div>
+
+        <!-- Barnlås: lås upp -->
+        <div id="login-lasupp" class="lg-view" style="display:none;">
+          <h1 class="lg-h">Lås upp webbläsaren</h1>
+          <p class="lg-lead" id="lasupp-lead"></p>
+          <input id="lasupp-pw" type="password" autocomplete="off" placeholder="Lösenordet till låset" class="lg-in" />
+          <div id="lasupp-error" class="lg-err" style="display:none;"></div>
+          <button id="lasupp-submit" class="lg-btn">Lås upp</button>
+          <div class="lg-row">
+            <button id="lasupp-avbryt" type="button" class="lg-link dim">← Tillbaka</button>
+            <button id="lasupp-glomt" type="button" class="lg-link dim">Glömt lösenordet?</button>
+          </div>
+        </div>
+
+        <!-- Barnlås: glömt lösenordet → kod till föräldern → nytt lösenord -->
+        <div id="login-lasglomt" class="lg-view" style="display:none;">
+          <h1 class="lg-h">Välj ett nytt lösenord</h1>
+          <p class="lg-lead">Vi har mejlat en kod till förälderns konto. Skriv koden och välj ett nytt lösenord till låset.</p>
+          <input id="lasglomt-kod" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" class="lg-code" />
+          <input id="lasglomt-pw1" type="password" autocomplete="new-password" placeholder="Nytt lösenord till låset" class="lg-in" style="margin-top:10px;" />
+          <input id="lasglomt-pw2" type="password" autocomplete="new-password" placeholder="Skriv lösenordet igen" class="lg-in" style="margin-top:10px;" />
+          <div id="lasglomt-error" class="lg-err" style="display:none;"></div>
+          <button id="lasglomt-submit" class="lg-btn">Spara nytt lösenord</button>
+          <div class="lg-row">
+            <button id="lasglomt-avbryt" type="button" class="lg-link dim">← Tillbaka</button>
+            <button id="lasglomt-igen" type="button" class="lg-link dim">Skicka ny kod</button>
+          </div>
         </div>
 
         <!-- Logga in som barn (hemlig kod) -->
@@ -455,6 +496,7 @@
           <div class="lg-row">
             <button id="child-back" type="button" class="lg-link dim">← Tillbaka</button>
             <button id="child-resend" type="button" class="lg-link dim" style="display:none;">Skicka ny kod</button>
+            <button id="child-las-upp" type="button" class="lg-link dim" style="display:none;">Lås upp webbläsaren</button>
           </div>
         </div>
       </div>

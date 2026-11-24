@@ -1025,6 +1025,13 @@ function glomKontoLokalt() {
   try { localStorage.removeItem('skoll-account'); } catch {}
 }
 if (account && !account.token) account = null;  // gammalt kontonummer-format → nollställ
+/* ── Barnlås: webbläsaren låst till ett barnkonto (huvudprocessen äger låset och lösenordet) ──
+ * Så länge låset sitter är fönstrets konto alltid barnets, vad som än låg sparat. */
+let LAS = { last: false };
+try { LAS = (window.barnlas && window.barnlas.status()) || LAS; } catch {}
+function lasPa() { return !!(LAS && LAS.last); }
+let _lasByte = false;   // sant bara medan föräldern själv låser (då får förälderns konto loggas ut)
+if (lasPa() && LAS.konto && (!account || !account.isChild || account.childId !== LAS.konto.childId)) { account = { ...LAS.konto }; sparaKontoLokalt(); }
 /* ── Familj + barnläge: deklareras HÄR, före restoreTabs() längre ner (förr låg `let fam` efter den, och
  * en barnflik som återställdes vid start kastade TDZ-fel i famBlocked). ── */
 const FAM_KEY = 'adraze-family';
@@ -1097,7 +1104,13 @@ function updateAccountBtn() {
   try { if (typeof historyOpen !== 'undefined' && historyOpen) renderHistory(); } catch {}
 }
 function setLoginView(name) {
-  const map = { profiles: 'login-profiles', login: 'login-form', pw: 'login-pw-view', signup: 'login-signup', signuppw: 'login-signup-pw', code: 'login-code', reset: 'login-reset', resetconfirm: 'login-reset-confirm', resetpw: 'login-reset-pw', account: 'login-account-view', child: 'login-child' };
+  const map = { profiles: 'login-profiles', login: 'login-form', pw: 'login-pw-view', signup: 'login-signup', signuppw: 'login-signup-pw', code: 'login-code', reset: 'login-reset', resetconfirm: 'login-reset-confirm', resetpw: 'login-reset-pw', account: 'login-account-view', child: 'login-child', las: 'login-las', lasupp: 'login-lasupp', lasglomt: 'login-lasglomt' };
+  // Barnlås: inga profiler och ingen vuxeninloggning, bara barnets egen inloggning och upplåsningen
+  if (lasPa() && name !== 'lasupp' && name !== 'lasglomt') name = account ? 'account' : 'child';
+  try {
+    $('logout-btn').style.display = lasPa() ? 'none' : ''; $('las-upp-btn').style.display = lasPa() ? '' : 'none';
+    $('child-las-upp').style.display = lasPa() ? 'inline' : 'none'; if (lasPa() && !childPendingCode) $('child-back').style.display = 'none'; else $('child-back').style.display = '';
+  } catch {}
   for (const k in map) { const el = $(map[k]); if (el) el.style.display = (k === name) ? 'block' : 'none'; }
 }
 function openLogin() {
@@ -1251,6 +1264,7 @@ async function barnEnhetAnmal(token) {
   if (r && r.ok && (r.foralder || r.kand === false)) { try { localStorage.removeItem(BARN_ENHET_KEY); } catch {} }
 }
 function loginAs(token, email, pro, name) {
+  if (lasPa()) { try { showToast('Webbläsaren är låst till ett barnkonto.'); } catch {} return; }
   try { window.auth.googleAvbryt(); } catch {}   // ett väntande "Fortsätt med Google" gäller inte längre
   account = { token, email: email || '', pro: !!pro, name: name || '' };
   socMe = null;   // förra kontots profil (bild m.m.) får inte hänga kvar
@@ -1277,6 +1291,7 @@ function loginAs(token, email, pro, name) {
 // glom = logga ut på riktigt och ta bort profilen (kontot raderat, barnet utloggat av föräldern).
 // Annars sparas kontot som profil och profilväljaren visas, som på Netflix.
 function doLogout(reopenKrypto, glom) {
+  if (lasPa() && !glom && !_lasByte) { oppnaLasUpp(); return; }
   chattOpen = false; chattUnread = 0; parkedKrypto = false; parkedChatt = false;
   for (const x of tabs) { x.panel = null; x.parked = null; }
   const t = account && account.token;
@@ -1453,6 +1468,8 @@ async function doChildLogin() {
   let r; try { r = await window.family.approve(childPendingCode, approval); } catch { r = { ok: false }; }
   busyBtn('child-submit', false, 'Loggar in…', 'Logga in');
   if (!r || !r.ok || !r.child) { err.textContent = (r && r.message) || 'Fel kod. Fråga din förälder igen.'; err.style.display = 'block'; return; }
+  if (lasPa() && r.child.id !== LAS.barnId) { err.textContent = tf('Den här webbläsaren är låst till {namn}.', { namn: LAS.namn }); err.style.display = 'block'; return; }
+  if (lasPa()) { try { await window.barnlas.nyToken(r.token, r.child.id); LAS = window.barnlas.status(); } catch {} }
   childPendingCode = null;
   await enterChildMode(r.token, r.child);
   closeLogin();
@@ -1736,7 +1753,7 @@ document.querySelectorAll('.pw-eye').forEach((b) => {
 });
 $('account-btn').addEventListener('click', () => openAccount());
 $('allow-chip') && $('allow-chip').addEventListener('click', () => { openSettings(); showSettingsCat('familj'); });
-$('kn-logout') && $('kn-logout').addEventListener('click', () => { doLogout(); renderKonto(); try { closeSettings(); } catch {} openLogin(); });
+$('kn-logout') && $('kn-logout').addEventListener('click', () => { if (lasPa()) { stangInstallningarSen(oppnaLasUpp); return; } doLogout(); renderKonto(); try { closeSettings(); } catch {} openLogin(); });
 $('kn-login') && $('kn-login').addEventListener('click', () => openLogin());
 (function kontoLageInst() {
   const t = $('kl-toggle'); if (!t || !window.kontoLage) return;
@@ -1804,6 +1821,140 @@ $('reset-confirm-submit').addEventListener('click', doResetConfirm);
 $('reset-confirm-back').addEventListener('click', () => setLoginView('reset'));
 $('reset-resend').addEventListener('click', doResetResend);
 $('logout-btn').addEventListener('click', () => doLogout());
+
+/* ── Barnlås: låsa, låsa upp, glömt lösenordet ──
+ * Låsa: föräldern (inloggad) väljer barn på Familj-sidan → varning + lösenord → servern loggar in barnet här →
+ * huvudprocessen sparar låset → förälderns konto blir en dold profil och fönstret blir barnets.
+ * Låsa upp: lösenordet kontrolleras i huvudprocessen (fem fel = fem minuters paus) → barnet loggas ut, profilerna är tillbaka. */
+const LAS_MIN = 6;
+let _lasBarn = null;
+function lasFel(id, msg) { const e = $(id); if (!e) return; if (msg) { e.textContent = msg; e.style.display = 'block'; } else e.style.display = 'none'; }
+function lasOverlay(vy) {
+  try { window.view.hide(); hideInfobar(); } catch {}
+  try { hideOverlayElements(); } catch {}
+  if (active) active.overlay = 'login';
+  setLoginView(vy);
+  $('login').classList.remove('hidden');
+}
+// Inställningsfliken tonar bort i 200 ms innan grannfliken tar över (closeTab): rutan öppnas när bytet är klart,
+// annars göms den igen av flikbytet
+function stangInstallningarSen(fn) { const st = settingsTab; try { closeSettings(); } catch {} let n = 0; const vanta = () => { if (st && tabs.indexOf(st) >= 0 && st._closing && n++ < 40) { setTimeout(vanta, 25); return; } fn(); }; setTimeout(vanta, 30); }
+function oppnaLas(c) {
+  if (!account || account.isChild || !account.token || lasPa()) return;
+  _lasBarn = c;
+  $('las-rubrik').textContent = tn('Lås webbläsaren till {n}?', c.name);
+  $('las-lead').textContent = tn('Bara {n}s konto finns kvar här tills du låser upp. Dina egna konton döljs och kommer tillbaka när du skriver lösenordet.', c.name);
+  $('las-pw1').value = ''; $('las-pw2').value = ''; lasFel('las-error');
+  stangInstallningarSen(() => { lasOverlay('las'); setTimeout(() => $('las-pw1').focus(), 30); });
+}
+function lasLosenOk(a, b, felId) {
+  if (a.length < LAS_MIN) { lasFel(felId, 'Lösenordet ska vara minst 6 tecken.'); return false; }
+  if (a !== b) { lasFel(felId, 'Lösenorden är inte lika.'); return false; }
+  return true;
+}
+async function doLas() {
+  const c = _lasBarn; if (!c || !account || account.isChild) return;
+  const pw = $('las-pw1').value;
+  if (!lasLosenOk(pw, $('las-pw2').value, 'las-error')) return;
+  lasFel('las-error');
+  busyBtn('las-submit', true, 'Låser…', 'Lås webbläsaren');
+  let r; try { r = await window.family.las(account.token, c.id); } catch { r = null; }
+  if (!r || !r.ok || !r.token) { busyBtn('las-submit', false, 'Låser…', 'Lås webbläsaren'); lasFel('las-error', (r && r.message) || 'Kunde inte nå AdRaze. Kontrollera din uppkoppling.'); return; }
+  const konto = { token: r.token, name: r.child.name, isChild: true, childId: r.child.id };
+  let s; try { s = await window.barnlas.satt({ konto, key: 'k:' + r.child.id, las: r.las, losenord: pw }); } catch { s = null; }
+  busyBtn('las-submit', false, 'Låser…', 'Lås webbläsaren');
+  if (!s || !s.ok) { lasFel('las-error', (s && s.message) || 'Låset kunde inte sparas på den här datorn.'); return; }
+  $('las-pw1').value = ''; $('las-pw2').value = '';
+  try { LAS = window.barnlas.status(); } catch {}
+  // Förälderns konto blir en (dold) profil, och fönstret blir barnets i samma andetag
+  _lasByte = true; try { doLogout(); } finally { _lasByte = false; }
+  await enterChildMode(r.token, r.child);
+  closeLogin();
+  showToast(tf('Låst till {namn}', { namn: r.child.name }));
+}
+let _lasPausTimer = null;
+function lasPausText(till) { return tf('För många fel försök. Försök igen {tid}.', { tid: fmtTime(till) }); }
+function lasPaus(till) {
+  const b = $('lasupp-submit'); if (!b) return;
+  if (_lasPausTimer) { clearTimeout(_lasPausTimer); _lasPausTimer = null; }
+  if (till && till > Date.now()) {
+    b.disabled = true; b.style.opacity = '0.7'; lasFel('lasupp-error', lasPausText(till));
+    _lasPausTimer = setTimeout(() => { b.disabled = false; b.style.opacity = '1'; lasFel('lasupp-error'); }, till - Date.now() + 300);
+  } else { b.disabled = false; b.style.opacity = '1'; }
+}
+function oppnaLasUpp() {
+  if (!lasPa()) return;
+  try { LAS = window.barnlas.status(); } catch {}
+  $('lasupp-lead').textContent = tf('Webbläsaren är låst till {namn}. Skriv lösenordet som valdes när den låstes.', { namn: LAS.namn || '' });
+  $('lasupp-pw').value = ''; lasFel('lasupp-error');
+  lasOverlay('lasupp');
+  lasPaus(LAS.sparrTill);
+  setTimeout(() => $('lasupp-pw').focus(), 30);
+}
+function stangLasUpp() { if (account) closeLogin(); else setLoginView('child'); }
+async function doLasUpp() {
+  const pw = $('lasupp-pw').value;
+  if (!pw) { lasFel('lasupp-error', 'Skriv lösenordet till låset.'); return; }
+  lasFel('lasupp-error');
+  busyBtn('lasupp-submit', true, 'Låser upp…', 'Lås upp');
+  let r; try { r = await window.barnlas.lasUpp(pw); } catch { r = null; }
+  busyBtn('lasupp-submit', false, 'Låser upp…', 'Lås upp');
+  $('lasupp-pw').value = '';
+  if (!r || !r.ok) {
+    if (r && r.sparrTill) { lasPaus(r.sparrTill); return; }
+    lasFel('lasupp-error', (r && r.kvar > 0) ? tn('Fel lösenord. {n} försök kvar.', r.kvar) : ((r && r.message) || 'Något gick fel. Försök igen.'));
+    return;
+  }
+  lasSlapp();
+  showToast('Webbläsaren är upplåst.');
+}
+// Låset är borta: barnet loggas ut på riktigt, barnläget släpper och profilerna visas igen
+function lasSlapp() {
+  LAS = { last: false };
+  const varBarn = !!(account && account.isChild);
+  if (varBarn) doLogout(false, true);
+  satBarnlage(false);
+  try { localStorage.removeItem(BARN_ENHET_KEY); } catch {}
+  try { unlockHistoryForParent(); } catch {}
+  try { const kb = $('kidblock'); if (kb) kb.style.display = 'none'; } catch {}
+  famSkickaTillMain();
+  hamtaProfiler().then(() => { if (account) return; if (profilLista.length) visaProfiler(); else setLoginView('login'); $('login').classList.remove('hidden'); });
+}
+async function lasSkickaKod(visaVy) {
+  let r; try { r = await window.barnlas.kod(); } catch { r = null; }
+  if (!r || !r.ok) { lasFel(visaVy ? 'lasupp-error' : 'lasglomt-error', (r && r.message) || 'Kunde inte nå AdRaze. Kontrollera din uppkoppling.'); return false; }
+  if (visaVy) { $('lasglomt-kod').value = ''; $('lasglomt-pw1').value = ''; $('lasglomt-pw2').value = ''; lasFel('lasglomt-error'); setLoginView('lasglomt'); setTimeout(() => $('lasglomt-kod').focus(), 30); }
+  else showToast('Ny kod skickad till förälderns mejl.');
+  return true;
+}
+async function doLasNytt() {
+  const kod = ($('lasglomt-kod').value || '').replace(/\D/g, ''), pw = $('lasglomt-pw1').value;
+  if (kod.length !== 6) { lasFel('lasglomt-error', 'Koden är 6 siffror.'); return; }
+  if (!lasLosenOk(pw, $('lasglomt-pw2').value, 'lasglomt-error')) return;
+  lasFel('lasglomt-error');
+  busyBtn('lasglomt-submit', true, 'Sparar…', 'Spara nytt lösenord');
+  let r; try { r = await window.barnlas.nytt(kod, pw); } catch { r = null; }
+  busyBtn('lasglomt-submit', false, 'Sparar…', 'Spara nytt lösenord');
+  if (!r || !r.ok) { lasFel('lasglomt-error', (r && r.message) || 'Något gick fel. Försök igen.'); return; }
+  $('lasglomt-pw1').value = ''; $('lasglomt-pw2').value = '';
+  oppnaLasUpp();
+  showToast('Nytt lösenord sparat. Skriv det för att låsa upp.');
+}
+$('las-submit').addEventListener('click', doLas);
+$('las-avbryt').addEventListener('click', () => { _lasBarn = null; closeLogin(); });
+$('las-pw1').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('las-pw2').focus(); });
+$('las-pw2').addEventListener('keydown', (e) => { if (e.key === 'Enter') doLas(); });
+$('las-upp-btn').addEventListener('click', oppnaLasUpp);
+$('child-las-upp').addEventListener('click', oppnaLasUpp);
+$('lasupp-submit').addEventListener('click', doLasUpp);
+$('lasupp-pw').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !$('lasupp-submit').disabled) doLasUpp(); });
+$('lasupp-avbryt').addEventListener('click', stangLasUpp);
+$('lasupp-glomt').addEventListener('click', () => lasSkickaKod(true));
+$('lasglomt-submit').addEventListener('click', doLasNytt);
+$('lasglomt-avbryt').addEventListener('click', oppnaLasUpp);
+$('lasglomt-igen').addEventListener('click', () => lasSkickaKod(false));
+// Ett annat fönster låste eller låste upp: ladda om, så att det här fönstret följer med
+try { window.barnlas.onAndrad(() => { try { location.reload(); } catch {} }); } catch {}
 $('prof-hantera').addEventListener('click', () => { profilHantera = !profilHantera; $('prof-error').style.display = 'none'; ritaProfiler(); });
 $('to-profiles').addEventListener('click', () => { if (profilLista.length) visaProfiler(); });
 $('to-child').addEventListener('click', () => { childPendingCode = null; $('child-code-input').value = ''; setLoginView('child'); showChildStep(1); });
@@ -3658,7 +3809,7 @@ function showBlockScreen(url, lage) {
   const dom = visaDoman(host);
   const q = (s) => ov.querySelector(s);
   if (famLocked()) {   // barnet är utloggat → låst tills en förälder (eller barnet med sin kod) loggar in
-    kbRita(ov, { tecken: ':(', dom, rubrik: 'AdRaze är låst.', text: 'Barnkontot är utloggat. Be en förälder logga in, eller logga in igen med din barnkod.',
+    kbRita(ov, { tecken: ':(', dom, rubrik: 'AdRaze är låst.', text: lasPa() ? 'Barnkontot är utloggat. Logga in igen med din barnkod, eller be en förälder låsa upp.' : 'Barnkontot är utloggat. Be en förälder logga in, eller logga in igen med din barnkod.',
       inne: '<div class="kb-knappar"><button class="liq" id="kidblock-login">Logga in</button><button class="liq-ghost" id="kidblock-back">Tillbaka</button></div>' });
     q('#kidblock-login').onclick = () => { kbStang(true); try { openLogin(); } catch {} };
     q('#kidblock-back').onclick = () => kbStang(true);
@@ -3755,6 +3906,7 @@ function renderFam() {
     });
     const cp = el.querySelector('[data-a=copy]'); if (cp) cp.addEventListener('click', () => { try { navigator.clipboard.writeText(c.code); } catch {} showToast(tn('Kod kopierad — ge den till {n}', c.name)); });
     const hb = el.querySelector('[data-a=hist]'); if (hb) hb.addEventListener('click', () => famShowHistory(c.id, c.name));
+    const lb = el.querySelector('[data-a=las]'); if (lb) lb.addEventListener('click', () => oppnaLas(c));
     el.querySelectorAll('.fam-fraga button[data-svar]').forEach((b) => b.addEventListener('click', () => {
       el.querySelectorAll('.fam-fraga button').forEach((x) => (x.disabled = true));
       famSvara(c, Number(b.closest('.fam-fraga').dataset.fraga), b.dataset.svar, Number(b.dataset.min || 0));
@@ -4031,6 +4183,7 @@ function famChildCard(c) {
     + '<div class="fam-addsite"><input class="fam-in" placeholder="t.ex. exempel.se" spellcheck="false" /><button class="btn btn-safe flex-none" style="height:40px;padding:0 14px;">Blockera</button></div>'
     + famLjudHtml(c)
     + '<div class="fam-krypto falk-bara">' + escapeHtml(tn('Säg till Falk: "blockera de här sidorna för {n}" — eller "tillåt X för {n} i en timme".', c.name)).replace('Falk', '<b>Falk</b>') + '</div>'
+    + ((c.code && account && !account.isChild) ? '<button class="fam-knapp" data-a="las" style="display:block;font-size:12.5px;padding:8px 12px;margin-top:10px;">' + escapeHtml(tn('Lås webbläsaren till {n}', c.name)) + '</button>' : '')
     + '<button class="fam-histbtn fam-knapp" data-a="hist" style="display:block;font-size:12.5px;padding:8px 12px;margin-top:10px;">' + escapeHtml(tn('Se historik för {n}', c.name)) + '</button>'
     + '<button class="fam-del" data-a="del">' + escapeHtml(tn('Ta bort {n} ur familjen', c.name)) + '</button></div>';
 }
