@@ -468,6 +468,7 @@ window.view.onBarnSparrad((id, url) => { const t = byId(id); if (t && t === acti
 let skipCloseConfirm = false;
 try { skipCloseConfirm = localStorage.getItem('skoll-skip-close-confirm') === '1'; } catch {}
 window.view.onConfirmClose(() => {
+  try { window.view.closeAck(); } catch {}   // huvudprocessen stänger annars själv efter en stund
   if (tabs.length <= 1 || skipCloseConfirm) { window.view.doClose(); return; }  // en flik / valt bort → stäng direkt
   showCloseConfirm(tabs.length);
 });

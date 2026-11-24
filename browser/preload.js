@@ -287,6 +287,7 @@ contextBridge.exposeInMainWorld('view', {
   onCloseTabId: (cb) => ipcRenderer.on('close-tab-id', (_e, id) => cb(id)),
   onConfirmClose: (cb) => ipcRenderer.on('confirm-close', () => cb()),
   doClose: () => ipcRenderer.send('win:do-close'),
+  closeAck: () => ipcRenderer.send('win:close-ack'),   // frågan om att stänga har kommit fram
   openCloseConfirm: (n) => ipcRenderer.send('open-close-confirm', n),
   onPersistSkipClose: (cb) => ipcRenderer.on('persist-skip-close', () => cb()),
   onFocusAddress: (cb) => ipcRenderer.on('focus-address', () => cb()),

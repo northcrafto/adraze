@@ -2550,8 +2550,9 @@ ipcMain.on('win:close', (e) => { try { BrowserWindow.fromWebContents(e.sender).c
 ipcMain.on('win:titlebar', (e, c) => {
   try { const w = BrowserWindow.fromWebContents(e.sender); if (w && w.setTitleBarOverlay && c) w.setTitleBarOverlay({ color: String(c.color || '#e7edf4'), symbolColor: String(c.symbolColor || '#0e2a47'), height: 44 }); } catch {}
 });
+ipcMain.on('win:close-ack', (e) => { const ctx = wins.get(e.sender.id); if (ctx) clearTimeout(ctx._stangVakt); });   // skalet har fått frågan och sköter resten
 ipcMain.on('win:do-close', (e) => {
-  const ctx = wins.get(e.sender.id); if (ctx) ctx.forceClose = true;
+  const ctx = wins.get(e.sender.id); if (ctx) { ctx.forceClose = true; clearTimeout(ctx._stangVakt); }
   const w = BrowserWindow.fromWebContents(e.sender); if (w) w.close();
 });
 // Öppna den flytande "Stäng alla flikar?"-notisen (eget litet fönster ovanför sidan,
@@ -3211,8 +3212,13 @@ function createWindow(incognito, fran) {
   win.on('close', (e) => {
     if (ctx.forceClose) return;                    // redan bekräftat → stäng på riktigt
     e.preventDefault();
-    if (win.webContents && !win.webContents.isDestroyed()) win.webContents.send('confirm-close');
-    else { ctx.forceClose = true; win.destroy(); }
+    if (win.webContents && !win.webContents.isDestroyed()) {
+      win.webContents.send('confirm-close');
+      // Skalet svarar direkt (win:close-ack) när det fått frågan. Kommer inget svar – skalet laddas, laddas om eller har
+      // hängt sig – stängs fönstret ändå. Förr väntade det för evigt, och hela AdRaze blev hängande vid avstängning.
+      clearTimeout(ctx._stangVakt);
+      ctx._stangVakt = setTimeout(() => { if (!win.isDestroyed() && !ctx.forceClose) { ctx.forceClose = true; try { win.close(); } catch {} } }, 2500);
+    } else { ctx.forceClose = true; win.destroy(); }
   });
   win.on('closed', () => {
     ctx.views.forEach((v) => { try { v.webContents.close(); } catch {} });
