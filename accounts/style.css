@@ -454,3 +454,15 @@ main { overflow-x: clip; }
 .pris-ge { margin-top: 22px; align-self: flex-start; font-size: 14.5px; font-weight: 600; color: #cfccc4; }
 @media (max-width: 760px) { .pris-grid { grid-template-columns: 1fr; } }
 
+
+/* CRO-förslaget 2026-11-24 */
+.bara-mobil { display: none; }
+@media (max-width: 700px) and (pointer: coarse) { .bara-dator { display: none; } .bara-mobil { display: inline-flex; } p.bara-mobil { display: block; } }
+.hero-mobil { margin-top: 14px; font-size: 14px; color: var(--dov); font-weight: 500; }
+.bevis a { color: inherit; }
+
+/* omgång 2: mindre rubrik i heron, ny ordning */
+.hero h1 { font-size: clamp(38px, 5vw, 70px); line-height: 1; letter-spacing: -0.045em; }
+.lead { max-width: 40ch; }
+.byter { padding-top: 40px; }
+.byter .las-mer { margin-top: 18px; }

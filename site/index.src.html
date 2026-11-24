@@ -25,38 +25,22 @@
       <h1>{{t:hero.title}}</h1>
       <p class="lead">{{t:hero.lead}}</p>
       <div class="cta-rad">
-        <a href="{{installera}}" class="btn btn-stor liq">{{chrome}}{{t:hero.cta}}</a>
-        <a href="#se-skillnaden" class="btn btn-stor liq-ghost">{{t:nav.difference}}</a>
+        <a href="{{installera}}" class="btn btn-stor liq bara-dator">{{chrome}}{{t:hero.cta}}</a>
+        <button type="button" class="btn btn-stor liq bara-mobil" data-skicka data-klar="{{t:hero.sent}}">{{arrow-right}}{{t:hero.send}}</button>
+        <a href="#ladda-ner" class="btn btn-stor liq-ghost">{{t:hero.browser}}</a>
       </div>
+      <p class="hero-mobil bara-mobil">{{t:hero.mobile}}</p>
       <ul class="bevis">
         <li>{{check}}{{t:hero.proof1}}</li>
-        <li>{{check}}{{t:hero.proof2}}</li>
+        <li>{{check}}<a class="nav-link" href="https://github.com/northcrafto/adraze" rel="noopener">{{t:hero.proof2}}</a></li>
         <li>{{check}}{{t:hero.proof3}}</li>
       </ul>
     </div>
     <figure class="hero-illu hero-3d">
       <canvas aria-label="{{t:hero.gorilla_alt}}" role="img"></canvas>
       <img class="hero-3d-reserv" src="/bilder/gorilla/g1.png" alt="{{t:hero.gorilla_alt}}" width="768" height="768">
-      <figcaption class="hero-3d-rakna"><b data-raknare>0</b> {{t:hero.eaten}}</figcaption>
+      <figcaption class="hero-3d-rakna" hidden><b data-raknare>0</b> {{t:hero.eaten}}</figcaption>
     </figure>
-  </section>
-
-  <!-- WEBBLÄSAREN: fyra personer står och håller upp flaggan -->
-  <section id="ladda-ner" class="ladda">
-    <div class="ladda-scen">
-      <div class="ladda-konst">
-        <img class="ladda-flagga" src="/illu/fira/flagga.svg" alt="" width="1000" height="626" loading="lazy">
-        <h2 class="ladda-rubrik"><span>AdRaze Browser<em>!</em></span></h2>
-      </div>
-      <div class="ladda-mitten">
-        <p>{{t:ladda.text}}</p>
-        <div class="ladda-knappar">
-          <a href="{{ladda}}#linux" class="btn btn-jatte liq ladda-linux"><img src="/bilder/tux.png" alt="" width="36" height="36" loading="lazy">{{t:hero.dl_linux}}</a>
-          <a href="https://github.com/northcrafto/adraze-dl/releases/latest/download/AdRaze.dmg" class="btn btn-jatte liq ladda-mac">{{apple-riktig}}{{t:dl.mac_btn}}</a>
-          <a href="https://apps.microsoft.com/detail/9NXWW5QDZV98" rel="noopener" class="btn btn-jatte liq ladda-win">{{windows-logo}}{{t:dl.windows_btn}}</a>
-        </div>
-      </div>
-    </div>
   </section>
 
   <!-- FÖRE / EFTER -->
@@ -82,6 +66,50 @@
         </figure>
       </div>
       <p class="jmf-not">{{t:demo.caption}}</p>
+    </div>
+  </section>
+
+  <!-- BYTER: tre skäl att byta just nu -->
+  <section id="byter" class="wrap funktioner byter">
+    <div class="sektion-huvud">
+      <h2>{{t:byter.title}}</h2>
+      <p>{{t:byter.lead}}</p>
+    </div>
+    <div class="kort-grid">
+      <article class="kort">
+        <img src="/illu/secure-server.svg" alt="" loading="lazy">
+        <h3>{{t:byter.c1_title}}</h3>
+        <p>{{t:byter.c1_text}}</p>
+      </article>
+      <article class="kort">
+        <img src="/illu/fast-loading.svg" alt="" loading="lazy">
+        <h3>{{t:byter.c2_title}}</h3>
+        <p>{{t:byter.c2_text}}</p>
+      </article>
+      <article class="kort">
+        <img src="/illu/private-data.svg" alt="" loading="lazy">
+        <h3>{{t:byter.c3_title}}</h3>
+        <p>{{t:byter.c3_text}}</p>
+        <a class="nav-link las-mer" href="#brave">{{t:byter.c3_link}} {{arrow-right}}</a>
+      </article>
+    </div>
+  </section>
+
+  <!-- WEBBLÄSAREN: fyra personer står och håller upp flaggan -->
+  <section id="ladda-ner" class="ladda">
+    <div class="ladda-scen">
+      <div class="ladda-konst">
+        <img class="ladda-flagga" src="/illu/fira/flagga.svg" alt="" width="1000" height="626" loading="lazy">
+        <h2 class="ladda-rubrik"><span>AdRaze Browser<em>!</em></span></h2>
+      </div>
+      <div class="ladda-mitten">
+        <p>{{t:ladda.text}}</p>
+        <div class="ladda-knappar">
+          <a href="{{ladda}}#linux" class="btn btn-jatte liq ladda-linux"><img src="/bilder/tux.png" alt="" width="36" height="36" loading="lazy">{{t:hero.dl_linux}}</a>
+          <a href="https://github.com/northcrafto/adraze-dl/releases/latest/download/AdRaze.dmg" class="btn btn-jatte liq ladda-mac">{{apple-riktig}}{{t:dl.mac_btn}}</a>
+          <a href="https://apps.microsoft.com/detail/9NXWW5QDZV98" rel="noopener" class="btn btn-jatte liq ladda-win">{{windows-logo}}{{t:dl.windows_btn}}</a>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -139,6 +167,37 @@
         <h3>{{t:features.pause_title}}</h3>
         <p>{{t:features.pause_text}}</p>
       </article>
+    </div>
+  </section>
+
+  <!-- MOT BRAVE -->
+  <section id="brave" class="wrap mot">
+    <div class="sektion-huvud">
+      <h2>{{t:mot.title}}</h2>
+      <p>{{t:mot.lead}}</p>
+    </div>
+    <div class="mot-grid">
+      <div>
+        <h3>{{t:mot.b_h}}</h3>
+        <ol class="mot-lista">
+          <li><b>2018</b><div><p>{{t:mot.b1}}</p><a class="nav-link" href="https://davidgerard.co.uk/blockchain/2019/01/13/brave-web-browser-no-longer-claims-to-fundraise-on-behalf-of-others-so-thats-nice/" target="_blank" rel="noopener nofollow">{{t:mot.kalla}}: David Gerard</a></div></li>
+          <li><b>2020</b><div><p>{{t:mot.b2}}</p><a class="nav-link" href="https://www.tomsguide.com/news/brave-affiliate-links-autocomplete" target="_blank" rel="noopener nofollow">{{t:mot.kalla}}: Tom's Guide</a></div></li>
+          <li><b>2021</b><div><p>{{t:mot.b3}}</p><a class="nav-link" href="https://portswigger.net/daily-swig/brave-browsers-tor-feature-found-to-leak-onion-queries-to-isps" target="_blank" rel="noopener nofollow">{{t:mot.kalla}}: PortSwigger</a></div></li>
+          <li><b>2023</b><div><p>{{t:mot.b4}}</p><a class="nav-link" href="https://www.windowscentral.com/software-apps/browsing/brave-browser-is-installing-a-vpn-without-your-permission" target="_blank" rel="noopener nofollow">{{t:mot.kalla}}: Windows Central</a></div></li>
+        </ol>
+        <p class="mot-not">{{t:mot.b_note}}</p>
+      </div>
+      <div class="mot-vi">
+        <h3>{{t:mot.a_h}}</h3>
+        <ul class="bocklista">
+          <li>{{check}}{{t:mot.a1}}</li>
+          <li>{{check}}{{t:mot.a2}}</li>
+          <li>{{check}}{{t:mot.a3}}</li>
+          <li>{{check}}{{t:mot.a4}}</li>
+          <li>{{check}}{{t:pris.free_4}}</li>
+        </ul>
+        <a class="nav-link las-mer" href="{{pre}}/integritet-webblasaren">{{t:open.privacy_link}} {{arrow-right}}</a>
+      </div>
     </div>
   </section>
 
@@ -219,37 +278,6 @@
     </div>
   </section>
 
-  <!-- MOT BRAVE -->
-  <section id="brave" class="wrap mot">
-    <div class="sektion-huvud">
-      <h2>{{t:mot.title}}</h2>
-      <p>{{t:mot.lead}}</p>
-    </div>
-    <div class="mot-grid">
-      <div>
-        <h3>{{t:mot.b_h}}</h3>
-        <ol class="mot-lista">
-          <li><b>2018</b><div><p>{{t:mot.b1}}</p><a class="nav-link" href="https://davidgerard.co.uk/blockchain/2019/01/13/brave-web-browser-no-longer-claims-to-fundraise-on-behalf-of-others-so-thats-nice/" target="_blank" rel="noopener nofollow">{{t:mot.kalla}}: David Gerard</a></div></li>
-          <li><b>2020</b><div><p>{{t:mot.b2}}</p><a class="nav-link" href="https://www.tomsguide.com/news/brave-affiliate-links-autocomplete" target="_blank" rel="noopener nofollow">{{t:mot.kalla}}: Tom's Guide</a></div></li>
-          <li><b>2021</b><div><p>{{t:mot.b3}}</p><a class="nav-link" href="https://portswigger.net/daily-swig/brave-browsers-tor-feature-found-to-leak-onion-queries-to-isps" target="_blank" rel="noopener nofollow">{{t:mot.kalla}}: PortSwigger</a></div></li>
-          <li><b>2023</b><div><p>{{t:mot.b4}}</p><a class="nav-link" href="https://www.windowscentral.com/software-apps/browsing/brave-browser-is-installing-a-vpn-without-your-permission" target="_blank" rel="noopener nofollow">{{t:mot.kalla}}: Windows Central</a></div></li>
-        </ol>
-        <p class="mot-not">{{t:mot.b_note}}</p>
-      </div>
-      <div class="mot-vi">
-        <h3>{{t:mot.a_h}}</h3>
-        <ul class="bocklista">
-          <li>{{check}}{{t:mot.a1}}</li>
-          <li>{{check}}{{t:mot.a2}}</li>
-          <li>{{check}}{{t:mot.a3}}</li>
-          <li>{{check}}{{t:mot.a4}}</li>
-          <li>{{check}}{{t:pris.free_4}}</li>
-        </ul>
-        <a class="nav-link las-mer" href="{{pre}}/integritet-webblasaren">{{t:open.privacy_link}} {{arrow-right}}</a>
-      </div>
-    </div>
-  </section>
-
   <!-- PRISER / PRO -->
   <section id="pro" class="wrap priser">
     <div class="sektion-huvud">
@@ -279,9 +307,7 @@
           <li>{{check}}{{t:pris.pro_2}}</li>
           <li>{{check}}{{t:pris.pro_3}}</li>
           <li>{{check}}{{t:pris.pro_4}}</li>
-          <li>{{check}}{{t:pris.pro_5}}</li>
           <li>{{check}}{{t:pris.pro_6}}</li>
-          <li>{{check}}{{t:pris.pro_7}}</li>
           <li>{{check}}{{t:pris.pro_8}}</li>
         </ul>
         <a class="pris-ge nav-link" href="{{pre}}/pro#ge">{{t:pris.gift_link}}</a>
@@ -374,6 +400,16 @@
 </footer>
 
 <script src="/main.js"></script>
+<script>
+// Räknaren visas först när gorillan ätit sin första annons, så att ingen ser "0".
+(() => { const b = document.querySelector('[data-raknare]'); if (!b) return;
+  new MutationObserver(() => { if (b.textContent.trim() !== '0') b.parentElement.hidden = false; }).observe(b, { childList: true, characterData: true, subtree: true }); })();
+// Mobil: tillägget går inte att installera där, så knappen skickar länken till datorn i stället.
+document.querySelectorAll('[data-skicka]').forEach((k) => k.addEventListener('click', async () => {
+  const u = location.origin + location.pathname + '?k=mobil-till-dator';
+  try { if (navigator.share) await navigator.share({ title: 'AdRaze', url: u }); else { await navigator.clipboard.writeText(u); k.lastChild.textContent = k.dataset.klar; } } catch {}
+}));
+</script>
 <script type="module" src="/klot.js"></script>
 <script type="module" src="/hero3d.js"></script>
 </body>
