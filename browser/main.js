@@ -8,7 +8,7 @@
  * per-fönster "ctx"-objekt i `wins`, nycklat på skalets webContents-id. IPC
  * routas till rätt fönster via `event.sender`.
  */
-const { app, BrowserWindow, WebContentsView, ipcMain, session, Menu, clipboard, dialog, shell, safeStorage, components, screen, net, webContents } = require('electron');
+const { app, BrowserWindow, WebContentsView, ipcMain, session, Menu, clipboard, dialog, shell, safeStorage, components, screen, net, webContents, nativeTheme } = require('electron');
 app.setName('AdRaze');  // egen datamapp (~/.config/AdRaze)
 app.enableSandbox();     // alla sidprocesser i Chromiums sandlåda, som i Chrome/Brave (se sandladeFlagga)
 // Oväntade fel i huvudprocessen loggas i ~/.config/AdRaze/fel.log i stället för Electrons
@@ -470,6 +470,12 @@ function applyClientHints(sess) {
       let mob = false; try { mob = !!(details.webContents && details.webContents.__adrazeMobil); } catch {}
       h['sec-ch-ua-mobile'] = mob ? '?1' : '?0';
       h['sec-ch-ua-platform'] = mob ? '"Android"' : plat;
+      // Sajternas eget mörka läge (anpassa-tema.js): Google m.fl. väljer mörk eller ljus sida på servern efter den här
+      // ledtråden, inte efter CSS. Chrome skickar den när sajten bett om den (Accept-CH); Electron sparar inte sådana
+      // önskemål, så den skickas med varje sidhämtning. Den säger samma sak som prefers-color-scheme redan gör.
+      if (details.resourceType === 'mainFrame' || details.resourceType === 'subFrame') {
+        try { h['sec-ch-prefers-color-scheme'] = nativeTheme.shouldUseDarkColors ? 'dark' : 'light'; } catch {}
+      }
       try { adblock.utgaende(details); } catch {}   // Blockera cookies (tredjepart/alla)
       cb({ requestHeaders: h });
     });
