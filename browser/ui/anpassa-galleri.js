@@ -56,7 +56,7 @@
   // [flikar, fält och knappar], i skala med AdRazes egna (input.css: data-anp-horn); fälten begränsas i CSS med min()
   const HORN = { kantig: ['1px', '1px'], normal: ['4px', '3px'], rund: ['6px', '99px'] };
   const TATHET = { kompakt: ['17px', '18px'], normal: ['21px', '22px'], luftig: ['25px', '27px'] };   // [flikrad, verktygsrad]
-  const morktLage = (l) => l === 'morkt' || (l === 'system' && !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches));
+  const morktLage = (l) => l === 'morkt' || (l === 'system' && (window.anpassaTema && window.anpassaTema.systemMorkt ? window.anpassaTema.systemMorkt() : !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches)));
   const accentAv = (v) => (v && typeof v['tema.accent'] === 'string' && HEX_RE.test(v['tema.accent']) ? v['tema.accent'] : STD_ACCENT);
   function palett(v) {
     v = v && typeof v === 'object' ? v : {};

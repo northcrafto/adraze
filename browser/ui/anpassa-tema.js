@@ -16,13 +16,14 @@
   const $ = (id) => document.getElementById(id);
 
   /* ── Valen ── */
-  const STANDARD = { accent: '#ff4b1f', lage: 'ljust', densitet: 'normal', horn: 'normal', typsnitt: 'system', storlek: 'normal', palett: 'standard' };
-  const ETIKETT = { accent: 'Accentfärg', lage: 'Ljust eller mörkt', densitet: 'Densitet', horn: 'Hörn', typsnitt: 'Typsnitt', storlek: 'Textstorlek', palett: 'Färguppsättning' };
+  const STANDARD = { accent: '#ff4b1f', lage: 'ljust', densitet: 'normal', horn: 'normal', typsnitt: 'system', storlek: 'normal', palett: 'standard', sajter: 'morka' };
+  const ETIKETT = { accent: 'Accentfärg', lage: 'Ljust eller mörkt', densitet: 'Densitet', horn: 'Hörn', typsnitt: 'Typsnitt', storlek: 'Textstorlek', palett: 'Färguppsättning', sajter: 'Webbsidor' };
   // Åtta kulörer runt färghjulet. Alla håller minst 3:1 mot ljus och mörk yta, utom Bärnsten som mörkas lite i ljust läge.
   const ACCENTER = [['#ff4b1f', 'AdRaze'], ['#d6336c', 'Hallon'], ['#7354d6', 'Viol'], ['#3b6fe0', 'Blå'],
     ['#0b8a8f', 'Hav'], ['#2f9e67', 'Skog'], ['#e8a317', 'Bärnsten'], ['#5f6b7a', 'Grafit']];
   const VAL = {
     lage: [['ljust', 'Ljust'], ['morkt', 'Mörkt'], ['system', 'Följ systemet']],
+    sajter: [['morka', 'Mörka'], ['tema', 'Som AdRaze'], ['ljusa', 'Ljusa']],
     densitet: [['kompakt', 'Kompakt'], ['normal', 'Normal'], ['luftig', 'Luftig']],
     horn: [['kantig', 'Kantig'], ['normal', 'Normal'], ['rund', 'Rund']],
     typsnitt: [['system', 'Standard'], ['klassisk', 'Klassisk'], ['tydlig', 'Tydlig'], ['serif', 'Serif'], ['mono', 'Mono']],
@@ -215,7 +216,10 @@
   } catch {}
   const lage = () => lagrat('lage') || gammalt || STANDARD.lage;
   const mm = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
-  const effektivt = (l) => (l === 'system' ? (mm && mm.matches ? 'dark' : 'light') : l === 'morkt' ? 'dark' : 'light');
+  // Datorns riktiga läge: huvudprocessen vet (matchMedia här visar det AdRaze har valt åt webbsidorna)
+  const T = window.anpassaTema;
+  const systemMorkt = () => (T && T.systemMorkt ? T.systemMorkt() : !!(mm && mm.matches));
+  const effektivt = (l) => (l === 'system' ? (systemMorkt() ? 'dark' : 'light') : l === 'morkt' ? 'dark' : 'light');
 
   /* ── Tillämpa ── */
   const ACCENT_VARS = { l: '--anp-accent-l', d: '--anp-accent-d', onL: '--anp-on-l', onD: '--anp-on-d', inkL: '--anp-ink-l', inkD: '--anp-ink-d' };
@@ -266,7 +270,8 @@
 
   tillampaAllt();   // före shell.js och första målningen
   A.on('tema.', (nyckel) => { if (nyckel === 'tema.lage') gammalt = null; schemalagg(); });
-  if (mm) mm.addEventListener('change', () => { visaLage(lage()); ritaForval(); uppdateraUi(); });
+  const systemBytt = () => { visaLage(lage()); ritaForval(); uppdateraUi(); };
+  if (T && T.onSystem) T.onSystem(systemBytt); else if (mm) mm.addEventListener('change', systemBytt);
 
   /* ── Välja ── */
   // Ljust/Mörkt/Följ systemet. Visas direkt här; övriga fönster följer via Anpassa.on.
@@ -408,6 +413,7 @@
           '<input class="anp-tema-hex" data-hex type="text" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Färgkod"></div>', true) +
         rad('Färg från bakgrunden', '<span data-bgstatus>Tar fram en färg ur bilden på startsidan.</span>', '<button type="button" class="set-btn flex-none" data-bgfarg>Hämta färg från bakgrunden</button>') +
         rad('Ljust eller mörkt', 'Följ systemet byter när datorn gör det.', seg('lage')) +
+        rad('Webbsidor', 'Sajter som har ett eget mörkt läge visas i det.', seg('sajter')) +
         '<div class="anp-tema-grupp">Form</div>' +
         rad('Densitet', 'Höjden på flikar, adressfält och rader.', seg('densitet')) +
         rad('Hörn', 'Hur runda flikar, knappar och fält är.', seg('horn')) +
@@ -428,7 +434,7 @@
   function uppdateraUi() {
     const s = $('anp-tema');
     if (!s || !s.dataset.ritad) return;
-    const v = { accent: varde('accent'), lage: lage(), densitet: varde('densitet'), horn: varde('horn'), typsnitt: varde('typsnitt'), storlek: varde('storlek'), palett: varde('palett') };
+    const v = { accent: varde('accent'), lage: lage(), densitet: varde('densitet'), horn: varde('horn'), typsnitt: varde('typsnitt'), storlek: varde('storlek'), palett: varde('palett'), sajter: varde('sajter') };
     const pa = (el, on) => { el.classList.toggle('on', on); el.setAttribute('aria-pressed', String(on)); };
     s.querySelectorAll('[data-namn][data-v]').forEach((b) => pa(b, v[b.dataset.namn] === b.dataset.v));
     s.querySelectorAll('[data-accent]').forEach((b) => pa(b, b.dataset.accent === v.accent));

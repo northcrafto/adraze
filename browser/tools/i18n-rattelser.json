@@ -1163,7 +1163,12 @@
   "Öppnat av alla": "Seen by everyone",
   "Översätt till svenska": "Translate to Swedish",
   "Översätter…": "Translating…",
-  "← Tillbaka till profilerna": "← Back to profiles"
+  "← Tillbaka till profilerna": "← Back to profiles",
+  "Sajter som har ett eget mörkt läge visas i det.": "Sites with their own dark mode are shown in it.",
+  "Som AdRaze": "Same as AdRaze",
+  "Ljusa": "Light",
+  "Mörka": "Dark",
+  "Webbsidor": "Web pages"
  },
  "vi": {
   "{kort} •••• {siffror} · sparas krypterat på din dator": "{kort} •••• {siffror} · được lưu mã hóa trên máy tính của bạn"

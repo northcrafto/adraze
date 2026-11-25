@@ -98,6 +98,9 @@ contextBridge.exposeInMainWorld('julBro', {
 // Anpassa-krok (tema): engångsflytt av det gamla ljust/mörkt-valet till tema.lage (ui/anpassa-tema.js, ../anpassa-tema.js)
 contextBridge.exposeInMainWorld('anpassaTema', {
   flyttaLage: (lage) => ipcRenderer.send('anpassa-tema:flytta-lage', lage),
+  // Datorns riktiga ljust/mörkt (matchMedia visar det AdRaze har valt åt webbsidorna, se anpassa-tema.js)
+  systemMorkt: () => { try { return ipcRenderer.sendSync('anpassa-tema:system-morkt') === true; } catch { return false; } },
+  onSystem: (fn) => ipcRenderer.on('anpassa-tema:system', (_e, v) => fn(v === true)),
 });
 // Anpassa → flikar (ui/anpassa-flikar.js): fästa flikar sover aldrig, tyst sparning av grupper, gruppens meny,
 // Ctrl+Shift+A (dolda flikar) och flikar som somnat (main.js skickar tab-discarded)

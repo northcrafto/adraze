@@ -167,7 +167,7 @@ function dnsFranMall(mall) {
   if (/dns\.google|8\.8\.8\.8/.test(mall)) return 'google';
   return 'automatic';
 }
-function systemetMorkt() { try { return require('electron').nativeTheme.shouldUseDarkColors; } catch { return false; } }
+function systemetMorkt() { try { return require('./anpassa-tema').systemMorkt(); } catch { return false; } }
 function lasJson(f) { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return null; } }
 function hamta(o, nyckel) {
   let d = o;

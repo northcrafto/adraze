@@ -4,7 +4,7 @@
 //   2. Engångsflytt av det gamla valet "Mörkt" (localStorage skoll-theme) in i tema.lage, utan att det
 //      hamnar i ångra-historiken (annars kunde Ångra plötsligt byta tema).
 // Allt annat (färger, läge, typsnitt, hörn) tillämpas i fönstret av ui/anpassa-tema.js.
-const { app, ipcMain, BrowserWindow } = require('electron');
+const { app, ipcMain, BrowserWindow, nativeTheme } = require('electron');
 const anpassa = require('./anpassa');
 
 // Rena utseendeval: barn får ändra dem (barnLast: false) och de får delas med en kod (importBar).
@@ -12,6 +12,8 @@ const anpassa = require('./anpassa');
 const NYCKLAR = [
   { nyckel: 'tema.accent', standard: '#ff4b1f', etikett: 'Accentfärg' },
   { nyckel: 'tema.lage', standard: 'ljust', etikett: 'Ljust eller mörkt', val: ['ljust', 'morkt', 'system'] },
+  // Webbsidornas eget mörka läge (prefers-color-scheme). 'morka' = alltid, 'tema' = som AdRaze, 'ljusa' = aldrig.
+  { nyckel: 'tema.sajter', standard: 'morka', etikett: 'Webbsidor', val: ['morka', 'tema', 'ljusa'] },
   { nyckel: 'tema.densitet', standard: 'normal', etikett: 'Densitet', val: ['kompakt', 'normal', 'luftig'] },
   { nyckel: 'tema.horn', standard: 'normal', etikett: 'Hörn', val: ['kantig', 'normal', 'rund'] },
   { nyckel: 'tema.typsnitt', standard: 'system', etikett: 'Typsnitt', val: ['system', 'klassisk', 'tydlig', 'serif', 'mono'] },
@@ -42,4 +44,29 @@ ipcMain.on('anpassa-tema:flytta-lage', (_e, lage) => {
   anpassa.satt('tema.lage', 'morkt', { utanHistorik: true });
 });
 
-module.exports = { NYCKLAR };
+/* ── Webbsidornas eget mörka läge ──
+ * Sajter som har en mörk version väljer den när webbläsaren säger prefers-color-scheme: dark, precis som i Chrome
+ * med mörkt system. Det styrs för hela appen med nativeTheme.themeSource, så det gäller från första bildrutan i alla
+ * flikar, popupfönster och service workers. Det här är INTE den tvingade mörkläggningen per sajt (anpassa-sajt.js).
+ * Eftersom themeSource också ändrar vad skalet ser i matchMedia sparas datorns riktiga läge här, och skalet frågar
+ * efter det (anpassa-tema:system-morkt) när tema.lage är "system". */
+let systemMorkt = false;
+const skickaSystem = () => { for (const w of BrowserWindow.getAllWindows()) { try { if (arSkal(w)) w.webContents.send('anpassa-tema:system', systemMorkt); } catch {} } };
+function satSajter() {
+  const s = anpassa.hamta('tema.sajter'), l = anpassa.hamta('tema.lage');
+  const mal = s === 'ljusa' ? 'light' : s === 'tema' ? (l === 'morkt' ? 'dark' : l === 'system' ? 'system' : 'light') : 'dark';
+  try { if (nativeTheme.themeSource !== mal) nativeTheme.themeSource = mal; } catch {}
+}
+app.whenReady().then(() => {
+  try { systemMorkt = !!nativeTheme.shouldUseDarkColors; } catch {}   // läses medan themeSource ännu är 'system'
+  nativeTheme.on('updated', () => {
+    if (nativeTheme.themeSource !== 'system') return;   // styrt av oss: säger inget om datorn
+    const nu = !!nativeTheme.shouldUseDarkColors;
+    if (nu !== systemMorkt) { systemMorkt = nu; skickaSystem(); }
+  });
+  satSajter();
+  anpassa.lyssna((nyckel) => { if (nyckel === 'tema.sajter' || nyckel === 'tema.lage' || nyckel == null) satSajter(); });
+});
+ipcMain.on('anpassa-tema:system-morkt', (e) => { e.returnValue = systemMorkt; });
+
+module.exports = { NYCKLAR, systemMorkt: () => systemMorkt };
