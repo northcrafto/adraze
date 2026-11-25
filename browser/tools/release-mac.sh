@@ -16,7 +16,10 @@ github_bygge() {
   # Blockeringsdatan (rålistorna finns inte i git) följer med som ett paket i ett utkast-släpp
   gh release view mac-indata -R $R >/dev/null 2>&1 || gh release create mac-indata -R $R --draft --title "Indata till Mac-bygget" --notes "Används av Mac-bygget på GitHub. Inte en version av AdRaze."
   tar -czf "/tmp/adraze-data-$V.tar.gz" adraze
-  gh release upload mac-indata -R $R --clobber "/tmp/adraze-data-$V.tar.gz"
+  # GitHubs uppladdning svarar ibland 502 (2026-11-25: Mac-bygget föll på det): tre försök
+  local OK=""
+  for i in 1 2 3; do gh release upload mac-indata -R $R --clobber "/tmp/adraze-data-$V.tar.gz" && { OK=1; break; }; sleep 15; done
+  [ -n "$OK" ] || { echo "Kunde inte ladda upp indatan till Mac-bygget"; return 1; }
   rm -f "/tmp/adraze-data-$V.tar.gz"
   local FORE; FORE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
   gh workflow run mac.yml -R $R -f ref="$SHA" -f version="$V"
