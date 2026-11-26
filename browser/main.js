@@ -123,7 +123,7 @@ function makeCtx(win, incognito) {
     topInset: 0, leftInset: 0, defaultZoom: 1,
     kryptoView: null, kryptoOpen: false, kryptoFull: false, authToken: null,
     chattView: null, chattOpen: false, chattFull: false, chattToken: null, chattChild: false, chattBoot: null,
-    htmlFull: false, _wasFull: false,   // HTML5-video/element i helskärm
+    htmlFull: false, htmlFullTab: null, _wasFull: false,   // HTML5-video/element i helskärm
   };
 }
 function ctxFor(event) { return wins.get(event.sender.id); }
@@ -139,7 +139,17 @@ function setFull(ctx, want) {
   if (want && process.platform === 'darwin') { try { ctx.win.setFullScreenable(true); } catch {} }
   try { ctx.win.setFullScreen(!!want); } catch {}
 }
-function toggleFull(ctx) { setFull(ctx, !ctx.win.isFullScreen()); }
+// F11 tar alltid ut: står en video i helskärm lämnar den den också, och räknas fönstret som helskärm
+// (av Electron eller av oss) går det ur, även om skrivbordet och Electron är oense om läget.
+function toggleFull(ctx) {
+  if (ctx.htmlFull) { avslutaHtmlFull(ctx); setFull(ctx, false); applyBounds(ctx); return; }
+  setFull(ctx, !(ctx.win.isFullScreen() || ctx.fullWanted));
+}
+function avslutaHtmlFull(ctx) {
+  const v = ctx.htmlFullTab != null && ctx.views.get(ctx.htmlFullTab);
+  ctx.htmlFull = false; ctx.htmlFullTab = null;
+  if (v) { try { v.webContents.executeJavaScript('document.fullscreenElement && document.exitFullscreen()', true).catch(() => {}); } catch {} }
+}
 function sendTo(ctx, ...a) { if (ctx && ctx.win && !ctx.win.isDestroyed()) ctx.win.webContents.send(...a); }
 function broadcast(...a) { wins.forEach((ctx) => sendTo(ctx, ...a)); if (a[0] === 'download-update') pushDownloadPopups(); }
 // Något stoppades (annons, spårare, kakruta, popup-fönster): säg till fönstren, och räkna det i julens räknare per dag
@@ -632,6 +642,9 @@ function panelSlide(ctx) {
 function raiseKrypto(ctx) { if (ctx && ctx.chattView) ctx.win.contentView.addChildView(ctx.chattView); if (ctx && ctx.kryptoView) ctx.win.contentView.addChildView(ctx.kryptoView); }
 function showOnly(ctx, tabId) {
   const now = Date.now();
+  // Byter man flik medan en video står i helskärm lämnar den helskärmen (som i Chrome). Annars täckte den
+  // nya fliken hela fönstret utan flikrad, och F11 kom inte ut eftersom htmlFull aldrig släpptes.
+  if (ctx.htmlFull && ctx.htmlFullTab !== tabId) { const was = ctx._wasFull; avslutaHtmlFull(ctx); setFull(ctx, was); }
   if (ctx.visibleTab && ctx.visibleTab !== tabId) ctx.lastActive.set(ctx.visibleTab, now); // starta ledig-klockan för fliken vi lämnar
   ctx.visibleTab = tabId; ctx.senasteFlik = tabId;   // Falk: fliken man senast tittade på, även när skalet tillfälligt gömt den
   ctx.lastActive.set(tabId, now);
@@ -1018,7 +1031,7 @@ function ensureView(ctx, tabId) {
   wc.on('did-start-navigation', (_e, _u, inPage, isMain) => { if (isMain && !inPage && wc.__blocked) { wc.__blocked = 0; sendTo(ctx, 'adblock:tab', tabId, 0); } });
   wc.on('dom-ready', () => { try { if (ctx.defaultZoom !== 1) wc.setZoomFactor(ctx.defaultZoom); } catch {} });
   // Video/element går i helskärm (sidans egen fullscreen-knapp) → täck HELA skärmen
-  wc.on('enter-html-full-screen', () => { ctx._wasFull = ctx.win.isFullScreen(); ctx.htmlFull = true; setFull(ctx, true); applyBounds(ctx); });
+  wc.on('enter-html-full-screen', () => { if (!ctx.htmlFull) ctx._wasFull = ctx.win.isFullScreen(); ctx.htmlFull = true; ctx.htmlFullTab = tabId; setFull(ctx, true); applyBounds(ctx); });
   wc.on('leave-html-full-screen', () => {
     // Ofrivilligt = fönstret har just tappat fokus (klick på en annan skärm).
     // Då bad ingen om att lämna: sätt tillbaka fönstrets helskärm och be sidan
@@ -1033,12 +1046,12 @@ function ensureView(ctx, tabId) {
         setTimeout(async () => {
           let inFs = false;
           try { inFs = await wc.executeJavaScriptInIsolatedWorld(999, [{ code: '!!document.fullscreenElement' }]); } catch {}
-          if (!inFs) { ctx.htmlFull = false; setFull(ctx, ctx._wasFull); applyBounds(ctx); }
+          if (!inFs) { ctx.htmlFull = false; ctx.htmlFullTab = null; setFull(ctx, ctx._wasFull); applyBounds(ctx); }
         }, 600);
       }, 120);
       return;
     }
-    ctx.htmlFull = false; setFull(ctx, ctx._wasFull); applyBounds(ctx);
+    ctx.htmlFull = false; ctx.htmlFullTab = null; setFull(ctx, ctx._wasFull); applyBounds(ctx);
   });
   wc.on('context-menu', (_e, params) => { try { buildContextMenu(ctx, wc, params); } catch {} });
   wc.on('did-finish-load', async () => {
@@ -2501,6 +2514,7 @@ ipcMain.on('view:destroy', (e, id) => {
   const v = ctx.views.get(id);
   if (v) { try { ctx.win.contentView.removeChildView(v); } catch {} try { v.webContents.close(); } catch {} ctx.views.delete(id); }
   ctx.incognitoTabs.delete(id); ctx.discarded.delete(id); ctx.lastActive.delete(id);
+  if (ctx.htmlFullTab === id) { const was = ctx._wasFull; avslutaHtmlFull(ctx); setFull(ctx, was); applyBounds(ctx); }   // fliken med videon i helskärm stängdes
   if (ctx.visibleTab === id) ctx.visibleTab = null;
 });
 require('./anpassa-arbetsytor').init({ ctxFor, flikUrlOk });   // Anpassa › Arbetsytor: vilande flikar som laddas först när de visas
