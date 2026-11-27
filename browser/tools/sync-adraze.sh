@@ -12,5 +12,7 @@ LISTS="${2:-../tools/lists}"
 for f in easylist easyprivacy ubo-filters ubo-quick-fixes ubo-unbreak peterlowe frellwit badware adguard-popups adraze-natverk brave-localhost brave-https-undantag; do
   [ -f "$LISTS/$f.txt" ] && cp "$LISTS/$f.txt" adraze/lists/ || echo "  (saknar $f.txt — motorn hoppar den)"
 done
+# uBlock-listans dellistor (!#include) in i samma fil, motorn läser en fil i taget
+[ -f adraze/lists/ubo-filters.txt ] && [ -d "$LISTS/ubo-filters.d" ] && node tools/klistra-in-listor.js adraze/lists/ubo-filters.txt "$LISTS/ubo-filters.d"
 grep -m1 '"version"' "$SRC/manifest.json" | sed 's/[^0-9.]//g' > adraze/VERSION
 echo "AdRaze-blockeraren $(cat adraze/VERSION) synkad"

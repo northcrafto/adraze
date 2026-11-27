@@ -11,3 +11,12 @@
 ! CapCut: köpknappen snurrar för evigt om ByteDance-säkerhetskollen (argus) blockeras – EasyPrivacy
 ! tar hela /monitor_browser/collect/*. Släpp bara säkerhetsdelen, vanlig telemetri blockeras fortfarande.
 @@||capcutapi.com/monitor_browser/collect/batch/security/$domain=capcut.com
+
+! Piratsajternas presentask-reklam (2026-11-27, 7movies.ws m.fl.): asialogger.com laddar en "tag" som sedan
+! hämtar annonsen från slumpade .rest/.cyou-domäner (vx.inigocorral.rest/cuid, vp.preceptwanion.rest/sbx).
+! Domänerna byts dagligen och listorna hinner inte med, så vi tar startaren och mönstren i stället.
+||asialogger.com^
+/sbx/f/*?pmf=$third-party
+/sbx/b/$third-party
+! 7movies har en egen "Ads"-knapp som stänger av reklamen för besöket: slå på den åt besökaren
+7movies.*##+js(set-session-storage-item, cinrift_ad_free, true)

@@ -15,11 +15,35 @@ const KALLOR = {
   'peterlowe.txt': 'https://pgl.yoyo.org/adservers/serverlist.php?hostformat=adblockplus&showintro=0&mimetype=plaintext',
   'frellwit.txt': 'https://raw.githubusercontent.com/lassekongo83/Frellwits-filter-lists/master/Frellwits-Swedish-Filter.txt',
 };
-const INTERVALL = 6 * 3600 * 1000;
+// Piratsajternas reklamnät byter domän flera gånger om dagen och EasyList hinner ikapp på några timmar.
+// Var 2:a timme räcker för att följa med; oförändrade listor kostar bara ett 304-svar (ETag).
+const INTERVALL = 2 * 3600 * 1000;
 // ##+js(...) kör kod på sidan. Ta bara emot scriptlet-rader från betrodda listor (uBlock Origin, AdGuard, EasyList).
 // Från övriga listor (enmansrepon, delade värdar) kastas raderna när listan hämtas – en kapad värd ska inte kunna köra kod.
 const BETRODDA_JS = new Set(['easylist.txt', 'easyprivacy.txt', 'ubo-filters.txt', 'badware.txt', 'adguard-popups.txt']);
 const kastaScriptlets = (text) => text.split(/\r?\n/).filter((l) => !/#@?#\+js\(/.test(l)).join('\n');
+
+/* uBlock-listan (filters.txt) är bara ett skal: det mesta ligger i dellistor som den pekar ut med
+ * "!#include filters-2026.txt" osv. Motorn läser en fil i taget, så dellistorna klistras in på
+ * platsen där de nämns. Dellistor i ett "!#if env_mobile"-block hoppas över (vi är en datorwebbläsare). */
+const INKLUDERA = /^!#include\s+(\S+)\s*$/;
+async function klistraIn(text, bas, hamtaText) {
+  const ut = []; let mobil = 0;
+  for (const rad of text.split(/\r?\n/)) {
+    const r = rad.trim();
+    if (/^!#if\b/.test(r)) { if (mobil || /env_mobile/.test(r) && !/!env_mobile/.test(r)) mobil++; ut.push(rad); continue; }
+    if (/^!#endif\b/.test(r)) { if (mobil) mobil--; ut.push(rad); continue; }
+    const m = INKLUDERA.exec(r);
+    if (!m) { ut.push(rad); continue; }
+    if (mobil) continue;
+    const namn = m[1];
+    if (namn.includes('..') || /^[a-z]+:/i.test(namn)) continue;   // bara syskonfiler, aldrig andra värdar
+    const del = await hamtaText(new URL(namn, bas).href, namn);
+    if (del == null) throw new Error('dellistan ' + namn + ' gick inte att hämta');
+    ut.push('! ---- ' + namn + ' ----', del, '! ---- slut ' + namn + ' ----');
+  }
+  return ut.join('\n');
+}
 
 function lasMeta(dir) { try { return JSON.parse(fs.readFileSync(path.join(dir, 'meta.json'), 'utf8')); } catch { return { filer: {} }; } }
 function sparaMeta(dir, meta) { try { fs.writeFileSync(path.join(dir, 'meta.json'), JSON.stringify(meta, null, 1)); } catch {} }
@@ -51,6 +75,9 @@ async function hamta(dir, medskickadDir, kallor, hel = true) {
       if (r.status === 304) continue;
       if (!r.ok) { console.warn('[listor]', fil, 'HTTP', r.status); continue; }
       let text = await r.text();
+      if (/^!#include\s/m.test(text)) {
+        text = await klistraIn(text, url, async (u) => { const d = await fetch(u, { headers: { 'user-agent': 'AdRaze-listuppdatering' }, signal: AbortSignal.timeout(60000) }); return d.ok ? d.text() : null; });
+      }
       if (!BETRODDA_JS.has(fil)) text = kastaScriptlets(text);   // kasta ##+js från listor vi inte märkt som betrodda
       let gammal = 0;
       try { gammal = fs.statSync(har ? mal : path.join(medskickadDir, fil)).size; } catch {}
@@ -94,4 +121,4 @@ function starta(dir, medskickadDir, onNya, kallor) {
 
 function senast(dir) { return lasMeta(dir).senast || 0; }
 
-module.exports = { starta, hamta, senast, KALLOR };
+module.exports = { starta, hamta, senast, KALLOR, klistraIn };
