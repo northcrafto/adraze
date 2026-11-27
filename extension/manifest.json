@@ -3,7 +3,7 @@
   "name": "__MSG_namn__",
   "short_name": "AdRaze",
   "default_locale": "en",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "__MSG_beskrivning__",
   "minimum_chrome_version": "121",
   "permissions": [
